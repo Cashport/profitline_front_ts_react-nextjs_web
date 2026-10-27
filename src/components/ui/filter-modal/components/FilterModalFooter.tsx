@@ -6,37 +6,36 @@ interface FilterModalFooterProps {
   onApply: () => void;
 }
 
+/** Pie del modal (docs/DESIGN.md §6): "Limpiar todo" a la izquierda; Cancelar y "Aplicar Filtros" lima. */
 export default function FilterModalFooter({
   onClearAll,
   onCancel,
   onApply
 }: FilterModalFooterProps) {
   return (
-    <div className="p-4 border-t border-border flex items-center justify-between bg-card/80 backdrop-blur-sm relative z-10">
+    <div className="flex items-center gap-2 border-t border-cp-line px-[22px] py-3.5">
       <button
         type="button"
         onClick={onClearAll}
-        className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors px-4 py-2 rounded-lg hover:bg-secondary"
+        className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-cp-ink-2"
       >
         Limpiar todo
       </button>
-
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-5 py-2.5 rounded-xl text-sm font-bold text-foreground hover:bg-secondary transition-colors"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          onClick={onApply}
-          className="bg-primary text-primary-foreground px-8 py-2.5 rounded-xl text-sm font-bold hover:opacity-90 shadow-lg shadow-primary/20 transition-all active:scale-95"
-        >
-          Aplicar Filtros
-        </button>
-      </div>
+      <div className="flex-1" />
+      <button
+        type="button"
+        onClick={onCancel}
+        className="h-10 cursor-pointer border-0 bg-transparent px-3.5 text-[13px] font-semibold text-cp-ink"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        onClick={onApply}
+        className="h-10 cursor-pointer rounded-[10px] border-0 bg-cp-lime px-[18px] text-[13px] font-semibold text-[#141414] hover:bg-[#d8f032]"
+      >
+        Aplicar Filtros
+      </button>
     </div>
   );
 }

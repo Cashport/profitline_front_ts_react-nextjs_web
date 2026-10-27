@@ -1,10 +1,11 @@
 "use client";
 
-import { memo, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, PanelRightOpen } from "lucide-react";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
+import { useModalDetail } from "@/context/ModalContext";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
 import type { SortState } from "@/modules/walletModule/types";
@@ -65,12 +66,23 @@ const ageTone = (days: number) =>
 
 const payments = (n: number) => plural(n, "pago", "pagos");
 
+/**
+ * Tiempo pendiente del chip. El banco sólo trae la fecha del pago: sin hora,
+ * las horas serían siempre las del corte ("8 h" en todos), así que va en días.
+ */
+const pendingLabel = (p: ITowerUnappliedPayment, hasTime: boolean) => {
+  const days = pendingDays(p);
+  if (!hasTime) return days ? `${days} d` : "Hoy";
+  return `${days ? `${days} d ` : ""}${p.pendingHours % 24} h`;
+};
+
 interface UnappliedRowProps {
   p: ITowerUnappliedPayment;
   ix: CatalogIndex;
   color: string;
   selected: boolean;
   onToggle: (clientId: string) => void;
+  onOpenPayment: (paymentId: string) => void;
 }
 
 /** Un pago. memo: al cambiar la selección sólo se repintan la fila que entra y la que sale. */
@@ -79,16 +91,16 @@ const UnappliedRow = memo(function UnappliedRow({
   ix,
   color,
   selected,
-  onToggle
+  onToggle,
+  onOpenPayment
 }: UnappliedRowProps) {
-  const days = pendingDays(p);
   const paid = fmtPaidAt(p.paidAt);
   return (
     <tr
       className={cn(ROW_CLICK, selected && ROW_SELECTED)}
-      // El link abre el pago en otra pestaña; el resto de la fila filtra por el cliente.
+      // El ID abre el detalle del pago; el resto de la fila filtra por el cliente.
       onClick={(e) => {
-        if (!(e.target as HTMLElement).closest("a")) onToggle(p.clientId);
+        if (!(e.target as HTMLElement).closest("a, button")) onToggle(p.clientId);
       }}
     >
       <td className={TD}>
@@ -104,7 +116,16 @@ const UnappliedRow = memo(function UnappliedRow({
             <ExternalLink className="h-[11px] w-[11px]" />
           </a>
         ) : (
-          <span className="text-[11px] font-semibold tabular-nums">{p.id}</span>
+          // Cashport no tiene una URL por pago: el detalle es el mismo panel de Bancos y Clientes.
+          <button
+            type="button"
+            onClick={() => onOpenPayment(p.id)}
+            title="Ver el detalle del pago"
+            className="inline-flex cursor-pointer items-center gap-[5px] border-0 bg-transparent p-0 text-[11px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
+          >
+            {p.id}
+            <PanelRightOpen className="h-[11px] w-[11px]" />
+          </button>
         )}
       </td>
       <td className={TD}>
@@ -116,8 +137,8 @@ const UnappliedRow = memo(function UnappliedRow({
         <span className={SUB}>{paid.time ? `${paid.weekday} · ${paid.time}` : paid.weekday}</span>
       </td>
       <td className={cn(TD, "text-right")}>
-        <StatusChip sev={ageTone(days)} className="rounded tabular-nums">
-          {`${days ? `${days} d ` : ""}${p.pendingHours % 24} h`}
+        <StatusChip sev={ageTone(pendingDays(p))} className="rounded tabular-nums">
+          {pendingLabel(p, Boolean(paid.time))}
         </StatusChip>
       </td>
       <td className={cn(TD, "text-right")}>
@@ -138,6 +159,7 @@ const UnappliedRow = memo(function UnappliedRow({
  */
 export default function UnappliedTable({ data }: { data: ICollectionTower }) {
   const { filters, toggleClient } = useTowerFilters();
+  const { openModal } = useModalDetail();
   const [age, setAge] = useState<PnaAge>("all");
   const [coordinators, setCoordinators] = useState<string[]>([]);
   const [sort, setSort] = useState<SortState>({ col: "days", dir: "desc" });
@@ -150,13 +172,24 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
     [data.unappliedPayments, minDays, coordinators, sort, ix]
   );
   const { visible, hasMore, sentinelRef } = useProgressiveRows(rows, scrollRef);
-  const { total, avgDays } = useMemo(() => {
+  const periodKey = data.period.key;
+  const { total, previous, avgDays } = useMemo(() => {
     const amount = sumBy(rows, (p) => p.amount);
     return {
       total: amount,
+      // La tabla trae también los pagos de meses anteriores que siguen abiertos; la
+      // tarjeta de aplicación, sólo los del mes. Esta parte es la diferencia entre ambas.
+      previous: sumBy(
+        rows.filter((p) => p.paidAt.slice(0, 7) < periodKey),
+        (p) => p.amount
+      ),
       avgDays: amount ? sumBy(rows, (p) => (p.amount * p.pendingHours) / 24) / amount : 0
     };
-  }, [rows]);
+  }, [rows, periodKey]);
+  const openPayment = useCallback(
+    (paymentId: string) => openModal("payment", { paymentId: Number(paymentId) }),
+    [openModal]
+  );
 
   const toggleCoordinator = (id: string) =>
     setCoordinators((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
@@ -165,7 +198,9 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
     active.length
       ? `${plural(active.length, "coordinador filtrando", "coordinadores filtrando")} · `
       : ""
-  }${payments(rows.length)} · ${money(total)}`;
+  }${payments(rows.length)} · ${money(total)}${
+    previous ? ` (${money(previous)} de meses anteriores)` : ""
+  }`;
 
   return (
     <PanelCard
@@ -257,6 +292,7 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
                   color={color}
                   selected={filters.client === p.clientId}
                   onToggle={toggleClient}
+                  onOpenPayment={openPayment}
                 />
               ))
             ) : (

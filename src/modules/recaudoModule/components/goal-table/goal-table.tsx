@@ -15,8 +15,8 @@ import type { Grouping, Tone } from "../../types";
 import { withAlpha } from "../../utils/chart";
 import { dimensionPatch, indexCatalogs, isDimensionSelected } from "../../utils/filters";
 import { full, money, pct, sem } from "../../utils/format";
-import { GoalRow, goalRows, nextSort, sortRows, sumBy } from "../../utils/rows";
-import { FOREGROUND } from "../shared/chart-styles";
+import { GoalRow, goalRows, nextSort, paceRatio, sortRows, sumBy } from "../../utils/rows";
+import { FORECAST, FOREGROUND } from "../shared/chart-styles";
 import ExcelButton from "../shared/excel-button";
 import GoalBar from "../shared/goal-bar";
 import SentinelRow from "../shared/sentinel-row";
@@ -25,6 +25,7 @@ import {
   EMPTY,
   HIDE_SM,
   NAME,
+  NO_GOAL,
   PERSON,
   ROW_CLICK,
   ROW_SELECTED,
@@ -65,10 +66,12 @@ interface AvanceProps {
 
 /** Barra hasta el 130% de la meta: recaudado, forecast punteado y marca de meta. */
 function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
-  const c = goal ? collected / goal : 0;
-  const f = goal ? forecast / goal : 0;
+  // Sin meta la barra salía llena (escala 0) y con 0 %.
+  if (goal <= 0) return <span className={NO_GOAL}>Sin meta</span>;
+  const c = collected / goal;
+  const f = forecast / goal;
   // Tono del recaudado: contra el ritmo esperado al día de corte, no contra la meta del mes.
-  const q = pace ? c / pace : 0;
+  const q = paceRatio(c, pace);
   const tone: Tone = q >= 1 ? "ok" : q >= 0.9 ? "warn" : "crit";
   const scale = goal * AVANCE_SCALE;
   const shown = Math.min(collected, scale);
@@ -80,7 +83,7 @@ function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
         { key: "rec", color, label: "Recaudado", value: `${money(collected)} · ${pct(c, 0)}` },
         {
           key: "fc",
-          color: withAlpha(color, 0.16),
+          color: withAlpha(FORECAST, 0.16),
           label: "Forecast",
           value: `${money(forecast)} · ${pct(f, 0)}`
         },
@@ -94,7 +97,7 @@ function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
           dashWidth={1}
           scale={scale}
           segments={[{ key: "rec", value: shown, color }]}
-          forecast={{ from: shown, to: Math.min(forecast, scale), color }}
+          forecast={{ from: shown, to: Math.min(forecast, scale), color: FORECAST }}
           goal={{ value: goal }}
         />
         <div className="flex justify-between text-[10.5px] tabular-nums text-muted-foreground">
@@ -116,7 +119,12 @@ interface GoalTableRowProps {
 }
 
 /** Una fila de la tabla. memo: al cambiar la selección sólo se repintan la fila que entra y la que sale. */
-const GoalTableRow = memo(function GoalTableRow({ row: r, selected, color, onSelect }: GoalTableRowProps) {
+const GoalTableRow = memo(function GoalTableRow({
+  row: r,
+  selected,
+  color,
+  onSelect
+}: GoalTableRowProps) {
   return (
     <tr className={cn(ROW_CLICK, selected && ROW_SELECTED)} onClick={() => onSelect(r)}>
       <td className={TD}>
@@ -153,7 +161,7 @@ const GoalTableRow = memo(function GoalTableRow({ row: r, selected, color, onSel
             { key: "rec", color, label: "Recaudado", value: money(r.collected) },
             {
               key: "in",
-              color: withAlpha(color, 0.16),
+              color: withAlpha(FORECAST, 0.16),
               label: "Por entrar",
               value: money(r.forecast - r.collected)
             },
@@ -185,16 +193,27 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
   const color = data.summary.series.collected.color;
   const grouping = GROUPING_BY_ID[by];
   const rows = useMemo(
-    () => sortRows(goalRows(data.clients, by, ix), sort, (r, col) => r[col as keyof GoalRow] as string | number),
+    () =>
+      sortRows(
+        goalRows(data.clients, by, ix),
+        sort,
+        (r, col) => r[col as keyof GoalRow] as string | number
+      ),
     [data.clients, by, ix, sort]
   );
   const { visible, hasMore, sentinelRef } = useProgressiveRows(rows, scrollRef);
-  const select = useCallback((r: GoalRow) => patch((f) => dimensionPatch(f, by, r, ix)), [patch, by, ix]);
+  const select = useCallback(
+    (r: GoalRow) => patch((f) => dimensionPatch(f, by, r, ix)),
+    [patch, by, ix]
+  );
 
-  const { onPace, tCollected, tGoal, tForecast, tPace } = useMemo(() => {
+  const { onPace, withGoal, tCollected, tGoal, tForecast, tPace } = useMemo(() => {
     const goal = sumBy(rows, (r) => r.goal);
+    // Sólo las filas con meta: las de meta 0 (y ritmo 0) contaban siempre como "al ritmo".
+    const measurable = rows.filter((r) => r.goal > 0);
     return {
-      onPace: rows.filter((r) => r.compliance >= r.pace).length,
+      onPace: measurable.filter((r) => paceRatio(r.compliance, r.pace) >= 1).length,
+      withGoal: measurable.length,
       tCollected: sumBy(rows, (r) => r.collected),
       tGoal: goal,
       tForecast: sumBy(rows, (r) => r.forecast),
@@ -205,7 +224,7 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
   return (
     <PanelCard
       title={`${grouping.plural} frente a su meta`}
-      hint={`${onPace} de ${rows.length} van al ritmo`}
+      hint={`${onPace} de ${withGoal} con meta van al ritmo`}
       flush
       actions={
         <>
@@ -268,9 +287,13 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
                 <tr>
                   <td className={TD_TOTAL}>Total</td>
                   <td className={cn(TD_TOTAL, "text-right tabular-nums")}>{money(tCollected)}</td>
-                  <td className={cn(TD_TOTAL, "text-right tabular-nums", HIDE_SM)}>{money(tGoal)}</td>
+                  <td className={cn(TD_TOTAL, "text-right tabular-nums", HIDE_SM)}>
+                    {money(tGoal)}
+                  </td>
                   <td className={cn(TD_TOTAL, "text-right tabular-nums")}>
-                    <span className={diffTone(tCollected - tGoal)}>{money(tCollected - tGoal, true)}</span>
+                    <span className={diffTone(tCollected - tGoal)}>
+                      {money(tCollected - tGoal, true)}
+                    </span>
                   </td>
                   <td className={TD_TOTAL}>
                     <Avance

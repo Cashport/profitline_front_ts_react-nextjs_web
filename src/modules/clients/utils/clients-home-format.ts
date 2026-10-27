@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import type { IClientsHomeExecutiveCatalogItem } from "@/types/clients/IClientsHome";
 import type { DuePeriod } from "../constants/clients-home";
 
 /* Formatos del Home de Clientes, iguales al diseño: montos en millones con
@@ -45,6 +46,14 @@ export const fmtCutoff = (iso: string): string =>
     minute: "2-digit"
   });
 
+/** "30/09 · 09:06" (línea meta del header). */
+export const fmtCutoffShort = (iso: string): string => {
+  const d = new Date(iso);
+  const day = d.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit" });
+  const time = d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: false });
+  return `${day} · ${time}`;
+};
+
 /** "2026-09-28" → "28/09/2026" sin pasar por la zona horaria del navegador. */
 export const fmtIsoDate = (iso: string | null): string => {
   if (!iso) return "…";
@@ -81,4 +90,22 @@ export const duePeriodRange = (period: DuePeriod): { from: string; to: string } 
     default:
       return { from: f(today), to: f(today) };
   }
+};
+
+/** Cascada Coordinador → Ejecutivo: solo los ejecutivos con clientes de esos
+    coordinadores, con la cantidad de clientes recalculada. Sin coordinadores
+    devuelve el catálogo completo. */
+export const executivesForCoordinators = (
+  executives: IClientsHomeExecutiveCatalogItem[],
+  coordinators: string[]
+): IClientsHomeExecutiveCatalogItem[] => {
+  if (!coordinators.length) return executives;
+  return executives
+    .map((e) => ({
+      ...e,
+      clients: e.coordinators
+        .filter((c) => coordinators.includes(c.key))
+        .reduce((sum, c) => sum + c.clients, 0)
+    }))
+    .filter((e) => e.clients > 0);
 };

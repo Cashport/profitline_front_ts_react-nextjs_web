@@ -33,7 +33,7 @@
         padding: 2px;
         padding-top: 4px;
         gap: 12px;
-        max-height: 50vh;
+        max-height: calc(50 * var(--vh));
         overflow-y: auto;
         scrollbar-width: thin;
     }

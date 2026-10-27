@@ -1,11 +1,20 @@
 /* Clases compartidas de la torre: tarjetas de indicadores y tablas. */
 
 /** Rótulo de las tarjetas de indicadores (el mismo de las tarjetas de la cartera). */
-export const KPI_LABEL = "text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground";
+export const KPI_LABEL =
+  "text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground";
 
 /** Cifra de las tarjetas de indicadores. */
 export const KPI_VALUE =
   "mt-1.5 text-[19px] font-bold leading-[1.15] tracking-[-0.02em] tabular-nums text-foreground";
+
+/**
+ * Tarjeta de indicador con barra (aplicación, tramos): encabezado, barra y
+ * leyenda son tres filas de la rejilla del tablero (subgrid), así las barras
+ * de tarjetas vecinas quedan a la misma altura.
+ */
+export const KPI_CARD =
+  "row-span-3 grid min-w-0 grid-cols-1 grid-rows-subgrid rounded-xl bg-card px-3.5 pb-3 pt-3.5 shadow-sm";
 
 /* ---------- tablas ----------
    border-separate y no collapse: con collapse los bordes del encabezado y del
@@ -38,6 +47,9 @@ export const PERSON = "block truncate text-[11.5px] font-semibold";
 export const SUB = "block truncate text-[10px] font-normal text-muted-foreground";
 
 export const AMOUNT = "whitespace-nowrap font-semibold tabular-nums";
+
+/** "Sin meta" en lugar de la barra de avance: sin meta no hay contra qué medir. */
+export const NO_GOAL = "whitespace-nowrap text-[10.5px] font-normal text-muted-foreground";
 
 /** Columnas que se ocultan en pantallas angostas (el h-sm del prototipo). */
 export const HIDE_SM = "max-sm:hidden";

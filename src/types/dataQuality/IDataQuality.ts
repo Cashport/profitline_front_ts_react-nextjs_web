@@ -347,6 +347,8 @@ export interface IGetCatalogs {
   material_id: number | null;
   material_code: string | null;
   material_name: string | null;
+  /** 'TRUE' | 'FALSE' calculado contra el catálogo oficial de GMN. */
+  MATCH?: "TRUE" | "FALSE" | null;
   factor: number;
   excluded: number;
 }
@@ -490,6 +492,21 @@ export interface IPacksUploadResult {
   created: number;
   updated: number;
   error_log: { url: string; filename: string } | null;
+}
+
+export interface IIqviaAuxUploadError {
+  fila: number;
+  motivo: string;
+  cod_iqvia?: string | null;
+}
+
+export interface IIqviaAuxUploadResult {
+  ok: boolean;
+  total_filas: number;
+  insertados: number;
+  actualizados: number;
+  sin_cambios: number;
+  errores: IIqviaAuxUploadError[];
 }
 
 export interface IPOS {
@@ -716,6 +733,64 @@ export interface IAuxiliaryFile {
   file_size: number | null; // bytes
   created_at: string;
   uploaded_at: string | null;
+  // HU cargue multiple (solo presente con la feature flag activa en el backend)
+  max_files?: number;
+  naming_mode?: AuxiliaryNamingMode;
+  async_upload?: boolean;
+  has_route?: boolean;
+  last_batch?: IAuxiliaryUploadBatchSummary | null;
+}
+
+export type AuxiliaryNamingMode = "fixed" | "numbered";
+
+export type AuxiliaryUploadStatus =
+  | "received"
+  | "pending"
+  | "processing"
+  | "success"
+  | "error";
+
+export type AuxiliaryBatchStatus =
+  | "uploading"
+  | "queued"
+  | "processing"
+  | "completed"
+  | "completed_with_errors"
+  | "incomplete";
+
+export interface IAuxiliaryUpload {
+  id: number;
+  batch_id?: string;
+  slot_index: number;
+  original_filename: string;
+  remote_filename: string;
+  remote_path?: string;
+  size_bytes?: number;
+  status: AuxiliaryUploadStatus;
+  delivery_state?: "pending" | "delivered" | "superseded";
+  error_message: string | null;
+  attempts?: number;
+  delivered_at: string | null;
+  created_at?: string;
+}
+
+export interface IAuxiliaryUploadBatchSummary {
+  id: string;
+  status: AuxiliaryBatchStatus;
+  file_count: number;
+  received_count: number;
+  processed_count: number;
+  failed_count: number;
+  created_at: string;
+  closed_at: string | null;
+}
+
+export interface IAuxiliaryUploadBatch extends IAuxiliaryUploadBatchSummary {
+  id_auxiliary_file: number;
+  naming_mode?: AuxiliaryNamingMode;
+  remote_dir?: string;
+  base_remote_name?: string;
+  files: IAuxiliaryUpload[];
 }
 
 export interface IRegion {
@@ -926,10 +1001,15 @@ export interface IGmnOficialesValidationReport {
   sheetName: string;
   rowsRead: number;
   rowsSkipped: number;
+  rowsKept?: number;
   rowsDuplicated: number;
-  rowsConflict: number;
+  duplicateGmnKeys?: number;
+  /** Compatibilidad con versiones previas del backend. */
+  rowsConflict?: number;
   countries: IGmnOficialesCountry[];
-  conflicts: IGmnOficialesConflict[];
+  /** Legado (ya no se usa: las filas distintas se conservan). */
+  conflicts?: IGmnOficialesConflict[];
+  invalidRows?: Array<{ rowNumber: number; reason: string }>;
 }
 
 export interface IGmnOficialesLoadResult {
@@ -939,12 +1019,17 @@ export interface IGmnOficialesLoadResult {
   sheetName: string;
   rowsRead: number;
   rowsSkipped: number;
+  rowsKept?: number;
   rowsDuplicated: number;
-  rowsConflict: number;
+  duplicateGmnKeys?: number;
+  rowsConflict?: number;
   rowsInserted: number;
   rowsUpdated: number;
+  rowsUnchanged?: number;
+  rowsDeactivated?: number;
   countries: IGmnOficialesCountry[];
-  conflictDetails: IGmnOficialesConflict[];
+  /** Legado (ya no se usa). */
+  conflictDetails?: IGmnOficialesConflict[];
 }
 
 export interface IGmnOficialesLoadRow {

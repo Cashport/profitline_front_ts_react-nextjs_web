@@ -15,6 +15,13 @@ import { plural } from "./format";
 export const sumBy = <T>(rows: T[], f: (row: T) => number) =>
   rows.reduce((acc, row) => acc + f(row), 0);
 
+/**
+ * Cumplimiento frente al ritmo esperado al día de corte (1 = va al ritmo). Sin
+ * historia el ritmo es 0: ahí sólo cuenta haber llegado a la meta.
+ */
+export const paceRatio = (compliance: number, pace: number) =>
+  pace > 0 ? compliance / pace : compliance >= 1 ? 1 : 0;
+
 /* ---------- orden ---------- */
 
 /** Clic en un encabezado: invierte si ya ordenaba por esa columna; si no, usa su dirección por defecto. */
@@ -23,7 +30,9 @@ export const nextSort = (
   col: string,
   defaultDir: SortState["dir"]
 ): SortState =>
-  cur && cur.col === col ? { col, dir: cur.dir === "asc" ? "desc" : "asc" } : { col, dir: defaultDir };
+  cur && cur.col === col
+    ? { col, dir: cur.dir === "asc" ? "desc" : "asc" }
+    : { col, dir: defaultDir };
 
 const compare = (x: string | number, y: string | number) =>
   typeof x === "string" ? x.localeCompare(String(y)) : x - Number(y);
@@ -38,7 +47,8 @@ export const sortRows = <T>(
   if (!sort?.col) return rows;
   const dir = sort.dir === "asc" ? 1 : -1;
   return [...rows].sort(
-    (a, b) => compare(value(a, sort.col), value(b, sort.col)) * dir || (tieBreak ? tieBreak(a, b) : 0)
+    (a, b) =>
+      compare(value(a, sort.col), value(b, sort.col)) * dir || (tieBreak ? tieBreak(a, b) : 0)
   );
 };
 
@@ -113,7 +123,7 @@ const goalGroupSub = (by: Grouping, id: string, n: number, ix: CatalogIndex) => 
       ? `Coord. ${ix.coordinators.get(coordinatorOf(ix, id))?.name ?? "—"}`
       : by === "channel"
         ? "Canal"
-        : (ix.managements.get(managementOf(ix, id))?.name ?? "—");
+        : ix.managements.get(managementOf(ix, id))?.name ?? "—";
   return `${context} · ${plural(n, "cliente", "clientes")}`;
 };
 
@@ -160,9 +170,9 @@ const executiveSub = (by: Grouping, id: string, n: number, ix: CatalogIndex) => 
   if (by === "client") return clientSub(ix, id);
   const context =
     by === "executive"
-      ? (ix.coordinators.get(coordinatorOf(ix, id))?.name ?? "—")
+      ? ix.coordinators.get(coordinatorOf(ix, id))?.name ?? "—"
       : by === "coordinator"
-        ? (ix.managements.get(managementOf(ix, id))?.name ?? "—")
+        ? ix.managements.get(managementOf(ix, id))?.name ?? "—"
         : "canal";
   return `${plural(n, "cliente", "clientes")} · ${context}`;
 };
@@ -273,7 +283,8 @@ export function unappliedRows(
     else byCoordinator.set(id, [p]);
   });
   const active = coordinators.filter((id) => byCoordinator.has(id));
-  if (active.length) list = list.filter((p) => active.includes(coordinatorOfClient(ix, p.clientId)));
+  if (active.length)
+    list = list.filter((p) => active.includes(coordinatorOfClient(ix, p.clientId)));
   const rows = sortRows(
     list,
     sort,

@@ -424,7 +424,7 @@ export function ModalDataIntake({
 
   // --- Form fields (shared by create and edit modes) ---
   const renderFormFields = () => (
-    <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto">
+    <div className="grid gap-6 py-4 max-h-[calc(60*var(--vh))] overflow-y-auto">
       {/* Tipo de Archivo Dropdown */}
       <div className="grid gap-2">
         <Label>Tipo de Archivo</Label>
@@ -652,7 +652,7 @@ export function ModalDataIntake({
 
   // --- View-only fields (for view mode without editing) ---
   const renderViewFields = () => (
-    <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto">
+    <div className="grid gap-6 py-4 max-h-[calc(60*var(--vh))] overflow-y-auto">
       {/* Tipo de Archivo */}
       <div className="grid gap-2">
         <Label>Tipo de Archivo</Label>

@@ -31,8 +31,6 @@ import type {
 } from "../../types";
 
 /** Misma superficie que el botón de tema y el buscador, a la misma altura. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface VisitsFilterModalProps {
   value: IVisitsFilters;
@@ -135,7 +133,6 @@ export default function VisitsFilterModal({
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ label: "Filtrar", className: TRIGGER_CLASS, showChevron: true }}
       formatTagValue={(_cat, items) =>
         items.length === 1 ? items[0].name : `${items.length} seleccionados`
       }

@@ -67,8 +67,8 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
             tip: `${b.label}: ${fmt(totals.aging[b.key])} M`
           }))}
         />
-        {/* Clic en un tramo: la tabla muestra solo la cartera de esa edad. */}
-        <div className="flex flex-wrap justify-between gap-x-2.5 gap-y-1 [container-type:inline-size]">
+        {/* Clic en un tramo: la tabla muestra solo la cartera de esa edad. Si no cabe, pasa a dos líneas. */}
+        <div className="flex flex-wrap justify-between gap-x-2.5 gap-y-0.5">
           {AGING_BUCKETS.map((b) => {
             const active = aging === b.key;
             return (
@@ -76,16 +76,16 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
                 key={b.key}
                 onClick={() => toggle(b.key)}
                 title={`${b.label}: ${fmt(totals.aging[b.key])} M`}
-                className="-mx-1 -my-0.5 flex min-w-0 shrink cursor-pointer items-center gap-1 whitespace-nowrap rounded-[5px] px-1 py-0.5 text-[clamp(9.5px,2.9cqi,11px)] text-[#6b6b6b] hover:!bg-[#f2f2f2]"
+                className="-mx-1 flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-[5px] px-1 text-[11px] leading-tight text-cp-ink-3 hover:!bg-cp-muted"
                 style={{
                   opacity: aging === null || active ? 1 : 0.35,
                   background: active ? "#f7f7f7" : "transparent",
                   boxShadow: active ? `inset 0 0 0 1px ${b.color}` : "none"
                 }}
               >
-                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: b.color }} />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-sm" style={{ background: b.color }} />
                 {b.short}
-                <span className="font-semibold text-[#141414]">
+                <span className="font-semibold text-cp-ink">
                   {fmtHeroShort(totals.aging[b.key])}
                 </span>
               </div>
@@ -114,10 +114,10 @@ const DocumentsCard = ({ totals }: { totals: IClientsHomeTotals }) => {
           value={fmt(it.amount)}
           unit="M"
           valueClassName="text-[clamp(18px,21cqi,20px)]"
-          className={`justify-between gap-2 px-3.5 [container-type:inline-size] ${i > 0 ? "border-l border-[#ececec]" : ""}`}
+          className={`justify-between gap-2 px-3.5 [container-type:inline-size] ${i > 0 ? "border-l border-cp-line" : ""}`}
           caption={
             <>
-              <b className="font-semibold text-[#141414]">{it.count.toLocaleString("es-CO")}</b>{" "}
+              <b className="font-semibold text-cp-ink">{it.count.toLocaleString("es-CO")}</b>{" "}
               {it.noun}
             </>
           }
@@ -137,7 +137,7 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
           label="Meta"
           pill={
             c.goal !== null && (
-              <StatusBadge bg="#f4f9d2" color="#141414" className="text-[11.5px]">
+              <StatusBadge bg="#cbe71e" color="#141414" className="text-[11.5px]">
                 {pct1(c.collectedPct)}
               </StatusBadge>
             )
@@ -172,22 +172,20 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
             }
           ]}
         />
-        <div className="min-w-0 [container-type:inline-size]">
-          {/* Sin espacio, el forecast baja a su propia línea, siempre a la derecha. */}
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 whitespace-nowrap text-[clamp(9px,2.45cqi,11px)] text-[#6b6b6b]">
-            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <LegendItem color={COLLECTION_COLORS.agreementsActive} label="Acuerdos">
-                {fmt(c.agreementsActive)} M
-              </LegendItem>
-              <LegendItem color={COLLECTION_COLORS.agreementsBroken} label="Incumplidos">
-                {fmt(c.agreementsBroken)} M
-              </LegendItem>
-            </span>
-            <span className="ml-auto">
-              Forecast <b className="font-semibold text-[#141414]">{fmt(c.forecast)} M</b>
-              {c.forecastPct !== null && ` · ${pct1(c.forecastPct)}`}
-            </span>
-          </div>
+        {/* Sin espacio, el forecast baja a su propia línea, siempre a la derecha. */}
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-0.5 whitespace-nowrap text-[11px] leading-tight text-cp-ink-3">
+          <span className="flex shrink-0 items-center gap-x-2">
+            <LegendItem color={COLLECTION_COLORS.agreementsActive} label="Acuerdos">
+              {fmt(c.agreementsActive)} M
+            </LegendItem>
+            <LegendItem color={COLLECTION_COLORS.agreementsBroken} label="Incumplidos">
+              {fmt(c.agreementsBroken)} M
+            </LegendItem>
+          </span>
+          <span className="ml-auto">
+            Forecast <b className="font-semibold text-cp-ink">{fmt(c.forecast)} M</b>
+            {c.forecastPct !== null && ` · ${pct1(c.forecastPct)}`}
+          </span>
         </div>
       </div>
     </>
@@ -204,7 +202,7 @@ const LegendItem = ({
   children: React.ReactNode;
 }) => (
   <span className="flex items-center gap-[5px]">
-    <span className="h-1.5 w-1.5 rounded-sm" style={{ background: color }} />
-    {label} <b className="font-semibold text-[#141414]">{children}</b>
+    <span className="h-1.5 w-1.5 shrink-0 rounded-sm" style={{ background: color }} />
+    {label} <b className="font-semibold text-cp-ink">{children}</b>
   </span>
 );

@@ -71,6 +71,7 @@ export function CatalogsTable() {
   const {
     data: equivalencies = [],
     isLoading,
+    error,
     mutate
   } = useCatalogsDataQuality(String(params.clientId), String(params.countryId), debouncedSearch);
 
@@ -254,12 +255,23 @@ export function CatalogsTable() {
             Nueva Equivalencia
           </Button>
         </div>
+        {error ? (
+          <div className="bg-white rounded-lg p-6 text-center">
+            <p className="text-red-600">
+              {error instanceof Error
+                ? error.message
+                : "No se pudo cargar el catálogo de equivalencias."}
+            </p>
+          </div>
+        ) : (
+        <>
         <Table>
           <TableHeader>
             <TableRow style={{ borderColor: "#DDDDDD" }}>
               <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
               <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
               <TableHead style={{ color: "#141414" }}>GMN</TableHead>
+              <TableHead style={{ color: "#141414" }}>MATCH</TableHead>
               <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
               <TableHead style={{ color: "#141414" }}>Factor</TableHead>
               <TableHead style={{ color: "#141414" }}>Exclusión</TableHead>
@@ -286,6 +298,16 @@ export function CatalogsTable() {
                 </TableCell>
                 <TableCell>
                   <span style={{ color: "#141414" }}>{item.material_code}</span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    style={{
+                      color: item.MATCH === "TRUE" ? "#166534" : "#B91C1C",
+                      fontWeight: 600
+                    }}
+                  >
+                    {item.MATCH === "TRUE" ? "MATCH" : "NO MATCH"}
+                  </span>
                 </TableCell>
                 <TableCell>
                   <span style={{ color: "#141414" }}>{item.material_name}</span>
@@ -407,6 +429,8 @@ export function CatalogsTable() {
             showSizeChanger={false}
           />
         </div>
+        </>
+        )}
 
         <ModalAddEditCatalog
           isOpen={whichModalOpen.selected === 1}

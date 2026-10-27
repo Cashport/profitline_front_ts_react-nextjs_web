@@ -26,10 +26,8 @@ export default function ClientsLayout({ children }: ClientsLayoutProps) {
       headerTitle="Clientes"
       headerTitleExtra={<ClientsHomeHeaderExtra />}
       headerActions={<ClientsHomeHeaderActions />}
-      headerClassName={isHome ? "!pb-0" : undefined}
-      contentClassName={
-        isHome ? "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : undefined
-      }
+      headerBack={isHome ? undefined : CLIENTS_HOME_PATH}
+      contentClassName={isHome ? "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : undefined}
     >
       {children}
     </ViewWrapper>

@@ -51,14 +51,18 @@ export default function NoveltyAlertsView() {
   }>({ countries: [], clients: [], types: [], categories: [] });
 
   useEffect(() => {
-    getAlertsFilters().then((data) =>
-      setFiltersData({
-        countries: data.countries,
-        clients: data.clients,
-        types: data.types,
-        categories: data.categories ?? []
-      })
-    );
+    getAlertsFilters()
+      .then((data) =>
+        setFiltersData({
+          countries: data.countries,
+          clients: data.clients,
+          types: data.types,
+          categories: data.categories ?? []
+        })
+      )
+      .catch((error) => {
+        console.error("Error fetching alerts filters:", error);
+      });
   }, []);
 
   // Las tarjetas espejan el select de tipos: una categoría está activa cuando todos sus
@@ -98,7 +102,7 @@ export default function NoveltyAlertsView() {
     setClientFilter("all");
   };
 
-  const { data: alertsResponse, isLoading } = useDataQualityAlerts(
+  const { data: alertsResponse, isLoading, error } = useDataQualityAlerts(
     currentPage,
     10,
     searchTerm || undefined,
@@ -222,16 +226,26 @@ export default function NoveltyAlertsView() {
             <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
               Lista de Alertas y Novedades
             </h3>
-            <AlertsTable
-              alerts={alerts}
-              isLoading={isLoading}
-              pagination={{
-                current: currentPage,
-                total: alertsData?.total ?? 0,
-                pageSize: alertsData?.limit ?? 10
-              }}
-              onPageChange={setCurrentPage}
-            />
+            {error ? (
+              <div className="bg-white rounded-lg p-6 text-center">
+                <p className="text-red-600">
+                  {error instanceof Error
+                    ? error.message
+                    : "No se pudo cargar la información de alertas."}
+                </p>
+              </div>
+            ) : (
+              <AlertsTable
+                alerts={alerts}
+                isLoading={isLoading}
+                pagination={{
+                  current: currentPage,
+                  total: alertsData?.total ?? 0,
+                  pageSize: alertsData?.limit ?? 10
+                }}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </div>
         </CardContent>
       </Card>

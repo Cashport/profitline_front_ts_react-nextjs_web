@@ -97,7 +97,7 @@ export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Pr
         <Progress
           percent={Number(progress.toFixed(2))}
           status="active"
-          strokeColor={{ from: "#cbe61e", to: "#32bbe5" }}
+          strokeColor={{ from: "#cbe71e", to: "#32bbe5" }}
           trailColor="#eeeeee"
           strokeWidth={10}
         />

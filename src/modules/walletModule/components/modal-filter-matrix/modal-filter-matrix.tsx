@@ -6,7 +6,6 @@ import type {
   FilterOptionItem,
   FilterSelection
 } from "@/components/ui/filter-modal";
-import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import { useIncidentListFilters } from "@/modules/noveltiesModule/hooks/useIncidentListFilters";
 
 import { EMPTY_MATRIX_MODAL_FILTERS } from "../../constants";
@@ -14,8 +13,6 @@ import { estadoMeta } from "../../utils/estados";
 import type { EstadoId, IWalletMatrixModalFilters } from "../../types";
 
 /** Misma superficie que el botón de tema para que los dos lean como un par. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface ModalFilterMatrixProps {
   value: IWalletMatrixModalFilters;
@@ -50,8 +47,10 @@ const toTexts = (items?: FilterOptionItem[]) => (items ?? []).map((o) => o.id);
  * Botón "Filtros" de la matriz. Todas las categorías son multi: el API recibe
  * cada lista separada por coma. Ejecutivo viaja por correo; coordinador,
  * mercado, KAM y KAM líder, por el valor canónico que devuelve
- * /invoice/incident-list/filters. Estado comparte la selección con los chips de
- * la matriz: son estados de la pantalla, y la vista los traduce a statusKey.
+ * /invoice/incident-list/filters. Tipo de novedad sale de ese mismo catálogo,
+ * con los inactivos, para poder filtrar novedades viejas. Estado comparte la
+ * selección con los chips de la matriz: son estados de la pantalla, y la vista
+ * los traduce a statusKey.
  */
 export default function ModalFilterMatrix({
   value,
@@ -60,7 +59,6 @@ export default function ModalFilterMatrix({
   estadosLoading = false
 }: ModalFilterMatrixProps) {
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
-  const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
 
   const coordinadorOptions = canonicalOptions(filters?.coordinator);
   const mercadoOptions = canonicalOptions(filters?.market);
@@ -75,7 +73,7 @@ export default function ModalFilterMatrix({
     id: e,
     name: estadoMeta(e).nom
   }));
-  const tipoNovedadOptions = toOptions(motives);
+  const tipoNovedadOptions = toOptions(filters?.novelty_type);
 
   const selection: FilterSelection = {
     coordinador: many(value.coordinator, coordinadorOptions),
@@ -142,7 +140,7 @@ export default function ModalFilterMatrix({
       key: "tipoNovedad",
       label: "Tipo de novedad",
       options: tipoNovedadOptions,
-      status: status(isLoadingMotives)
+      status: filtersStatus
     }
   ];
 
@@ -150,7 +148,6 @@ export default function ModalFilterMatrix({
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ className: TRIGGER_CLASS }}
       formatTagValue={(_cat, items) =>
         items.length === 1 ? items[0].name : `${items.length} seleccionados`
       }

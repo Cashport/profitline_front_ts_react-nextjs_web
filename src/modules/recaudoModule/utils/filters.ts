@@ -120,7 +120,8 @@ export const dimensionPatch = (
   if (by === "client") {
     return f.client === row.id ? { client: null } : { client: row.id, search: "" };
   }
-  if (by === "executive") return f.executive === row.id ? { executive: null } : executivePatch(row.id, ix);
+  if (by === "executive")
+    return f.executive === row.id ? { executive: null } : executivePatch(row.id, ix);
   if (by === "channel") return { channel: f.channel === row.id ? null : row.id };
   return f.coordinator === row.id ? { coordinator: null } : coordinatorPatch(f, row.id, ix);
 };
@@ -214,7 +215,8 @@ export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChi
       remove: { client: null }
     });
   }
-  if (f.search) chips.push({ key: "search", label: "Búsqueda", value: f.search, remove: { search: "" } });
+  if (f.search)
+    chips.push({ key: "search", label: "Búsqueda", value: f.search, remove: { search: "" } });
   if (f.aging !== null) {
     chips.push({
       key: "aging",

@@ -95,7 +95,7 @@ export default function TicketDetailModal({ ticketId, onClose }: TicketDetailMod
       closeIcon={null}
       centered
       destroyOnClose
-      width="min(640px, 95vw)"
+      width="min(640px, 95 * var(--vw))"
       // El modal vive en un portal fuera de .wallet-scope y del contenedor .dark,
       // así que el tema se re-declara aquí (ver GroupDetailModal).
       rootClassName={resolvedTheme === "dark" ? "dark" : undefined}

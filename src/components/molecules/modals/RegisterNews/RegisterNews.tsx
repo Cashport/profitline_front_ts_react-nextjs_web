@@ -110,13 +110,8 @@ const RegisterNews = ({
   const onSubmit = (data: IFormRegisterNews) => submitIncident(data);
 
   const handleCreateNewIncident = () => {
-    if (!lastSubmittedData) return false;
     // Use the captured data and resubmit with create_new=true
-    submitIncident(lastSubmittedData, true);
-    // Returning false prevents Ant Design's Modal from auto-closing on OK click.
-    // We control the close explicitly via the state changes above so there's
-    // no race condition with the parent's onCloseAllModals side effects.
-    return false;
+    if (lastSubmittedData) submitIncident(lastSubmittedData, true);
   };
 
   const handleCloseIncidentConfirmation = () => {
@@ -144,62 +139,78 @@ const RegisterNews = ({
   }, [isOpen]);
 
   return (
-    <Modal className="contentRegisterNews" width="50%" footer={null} open={isOpen} closable={false}>
-      <button className="contentRegisterNews__header" onClick={handleClose}>
-        <CaretLeft size="1.25rem" />
-        <h4>Registrar novedad</h4>
-      </button>
-      <p className="contentRegisterNews__description">
-        Adjunta la evidencia e ingresa un comentario
-      </p>
-      <form onSubmit={handleSubmit(onSubmit)} className="contentRegisterNews__form">
-        <div className="contentRegisterNews__select">
-          <InputSelect
-            titleInput="Motivo"
-            nameInput="motive"
-            control={control}
-            error={errors.motive}
-            options={motives?.map((motive) => ({ value: motive?.name, label: motive?.name })) || []}
-            loading={isLoading}
-            isError={isError}
-            placeholder="Seleccionar motivo"
-            popupMatchSelectWidth={false}
+    <>
+      <Modal
+        className="contentRegisterNews"
+        width="50%"
+        footer={null}
+        open={isOpen}
+        closable={false}
+      >
+        <button className="contentRegisterNews__header" onClick={handleClose}>
+          <CaretLeft size="1.25rem" />
+          <h4>Registrar novedad</h4>
+        </button>
+        <p className="contentRegisterNews__description">
+          Adjunta la evidencia e ingresa un comentario
+        </p>
+        <form onSubmit={handleSubmit(onSubmit)} className="contentRegisterNews__form">
+          <div className="contentRegisterNews__select">
+            <InputSelect
+              titleInput="Motivo"
+              nameInput="motive"
+              control={control}
+              error={errors.motive}
+              options={
+                motives?.map((motive) => ({
+                  value: motive?.name,
+                  label: motive?.name,
+                  title: motive?.description
+                })) || []
+              }
+              loading={isLoading}
+              isError={isError}
+              placeholder="Seleccionar motivo"
+              popupMatchSelectWidth={false}
+            />
+            <InputFormMoney
+              titleInput="Monto novedad"
+              nameInput="amount"
+              control={control}
+              error={errors.amount}
+              placeholder="Ingresar monto"
+              typeInput="number"
+              customStyle={{ width: "100%" }}
+              validationRules={{ required: false }}
+            />
+            <div />
+          </div>
+          <ModalAttachEvidence
+            selectedEvidence={selectedEvidence}
+            setSelectedEvidence={setSelectedEvidence}
+            handleAttachEvidence={handleSubmit(onSubmit)}
+            commentary={commentary}
+            setCommentary={setCommentary}
+            isOpen={true}
+            handleCancel={handleClose}
+            customTexts={{
+              title: "Registrar novedad",
+              description: "Adjunta la evidencia e ingresa un comentario",
+              cancelButtonText: "Cancelar",
+              acceptButtonText: isSubmitting ? "Enviando..." : "Guardar"
+            }}
+            noTitle
+            noDescription
+            multipleFiles
+            loading={isSubmitting}
+            confirmDisabled={!commentary || !isValid}
+            isMandatory={{ evidence: false, commentary: true }}
+            noModal
           />
-          <InputFormMoney
-            titleInput="Monto novedad"
-            nameInput="amount"
-            control={control}
-            error={errors.amount}
-            placeholder="Ingresar monto"
-            typeInput="number"
-            customStyle={{ width: "100%" }}
-            validationRules={{ required: false }}
-          />
-          <div />
-        </div>
-        <ModalAttachEvidence
-          selectedEvidence={selectedEvidence}
-          setSelectedEvidence={setSelectedEvidence}
-          handleAttachEvidence={handleSubmit(onSubmit)}
-          commentary={commentary}
-          setCommentary={setCommentary}
-          isOpen={true}
-          handleCancel={handleClose}
-          customTexts={{
-            title: "Registrar novedad",
-            description: "Adjunta la evidencia e ingresa un comentario",
-            cancelButtonText: "Cancelar",
-            acceptButtonText: isSubmitting ? "Enviando..." : "Guardar"
-          }}
-          noTitle
-          noDescription
-          multipleFiles
-          loading={isSubmitting}
-          confirmDisabled={!commentary || !isValid}
-          isMandatory={{ evidence: false, commentary: true }}
-          noModal
-        />
-      </form>
+        </form>
+      </Modal>
+      {/* Must stay outside <Modal>: antd stops re-rendering a closed Modal's children, so closing
+        both in the same update left this confirm open with its button loading */}
       <ModalConfirmAction
         isOpen={showIncidentConfirmation}
         onClose={handleCloseIncidentConfirmation}
@@ -209,7 +220,7 @@ const RegisterNews = ({
         cancelText="No crear nueva novedad"
         okLoading={isSubmitting}
       />
-    </Modal>
+    </>
   );
 };
 

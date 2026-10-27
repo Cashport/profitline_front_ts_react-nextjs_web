@@ -5,6 +5,7 @@ import { Dropdown, Spin, message } from "antd";
 
 import { uploadAuxiliaryFile } from "@/services/dataQuality/dataQuality";
 import { useAuxiliaryFiles } from "../../hooks/useAuxiliaryFiles";
+import { AuxiliaryUploadModal } from "../AuxiliaryUploadModal/AuxiliaryUploadModal";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -16,7 +17,7 @@ import {
   TableHeader,
   TableRow
 } from "@/modules/chat/ui/table";
-import { IAuxiliaryFile } from "@/types/dataQuality/IDataQuality";
+import { IAuxiliaryFile, IAuxiliaryUploadBatchSummary } from "@/types/dataQuality/IDataQuality";
 
 const bytesToMB = (bytes: number | null): string => {
   if (!bytes) return "-";
@@ -27,11 +28,45 @@ const formatDate = (isoDateString: string | null): string => {
   return isoDateString ? dayjs(isoDateString).format("YYYY-MM-DD") : "-";
 };
 
+/**
+ * Estado del ultimo cargue asincrono. Los estados intermedios se muestran como
+ * "En proceso" para no confundir "recibido" con "entregado al SFTP".
+ */
+const batchStatusView = (
+  batch: IAuxiliaryUploadBatchSummary | null | undefined
+): { label: string; color: string } | null => {
+  if (!batch) return null;
+  switch (batch.status) {
+    case "completed":
+      return { label: "Exitoso", color: "#12B76A" };
+    case "completed_with_errors":
+      return {
+        label: `Con errores (${batch.failed_count})`,
+        color: "#B42318"
+      };
+    case "incomplete":
+      return { label: "Incompleto", color: "#B54708" };
+    case "processing":
+    case "queued":
+    case "uploading":
+      return { label: "En proceso", color: "#175CD3" };
+    default:
+      return null;
+  }
+};
+
 export function AuxiliaryFilesTable() {
   const { auxiliaryFiles, isLoading, isValidating, mutate } = useAuxiliaryFiles();
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadTarget, setUploadTarget] = useState<IAuxiliaryFile | null>(null);
+  const [uploadBatchId, setUploadBatchId] = useState<string | null>(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
-  const handleUpload = (id: number) => {
+  const showStatus = (auxiliaryFiles ?? []).some(
+    (file) => file.async_upload || file.last_batch
+  );
+
+  const openLegacyUpload = (id: number) => {
     const input = document.createElement("input");
     input.type = "file";
     input.onchange = async (e) => {
@@ -57,6 +92,29 @@ export function AuxiliaryFilesTable() {
       input.remove();
     };
     input.click();
+  };
+
+  const handleUpload = (file: IAuxiliaryFile) => {
+    if (file.has_route === false) {
+      message.error(
+        `El auxiliar ${file.file_type} no tiene ruta SFTP activa configurada. Contacta a soporte de datos.`
+      );
+      return;
+    }
+    if (file.async_upload) {
+      setUploadTarget(file);
+      setUploadBatchId(null);
+      setUploadModalOpen(true);
+      return;
+    }
+    openLegacyUpload(file.id);
+  };
+
+  const handleViewBatch = (file: IAuxiliaryFile) => {
+    if (!file.last_batch) return;
+    setUploadTarget(file);
+    setUploadBatchId(file.last_batch.id);
+    setUploadModalOpen(true);
   };
 
   const handleDownload = async (file: IAuxiliaryFile) => {
@@ -103,6 +161,11 @@ export function AuxiliaryFilesTable() {
             <TableHead className="w-24" style={{ color: "#141414", fontWeight: 600 }}>
               Tamaño
             </TableHead>
+            {showStatus && (
+              <TableHead className="w-[150px]" style={{ color: "#141414", fontWeight: 600 }}>
+                Estado
+              </TableHead>
+            )}
             <TableHead className="w-20" style={{ color: "#141414", fontWeight: 600 }}>
               Acciones
             </TableHead>
@@ -111,85 +174,122 @@ export function AuxiliaryFilesTable() {
         <TableBody>
           {!isLoading && !auxiliaryFiles?.length ? (
             <TableRow style={{ borderColor: "#DDDDDD" }}>
-              <TableCell colSpan={6} className="py-10 text-center text-gray-500">
+              <TableCell colSpan={showStatus ? 7 : 6} className="py-10 text-center text-gray-500">
                 No hay archivos auxiliares
               </TableCell>
             </TableRow>
           ) : (
-            auxiliaryFiles?.map((file) => (
-              <TableRow
-                key={file.id}
-                className="hover:bg-gray-50"
-                style={{ borderColor: "#DDDDDD" }}
-              >
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs text-white"
-                    style={{ backgroundColor: file.file_type_color }}
-                  >
-                    {file.file_type}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                    <span style={{ color: "#141414" }}>{formatDate(file.created_at)}</span>
-                  </div>
-                </TableCell>
-                <TableCell
-                  className="overflow-hidden text-ellipsis"
-                  title={file.description || undefined}
+            auxiliaryFiles?.map((file) => {
+              const statusView = batchStatusView(file.last_batch);
+
+              return (
+                <TableRow
+                  key={file.id}
+                  className="hover:bg-gray-50"
+                  style={{ borderColor: "#DDDDDD" }}
                 >
-                  <span className="font-normal" style={{ color: "#141414" }}>
-                    {file.description || "-"}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                    <span style={{ color: "#141414" }}>{formatDate(file.uploaded_at)}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span style={{ color: "#141414" }}>{bytesToMB(file.file_size)}</span>
-                </TableCell>
-                <TableCell className="w-0">
-                  <div className="flex items-center justify-end">
-                    <Dropdown
-                      menu={{
-                        items: [
-                          {
-                            key: "upload",
-                            label: "Cargar",
-                            onClick: () => handleUpload(file.id),
-                            disabled: isUploading
-                          },
-                          {
-                            key: "download",
-                            label: "Descargar",
-                            onClick: () => handleDownload(file),
-                            disabled: !file.file_url
-                          }
-                        ]
-                      }}
-                      trigger={["click"]}
+                  <TableCell>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs text-white"
+                      style={{ backgroundColor: file.file_type_color }}
                     >
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                      {file.file_type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                      <span style={{ color: "#141414" }}>{formatDate(file.created_at)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell
+                    className="overflow-hidden text-ellipsis"
+                    title={file.description || undefined}
+                  >
+                    <span className="font-normal" style={{ color: "#141414" }}>
+                      {file.description || "-"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                      <span style={{ color: "#141414" }}>{formatDate(file.uploaded_at)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span style={{ color: "#141414" }}>{bytesToMB(file.file_size)}</span>
+                  </TableCell>
+                  {showStatus && (
+                    <TableCell>
+                      {statusView ? (
+                        <span className="flex items-center gap-2 text-xs" style={{ color: "#141414" }}>
+                          <span
+                            className="inline-block size-2 rounded-full"
+                            style={{ backgroundColor: statusView.color }}
+                          />
+                          {statusView.label}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                  )}
+                  <TableCell className="w-0">
+                    <div className="flex items-center justify-end">
+                      <Dropdown
+                        menu={{
+                          items: [
+                            {
+                              key: "upload",
+                              label: "Cargar",
+                              onClick: () => handleUpload(file),
+                              disabled: isUploading
+                            },
+                            {
+                              key: "view",
+                              label: "Ver archivos",
+                              onClick: () => handleViewBatch(file),
+                              disabled: !file.last_batch
+                            },
+                            {
+                              key: "download",
+                              label: "Descargar",
+                              onClick: () => handleDownload(file),
+                              disabled: !file.file_url
+                            }
+                          ]
+                        }}
+                        trigger={["click"]}
                       >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </Dropdown>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </Dropdown>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })
           )}
         </TableBody>
       </Table>
+
+      <AuxiliaryUploadModal
+        isOpen={uploadModalOpen}
+        auxiliaryFile={uploadTarget}
+        initialBatchId={uploadBatchId}
+        onClose={() => {
+          setUploadModalOpen(false);
+          setUploadTarget(null);
+          setUploadBatchId(null);
+        }}
+        onFinished={() => mutate()}
+      />
     </Spin>
   );
 }

@@ -180,7 +180,7 @@ export default function ModalCreateEmailTemplate({
       destroyOnClose
       styles={{
         body: {
-          maxHeight: "calc(90vh - 110px)",
+          maxHeight: "calc(90 * var(--vh) - 110px)",
           overflowY: "auto",
           scrollbarWidth: "thin"
         }

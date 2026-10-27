@@ -1,11 +1,25 @@
 @import "@styles/variables.scss";
 
+// Riel abierto: al pasar el mouse / foco por teclado sobre el panel, o fijado (sidebar.scss).
+@mixin railOpen {
+    :global(.railPanel:hover) &,
+    :global(.railPanel:has(:focus-visible)) &,
+    :global(.railPinned) & {
+        @content;
+    }
+}
+
+// Cerrado, los ítems miden lo mismo que el cuadro del ícono y quedan centrados en el riel;
+// abierto, el mismo padding deja el ícono en su sitio y el ítem crece a la derecha.
+$item-inset: calc((var(--rail-w) - 40px) / 2);
+
 .containerButtons {
     display: flex;
     flex-direction: column;
-    padding: 10px 14px;
-    align-items: center;
-    row-gap: 6px;
+    align-items: stretch;
+    width: 100%;
+    padding: 0 $item-inset;
+    row-gap: 2px;
     flex: 1 1 auto; // take the max height available within the group
     min-height: 0; // allow shrinking below content so overflow can scroll
     overflow-y: auto; // scroll the buttons when the viewport is too short
@@ -40,43 +54,145 @@
 
     &.mobile {
         flex-direction: row;
+        flex-wrap: wrap;
         justify-content: center;
+        gap: 4px;
+        padding: 8px;
         flex: 0 0 auto; // reset: mobile dropdown must not grow/scroll vertically
         overflow: visible;
         mask-image: none; // a mask clips to the element box, which would cut off the overflowing dropdown
-    }
 
-    .buttonIcon {
-        background-color: $secondary;
-        box-shadow: none;
-        color: black;
-        align-items: center;
-
-        &:hover {
-            background-color: $secondary !important;
-            color: black;
-        }
-    }
-
-    .buttonIconActive {
-        background-color: transparent;
-        color: black;
-        box-shadow: none;
-        align-items: center;
-
-        &:hover {
-            background-color: $secondary !important;
-            color: black;
+        .groupHead {
+            display: none;
         }
 
-        :global(.dark) & {
-            color: rgb(var(--sidebar-foreground));
+        .railItem {
+            width: auto;
+        }
+
+        .railLabel {
+            opacity: 1;
         }
     }
 }
 
-@media (max-width: 768px) {
-    .containerButtons {
-        padding: 7px 16px;
+// Separador entre grupos: cerrado es una línea; abierto, la línea se oculta y el título
+// hace de separador. El título ocupa su espacio aunque esté oculto, así nada salta al abrir.
+.groupHead {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-end;
+    height: 28px;
+    margin-top: 6px;
+    padding: 0 0 4px 8px;
+    border-top: 1px solid $cp-line;
+    transition: border-color 0.15s ease;
+
+    @include railOpen {
+        border-top-color: transparent;
+    }
+
+    &.first {
+        height: 24px;
+        margin-top: 0;
+        border-top: 0;
+    }
+
+    .groupTitle {
+        overflow: hidden;
+        white-space: nowrap;
+        font-family: $font-poppins, sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: $cp-ink-4;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+
+        @include railOpen {
+            opacity: 1;
+        }
+    }
+}
+
+// docs/DESIGN.md §3: ícono 18 visible en cuadro 36×30 radio 9 (px CSS ÷ zoom 0.75).
+.railItem {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    width: 100%;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    font-family: $font-poppins, sans-serif; // <button> no hereda la fuente
+    background: transparent;
+    cursor: pointer;
+    color: $cp-ink;
+    text-decoration: none;
+    overflow: hidden;
+    transition: background-color 0.15s ease;
+
+    .railIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 40px;
+        height: 36px;
+    }
+
+    .railLabel {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        color: $cp-ink-2;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+
+        @include railOpen {
+            opacity: 1;
+        }
+    }
+
+    // Es un <a>: sin el color explícito hereda el azul de enlace de AntD al pasar el mouse.
+    &:hover {
+        color: $cp-ink;
+        background-color: $cp-muted;
+
+        .railLabel {
+            color: $cp-ink;
+        }
+    }
+
+    &.active {
+        background-color: $cp-lime;
+        color: $cp-ink;
+
+        .railLabel {
+            font-weight: 600;
+            color: $cp-ink;
+        }
+    }
+
+    :global(.dark) & {
+        color: rgb(var(--sidebar-foreground));
+
+        .railLabel {
+            color: rgb(var(--sidebar-foreground));
+        }
+
+        &:hover {
+            background-color: rgb(var(--sidebar-accent));
+        }
+
+        &.active {
+            color: $cp-ink;
+
+            .railLabel {
+                color: $cp-ink;
+            }
+        }
     }
 }

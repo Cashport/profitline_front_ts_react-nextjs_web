@@ -8,7 +8,6 @@ import type {
   FilterOptionItem,
   FilterSelection
 } from "@/components/ui/filter-modal";
-import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import {
   DateDraft,
   FilterDateTab,
@@ -22,8 +21,6 @@ import { useNoveltyStatuses } from "../../hooks/useNoveltyStatuses";
 import type { INoveltiesFilters } from "../../types";
 
 /** Misma altura y superficie que los demás controles de la barra. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface NoveltiesFilterModalProps {
   value: INoveltiesFilters;
@@ -43,11 +40,12 @@ const toText = (items?: FilterOptionItem[]) => items?.[0]?.id ?? null;
 /**
  * Botón "Filtros" de la bandeja. Cada categoría es de una sola opción porque
  * el listado recibe un id por parámetro. Coordinador, KAM y mercado envían el
- * valor canónico del catálogo, que es lo que el listado espera de vuelta.
+ * valor canónico del catálogo, que es lo que el listado espera de vuelta. Tipo
+ * de novedad sale de ese mismo catálogo, con los inactivos, para poder filtrar
+ * novedades viejas.
  */
 export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilterModalProps) {
   const { statuses, isLoading: isLoadingStatuses } = useNoveltyStatuses();
-  const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
   // El draft interno de FilterModal sólo cubre categorías de opciones, así que
@@ -60,7 +58,7 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
   const estadoOptions: FilterOptionItem[] = statuses
     .filter((s) => s.id !== NOVELTY_STATUS_FUSIONADA_ID)
     .map((s) => ({ id: String(s.id), name: s.description }));
-  const motivoOptions: FilterOptionItem[] = (motives ?? []).map((m) => ({
+  const motivoOptions: FilterOptionItem[] = (filters?.novelty_type ?? []).map((m) => ({
     id: String(m.id),
     name: m.name
   }));
@@ -111,7 +109,7 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
       label: "Tipo de novedad",
       selectMode: "single",
       options: motivoOptions,
-      status: isLoadingMotives ? "loading" : undefined
+      status: filtersStatus
     },
     {
       key: "coordinador",
@@ -161,7 +159,6 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ className: TRIGGER_CLASS }}
       formatTagValue={(_cat, items) => items[0]?.name ?? ""}
       onApply={(sel) =>
         onChange({

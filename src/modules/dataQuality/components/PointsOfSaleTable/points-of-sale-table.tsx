@@ -33,7 +33,7 @@ export function PointsOfSaleTable() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
 
-  const { data, isLoading, mutate } = usePointsOfSale(clientId, countryId, debouncedSearch);
+  const { data, isLoading, error, mutate } = usePointsOfSale(clientId, countryId, debouncedSearch);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
@@ -199,14 +199,22 @@ export function PointsOfSaleTable() {
           Nuevo POS
         </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={isLoading}
-        pagination={{ pageSize: 7 }}
-        size="small"
-      />
+      {error ? (
+        <div className="bg-white rounded-lg p-6 text-center">
+          <p className="text-red-600">
+            {error instanceof Error ? error.message : "No se pudo cargar los puntos de venta."}
+          </p>
+        </div>
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={data}
+          rowKey="id"
+          loading={isLoading}
+          pagination={{ pageSize: 7 }}
+          size="small"
+        />
+      )}
 
       <ModalAddEditPOS
         isOpen={isModalOpen}

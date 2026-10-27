@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Select } from "antd";
 
+import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import { useProjectUsers } from "@/hooks/useProjectUsers";
-import { useIncidentListFilters } from "@/modules/noveltiesModule/hooks/useIncidentListFilters";
 import type { IIncidentDetail } from "@/hooks/useNoveltyDetail";
 import type { IUpdateIncidentBody } from "@/types/novelties/INovelties";
 import { parseApiDate } from "../../utils/api-adapter";
@@ -43,13 +43,15 @@ function EditNoveltyForm({
   onClose,
   onSave
 }: Omit<ModalEditNoveltyProps, "open">) {
-  const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
+  const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
   const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
   // El detalle del incidente no trae el id del motivo, sólo su nombre: el
   // valor inicial se resuelve contra el catálogo cuando éste llega, por eso
-  // el estado guarda sólo lo que el usuario cambió.
-  const tipos = filters?.novelty_type ?? [];
+  // el estado guarda sólo lo que el usuario cambió. Si el motivo ya no está
+  // en el catálogo (inactivo), su nombre queda de placeholder y se puede
+  // guardar sin elegir otro: sin motive_id, el PUT conserva el tipo.
+  const tipos = motives ?? [];
   const motiveInicial = tipos.find((t) => t.name === incident.incident_name)?.id;
   const assignedInicial = incident.assigned_to ?? undefined;
 
@@ -59,10 +61,9 @@ function EditNoveltyForm({
 
   const motiveId = motiveElegido ?? motiveInicial;
   const hayCambios = motiveId !== motiveInicial || assignedTo !== assignedInicial;
-  const canSubmit = motiveId !== undefined && hayCambios;
 
   const handleSubmit = async () => {
-    if (!canSubmit || isSending) return;
+    if (!hayCambios || isSending) return;
     setIsSending(true);
     try {
       await onSave({ motive_id: motiveId, assigned_to: assignedTo ?? null });
@@ -82,7 +83,7 @@ function EditNoveltyForm({
       sendingLabel="Guardando…"
       onSubmit={handleSubmit}
       isSending={isSending}
-      submitDisabled={!canSubmit}
+      submitDisabled={!hayCambios}
     >
       <div>
         <SectionTitle>Datos editables</SectionTitle>
@@ -92,13 +93,13 @@ function EditNoveltyForm({
             <Select
               className="w-full"
               value={motiveId}
-              options={tipos.map((t) => ({ value: t.id, label: t.name }))}
+              options={tipos.map((t) => ({ value: t.id, label: t.name, title: t.description }))}
               onChange={setMotiveElegido}
               showSearch
               optionFilterProp="label"
-              loading={isLoadingFilters}
+              loading={isLoadingMotives}
               disabled={isSending}
-              placeholder="Selecciona el tipo"
+              placeholder={incident.incident_name}
             />
           </div>
           <div>
