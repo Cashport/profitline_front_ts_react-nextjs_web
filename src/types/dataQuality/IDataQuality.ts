@@ -1032,3 +1032,40 @@ export interface IGmnOficialesLoadRow {
   uploaded_by: number | null;
   created_at: string;
 }
+
+export type TReprocessStartFrom = "month_start" | "specific_date";
+
+export interface IReprocessArchiveDatesRequest {
+  start_from: TReprocessStartFrom;
+  id_client_data: number;
+  /** Solo con "specific_date". La llave debe estar ausente con "month_start". */
+  from_date?: string;
+}
+
+export interface IReprocessArchiveDatesDetail {
+  ruleId: number;
+  clientId: number;
+  typeId: number;
+  typeDescription: string;
+  periodicity: string;
+  deleted: number;
+  planned: number;
+  created: number;
+  revived: number;
+}
+
+export interface IReprocessArchiveDatesResult {
+  scope: string;
+  fromDate: string;
+  /** Límite superior exclusivo (día 1 del mes siguiente): no mostrarlo como el "hasta". */
+  toDate: string;
+  summary: {
+    rules: number;
+    deleted: number;
+    created: number;
+    revived: number;
+    planned: number;
+  };
+  /** Solo las reglas en las que hubo algo que hacer; vacío no es un error. */
+  details: IReprocessArchiveDatesDetail[];
+}

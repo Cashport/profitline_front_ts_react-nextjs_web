@@ -30,7 +30,9 @@ import {
   IBotRunNowResult,
   IBotHistoryList,
   IVariableHistoryEntry,
-  IAuxiliaryUploadBatch
+  IAuxiliaryUploadBatch,
+  IReprocessArchiveDatesRequest,
+  IReprocessArchiveDatesResult
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -780,6 +782,26 @@ export const createNewFileDate = async (
     return response.data;
   } catch (error) {
     console.error("Error creating new file date:", error);
+    throw error;
+  }
+};
+
+/**
+ * Reprocesa las fechas de archivo del cliente desde el inicio del mes o desde una fecha
+ * específica, hasta el final del mes actual. El payload se construye con
+ * `buildReprocessPayload` para que `from_date` no viaje con "month_start".
+ */
+export const reprocessArchiveDates = async (
+  payload: IReprocessArchiveDatesRequest
+): Promise<IReprocessArchiveDatesResult> => {
+  try {
+    const response: GenericResponse<IReprocessArchiveDatesResult> = await API.post(
+      `${config.API_HOST}/data/archive-dates/reprocess`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error reprocessing archive dates:", error);
     throw error;
   }
 };
