@@ -1,0 +1,56 @@
+.modalIntakeStructure {
+    .ant-modal-content {
+        .ant-modal-close {
+            margin-right: 15px;
+            margin-top: 6px;
+        }
+    }
+
+    .structureSummary {
+        margin-top: 16px;
+
+        .headerTags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            max-height: 160px;
+            overflow-y: auto;
+
+            .ant-tag {
+                margin-inline-end: 0;
+            }
+        }
+    }
+
+    .structureAlert {
+        margin-top: 16px;
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+    }
+
+    .issueList {
+        margin: 16px 0 0;
+        padding: 0;
+        list-style: none;
+        max-height: 320px;
+        overflow-y: auto;
+
+        li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #141414;
+
+            .ant-tag {
+                flex-shrink: 0;
+                margin-inline-end: 0;
+            }
+        }
+    }
+}

@@ -310,10 +310,15 @@ export const deleteCatalog = async (catalogId: number): Promise<any> => {
   }
 };
 
+/**
+ * `useAsTemplate` responde la pregunta del backend cuando la regla del archivo
+ * aun no tiene template de estructura (409 TEMPLATE_DECISION_REQUIRED).
+ */
 export const uploadIntakeFile = async (
   id_archives_client_data: number,
   file: File,
-  evidence?: File
+  evidence?: File,
+  useAsTemplate?: boolean
 ): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
@@ -321,6 +326,9 @@ export const uploadIntakeFile = async (
     formData.append("evidence", evidence);
   }
   formData.append("id_archives_client_data", id_archives_client_data.toString());
+  if (useAsTemplate !== undefined) {
+    formData.append("use_as_template", String(useAsTemplate));
+  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/create-intake`,
@@ -335,11 +343,15 @@ export const uploadIntakeFile = async (
 
 export const uploadGenericIntakeFile = async (
   id_archives_client_data: number,
-  file: File
+  file: File,
+  useAsTemplate?: boolean
 ): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("id_archives_client_data", id_archives_client_data.toString());
+  if (useAsTemplate !== undefined) {
+    formData.append("use_as_template", String(useAsTemplate));
+  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/create-intake-generic`,
