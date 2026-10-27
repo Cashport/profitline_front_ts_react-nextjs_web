@@ -16,7 +16,7 @@ import { withAlpha } from "../../utils/chart";
 import { dimensionPatch, indexCatalogs, isDimensionSelected } from "../../utils/filters";
 import { full, money, pct, sem } from "../../utils/format";
 import { GoalRow, goalRows, nextSort, paceRatio, sortRows, sumBy } from "../../utils/rows";
-import { FOREGROUND } from "../shared/chart-styles";
+import { FORECAST, FOREGROUND } from "../shared/chart-styles";
 import ExcelButton from "../shared/excel-button";
 import GoalBar from "../shared/goal-bar";
 import SentinelRow from "../shared/sentinel-row";
@@ -83,7 +83,7 @@ function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
         { key: "rec", color, label: "Recaudado", value: `${money(collected)} · ${pct(c, 0)}` },
         {
           key: "fc",
-          color: withAlpha(color, 0.16),
+          color: withAlpha(FORECAST, 0.16),
           label: "Forecast",
           value: `${money(forecast)} · ${pct(f, 0)}`
         },
@@ -97,7 +97,7 @@ function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
           dashWidth={1}
           scale={scale}
           segments={[{ key: "rec", value: shown, color }]}
-          forecast={{ from: shown, to: Math.min(forecast, scale), color }}
+          forecast={{ from: shown, to: Math.min(forecast, scale), color: FORECAST }}
           goal={{ value: goal }}
         />
         <div className="flex justify-between text-[10.5px] tabular-nums text-muted-foreground">
@@ -161,7 +161,7 @@ const GoalTableRow = memo(function GoalTableRow({
             { key: "rec", color, label: "Recaudado", value: money(r.collected) },
             {
               key: "in",
-              color: withAlpha(color, 0.16),
+              color: withAlpha(FORECAST, 0.16),
               label: "Por entrar",
               value: money(r.forecast - r.collected)
             },
