@@ -9,6 +9,28 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // Viewport units compensated for the global `zoom` (see --vh / --vw in globals.scss)
+      height: {
+        screen: "calc(100 * var(--vh))",
+        svh: "calc(100 * var(--vh))",
+        dvh: "calc(100 * var(--vh))",
+        lvh: "calc(100 * var(--vh))"
+      },
+      minHeight: {
+        screen: "calc(100 * var(--vh))",
+        svh: "calc(100 * var(--vh))",
+        dvh: "calc(100 * var(--vh))",
+        lvh: "calc(100 * var(--vh))"
+      },
+      maxHeight: {
+        screen: "calc(100 * var(--vh))",
+        svh: "calc(100 * var(--vh))",
+        dvh: "calc(100 * var(--vh))",
+        lvh: "calc(100 * var(--vh))"
+      },
+      width: {
+        screen: "calc(100 * var(--vw))"
+      },
       colors: {
         "cashport-green": "rgb(var(--cashport-green) / <alpha-value>)",
         "cashport-orange": "rgb(var(--cashport-orange) / <alpha-value>)",
@@ -16,6 +38,30 @@ module.exports = {
         "cashport-gray-light": "rgb(var(--cashport-gray-light) / <alpha-value>)",
         "cashport-gray-lighter": "rgb(var(--cashport-gray-lighter) / <alpha-value>)",
         "cashport-white": "rgb(var(--cashport-white) / <alpha-value>)",
+        // docs/DESIGN.md §1 (text-cp-ink-3, border-cp-line, bg-cp-lime…)
+        cp: Object.fromEntries(
+          [
+            "lime",
+            "lime-dark",
+            "lime-tint",
+            "blue",
+            "blue-hover",
+            "orange",
+            "navy",
+            "magenta",
+            "red",
+            "ink",
+            "ink-2",
+            "ink-3",
+            "ink-4",
+            "line",
+            "line-2",
+            "bg",
+            "surface",
+            "muted",
+            "subtle"
+          ].map((name) => [name, `rgb(var(--cp-${name}) / <alpha-value>)`])
+        ),
         background: "rgb(var(--background) / <alpha-value>)",
         foreground: "rgb(var(--foreground) / <alpha-value>)",
         card: {

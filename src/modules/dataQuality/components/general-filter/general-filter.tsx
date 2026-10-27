@@ -97,7 +97,7 @@ export function DataQualityGeneralFilter({
 
       {isOpen && (
         <div className="absolute top-full right-0 min-[900px]:right-auto min-[900px]:left-0 mt-1 w-96 bg-cashport-white border border-cashport-gray-light rounded-lg shadow-lg z-10">
-          <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto [scrollbar-width:thin]">
+          <div className="p-4 space-y-4 max-h-[calc(70*var(--vh))] overflow-y-auto [scrollbar-width:thin]">
             {sections.map((section) => (
               <div key={section.key}>
                 <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">

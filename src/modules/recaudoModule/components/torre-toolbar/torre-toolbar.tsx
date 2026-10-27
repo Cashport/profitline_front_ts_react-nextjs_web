@@ -8,8 +8,8 @@ import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { clientOptions, matchesClient } from "../../utils/filters";
 import FiltersPopover from "../filters-popover/filters-popover";
 
-/** Mismo alto que el botón de tema, como en el encabezado de la cartera. */
-const HEADER_THEME = { token: { controlHeight: 48 } };
+/** Mismo alto que "Filtrar" y el botón de tema (--control-h del header compartido). */
+const HEADER_THEME = { token: { controlHeight: 43, borderRadius: 11 } };
 
 /** Herramientas de la torre en el encabezado: buscador de clientes, periodo y filtros. */
 export default function TorreToolbar({ data }: { data?: ICollectionTower }) {

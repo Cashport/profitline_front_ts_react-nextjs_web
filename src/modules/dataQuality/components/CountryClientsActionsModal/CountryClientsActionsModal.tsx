@@ -12,6 +12,9 @@ type CountryClientsActionsModalProps = {
   onDownloadCatalog: () => void;
   isDownloadCatalogLoading: boolean;
   onUploadFile?: () => void;
+  onDownloadIqviaCatalog?: () => void;
+  isDownloadIqviaCatalogLoading?: boolean;
+  onUploadIqviaCatalog?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
   onUploadPointsOfSale?: () => void;
   onDownloadMaterials?: () => void;
@@ -30,6 +33,9 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onDownloadCatalog,
   isDownloadCatalogLoading,
   onUploadFile,
+  onDownloadIqviaCatalog,
+  isDownloadIqviaCatalogLoading = false,
+  onUploadIqviaCatalog,
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale,
   onDownloadMaterials,
@@ -58,8 +64,23 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
           onClick={onDownloadCatalog}
           disabled={isDownloadCatalogLoading}
         />
+        {onDownloadIqviaCatalog && (
+          <ButtonGenerateAction
+            icon={<DownloadSimple size={20} />}
+            title="Descargar catálogo IQVIA"
+            onClick={onDownloadIqviaCatalog}
+            disabled={isDownloadIqviaCatalogLoading}
+          />
+        )}
         {!downloadCatalogOnly && (
           <>
+            {onUploadIqviaCatalog && (
+              <ButtonGenerateAction
+                icon={<UploadSimple size={20} />}
+                title="Cargar catálogo IQVIA"
+                onClick={onUploadIqviaCatalog}
+              />
+            )}
             {onDownloadMaterials && (
               <ButtonGenerateAction
                 icon={<DownloadSimple size={20} />}
@@ -99,7 +120,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
             {onUploadGmnOficiales && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}
-                title="GMN oficiales"
+                title="Cargar Maestra Productos"
                 onClick={onUploadGmnOficiales}
               />
             )}

@@ -149,7 +149,7 @@
         padding: 1rem;
 
         .buttonGoBack {
-            max-width: 65vw;
+            max-width: calc(65 * var(--vw));
             justify-content: flex-start;
 
             > span {

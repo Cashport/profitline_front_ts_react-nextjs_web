@@ -1,11 +1,20 @@
 /* Clases compartidas de la torre: tarjetas de indicadores y tablas. */
 
 /** Rótulo de las tarjetas de indicadores (el mismo de las tarjetas de la cartera). */
-export const KPI_LABEL = "text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground";
+export const KPI_LABEL =
+  "text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground";
 
 /** Cifra de las tarjetas de indicadores. */
 export const KPI_VALUE =
   "mt-1.5 text-[19px] font-bold leading-[1.15] tracking-[-0.02em] tabular-nums text-foreground";
+
+/**
+ * Tarjeta de indicador con barra (aplicación, tramos): encabezado, barra y
+ * leyenda son tres filas de la rejilla del tablero (subgrid), así las barras
+ * de tarjetas vecinas quedan a la misma altura.
+ */
+export const KPI_CARD =
+  "row-span-3 grid min-w-0 grid-cols-1 grid-rows-subgrid rounded-xl bg-card px-3.5 pb-3 pt-3.5 shadow-sm";
 
 /* ---------- tablas ----------
    border-separate y no collapse: con collapse los bordes del encabezado y del

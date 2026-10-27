@@ -1,29 +1,68 @@
+// docs/DESIGN.md §4: una línea de 58px visibles, sticky, fondo de la app.
 .wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-bottom: 1rem;
+    gap: 12px;
+    min-height: var(--header-h);
+    // El título arranca alineado con el texto de las tarjetas (su padding horizontal).
+    padding-left: 21px;
+    background-color: rgb(var(--cp-bg));
+    color: rgb(var(--cp-ink));
 
-    :global(.dark) & {
-        color: rgb(var(--foreground));
-    }
-
-    .titleWrapper {
+    .back {
         display: flex;
         align-items: center;
-        column-gap: 1.25rem;
+        justify-content: center;
+        flex-shrink: 0;
+        height: var(--control-h);
+        margin-left: -4px;
+        padding: 0 2px;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    // Título y, a su derecha en la misma línea, la meta (corte · recargar, proyectar).
+    .titleBlock {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        min-width: 0;
     }
 
     .title {
-        font-size: 24px;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 23px;
         font-weight: 600;
-        line-height: 30px;
+        line-height: 1.15;
+    }
+
+    .meta {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        min-width: 0;
+        white-space: nowrap;
+        font-size: 14px;
+        line-height: 1.2;
+        color: rgb(var(--cp-ink-3));
     }
 
     .actions {
         display: flex;
-        column-gap: 8px;
+        flex: 1 1 auto;
+        justify-content: flex-end;
         align-items: center;
+        gap: 8px;
+        min-width: 0;
     }
 }
 

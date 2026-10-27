@@ -243,7 +243,7 @@ export default function ModalAddEditPOS({
       title={mode === "edit" ? "Editar POS" : "Nuevo POS"}
       styles={{
         body: {
-          maxHeight: "calc(70vh - 55px)",
+          maxHeight: "calc(70 * var(--vh) - 55px)",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden"

@@ -7,6 +7,7 @@ import ColumnText from "@/components/organisms/proveedores/components/ColumnText
 import { useMessageApi } from "@/context/MessageContext";
 import { executeBotManually } from "@/services/bots/bots";
 import { IBotHealth } from "@/types/bots/IBotHealth";
+import { useConfirmBotExecution } from "@/hooks/useConfirmBotExecution";
 import { BotStatusBadge } from "../BotStatusBadge/BotStatusBadge";
 
 const { Title, Text } = Typography;
@@ -30,18 +31,19 @@ export const BotDetailDrawer: React.FC<BotDetailDrawerProps> = ({
   const { showMessage } = useMessageApi();
   const [executing, setExecuting] = useState(false);
 
+  const handleExecute = async (selectedBot: IBotHealth) => {
+    setExecuting(true);
+    const success = await executeBotManually(selectedBot.schedule_id, showMessage);
+    setExecuting(false);
+    if (success) onExecuted?.();
+  };
+  const { requestExecution, confirmationModal } = useConfirmBotExecution(handleExecute);
+
   if (!bot) return null;
 
   // id_client_data siempre viene en BotStatusDTO: lleva a la ficha del cliente en
   // el módulo de Calidad de Datos, donde se gestionan sus ingestas/archivos.
   const clientHref = `/data-quality/client/${bot.id_client_data}`;
-
-  const handleExecute = async () => {
-    setExecuting(true);
-    const success = await executeBotManually(bot.schedule_id, showMessage);
-    setExecuting(false);
-    if (success) onExecuted?.();
-  };
 
   return (
     <Drawer
@@ -158,7 +160,7 @@ export const BotDetailDrawer: React.FC<BotDetailDrawerProps> = ({
           type="primary"
           icon={<ArrowsClockwise size={16} />}
           loading={executing}
-          onClick={handleExecute}
+          onClick={() => requestExecution(bot)}
         >
           Ejecutar bot
         </Button>
@@ -168,6 +170,7 @@ export const BotDetailDrawer: React.FC<BotDetailDrawerProps> = ({
           </Link>
         )}
       </Flex>
+      {confirmationModal}
     </Drawer>
   );
 };

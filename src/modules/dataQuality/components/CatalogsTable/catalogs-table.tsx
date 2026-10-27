@@ -71,6 +71,7 @@ export function CatalogsTable() {
   const {
     data: equivalencies = [],
     isLoading,
+    error,
     mutate
   } = useCatalogsDataQuality(String(params.clientId), String(params.countryId), debouncedSearch);
 
@@ -254,6 +255,16 @@ export function CatalogsTable() {
             Nueva Equivalencia
           </Button>
         </div>
+        {error ? (
+          <div className="bg-white rounded-lg p-6 text-center">
+            <p className="text-red-600">
+              {error instanceof Error
+                ? error.message
+                : "No se pudo cargar el catálogo de equivalencias."}
+            </p>
+          </div>
+        ) : (
+        <>
         <Table>
           <TableHeader>
             <TableRow style={{ borderColor: "#DDDDDD" }}>
@@ -418,6 +429,8 @@ export function CatalogsTable() {
             showSizeChanger={false}
           />
         </div>
+        </>
+        )}
 
         <ModalAddEditCatalog
           isOpen={whichModalOpen.selected === 1}

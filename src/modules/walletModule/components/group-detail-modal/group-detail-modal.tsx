@@ -342,7 +342,7 @@ function GroupDetailBody({
   // incidente no hay nada que pintar más que el estado de carga o el error.
   if (!detail) {
     return (
-      <div className="wallet-scope relative flex h-[min(88vh,900px)] flex-col items-center justify-center bg-card text-foreground">
+      <div className="wallet-scope relative flex h-[min(88*var(--vh),900px)] flex-col items-center justify-center bg-card text-foreground">
         <CloseButton onClose={onClose} />
         {isLoadingIncident ? (
           <ProfitLoader size="small" />
@@ -356,7 +356,7 @@ function GroupDetailBody({
   }
 
   return (
-    <div className="wallet-scope flex h-[min(88vh,900px)] flex-col bg-card text-foreground">
+    <div className="wallet-scope flex h-[min(88*var(--vh),900px)] flex-col bg-card text-foreground">
       <GroupModalHeader
         detail={detail}
         onClose={onClose}
@@ -527,7 +527,7 @@ export default function GroupDetailModal({
       closeIcon={null}
       centered
       destroyOnClose
-      width="min(1320px, 95vw)"
+      width="min(1320px, 95 * var(--vw))"
       // El modal vive en un portal fuera de .wallet-scope y del contenedor .dark,
       // así que el tema se re-declara aquí: `dark` en la raíz y `wallet-scope`
       // en el cuerpo, porque el token block es `.dark .wallet-scope`.

@@ -1,33 +1,25 @@
 "use client";
-import { Button } from "antd";
+import { Fragment } from "react";
 import Link from "next/link";
 import {
-  BellSimpleRinging,
-  Gear,
   User,
   Bank,
-  SquaresFour,
   Storefront,
-  // UsersFour,
-  // Stack,
-  ClipboardText,
+  Envelope,
+  Gear,
   ListChecks,
-  ArrowCounterClockwise,
-  TextIndent,
+  Money,
+  Package,
+  BellRinging,
   Ticket
-  // Gauge
 } from "phosphor-react";
 import {
   ChatCircleDots,
-  SealPercent,
   HandTap,
   Robot,
-  ChartBar,
   ShoppingCartSimple,
   Database,
   CurrencyCircleDollar,
-  Chats,
-  FadersHorizontal,
   Invoice,
   MapPin,
   PresentationChart
@@ -35,8 +27,6 @@ import {
 import { FileHeart } from "lucide-react";
 
 import { checkUserViewPermissions, cn } from "@/utils/utils";
-import useScreenHeight from "@/components/hooks/useScreenHeight";
-import useScreenWidth from "@/components/hooks/useScreenWidth";
 import useScrollFade from "@/components/hooks/useScrollFade";
 import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
 
@@ -44,16 +34,250 @@ import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 
 import styles from "./ModulesButtons.module.scss";
 
+const ICON_SIZE = 20;
+
 interface ModulesButtonsProps {
   path: string;
   project: ISelectedProject | undefined;
   isMobileMenu?: boolean;
 }
 
+type RailGroup = "Cartera" | "Recaudo" | "Comercial" | "Automatización" | "Gestión";
+
+interface RailModule {
+  href: string;
+  label: string;
+  group: RailGroup;
+  icon: React.ReactNode;
+  visible: (project: ISelectedProject | undefined, path: string) => boolean;
+  isActive: (path: string) => boolean;
+}
+
+const can = (view: string) => (project: ISelectedProject | undefined) =>
+  checkUserViewPermissions(project, view);
+
+/* Agrupados por etapa del flujo (opción 1e de "Menu Lateral Opciones"); los grupos salen
+   en el orden de este arreglo. Descuentos, Notificaciones, Configuración, Proveedores,
+   Administración de clientes, Comunicaciones masivas, Torre de control y el dashboard
+   nuevo están desactivados en el menú. */
+const MODULES: RailModule[] = [
+  {
+    href: "/clientes/all",
+    label: "Cartera",
+    group: "Cartera",
+    icon: <User size={ICON_SIZE} />,
+    visible: can("Clientes"),
+    isActive: (p) => p.startsWith("/clientes")
+  },
+  {
+    href: "/wallet",
+    label: "Cartera por edad",
+    group: "Cartera",
+    icon: <Invoice size={ICON_SIZE} />,
+    visible: can("Wallet"),
+    isActive: (p) => p.startsWith("/wallet")
+  },
+  {
+    href: "/novelties",
+    label: "Novedades",
+    group: "Cartera",
+    icon: <BellRinging size={ICON_SIZE} />,
+    visible: can("Novelties"),
+    isActive: (p) => p.startsWith("/novelties")
+  },
+  {
+    href: "/balances",
+    label: "Saldos",
+    group: "Cartera",
+    icon: <CurrencyCircleDollar size={ICON_SIZE} />,
+    visible: can("Balances"),
+    isActive: (p) => p.startsWith("/balances")
+  },
+  {
+    href: "/cuentas-medicas",
+    label: "Cuentas médicas",
+    group: "Cartera",
+    icon: <FileHeart size={ICON_SIZE} strokeWidth={1.7} />,
+    visible: can("MedicalAccounts"),
+    isActive: (p) => p.startsWith("/cuentas-medicas")
+  },
+  {
+    href: "/dashboard",
+    label: "Torre de recaudo",
+    group: "Recaudo",
+    icon: <Money size={ICON_SIZE} />,
+    visible: can("Dashboard"),
+    isActive: (p) => p.startsWith("/dashboard")
+  },
+  {
+    href: "/banco",
+    label: "Bancos",
+    group: "Recaudo",
+    icon: <Bank size={ICON_SIZE} />,
+    visible: can("Bancos"),
+    isActive: (p) => p === "/banco"
+  },
+  {
+    href: "/applyModule",
+    label: "Aplicación de pagos",
+    group: "Recaudo",
+    icon: <HandTap size={ICON_SIZE} />,
+    visible: (_project, p) => p === "/applyModule",
+    isActive: (p) => p === "/applyModule"
+  },
+  {
+    href: "/comercio",
+    label: "Marketplace",
+    group: "Comercial",
+    icon: <Storefront size={ICON_SIZE} />,
+    visible: can("Marketplace"),
+    isActive: (p) => p.startsWith("/comercio")
+  },
+  {
+    href: "/purchase-orders",
+    label: "Órdenes de compra",
+    group: "Comercial",
+    icon: <ShoppingCartSimple size={ICON_SIZE} />,
+    visible: can("PurchaseOrders"),
+    isActive: (p) => p.startsWith("/purchase-orders")
+  },
+  {
+    href: "/visits",
+    label: "Visitas",
+    group: "Comercial",
+    icon: <MapPin size={ICON_SIZE} />,
+    visible: can("Visits"),
+    isActive: (p) => p.startsWith("/visits")
+  },
+  {
+    href: "/logistica-inversa",
+    label: "Logística inversa",
+    group: "Comercial",
+    icon: <Package size={ICON_SIZE} />,
+    visible: can("ReverseLogistics"),
+    isActive: (p) => p.startsWith("/logistica-inversa")
+  },
+  {
+    // Salud de Automatizaciones vive bajo Data Quality (no hay permiso propio).
+    href: "/data-quality/automations",
+    label: "Bots",
+    group: "Automatización",
+    icon: <Robot size={ICON_SIZE} />,
+    visible: can("DataQuality"),
+    isActive: (p) => p.startsWith("/data-quality/automations")
+  },
+  {
+    href: "/task-manager",
+    label: "Mail",
+    group: "Automatización",
+    icon: <Envelope size={ICON_SIZE} />,
+    visible: can("GestorTareas"),
+    isActive: (p) => p === "/task-manager"
+  },
+  {
+    href: "/chat",
+    label: "WhatsApp",
+    group: "Automatización",
+    icon: <ChatCircleDots size={ICON_SIZE} />,
+    visible: can("Whatsapp"),
+    isActive: (p) => p === "/chat"
+  },
+  {
+    href: "/data-quality",
+    label: "Data Quality",
+    group: "Automatización",
+    icon: <Database size={ICON_SIZE} />,
+    visible: can("DataQuality"),
+    isActive: (p) => p.startsWith("/data-quality") && !p.startsWith("/data-quality/automations")
+  },
+  {
+    href: "/aprobaciones",
+    label: "Aprobaciones",
+    group: "Gestión",
+    icon: <ListChecks size={ICON_SIZE} />,
+    visible: can("Aprobaciones"),
+    isActive: (p) => p === "/aprobaciones"
+  },
+  {
+    href: "/tickets",
+    label: "Tickets",
+    group: "Gestión",
+    icon: <Ticket size={ICON_SIZE} />,
+    visible: can("Tickets"),
+    isActive: (p) => p.startsWith("/tickets")
+  },
+  {
+    href: "/reports",
+    label: "Informes",
+    group: "Gestión",
+    icon: <PresentationChart size={ICON_SIZE} />,
+    visible: can("Reports"),
+    isActive: (p) => p.startsWith("/reports")
+  }
+];
+
+/** Configuración (administración del market) va fija abajo, junto a "Fijar abierto" y "Cerrar sesión". */
+const SETTINGS_MODULE: Omit<RailModule, "group"> = {
+  href: "/market-admin",
+  label: "Configuración",
+  icon: <Gear size={ICON_SIZE} />,
+  visible: can("MarketAdmin"),
+  isActive: (p) =>
+    p.startsWith("/market-admin") ||
+    p.startsWith("/settings") ||
+    p.startsWith("/mass-communications")
+};
+
+interface RailItemProps {
+  label: string;
+  icon: React.ReactNode;
+  active?: boolean;
+  href?: string;
+  onClick?: (e: React.MouseEvent) => void;
+}
+
+/**
+ * Ítem del riel: el ícono queda fijo en su cuadro (no se mueve al abrir) y el nombre solo
+ * se ve con el riel abierto, al pasar el mouse o fijado (ver sidebar.scss).
+ */
+export const RailItem = ({ label, icon, active, href, onClick }: RailItemProps) => {
+  const className = cn(styles.railItem, active && styles.active);
+  const content = (
+    <>
+      <span className={styles.railIcon}>{icon}</span>
+      <span className={styles.railLabel}>{label}</span>
+    </>
+  );
+
+  return href ? (
+    <Link href={href} className={className} aria-label={label} onClick={onClick}>
+      {content}
+    </Link>
+  ) : (
+    <button type="button" className={className} aria-label={label} onClick={onClick}>
+      {content}
+    </button>
+  );
+};
+
+/** "Configuración" fija al pie del riel; no se muestra sin el permiso de administración. */
+export const SettingsRailItem = ({ path, project }: Omit<ModulesButtonsProps, "isMobileMenu">) => {
+  const { attemptNavigation } = useUnsavedChanges();
+  if (!SETTINGS_MODULE.visible(project, path)) return null;
+  return (
+    <RailItem
+      href={SETTINGS_MODULE.href}
+      label={SETTINGS_MODULE.label}
+      icon={SETTINGS_MODULE.icon}
+      active={SETTINGS_MODULE.isActive(path)}
+      onClick={(e) => {
+        if (attemptNavigation(SETTINGS_MODULE.href)) e.preventDefault();
+      }}
+    />
+  );
+};
+
 export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesButtonsProps) => {
-  const height = useScreenHeight();
-  const width = useScreenWidth();
-  const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
   const { attemptNavigation } = useUnsavedChanges();
   // the mobile dropdown lays out in a row and never scrolls, so it needs no fade
   const { ref: containerRef, fade } = useScrollFade<HTMLDivElement>(!isMobileMenu);
@@ -62,8 +286,10 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
     if (attemptNavigation(href)) e.preventDefault();
   };
 
+  const visible = MODULES.filter((m) => m.visible(project, path));
+
   return (
-    <div
+    <nav
       ref={containerRef}
       className={cn(
         styles.containerButtons,
@@ -72,419 +298,24 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
         fade.bottom && styles.fadeBottom
       )}
     >
-      {/* Dashboard */}
-      {checkUserViewPermissions(project, "Dashboard") && (
-        <Link href="/dashboard" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<SquaresFour size={iconSize} />}
-            className={path.startsWith("/dashboard") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/dashboard")}
+      {visible.map((m, i) => (
+        <Fragment key={m.href}>
+          {m.group !== visible[i - 1]?.group && (
+            <div className={cn(styles.groupHead, i === 0 && styles.first)}>
+              <span className={styles.groupTitle}>{m.group}</span>
+            </div>
+          )}
+          <RailItem
+            href={m.href}
+            label={m.label}
+            icon={m.icon}
+            active={m.isActive(path)}
+            onClick={(e) => handleNavClick(e, m.href)}
           />
-        </Link>
-      )}
-
-      {/* Clientes */}
-      {checkUserViewPermissions(project, "Clientes") && (
-        <Link href="/clientes/all">
-          <Button
-            type="primary"
-            size="large"
-            icon={<User size={iconSize} />}
-            className={path.startsWith("/clientes") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/clientes/all")}
-          />
-        </Link>
-      )}
-
-      {/* Descuentos */}
-      {/* {checkUserViewPermissions(project, "Descuentos") && (
-        <Link href="/descuentos" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<SealPercent size={iconSize} />}
-            className={path.startsWith("/descuentos") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/descuentos")}
-          />
-        </Link>
-      )} */}
-
-      {/* Notificaciones */}
-      {/* {checkUserViewPermissions(project, "Notificaciones") && (
-        <Link href="/notificaciones" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<BellSimpleRinging size={iconSize} />}
-            className={
-              path.startsWith("/notificaciones") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/notificaciones")}
-          />
-        </Link>
-      )} */}
-
-      {/* Marketplace / Comercio */}
-      {checkUserViewPermissions(project, "Marketplace") && (
-        <Link href="/comercio" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Storefront size={iconSize} />}
-            className={path.startsWith("/comercio") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/comercio")}
-          />
-        </Link>
-      )}
-
-      {/* Bancos */}
-      {checkUserViewPermissions(project, "Bancos") && (
-        <Link href="/banco" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Bank size={iconSize} />}
-            className={path === "/banco" ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/banco")}
-          />
-        </Link>
-      )}
-
-      {/* Configuración / Settings */}
-      {/* {checkUserViewPermissions(project, "Configuracion") && (
-        <Link href="/settings" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Gear size={iconSize} />}
-            className={
-              path === "/settings" || path.startsWith("/proyectos/review")
-                ? styles.buttonIcon
-                : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/settings")}
-          />
-        </Link>
-      )} */}
-
-      {/* Proveedores */}
-      {/* {checkUserViewPermissions(project, "Proveedores") && (
-        <Link href="/proveedores" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<UsersFour size={iconSize} />}
-            className={
-              path === "/proveedores" || path.startsWith("/proveedores")
-                ? styles.buttonIcon
-                : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/proveedores")}
-          />
-        </Link>
-      )} */}
-
-      {/* Apply Module */}
-      {path === "/applyModule" && (
-        <Link href="/applyModule" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<HandTap size={iconSize} />}
-            className={path === "/applyModule" ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/applyModule")}
-          />
-        </Link>
-      )}
-
-      {/* Administración de Clientes */}
-      {/* {checkUserViewPermissions(project, "AdministracionClientes") && (
-        <Link href="/client-management" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Stack size={iconSize} />}
-            className={path === "/client-management" ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/client-management")}
-          />
-        </Link>
-      )} */}
-
-      {/* Salud de Automatizaciones: vive bajo Data Quality (origin/main no tiene un
-          permiso "SaludAutomatizaciones" propio en el catálogo, solo "DataQuality").
-          Reutiliza ese permiso real en vez de uno inventado. */}
-      {checkUserViewPermissions(project, "DataQuality") && (
-        <Link href="/data-quality/automations" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Robot size={iconSize} />}
-            className={
-              path.startsWith("/data-quality/automations") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/data-quality/automations")}
-          />
-        </Link>
-      )}
-
-      {/* Chat */}
-      {checkUserViewPermissions(project, "Whatsapp") && (
-        <Link href="/chat" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ChatCircleDots size={iconSize} />}
-            className={path === "/chat" ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/chat")}
-          />
-        </Link>
-      )}
-
-      {/* Aprobaciones */}
-      {checkUserViewPermissions(project, "Aprobaciones") && (
-        <Link href="/aprobaciones" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ListChecks size={iconSize} />}
-            className={path === "/aprobaciones" ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/aprobaciones")}
-          />
-        </Link>
-      )}
-
-      {/* New Dashboard */}
-      {false && (
-        <Link href="/newDashboard" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ChartBar size={iconSize} />}
-            className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/newDashboard")}
-          />
-        </Link>
-      )}
-
-      {/* New Task Manager */}
-      {checkUserViewPermissions(project, "GestorTareas") && (
-        <Link href="/task-manager" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ClipboardText size={iconSize} />}
-            className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/task-manager")}
-          />
-        </Link>
-      )}
-
-      {/* Purchase Orders */}
-      {checkUserViewPermissions(project, "PurchaseOrders") && (
-        <Link href="/purchase-orders" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ShoppingCartSimple size={iconSize} />}
-            className={
-              path.startsWith("/purchase-orders") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/purchase-orders")}
-          />
-        </Link>
-      )}
-
-      {/* Data Quality */}
-      {checkUserViewPermissions(project, "DataQuality") && (
-        <Link href="/data-quality" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Database size={iconSize} />}
-            className={
-              path.startsWith("/data-quality") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/data-quality")}
-          />
-        </Link>
-      )}
-      {/* Balances */}
-      {checkUserViewPermissions(project, "Balances") && (
-        <Link href="/balances" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<CurrencyCircleDollar size={iconSize} />}
-            className={path.startsWith("/balances") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/balances")}
-          />
-        </Link>
-      )}
-      {/* Mass Communications */}
-      {/* {checkUserViewPermissions(project, "MassCommunications") && (
-        <Link href="/mass-communications" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Chats size={iconSize} />}
-            className={
-              path.startsWith("/mass-communications") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/mass-communications")}
-          />
-        </Link>
-      )} */}
-
-      {/* Cuentas Médicas */}
-      {checkUserViewPermissions(project, "MedicalAccounts") && (
-        <Link href="/cuentas-medicas" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<FileHeart size={iconSize} />}
-            className={
-              path.startsWith("/cuentas-medicas") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/cuentas-medicas")}
-          />
-        </Link>
-      )}
-
-      {/* Logística Inversa */}
-      {checkUserViewPermissions(project, "ReverseLogistics") && (
-        <Link href="/logistica-inversa" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ArrowCounterClockwise size={iconSize} />}
-            className={
-              path.startsWith("/logistica-inversa") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/logistica-inversa")}
-          />
-        </Link>
-      )}
-
-      {/* Market Admin */}
-      {checkUserViewPermissions(project, "MarketAdmin") && (
-        <Link href="/market-admin" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<FadersHorizontal size={iconSize} />}
-            className={
-              path.startsWith("/market-admin") ||
-              path.startsWith("/settings") ||
-              path.startsWith("/mass-communications")
-                ? styles.buttonIcon
-                : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/market-admin")}
-          />
-        </Link>
-      )}
-
-      {/* New wallet */}
-      {checkUserViewPermissions(project, "Wallet") && (
-        <Link href="/wallet" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Invoice size={iconSize} />}
-            className={path.startsWith("/wallet") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/wallet")}
-          />
-        </Link>
-      )}
-
-      {/* Novelties */}
-      {checkUserViewPermissions(project, "Novelties") && (
-        <Link href="/novelties" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<TextIndent size={iconSize} />}
-            className={path.startsWith("/novelties") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/novelties")}
-          />
-        </Link>
-      )}
-
-      {/* Tickets */}
-      {checkUserViewPermissions(project, "Tickets") && (
-        <Link href="/tickets" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Ticket size={iconSize} />}
-            className={path.startsWith("/tickets") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/tickets")}
-          />
-        </Link>
-      )}
-
-      {/* Visitas */}
-      {checkUserViewPermissions(project, "Visits") && (
-        <Link href="/visits" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<MapPin size={iconSize} />}
-            className={path.startsWith("/visits") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/visits")}
-          />
-        </Link>
-      )}
-
-      {/* Informes */}
-      {checkUserViewPermissions(project, "Reports") && (
-        <Link href="/reports" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<PresentationChart size={iconSize} />}
-            className={path.startsWith("/reports") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/reports")}
-          />
-        </Link>
-      )}
-
-      {/* Precintos */}
-      {checkUserViewPermissions(project, "Precintos") && (
-        <Link href="/precintos" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={
-              <svg width={iconSize} height={iconSize} viewBox="0 0 24 30" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="5" y="3" width="14" height="15" rx="3" />
-                <circle cx="12" cy="8.5" r="2" />
-                <path d="M12 18v8" />
-                <path d="M8 22h8" />
-              </svg>
-            }
-            className={path.startsWith("/precintos") ? styles.buttonIcon : styles.buttonIconActive}
-            onClick={(e) => handleNavClick(e, "/precintos")}
-          />
-        </Link>
-      )}
-
-      {/* Control tower */}
-      {/* {checkUserViewPermissions(project, "ControlTower") && (
-        <Link href="/torreControl" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<Gauge size={iconSize} />}
-            className={
-              path.startsWith("/torreControl") ? styles.buttonIcon : styles.buttonIconActive
-            }
-            onClick={(e) => handleNavClick(e, "/torreControl")}
-          />
-        </Link>
-      )} */}
-    </div>
+        </Fragment>
+      ))}
+      {/* En móvil no está el pie del riel: Configuración va al final de la lista. */}
+      {isMobileMenu && <SettingsRailItem path={path} project={project} />}
+    </nav>
   );
 };

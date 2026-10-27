@@ -1,30 +1,8 @@
 "use client";
-import { useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Avatar, Button, Popover } from "antd";
-import { CaretDown, User } from "phosphor-react";
+import UserMenu from "@/components/organisms/header/user-menu/user-menu";
 
-import { logOut } from "../../../../firebase-utils";
-import styles from "./ProfileMenu.module.scss";
-
-/** Avatar del usuario con el menú para cerrar sesión, a la derecha de los encabezados. */
-export const ProfileMenu = () => {
-  const router = useRouter();
-
-  const handleLogOut = useCallback(() => {
-    logOut(router);
-  }, [router]);
-
-  return (
-    <div className={styles.profile}>
-      <Avatar icon={<User />} />
-      <Popover
-        placement="bottomRight"
-        trigger="click"
-        content={<Button onClick={handleLogOut}>Cerrar Sesion</Button>}
-      >
-        <CaretDown className={styles.arrow} />
-      </Popover>
-    </div>
-  );
-};
+/**
+ * Avatar del usuario con su menú, a la derecha de los encabezados que no usan el `Header`
+ * compartido (p. ej. Informes). Es el mismo menú del header (docs/DESIGN.md §4).
+ */
+export const ProfileMenu = () => <UserMenu />;

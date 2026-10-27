@@ -2,7 +2,6 @@
 
 .banksView {
     background-color: $white;
-    border-radius: 0.5rem;
-    margin-top: 1.5rem;
+    border-radius: var(--card-radius);
     padding: 1.5rem;
 }

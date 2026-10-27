@@ -11,6 +11,7 @@ import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import { runBotNow } from "@/services/dataQuality/dataQuality";
 import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
+import { useConfirmBotExecution } from "@/hooks/useConfirmBotExecution";
 
 import { AutomationStatusCards } from "../../components/automation-status-cards";
 import { BotsTable } from "../../components/bots-table";
@@ -70,6 +71,8 @@ export default function AutomationsView() {
     setSelectedBot(bot);
     setIsDrawerOpen(true);
   };
+
+  const { requestExecution, confirmationModal } = useConfirmBotExecution(handleRun);
 
   const filteredBots = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -165,7 +168,7 @@ export default function AutomationsView() {
               totalBots={bots.length}
               loading={isLoading}
               executingScheduleId={executingScheduleId}
-              onRun={handleRun}
+              onRun={requestExecution}
               onViewHistory={handleViewHistory}
               onClientClick={goToClient}
             />
@@ -178,9 +181,10 @@ export default function AutomationsView() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         executingScheduleId={executingScheduleId}
-        onRun={handleRun}
+        onRun={requestExecution}
         onClientClick={goToClient}
       />
+      {confirmationModal}
     </div>
   );
 }

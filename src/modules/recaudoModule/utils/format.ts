@@ -104,6 +104,23 @@ export const fmtCutoff = (iso: string) =>
     minute: "2-digit"
   });
 
+/** Corte corto para el header: "28/09 · 17:00". */
+export const fmtCutoffShort = (iso: string) => {
+  const d = new Date(iso);
+  const day = d.toLocaleDateString("es-CO", {
+    timeZone: TIME_ZONE,
+    day: "2-digit",
+    month: "2-digit"
+  });
+  const time = d.toLocaleTimeString("es-CO", {
+    timeZone: TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+  return `${day} · ${time}`;
+};
+
 const BOGOTA_PARTS = new Intl.DateTimeFormat("en-CA", {
   timeZone: TIME_ZONE,
   year: "numeric",

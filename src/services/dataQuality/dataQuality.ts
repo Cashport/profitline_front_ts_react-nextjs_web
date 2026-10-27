@@ -27,15 +27,17 @@ import {
   IDataEmail,
   IRegion,
   IPacksUploadResult,
+  IIqviaAuxUploadResult,
   IBotRunNowResult,
   IBotHistoryList,
-  IVariableHistoryEntry
+  IVariableHistoryEntry,
+  IAuxiliaryUploadBatch
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
   try {
     const response: GenericResponse<ISummaryCountries> = await API.get(
-      `${config.API_HOST}/data/countries-summary/${projectId}?page=1&limit=10`
+      `${config.API_HOST}/data/countries-summary/${projectId}?page=1&limit=100`
     );
     return response.data;
   } catch (error) {
@@ -524,6 +526,47 @@ export const downloadUnifiedCatalogFile = async ({
   }
 };
 
+/**
+ * Auxiliar de clientes IQVIA (Haleon Brasil).
+ * Descarga: mismo patrón que el catálogo general (URL de S3).
+ * Carga: upsert por Cod_Iqvia; devuelve el resumen y los errores por fila.
+ */
+export const downloadIqviaAuxCatalog = async ({
+  countryId
+}: {
+  countryId?: number | string;
+}) => {
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await API.get(`${config.API_HOST}/data/iqvia/aux/download${queryString}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const uploadIqviaAuxCatalog = async (
+  file: File,
+  countryId?: number | string
+): Promise<IIqviaAuxUploadResult> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<IIqviaAuxUploadResult> = await API.post(
+      `${config.API_HOST}/data/iqvia/aux/upload${queryString}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading IQVIA auxiliary file:", error);
+    throw error;
+  }
+};
+
 export const convertMaterialToPack = async (materialId: number): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.put(
@@ -808,6 +851,65 @@ export const uploadAuxiliaryFile = async (id: number, file: File): Promise<any> 
     console.error("Error uploading auxiliary file:", error);
     throw error;
   }
+};
+
+/**
+ * HU cargue multiple de Auxiliares de LATAM.
+ * Un archivo por request: el backend responde 202 cuando el archivo quedo en
+ * S3 + registrado en MySQL. NO espera la conversion ni el SFTP.
+ */
+export interface IUploadAuxiliaryUploadRequest {
+  id: number;
+  batchId: string;
+  fileCount: number;
+  slotIndex: number;
+  file: File;
+}
+
+export const uploadAuxiliaryUpload = async ({
+  id,
+  batchId,
+  fileCount,
+  slotIndex,
+  file
+}: IUploadAuxiliaryUploadRequest): Promise<{
+  uploadId: number;
+  batchId: string;
+  slotIndex: number;
+  remoteFilename: string;
+  status: string;
+  receivedCount: number;
+  fileCount: number;
+}> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("batch_id", batchId);
+  formData.append("file_count", String(fileCount));
+  formData.append("slot_index", String(slotIndex));
+
+  const response: GenericResponse<any> = await API.post(
+    `${config.API_HOST}/data/auxiliary-files/${id}/uploads`,
+    formData
+  );
+  return response.data;
+};
+
+export const getAuxiliaryUploadBatch = async (
+  batchId: string
+): Promise<IAuxiliaryUploadBatch> => {
+  const response: GenericResponse<IAuxiliaryUploadBatch> = await API.get(
+    `${config.API_HOST}/data/auxiliary-upload-batches/${batchId}`
+  );
+  return response.data;
+};
+
+export const retryAuxiliaryUpload = async (
+  uploadId: number
+): Promise<{ batchId: string }> => {
+  const response: GenericResponse<{ batchId: string }> = await API.post(
+    `${config.API_HOST}/data/auxiliary-uploads/${uploadId}/retry`
+  );
+  return response.data;
 };
 
 // Email routing rules ENDPOINTS

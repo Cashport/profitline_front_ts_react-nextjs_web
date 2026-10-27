@@ -75,8 +75,6 @@ const getEventMeta = (label: string) => {
 };
 
 /** Mismo botón "Filtrar" que TaskManager y Balances. */
-const TRIGGER_CLASS =
-  "h-12 flex items-center gap-2 border border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent px-4 rounded-md";
 
 /* Evento | Descripción | Usuario | acciones. Al reactivar Monto, volver a la rejilla
    de 5 columnas: grid-cols-[minmax(220px,1.4fr)_minmax(220px,2fr)_minmax(180px,1fr)_140px_32px] */
@@ -395,7 +393,6 @@ const HistoryTab = () => {
           categories={filterCategories}
           value={filters}
           isLoading={isLoading}
-          trigger={{ label: "Filtrar", showChevron: true, className: TRIGGER_CLASS }}
           formatTagValue={(_category, items) =>
             items.length === 1 ? items[0].name : `${items.length} seleccionados`
           }

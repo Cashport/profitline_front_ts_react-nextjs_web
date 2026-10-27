@@ -5,6 +5,7 @@ import { Segmented } from "antd";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import { cn } from "@/utils/utils";
+import { useWalletTheme } from "@/modules/walletModule/contexts/wallet-theme-context";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { CURVE_REFERENCES } from "../../constants";
 import { useContainerSize } from "../../hooks/use-container-size";
@@ -17,6 +18,7 @@ import {
   AXIS_WEEKEND,
   CHART_HEIGHT,
   CHART_MARGIN as M,
+  FORECAST,
   FOREGROUND,
   GRID,
   MUTED,
@@ -32,10 +34,15 @@ import TowerTooltip, { TipContentProps, TipRow } from "../shared/tower-tooltip";
 
 const axisMoney = (v: number) => (v === 0 ? "$0" : money(v));
 
+/** Verde del recaudo oscurecido: como línea sobre blanco, el del API se ve tenue. */
+const COLLECTED_LINE_LIGHT = "#8A9E00";
+
 interface ChartProps {
   data: ICollectionTower;
   reference: CurveReference;
   width: number;
+  /** Color de la línea del acumulado: depende del tema. */
+  line: string;
 }
 
 /**
@@ -44,7 +51,7 @@ interface ChartProps {
  * el forecast y la referencia histórica (mediana de 6 meses y/o mes anterior).
  * Port del gráfico SVG del prototipo.
  */
-function Chart({ data, reference, width }: ChartProps) {
+function Chart({ data, reference, width, line }: ChartProps) {
   const gradientId = `recaudo-area-${useId().replace(/:/g, "")}`;
   const { daily, period, summary } = data;
   const collected = summary.series.collected.color;
@@ -78,7 +85,10 @@ function Chart({ data, reference, width }: ChartProps) {
   const expected = new Map<number, number>();
   if (open) {
     for (let i = 1; i < projected.length; i++) {
-      expected.set(projected[i].day, (projected[i].projected ?? 0) - (projected[i - 1].projected ?? 0));
+      expected.set(
+        projected[i].day,
+        (projected[i].projected ?? 0) - (projected[i - 1].projected ?? 0)
+      );
     }
   }
 
@@ -100,20 +110,36 @@ function Chart({ data, reference, width }: ChartProps) {
     if (t <= D) {
       rows.push(
         { key: "apl", color: applied.color, label: applied.label, value: money(p.applied ?? 0) },
-        { key: "pna", color: unapplied.color, label: unapplied.label, value: money(p.unapplied ?? 0) },
+        {
+          key: "pna",
+          color: unapplied.color,
+          label: unapplied.label,
+          value: money(p.unapplied ?? 0)
+        },
         { key: "acu", color: collected, label: "Acumulado", value: money(p.cumulative ?? 0) }
       );
       total = { label: "Recaudo del día", value: money(dayTotal(t)) };
     } else if (open) {
       const e = expected.get(t);
       if (e !== undefined) {
-        rows.push({ key: "esp", color: withAlpha(collected, 0.16), label: "Esperado del día", value: money(e) });
+        rows.push({
+          key: "esp",
+          color: withAlpha(FORECAST, 0.16),
+          label: "Esperado del día",
+          value: money(e)
+        });
       }
       if (p.projected !== null) {
-        rows.push({ key: "proy", color: collected, label: "Acumulado proyectado", value: money(p.projected) });
+        rows.push({
+          key: "proy",
+          color: FORECAST,
+          label: "Acumulado proyectado",
+          value: money(p.projected)
+        });
       }
     }
-    if (showPrev) rows.push({ key: "prev", color: PREVIOUS, label: "Mes anterior", value: money(prevAt(t)) });
+    if (showPrev)
+      rows.push({ key: "prev", color: PREVIOUS, label: "Mes anterior", value: money(prevAt(t)) });
     if (showMedian) {
       rows.push({ key: "med", color: MUTED, label: "Mediana 6M", value: money(p.median6m ?? 0) });
     }
@@ -197,10 +223,22 @@ function Chart({ data, reference, width }: ChartProps) {
         return (
           <g key={`b${t}`}>
             {a > 0 && (
-              <rect x={X(t) - barW / 2} y={ya} width={barW} height={Math.max(0, y1 - ya)} fill={applied.color} />
+              <rect
+                x={X(t) - barW / 2}
+                y={ya}
+                width={barW}
+                height={Math.max(0, y1 - ya)}
+                fill={applied.color}
+              />
             )}
             {u > 0 && (
-              <rect x={X(t) - barW / 2} y={yb} width={barW} height={Math.max(0, ya - yb)} fill={unapplied.color} />
+              <rect
+                x={X(t) - barW / 2}
+                y={yb}
+                width={barW}
+                height={Math.max(0, ya - yb)}
+                fill={unapplied.color}
+              />
             )}
           </g>
         );
@@ -212,14 +250,20 @@ function Chart({ data, reference, width }: ChartProps) {
           y={YB(v)}
           width={barW}
           height={Math.max(0, y1 - YB(v))}
-          fill={withAlpha(collected, 0.16)}
-          stroke={collected}
+          fill={withAlpha(FORECAST, 0.16)}
+          stroke={FORECAST}
           strokeWidth={1}
           strokeDasharray="3 2"
         />
       ))}
 
-      <rect x={M.l} y={Y(summary.goal) - 5} width={iw} height={10} className="fill-muted opacity-60" />
+      <rect
+        x={M.l}
+        y={Y(summary.goal) - 5}
+        width={iw}
+        height={10}
+        className="fill-muted opacity-60"
+      />
       <line
         x1={M.l}
         x2={M.l + iw}
@@ -268,7 +312,7 @@ function Chart({ data, reference, width }: ChartProps) {
       <path
         d={linePath(actual)}
         fill="none"
-        stroke={collected}
+        stroke={line}
         strokeWidth={2.6}
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -278,7 +322,7 @@ function Chart({ data, reference, width }: ChartProps) {
           <path
             d={linePath(projected.map((p): [number, number] => [X(p.day), Y(p.projected ?? 0)]))}
             fill="none"
-            stroke={collected}
+            stroke={FORECAST}
             strokeWidth={2.2}
             strokeDasharray="5 4"
             strokeLinecap="round"
@@ -288,7 +332,7 @@ function Chart({ data, reference, width }: ChartProps) {
             cy={Y(summary.forecast)}
             r={4.5}
             className="fill-card"
-            stroke={collected}
+            stroke={FORECAST}
             strokeWidth={2}
           />
         </>
@@ -324,8 +368,9 @@ function Chart({ data, reference, width }: ChartProps) {
 export default function DailyCollectionChart({ data }: { data: ICollectionTower }) {
   const [reference, setReference] = useState<CurveReference>("median");
   const [ref, { width }] = useContainerSize<HTMLDivElement>();
+  const { resolvedTheme } = useWalletTheme();
   const { period, summary, daily } = data;
-  const collected = summary.series.collected.color;
+  const line = resolvedTheme === "dark" ? summary.series.collected.color : COLLECTED_LINE_LIGHT;
   const { applied, unapplied } = data.application.series;
   const hasPrev = daily.some((p) => p.previousMonth !== null);
   const hasMedian = daily.some((p) => p.median6m !== null);
@@ -346,9 +391,9 @@ export default function DailyCollectionChart({ data }: { data: ICollectionTower 
       }
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-3 text-[10.5px] text-foreground/80">
-        <LegendItem mark={<LineSwatch color={collected} width={2.6} />} label="Acumulado" />
+        <LegendItem mark={<LineSwatch color={line} width={2.6} />} label="Acumulado" />
         {period.open && (
-          <LegendItem mark={<LineSwatch color={collected} dash="4 3" />} label="Proyección" />
+          <LegendItem mark={<LineSwatch color={FORECAST} dash="4 3" />} label="Proyección" />
         )}
         <LegendItem
           mark={<LineSwatch className="stroke-foreground" dash="5 3" width={1.4} />}
@@ -373,13 +418,13 @@ export default function DailyCollectionChart({ data }: { data: ICollectionTower 
         />
         {period.open && (
           <LegendItem
-            mark={<Swatch color={collected} outline fill={withAlpha(collected, 0.16)} />}
+            mark={<Swatch color={FORECAST} outline fill={withAlpha(FORECAST, 0.16)} />}
             label="Esperado"
           />
         )}
       </div>
       <div ref={ref} className="relative mx-1.5 mb-2" style={{ height: CHART_HEIGHT }}>
-        {width > 0 && <Chart data={data} reference={reference} width={width} />}
+        {width > 0 && <Chart data={data} reference={reference} width={width} line={line} />}
       </div>
     </PanelCard>
   );

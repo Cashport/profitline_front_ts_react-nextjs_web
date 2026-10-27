@@ -284,7 +284,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
                 {manualFiles.map((file, index) => (
                   <div key={index} className="uploadInterface__fileItem">
                     <div className="uploadInterface__fileInfo">
-                      <CheckCircle size={20} color="#cbe61e" />
+                      <CheckCircle size={20} color="#cbe71e" />
                       <div className="uploadInterface__fileDetails">
                         <span className="uploadInterface__fileName">{file.name}</span>
                         <span className="uploadInterface__fileSize">
@@ -321,7 +321,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-2xl bg-cashport-white border-cashport-gray-light max-h-[90vh] overflow-y-auto uploadInterface">
+      <Card className="w-full max-w-2xl bg-cashport-white border-cashport-gray-light max-h-[calc(90*var(--vh))] overflow-y-auto uploadInterface">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-cashport-black">Cargar Orden de compra</CardTitle>
           <Button

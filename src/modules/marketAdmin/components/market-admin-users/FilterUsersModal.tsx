@@ -18,8 +18,6 @@ const ESTADO_OPTIONS: FilterOptionItem[] = [
   { id: "0", name: "Inactivo" }
 ];
 
-const TRIGGER_CLASS =
-  "h-12 flex items-center gap-2 border border-[#E0E0E0] rounded-lg px-4 bg-white text-[#141414] hover:bg-[#F0F0F0] transition-colors";
 
 interface FilterUsersModalProps {
   value: IMarketAdminUsersFilter;
@@ -72,7 +70,6 @@ export default function FilterUsersModal({ value, onChange }: FilterUsersModalPr
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ className: TRIGGER_CLASS, showChevron: true }}
       onApply={(sel) => onChange(selectionToDomain(sel))}
       onValueChange={(sel) => onChange(selectionToDomain(sel))}
       onClearAll={() => onChange({ roleId: null, status: null })}

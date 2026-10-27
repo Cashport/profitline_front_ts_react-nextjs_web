@@ -60,10 +60,10 @@ export default function BoardSelector() {
         <button
           type="button"
           aria-haspopup="menu"
-          className="-ml-1.5 flex cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-1.5 py-1 text-base font-bold text-foreground hover:bg-muted"
+          className="-ml-1.5 flex cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-1.5 py-0 text-[23px] font-semibold leading-[1.15] text-cp-ink hover:bg-cp-muted"
         >
           {active.name}
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          <ChevronDown className="h-5 w-5 text-cp-ink-3" />
         </button>
       </Dropdown>
     </h1>
