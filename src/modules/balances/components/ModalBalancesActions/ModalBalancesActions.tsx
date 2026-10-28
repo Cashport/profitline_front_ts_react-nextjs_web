@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { message, Modal } from "antd";
-import { ArrowsClockwise, DownloadSimple } from "@phosphor-icons/react";
+import { ArrowsClockwise, DownloadSimple, PaperPlaneTilt } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalChangeBalanceStatus } from "../ModalChangeBalanceStatus/ModalChangeBalanceStatus";
@@ -14,13 +14,15 @@ interface Props {
   onClose: () => void;
   balanceIds: number[];
   onSuccess: () => void;
+  onSendToApply?: () => void;
 }
 
 export const ModalBalancesActions: React.FC<Props> = ({
   isOpen,
   onClose,
   balanceIds,
-  onSuccess
+  onSuccess,
+  onSendToApply
 }) => {
   const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
   const [isChangeEligibilityOpen, setIsChangeEligibilityOpen] = useState(false);
@@ -92,6 +94,13 @@ export const ModalBalancesActions: React.FC<Props> = ({
                 setIsChangeEligibilityOpen(true);
                 onClose();
               }}
+            />
+          )}
+          {onSendToApply && balanceIds.length > 0 && (
+            <ButtonGenerateAction
+              icon={<PaperPlaneTilt size={20} />}
+              title="Enviar a aplicar"
+              onClick={onSendToApply}
             />
           )}
         </div>

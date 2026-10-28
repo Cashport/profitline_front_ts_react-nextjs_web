@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { AxiosError } from "axios";
 
 import { Flex, Spin } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
@@ -15,6 +16,10 @@ import { ModalBalancesActions } from "@/modules/balances/components/ModalBalance
 import { useBalances } from "@/hooks/useBalances";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
+import { useApplicationTable } from "@/hooks/useApplicationTable";
+import { useMessageApi } from "@/context/MessageContext";
+import { useAppStore } from "@/lib/store/store";
+import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
 import { extractSingleParam } from "@/utils/utils";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import {
@@ -29,6 +34,9 @@ import { useSelectedBalances } from "@/modules/balances/hooks/useSelectedBalance
 export function ClientBalancesView() {
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const { showMessage } = useMessageApi();
+  const { mutate: mutateApplyTabData } = useApplicationTable();
 
   const [filter, setFilter] = useState<ISaldosFilterValue>({
     motive_ids: [],
@@ -74,6 +82,25 @@ export function ClientBalancesView() {
 
   const closeDetailSheet = () => {
     setIsDetailSheetOpen(false);
+  };
+
+  const handleSendToApply = async () => {
+    try {
+      await addItemsToTable(projectId, clientId, "balances", state.selectedSaldoIds.map(Number));
+      showMessage("success", "Saldos añadidos a la tabla de aplicación de pagos");
+      mutateApplyTabData();
+      mutate();
+      clearSelection();
+      setIsActionsOpen(false);
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof AxiosError
+          ? error.response?.data?.message ||
+              "Error al añadir saldos a la tabla de aplicación de pagos"
+          : "Error al añadir saldos a la tabla de aplicación de pagos"
+      );
+    }
   };
 
   const filteredGroups = balancesData ?? [];
@@ -183,6 +210,7 @@ export function ClientBalancesView() {
           mutate();
           clearSelection();
         }}
+        onSendToApply={handleSendToApply}
       />
     </>
   );
