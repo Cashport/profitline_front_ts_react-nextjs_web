@@ -12,6 +12,7 @@ export const EVEN_QUANTITY_PRODUCT: ProductIdentifier = {
 
 export const EVEN_QUANTITY_GROUP_PRODUCTS: ProductIdentifier[] = [
   { SKU: "012132", EAN: null, description: "RESTYLANE VOLYME 1ml" },
+  { SKU: "012133", EAN: null, description: "RESTYLANE REFYNE 1ml" },
   { SKU: "011594", EAN: null, description: "RESTYLANE REFYNE 1ml New" },
   { SKU: "012130", EAN: null, description: "REST LYFT LIDO 1ml" },
   { SKU: "012126", EAN: null, description: "RESTYLANE LIDOCAINA 1ml" },
