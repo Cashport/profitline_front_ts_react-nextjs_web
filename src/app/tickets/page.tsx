@@ -1,5 +1,5 @@
-import TicketsView from "@/modules/ticketsModule/containers/tickets-view/tickets-view";
+import TasksView from "@/modules/ticketsModule/containers/tasks-view/tasks-view";
 
 export default function TicketsPage() {
-  return <TicketsView />;
+  return <TasksView />;
 }
