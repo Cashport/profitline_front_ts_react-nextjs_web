@@ -6,6 +6,7 @@ import { Dropdown, Spin, message } from "antd";
 import { uploadAuxiliaryFile } from "@/services/dataQuality/dataQuality";
 import { useAuxiliaryFiles } from "../../hooks/useAuxiliaryFiles";
 import { AuxiliaryUploadModal } from "../AuxiliaryUploadModal/AuxiliaryUploadModal";
+import { invalidateDataQualityCache } from "../../utils/invalidateDataQuality";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -288,7 +289,10 @@ export function AuxiliaryFilesTable() {
           setUploadTarget(null);
           setUploadBatchId(null);
         }}
-        onFinished={() => mutate()}
+        onFinished={() => {
+          mutate();
+          invalidateDataQualityCache();
+        }}
       />
     </Spin>
   );

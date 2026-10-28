@@ -15,6 +15,7 @@ import ModalCreateNewFile from "../ModalCreateNewFile/ModalCreateNewFile";
 import { ModalDataIntake } from "../modal-data-intake";
 import { IModalMode } from "../modal-data-intake/modal-data-intake";
 import { IClientDetailDataArchive } from "@/types/dataQuality/IDataQuality";
+import { invalidateDataQualityCache } from "../../utils/invalidateDataQuality";
 
 interface IClientDetailArchivesProps {
   clientId: string;
@@ -233,6 +234,7 @@ export function ClientDetailArchives({
         onSuccess={() => {
           onMutateDetail();
           mutateArchives();
+          invalidateDataQualityCache();
         }}
       />
 
@@ -250,6 +252,7 @@ export function ClientDetailArchives({
         onSuccess={() => {
           onMutateDetail();
           mutateArchives();
+          invalidateDataQualityCache();
         }}
       />
     </>

@@ -15,6 +15,7 @@ import {
 } from "@/services/dataQuality/dataQuality";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
+import { invalidateDataQualityCache } from "../../utils/invalidateDataQuality";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
 import { ModalFileHistory } from "../ModalFileHistory";
 import { useAppStore } from "@/lib/store/store";
@@ -332,6 +333,7 @@ export function ClientDetailTable({
           await uploadEvidence(id, file);
           message.success("Evidencia cargada exitosamente.");
           onMutate?.();
+          invalidateDataQualityCache();
         } catch (error) {
           message.error(
             error instanceof Error
@@ -373,6 +375,7 @@ export function ClientDetailTable({
           message.success("Carga exitosa.");
           mutateDetail?.();
           onMutate?.();
+          invalidateDataQualityCache();
         } catch (error) {
           message.error(error instanceof Error ? error.message : "Error al cargar.");
         } finally {
@@ -566,6 +569,7 @@ export function ClientDetailTable({
         onSuccess={() => {
           mutateDetail?.();
           onMutate?.();
+          invalidateDataQualityCache();
         }}
       />
       <ModalConfirmAction

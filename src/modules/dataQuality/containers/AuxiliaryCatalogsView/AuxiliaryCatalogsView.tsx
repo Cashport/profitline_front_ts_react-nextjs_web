@@ -24,6 +24,7 @@ import {
   uploadPointsOfSaleFile,
   uploadPacksFile
 } from "@/services/dataQuality/dataQuality";
+import { invalidateDataQualityCache } from "../../utils/invalidateDataQuality";
 
 type UploadKind = "materials" | "pos" | "packs";
 
@@ -75,6 +76,7 @@ export default function AuxiliaryCatalogsView() {
       }
       message.success("Archivo cargado exitosamente.");
       setUploadOpen(false);
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
     } finally {

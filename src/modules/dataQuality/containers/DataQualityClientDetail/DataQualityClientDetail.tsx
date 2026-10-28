@@ -34,6 +34,7 @@ import ModalUploadInTransitHaleon from "../../components/ModalUploadInTransitHal
 
 import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
 import { ModalDataEmailRules } from "../../components/ModalDataRegisteredEmails/ModalDataEmailRules";
+import { invalidateDataQualityCache } from "../../utils/invalidateDataQuality";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -109,6 +110,7 @@ export default function DataQualityClientDetails() {
       message.success("Archivo de puntos de venta cargado exitosamente.");
       setWhichModalIsOpen(0);
       mutate();
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
@@ -135,6 +137,7 @@ export default function DataQualityClientDetails() {
       }
       setWhichModalIsOpen(0);
       mutate();
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al cargar el archivo de packs.");
     } finally {
@@ -155,6 +158,7 @@ export default function DataQualityClientDetails() {
       message.success("Archivo cargado exitosamente.");
       setWhichModalIsOpen(0);
       mutate();
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
     } finally {
@@ -170,6 +174,7 @@ export default function DataQualityClientDetails() {
       message.success("Archivo de auxiliar de materiales cargado exitosamente.");
       setWhichModalIsOpen(0);
       mutate();
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(
         error instanceof Error
@@ -403,7 +408,10 @@ export default function DataQualityClientDetails() {
         isOpen={whichModalIsOpen === 7}
         onClose={() => setWhichModalIsOpen(0)}
         clientId={clientId}
-        onSuccess={() => mutate()}
+        onSuccess={() => {
+          mutate();
+          invalidateDataQualityCache();
+        }}
       />
     </div>
   );

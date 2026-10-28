@@ -24,6 +24,7 @@ import {
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useCountriesClients } from "../../hooks/useCountriesClients";
+import { invalidateDataQualityCache } from "../../utils/invalidateDataQuality";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
@@ -166,6 +167,7 @@ export default function CountriesClientsView() {
       const res = await uploadIqviaAuxCatalog(file, countryId);
       setIqviaUploadResult(res);
       closeAllModals();
+      invalidateDataQualityCache();
 
       if (res.errores.length > 0) {
         message.warning(
@@ -197,6 +199,7 @@ export default function CountriesClientsView() {
       message.success("Archivo de auxiliar de materiales cargado exitosamente.");
       closeAllModals();
       mutate();
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(
         error instanceof Error
@@ -219,6 +222,7 @@ export default function CountriesClientsView() {
       message.success("Archivo de puntos de venta cargado exitosamente.");
       closeAllModals();
       mutate();
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
@@ -245,6 +249,7 @@ export default function CountriesClientsView() {
       }
       closeAllModals();
       mutate();
+      invalidateDataQualityCache();
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al cargar el archivo de packs.");
     } finally {
