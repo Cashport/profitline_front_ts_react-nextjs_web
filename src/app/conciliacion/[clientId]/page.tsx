@@ -1,9 +1,12 @@
-import { MassConcilationView } from "@/components/organisms/projects/MassConcilationView/MassConcilationView";
 import { Metadata } from "next";
+
+import PortfolioConciliationView from "@/modules/portfolioConciliation/containers/portfolio-conciliation-view/portfolio-conciliation-view";
+
 export const metadata: Metadata = {
-  title: "Profitline"
+  title: "Conciliación masiva",
+  description: "Conciliación masiva de la cartera del cliente"
 };
 
 export default function Concilation() {
-  return <MassConcilationView />;
+  return <PortfolioConciliationView />;
 }
