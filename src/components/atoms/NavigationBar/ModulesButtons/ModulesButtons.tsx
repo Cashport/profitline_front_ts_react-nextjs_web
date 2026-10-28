@@ -200,7 +200,7 @@ const MODULES: RailModule[] = [
   },
   {
     href: "/tickets",
-    label: "Tickets",
+    label: "Tareas",
     group: "Gestión",
     icon: <Ticket size={ICON_SIZE} />,
     visible: can("Tickets"),
