@@ -21,6 +21,7 @@ import {
   Database,
   CurrencyCircleDollar,
   Invoice,
+  LockKey,
   MapPin,
   PresentationChart
 } from "@phosphor-icons/react";
@@ -92,6 +93,14 @@ const MODULES: RailModule[] = [
     icon: <CurrencyCircleDollar size={ICON_SIZE} />,
     visible: can("Balances"),
     isActive: (p) => p.startsWith("/balances")
+  },
+  {
+    href: "/blockingAlerts",
+    label: "Alertas de bloqueo",
+    group: "Cartera",
+    icon: <LockKey size={ICON_SIZE} />,
+    visible: can("BlockingAlerts"),
+    isActive: (p) => p.startsWith("/blockingAlerts")
   },
   {
     href: "/cuentas-medicas",
