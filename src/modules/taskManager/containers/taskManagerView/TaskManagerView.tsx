@@ -7,7 +7,7 @@ import { getTasksByStatus, getTaskTabs, getTaskTypes } from "@/services/tasks/ta
 import { ITask, ITaskTypes } from "@/types/tasks/ITasks";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { Card, CardContent } from "@/modules/chat/ui/card";
+import Header from "@/components/organisms/header";
 import StatusTab from "@/modules/taskManager/components/statusTab/StatusTab";
 import TasksTable, {
   SortKey,
@@ -355,20 +355,27 @@ export const TaskManagerView: React.FC = () => {
   });
 
   return (
-    <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
-      <Card className="bg-cashport-white border-0 shadow-sm p-6 flex flex-col min-h-0 max-h-full">
-        <CardContent className="p-0 flex flex-col flex-1 min-h-0">
+    <main className="cp-page flex-1 min-h-0 overflow-hidden">
+      <Header
+        title="Gestor de tareas"
+        actionsExtra={
+          <FilterTasksModal
+            inHeader
+            taskTypes={taskTypes}
+            value={selectedFilters}
+            onChange={setSelectedFilters}
+          />
+        }
+      />
+      {/* Tarjeta compartida (docs/DESIGN.md §3); el buscador es el de la tabla. */}
+      <div className="cp-card flex min-h-0 max-h-full flex-col px-[18px] py-[14px]">
+        <div className="flex flex-col flex-1 min-h-0">
           <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="flex gap-2">
               <UiSearchInput
                 className="search"
                 placeholder="Buscar tarea"
                 onChange={(event) => setSearchTerm(event.target.value)}
-              />
-              <FilterTasksModal
-                taskTypes={taskTypes}
-                value={selectedFilters}
-                onChange={setSelectedFilters}
               />
               <GenerateActionButton
                 onClick={() => {
@@ -377,15 +384,18 @@ export const TaskManagerView: React.FC = () => {
               />
             </div>
 
-            <PrincipalButton customStyles={{ height: "100%" }}>
-              <Plus className="h-5 w-5 mr-2" />
-              Nueva tarea
-            </PrincipalButton>
+            {/* PrincipalButton fija height:100% con !important: el contenedor le da el alto del buscador (--control-h) */}
+            <div className="h-[var(--control-h)] flex-shrink-0">
+              <PrincipalButton fullWidth customStyles={{ fontSize: 14 }}>
+                <Plus className="h-[18px] w-[18px] mr-2" />
+                Nueva tarea
+              </PrincipalButton>
+            </div>
           </div>
 
           <StatusTab tabs={tabItems} activeKey={activeTabKey} onChange={setActiveTabKey} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Modals */}
       <ModalGenerateActionTaskManager

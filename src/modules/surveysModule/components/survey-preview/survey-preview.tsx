@@ -14,7 +14,7 @@ interface SurveyPreviewProps {
 }
 
 const BOX =
-  "flex h-10 w-full items-center rounded-[10px] border border-[#e3e3e3] px-3 text-xs text-[#8a8a8a]";
+  "flex h-10 w-full items-center rounded-[10px] border border-[#e3e3e3] px-3 text-[13px] text-[#8a8a8a]";
 
 /** Control de cada tipo como lo pinta la app, sin respuesta. */
 function PreviewControl({ question }: { question: IVisitFormQuestion }) {
@@ -30,7 +30,7 @@ function PreviewControl({ question }: { question: IVisitFormQuestion }) {
       return (
         <span className={cn(BOX, "h-[72px] flex-col items-stretch justify-between py-2.5")}>
           <span>{question.placeholder}</span>
-          <span className="self-end text-[10px]">0 / {v.max_length ?? 5000}</span>
+          <span className="self-end text-[13px]">0 / {v.max_length ?? 5000}</span>
         </span>
       );
     case "dropdown":
@@ -47,7 +47,7 @@ function PreviewControl({ question }: { question: IVisitFormQuestion }) {
           {(question.options ?? []).map((o) => (
             <span
               key={o.id}
-              className="inline-flex h-8 items-center gap-[7px] rounded-full border border-[#e3e3e3] px-3 text-xs text-[#141414]"
+              className="inline-flex h-8 items-center gap-[7px] rounded-full border border-[#e3e3e3] px-3 text-[13px] text-[#141414]"
             >
               <i
                 className={cn(
@@ -69,7 +69,7 @@ function PreviewControl({ question }: { question: IVisitFormQuestion }) {
       );
     case "location":
       return (
-        <span className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-[#ff6a13] text-xs font-semibold text-[#ff6a13]">
+        <span className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-[#ff6a13] text-[13px] font-semibold text-[#ff6a13]">
           <MapPin className="h-[15px] w-[15px]" />
           Capturar ubicación
         </span>
@@ -77,7 +77,7 @@ function PreviewControl({ question }: { question: IVisitFormQuestion }) {
     case "photo":
     case "file":
       return (
-        <span className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[#d6d6d6] text-xs font-semibold text-[#141414]">
+        <span className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[#d6d6d6] text-[13px] font-semibold text-[#141414]">
           <span className="text-[#ff6a13]">+</span>
           {question.type === "photo" ? "Tomar foto" : "Adjuntar archivo"}
           <span className="font-normal text-[#8a8a8a]">· 0 de {v.max_files ?? 1}</span>
@@ -97,7 +97,7 @@ export default function SurveyPreview({ draft, selectedId, onSelect }: SurveyPre
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <p className="text-[11.5px] font-medium text-[#8a8a8a]">Vista previa · app del asesor</p>
+      <p className="text-[13px] font-medium text-[#8a8a8a]">Vista previa · app del asesor</p>
 
       <div className="flex max-h-[min(760px,calc(100*var(--vh)-180px))] w-[340px] max-w-full flex-col overflow-hidden rounded-[36px] border border-[#e3e3e3] bg-white shadow-[0_20px_50px_rgba(0,0,0,.08)]">
         <div className="px-4 pt-[18px]">
@@ -109,9 +109,9 @@ export default function SurveyPreview({ draft, selectedId, onSelect }: SurveyPre
               <div className="truncate text-sm font-semibold text-[#141414]">
                 {draft.name.trim() || "Encuesta sin título"}
               </div>
-              <div className="text-[11px] text-[#2b4a5f]">Cliente de ejemplo</div>
+              <div className="text-[13px] text-[#2b4a5f]">Cliente de ejemplo</div>
             </div>
-            <span className="rounded-full bg-[#f2f2f2] px-[9px] py-[3px] text-[11px] font-semibold text-[#141414]">
+            <span className="rounded-full bg-[#f2f2f2] px-[9px] py-[3px] text-[13px] font-semibold text-[#141414]">
               {total ? `${step}/${total}` : "0/0"}
             </span>
           </div>
@@ -125,10 +125,10 @@ export default function SurveyPreview({ draft, selectedId, onSelect }: SurveyPre
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
           {draft.description && (
-            <p className="text-[11.5px] leading-normal text-[#6b6b6b]">{draft.description}</p>
+            <p className="text-[13px] leading-normal text-[#6b6b6b]">{draft.description}</p>
           )}
           {required > 0 && (
-            <p className="mb-1 mt-1.5 flex items-center gap-1.5 text-[11px] font-medium text-[#ff6a13]">
+            <p className="mb-1 mt-1.5 flex items-center gap-1.5 text-[13px] font-medium text-[#ff6a13]">
               <i className="h-[5px] w-[5px] rounded-full bg-[#ff6a13]" />
               Faltan {required} obligatorias
             </p>
@@ -143,13 +143,13 @@ export default function SurveyPreview({ draft, selectedId, onSelect }: SurveyPre
                 q.id === selectedId && "bg-[#f4f9d2]"
               )}
             >
-              <span className="text-[12.5px] font-semibold leading-[1.35] text-[#141414]">
+              <span className="text-[13px] font-semibold leading-[1.35] text-[#141414]">
                 <span className="mr-1 text-[#a3a3a3]">{i + 1}</span>
                 {q.label || "Pregunta sin título"}
                 {q.required && <span className="text-[#ff6a13]"> *</span>}
               </span>
               {q.description && (
-                <span className="mt-px text-[10.5px] text-[#8a8a8a]">{q.description}</span>
+                <span className="mt-px text-[13px] text-[#8a8a8a]">{q.description}</span>
               )}
               <span className="mt-2 block w-full">
                 <PreviewControl question={q} />
@@ -159,10 +159,10 @@ export default function SurveyPreview({ draft, selectedId, onSelect }: SurveyPre
         </div>
 
         <div className="flex gap-2 border-t border-[#f0f0f0] px-3.5 pb-[18px] pt-2.5">
-          <span className="flex h-10 items-center rounded-full border border-[#e3e3e3] px-[18px] text-[12.5px] font-semibold text-[#141414]">
+          <span className="flex h-10 items-center rounded-full border border-[#e3e3e3] px-[18px] text-[13px] font-semibold text-[#141414]">
             Guardar
           </span>
-          <span className="flex h-10 flex-1 items-center justify-center rounded-full bg-[#efefe9] text-[12.5px] font-semibold text-[#a3a3a3]">
+          <span className="flex h-10 flex-1 items-center justify-center rounded-full bg-[#efefe9] text-[13px] font-semibold text-[#a3a3a3]">
             Finalizar form
           </span>
         </div>

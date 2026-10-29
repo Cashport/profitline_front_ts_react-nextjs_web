@@ -110,7 +110,7 @@ const UnappliedRow = memo(function UnappliedRow({
             target="_blank"
             rel="noopener noreferrer"
             title="Abrir el pago en Cashport"
-            className="inline-flex items-center gap-[5px] text-[11px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-[5px] text-[13px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
           >
             {p.id}
             <ExternalLink className="h-[11px] w-[11px]" />
@@ -121,7 +121,7 @@ const UnappliedRow = memo(function UnappliedRow({
             type="button"
             onClick={() => onOpenPayment(p.id)}
             title="Ver el detalle del pago"
-            className="inline-flex cursor-pointer items-center gap-[5px] border-0 bg-transparent p-0 text-[11px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
+            className="inline-flex cursor-pointer items-center gap-[5px] border-0 bg-transparent p-0 text-[13px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
           >
             {p.id}
             <PanelRightOpen className="h-[11px] w-[11px]" />
@@ -251,7 +251,7 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
                   aria-pressed={on}
                   onClick={() => toggleCoordinator(c.id)}
                   className={cn(
-                    "cursor-pointer rounded-md border border-transparent bg-transparent px-2 py-1 text-[12.5px] text-muted-foreground transition-colors hover:text-foreground",
+                    "cursor-pointer rounded-md border border-transparent bg-transparent px-2 py-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground",
                     on && "border-wallet-accent bg-wallet-accent-soft font-medium text-foreground"
                   )}
                 >
@@ -309,7 +309,7 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
                 <td className={TD_TOTAL}>{payments(rows.length)}</td>
                 <td className={cn(TD_TOTAL, HIDE_SM)} />
                 <td className={cn(TD_TOTAL, "text-right")}>
-                  <span className="text-[10.5px] font-normal text-muted-foreground">
+                  <span className="text-[13px] font-normal text-muted-foreground">
                     {fmt(avgDays, 1)} días prom.
                   </span>
                 </td>

@@ -191,9 +191,7 @@ export default function ProductsDetailsAndDiscounts({
             };
           const finalPrice = item.discount?.primary?.new_price ?? item.price;
           const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
-          const executiveEntry = executiveDiscounts.find(
-            (e) => e.product_sku === item.product_sku
-          );
+          const executiveEntry = executiveDiscounts.find((e) => e.product_sku === item.product_sku);
           return {
             key: `${product.id}-${product.SKU}`,
             description: item.description,
@@ -219,8 +217,7 @@ export default function ProductsDetailsAndDiscounts({
       // El backend incluye los packs en `confirmOrderData.products` y en
       // `discounts.discountItems`, igual que cualquier producto, así que
       // podemos reutilizar el mismo lookup para sacar el descuento.
-      const item: CheckoutItem =
-        discountBySku.get(pack.SKU) ??
+      const item: CheckoutItem = discountBySku.get(pack.SKU) ??
         productsBySku.get(pack.SKU) ?? {
           product_sku: pack.SKU,
           quantity: pack.quantity,
@@ -310,7 +307,7 @@ export default function ProductsDetailsAndDiscounts({
         {/* Otros descuentos */}
         <div className="mx-5 mt-4 mb-5 rounded-xl border border-[#EEEEEE] overflow-hidden flex-shrink-0">
           <div className="px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE]">
-            <p className="text-xs font-semibold text-[#141414]">Otros descuentos</p>
+            <p className="text-[13px] font-semibold text-[#141414]">Otros descuentos</p>
           </div>
           <div className="flex items-center gap-3 px-4 py-3">
             <span className="flex-1 text-sm text-[#141414]">{secondaryDiscount?.name}</span>

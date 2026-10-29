@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 
 export interface IEjecutivoStats {
   EjecutivoId: string;
@@ -32,50 +33,47 @@ export const EjecutivosTable: React.FC<EjecutivosTableProps> = ({
 }) => {
   
   // 👇 Función para pintar las flechitas
-  const renderSortIcon = (field: string) => {
-    if (sortField === field) {
-      return <span className="text-[10px] text-gray-900 font-bold ml-1">{sortOrder === 'ASC' ? '▲' : '▼'}</span>;
-    }
-    return <span className="text-[10px] text-gray-400 ml-1">▲▼</span>;
-  };
+  const renderSortIcon = (field: string) => (
+    <SortArrows dir={sortField === field ? (sortOrder === 'ASC' ? 'asc' : 'desc') : null} />
+  );
 
   return (
     <div className="w-full bg-white overflow-visible">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
+        <table className="w-full text-left text-[13px] border-collapse">
           <thead>
-            <tr className="border-b border-gray-100 text-gray-800 font-bold select-none">
+            <tr className="select-none">
               
               {/* 👇 COLUMNAS CON FLECHITAS 👇 */}
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('EjecutivoNombre')}>
-                <div className="flex items-center">Ejecutivo {renderSortIcon('EjecutivoNombre')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('EjecutivoNombre')}>
+                <span className="inline-flex items-center gap-1">Ejecutivo{renderSortIcon('EjecutivoNombre')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('UltimoEnvio')}>
-                <div className="flex items-center">Último envío {renderSortIcon('UltimoEnvio')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('UltimoEnvio')}>
+                <span className="inline-flex items-center gap-1">Último envío{renderSortIcon('UltimoEnvio')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('Recibidos')}>
-                <div className="flex items-center">Recibidos {renderSortIcon('Recibidos')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('Recibidos')}>
+                <span className="inline-flex items-center gap-1">Recibidos{renderSortIcon('Recibidos')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('Usados')}>
-                <div className="flex items-center">Usados {renderSortIcon('Usados')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('Usados')}>
+                <span className="inline-flex items-center gap-1">Usados{renderSortIcon('Usados')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('Anulados')}>
-                <div className="flex items-center">Anulados {renderSortIcon('Anulados')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('Anulados')}>
+                <span className="inline-flex items-center gap-1">Anulados{renderSortIcon('Anulados')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('PorcentajeUso')}>
-                <div className="flex items-center">% de uso {renderSortIcon('PorcentajeUso')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('PorcentajeUso')}>
+                <span className="inline-flex items-center gap-1">% de uso{renderSortIcon('PorcentajeUso')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('Asignados')}>
-                <div className="flex items-center">Asignados {renderSortIcon('Asignados')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('Asignados')}>
+                <span className="inline-flex items-center gap-1">Asignados{renderSortIcon('Asignados')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold text-right"></th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-right text-[13.5px] font-semibold text-cp-ink"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 text-gray-700">
@@ -99,7 +97,7 @@ export const EjecutivosTable: React.FC<EjecutivosTableProps> = ({
                         style={{ width: `${Math.min(ejecutivo.PorcentajeUso, 100)}%` }} 
                       />
                     </div>
-                    <span className="font-bold text-gray-700 text-xs">
+                    <span className="font-bold text-gray-700 text-[13px]">
                       {Math.round(ejecutivo.PorcentajeUso)}%
                     </span>
                   </div>

@@ -23,7 +23,7 @@ const StatusPill = ({ status }: { status: string }) => {
     className: "bg-[#F0F0F0] text-[#666666] border border-[#DDDDDD]"
   };
   return (
-    <span className={`px-2 py-1 text-[11px] font-semibold rounded-lg w-fit ${cfg.className}`}>
+    <span className={`px-2 py-1 text-[13px] font-semibold rounded-lg w-fit ${cfg.className}`}>
       {cfg.label}
     </span>
   );
@@ -41,10 +41,10 @@ const ItemsCell = ({ items }: { items: IManagerBonificationItem[] }) => {
         <div key={item.group_item_id} className="flex flex-col gap-1">
           {showHeader && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-semibold text-[#666666]">
+              <span className="text-[13px] font-semibold text-[#666666]">
                 Subgrupo {item.subgroup_number}
               </span>
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#F0F0F0] text-[#666666]">
+              <span className="text-[13px] font-semibold px-1.5 py-0.5 rounded-full bg-[#F0F0F0] text-[#666666]">
                 {item.fixed ? "Fijo" : `Elige hasta ${item.max_selection_qty}`}
               </span>
             </div>
@@ -54,7 +54,7 @@ const ItemsCell = ({ items }: { items: IManagerBonificationItem[] }) => {
               <span className="text-sm text-[#141414] truncate">
                 <span className="text-[#999999]">{p.sku}</span> — {p.description}
               </span>
-              <span className="text-xs font-semibold text-[#666666] shrink-0">×{p.qty}</span>
+              <span className="text-[13px] font-semibold text-[#666666] shrink-0">×{p.qty}</span>
             </div>
           ))}
         </div>

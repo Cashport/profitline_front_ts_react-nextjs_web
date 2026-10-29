@@ -15,12 +15,12 @@ export default function AdvisorDetailPending({ failed, onBack }: AdvisorDetailPe
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1.5 py-1 text-[11px] tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground"
+        className="flex items-center gap-1.5 py-1 text-[13px] tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronLeft className="h-3 w-3" />
         Equipo
       </button>
-      <p className="px-2 py-3.5 text-xs text-muted-foreground">
+      <p className="px-2 py-3.5 text-[13px] text-muted-foreground">
         {failed ? "No se pudo cargar el detalle del asesor." : "Cargando detalle del asesor…"}
       </p>
     </div>

@@ -150,10 +150,10 @@ export function PurchaseOrdersView() {
   };
 
   return (
-    <div className="bg-white rounded-lg">
+    <div className="cp-page">
       {/* Main white card containing all content */}
       <main>
-        <Card className="bg-cashport-white border-0 shadow-sm p-6">
+        <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface px-[18px] py-[14px] shadow-none">
           <CardContent className="p-0 ">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-y-3">
               <div
@@ -177,10 +177,10 @@ export function PurchaseOrdersView() {
 
                 <Link href="/purchase-orders/dashboard">
                   <Button
-                    className="!flex !h-12 !items-center !border !border-solid !border-transparent !bg-[#f7f7f7] !px-4 !py-3 !font-semibold"
+                    className="!flex !h-[var(--control-h)] !items-center !border !border-solid !border-transparent !bg-[#f7f7f7] !px-4 !py-0 !text-[14px] !font-semibold"
                     size="large"
                   >
-                    {isMobile || isTablet ? <PresentationChart size={24} /> : "Dashboard"}
+                    {isMobile || isTablet ? <PresentationChart size={18} /> : "Dashboard"}
                   </Button>
                 </Link>
 
@@ -206,12 +206,16 @@ export function PurchaseOrdersView() {
                 />
               </div>
 
-              <div className="h-12">
+              {/* PrincipalButton ocupa el 100% del alto: mismo alto que el buscador */}
+              <div className="h-[var(--control-h)]">
                 <PrincipalButton
                   onClick={() => setWhichModalIsOpen({ selected: 2 })}
-                  customStyles={{ padding: isMobile || isTablet ? "7px 12px" : undefined }}
+                  customStyles={{
+                    padding: isMobile || isTablet ? "7px 12px" : undefined,
+                    fontSize: 14
+                  }}
                 >
-                  <Upload className={isMobile || isTablet ? "h-4 w-4" : "h-4 w-4 mr-2"} />
+                  <Upload className={isMobile || isTablet ? "h-[18px] w-[18px]" : "mr-2 h-[18px] w-[18px]"} />
                   {isMobile || isTablet ? null : "Cargar Orden de compra"}
                 </PrincipalButton>
               </div>

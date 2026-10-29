@@ -114,9 +114,9 @@ export default function PaisesSection({
         <button
           disabled={disabled}
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors flex-shrink-0"
         >
-          <Plus size={14} /> Agregar países
+          <Plus size={18} /> Agregar países
         </button>
       </div>
 

@@ -33,7 +33,7 @@ const MyPaymentsTab: React.FC<MyPaymentsTabProps> = ({ availablePayments }) => {
             backgroundColor: payment.color
           }}
         />
-        <span style={{ color: payment.color, fontSize: "12px", fontWeight: 500 }}>
+        <span style={{ color: payment.color, fontSize: "13px", fontWeight: 500 }}>
           {payment.status_description}
         </span>
       </Flex>

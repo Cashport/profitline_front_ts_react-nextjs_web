@@ -21,10 +21,7 @@ import ProfitLoader from "@/components/ui/profit-loader/profit-loader";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import { Button } from "@/modules/chat/ui/button";
 
-import {
-  retryAuxiliaryUpload,
-  uploadAuxiliaryUpload
-} from "@/services/dataQuality/dataQuality";
+import { retryAuxiliaryUpload, uploadAuxiliaryUpload } from "@/services/dataQuality/dataQuality";
 import { useAuxiliaryUploadBatch } from "../../hooks/useAuxiliaryUploadBatch";
 import {
   AuxiliaryUploadStatus,
@@ -54,10 +51,7 @@ interface LocalItem {
 
 const MAX_ATTEMPTS_PER_FILE = 2;
 
-const STATUS_META: Record<
-  AuxiliaryUploadStatus | LocalStatus,
-  { label: string; color: string }
-> = {
+const STATUS_META: Record<AuxiliaryUploadStatus | LocalStatus, { label: string; color: string }> = {
   pending: { label: "Pendiente", color: "default" },
   uploading: { label: "Subiendo", color: "processing" },
   received: { label: "Recibido", color: "blue" },
@@ -128,28 +122,19 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
         );
         return prev;
       }
-      const duplicated = prev.some(
-        (item) => item.name === file.name && item.size === file.size
-      );
+      const duplicated = prev.some((item) => item.name === file.name && item.size === file.size);
       return duplicated ? prev : [...prev, file];
     });
   };
 
   const sendSlot = useCallback(
-    async (
-      targetBatchId: string,
-      slotIndex: number,
-      file: File,
-      fileCount: number
-    ) => {
+    async (targetBatchId: string, slotIndex: number, file: File, fileCount: number) => {
       const id = auxiliaryFile?.id;
       if (!id) return false;
 
       setItems((prev) =>
         prev.map((item) =>
-          item.slotIndex === slotIndex
-            ? { ...item, status: "uploading", error: undefined }
-            : item
+          item.slotIndex === slotIndex ? { ...item, status: "uploading", error: undefined } : item
         )
       );
 
@@ -184,9 +169,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
 
       setItems((prev) =>
         prev.map((item) =>
-          item.slotIndex === slotIndex
-            ? { ...item, status: "error", error: lastError }
-            : item
+          item.slotIndex === slotIndex ? { ...item, status: "error", error: lastError } : item
         )
       );
       return false;
@@ -210,12 +193,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
 
     let anyReceived = false;
     for (let index = 0; index < selected.length; index++) {
-      const received = await sendSlot(
-        targetBatchId,
-        index + 1,
-        selected[index],
-        fileCount
-      );
+      const received = await sendSlot(targetBatchId, index + 1, selected[index], fileCount);
       if (received && !anyReceived) {
         anyReceived = true;
         // Solo se habilita el polling cuando el lote ya existe en el backend.
@@ -227,9 +205,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
     if (anyReceived) {
       await mutate();
     } else {
-      message.error(
-        "No se pudo recibir ningun archivo. Revisa la conexion e intenta de nuevo."
-      );
+      message.error("No se pudo recibir ningun archivo. Revisa la conexion e intenta de nuevo.");
     }
   };
 
@@ -301,14 +277,12 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                       <p className="truncate text-sm text-[#141414]" title={file.name}>
                         {index + 1}. {file.name}
                       </p>
-                      <p className="text-xs text-[#6B7280]">{formatBytes(file.size)}</p>
+                      <p className="text-[13px] text-[#6B7280]">{formatBytes(file.size)}</p>
                     </div>
                     <button
                       type="button"
-                      className="text-xs text-[#B42318] hover:underline"
-                      onClick={() =>
-                        setSelected((prev) => prev.filter((_, i) => i !== index))
-                      }
+                      className="text-[13px] text-[#B42318] hover:underline"
+                      onClick={() => setSelected((prev) => prev.filter((_, i) => i !== index))}
                       disabled={isUploading}
                     >
                       Quitar
@@ -322,10 +296,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
               <Button variant="outline" onClick={onClose} disabled={isUploading}>
                 Cancelar
               </Button>
-              <Button
-                onClick={handleStart}
-                disabled={selected.length === 0 || isUploading}
-              >
+              <Button onClick={handleStart} disabled={selected.length === 0 || isUploading}>
                 {isUploading ? "Subiendo..." : `Cargar ${selected.length || ""} archivo(s)`}
               </Button>
             </div>
@@ -350,20 +321,21 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
             )}
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Tag color="blue">Recibidos {batch?.received_count ?? 0}/{summary.total}</Tag>
+              <Tag color="blue">
+                Recibidos {batch?.received_count ?? 0}/{summary.total}
+              </Tag>
               <Tag color="success">Exitosos {summary.ok}</Tag>
               <Tag color={summary.ko > 0 ? "error" : "default"}>Error {summary.ko}</Tag>
             </div>
 
-            {(batch?.status === "uploading" || localOnlyItems.length > 0) &&
-              !isUploading && (
-                <Alert
-                  type="warning"
-                  showIcon
-                  message="El cargue quedo incompleto"
-                  description="Faltan archivos por recibir. Reintenta los archivos marcados; si cierras ahora, el auxiliar se libera cuando expire el lote (15 min)."
-                />
-              )}
+            {(batch?.status === "uploading" || localOnlyItems.length > 0) && !isUploading && (
+              <Alert
+                type="warning"
+                showIcon
+                message="El cargue quedo incompleto"
+                description="Faltan archivos por recibir. Reintenta los archivos marcados; si cierras ahora, el auxiliar se libera cuando expire el lote (15 min)."
+              />
+            )}
 
             {batch?.status === "completed" && (
               <Alert
@@ -406,7 +378,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                         <p className="truncate text-sm text-[#141414]">
                           {file.slot_index}. {file.original_filename}
                         </p>
-                        <p className="truncate text-xs text-[#6B7280]">
+                        <p className="truncate text-[13px] text-[#6B7280]">
                           Remoto: {file.remote_filename}
                         </p>
                       </div>
@@ -415,7 +387,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                         {file.status === "error" && (
                           <button
                             type="button"
-                            className="flex items-center gap-1 text-xs text-[#175CD3] hover:underline"
+                            className="flex items-center gap-1 text-[13px] text-[#175CD3] hover:underline"
                             onClick={() => handleRetryDelivered(file)}
                           >
                             <ArrowsClockwise size={14} /> Reintentar
@@ -424,7 +396,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                       </div>
                     </div>
                     {file.error_message && (
-                      <p className="text-xs text-[#B42318]">{file.error_message}</p>
+                      <p className="text-[13px] text-[#B42318]">{file.error_message}</p>
                     )}
                   </div>
                 );
@@ -440,7 +412,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                       <p className="truncate text-sm text-[#141414]">
                         {item.slotIndex}. {item.file.name}
                       </p>
-                      <p className="text-xs text-[#6B7280]">
+                      <p className="text-[13px] text-[#6B7280]">
                         {item.remoteFilename
                           ? `Remoto: ${item.remoteFilename}`
                           : "Sin nombre remoto asignado"}
@@ -453,7 +425,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                       {item.status === "error" && (
                         <button
                           type="button"
-                          className="flex items-center gap-1 text-xs text-[#175CD3] hover:underline"
+                          className="flex items-center gap-1 text-[13px] text-[#175CD3] hover:underline"
                           onClick={() => handleRetryItem(item)}
                         >
                           <ArrowsClockwise size={14} /> Reintentar
@@ -461,9 +433,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                       )}
                     </div>
                   </div>
-                  {item.error && (
-                    <p className="text-xs text-[#B42318]">{item.error}</p>
-                  )}
+                  {item.error && <p className="text-[13px] text-[#B42318]">{item.error}</p>}
                 </div>
               ))}
             </div>
@@ -471,9 +441,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
             {(isUploading || (batch && !isTerminal)) && (
               <div className="flex items-center gap-2 text-sm text-[#6B7280]">
                 <ProfitLoader size="small" />
-                {isUploading
-                  ? "Subiendo archivos..."
-                  : "Convirtiendo y entregando al SFTP..."}
+                {isUploading ? "Subiendo archivos..." : "Convirtiendo y entregando al SFTP..."}
               </div>
             )}
 

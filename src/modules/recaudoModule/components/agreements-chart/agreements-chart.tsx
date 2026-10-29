@@ -73,7 +73,7 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
   // El corte del mes en curso; en un mes cerrado coincide con el último día y no se marca.
   const iToday = period.open ? period.cutoffDay - 1 : -1;
   const barW = Math.max(2, bw * 0.62);
-  const every = bw >= 15 ? 1 : 2;
+  const every = bw >= 18 ? 1 : 2;
   const labelY = M.t + ih + 13;
   const lineX = (i: number) => M.l + (i + 1) * bw;
 
@@ -310,7 +310,7 @@ export default function AgreementsChart({ data }: { data: ICollectionTower }) {
         </TowerPopover>
       }
     >
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-2.5 text-[10.5px] text-foreground/80">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-2.5 text-[13px] text-foreground/80">
         {agreementStatuses.map((s) => (
           <LegendItem key={s.key} mark={<Swatch color={s.color} />} label={s.label} />
         ))}

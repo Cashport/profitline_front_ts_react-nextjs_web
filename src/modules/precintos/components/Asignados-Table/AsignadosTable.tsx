@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 
 interface AsignadosTableProps {
   data?: any[]; 
@@ -50,39 +51,36 @@ export const AsignadosTable: React.FC<AsignadosTableProps> = ({
     );
   };
 
-  const renderSortIcon = (field: string) => {
-    if (sortField === field) {
-      return <span className="text-[10px] text-gray-900 font-bold ml-1">{sortOrder === 'ASC' ? '▲' : '▼'}</span>;
-    }
-    return <span className="text-[10px] text-gray-400 ml-1">▲▼</span>;
-  };
+  const renderSortIcon = (field: string) => (
+    <SortArrows dir={sortField === field ? (sortOrder === 'ASC' ? 'asc' : 'desc') : null} />
+  );
 
   return (
     <div className="w-full bg-white overflow-visible">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
+        <table className="w-full text-left text-[13px] border-collapse">
           <thead>
-            <tr className="border-b border-gray-100 text-gray-800 font-bold select-none">
-              <th className="py-3 px-4 w-10">
+            <tr className="select-none">
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink">
                 <input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" />
               </th>
               
               {/* 👇 COLUMNA ORDENABLE: DESDE 👇 */}
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('IdPrecinto')}>
-                <div className="flex items-center">Desde {renderSortIcon('IdPrecinto')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('IdPrecinto')}>
+                <span className="inline-flex items-center gap-1">Desde{renderSortIcon('IdPrecinto')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold">Hasta</th>
-              <th className="py-3 px-4 font-bold">Cantidad</th>
-              <th className="py-3 px-4 font-bold">Ejecutivo</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Hasta</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Cantidad</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Ejecutivo</th>
               
               {/* 👇 COLUMNA ORDENABLE: ASIGNADO (Fecha) 👇 */}
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('FechaRegistro')}>
-                <div className="flex items-center">Asignado {renderSortIcon('FechaRegistro')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('FechaRegistro')}>
+                <span className="inline-flex items-center gap-1">Asignado{renderSortIcon('FechaRegistro')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold">Asignado por</th>
-              <th className="py-3 px-4 w-12 text-right"></th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Asignado por</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-12 text-right text-[13.5px] font-semibold text-cp-ink"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 text-gray-700">
@@ -119,7 +117,7 @@ export const AsignadosTable: React.FC<AsignadosTableProps> = ({
                               setActiveMenuId(null); 
                               if (onMoverEjecutivo) onMoverEjecutivo(getCodigosDelItem(), item.UsuarioAsigno); 
                             }} 
-                            className="w-full px-4 py-2 text-xs font-semibold text-gray-800 hover:bg-gray-50 text-left transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[13px] font-semibold text-gray-800 hover:bg-gray-50 text-left transition-colors cursor-pointer"
                           >
                             Cambiar de ejecutivo {item.Cantidad > 1 ? `(${item.Cantidad})` : ''}
                           </button>
@@ -130,7 +128,7 @@ export const AsignadosTable: React.FC<AsignadosTableProps> = ({
                               setActiveMenuId(null); 
                               if (onDevolverBodega) onDevolverBodega(getCodigosDelItem()); 
                             }} 
-                            className="w-full px-4 py-2 text-xs font-semibold text-gray-800 hover:bg-gray-50 text-left transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[13px] font-semibold text-gray-800 hover:bg-gray-50 text-left transition-colors cursor-pointer"
                           >
                             Devolver a bodega {item.Cantidad > 1 ? `(${item.Cantidad})` : ''}
                           </button>
@@ -141,7 +139,7 @@ export const AsignadosTable: React.FC<AsignadosTableProps> = ({
                               setActiveMenuId(null); 
                               if (onAnularPrecintos) onAnularPrecintos(getCodigosDelItem()); 
                             }} 
-                            className="w-full px-4 py-2 text-xs font-semibold text-pink-600 hover:bg-pink-50/50 text-left transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[13px] font-semibold text-pink-600 hover:bg-pink-50/50 text-left transition-colors cursor-pointer"
                           >
                             Anular precinto {item.Cantidad > 1 ? `(${item.Cantidad})` : ''}
                           </button>

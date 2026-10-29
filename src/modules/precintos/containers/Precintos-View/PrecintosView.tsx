@@ -174,7 +174,7 @@ export const PrecintosView: React.FC = () => {
     try {
       setIsLoadingEjecutivos(true);
       const data = await getEjecutivosStats();
-      let sortedData = (data.data || data);
+      const sortedData = (data.data || data);
 
       if (sortField && sortOrder) {
         sortedData.sort((a: any, b: any) => {
@@ -394,7 +394,7 @@ export const PrecintosView: React.FC = () => {
 
             {/* Generar Acción */}
             <button onClick={() => setIsActionOpen(true)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-800 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer shadow-2xs">
-              <span className="text-[11px] tracking-widest font-extrabold">•••</span><span>Generar acción</span>
+              <span className="text-[13px] tracking-widest font-extrabold">•••</span><span>Generar acción</span>
             </button>
           </div>
         </div>

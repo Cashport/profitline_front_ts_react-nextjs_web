@@ -28,7 +28,7 @@ export default function ReportCard({ report, isNew }: ReportCardProps) {
           </span>
           {isNew && <NewReportBadge />}
         </div>
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-muted-foreground">
           <span>{report.report_type_name}</span>
           <span>{fmtReportDate(report.created_at)}</span>
         </div>

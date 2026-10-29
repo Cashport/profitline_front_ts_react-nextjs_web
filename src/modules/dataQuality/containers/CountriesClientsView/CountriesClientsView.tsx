@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
 import { Button as AntButton, Modal, message } from "antd";
@@ -17,17 +17,13 @@ import {
   uploadPacksFile
 } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
-import {
-  checkUserComponentPermission,
-  hasDataQualityManagementPermission
-} from "@/utils/utils";
+import { checkUserComponentPermission, hasDataQualityManagementPermission } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useCountriesClients } from "../../hooks/useCountriesClients";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
-import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
 import { DataQualityGeneralFilter } from "../../components/general-filter";
@@ -53,10 +49,6 @@ export default function CountriesClientsView() {
   );
   const height = useScreenHeight();
   const width = useScreenWidth();
-
-  const handleGoBack = () => {
-    router.push("/data-quality");
-  };
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
@@ -246,7 +238,9 @@ export default function CountriesClientsView() {
       closeAllModals();
       mutate();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al cargar el archivo de packs.");
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo de packs."
+      );
     } finally {
       setIsUploadPacksLoading(false);
     }
@@ -255,111 +249,100 @@ export default function CountriesClientsView() {
   const countryName = clientsData.length > 0 ? clientsData[0].country_name : "";
 
   return (
-    <div className="flex flex-col gap-4">
-      <Header title={countryName} />
+    <div className="cp-page">
+      <Header title={countryName} back="/data-quality" />
 
       {/* Main Content */}
-      <Card className="border-none p-0">
-        <CardContent className="p-6">
-          {/* Filter Bar */}
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-700 hover:text-gray-900"
-                onClick={handleGoBack}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                <span className="hidden min-[900px]:inline">Inicio</span>
-              </Button>
-              {/* Search Input */}
-              <div className="flex-1 max-w-sm">
-                <UiSearchInput
-                  placeholder="Buscar cliente..."
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <AntButton
-                className="flex items-center gap-2 px-4 !h-[48px] !bg-[#f7f7f7] !border-none rounded-lg !font-semibold text-base cursor-pointer hover:!border-[#dddddd]"
-                size="large"
-                icon={<DotsThree size={"1.5rem"} />}
-                style={{ display: canManage || canDownloadCatalog ? undefined : "none" }}
-                onClick={() => setWhichModalIsOpen(1)}
-              >
-                {width > 1100 && <span className="hidden min-[1100px]:inline">Generar acción</span>}
-              </AntButton>
-
-              <DataQualityGeneralFilter
-                filterOptions={filters}
-                activeFilters={activeFilters}
-                onChange={(key, val) =>
-                  setActiveFilters((prev) => ({ ...prev, [key]: val ?? "all" }))
-                }
+      <div className="cp-card px-[18px] py-[14px]">
+        {/* Filter Bar */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            {/* Search Input */}
+            <div className="flex-1 max-w-sm">
+              <UiSearchInput
+                placeholder="Buscar cliente..."
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <AntButton
+              className="flex items-center gap-2 px-4 !h-[var(--control-h)] !bg-[#f7f7f7] !border-none rounded-lg !font-semibold !text-sm cursor-pointer hover:!border-[#dddddd]"
+              size="large"
+              icon={<DotsThree size={18} weight="bold" />}
+              style={{ display: canManage || canDownloadCatalog ? undefined : "none" }}
+              onClick={() => setWhichModalIsOpen(1)}
+            >
+              {width > 1100 && <span className="hidden min-[1100px]:inline">Generar acción</span>}
+            </AntButton>
 
-            <div className="flex items-center gap-4">
-              {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
-                <Link
-                  href={`/data-quality/alerts?countryId=${countryId}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <Button variant="outline" className="h-12">
-                    <BellSimpleRinging size={18} />
-                    <span className="hidden min-[1100px]:inline">Alertas</span>
-                  </Button>
-                </Link>
-              )}
-              {hasDataQualityManagementPermission(selectedProject) && (
-                <Link
-                  href={`/data-quality/references?scope=country&id_country=${countryId}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <Button variant="outline" className="h-12">
-                    Referencias
-                  </Button>
-                </Link>
-              )}
-              {canManage && (
-                <Button
-                  className="h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-                  onClick={() => setWhichModalIsOpen(3)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear cliente
-                </Button>
-              )}
-            </div>
+            <DataQualityGeneralFilter
+              filterOptions={filters}
+              activeFilters={activeFilters}
+              onChange={(key, val) =>
+                setActiveFilters((prev) => ({ ...prev, [key]: val ?? "all" }))
+              }
+            />
           </div>
 
-          {/* Clients Table */}
-          {error ? (
-            <div className="bg-white rounded-lg p-6 text-center">
-              <p className="text-red-600">
-                {error instanceof Error
-                  ? error.message
-                  : "No se pudo cargar la información de este país."}
-              </p>
-            </div>
-          ) : (
-            <CountriesClientsTable
-              data={clientsData}
-              loading={isLoading}
-              pagination={{ ...pagination, total }}
-              onPaginationChange={(page, pageSize) => {
-                setPagination((prev) => ({
-                  ...prev,
-                  current: page,
-                  pageSize: pageSize || prev.pageSize
-                }));
-              }}
-              scrollHeight={height - 325}
-              onRowClick={handleRowClick}
-            />
-          )}
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-4">
+            {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+              <Link
+                href={`/data-quality/alerts?countryId=${countryId}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Button variant="outline" className="h-[var(--control-h)]">
+                  <BellSimpleRinging size={18} />
+                  <span className="hidden min-[1100px]:inline">Alertas</span>
+                </Button>
+              </Link>
+            )}
+            {hasDataQualityManagementPermission(selectedProject) && (
+              <Link
+                href={`/data-quality/references?scope=country&id_country=${countryId}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Button variant="outline" className="h-[var(--control-h)]">
+                  Referencias
+                </Button>
+              </Link>
+            )}
+            {canManage && (
+              <Button
+                className="h-[var(--control-h)] bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+                onClick={() => setWhichModalIsOpen(3)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Crear cliente
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Clients Table */}
+        {error ? (
+          <div className="bg-white rounded-lg p-6 text-center">
+            <p className="text-red-600">
+              {error instanceof Error
+                ? error.message
+                : "No se pudo cargar la información de este país."}
+            </p>
+          </div>
+        ) : (
+          <CountriesClientsTable
+            data={clientsData}
+            loading={isLoading}
+            pagination={{ ...pagination, total }}
+            onPaginationChange={(page, pageSize) => {
+              setPagination((prev) => ({
+                ...prev,
+                current: page,
+                pageSize: pageSize || prev.pageSize
+              }));
+            }}
+            scrollHeight={height - 325}
+            onRowClick={handleRowClick}
+          />
+        )}
+      </div>
       <CountryClientsActionsModal
         isOpen={whichModalIsOpen === 1}
         onClose={closeAllModals}
@@ -455,11 +438,11 @@ export default function CountriesClientsView() {
                 <p className="mb-2 text-sm font-semibold text-red-600">Errores por fila</p>
                 <div className="max-h-64 overflow-auto rounded border border-gray-200">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="px-3 py-2">Fila</th>
-                        <th className="px-3 py-2">Cod_Iqvia</th>
-                        <th className="px-3 py-2">Motivo</th>
+                    <thead>
+                      <tr className="border-b border-cp-line bg-cp-surface">
+                        <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Fila</th>
+                        <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Cod_Iqvia</th>
+                        <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Motivo</th>
                       </tr>
                     </thead>
                     <tbody>

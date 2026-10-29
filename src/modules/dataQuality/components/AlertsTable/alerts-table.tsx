@@ -44,7 +44,7 @@ const columns: TableProps<IAlert>["columns"] = [
     title: "País",
     dataIndex: "country_name",
     render: (text: string) => (
-      <Badge variant="outline" className="text-xs">
+      <Badge variant="outline" className="text-[13px]">
         {text}
       </Badge>
     )
@@ -70,7 +70,7 @@ const columns: TableProps<IAlert>["columns"] = [
       periodicity?.length ? (
         <div className="flex flex-wrap gap-1">
           {periodicity.map((item) => (
-            <Badge key={item} variant="outline" className="text-xs">
+            <Badge key={item} variant="outline" className="text-[13px]">
               {item}
             </Badge>
           ))}
@@ -121,7 +121,7 @@ const columns: TableProps<IAlert>["columns"] = [
             <Button
               variant="outline"
               size="sm"
-              className="text-xs bg-transparent"
+              className="text-[13px] bg-transparent"
               title={isCatalog ? "Ir al catálogo del cliente" : "Ir al detalle del cliente"}
             >
               <ExternalLink className="w-3 h-3 mr-1" />

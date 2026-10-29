@@ -71,7 +71,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
                     <p style={{ fontSize: 16, fontWeight: 400 }}>
                       {doc.name || "Seleccionar archivo"}
                     </p>
-                    <p style={{ fontSize: 10, fontWeight: 300 }}>{doc.uploadedAt}</p>
+                    <p style={{ fontSize: 13, fontWeight: 300 }}>{doc.uploadedAt}</p>
                   </Flex>
                   <Button
                     type="text"
@@ -100,7 +100,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
                   <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
                     <FileArrowUp size={16} />
                     <p style={{ fontSize: 16, fontWeight: 400 }}>Seleccionar archivo</p>
-                    <p style={{ fontSize: 10, fontWeight: 300 }}>
+                    <p style={{ fontSize: 13, fontWeight: 300 }}>
                       PDF, Word, PNG. (Tamaño max 30MB)
                     </p>
                   </Flex>

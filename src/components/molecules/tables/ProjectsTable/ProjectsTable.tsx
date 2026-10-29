@@ -202,7 +202,7 @@ export const ProjectTable = () => {
   return (
     <main className="mainProjectsTable">
       {contextHolder}
-      <Flex justify="space-between" className="mainProjectsTable_header">
+      <Flex justify="space-between" align="center" className="mainProjectsTable_header">
         <Flex gap={"10px"}>
           <UiSearchInput
             className="search"
@@ -218,7 +218,7 @@ export const ProjectTable = () => {
         </Flex>
         <Button type="primary" className="buttonNewProject" size="large" href="/proyectos/new">
           Nuevo Proyecto
-          {<Plus weight="bold" size={14} />}
+          {<Plus weight="bold" size={18} />}
         </Button>
       </Flex>
       <Table

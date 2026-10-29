@@ -15,13 +15,14 @@ export const DotsDropdown = ({
   items,
   customButtonStyle,
   customIcon,
-  dotsSize = "1.8rem"
+  dotsSize = "18px"
 }: DotsDropdownProps) => {
   const customDropdown = (menu: ReactNode) => <div className="dropdown">{menu}</div>;
 
+  // Mismo alto que el buscador de la barra (DESIGN.md §8).
   const buttonStyle = {
-    height: "48px",
-    width: "48px"
+    height: "var(--control-h)",
+    width: "var(--control-h)"
   };
 
   return (
@@ -34,7 +35,6 @@ export const DotsDropdown = ({
       <Button
         style={customButtonStyle ? customButtonStyle : buttonStyle}
         className="dotsButton"
-        size="large"
         icon={customIcon ? customIcon : <DotsThree size={dotsSize} />}
       />
     </Dropdown>

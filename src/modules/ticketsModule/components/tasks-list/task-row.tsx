@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp } from "lucide-react";
-
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { cn } from "@/utils/utils";
 import type { ITaskConfig, ITaskFieldConfig, ITicket } from "@/types/tickets/ITickets";
 import { TASK_COLUMN_LAYOUT } from "../../constants";
@@ -19,7 +18,7 @@ interface TaskHeaderRowProps {
 export function TaskHeaderRow({ columns, grid, sortBy, sortDir, onSort }: TaskHeaderRowProps) {
   return (
     <div
-      className="sticky top-[var(--header-h)] z-10 grid h-[var(--table-head-h)] items-center gap-3 rounded-t-[var(--card-radius)] border-b border-cp-line bg-cp-surface px-4 text-[12px] font-semibold text-cp-ink"
+      className="sticky top-[var(--header-h)] z-10 grid h-[var(--table-head-h)] items-center gap-3 rounded-t-[var(--card-radius)] border-b border-cp-line bg-cp-surface px-4 text-[13.5px] font-semibold text-cp-ink"
       style={{ gridTemplateColumns: grid }}
     >
       {columns.map((c) => {
@@ -44,13 +43,7 @@ export function TaskHeaderRow({ columns, grid, sortBy, sortDir, onSort }: TaskHe
             )}
           >
             <span className="truncate">{c.column_label}</span>
-            {active ? (
-              sortDir === "asc" ? (
-                <ArrowUp className="h-3 w-3 shrink-0" />
-              ) : (
-                <ArrowDown className="h-3 w-3 shrink-0" />
-              )
-            ) : null}
+            <SortArrows dir={active ? sortDir : null} />
           </button>
         );
       })}

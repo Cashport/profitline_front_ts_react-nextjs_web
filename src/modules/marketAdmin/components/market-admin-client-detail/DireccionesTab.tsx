@@ -58,7 +58,7 @@ export default function DireccionesTab({
         <div className="flex items-center gap-2">
           <span className="text-sm text-[#141414]">{v}</span>
           {d.is_principal === 1 && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#F0F7E1] text-[#5A7A00]">
+            <span className="text-[13px] font-semibold px-2 py-0.5 rounded-full bg-[#F0F7E1] text-[#5A7A00]">
               Principal
             </span>
           )}
@@ -122,9 +122,9 @@ export default function DireccionesTab({
         {canCreate && (
           <button
             onClick={() => setModal({ mode: "new" })}
-            className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
           >
-            <Plus size={14} /> Nueva dirección
+            <Plus size={18} /> Nueva dirección
           </button>
         )}
       </div>

@@ -1,6 +1,7 @@
 @import "@styles/variables.scss";
 
-// Riel abierto: al pasar el mouse / foco por teclado sobre el panel, o fijado (sidebar.scss).
+// Diseño "Menu Lateral Cashport" 6e. Riel abierto: al pasar el mouse / foco por teclado
+// sobre el panel, o fijado (sidebar.scss).
 @mixin railOpen {
     :global(.railPanel:hover) &,
     :global(.railPanel:has(:focus-visible)) &,
@@ -9,31 +10,23 @@
     }
 }
 
-// Cerrado, los ítems miden lo mismo que el cuadro del ícono y quedan centrados en el riel;
-// abierto, el mismo padding deja el ícono en su sitio y el ítem crece a la derecha.
-$item-inset: calc((var(--rail-w) - 40px) / 2);
-
 .containerButtons {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
     width: 100%;
-    padding: 0 $item-inset;
-    row-gap: 2px;
-    flex: 1 1 auto; // take the max height available within the group
-    min-height: 0; // allow shrinking below content so overflow can scroll
-    overflow-y: auto; // scroll the buttons when the viewport is too short
+    flex: 1 1 auto; // toma el alto disponible del grupo
+    min-height: 0; // puede encogerse para que la lista haga scroll en pantallas bajas
+    overflow-y: auto;
     overflow-x: hidden;
 
-    // no scrollbar: the edge fade below is the scroll affordance instead
+    // sin barra: el desvanecido del borde indica que hay más
     scrollbar-width: none;
     &::-webkit-scrollbar {
         display: none;
     }
 
-    // Fade only the edge that has content hidden past it (classes driven by useScrollFade).
-    // mask-image rather than a gradient overlay, so it needs no colour and works unchanged
-    // over both the light and the dark (.dark) sidebar background.
+    // Desvanece solo el borde con contenido oculto (clases de useScrollFade). mask-image en vez
+    // de un degradado encima: no necesita color y sirve igual en claro y oscuro.
     --fade-top: 0px;
     --fade-bottom: 0px;
     mask-image: linear-gradient(
@@ -58,16 +51,22 @@ $item-inset: calc((var(--rail-w) - 40px) / 2);
         justify-content: center;
         gap: 4px;
         padding: 8px;
-        flex: 0 0 auto; // reset: mobile dropdown must not grow/scroll vertically
+        flex: 0 0 auto; // el desplegable móvil no crece ni hace scroll
         overflow: visible;
-        mask-image: none; // a mask clips to the element box, which would cut off the overflowing dropdown
+        mask-image: none; // la máscara recortaría el desplegable
 
-        .groupHead {
+        .group {
+            display: contents;
+            border: 0;
+        }
+
+        .groupTitle {
             display: none;
         }
 
         .railItem {
             width: auto;
+            padding-right: 10px;
         }
 
         .railLabel {
@@ -76,80 +75,80 @@ $item-inset: calc((var(--rail-w) - 40px) / 2);
     }
 }
 
-// Separador entre grupos: cerrado es una línea; abierto, la línea se oculta y el título
-// hace de separador. El título ocupa su espacio aunque esté oculto, así nada salta al abrir.
-.groupHead {
-    flex-shrink: 0;
+// Un bloque por grupo: 3px arriba/abajo, 1px entre ítems y línea #ececec entre grupos
+// (visible abierto y cerrado).
+.group {
     display: flex;
-    align-items: flex-end;
-    height: 28px;
-    margin-top: 6px;
-    padding: 0 0 4px 8px;
-    border-top: 1px solid $cp-line;
-    transition: border-color 0.15s ease;
+    flex-direction: column;
+    gap: 1px;
+    flex-shrink: 0;
+    padding: 3px 0;
 
-    @include railOpen {
-        border-top-color: transparent;
-    }
-
-    &.first {
-        height: 24px;
-        margin-top: 0;
-        border-top: 0;
-    }
-
-    .groupTitle {
-        overflow: hidden;
-        white-space: nowrap;
-        font-family: $font-poppins, sans-serif;
-        font-size: 12px;
-        font-weight: 600;
-        color: $cp-ink-4;
-        opacity: 0;
-        transition: opacity 0.15s ease;
-
-        @include railOpen {
-            opacity: 1;
-        }
+    & + & {
+        border-top: 1px solid $cp-line;
     }
 }
 
-// docs/DESIGN.md §3: ícono 18 visible en cuadro 36×30 radio 9 (px CSS ÷ zoom 0.75).
+// El título ocupa su alto aunque esté oculto: al abrir no salta nada.
+.groupTitle {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    padding-left: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: $font-poppins, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: $cp-ink-3;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+
+    @include railOpen {
+        opacity: 1;
+    }
+}
+
+// Ítem: 34px de alto, radio 10, ícono 19px a 10px del borde y nombre a 12px del ícono.
+// Cerrado mide 40px (solo el ícono, centrado en el riel); abierto ocupa todo el ancho.
 .railItem {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 12px;
     flex-shrink: 0;
-    width: 100%;
-    height: 36px;
-    padding: 0;
+    width: 40px;
+    height: 34px;
+    padding: 0 0 0 10px;
     border: 0;
     border-radius: 10px;
     font-family: $font-poppins, sans-serif; // <button> no hereda la fuente
+    font-size: 13.5px;
+    font-weight: 400;
     background: transparent;
     cursor: pointer;
     color: $cp-ink;
     text-decoration: none;
+    white-space: nowrap;
     overflow: hidden;
-    transition: background-color 0.15s ease;
+    transition:
+        width 0.18s ease,
+        background-color 0.15s ease;
+
+    @include railOpen {
+        width: 100%;
+    }
 
     .railIcon {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        width: 40px;
-        height: 36px;
+        flex: none;
     }
 
     .railLabel {
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 14px;
-        color: $cp-ink-2;
+        color: inherit;
         opacity: 0;
-        transition: opacity 0.15s ease;
+        transition: opacity 0.12s ease;
 
         @include railOpen {
             opacity: 1;
@@ -159,29 +158,17 @@ $item-inset: calc((var(--rail-w) - 40px) / 2);
     // Es un <a>: sin el color explícito hereda el azul de enlace de AntD al pasar el mouse.
     &:hover {
         color: $cp-ink;
-        background-color: $cp-muted;
-
-        .railLabel {
-            color: $cp-ink;
-        }
+        background-color: #f4f4f4;
     }
 
     &.active {
         background-color: $cp-lime;
         color: $cp-ink;
-
-        .railLabel {
-            font-weight: 600;
-            color: $cp-ink;
-        }
+        font-weight: 600;
     }
 
     :global(.dark) & {
         color: rgb(var(--sidebar-foreground));
-
-        .railLabel {
-            color: rgb(var(--sidebar-foreground));
-        }
 
         &:hover {
             background-color: rgb(var(--sidebar-accent));
@@ -189,10 +176,11 @@ $item-inset: calc((var(--rail-w) - 40px) / 2);
 
         &.active {
             color: $cp-ink;
-
-            .railLabel {
-                color: $cp-ink;
-            }
+            background-color: $cp-lime;
         }
     }
+}
+
+:global(.dark) .group + .group {
+    border-top-color: rgb(var(--sidebar-border));
 }

@@ -67,12 +67,12 @@ export const ExecutiveFilter: React.FC<ExecutiveFilterProps> = ({
         />
       </div>
 
-      <div className="bg-gray-100/70 py-2.5 px-3.5 rounded-xl flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wide">
-        <span>{filteredExecs.length} RESULTADOS</span>
+      <div className="bg-gray-100/70 py-2.5 px-3.5 rounded-xl flex items-center justify-between text-[13px] font-bold text-gray-500">
+        <span>{filteredExecs.length} resultados</span>
         <button
           type="button"
           onClick={handleSelectAll}
-          className="text-[#9ec400] hover:text-lime-700 font-bold transition-colors cursor-pointer capitalize text-xs"
+          className="text-[#9ec400] hover:text-lime-700 font-bold transition-colors cursor-pointer text-[13px]"
         >
           {isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}
         </button>

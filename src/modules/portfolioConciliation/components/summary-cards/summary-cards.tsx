@@ -28,11 +28,11 @@ const SummaryCards = ({ summary, selected, onSelect }: Props) => {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2">
       <button type="button" onClick={() => onSelect(null)} className={cardClass(!selected)}>
-        <span className="text-xs text-[#444]">Todos los documentos</span>
+        <span className="text-[13px] text-[#444]">Todos los documentos</span>
         <span className="text-lg font-semibold tabular-nums">
           {formatNumber(summary.total.count)}
         </span>
-        <span className="max-w-full truncate text-[11px] text-[#8a8a8a]">
+        <span className="max-w-full truncate text-[13px] text-[#8a8a8a]">
           Cliente {money(summary.total.client_amount)}
         </span>
       </button>
@@ -47,7 +47,7 @@ const SummaryCards = ({ summary, selected, onSelect }: Props) => {
             onClick={() => onSelect(selected === status ? null : status)}
             className={cardClass(selected === status)}
           >
-            <span className="flex items-center gap-1.5 whitespace-nowrap text-xs text-[#444]">
+            <span className="flex items-center gap-1.5 whitespace-nowrap text-[13px] text-[#444]">
               <span
                 className="h-[7px] w-[7px] rounded-full"
                 style={{ backgroundColor: meta.dot }}
@@ -55,7 +55,7 @@ const SummaryCards = ({ summary, selected, onSelect }: Props) => {
               {meta.plural}
             </span>
             <span className="text-lg font-semibold tabular-nums">{formatNumber(totals.count)}</span>
-            <span className="max-w-full truncate text-[11px] text-[#8a8a8a]">
+            <span className="max-w-full truncate text-[13px] text-[#8a8a8a]">
               {status === "NO_EXISTE"
                 ? `Cliente ${money(totals.client_amount)} · ${meta.hint.toLowerCase()}`
                 : `Cliente ${money(totals.client_amount)} · Cashport ${money(totals.cashport_amount)}`}

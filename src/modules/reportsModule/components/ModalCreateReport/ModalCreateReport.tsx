@@ -15,7 +15,7 @@ import { nameFromFile } from "../../utils/reports-format";
 
 const { Title } = Typography;
 
-const LABEL_CLASS = "text-xs font-semibold uppercase tracking-wide text-gray-500";
+const LABEL_CLASS = "text-[13px] font-semibold text-gray-500";
 
 interface ModalCreateReportProps {
   isOpen: boolean;
@@ -125,7 +125,7 @@ export function ModalCreateReport({
             <button
               type="button"
               onClick={onCreateType}
-              className="text-xs font-medium text-[#1677ff] hover:underline"
+              className="text-[13px] font-medium text-[#1677ff] hover:underline"
             >
               + Crear tipo
             </button>
@@ -169,7 +169,7 @@ export function ModalCreateReport({
               subtitle={`Archivo .html generado en Claude · máx. ${REPORT_FILE_MAX_MB} MB`}
             />
           )}
-          {fileError && <p className="mt-2 text-xs text-red-500">{fileError}</p>}
+          {fileError && <p className="mt-2 text-[13px] text-red-500">{fileError}</p>}
         </div>
       </Flex>
     </Modal>

@@ -94,11 +94,11 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
             text="Stock insuficiente"
             colorTag="#ff350d"
             colorText="#ffffff"
-            fontSize="0.75rem"
+            fontSize="13px"
           />
         )}
         {isLocked && (
-          <SimpleTag text="Auto" colorTag="#CBE71E" colorText="#000000" fontSize="0.75rem" />
+          <SimpleTag text="Auto" colorTag="#CBE71E" colorText="#000000" fontSize="13px" />
         )}
       </h4>
 

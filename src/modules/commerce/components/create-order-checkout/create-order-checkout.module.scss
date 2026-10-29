@@ -48,14 +48,14 @@
                 grid-column: 1 / span 2;
 
                 &__label {
-                    font-size: 0.75rem;
+                    font-size: 13px;
                     font-weight: 600;
                     color: $gray;
                     margin-bottom: 0.25rem;
                 }
 
                 &__hint {
-                    font-size: 0.75rem;
+                    font-size: 13px;
                     color: $gray;
                     margin-top: 0.25rem;
                 }
@@ -117,7 +117,7 @@
 
     .inputLabel {
         color: #909090;
-        font-size: 0.75rem;
+        font-size: 13px;
         font-style: normal;
         font-weight: 600;
         line-height: normal;

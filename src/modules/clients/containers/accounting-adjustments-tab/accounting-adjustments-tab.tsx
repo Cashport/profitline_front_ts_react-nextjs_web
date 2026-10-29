@@ -160,9 +160,10 @@ const AccountingAdjustmentsTab = () => {
       <div className="accountingAdjustmentsTab">
         <Flex
           justify="space-between"
+          align="center"
           className="accountingAdjustmentsTab__header clientStickyHeader"
         >
-          <Flex gap={"0.5rem"}>
+          <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar"
@@ -172,7 +173,7 @@ const AccountingAdjustmentsTab = () => {
             <Button
               className="button__actions"
               size="large"
-              icon={<DotsThree size={"1.5rem"} />}
+              icon={<DotsThree size={18} />}
               disabled={false}
               onClick={() => setIsModalOpen({ selected: 1 })} // Open modal for actions
             >

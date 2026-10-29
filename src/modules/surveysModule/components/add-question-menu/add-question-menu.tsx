@@ -42,7 +42,7 @@ export default function AddQuestionMenu({
 
       {open && (
         <div className="rounded-xl bg-card p-3 shadow-sm">
-          <p className="mb-2 text-xs text-muted-foreground">
+          <p className="mb-2 text-[13px] text-muted-foreground">
             {selectedNumber
               ? `Se agrega debajo de la pregunta ${selectedNumber}`
               : "Se agrega al final"}
@@ -65,7 +65,7 @@ export default function AddQuestionMenu({
                   </span>
                   <span className="min-w-0">
                     <span className="block font-medium">{label}</span>
-                    <span className="block truncate text-[11px] text-muted-foreground">{hint}</span>
+                    <span className="block truncate text-[13px] text-muted-foreground">{hint}</span>
                   </span>
                 </button>
               );
@@ -74,7 +74,7 @@ export default function AddQuestionMenu({
         </div>
       )}
 
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-[13px] text-muted-foreground">
         <span className="text-[#e0007a]">*</span> Obligatoria · arrastra{" "}
         <GripVertical className="inline h-3.5 w-3.5 align-text-bottom" /> para reordenar
       </p>

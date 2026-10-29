@@ -103,18 +103,22 @@ export const BanksRules = ({ onClickBack }: PropsBanksRules) => {
           Reglas de bancos
         </Button>
 
-        <PrincipalButton
-          onClick={handleCreateNewRule}
-          customStyles={{ marginLeft: "auto", height: "3rem" }}
-        >
-          Crear nueva regla <Bank size={16} />
-        </PrincipalButton>
+        {/* PrincipalButton ocupa el 100% del alto: el wrapper lo limita a --control-h */}
+        <div className={styles.ctaWrapper}>
+          <PrincipalButton onClick={handleCreateNewRule} customStyles={{ fontSize: 14 }}>
+            Crear nueva regla <Bank size={18} />
+          </PrincipalButton>
+        </div>
       </Flex>
 
       <div className={styles.tableHeaderButtons}>
         <UiSearchInput placeholder="Buscar" onChange={(e) => handleSearch(e.target.value)} />
         <FilterDiscounts />
-        <DotsDropdown items={items} />
+        <DotsDropdown
+          items={items}
+          dotsSize="18px"
+          customButtonStyle={{ height: "var(--control-h)", width: "var(--control-h)" }}
+        />
       </div>
 
       {isLoading ? (

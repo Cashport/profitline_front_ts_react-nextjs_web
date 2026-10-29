@@ -40,7 +40,7 @@ export default function EmailTemplateCard({
         </Text>
         <Tag
           color={isSelected ? undefined : "default"}
-          className={`shrink-0 text-[10px] !m-0 ${
+          className={`shrink-0 text-[13px] !m-0 ${
             isSelected ? "!bg-[#CBE71E] !text-black !border-[#CBE71E]" : "!text-[#a5a5a5]"
           }`}
         >
@@ -48,8 +48,8 @@ export default function EmailTemplateCard({
         </Tag>
       </div>
 
-      <Text type="secondary" className="text-xs block mb-2.5">
-        <Text strong className="text-xs">
+      <Text type="secondary" className="text-[13px] block mb-2.5">
+        <Text strong className="text-[13px]">
           Asunto:{" "}
         </Text>
         {template.subject}
@@ -61,7 +61,7 @@ export default function EmailTemplateCard({
             <Tag
               key={att.name}
               icon={<PaperclipIcon size={10} />}
-              className="!flex !items-center !gap-1 !text-[10px] !font-medium !text-black/70"
+              className="!flex !items-center !gap-1 !text-[13px] !font-medium !text-black/70"
             >
               {att.name}
             </Tag>

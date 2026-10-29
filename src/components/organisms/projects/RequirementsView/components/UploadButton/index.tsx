@@ -46,7 +46,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({
               <Title level={5} style={{ fontWeight: 400, marginBottom: 0 }}>
                 {file.name}
               </Title>
-              <Text type="secondary" style={{ fontSize: 10, fontWeight: 300 }}>
+              <Text type="secondary" style={{ fontSize: 13, fontWeight: 300 }}>
                 {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </Text>
             </Flex>

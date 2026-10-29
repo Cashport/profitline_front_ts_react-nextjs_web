@@ -133,7 +133,7 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-extrabold text-gray-900">Ingresar a bodega</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Registra precintos nuevos que llegan al inventario</p>
+              <p className="text-[13px] text-gray-400 mt-0.5">Registra precintos nuevos que llegan al inventario</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg font-bold p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
@@ -145,27 +145,27 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
         <div className="p-6 space-y-6">
           {/* 1. Precintos nuevos */}
           <div className="space-y-3">
-            <label className="block text-xs font-bold text-gray-900 uppercase tracking-wider">1. Precintos nuevos</label>
+            <label className="block text-[13px] font-bold text-gray-900">1. Precintos nuevos</label>
             
             <div className="inline-flex p-1 bg-gray-100/80 rounded-2xl gap-1">
-              <button type="button" onClick={() => setActiveTab('rango')} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'rango' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Rango</button>
-              <button type="button" onClick={() => setActiveTab('individual')} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'individual' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Individual / códigos</button>
+              <button type="button" onClick={() => setActiveTab('rango')} className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${activeTab === 'rango' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Rango</button>
+              <button type="button" onClick={() => setActiveTab('individual')} className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${activeTab === 'individual' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Individual / códigos</button>
             </div>
 
             {activeTab === 'rango' ? (
               <div className="grid grid-cols-2 gap-4 pt-1">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1.5">Desde</label>
+                  <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Desde</label>
                   <input type="text" placeholder="Ej. TS100" value={desde} onChange={(e) => setDesde(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-1 focus:ring-black" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1.5">Hasta</label>
+                  <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Hasta</label>
                   <input type="text" placeholder="Ej. TS109" value={hasta} onChange={(e) => setHasta(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-1 focus:ring-black" />
                 </div>
               </div>
             ) : (
               <div className="pt-1">
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Códigos (separados por coma o salto de línea)</label>
+                <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Códigos (separados por coma o salto de línea)</label>
                 <textarea rows={3} placeholder="Ej: TS100, TS102, 12003..." value={codigosIndividuales} onChange={(e) => setCodigosIndividuales(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-black resize-none" />
               </div>
             )}
@@ -173,21 +173,21 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
 
           {/* 2. Envío */}
           <div className="space-y-3 pt-2 border-t border-gray-100">
-            <label className="block text-xs font-bold text-gray-900 uppercase tracking-wider">2. Envío</label>
+            <label className="block text-[13px] font-bold text-gray-900">2. Envío</label>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Fecha</label>
+                <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Fecha</label>
                 <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-1 focus:ring-black cursor-pointer" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Proveedor / observación <span className="text-gray-400 font-normal">(opcional)</span></label>
+                <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Proveedor / observación <span className="text-gray-400 font-normal">(opcional)</span></label>
                 <input type="text" placeholder="Ej. Factura 4581 · Precintos Andinos" value={observacion} onChange={(e) => setObservacion(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black" />
               </div>
             </div>
           </div>
 
           {errorModal && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs font-medium p-3 rounded-xl flex items-start gap-2 animate-in fade-in">
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-[13px] font-medium p-3 rounded-xl flex items-start gap-2 animate-in fade-in">
               <span className="text-yellow-500 text-sm">⚠️</span>
               <div>{errorModal}</div>
             </div>
@@ -196,12 +196,12 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
 
         {/* Footer */}
         <div className="p-5 px-6 border-t border-gray-100 flex items-center justify-between bg-white">
-          <span className="text-xs text-gray-400 font-medium">
+          <span className="text-[13px] text-gray-400 font-medium">
             {isLoading ? 'Guardando en la base de datos...' : 'Ingresa un rango o los códigos'}
           </span>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={onClose} disabled={isLoading} className="px-5 py-2.5 text-xs font-bold text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50">Cancelar</button>
-            <button type="button" onClick={handleIngresar} disabled={isLoading} className="px-6 py-2.5 text-xs font-bold bg-[#c2f012] text-black rounded-xl hover:bg-[#b0dc0e] shadow-sm transition-colors cursor-pointer disabled:opacity-50">
+            <button type="button" onClick={onClose} disabled={isLoading} className="px-5 py-2.5 text-[13px] font-bold text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50">Cancelar</button>
+            <button type="button" onClick={handleIngresar} disabled={isLoading} className="px-6 py-2.5 text-[13px] font-bold bg-[#c2f012] text-black rounded-xl hover:bg-[#b0dc0e] shadow-sm transition-colors cursor-pointer disabled:opacity-50">
               {isLoading ? 'Ingresando...' : 'Ingresar precintos'}
             </button>
           </div>

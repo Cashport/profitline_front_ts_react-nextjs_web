@@ -47,10 +47,10 @@ export default function MessageSection({
   onCreateTemplate
 }: MessageSectionProps) {
   return (
-    <section className="bg-white rounded-lg p-6">
+    <section className="cp-card px-[18px] py-[14px]">
       <div className="flex justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-bold">
+          <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-[13px] font-bold">
             3
           </div>
           <Text strong className="text-[15px]">
@@ -140,9 +140,9 @@ export default function MessageSection({
             {currentTemplate && (
               <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-[#DDDDDD] flex gap-2 items-start">
                 <Info size={16} className="text-gray-400 shrink-0 mt-0.5" />
-                <Text type="secondary" className="text-xs leading-relaxed">
+                <Text type="secondary" className="text-[13px] leading-relaxed">
                   Las variables{" "}
-                  <Text code className="text-[11px]">
+                  <Text code className="text-[13px]">
                     {currentTemplate.variables.map((v) => `{{${v}}}`).join(", ")}
                   </Text>{" "}
                   se completan automaticamente con los datos de cada cliente al momento del envio.

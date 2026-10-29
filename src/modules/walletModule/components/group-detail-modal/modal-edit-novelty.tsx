@@ -25,7 +25,7 @@ interface ModalEditNoveltyProps {
 const ReadOnly = ({ label, value }: { label: string; value: string }) => (
   <div className="min-w-0">
     <Label>{label}</Label>
-    <p className="truncate text-[12.5px] font-semibold text-foreground" title={value}>
+    <p className="truncate text-[13px] font-semibold text-foreground" title={value}>
       {value}
     </p>
   </div>
@@ -129,7 +129,7 @@ function EditNoveltyForm({
           <ReadOnly label="Fecha de compromiso" value={fecha(incident.next_ticket_date)} />
           <ReadOnly label="Fecha límite de solución" value={fecha(incident.limit_date)} />
         </div>
-        <p className="mt-3 text-[11.5px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
           Las fechas no se editan a mano: el compromiso se mueve al cerrar el ticket en curso y la
           fecha límite se fija al crear la novedad. El cambio queda registrado en la línea de tiempo
           del grupo.

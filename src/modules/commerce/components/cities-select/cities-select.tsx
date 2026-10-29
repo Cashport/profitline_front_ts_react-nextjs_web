@@ -96,8 +96,7 @@ export default function CitiesSelect({
 
   const handleSelect = (cityName: string) => {
     onChange(cityName);
-    const warehouseId =
-      allCities.find((c) => c.city_name === cityName)?.warehouse_id ?? 0;
+    const warehouseId = allCities.find((c) => c.city_name === cityName)?.warehouse_id ?? 0;
     onChangeWarehouseId(warehouseId);
     setSearchValue("");
   };

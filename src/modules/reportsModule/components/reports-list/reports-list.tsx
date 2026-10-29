@@ -24,7 +24,7 @@ interface ReportsListProps {
   onClearCriteria: () => void;
 }
 
-/** Tarjeta "Informes publicados": tabla en escritorio y tarjetas en pantallas angostas. */
+/** Tarjeta del listado de informes: tabla en escritorio y tarjetas en pantallas angostas. */
 export default function ReportsList({
   reports,
   total,
@@ -91,16 +91,17 @@ export default function ReportsList({
   };
 
   return (
-    <section className="rounded-xl bg-card p-4 shadow-sm">
-      <div className="flex flex-wrap items-baseline justify-between gap-2.5 px-1 pb-3">
-        <h2 className="text-sm font-semibold text-foreground">Informes publicados</h2>
-        {!isLoading && !error && (
-          <span className="text-xs text-muted-foreground">
+    <section className="cp-card px-[18px] py-[14px]">
+      {/* Sin título: el buscador va en el header (docs/DESIGN.md §4). El contador va al pie de
+          la tabla, no arriba. */}
+      {renderContent()}
+      {!isLoading && !error && reports.length > 0 && (
+        <div className="flex justify-end pt-3">
+          <span className="whitespace-nowrap text-[13px] text-muted-foreground">
             {fmtReportsCount(reports.length, total)}
           </span>
-        )}
-      </div>
-      {renderContent()}
+        </div>
+      )}
     </section>
   );
 }

@@ -14,7 +14,7 @@ interface GenerateActionButtonProps {
 export const GenerateActionButton: React.FC<GenerateActionButtonProps> = ({
   label = "Generar acción",
   onClick,
-  icon = <DotsThree size="1.5rem" />, // Icono predeterminado
+  icon = <DotsThree size={18} weight="bold" />, // Icono predeterminado
   style, // Estilos personalizados pasados por props
   disabled = false
 }) => {

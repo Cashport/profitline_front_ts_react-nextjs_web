@@ -73,12 +73,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
   ];
 
   return (
-    <div
-      className={cn(
-        "flex min-w-0 flex-col rounded-xl bg-card px-5 pb-3.5 pt-3.5 shadow-sm",
-        className
-      )}
-    >
+    <div className={cn("cp-card flex min-w-0 flex-col px-[18px] py-[14px]", className)}>
       <div className="flex items-end gap-3.5">
         <div className="min-w-0">
           <div className={KPI_LABEL}>Recaudo</div>
@@ -104,7 +99,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
           >
             <span
               className={cn(
-                "mt-0.5 inline-block whitespace-nowrap text-[11px] font-semibold",
+                "mt-0.5 inline-block whitespace-nowrap text-[13px] font-semibold",
                 isFinite(vsAvg3) && TONE_TEXT[vsAvg3 >= 0 ? "ok" : "crit"]
               )}
             >
@@ -119,7 +114,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
             {/* Fondo tenue del color del recaudo y texto del tema: el color del API
                 es uno solo para los dos temas y no garantiza contraste como texto. */}
             <span
-              className="rounded-md px-[9px] py-[3px] text-[11.5px] font-bold tabular-nums text-foreground"
+              className="rounded-md px-[9px] py-[3px] text-[13px] font-bold tabular-nums text-foreground"
               style={{ background: withAlpha(cs.color, 0.16) }}
             >
               {pct(compliance)}
@@ -234,7 +229,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
         }}
       />
 
-      <div className="flex flex-wrap items-center gap-3 text-[10.5px] text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-3 text-[13px] text-muted-foreground">
         <LegendItem
           mark={<Swatch color={cs.color} />}
           label={cs.label}

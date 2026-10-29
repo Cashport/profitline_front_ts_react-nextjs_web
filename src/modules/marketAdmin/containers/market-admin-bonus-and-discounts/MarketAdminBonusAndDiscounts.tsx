@@ -11,6 +11,7 @@ import {
   MARKET_ADMIN_DISCOUNTS_TABS,
   MarketAdminDiscountsTab
 } from "@/components/organisms/discounts/constants/routes";
+import Header from "@/components/organisms/header";
 
 const isKnownTab = (tab?: string): tab is MarketAdminDiscountsTab =>
   Object.values(MARKET_ADMIN_DISCOUNTS_TABS).some((key) => key === tab);
@@ -60,10 +61,10 @@ export default function MarketAdminBonusAndDiscounts({ initialTab }: Props) {
   }
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Descuentos y bonificados</h1>
+    <div className="cp-page min-h-full">
+      <Header title="Descuentos y bonificados" back="/market-admin" />
 
-      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         <UiTab tabs={tabs} activeKey={activeTab} onChangeTab={setActiveTab} />
       </div>
 

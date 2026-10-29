@@ -61,14 +61,14 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
         />
       </div>
       <div className="flex flex-col gap-2 rounded-[12px] border border-cp-line p-3">
-        <span className="text-[11px] font-semibold uppercase tracking-[.12em] text-cp-ink-4">
+        <span className="text-[13px] font-semibold text-cp-ink-4">
           Plantilla · Cobro con link de pago
         </span>
         <p className="m-0 whitespace-pre-line rounded-[4px_12px_12px_12px] bg-cp-muted p-3 text-[13px] leading-relaxed">
           {message}
         </p>
-        <span className="flex w-fit items-center gap-1.5 rounded-lg bg-cp-muted px-2 py-1 text-[12px] font-semibold">
-          <span className="text-[10px] text-cp-orange">PDF</span>
+        <span className="flex w-fit items-center gap-1.5 rounded-lg bg-cp-muted px-2 py-1 text-[13px] font-semibold">
+          <span className="text-[13px] text-cp-orange">PDF</span>
           estado_cuenta.pdf
         </span>
       </div>

@@ -88,7 +88,7 @@ const UploadModal = ({
         <header className="flex items-center gap-3 border-b border-[#ececec] px-[22px] py-4">
           <div className="mr-auto min-w-0">
             <h3 className="text-base font-semibold">Cargar cartera del cliente</h3>
-            {clientName && <p className="truncate text-xs text-muted-foreground">{clientName}</p>}
+            {clientName && <p className="truncate text-[13px] text-muted-foreground">{clientName}</p>}
           </div>
           <Button
             type="text"
@@ -103,12 +103,12 @@ const UploadModal = ({
           {file ? (
             <div className="flex min-h-[140px] items-center justify-center rounded-lg border border-foreground p-4">
               <div className="flex min-w-0 max-w-full items-center gap-3">
-                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-[#f4f9d2] text-[10px] font-bold">
+                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-[#f4f9d2] text-[13px] font-bold">
                   XLSX
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-[13px] font-medium">{file.name}</span>
-                  <span className="block text-[11px] text-[#8a8a8a]">
+                  <span className="block text-[13px] text-[#8a8a8a]">
                     {formatFileSize(file.size)}
                   </span>
                 </span>
@@ -133,17 +133,17 @@ const UploadModal = ({
                 <span className="text-[13px] font-medium">
                   Arrastra el Excel aquí o haz clic para buscarlo
                 </span>
-                <span className="text-[11px] text-[#8a8a8a]">.xlsx · hasta 30 MB</span>
+                <span className="text-[13px] text-[#8a8a8a]">.xlsx · hasta 30 MB</span>
               </div>
             </Upload.Dragger>
           )}
 
-          <div className="flex flex-col gap-1 text-[12px] text-[#444]">
+          <div className="flex flex-col gap-1 text-[13px] text-[#444]">
             <span>
               Columnas obligatorias: <b>Id documento</b>, <b>Tipo</b> (Factura, Nota crédito, Nota
               débito o Saldo) y <b>Monto cliente</b>. Las demás columnas se ignoran.
             </span>
-            <Typography.Link href={TEMPLATE_URL} download underline className="!text-[12px]">
+            <Typography.Link href={TEMPLATE_URL} download underline className="!text-[13px]">
               Descargar plantilla
             </Typography.Link>
           </div>
@@ -152,9 +152,9 @@ const UploadModal = ({
             <Warning size={20} weight="fill" className="mt-0.5 flex-none text-[#c2410c]" />
             <div className="flex min-w-0 flex-col gap-1">
               <span className="text-[13px] font-semibold text-[#9a3412]">
-                Esta carga reemplaza TODA la cartera conciliada del cliente
+                Esta carga reemplaza toda la cartera conciliada del cliente
               </span>
-              <span className="text-[12px] text-[#7c2d12]">
+              <span className="text-[13px] text-[#7c2d12]">
                 {currentUpload
                   ? `Hoy tiene ${formatNumber(currentUpload.total_rows ?? 0)} documentos, cargados el ${formatDateTime(
                       currentUpload.finished_at ?? currentUpload.created_at
@@ -177,14 +177,14 @@ const UploadModal = ({
           </Checkbox>
 
           {error && (
-            <div className="rounded-lg bg-[#fdecec] px-3 py-2 text-[12px] text-[#c4321c]">
+            <div className="rounded-lg bg-[#fdecec] px-3 py-2 text-[13px] text-[#c4321c]">
               {error}
             </div>
           )}
         </div>
 
         <footer className="flex items-center gap-2.5 border-t border-[#ececec] px-[22px] py-3.5">
-          <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+          <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">
             {!file
               ? "Ningún archivo seleccionado"
               : !accepted

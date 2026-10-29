@@ -39,7 +39,6 @@
 
         .search {
             width: 400px;
-            height: 48px;
         }
 
         .options {
@@ -112,12 +111,15 @@
     }
 
     .buttonNewProject {
+        // Mismo alto que el buscador de la barra (DESIGN.md §8).
+        height: var(--control-h) !important;
+        font-size: 14px;
         gap: 10px;
         display: flex;
         color: black;
         box-shadow: none;
         font-weight: 600;
-        padding: 12px 24px;
+        padding: 0 24px;
         align-items: center;
         background-color: $secondary;
 

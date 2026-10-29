@@ -50,15 +50,13 @@ export default function TorreView() {
     setTramos((s) => (s.includes(t) ? s.filter((x) => x !== t) : [...s, t]));
 
   return (
-    <div className="wallet-scope flex flex-col gap-4 pb-6">
+    <div className="wallet-scope cp-page pb-6">
       <TorreHeader onSearchChange={setSearch} />
 
-      <h2 className="text-lg font-semibold text-foreground">Torre de control</h2>
-
-      <TorreFilters resumen={resumenVista} />
       <TorreKpiCards resumen={resumenVista} novedades={novedades} />
+      <TorreFilters resumen={resumenVista} />
 
-      <div className="grid grid-cols-1 items-stretch gap-3.5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 items-stretch gap-[var(--card-gap)] xl:grid-cols-2">
         <AgingPanel
           porTramo={tramosBase}
           resumen={resumenBase}
@@ -68,7 +66,7 @@ export default function TorreView() {
         <ExecutivePanel ejecutivos={ejecutivos} />
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-3.5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-[var(--card-gap)] xl:grid-cols-2">
         <NoveltyTypePanel tipos={tipos} />
         <TopClientsPanel clientes={clientes} />
       </div>

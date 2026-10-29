@@ -83,7 +83,7 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
         <div className="flex flex-wrap items-baseline justify-between gap-2.5 px-1">
           <h2 className="text-sm font-semibold text-foreground">Respuestas recientes</h2>
           {responsesPage && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[13px] text-muted-foreground">
               Mostrando {responses.length} de {total.toLocaleString("es-CO")}
             </span>
           )}

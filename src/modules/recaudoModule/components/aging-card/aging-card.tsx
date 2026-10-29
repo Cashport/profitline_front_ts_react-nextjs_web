@@ -57,7 +57,7 @@ export default function AgingCard({ data }: { data: ICollectionTower }) {
             aria-pressed={filters.aging === b.key}
             onClick={() => toggleAging(b.key)}
             className={cn(
-              "flex min-w-0 cursor-pointer items-center gap-[5px] border-0 bg-transparent p-0 text-left text-[10.5px] text-muted-foreground transition-opacity",
+              "flex min-w-0 cursor-pointer items-center gap-[5px] border-0 bg-transparent p-0 text-left text-[13px] text-muted-foreground transition-opacity",
               filters.aging !== null && filters.aging !== b.key && "opacity-40"
             )}
           >

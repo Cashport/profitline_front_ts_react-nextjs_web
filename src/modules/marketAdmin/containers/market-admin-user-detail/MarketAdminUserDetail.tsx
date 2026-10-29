@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, Globe, Layers, Settings, Users } from "lucide-react";
+import { Globe, Layers, Settings, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminUserDetail } from "@/modules/marketAdmin/hooks/useMarketAdminUserDetail";
@@ -29,11 +28,12 @@ import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-deta
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
 import PaisesSection from "@/modules/marketAdmin/components/market-admin-user-detail/PaisesSection";
 import ConfiguracionFacturadorTab from "@/modules/marketAdmin/components/market-admin-user-detail/ConfiguracionFacturadorTab";
+import Header from "@/components/organisms/header";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-[#999999]">{label}</span>
+      <span className="text-[13px] text-[#999999]">{label}</span>
       <span className="text-sm font-bold text-[#141414]">{value}</span>
     </div>
   );
@@ -54,9 +54,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const { data: facturadores, isLoading: isLoadingFacturadores } =
     useMarketAdminFacturadores(isSeller);
 
-  const [activeTab, setActiveTab] = useState<
-    "clientes" | "grupos" | "paises" | "configuraciones"
-  >("clientes");
+  const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "paises" | "configuraciones">(
+    "clientes"
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingBiller, setIsSavingBiller] = useState(false);
   const [isSavingGrupos, setIsSavingGrupos] = useState(false);
@@ -330,25 +330,21 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">{usuario.name}</h1>
-
-      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
-          <Link
-            href="/market-admin/usuarios"
-            className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] transition-colors"
-          >
-            <ArrowLeft size={14} /> Volver
-          </Link>
+    <div className="cp-page min-h-full">
+      {/* Volver y rol van en el header compartido (docs/DESIGN.md §4) */}
+      <Header
+        title={usuario.name}
+        back="/market-admin/usuarios"
+        actionsExtra={
           <span
-            className={`text-xs font-semibold px-3 py-1 rounded-full ${ROL_STYLES[usuario.role_name] ?? "bg-[#F5F5F5] text-[#666666]"}`}
+            className={`text-[13px] font-semibold px-3 py-1 rounded-full ${ROL_STYLES[usuario.role_name] ?? "bg-[#F5F5F5] text-[#666666]"}`}
           >
             {usuario.role_name || "—"}
           </span>
-        </div>
+        }
+      />
 
+      <div className="cp-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
         {/* Información general + Asignaciones */}
         <div className="grid grid-cols-2 gap-8">
           <div className="flex flex-col gap-5">
@@ -404,8 +400,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               allPaises={allPaises}
               loading={!paisesLoaded || isLoadingCountries}
               error={
-                paisesError ||
-                (countriesError ? "No se pudo cargar el catálogo de países." : null)
+                paisesError || (countriesError ? "No se pudo cargar el catálogo de países." : null)
               }
               onRetry={() => {
                 void loadPaises();

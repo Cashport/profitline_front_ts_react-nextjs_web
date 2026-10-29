@@ -34,7 +34,7 @@ export default function UsuariosTab({ usuarios, isLoading }: Props) {
       width: 140,
       onHeaderCell: headerCell,
       render: (rol: string) => (
-        <span className="text-xs bg-[#F5F5F5] text-[#666666] px-2 py-0.5 rounded font-medium w-fit">
+        <span className="text-[13px] bg-[#F5F5F5] text-[#666666] px-2 py-0.5 rounded font-medium w-fit">
           {rol || "—"}
         </span>
       )

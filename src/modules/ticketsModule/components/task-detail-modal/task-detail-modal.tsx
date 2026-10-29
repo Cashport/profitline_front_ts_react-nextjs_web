@@ -41,7 +41,7 @@ const EVENT_LABEL: Record<string, string> = {
 };
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-0.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-cp-ink-3">
+  <div className="mb-0.5 text-[13px] font-semibold text-cp-ink-3">
     {children}
   </div>
 );
@@ -91,7 +91,7 @@ export default function TaskDetailModal({ config }: { config: ITaskConfig }) {
             {isLoading ? (
               <ProfitLoader size="small" />
             ) : (
-              <p className="px-6 text-center text-[12.5px] text-cp-magenta">
+              <p className="px-6 text-center text-[13px] text-cp-magenta">
                 {(error as Error)?.message || "No se pudo cargar la tarea."}
               </p>
             )}
@@ -165,11 +165,11 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 pr-10 text-[12px]">
+      <div className="flex flex-wrap items-center gap-2 pr-10 text-[13px]">
         <span className="font-mono text-cp-ink-3">{t.ticket_code}</span>
         <StatusLabel config={config} ticket={t} />
         {t.incident_id && (
-          <span className="rounded-[5px] bg-cp-muted px-1.5 text-[11px] text-cp-ink-3">
+          <span className="rounded-[5px] bg-cp-muted px-1.5 text-[13px] text-cp-ink-3">
             Novedad #{t.incident_id}
           </span>
         )}
@@ -186,7 +186,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
           <h3 className="mt-2 text-[16px] font-semibold leading-snug">{t.title}</h3>
           <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3.5 sm:grid-cols-3">
             {gridFields.map((f) => (
-              <div key={f.key} className="min-w-0 text-[12.5px] text-cp-ink-2">
+              <div key={f.key} className="min-w-0 text-[13px] text-cp-ink-2">
                 <Label>{f.label}</Label>
                 <div className="flex min-w-0">
                   <TaskCell field={f} ticket={t} config={config} />
@@ -194,7 +194,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
               </div>
             ))}
             {assigneeField && (
-              <div className="min-w-0 text-[12.5px]">
+              <div className="min-w-0 text-[13px]">
                 <Label>{assigneeField.label}</Label>
                 <Select
                   size="small"
@@ -214,13 +214,13 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
           {t.description && (
             <div className="mt-4 border-t border-cp-line pt-3.5">
               <Label>Descripción</Label>
-              <p className="whitespace-pre-line text-[12.5px] leading-relaxed">{t.description}</p>
+              <p className="whitespace-pre-line text-[13px] leading-relaxed">{t.description}</p>
             </div>
           )}
           {t.resolution_comment && (
             <div className="mt-3">
               <Label>Comentario de cierre</Label>
-              <p className="whitespace-pre-line text-[12.5px]">{t.resolution_comment}</p>
+              <p className="whitespace-pre-line text-[13px]">{t.resolution_comment}</p>
             </div>
           )}
         </>
@@ -260,7 +260,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
 
       {target && !editing && (
         <div className="mt-3 flex flex-col gap-2 rounded-lg bg-cp-subtle p-3">
-          <span className="text-[12px] font-semibold text-cp-ink-2">
+          <span className="text-[13px] font-semibold text-cp-ink-2">
             {target === "COMPLETED" ? "¿Cómo se resolvió?" : "¿Por qué se cancela?"} (opcional)
           </span>
           <Input.TextArea
@@ -314,7 +314,7 @@ function EditForm({
               : "flex flex-col gap-1"
           }
         >
-          <span className="text-[12px] font-semibold text-cp-ink-2">
+          <span className="text-[13px] font-semibold text-cp-ink-2">
             {f.label}
             {f.required && <span className="text-cp-magenta"> *</span>}
           </span>
@@ -374,7 +374,7 @@ function History({ ticketId, config }: { ticketId: number; config: ITaskConfig }
           const changed =
             log.event !== "CREATED" && (log.old_value !== null || log.new_value !== null);
           return (
-            <li key={log.id} className="text-[12px] text-cp-ink-2">
+            <li key={log.id} className="text-[13px] text-cp-ink-2">
               <b className="font-semibold text-cp-ink">{log.performed_by_name ?? "—"}</b>{" "}
               {EVENT_LABEL[log.event] ?? log.event}
               {log.event === "FIELD_CHANGED" && log.field_changed

@@ -156,7 +156,7 @@ export default function TableMassCommunications({
             key: "remove",
             disabled: isRemovingClient,
             label: (
-              <span className="flex items-center gap-2 text-red-600 text-xs">
+              <span className="flex items-center gap-2 text-red-600 text-[13px]">
                 <Trash2 className="w-3.5 h-3.5" />
                 Eliminar del envio
               </span>

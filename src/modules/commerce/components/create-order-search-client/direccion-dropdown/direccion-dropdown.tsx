@@ -82,7 +82,7 @@ function DireccionDropdown({
                         <MapPin size={14} className="text-[#999999] mt-0.5 flex-shrink-0" />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-[#141414]">{d.address}</p>
-                          <p className="text-xs text-[#999999] truncate">{d.city}</p>
+                          <p className="text-[13px] text-[#999999] truncate">{d.city}</p>
                         </div>
                         {isSelected && (
                           <Check

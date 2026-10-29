@@ -48,7 +48,7 @@ export default function PortfolioCard({
             />
             <div
               className={cn(
-                "flex text-[12.5px] text-cp-ink-3",
+                "flex text-[13px] text-cp-ink-3",
                 stacked
                   ? "flex-col gap-1.5"
                   : "flex-wrap gap-x-6 gap-y-1 max-md:flex-col max-md:gap-1.5"
@@ -67,7 +67,7 @@ export default function PortfolioCard({
             </div>
           </div>
           {extras && (
-            <div className="flex flex-col gap-1.5 border-t border-cp-line pt-2.5 text-[12.5px] text-cp-ink-3">
+            <div className="flex flex-col gap-1.5 border-t border-cp-line pt-2.5 text-[13px] text-cp-ink-3">
               {extras.map((e) => (
                 <span key={e.label} className="flex items-center gap-1.5 whitespace-nowrap">
                   <span className="flex-1">{e.label}</span>

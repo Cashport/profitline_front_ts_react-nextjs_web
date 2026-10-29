@@ -42,7 +42,7 @@ export default function SurveysView() {
   ];
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
+    <div className="cp-page pb-6">
       <SurveysHeader
         search={store.search}
         onSearchChange={store.setSearch}

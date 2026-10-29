@@ -71,7 +71,7 @@ export default function DetailTooltip({ title, rows, total, children }: DetailTo
   const { resolvedTheme } = useWalletTheme();
 
   const content = (
-    <div className="wallet-scope text-[11.5px] leading-normal text-popover-foreground">
+    <div className="wallet-scope text-[13px] leading-normal text-popover-foreground">
       <div className="mb-1.5 border-b border-border pb-[5px] font-bold">{title}</div>
 
       {rows.map((r) => (

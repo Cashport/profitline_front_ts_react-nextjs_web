@@ -146,7 +146,7 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
                     <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
                       <FileArrowUp size={16} />
                       <p style={{ fontSize: 16, fontWeight: 400 }}>Seleccionar archivo</p>
-                      <p style={{ fontSize: 10, fontWeight: 300 }}>
+                      <p style={{ fontSize: 13, fontWeight: 300 }}>
                         PDF, Word, PNG. (Tamaño max 30MB)
                       </p>
                     </Flex>

@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   description: "Gestor de tareas"
 };
 const TaskManagerLayout = ({ children }: { children: React.ReactNode }) => {
-  return <ViewWrapper headerTitle="Gestor de tareas">{children}</ViewWrapper>;
+  return (
+    <ViewWrapper headerTitle="Gestor de tareas" hideHeader>
+      {children}
+    </ViewWrapper>
+  );
 };
 export default TaskManagerLayout;

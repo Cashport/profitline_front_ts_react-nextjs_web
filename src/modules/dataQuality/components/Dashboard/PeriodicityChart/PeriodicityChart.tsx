@@ -34,7 +34,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
   };
 
   return (
-    <Card className="p-6" style={{ borderColor: "#E5E7EB" }}>
+    <Card className="cp-card rounded-[var(--card-radius)] border-0 bg-cp-surface shadow-none px-[18px] py-[14px]">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>
@@ -42,14 +42,14 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
           </h3>
           {selectedFileTypeLabel && (
             <span
-              className="text-xs px-2 py-0.5 rounded-md font-medium"
+              className="text-[13px] px-2 py-0.5 rounded-md font-medium"
               style={{ backgroundColor: "#F3F4F6", color: "#374151" }}
             >
               {selectedFileTypeLabel}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex items-center gap-3 text-[13px]">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.processado }} />
             <span style={{ color: "#6B7280" }}>Processado</span>
@@ -80,10 +80,10 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
           return (
             <div key={item.periodicity} className="flex items-center gap-4">
               <div className="w-16">
-                <div className="text-xs font-semibold" style={{ color: "#111827" }}>
+                <div className="text-[13px] font-semibold" style={{ color: "#111827" }}>
                   {item.periodicity}
                 </div>
-                <div className="text-xs" style={{ color: "#9CA3AF" }}>
+                <div className="text-[13px]" style={{ color: "#9CA3AF" }}>
                   {item.total_archivos} arch.
                 </div>
               </div>
@@ -95,7 +95,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
                 >
                   {item.procesados > 0 && (
                     <div
-                      className="h-full flex items-center justify-center text-xs font-semibold text-white relative"
+                      className="h-full flex items-center justify-center text-[13px] font-semibold text-white relative"
                       style={{ width: `${processadoWidth}%`, backgroundColor: COLORS.processado }}
                     >
                       <span className="absolute">{item.procesados}</span>
@@ -103,7 +103,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
                   )}
                   {item.novedades > 0 && (
                     <div
-                      className="h-full flex items-center justify-center text-xs font-semibold text-white relative"
+                      className="h-full flex items-center justify-center text-[13px] font-semibold text-white relative"
                       style={{ width: `${novedadWidth}%`, backgroundColor: COLORS.novedad }}
                     >
                       <span className="absolute">{item.novedades}</span>
@@ -111,7 +111,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
                   )}
                   {item.retrasados > 0 && (
                     <div
-                      className="h-full flex items-center justify-center text-xs font-semibold text-white relative"
+                      className="h-full flex items-center justify-center text-[13px] font-semibold text-white relative"
                       style={{ width: `${retrasoWidth}%`, backgroundColor: COLORS.retraso }}
                     >
                       <span className="absolute">{item.retrasados}</span>
@@ -119,15 +119,22 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
                   )}
                   {item.pendientes > 0 && (
                     <div
-                      className="h-full flex items-center justify-center text-xs font-semibold relative"
-                      style={{ width: `${pendienteWidth}%`, backgroundColor: COLORS.pendiente, color: "#555" }}
+                      className="h-full flex items-center justify-center text-[13px] font-semibold relative"
+                      style={{
+                        width: `${pendienteWidth}%`,
+                        backgroundColor: COLORS.pendiente,
+                        color: "#555"
+                      }}
                     >
                       <span className="absolute">{item.pendientes}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="text-xs text-right" style={{ color: "#9CA3AF", minWidth: "60px" }}>
+                <div
+                  className="text-[13px] text-right"
+                  style={{ color: "#9CA3AF", minWidth: "60px" }}
+                >
                   {item.total_archivos - item.procesados} pend.
                 </div>
               </div>
@@ -137,7 +144,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
       </div>
 
       <div
-        className="flex items-center gap-4 mt-5 pt-4 border-t text-xs"
+        className="flex items-center gap-4 mt-5 pt-4 border-t text-[13px]"
         style={{ borderColor: "#E5E7EB" }}
       >
         <div className="flex items-center gap-1.5">

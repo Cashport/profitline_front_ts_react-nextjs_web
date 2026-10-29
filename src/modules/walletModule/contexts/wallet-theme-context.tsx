@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeMenuContext } from "@/context/ThemeMenuContext";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 type ThemePreference = "light" | "dark" | "system";
@@ -54,7 +55,8 @@ export function WalletThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <WalletThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
-      {children}
+      {/* El selector de tema vive en el menú del avatar del header compartido. */}
+      <ThemeMenuContext.Provider value={{ theme, setTheme }}>{children}</ThemeMenuContext.Provider>
     </WalletThemeContext.Provider>
   );
 }

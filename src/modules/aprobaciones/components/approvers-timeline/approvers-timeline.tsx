@@ -41,11 +41,11 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
         <div key={order} className="relative">
           {/* Step indicator */}
           <div className="mb-3 flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs font-semibold">
+            <Badge variant="secondary" className="text-[13px] font-semibold">
               Paso {order}
             </Badge>
             {stepsByOrder[order].length > 1 && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground">
                 ({stepsByOrder[order].length} aprobadores)
               </span>
             )}
@@ -80,7 +80,7 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
 
                         {/* Date */}
                         {step.approvedAt && (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-[13px] text-muted-foreground">
                             {formatDate(step.approvedAt)}
                           </p>
                         )}
@@ -131,7 +131,7 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
           {orderIndex < orders.length - 1 && (
             <div className="my-4 flex items-center gap-2 pl-2">
               <div className="h-8 w-0.5 bg-border"></div>
-              <div className="text-xs text-muted-foreground">↓</div>
+              <div className="text-[13px] text-muted-foreground">↓</div>
             </div>
           )}
         </div>
