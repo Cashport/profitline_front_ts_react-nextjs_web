@@ -15,6 +15,9 @@ type CountryClientsActionsModalProps = {
   onDownloadIqviaCatalog?: () => void;
   isDownloadIqviaCatalogLoading?: boolean;
   onUploadIqviaCatalog?: () => void;
+  onDownloadIqviaProductCatalog?: () => void;
+  isDownloadIqviaProductCatalogLoading?: boolean;
+  onUploadIqviaProductCatalog?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
   onUploadPointsOfSale?: () => void;
   onDownloadMaterials?: () => void;
@@ -36,6 +39,9 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onDownloadIqviaCatalog,
   isDownloadIqviaCatalogLoading = false,
   onUploadIqviaCatalog,
+  onDownloadIqviaProductCatalog,
+  isDownloadIqviaProductCatalogLoading = false,
+  onUploadIqviaProductCatalog,
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale,
   onDownloadMaterials,
@@ -67,9 +73,17 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
         {onDownloadIqviaCatalog && (
           <ButtonGenerateAction
             icon={<DownloadSimple size={20} />}
-            title="Descargar catálogo IQVIA"
+            title="Descargar catálogo IQVIA Clientes"
             onClick={onDownloadIqviaCatalog}
             disabled={isDownloadIqviaCatalogLoading}
+          />
+        )}
+        {onDownloadIqviaProductCatalog && (
+          <ButtonGenerateAction
+            icon={<DownloadSimple size={20} />}
+            title="Descargar catálogo IQVIA Productos"
+            onClick={onDownloadIqviaProductCatalog}
+            disabled={isDownloadIqviaProductCatalogLoading}
           />
         )}
         {!downloadCatalogOnly && (
@@ -77,8 +91,15 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
             {onUploadIqviaCatalog && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}
-                title="Cargar catálogo IQVIA"
+                title="Cargar catálogo IQVIA Clientes"
                 onClick={onUploadIqviaCatalog}
+              />
+            )}
+            {onUploadIqviaProductCatalog && (
+              <ButtonGenerateAction
+                icon={<UploadSimple size={20} />}
+                title="Cargar catálogo IQVIA Productos"
+                onClick={onUploadIqviaProductCatalog}
               />
             )}
             {onDownloadMaterials && (
