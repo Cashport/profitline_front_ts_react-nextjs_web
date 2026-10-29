@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Segmented, Select, Switch } from "antd";
+import { ConfigProvider, Segmented, Select, Switch } from "antd";
 import { Download } from "lucide-react";
 
 import type { IVisitFormResponsesExportParams } from "@/types/surveys/ISurveys";
@@ -46,12 +46,17 @@ export default function ResponsesDownloadCard({ formId }: { formId: number }) {
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-[11px] font-medium text-muted-foreground">Formato</span>
-          <Segmented
-            block
-            value={format}
-            onChange={(value) => setFormat(value as ExportFormat)}
-            options={FORMATS}
-          />
+          {/* El tema raíz fija colorTextSecondary en blanco, que oculta la opción no seleccionada */}
+          <ConfigProvider
+            theme={{ components: { Segmented: { itemColor: "rgba(0, 0, 0, 0.65)" } } }}
+          >
+            <Segmented
+              block
+              value={format}
+              onChange={(value) => setFormat(value as ExportFormat)}
+              options={FORMATS}
+            />
+          </ConfigProvider>
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-[11px] font-medium text-muted-foreground">Periodo</span>
