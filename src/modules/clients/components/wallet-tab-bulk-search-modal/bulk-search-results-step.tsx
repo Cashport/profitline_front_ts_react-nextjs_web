@@ -84,7 +84,7 @@ const BulkSearchResultsStep = ({
     {
       title: "ID",
       dataIndex: "id",
-      render: (id: string) => <span className="font-mono text-xs">{id}</span>
+      render: (id: string) => <span className="font-mono text-[13px]">{id}</span>
     },
     {
       title: "Resultado",
@@ -159,7 +159,7 @@ const BulkSearchResultsStep = ({
                   : "border-[#ececec] bg-[#fafafa] hover:border-[#d6d6d6]"
               )}
             >
-              <span className="flex items-center gap-1.5 whitespace-nowrap text-xs text-[#444]">
+              <span className="flex items-center gap-1.5 whitespace-nowrap text-[13px] text-[#444]">
                 <span
                   className="h-[7px] w-[7px] rounded-full"
                   style={{ backgroundColor: RESULT_META[kind].dot }}
@@ -169,7 +169,7 @@ const BulkSearchResultsStep = ({
               <span className="text-lg font-semibold tabular-nums text-foreground">
                 {formatNumber(counts[kind])}
               </span>
-              <span className="max-w-full truncate text-[11px] text-[#8a8a8a]">
+              <span className="max-w-full truncate text-[13px] text-[#8a8a8a]">
                 {cardMeta[kind]}
               </span>
             </button>
@@ -182,9 +182,8 @@ const BulkSearchResultsStep = ({
             placeholder="Buscar en resultados"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            showBorder
           />
-          <span className="mr-auto text-[11px] text-[#8a8a8a]">
+          <span className="mr-auto text-[13px] text-[#8a8a8a]">
             {filteredRows.length > VISIBLE_ROWS
               ? `Mostrando ${VISIBLE_ROWS} de ${formatNumber(filteredRows.length)} · el Excel trae todo`
               : `${formatNumber(filteredRows.length)} registros`}

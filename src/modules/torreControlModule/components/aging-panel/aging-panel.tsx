@@ -68,7 +68,7 @@ export default function AgingPanel({ porTramo, resumen, seleccion, onToggle }: A
               >
                 <span
                   className={cn(
-                    "text-center text-[11.5px] font-bold tabular-nums",
+                    "text-center text-[13px] font-bold tabular-nums",
                     activa ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
@@ -104,13 +104,13 @@ export default function AgingPanel({ porTramo, resumen, seleccion, onToggle }: A
 
                 <span
                   className={cn(
-                    "truncate text-center text-[10.5px] tracking-[0.02em]",
+                    "truncate text-center text-[13px] tracking-[0.02em]",
                     activa ? "font-semibold text-foreground" : "text-muted-foreground"
                   )}
                 >
                   {TRAMOS[i].short}
                 </span>
-                <span className="-mt-1 text-center text-[10px] text-muted-foreground">
+                <span className="-mt-1 text-center text-[13px] text-muted-foreground">
                   {segments.total ? `${pct(g.total, segments.total).toFixed(0)}%` : "—"}
                 </span>
               </button>
@@ -119,7 +119,7 @@ export default function AgingPanel({ porTramo, resumen, seleccion, onToggle }: A
         })}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-[18px] gap-y-1 border-t border-border pt-3 text-[11.5px] text-muted-foreground">
+      <div className="mt-3 flex flex-wrap items-center gap-x-[18px] gap-y-1 border-t border-border pt-3 text-[13px] text-muted-foreground">
         <span>
           Corriente{" "}
           <b className="ml-1 font-semibold tabular-nums text-foreground">{fmtM(tramos[0])}</b>

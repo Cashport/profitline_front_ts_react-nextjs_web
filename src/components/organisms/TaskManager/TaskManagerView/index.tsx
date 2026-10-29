@@ -6,7 +6,6 @@ import { useTasks } from "@/hooks/useTasks";
 import { useDebounce } from "@/hooks/useSearch";
 
 import UiSearchInput from "@/components/ui/search-input";
-import Container from "@/components/atoms/Container/Container";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import TaskTable from "../TaskManagerTable";
 import SendEmailModal from "@/components/molecules/modals/SendEmailModal";
@@ -41,9 +40,10 @@ const TaskManagerView = () => {
 
   return (
     <>
-      <Container style={{ overflowY: "auto" }}>
+      {/* Tarjeta compartida (docs/DESIGN.md §3). */}
+      <div className="cp-card flex h-full flex-col overflow-y-auto px-[18px] py-[14px]">
         <Flex gap={"1rem"} vertical>
-          <Flex gap={"0.5rem"}>
+          <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="search"
               placeholder="Buscar tarea"
@@ -81,7 +81,7 @@ const TaskManagerView = () => {
           onClose={() => setModalMakeCallVisible(false)}
           onSend={() => {}}
         />
-      </Container>
+      </div>
     </>
   );
 };

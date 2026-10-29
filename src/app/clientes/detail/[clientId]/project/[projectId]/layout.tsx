@@ -2,9 +2,7 @@
 
 import { FC, useEffect, useMemo, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button, Flex, Spin } from "antd";
-import { CaretLeft } from "phosphor-react";
+import { Flex, Spin } from "antd";
 
 import { extractSingleParam } from "@/utils/utils";
 import { useMessageApi, MessageProvider } from "@/context/MessageContext";
@@ -12,6 +10,7 @@ import { SelectedPaymentsProvider } from "@/context/SelectedPaymentsContext";
 import { useClientDetails } from "@/modules/clients/hooks/client-details/client-details.hook";
 import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
 
+import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
 import { InvoiceAction } from "@/modules/clients/constants/invoice-actions.constants";
 import InvoiceActionsModal from "@/modules/clients/containers/invoice-actions-modal";
@@ -105,40 +104,25 @@ const ClientDetailsLayout: FC<ClientDetailsLayoutProps> = ({ children }) => {
     <SelectedPaymentsProvider>
       <MessageProvider>
         <ClientDetailsContext.Provider value={ClientDetailObject}>
-          <main className={styles.mainDetail}>
-            <Flex vertical className={styles.containerDetailClient}>
-              <Flex className={styles.stickyHeader} align="center" justify="space-between">
-                <Flex className={styles.infoHeader} align="center" justify="space-between">
-                  <Flex align="center" gap={4}>
-                    <Link href={`/clientes/all`}>
-                      <Button
-                        type="text"
-                        size="large"
-                        className={styles.buttonGoBack}
-                        icon={<CaretLeft size={"1.6rem"} />}
-                      >
-                        {portfolioData ? portfolioData?.data_wallet?.client_name : "Loading..."}
-                      </Button>
-                    </Link>
-                    {portfolioData && (
-                      <span className={styles.clientId}>
-                        {portfolioData?.data_wallet?.client_id}
-                      </span>
-                    )}
-                  </Flex>
-                  <FilterClientPortfolio setSelectedFilters={setFilters} />
-                </Flex>
+          <div className="cp-page">
+            <Header
+              title={portfolioData?.data_wallet?.client_name ?? "Cargando..."}
+              titleExtra={portfolioData?.data_wallet?.client_id}
+              back="/clientes/all"
+              actionsExtra={<FilterClientPortfolio setSelectedFilters={setFilters} />}
+            />
+            <main className={styles.mainDetail}>
+              <Flex vertical className={styles.containerDetailClient}>
+                <UiTab tabs={items} sticky onChangeTab={handleTabChange} activeKey={activeTab} />
+
+                {!portfolioData ? (
+                  <Spin style={{ margin: "1rem auto", display: "block" }} />
+                ) : (
+                  <div>{children}</div>
+                )}
               </Flex>
-
-              <UiTab tabs={items} sticky onChangeTab={handleTabChange} activeKey={activeTab} />
-
-              {!portfolioData ? (
-                <Spin style={{ margin: "1rem auto", display: "block" }} />
-              ) : (
-                <div>{children}</div>
-              )}
-            </Flex>
-          </main>
+            </main>
+          </div>
           {showInvoiceActionsModal && <InvoiceActionsModal />}
         </ClientDetailsContext.Provider>
       </MessageProvider>

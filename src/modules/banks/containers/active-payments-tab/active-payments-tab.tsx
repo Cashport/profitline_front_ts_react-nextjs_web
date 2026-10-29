@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
-import { Button, Flex, Spin } from "antd";
-import { Bank, DotsThree } from "phosphor-react";
+import { Flex, Spin } from "antd";
+import { DotsThree } from "phosphor-react";
 import dayjs from "dayjs";
 
 import { useModalDetail } from "@/context/ModalContext";
@@ -11,7 +11,6 @@ import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransac
 import { approvePayment } from "@/services/banksPayments/banksPayments";
 import { markPaymentsAsUnidentified } from "@/services/applyTabClients/applyTabClients";
 
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import BanksTable from "../../components/banks-table/Banks-table";
@@ -26,10 +25,7 @@ import ModalActionsChangeErpId from "../../components/modal-actions-change-erp-i
 import ModalActionsChangePeriod from "../../components/modal-actions-change-period";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
-import {
-  FilterActivePaymentsTab,
-  IActivePaymentsFilters
-} from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
+import { IActivePaymentsFilters } from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
 import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 
 import { ISingleBank } from "@/types/banks/IBanks";
@@ -37,12 +33,19 @@ import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { IFormFilterDates } from "../../components/modal-filter-select-dates/modal-filter-select-dates";
 
 import styles from "./active-payments-tab.module.scss";
+import { BanksSlot } from "../../contexts/banks-chrome-context";
+import BanksFilterModal from "../../components/banks-filter-modal/banks-filter-modal";
 
 interface ActivePaymentsTabProps {
   isActive: boolean;
 }
 
-const STATUS_ORDER = ["Sin identificar", "Pendiente ingreso a SAP", "Identificado", "Pago aplicado"];
+const STATUS_ORDER = [
+  "Sin identificar",
+  "Pendiente ingreso a SAP",
+  "Identificado",
+  "Pago aplicado"
+];
 const PAGO_APLICADO_STATUS_ID = 4;
 const IDENTIFICADO_STATUS_ID = 1;
 
@@ -162,17 +165,41 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
         <BanksRules onClickBack={() => setShowBankRules(false)} />
       ) : (
         <Flex className={styles.activePaymentsTab} vertical>
-          <div className={`${styles.header} banksStickyHeader`}>
-            <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-            <FilterActivePaymentsTab
-              setSelectedFilters={setSelectedFilters}
-              handleOpenCustomDate={() => setIsSelectOpen({ selected: 7 })}
-              customDate={customDate}
-              setCustomDate={setCustomDate}
+          {/* Diseño "Pedidos y Bancos": buscador y Filtrar en el header; las acciones junto a las
+              pestañas (ver banks-chrome-context). */}
+          <BanksSlot to="header" active={isActive}>
+            <BanksFilterModal setSelectedFilters={setSelectedFilters} withActive defaultLast30 />
+            <OptimizedSearchComponent
+              title="Buscar referencia, valor…"
+              onSearch={handleSearch}
+              surface="page"
+              className="!w-[220px] !flex-none"
             />
-            <Button
-              className={styles.button__actions}
-              icon={<DotsThree size={"1.5rem"} />}
+          </BanksSlot>
+          <BanksSlot to="tabs" active={isActive}>
+            <button
+              type="button"
+              onClick={handleOpenBankRules}
+              className="flex h-[var(--control-h)] cursor-pointer items-center gap-1.5 rounded-lg border border-cp-line-2 bg-cp-surface px-3 text-[14px] font-medium text-cp-ink hover:border-cp-ink"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden
+              >
+                <path d="M4 6h10M4 12h16M4 18h7M17 4v4M20 16v4" />
+              </svg>
+              Reglas de banco
+            </button>
+            <button
+              type="button"
+              title="Generar acción"
+              aria-label="Generar acción"
               onClick={() => {
                 if (!selectedRows || selectedRows.length === 0) {
                   showMessage("error", "Seleccione al menos un pago");
@@ -180,14 +207,11 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
                 }
                 setisGenerateActionOpen(true);
               }}
+              className="flex h-[var(--control-h)] w-[var(--control-h)] cursor-pointer items-center justify-center rounded-lg border border-cp-line-2 bg-cp-surface text-cp-ink hover:border-cp-ink"
             >
-              Generar acción
-            </Button>
-            <PrincipalButton onClick={handleOpenBankRules} customStyles={{ marginLeft: "auto" }}>
-              Reglas de bancos
-              <Bank size={16} />
-            </PrincipalButton>
-          </div>
+              <DotsThree size={18} weight="bold" />
+            </button>
+          </BanksSlot>
 
           {isLoading ? (
             <Flex justify="center">
@@ -197,34 +221,39 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
             <Collapse
               stickyLabel
               labelStickyOffset={"6rem"}
-              items={data?.slice().sort((a, b) => {
-                const ia = STATUS_ORDER.indexOf(a.payments_status);
-                const ib = STATUS_ORDER.indexOf(b.payments_status);
-                return (ia === -1 ? STATUS_ORDER.length : ia) - (ib === -1 ? STATUS_ORDER.length : ib);
-              }).map((status) => ({
-                key: status.payments_status_id,
-                label: (
-                  <LabelCollapse
-                    status={status.payments_status}
-                    color={status.color}
-                    quantity={status.payments.length}
-                    total={status.total_account || 0}
-                  />
-                ),
-                children: (
-                  <BanksTable
-                    clientsByStatus={status.payments.map((client) => ({
-                      ...client,
-                      client_status_id: status.payments_status_id
-                    }))}
-                    handleOpenPaymentDetail={handleOpenPaymentDetail}
-                    selectedRows={selectedRows}
-                    setSelectedRows={setSelectedRows}
-                    bankStatusId={status.payments_status_id}
-                    clearSelected={clearSelected}
-                  />
-                )
-              }))}
+              items={data
+                ?.slice()
+                .sort((a, b) => {
+                  const ia = STATUS_ORDER.indexOf(a.payments_status);
+                  const ib = STATUS_ORDER.indexOf(b.payments_status);
+                  return (
+                    (ia === -1 ? STATUS_ORDER.length : ia) - (ib === -1 ? STATUS_ORDER.length : ib)
+                  );
+                })
+                .map((status) => ({
+                  key: status.payments_status_id,
+                  label: (
+                    <LabelCollapse
+                      status={status.payments_status}
+                      color={status.color}
+                      quantity={status.payments.length}
+                      total={status.total_account || 0}
+                    />
+                  ),
+                  children: (
+                    <BanksTable
+                      clientsByStatus={status.payments.map((client) => ({
+                        ...client,
+                        client_status_id: status.payments_status_id
+                      }))}
+                      handleOpenPaymentDetail={handleOpenPaymentDetail}
+                      selectedRows={selectedRows}
+                      setSelectedRows={setSelectedRows}
+                      bankStatusId={status.payments_status_id}
+                      clearSelected={clearSelected}
+                    />
+                  )
+                }))}
             />
           )}
 

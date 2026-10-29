@@ -46,7 +46,7 @@ const STATUS_TABS: AlertsStatusFilter[] = ["all", "blocked", "warning", "ok"];
 
 /** Toggle Clientes / Puntos de venta: en móvil, letra e íconos más pequeños para que quepa. */
 const VIEW_LABEL =
-  "flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold max-md:gap-1 max-md:text-[11.5px]";
+  "flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold max-md:gap-1 max-md:text-[13px]";
 const VIEW_ICON = "h-3.5 w-3.5 shrink-0 max-md:h-3 max-md:w-3";
 
 /** Sin tildes ni mayúsculas: "exito" encuentra "Éxito". */
@@ -148,7 +148,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
       )}
       {matches.length > PAGE_SIZE && (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-[12px] text-cp-ink-3">
+          <span className="text-[13px] text-cp-ink-3">
             {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + visible.length} de{" "}
             {plural(matches.length, ...noun)}
           </span>
@@ -262,7 +262,6 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
             </span>
           )
         }
-        themeToggle={!clientId}
       />
 
       {error && (
@@ -314,7 +313,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
             />
           </section>
 
-          <p className="m-0 text-center text-[11.5px] leading-relaxed text-cp-ink-4">
+          <p className="m-0 text-center text-[13px] leading-relaxed text-cp-ink-4">
             {BLOCKING_RULES}
             {isPos && (
               <>

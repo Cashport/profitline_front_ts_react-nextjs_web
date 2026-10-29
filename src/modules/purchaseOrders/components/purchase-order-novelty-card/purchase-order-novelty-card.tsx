@@ -31,7 +31,7 @@ export function PurchaseOrderNoveltyCard({ novelties }: PurchaseOrderNoveltyCard
             </h3>
             <Badge
               variant="outline"
-              className="text-xs"
+              className="text-[13px]"
               style={{
                 borderColor: "#FFA726",
                 color: "#FFA726",
@@ -45,7 +45,7 @@ export function PurchaseOrderNoveltyCard({ novelties }: PurchaseOrderNoveltyCard
             {novelties.map((novelty) => (
               <div key={novelty.id} className="flex items-start gap-2 text-sm">
                 <span className="text-orange-500 h-[14px]">•</span>
-                <p className="text-gray-700 text-xs mt-[2px]">
+                <p className="text-gray-700 text-[13px] mt-[2px]">
                   <strong>{novelty.novelty_type_name}:</strong> {novelty.description}
                 </p>
               </div>

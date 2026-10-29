@@ -24,7 +24,7 @@ export default function FilterModalFooter({
       >
         Limpiar todo
       </button>
-      {summary && <span className="text-[12.5px] text-cp-ink-3">{summary}</span>}
+      {summary && <span className="text-[13px] text-cp-ink-3">{summary}</span>}
       <div className="flex-1" />
       <button
         type="button"

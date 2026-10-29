@@ -44,7 +44,7 @@ export function MedicalAccountsToolbar({
         <Select
           allowClear
           placeholder="Estado"
-          style={{ width: 180, height: 38 }}
+          style={{ width: 180, height: "var(--control-h)" }}
           options={statuses.map(({ code, name }) => ({ value: code, label: name }))}
           value={statusFilter}
           onChange={(value) => onStatusChange(value ?? null)}
@@ -53,7 +53,7 @@ export function MedicalAccountsToolbar({
         <Input
           allowClear
           placeholder="EPS"
-          style={{ width: 160, height: 38 }}
+          style={{ width: 160, height: "var(--control-h)" }}
           value={epsFilter}
           onChange={(e) => onEpsChange(e.target.value)}
         />
@@ -65,9 +65,12 @@ export function MedicalAccountsToolbar({
         />
       </div>
 
-      <PrincipalButton icon={<Plus size={18} />} onClick={onAdd}>
-        Agregar cuenta médica
-      </PrincipalButton>
+      {/* PrincipalButton fija height:100% con !important: el contenedor le da el alto del buscador (--control-h) */}
+      <div className="h-[var(--control-h)] flex-shrink-0">
+        <PrincipalButton icon={<Plus size={18} />} onClick={onAdd} customStyles={{ fontSize: 14 }}>
+          Agregar cuenta médica
+        </PrincipalButton>
+      </div>
     </div>
   );
 }

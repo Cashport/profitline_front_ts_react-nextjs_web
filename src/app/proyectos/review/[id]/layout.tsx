@@ -1,14 +1,12 @@
 "use client";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { Tabs, Flex, Skeleton, Typography } from "antd";
+import { Tabs, Flex, Skeleton } from "antd";
 
 import { extractSingleParam } from "@/utils/utils";
 import { useProject } from "@/hooks/useProject";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 
 import "./layoutProjectDetail.scss";
-
-const { Title } = Typography;
 
 export default function ProjectLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -41,26 +39,13 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
   ];
 
   return (
-    <ViewWrapper headerTitle="">
-      <Flex vertical className="containerTabsAndContent">
-        {/* Title Section */}
-        <Flex component={"navbar"} align="center" justify="space-between">
-          <Flex className="infoHeaderProject">
-            <Flex gap={"2rem"} align="center" style={{ width: "100%" }}>
-              {loading ? (
-                <>
-                  <Skeleton.Input size="large" />
-                  <Skeleton.Input size="large" />
-                </>
-              ) : (
-                <Title level={1} className="titleName">
-                  {data?.PROJECT_DESCRIPTION ?? ""}
-                </Title>
-              )}
-            </Flex>
-          </Flex>
-        </Flex>
-
+    // Header compartido: nombre del proyecto y "‹" al listado (docs/DESIGN.md §4)
+    <ViewWrapper
+      headerTitle={loading ? "" : data?.PROJECT_DESCRIPTION ?? ""}
+      headerTitleExtra={loading ? <Skeleton.Input size="small" active /> : undefined}
+      headerBack="/settings"
+    >
+      <Flex vertical className="cp-card containerTabsAndContent px-[18px] py-[14px]">
         {/* Tabs Section */}
         <Flex className="tabsContainer">
           <Tabs

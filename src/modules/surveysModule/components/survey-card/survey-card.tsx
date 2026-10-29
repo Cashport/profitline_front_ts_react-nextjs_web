@@ -8,7 +8,7 @@ import { formatDateAndTime } from "@/utils/utils";
 import SurveyStatus from "../survey-status/survey-status";
 
 const ACTION_CLASS =
-  "flex h-8 items-center rounded-md border border-border px-2.5 text-xs font-semibold text-foreground transition-colors hover:border-[#9bb514] hover:text-foreground";
+  "flex h-8 items-center rounded-md border border-border px-2.5 text-[13px] font-semibold text-foreground transition-colors hover:border-[#9bb514] hover:text-foreground";
 
 /** Fila del listado en pantallas angostas, donde la tabla no cabe. */
 export default function SurveyCard({ form }: { form: IVisitFormListItem }) {
@@ -24,7 +24,7 @@ export default function SurveyCard({ form }: { form: IVisitFormListItem }) {
         <SurveyStatus status={form.status} />
       </div>
 
-      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-muted-foreground">
         <span>
           <b className="font-semibold text-foreground">
             {form.response_count.toLocaleString("es-CO")}

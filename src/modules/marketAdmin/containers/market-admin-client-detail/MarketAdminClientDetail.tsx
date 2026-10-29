@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import useSWR from "swr";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, Package, Tag, Users, MapPin, Settings } from "lucide-react";
+import { Package, Tag, Users, MapPin, Settings } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -39,11 +38,12 @@ import UsuariosTab from "@/modules/marketAdmin/components/market-admin-client-de
 import ProductosTab from "@/modules/marketAdmin/components/market-admin-client-detail/ProductosTab";
 import ConfiguracionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/ConfiguracionesTab";
 import ClientCodeSelect from "@/modules/marketAdmin/components/market-admin-client-detail/ClientCodeSelect";
+import Header from "@/components/organisms/header";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-[#999999]">{label}</span>
+      <span className="text-[13px] text-[#999999]">{label}</span>
       <span className="text-sm font-bold text-[#141414]">{value}</span>
     </div>
   );
@@ -271,22 +271,16 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">{cliente.client_name}</h1>
-
-      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
-          <Link
-            href="/market-admin/clientes"
-            className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] transition-colors"
-          >
-            <ArrowLeft size={14} /> Volver
-          </Link>
+    <div className="cp-page min-h-full">
+      {/* Volver, código y estado van en el header compartido (docs/DESIGN.md §4) */}
+      <Header
+        title={cliente.client_name}
+        back="/market-admin/clientes"
+        actionsExtra={
           <div className="flex items-center gap-3">
             <ClientCodeSelect nit={cliente.nit} codigo={codigo} codes={codes} />
             <span
-              className={`text-xs font-semibold px-3 py-1 rounded-full ${
+              className={`text-[13px] font-semibold px-3 py-1 rounded-full ${
                 isActive === 1 ? "bg-[#E6F9E6] text-[#1A7A1A]" : "bg-[#EEEEEE] text-[#999999]"
               }`}
             >
@@ -297,8 +291,10 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
                   : "Inactivo"}
             </span>
           </div>
-        </div>
+        }
+      />
 
+      <div className="cp-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
         {/* Información general */}
         <div>
           <p className="text-sm font-bold text-[#141414] mb-4">Información general</p>
@@ -316,10 +312,10 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
                     return (
                       <span
                         key={l}
-                        className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full"
+                        className="flex items-center gap-1 text-[13px] font-bold px-2 py-0.5 rounded-full"
                         style={{ backgroundColor: c.bg, color: c.text }}
                       >
-                        <span className="w-3.5 h-3.5 rounded-full bg-white/30 flex items-center justify-center text-[8px]">
+                        <span className="h-[18px] px-1 rounded-full bg-white/30 flex items-center justify-center text-[13px]">
                           {lineaAbrev(l)}
                         </span>
                         {l}

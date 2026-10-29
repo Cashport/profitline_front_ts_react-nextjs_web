@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
-import { ProfileMenu } from "@/components/atoms/ProfileMenu/ProfileMenu";
+import UserMenu from "@/components/organisms/header/user-menu/user-menu";
 
 interface SurveyPageHeaderProps {
   backHref: string;
@@ -45,13 +45,13 @@ export default function SurveyPageHeader({
       </Link>
 
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
-        <h1 className="truncate text-2xl font-semibold text-foreground">{title}</h1>
+        <h1 className="truncate text-[18px] font-semibold text-foreground">{title}</h1>
         {titleExtra}
       </div>
 
       <div className="ml-auto flex flex-wrap items-center gap-2">
         {actions}
-        <ProfileMenu />
+        <UserMenu />
       </div>
     </header>
   );

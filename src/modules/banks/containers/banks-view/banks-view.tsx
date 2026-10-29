@@ -1,7 +1,9 @@
 "use client";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
+import { BanksChromeContext } from "../../contexts/banks-chrome-context";
 
 import styles from "./banks-view.module.scss";
 import ActivePaymentsTab from "../active-payments-tab";
@@ -23,6 +25,10 @@ export const BanksView: FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Espacios donde la pestaña activa pinta sus controles (ver banks-chrome-context).
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  const [tabsSlot, setTabsSlot] = useState<HTMLElement | null>(null);
 
   const tabFromUrl = searchParams.get("tab");
   const activeKey = tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : TAB_KEYS.activePayments;
@@ -80,15 +86,24 @@ export const BanksView: FC = () => {
   ];
 
   return (
-    <div className={styles.banksView}>
-      <UiTab
-        tabs={items}
-        sticky
-        stickyOffset="-1rem"
-        activeKey={activeKey}
-        onChangeTab={handleChangeTab}
-      />
-    </div>
+    <BanksChromeContext.Provider value={{ headerSlot, tabsSlot }}>
+      <div className="cp-page">
+        <Header
+          title="Bancos"
+          actionsExtra={<div ref={setHeaderSlot} className="cp-on-page flex items-center gap-2" />}
+        />
+        <div className={styles.banksView}>
+          <UiTab
+            tabs={items}
+            sticky
+            stickyOffset="0"
+            activeKey={activeKey}
+            onChangeTab={handleChangeTab}
+            tabBarExtraContent={<div ref={setTabsSlot} className="flex items-center gap-2" />}
+          />
+        </div>
+      </div>
+    </BanksChromeContext.Provider>
   );
 };
 

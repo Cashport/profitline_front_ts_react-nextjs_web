@@ -77,7 +77,7 @@ function LaneMore({
           type="button"
           onClick={more.loadMore}
           disabled={more.isLoading}
-          className="cursor-pointer rounded-md border border-dashed border-border bg-transparent py-1.5 text-[11.5px] font-semibold text-muted-foreground hover:text-foreground disabled:cursor-default disabled:opacity-60"
+          className="cursor-pointer rounded-md border border-dashed border-border bg-transparent py-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground disabled:cursor-default disabled:opacity-60"
         >
           {more.isLoading
             ? "Cargando…"

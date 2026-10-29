@@ -2,13 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { Select as AntSelect, message } from "antd";
 
 import Header from "@/components/organisms/header";
-import { Card, CardContent } from "@/modules/chat/ui/card";
 import UiSearchInput from "@/components/ui/search-input";
-import { Button } from "@/modules/chat/ui/button";
 import { runBotNow } from "@/services/dataQuality/dataQuality";
 import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
 import { useConfirmBotExecution } from "@/hooks/useConfirmBotExecution";
@@ -30,14 +27,6 @@ export default function AutomationsView() {
   const [executingScheduleId, setExecutingScheduleId] = useState<number | null>(null);
   const [selectedBot, setSelectedBot] = useState<IBotStatusItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const handleGoBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/data-quality/alerts");
-    }
-  };
 
   // id_client_data es el mismo identificador que ya usa Clientes para esta ruta
   // (ver CountriesClientsView: router.push(`/data-quality/client/${record.id}`)).
@@ -113,68 +102,56 @@ export default function AutomationsView() {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <Header title="Salud de Automatizaciones" />
+    <div className="cp-page">
+      <Header title="Salud de Automatizaciones" back="/data-quality/alerts" />
 
-      <Card className="p-0 border-none">
-        <CardContent className="pt-6">
-          <div className="mb-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-700 hover:text-gray-900"
-                onClick={handleGoBack}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Atrás
-              </Button>
-
-              <div className="flex-1 min-w-64">
-                <UiSearchInput
-                  placeholder="Buscar cliente o bot..."
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              <AntSelect
-                showSearch
-                optionFilterProp="label"
-                value={countryFilter}
-                onChange={setCountryFilter}
-                placeholder="Todos los países"
-                className="w-48"
-                style={{ minWidth: "12rem", height: "48px" }}
-                options={[
-                  { label: "Todos los países", value: "all" },
-                  ...uniqueCountries.map((country) => ({ label: country, value: country }))
-                ]}
+      <div className="cp-card px-[18px] py-[14px]">
+        <div className="mb-6">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex-1 min-w-64">
+              <UiSearchInput
+                placeholder="Buscar cliente o bot..."
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-          </div>
 
-          <AutomationStatusCards
-            summary={summary}
-            statusFilter={statusFilter}
-            onStatusClick={setStatusFilter}
-          />
-
-          <div className="pt-6">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
-              Bots por cliente
-            </h3>
-            <BotsTable
-              bots={filteredBots}
-              totalBots={bots.length}
-              loading={isLoading}
-              executingScheduleId={executingScheduleId}
-              onRun={requestExecution}
-              onViewHistory={handleViewHistory}
-              onClientClick={goToClient}
+            <AntSelect
+              showSearch
+              optionFilterProp="label"
+              value={countryFilter}
+              onChange={setCountryFilter}
+              placeholder="Todos los países"
+              className="w-48"
+              style={{ minWidth: "12rem", height: "var(--control-h)" }}
+              options={[
+                { label: "Todos los países", value: "all" },
+                ...uniqueCountries.map((country) => ({ label: country, value: country }))
+              ]}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <AutomationStatusCards
+          summary={summary}
+          statusFilter={statusFilter}
+          onStatusClick={setStatusFilter}
+        />
+
+        <div className="pt-6">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
+            Bots por cliente
+          </h3>
+          <BotsTable
+            bots={filteredBots}
+            totalBots={bots.length}
+            loading={isLoading}
+            executingScheduleId={executingScheduleId}
+            onRun={requestExecution}
+            onViewHistory={handleViewHistory}
+            onClientClick={goToClient}
+          />
+        </div>
+      </div>
 
       <BotHistoryDrawer
         bot={selectedBot}

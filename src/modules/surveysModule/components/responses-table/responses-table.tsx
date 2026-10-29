@@ -13,7 +13,7 @@ interface ResponsesTableProps {
 }
 
 const TH =
-  "border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
+  "border-b border-cp-line bg-cp-surface px-3 py-3 text-left text-[13.5px] font-semibold text-cp-ink";
 
 /** La fecha de una respuesta: la de cierre, o la del último guardado si quedó parcial. */
 const responseDate = (r: IVisitFormResponseListItem) =>
@@ -66,7 +66,7 @@ export default function ResponsesTable({ responses, onOpen }: ResponsesTableProp
                     {r.client_name ?? "—"}
                   </span>
                   {r.client_nit && (
-                    <span className="block text-[11px] text-muted-foreground">
+                    <span className="block text-[13px] text-muted-foreground">
                       NIT {r.client_nit}
                     </span>
                   )}
@@ -98,7 +98,7 @@ export default function ResponsesTable({ responses, onOpen }: ResponsesTableProp
             <span className="truncate text-[13.5px] font-semibold text-[#1677ff]">
               {r.client_name ?? "—"}
             </span>
-            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted-foreground">
               <span>{responseDate(r)}</span>
               <span>{r.user_name ?? "—"}</span>
               <StatusPill

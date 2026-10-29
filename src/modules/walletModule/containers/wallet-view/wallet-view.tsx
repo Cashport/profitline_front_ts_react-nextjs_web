@@ -366,7 +366,7 @@ export default function WalletView() {
   const primeraCarga = !matrix && !error;
 
   return (
-    <div className="wallet-scope flex flex-col gap-4 pb-6">
+    <div className="wallet-scope cp-page pb-6">
       <WalletHeader
         search={search}
         onSearchChange={setSearch}

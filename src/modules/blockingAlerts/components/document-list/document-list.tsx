@@ -67,7 +67,7 @@ export default function DocumentList<T>({
               onChange={() => onSelectedChange(allOn ? others : [...others, ...ids])}
             />
             <span className="flex-1 text-[13px] font-semibold text-cp-ink">Seleccionar todas</span>
-            <span className="text-[12px] text-cp-ink-3">
+            <span className="text-[13px] text-cp-ink-3">
               {plural(items.length, ...noun)} · {money(total(items))}
             </span>
           </label>
@@ -89,7 +89,7 @@ export default function DocumentList<T>({
                   <span className="block truncate text-[13px] font-semibold text-cp-ink">
                     {title}
                   </span>
-                  <span className="flex items-center gap-1.5 text-[12px] text-cp-ink-3">
+                  <span className="flex items-center gap-1.5 text-[13px] text-cp-ink-3">
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ background: dot }}

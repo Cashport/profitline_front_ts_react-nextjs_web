@@ -64,7 +64,7 @@ export default function SurveyResponseModal({ responseId, onClose }: SurveyRespo
                       href={file.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-[#1677ff]"
+                      className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[13px] font-medium text-[#1677ff]"
                     >
                       <FileText className="h-3.5 w-3.5" />
                       {file.name}
@@ -103,7 +103,7 @@ export default function SurveyResponseModal({ responseId, onClose }: SurveyRespo
             <span className="text-[17px] font-semibold">
               {response.client.name ?? "Cliente sin nombre"}
             </span>
-            <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-muted-foreground">
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-normal text-muted-foreground">
               {formatDateAndTime(response.completedAt ?? response.startedAt)} ·{" "}
               {response.user.name ?? "—"}
               <StatusPill

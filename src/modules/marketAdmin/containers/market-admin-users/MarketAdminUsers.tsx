@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import { ChevronLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -23,6 +22,7 @@ import { inviteUser } from "@/services/users/users";
 import { ApiError } from "@/utils/api/api";
 import { IMarketAdminUser } from "@/types/marketAdmin/IMarketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
+import Header from "@/components/organisms/header";
 
 const PAGE_SIZE = 20;
 
@@ -138,7 +138,7 @@ export default function MarketAdminUsers() {
       onHeaderCell: headerCell,
       render: (rol: string) => (
         <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${ROL_STYLES[rol] ?? "bg-[#F0F0F0] text-[#666666]"}`}
+          className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${ROL_STYLES[rol] ?? "bg-[#F0F0F0] text-[#666666]"}`}
         >
           {rol || "—"}
         </span>
@@ -162,7 +162,7 @@ export default function MarketAdminUsers() {
       onHeaderCell: headerCell,
       render: (isActive: 1 | 0) => (
         <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
+          className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${
             isActive === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
           }`}
         >
@@ -187,18 +187,12 @@ export default function MarketAdminUsers() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Usuarios</h1>
+    <div className="cp-page min-h-full">
+      <Header title="Usuarios" back="/market-admin" />
 
-      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
-          <Link
-            href="/market-admin"
-            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
-          >
-            <ChevronLeft size={18} />
-          </Link>
           <UiSearchInput
             placeholder="Buscar..."
             onChange={(e) => {
@@ -244,8 +238,12 @@ export default function MarketAdminUsers() {
           <FilterUsersModal value={filter} onChange={handleFilterChange} />
 
           {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
-          <div className="h-10 flex-shrink-0 ml-auto">
-            <PrincipalButton onClick={() => setShowCreate(true)} icon={<Plus size={15} />}>
+          <div className="h-[var(--control-h)] flex-shrink-0 ml-auto">
+            <PrincipalButton
+              onClick={() => setShowCreate(true)}
+              icon={<Plus size={18} />}
+              customStyles={{ fontSize: 14 }}
+            >
               Crear usuario
             </PrincipalButton>
           </div>

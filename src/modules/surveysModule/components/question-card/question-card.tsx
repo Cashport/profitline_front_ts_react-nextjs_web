@@ -132,7 +132,7 @@ export default function QuestionCard({
     </span>
   );
   const number = (
-    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-foreground">
+    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-[13px] font-semibold text-foreground">
       {index + 1}
     </span>
   );
@@ -244,9 +244,9 @@ export default function QuestionCard({
               {question.label || <span className="text-muted-foreground">Pregunta sin título</span>}
               {question.required && <span className="text-[#e0007a]"> *</span>}
             </div>
-            {subLine && <div className="truncate text-xs text-muted-foreground">{subLine}</div>}
+            {subLine && <div className="truncate text-[13px] text-muted-foreground">{subLine}</div>}
           </div>
-          <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex shrink-0 items-center gap-2 text-[13px] text-muted-foreground">
             {question.visible_if && (
               <span
                 title="Se muestra según la respuesta de otra pregunta"

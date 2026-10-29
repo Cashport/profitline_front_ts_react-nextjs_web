@@ -21,6 +21,8 @@ interface ModalFilterMatrixProps {
   selectableEstados: EstadoId[];
   /** El catálogo de estados aún no llega. */
   estadosLoading?: boolean;
+  /** En el header compartido: chips a la izquierda de "Filtrar" (ver FilterModal). */
+  inHeader?: boolean;
 }
 
 type Loading = "loading" | undefined;
@@ -56,7 +58,8 @@ export default function ModalFilterMatrix({
   value,
   onChange,
   selectableEstados,
-  estadosLoading = false
+  estadosLoading = false,
+  inHeader
 }: ModalFilterMatrixProps) {
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
@@ -154,6 +157,7 @@ export default function ModalFilterMatrix({
       onApply={(sel) => onChange(selectionToDomain(sel))}
       onValueChange={(sel) => onChange(selectionToDomain(sel))}
       onClearAll={() => onChange(EMPTY_MATRIX_MODAL_FILTERS)}
+      inHeader={inHeader}
     />
   );
 }

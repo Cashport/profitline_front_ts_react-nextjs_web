@@ -101,7 +101,8 @@ export default function ModalShippingInfo({
   const splitProductDescriptions = useMemo(() => {
     const descs: string[] = [];
     for (const i of discountItems) {
-      if ((draft.cantidades[i.item_uuid || i.product_sku] ?? 0) > 0) descs.push(i.description ?? "");
+      if ((draft.cantidades[i.item_uuid || i.product_sku] ?? 0) > 0)
+        descs.push(i.description ?? "");
     }
     for (const b of bonusItems) {
       if ((draft.bonusCantidades[b.product_sku] ?? 0) > 0) descs.push(b.description ?? "");
@@ -182,10 +183,10 @@ export default function ModalShippingInfo({
   // (o la autocomplete desde la ciudad seleccionada).
   useEffect(() => {
     const matchedWarehouseId = businessUnit
-    ? (warehouseBu as Record<string, number | undefined>)[businessUnit]
+      ? (warehouseBu as Record<string, number | undefined>)[businessUnit]
       : undefined;
-      if (matchedWarehouseId !== undefined) {
-      console.log("rerender")
+    if (matchedWarehouseId !== undefined) {
+      console.log("rerender");
       setWarehouseForced(matchedWarehouseId);
       setDraft((d) => ({ ...d, warehouse_id: matchedWarehouseId }));
     } else {
@@ -248,9 +249,9 @@ export default function ModalShippingInfo({
           {/* Left: productos */}
           <div className="flex-1 flex flex-col min-h-0 border-r border-[#EEEEEE]">
             <div className="grid grid-cols-[1fr_48px_64px] px-4 py-2.5 bg-[#FAFAFA] border-b border-[#EEEEEE] flex-shrink-0">
-              <span className="text-[10px] text-[#999999] font-semibold">Producto</span>
-              <span className="text-[10px] text-[#999999] font-semibold text-center">Disp.</span>
-              <span className="text-[10px] text-[#999999] font-semibold text-center">Cant.</span>
+              <span className="text-[13px] text-[#999999] font-semibold">Producto</span>
+              <span className="text-[13px] text-[#999999] font-semibold text-center">Disp.</span>
+              <span className="text-[13px] text-[#999999] font-semibold text-center">Cant.</span>
             </div>
             <div className="overflow-y-auto flex-1">
               {discountItems.map((item, iIdx) => {
@@ -267,9 +268,11 @@ export default function ModalShippingInfo({
                     key={`${item.product_sku}::${iIdx}`}
                     className={`grid grid-cols-[1fr_48px_64px] items-center px-4 py-3 ${!isLastRow ? "border-b border-[#F4F4F4]" : ""}`}
                   >
-                    <p className="text-xs text-[#141414] leading-tight pr-2">{item.description}</p>
+                    <p className="text-[13px] text-[#141414] leading-tight pr-2">
+                      {item.description}
+                    </p>
                     <p
-                      className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
+                      className={`text-[13px] font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
                     >
                       {puedeAsignar}
                     </p>
@@ -289,7 +292,7 @@ export default function ModalShippingInfo({
                           cantidades: { ...d.cantidades, [item.item_uuid || item.product_sku]: v }
                         }));
                       }}
-                      className="w-full text-center text-xs font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                      className="w-full text-center text-[13px] font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
                     />
                   </div>
                 );
@@ -297,7 +300,7 @@ export default function ModalShippingInfo({
               {hasBonus && (
                 <>
                   <div className="grid grid-cols-[1fr_48px_64px] px-4 py-2 bg-[#F7FDE8] border-y border-[#F0F9D8] items-center">
-                    <span className="text-[10px] text-[#6AB000] font-semibold uppercase tracking-wide flex items-center gap-1.5">
+                    <span className="text-[13px] text-[#6AB000] font-semibold flex items-center gap-1.5">
                       <Gift size={10} />
                       Bonificados
                     </span>
@@ -318,11 +321,11 @@ export default function ModalShippingInfo({
                         key={`promo-${item.product_sku}`}
                         className={`grid grid-cols-[1fr_48px_64px] items-center px-4 py-3 bg-[#FDFFF5] ${!isLastBonus ? "border-b border-[#F0F9D8]" : ""}`}
                       >
-                        <p className="text-xs text-[#141414] leading-tight pr-2">
+                        <p className="text-[13px] text-[#141414] leading-tight pr-2">
                           {item.description}
                         </p>
                         <p
-                          className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
+                          className={`text-[13px] font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
                         >
                           {puedeAsignar}
                         </p>
@@ -342,7 +345,7 @@ export default function ModalShippingInfo({
                               bonusCantidades: { ...d.bonusCantidades, [item.product_sku]: v }
                             }));
                           }}
-                          className="w-full text-center text-xs font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                          className="w-full text-center text-[13px] font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
                         />
                       </div>
                     );
@@ -360,11 +363,11 @@ export default function ModalShippingInfo({
                         key={`other-${item.product_sku}`}
                         className={`grid grid-cols-[1fr_48px_64px] items-center px-4 py-3 bg-[#FDFFF5] ${!isLastOther ? "border-b border-[#F0F9D8]" : ""}`}
                       >
-                        <p className="text-xs text-[#141414] leading-tight pr-2">
+                        <p className="text-[13px] text-[#141414] leading-tight pr-2">
                           {item.description}
                         </p>
                         <p
-                          className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
+                          className={`text-[13px] font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
                         >
                           {puedeAsignar}
                         </p>
@@ -387,7 +390,7 @@ export default function ModalShippingInfo({
                               }
                             }));
                           }}
-                          className="w-full text-center text-xs font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                          className="w-full text-center text-[13px] font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
                         />
                       </div>
                     );
@@ -398,7 +401,7 @@ export default function ModalShippingInfo({
 
             {splitTotal > 0 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-[#EEEEEE] bg-[#FAFAFA] flex-shrink-0">
-                <span className="text-xs text-[#666666]">
+                <span className="text-[13px] text-[#666666]">
                   Total{" "}
                   <span className="text-[#999999]">
                     ({Object.values(draft.cantidades).reduce((s, v) => s + v, 0)} und.)
@@ -412,13 +415,13 @@ export default function ModalShippingInfo({
           {/* Right: formulario */}
           <div className="w-[40%] flex-shrink-0 overflow-y-auto px-4 py-4 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-[#666666]">
+              <label className="text-[13px] font-semibold text-[#666666]">
                 Dirección de entrega
               </label>
               <select
                 value={draft.addressSelectValue}
                 onChange={(e) => setDraft((d) => ({ ...d, addressSelectValue: e.target.value }))}
-                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
+                className="w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
               >
                 <option value="" disabled>
                   Seleccione una dirección
@@ -432,7 +435,7 @@ export default function ModalShippingInfo({
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-[#666666]">Ciudad</label>
+              <label className="text-[13px] font-semibold text-[#666666]">Ciudad</label>
               <CitiesSelect
                 cities={warehouseCities}
                 isLoading={isCityLoading}
@@ -446,7 +449,7 @@ export default function ModalShippingInfo({
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-[#666666]">
+              <label className="text-[13px] font-semibold text-[#666666]">
                 Dirección de despacho
               </label>
               <input
@@ -456,14 +459,14 @@ export default function ModalShippingInfo({
                 maxLength={35}
                 readOnly={!isNewAddress}
                 onChange={(e) => setDraft((d) => ({ ...d, dispatch_address: e.target.value }))}
-                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
+                className="w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
               />
-              {isNewAddress && <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>}
+              {isNewAddress && <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>}
             </div>
 
             {isNewAddress && (
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-semibold text-[#666666]">
+                <label className="text-[13px] font-semibold text-[#666666]">
                   Bodega de despacho
                 </label>
                 <WarehouseSelect
@@ -476,25 +479,25 @@ export default function ModalShippingInfo({
             )}
 
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-[#666666]">Correo electrónico</label>
+              <label className="text-[13px] font-semibold text-[#666666]">Correo electrónico</label>
               <input
                 type="email"
                 placeholder="correo@ejemplo.com"
                 value={draft.email}
                 onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
-                className={`w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                className={`w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
                   isEmailInvalid
                     ? "border-red-400 focus:border-red-500"
                     : "border-[#DDDDDD] focus:border-[#141414]"
                 }`}
               />
               {isEmailInvalid && (
-                <p className="text-[10px] text-red-500">Correo electrónico no válido</p>
+                <p className="text-[13px] text-red-500">Correo electrónico no válido</p>
               )}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-[#666666]">
+              <label className="text-[13px] font-semibold text-[#666666]">
                 Teléfono de contacto
               </label>
               <div className="flex gap-1.5">
@@ -502,7 +505,7 @@ export default function ModalShippingInfo({
                   value={draft.indicativo}
                   disabled={isLoadingOptions}
                   onChange={(e) => setDraft((d) => ({ ...d, indicativo: e.target.value }))}
-                  className="w-16 px-1.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] text-center"
+                  className="w-16 px-1.5 py-2 text-[13px] bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] text-center"
                 >
                   {callingCodeOptions.length === 0 && <option value="+57">+57</option>}
                   {callingCodeOptions.map((o) => {
@@ -521,7 +524,7 @@ export default function ModalShippingInfo({
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, telefono: e.target.value.replace(/\D/g, "") }))
                   }
-                  className={`flex-1 px-2.5 py-2 text-xs bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                  className={`flex-1 px-2.5 py-2 text-[13px] bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
                     isPhoneInvalid
                       ? "border-red-400 focus:border-red-500"
                       : "border-[#DDDDDD] focus:border-[#141414]"
@@ -529,12 +532,12 @@ export default function ModalShippingInfo({
                 />
               </div>
               {isPhoneInvalid && (
-                <p className="text-[10px] text-red-500">{phoneErrorMessage(draft.indicativo)}</p>
+                <p className="text-[13px] text-red-500">{phoneErrorMessage(draft.indicativo)}</p>
               )}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-[#666666]">Observaciones</label>
+              <label className="text-[13px] font-semibold text-[#666666]">Observaciones</label>
               <textarea
                 placeholder="Instrucciones especiales para esta entrega"
                 maxLength={35}
@@ -543,9 +546,9 @@ export default function ModalShippingInfo({
                   setDraft((d) => ({ ...d, observaciones: sanitizeComment(e.target.value) }))
                 }
                 rows={1}
-                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
+                className="w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
               />
-              <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+              <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
             </div>
           </div>
         </div>

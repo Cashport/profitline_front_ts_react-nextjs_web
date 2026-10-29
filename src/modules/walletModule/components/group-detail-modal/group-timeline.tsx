@@ -23,7 +23,7 @@ const DOT: Record<string, string> = {
 export default function GroupTimeline({ entries, tickets }: GroupTimelineProps) {
   if (!entries.length) {
     return (
-      <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+      <p className="text-[13px] leading-relaxed text-muted-foreground">
         Todavía no hay gestiones registradas en este grupo.
       </p>
     );
@@ -55,15 +55,15 @@ export default function GroupTimeline({ entries, tickets }: GroupTimelineProps) 
               {esTicket && st ? st.ico : e.tipo === "ticket_ok" ? "✓" : e.autor?.iniciales ?? "··"}
             </div>
 
-            <div className="min-w-0 text-[12.5px] text-foreground">
-              <div className="mb-0.5 text-[11px] text-muted-foreground">
+            <div className="min-w-0 text-[13px] text-foreground">
+              <div className="mb-0.5 text-[13px] text-muted-foreground">
                 {e.autor?.nombre ?? "Sistema"} · {fmtD(e.fecha)}
                 {e.tipo === "evento" ? " · evento" : ""}
               </div>
 
               {ticket && st ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-mono text-[11.5px] text-muted-foreground">{ticket.id}</span>
+                  <span className="font-mono text-[13px] text-muted-foreground">{ticket.id}</span>
                   {e.texto}
                   {ticket.estado === "abierto" && (
                     <StatusChip sev={st.tsev ?? st.sev}>{st.tiempo ?? st.estado}</StatusChip>

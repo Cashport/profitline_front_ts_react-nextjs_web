@@ -68,7 +68,7 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
               placeholder="Hola {'{nombre}'} tienes {'{dias_atraso}'} días de atraso..."
               className="min-h-[140px] bg-[#F7F7F7] border-[#DDDDDD]"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               Soporta variables simples como {"{nombre}"} y {"{dias_atraso}"}.
             </p>
           </div>
@@ -78,7 +78,9 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
           >
             <div>
               <p className="text-sm font-medium">Vista previa de enlaces</p>
-              <p className="text-xs text-muted-foreground">Enviar con vista previa enriquecida</p>
+              <p className="text-[13px] text-muted-foreground">
+                Enviar con vista previa enriquecida
+              </p>
             </div>
             <Switch checked={preview} onCheckedChange={setPreview} />
           </div>

@@ -23,7 +23,7 @@ export default function ActionTileGroup({
     <section className={className}>
       <div className="mb-3 flex items-center gap-2">
         <span className={cn("h-1.5 w-1.5 rounded-full", actionToneClasses[tone].dot)} />
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <span className="text-[13px] font-semibold text-muted-foreground">
           {title}
         </span>
       </div>

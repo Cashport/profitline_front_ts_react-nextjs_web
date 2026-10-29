@@ -1,7 +1,6 @@
 "use client";
 
 import Header from "@/components/organisms/header";
-import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
 import BoardSelector from "../board-selector/board-selector";
 
 interface RecaudoHeaderProps {
@@ -20,18 +19,15 @@ interface RecaudoHeaderProps {
  */
 export default function RecaudoHeader({ info, tools, below }: RecaudoHeaderProps) {
   return (
-    // -mb-3.5 anula el gap-3.5 de la vista: el contenido arranca justo bajo el header, como en Clientes.
-    <div className="sticky top-0 z-20 -mb-3.5 flex flex-col bg-cp-bg">
+    // El Header va envuelto (fijo junto con los chips), así que .cp-page no lo reconoce como hijo
+    // directo: el margen negativo anula aquí el --section-gap de la vista, igual que hace .cp-page
+    // con el Header suelto. El contenido arranca justo bajo el header, como en Clientes.
+    <div className="sticky top-0 z-20 -mb-[var(--section-gap)] flex flex-col bg-cp-bg">
       <Header
         title="Torre de control de recaudo"
         titleNode={<BoardSelector />}
         titleExtra={info}
-        actionsExtra={
-          <>
-            {tools}
-            <WalletThemeToggle />
-          </>
-        }
+        actionsExtra={<>{tools}</>}
         className="!static"
       />
       {below}

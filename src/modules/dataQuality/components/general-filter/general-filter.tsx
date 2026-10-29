@@ -76,10 +76,30 @@ export function DataQualityGeneralFilter({
     icon: React.ReactNode;
     options: { value: string | null; label: string }[];
   }[] = [
-    { key: "status", label: "Estados", icon: <Filter className="h-3 w-3 inline mr-1" />, options: statusOptions },
-    { key: "periodicity", label: "Periodicidad", icon: <Calendar className="h-3 w-3 inline mr-1" />, options: periodicityOptions },
-    { key: "fileType", label: "Tipo de archivo", icon: <FileText className="h-3 w-3 inline mr-1" />, options: fileTypeOptions },
-    { key: "intakeType", label: "Tipo de ingesta", icon: <Package className="h-3 w-3 inline mr-1" />, options: intakeTypeOptions }
+    {
+      key: "status",
+      label: "Estados",
+      icon: <Filter className="h-3 w-3 inline mr-1" />,
+      options: statusOptions
+    },
+    {
+      key: "periodicity",
+      label: "Periodicidad",
+      icon: <Calendar className="h-3 w-3 inline mr-1" />,
+      options: periodicityOptions
+    },
+    {
+      key: "fileType",
+      label: "Tipo de archivo",
+      icon: <FileText className="h-3 w-3 inline mr-1" />,
+      options: fileTypeOptions
+    },
+    {
+      key: "intakeType",
+      label: "Tipo de ingesta",
+      icon: <Package className="h-3 w-3 inline mr-1" />,
+      options: intakeTypeOptions
+    }
   ];
 
   return (
@@ -87,7 +107,7 @@ export function DataQualityGeneralFilter({
       <Button
         variant="outline"
         size="sm"
-        className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-normal text-base"
+        className="h-[var(--control-h)] border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-normal text-sm"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Filter className="h-4 w-4 mr-2" />
@@ -100,7 +120,7 @@ export function DataQualityGeneralFilter({
           <div className="p-4 space-y-4 max-h-[calc(70*var(--vh))] overflow-y-auto [scrollbar-width:thin]">
             {sections.map((section) => (
               <div key={section.key}>
-                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
                   {section.icon}
                   {section.label}
                 </label>

@@ -31,7 +31,7 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
       <div className="p-4 space-y-4">
         {/* Tipo Filter Section */}
         <div>
-          <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+          <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
             <Tag className="h-3 w-3 inline mr-1" />
             Tipo
           </label>
@@ -57,7 +57,9 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
                     ? "bg-cashport-green text-cashport-black font-medium"
                     : "text-cashport-black"
                 }`}
-                onClick={() => onChange({ ...value, motive_ids: toggle(value.motive_ids, motive.id) })}
+                onClick={() =>
+                  onChange({ ...value, motive_ids: toggle(value.motive_ids, motive.id) })
+                }
               >
                 <div className="truncate" title={motive.name}>
                   {motive.name}
@@ -89,7 +91,7 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
       <Button
         variant="outline"
         disabled={isLoading}
-        className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
+        className="h-[var(--control-h)] border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
       >
         <Filter className="h-4 w-4 mr-2" />
         Filtros

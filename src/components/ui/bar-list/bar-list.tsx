@@ -36,7 +36,7 @@ interface BarListProps {
 
 export default function BarList({ rows, emptyLabel, maxHeight, wrapTrack }: BarListProps) {
   if (rows.length === 0) {
-    return <p className="py-2 text-[11.5px] text-muted-foreground">{emptyLabel}</p>;
+    return <p className="py-2 text-[13px] text-muted-foreground">{emptyLabel}</p>;
   }
 
   return (
@@ -65,7 +65,7 @@ export default function BarList({ rows, emptyLabel, maxHeight, wrapTrack }: BarL
         return (
           <div
             key={row.id}
-            className="grid grid-cols-[130px_1fr_82px] items-center gap-2.5 py-[5px] text-xs"
+            className="grid grid-cols-[130px_1fr_96px] items-center gap-2.5 py-[5px] text-[13px]"
           >
             <span className="truncate text-foreground" title={row.label}>
               {row.label}

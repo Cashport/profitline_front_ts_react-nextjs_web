@@ -62,7 +62,7 @@ function TooltipLabel({
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="max-w-xs bg-[#141414] text-white text-xs leading-relaxed p-3"
+          className="max-w-xs bg-[#141414] text-white text-[13px] leading-relaxed p-3"
         >
           {tooltip}
         </TooltipContent>
@@ -171,7 +171,7 @@ export default function PromocionCard({
             onChange={(e) => onChange({ ...promo, nombre: e.target.value })}
             className="text-sm font-semibold text-[#141414] outline-none bg-transparent w-full hover:bg-[#F7F7F7] focus:bg-[#F7F7F7] px-1.5 py-0.5 rounded transition-colors"
           />
-          <p className="text-xs text-[#999999] px-1.5">
+          <p className="text-[13px] text-[#999999] px-1.5">
             {promo.tipoCondicion === "monto" ? "Por monto" : "Por combinación"} ·{" "}
             {promo.niveles.length} nivel(es)
           </p>
@@ -204,7 +204,7 @@ export default function PromocionCard({
         <div className="border-t border-[#EEEEEE] px-5 py-4 flex flex-col gap-4 bg-[#FAFAFA]">
           {/* Tipo de condición como radio buttons */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-[#666666]">Tipo de condición</label>
+            <label className="text-[13px] font-medium text-[#666666]">Tipo de condición</label>
             <div className="flex gap-3">
               <label
                 className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border cursor-pointer transition-all ${
@@ -263,10 +263,10 @@ export default function PromocionCard({
 
           {/* Vigencia y límites */}
           <div className="flex flex-col gap-3">
-            <label className="text-xs font-medium text-[#666666]">Vigencia y límites</label>
+            <label className="text-[13px] font-medium text-[#666666]">Vigencia y límites</label>
             <div className="flex flex-wrap items-end gap-3">
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-[#999999]">Fecha inicio</span>
+                <span className="text-[13px] text-[#999999]">Fecha inicio</span>
                 <input
                   type="date"
                   value={promo.fechaInicio ?? ""}
@@ -275,7 +275,7 @@ export default function PromocionCard({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-[#999999]">Fecha fin</span>
+                <span className="text-[13px] text-[#999999]">Fecha fin</span>
                 <input
                   type="date"
                   value={promo.fechaFin ?? ""}
@@ -284,7 +284,7 @@ export default function PromocionCard({
                 />
               </label>
               <label className="flex flex-col gap-1 w-28">
-                <span className="text-[11px] text-[#999999]">
+                <span className="text-[13px] text-[#999999]">
                   <TooltipLabel text="Acumulable" tooltip={TOOLTIPS.accumulable} />
                 </span>
                 <input
@@ -302,7 +302,7 @@ export default function PromocionCard({
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {MAX_USAGE_FIELDS.map(([label, key, tooltipKey]) => (
                 <label key={key} className="flex flex-col gap-1">
-                  <span className="text-[11px] text-[#999999]">
+                  <span className="text-[13px] text-[#999999]">
                     <TooltipLabel text={label} tooltip={TOOLTIPS[tooltipKey]} />
                   </span>
                   <input
@@ -316,7 +316,10 @@ export default function PromocionCard({
                     onChange={(e) => {
                       const raw = e.target.value;
                       const next = raw === "" ? undefined : parseInt(raw, 10);
-                      onChange({ ...promo, [key]: Number.isNaN(next as number) ? undefined : next });
+                      onChange({
+                        ...promo,
+                        [key]: Number.isNaN(next as number) ? undefined : next
+                      });
                     }}
                     placeholder="Sin límite"
                     className="px-3 py-2 text-sm text-[#141414] bg-white border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors"
@@ -331,11 +334,11 @@ export default function PromocionCard({
             <button
               type="button"
               onClick={() => setShowBehavior((v) => !v)}
-              className="flex items-center gap-2 self-start text-xs font-medium text-[#666666] hover:text-[#141414] transition-colors"
+              className="flex items-center gap-2 self-start text-[13px] font-medium text-[#666666] hover:text-[#141414] transition-colors"
             >
               {showBehavior ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               Comportamiento
-              <span className="text-[10px] text-[#AAAAAA] font-normal">
+              <span className="text-[13px] text-[#AAAAAA] font-normal">
                 (configuración avanzada)
               </span>
             </button>
@@ -356,10 +359,7 @@ export default function PromocionCard({
                       }
                     }}
                   />
-                  <TooltipLabel
-                    text="Unidad de negocio"
-                    tooltip={TOOLTIPS.businessUnit}
-                  />
+                  <TooltipLabel text="Unidad de negocio" tooltip={TOOLTIPS.businessUnit} />
                   <Select
                     disabled={!businessUnitEnabled}
                     value={promo.businessUnit}
@@ -391,9 +391,7 @@ export default function PromocionCard({
                   <Toggle
                     value={Boolean(promo.takeFirstEligibleRangeDiscount)}
                     label="Tomar primer rango elegible"
-                    onChange={(v) =>
-                      onChange({ ...promo, takeFirstEligibleRangeDiscount: v })
-                    }
+                    onChange={(v) => onChange({ ...promo, takeFirstEligibleRangeDiscount: v })}
                   />
                   <TooltipLabel
                     text="Tomar primer rango elegible"
@@ -407,9 +405,7 @@ export default function PromocionCard({
                   <Toggle
                     value={promo.applyCrossSelling !== false}
                     label="Permitir cross-selling"
-                    onChange={(v) =>
-                      onChange({ ...promo, applyCrossSelling: v })
-                    }
+                    onChange={(v) => onChange({ ...promo, applyCrossSelling: v })}
                   />
                   <TooltipLabel
                     text="Permitir cross-selling"
@@ -440,7 +436,7 @@ export default function PromocionCard({
 
           {/* Niveles */}
           <div className="flex flex-col gap-3">
-            <p className="text-xs font-medium text-[#666666]">Niveles / escalones</p>
+            <p className="text-[13px] font-medium text-[#666666]">Niveles / escalones</p>
             {promo.niveles.map((nivel, idx) => (
               <NivelRow
                 key={nivel.id}
@@ -454,7 +450,7 @@ export default function PromocionCard({
             ))}
             <button
               onClick={addNivel}
-              className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-xs text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors"
+              className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-[13px] text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors"
             >
               <Plus size={12} /> Agregar nivel
             </button>

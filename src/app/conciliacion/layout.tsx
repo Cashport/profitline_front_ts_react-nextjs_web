@@ -12,7 +12,12 @@ interface ConcilationLayoutProps {
 }
 
 const ConcilationLayout: FC<ConcilationLayoutProps> = ({ children }) => {
-  return <ViewWrapper headerTitle="">{children}</ViewWrapper>;
+  // Pantalla de segundo nivel (se entra desde el detalle del cliente): "‹" vuelve atrás.
+  return (
+    <ViewWrapper headerTitle="Conciliación" headerBack="/clientes/all">
+      {children}
+    </ViewWrapper>
+  );
 };
 
 export default ConcilationLayout;

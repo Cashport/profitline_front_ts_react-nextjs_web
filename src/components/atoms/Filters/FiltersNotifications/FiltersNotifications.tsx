@@ -149,8 +149,7 @@ export default function FiltersNotifications({ setSelectedFilters }: Props) {
   return (
     <Cascader
       className="filterCascader"
-      style={{ width: "130px", height: "100%" }}
-      size="large"
+      style={{ width: "130px" }}
       multiple
       maxTagCount="responsive"
       placeholder="Filtrar"

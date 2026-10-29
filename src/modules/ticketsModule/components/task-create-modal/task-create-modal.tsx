@@ -118,7 +118,7 @@ export default function TaskCreateModal({ config }: { config: ITaskConfig }) {
             key={f.key}
             className={cn("flex min-w-0 flex-col gap-1", isWide(f) && "sm:col-span-2")}
           >
-            <span className="text-[12px] font-semibold text-cp-ink-2">
+            <span className="text-[13px] font-semibold text-cp-ink-2">
               {f.label}
               {f.required && <span className="text-cp-magenta"> *</span>}
             </span>

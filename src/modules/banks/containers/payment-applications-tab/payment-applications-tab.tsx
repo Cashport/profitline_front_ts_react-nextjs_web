@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Button, Flex, Spin } from "antd";
+import { Flex, Spin } from "antd";
 import { DotsThree } from "phosphor-react";
 import dayjs from "dayjs";
 
@@ -8,10 +8,7 @@ import { useMessageApi } from "@/context/MessageContext";
 
 import BanksRules from "../bank-rules";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
-import {
-  FilterPaymentApplicationsTab,
-  IPaymentApplicationsFilters
-} from "@/components/atoms/Filters/FilterPaymentApplicationsTab/FilterPaymentApplicationsTab";
+import { IPaymentApplicationsFilters } from "@/components/atoms/Filters/FilterPaymentApplicationsTab/FilterPaymentApplicationsTab";
 import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
@@ -26,6 +23,8 @@ import { IFormFilterDates } from "../../components/modal-filter-select-dates/mod
 import styles from "./payment-applications-tab.module.scss";
 import { usePaymentApplications } from "@/hooks/usePaymentApplications";
 import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransactionType";
+import { BanksSlot } from "../../contexts/banks-chrome-context";
+import BanksFilterModal from "../../components/banks-filter-modal/banks-filter-modal";
 
 interface PaymentApplicationsTabProps {
   isActive: boolean;
@@ -93,17 +92,22 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({
         <BanksRules onClickBack={() => setShowBankRules(false)} />
       ) : (
         <Flex className={styles.activePaymentsTab} vertical>
-          <div className={`${styles.header} banksStickyHeader`}>
-            <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-            <FilterPaymentApplicationsTab
-              setSelectedFilters={setSelectedFilters}
-              handleOpenCustomDate={() => setIsSelectOpen({ selected: 7 })}
-              customDate={customDate}
-              setCustomDate={setCustomDate}
+          {/* Diseño "Pedidos y Bancos": buscador y Filtrar en el header; las acciones junto a las
+              pestañas (ver banks-chrome-context). */}
+          <BanksSlot to="header" active={isActive}>
+            <BanksFilterModal setSelectedFilters={setSelectedFilters} />
+            <OptimizedSearchComponent
+              title="Buscar referencia, valor…"
+              onSearch={handleSearch}
+              surface="page"
+              className="!w-[220px] !flex-none"
             />
-            <Button
-              className={styles.button__actions}
-              icon={<DotsThree size={"1.5rem"} />}
+          </BanksSlot>
+          <BanksSlot to="tabs" active={isActive}>
+            <button
+              type="button"
+              title="Generar acción"
+              aria-label="Generar acción"
               onClick={() => {
                 if (!selectedRows || selectedRows.length === 0) {
                   showMessage("error", "Seleccione al menos una aplicación de pago");
@@ -111,10 +115,11 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({
                 }
                 setisGenerateActionOpen(true);
               }}
+              className="flex h-[var(--control-h)] w-[var(--control-h)] cursor-pointer items-center justify-center rounded-lg border border-cp-line-2 bg-cp-surface text-cp-ink hover:border-cp-ink"
             >
-              Generar acción
-            </Button>
-          </div>
+              <DotsThree size={18} weight="bold" />
+            </button>
+          </BanksSlot>
 
           {isLoading ? (
             <Flex justify="center">

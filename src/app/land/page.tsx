@@ -9,7 +9,8 @@ export default function LandPage() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100%"
+        flex: 1,
+        minHeight: 0
       }}
     >
       <LogoCashport width={670} height={172} />

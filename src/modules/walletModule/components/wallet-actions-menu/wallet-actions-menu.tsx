@@ -33,7 +33,7 @@ export default function WalletActionsMenu({
         type="button"
         aria-label="Más acciones"
         title="Más acciones"
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-secondary"
+        className="flex h-[var(--control-h)] w-[var(--control-h)] shrink-0 items-center justify-center rounded-lg border-0 bg-cp-surface text-cp-ink transition-colors hover:bg-cp-muted"
       >
         <MoreHorizontal className="h-4 w-4" />
       </button>

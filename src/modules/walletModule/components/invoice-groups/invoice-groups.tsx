@@ -34,7 +34,7 @@ const TEXTUAL_COLS = ["grupo", "cliente", "estado"];
 const PAGE_SIZE = 15;
 
 const TH_PLAIN =
-  "whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
+  "whitespace-nowrap border-b border-cp-line bg-cp-surface px-3 py-3 text-left text-[13.5px] font-semibold text-cp-ink";
 
 /** Días sin gestión: verde ≤3, ámbar ≤7, rojo por encima. */
 const GestionChip = ({ dias }: { dias: number | null }) => {
@@ -112,10 +112,10 @@ export default function InvoiceGroups({
       : "Grupos de facturas";
 
   return (
-    <section ref={zona} className="rounded-xl bg-card text-card-foreground shadow-sm">
+    <section ref={zona} className="cp-card text-card-foreground">
       <div className="flex flex-wrap items-center gap-2.5 border-b border-border p-4">
         <h3 className="text-[13.5px] font-semibold text-foreground">{titulo}</h3>
-        <span className="ml-auto text-[11.5px] text-muted-foreground">
+        <span className="ml-auto text-[13px] text-muted-foreground">
           {loading ? (
             "Actualizando…"
           ) : (
@@ -129,7 +129,7 @@ export default function InvoiceGroups({
           <button
             type="button"
             onClick={onClearDrilldown}
-            className="rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px] font-semibold text-foreground transition-colors hover:bg-secondary"
+            className="rounded-md border border-border bg-card px-2.5 py-1 text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary"
           >
             Ver todos
           </button>
@@ -137,7 +137,7 @@ export default function InvoiceGroups({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
               <SortableTh col="grupo" label="Grupo" sort={sort} onSort={onSort} />
@@ -164,7 +164,7 @@ export default function InvoiceGroups({
                 Límite
               </th>
               <SortableTh col="estado" label="Estado" sort={sort} onSort={onSort} />
-              <th className="border-b border-border bg-muted/40" />
+              <th className="border-b border-cp-line bg-cp-surface" />
             </tr>
           </thead>
 
@@ -205,7 +205,7 @@ export default function InvoiceGroups({
                         estadoMeta(g.tipo).nom
                       )}
                     </span>
-                    <div className="text-[11.5px] text-muted-foreground">{g.detalle}</div>
+                    <div className="text-[13px] text-muted-foreground">{g.detalle}</div>
                   </td>
 
                   <td className="px-3 py-2.5 text-foreground">{g.cliente}</td>
@@ -268,7 +268,7 @@ export default function InvoiceGroups({
 
       {!loading && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
-          <span className="text-[11.5px] text-muted-foreground">
+          <span className="text-[13px] text-muted-foreground">
             Mostrando {pageRows.length} de {grp(visibleRows.length)}
           </span>
           <Pagination
@@ -282,7 +282,7 @@ export default function InvoiceGroups({
         </div>
       )}
 
-      <div className="border-t border-border px-4 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
+      <div className="border-t border-border px-4 py-3 text-[13px] leading-relaxed text-muted-foreground">
         {enTramo ? (
           // Con un tramo elegido el API recorta cada grupo a ese tramo, así que
           // aquí no se ve el total del grupo sino su parte. Decirlo evita que

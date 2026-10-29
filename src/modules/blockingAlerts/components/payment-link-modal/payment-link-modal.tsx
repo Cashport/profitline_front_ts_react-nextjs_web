@@ -64,7 +64,7 @@ export default function PaymentLinkModal({
           <CircleCheck className="h-11 w-11 text-cp-lime-dark" strokeWidth={1.8} />
           <span className="mt-2 text-[16px] font-semibold">Link listo para enviar</span>
           <span className="text-[22px] font-semibold tabular-nums">{amount}</span>
-          <span className="text-[12px] text-cp-ink-3">Vence el {expires}</span>
+          <span className="text-[13px] text-cp-ink-3">Vence el {expires}</span>
         </div>
         <div className="flex items-center gap-2.5 rounded-[10px] border border-cp-line-2 py-1.5 pl-3 pr-1.5">
           <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{link}</span>
@@ -87,7 +87,7 @@ export default function PaymentLinkModal({
               key={label}
               type="button"
               onClick={onClick}
-              className="flex h-[62px] cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] border border-cp-line-2 bg-cp-surface text-[12px] font-semibold text-cp-ink hover:border-cp-ink"
+              className="flex h-[62px] cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] border border-cp-line-2 bg-cp-surface text-[13px] font-semibold text-cp-ink hover:border-cp-ink"
             >
               <Icon className="h-[18px] w-[18px]" />
               {label}
@@ -117,11 +117,11 @@ export default function PaymentLinkModal({
         ]}
       />
       <div className="flex flex-col items-center gap-1 rounded-[12px] border border-cp-line bg-cp-subtle px-4 py-4 text-center">
-        <span className="text-[11px] font-semibold uppercase tracking-[.12em] text-cp-ink-4">
+        <span className="text-[13px] font-semibold text-cp-ink-4">
           Vas a cobrar
         </span>
         <span className="text-[28px] font-semibold leading-tight tabular-nums">{amount}</span>
-        <span className="rounded-md bg-cp-muted px-2 py-0.5 text-[11.5px] font-semibold text-cp-ink-2">
+        <span className="rounded-md bg-cp-muted px-2 py-0.5 text-[13px] font-semibold text-cp-ink-2">
           {plural(charge.count, "factura", "facturas")}
         </span>
       </div>

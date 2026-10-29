@@ -30,13 +30,13 @@ export default function ReportsView() {
   const { types } = useReportTypes();
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
+    <div className="cp-page">
       <ReportsHeader
-        search={store.search}
-        onSearchChange={store.setSearch}
         filters={store.filters}
         onFiltersChange={store.setFilters}
         types={types}
+        search={store.search}
+        onSearchChange={store.setSearch}
         onPublish={() => setOpenModal("report")}
       />
 

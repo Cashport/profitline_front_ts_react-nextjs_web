@@ -13,7 +13,8 @@ const SimpleTag: React.FC<SimpleTagProps> = ({ text, colorTag, colorText, fontSi
       style={{
         backgroundColor: colorTag,
         color: colorText,
-        fontSize: fontSize,
+        // Piso de 13px (docs/DESIGN.md §1) aunque el llamador pase un tamaño menor.
+        fontSize: `max(13px, ${fontSize})`,
         fontWeight: 500,
         borderRadius: "4px",
         padding: "0.125rem 0.25rem",

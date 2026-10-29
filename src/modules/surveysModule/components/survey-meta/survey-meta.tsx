@@ -44,7 +44,7 @@ export default function SurveyMeta({ editor, isEdit }: SurveyMetaProps) {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted-foreground">
         <span>
           <b className="font-semibold text-foreground">{draft.questions.length}</b> preguntas
         </span>

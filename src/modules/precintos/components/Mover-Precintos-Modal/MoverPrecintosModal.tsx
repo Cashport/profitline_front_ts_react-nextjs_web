@@ -89,7 +89,7 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-extrabold text-gray-900">Mover precintos</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Traslada precintos sin usar a otra persona o de vuelta a bodega</p>
+              <p className="text-[13px] text-gray-400 mt-0.5">Traslada precintos sin usar a otra persona o de vuelta a bodega</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg font-bold p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">✕</button>
@@ -97,14 +97,14 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
 
         <div className="p-6 space-y-5">
           {/* Banner de precintos */}
-          <div className="bg-gray-50/80 border border-gray-100 rounded-2xl p-4 text-xs font-semibold text-gray-800">
+          <div className="bg-gray-50/80 border border-gray-100 rounded-2xl p-4 text-[13px] font-semibold text-gray-800">
             <span className="font-extrabold text-gray-900">Precintos:</span> {precintosSeleccionados.slice(0, 3).join(', ')}
             {precintosSeleccionados.length > 3 && ` ... y ${precintosSeleccionados.length - 3} más`} · {precintosSeleccionados.length} precintos
           </div>
 
           {/* Selector de Destino Personalizado */}
           <div className="space-y-2 relative">
-            <label className="block text-xs font-bold text-gray-900 uppercase tracking-wider">Mover a</label>
+            <label className="block text-[13px] font-bold text-gray-900">Mover a</label>
             <button 
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -113,7 +113,7 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
               <span className={destino ? "text-gray-900 font-bold" : "text-gray-400"}>
                 {getDestinoNombre()}
               </span>
-              <span className="text-gray-400 text-xs">▼</span>
+              <span className="text-gray-400 text-[13px]">▼</span>
             </button>
 
             {/* Menú desplegable */}
@@ -129,7 +129,7 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
                     className="w-full px-4 py-2.5 text-left hover:bg-gray-200 transition-colors cursor-pointer"
                   >
                     <div className="text-sm font-bold text-gray-900">Devolver a bodega</div>
-                    <div className="text-xs text-gray-500">1.129 disponibles</div>
+                    <div className="text-[13px] text-gray-500">1.129 disponibles</div>
                   </button>
 
                   {/* Lista de Ejecutivos */}
@@ -141,7 +141,7 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
                       className="w-full px-4 py-2.5 text-left hover:bg-gray-200 transition-colors cursor-pointer"
                     >
                       <div className="text-sm font-medium text-gray-800">{exec.EjecutivoNombre}</div>
-                      <div className="text-xs text-gray-500">{exec.Asignados} asignados</div>
+                      <div className="text-[13px] text-gray-500">{exec.Asignados} asignados</div>
                     </button>
                   ))}
 
@@ -152,14 +152,14 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
 
           {/* Fecha y Guía */}
           <div className="space-y-3 pt-2 border-t border-gray-100">
-            <label className="block text-xs font-bold text-gray-900 uppercase tracking-wider">Detalle del traslado</label>
+            <label className="block text-[13px] font-bold text-gray-900">Detalle del traslado</label>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Fecha</label>
+                <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Fecha</label>
                 <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-1 focus:ring-black cursor-pointer" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Guía / observación <span className="text-gray-400 font-normal">(opcional)</span></label>
+                <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Guía / observación <span className="text-gray-400 font-normal">(opcional)</span></label>
                 <input type="text" placeholder="Ej. Servientrega..." value={guia} onChange={(e) => setGuia(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black" />
               </div>
             </div>
@@ -168,10 +168,10 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
 
         {/* Footer */}
         <div className="p-5 px-6 border-t border-gray-100 flex items-center justify-between bg-white">
-          <span className="text-xs text-gray-400 font-medium">{!destino ? 'Selecciona el destino' : 'Listo para mover'}</span>
+          <span className="text-[13px] text-gray-400 font-medium">{!destino ? 'Selecciona el destino' : 'Listo para mover'}</span>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={onClose} disabled={isLoading} className="px-5 py-2.5 text-xs font-bold text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50">Cancelar</button>
-            <button type="button" disabled={!destino || isLoading} onClick={handleMover} className={`px-6 py-2.5 text-xs font-bold rounded-xl transition-colors cursor-pointer ${destino && !isLoading ? 'bg-[#c2f012] text-black hover:bg-[#b0dc0e] shadow-sm' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>
+            <button type="button" onClick={onClose} disabled={isLoading} className="px-5 py-2.5 text-[13px] font-bold text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50">Cancelar</button>
+            <button type="button" disabled={!destino || isLoading} onClick={handleMover} className={`px-6 py-2.5 text-[13px] font-bold rounded-xl transition-colors cursor-pointer ${destino && !isLoading ? 'bg-[#c2f012] text-black hover:bg-[#b0dc0e] shadow-sm' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>
               {isLoading ? 'Moviendo...' : `Mover ${precintosSeleccionados.length} precintos`}
             </button>
           </div>

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { IEcommerceClient } from "@/types/commerce/ICommerce";
+import SearchField from "@/components/ui/search-field/search-field";
 
 interface IClienteDropdownProps {
   options: IEcommerceClient[];
@@ -44,15 +45,12 @@ function ClienteDropdown({ options, loading, selected, onSelect }: IClienteDropd
             }}
           />
           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#DDDDDD] rounded-lg shadow-lg z-20">
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-[#DDDDDD]">
-              <Search size={14} className="text-[#999999] flex-shrink-0" />
-              <input
+            <div className="border-b border-[#DDDDDD] p-2">
+              <SearchField
                 autoFocus
-                type="text"
-                placeholder="Buscar cliente..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 text-sm outline-none bg-transparent text-[#141414] placeholder:text-[#999999]"
+                onChange={setSearch}
+                placeholder="Buscar cliente..."
               />
             </div>
             <ul className="max-h-56 overflow-y-auto py-1">

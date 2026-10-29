@@ -66,7 +66,7 @@ function Rail({ done, children }: { done: boolean; children: React.ReactNode }) 
 }
 
 const NODE =
-  "relative mt-[9px] grid h-3.5 w-3.5 place-items-center rounded-full border-2 bg-card text-[8px] font-semibold";
+  "relative mt-[7px] grid h-[18px] w-[18px] place-items-center rounded-full border-2 bg-card text-[13px] font-semibold leading-none";
 
 /**
  * Actividades del día colgadas de la visita a la que pertenecen: cada registro trae su
@@ -106,7 +106,7 @@ function RegisterRows({
       {rows.map((r) => (
         <li
           key={r.response_id}
-          className="grid cursor-pointer grid-cols-[34px_9px_minmax(0,1fr)_auto] items-center gap-x-2 rounded-[6px] py-[5px] text-[12px] leading-[1.35] text-foreground transition-colors hover:bg-secondary"
+          className="grid cursor-pointer grid-cols-[34px_9px_minmax(0,1fr)_auto] items-center gap-x-2 rounded-[6px] py-[5px] text-[13px] leading-[1.35] text-foreground transition-colors hover:bg-secondary"
           // La visita padre también es clicable: sin cortar, el salto acabaría en el de
           // la visita y el de la actividad se perdería.
           onClick={(e) => {
@@ -114,7 +114,7 @@ function RegisterRows({
             onJumpTo(minutesOfDay(r.at));
           }}
         >
-          <span className="text-[11px] tabular-nums text-muted-foreground">
+          <span className="text-[13px] tabular-nums text-muted-foreground">
             {fmtClock(minutesOfDay(r.at))}
           </span>
           <i
@@ -123,7 +123,7 @@ function RegisterRows({
           <span className="truncate">{r.client_name}</span>
           <span
             className={cn(
-              "whitespace-nowrap text-[11px]",
+              "whitespace-nowrap text-[13px]",
               r.effective ? "font-medium text-foreground/75" : "text-muted-foreground"
             )}
           >
@@ -187,7 +187,7 @@ export default function AdvisorDetail({
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1.5 py-1 text-[11px] tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground"
+        className="flex items-center gap-1.5 py-1 text-[13px] tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronLeft className="h-3 w-3" />
         Equipo
@@ -205,24 +205,24 @@ export default function AdvisorDetail({
             {d.user.userName}
           </h2>
           {d.zones.length > 0 && (
-            <div className="text-xs text-muted-foreground">Zona {d.zones.join(", ")}</div>
+            <div className="text-[13px] text-muted-foreground">Zona {d.zones.join(", ")}</div>
           )}
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
             <StatusPill label={d.state_name} color={color} />
             <button
               type="button"
               onClick={onOpenDay}
-              className="flex h-6 items-center gap-0.5 rounded-lg bg-[#cbe71e] pl-2 pr-1.5 text-xs font-bold text-[#141414] transition-colors hover:bg-[#b9d417]"
+              className="flex h-6 items-center gap-0.5 rounded-lg bg-[#cbe71e] pl-2 pr-1.5 text-[13px] font-bold text-[#141414] transition-colors hover:bg-[#b9d417]"
             >
               Ver día
               <ChevronRight className="h-3 w-3" />
             </button>
-            <span className="text-[11.5px] text-muted-foreground">{nowText(d)}</span>
+            <span className="text-[13px] text-muted-foreground">{nowText(d)}</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-x-3.5 gap-y-1 text-[10.5px] text-muted-foreground">
+      <div className="mt-3 flex flex-wrap gap-x-3.5 gap-y-1 text-[13px] text-muted-foreground">
         <span className="whitespace-nowrap">
           Últ. señal{" "}
           <b className="font-medium text-foreground/80">
@@ -235,7 +235,7 @@ export default function AdvisorDetail({
       </div>
 
       <div className="mt-3 rounded-xl border border-border px-3 py-2.5">
-        <div className="flex items-baseline justify-between gap-2 text-xs font-semibold text-foreground">
+        <div className="flex items-baseline justify-between gap-2 text-[13px] font-semibold text-foreground">
           <span>Actividades</span>
           <b className="whitespace-nowrap text-xl font-semibold">{activities.registered}</b>
         </div>
@@ -245,7 +245,7 @@ export default function AdvisorDetail({
             style={{ width: `${Math.min(100, activities.goal_pct)}%` }}
           />
         </div>
-        <div className="mt-1.5 text-[11px] text-muted-foreground">
+        <div className="mt-1.5 text-[13px] text-muted-foreground">
           {activities.registered} registradas
         </div>
         <div className="mt-2.5 flex h-[38px] items-end gap-[3px]">
@@ -264,7 +264,7 @@ export default function AdvisorDetail({
             );
           })}
         </div>
-        <div className="mt-[3px] flex justify-between text-[9.5px] text-muted-foreground">
+        <div className="mt-[3px] flex justify-between text-[13px] text-muted-foreground">
           <span>7:00</span>
           <span>12:00</span>
           <span>17:00</span>
@@ -274,16 +274,16 @@ export default function AdvisorDetail({
       <div className="mt-3 grid grid-cols-2 gap-2">
         {tiles.map((tile) => (
           <div key={tile.label} className="min-w-0 rounded-xl bg-secondary px-3 py-2.5">
-            <span className="block truncate text-[11.5px] text-foreground/70">{tile.label}</span>
+            <span className="block truncate text-[13px] text-foreground/70">{tile.label}</span>
             <div className="whitespace-nowrap text-xl font-semibold tabular-nums tracking-[-0.02em] text-foreground">
               {tile.value}
               {tile.suffix && (
-                <small className="ml-0.5 text-xs font-medium text-muted-foreground">
+                <small className="ml-0.5 text-[13px] font-medium text-muted-foreground">
                   {tile.suffix}
                 </small>
               )}
             </div>
-            <div className="mt-px truncate text-[11px] text-muted-foreground">{tile.detail}</div>
+            <div className="mt-px truncate text-[13px] text-muted-foreground">{tile.detail}</div>
           </div>
         ))}
       </div>
@@ -303,24 +303,24 @@ export default function AdvisorDetail({
       </div>
 
       <div className="mb-1.5 mt-[18px] flex items-baseline justify-between whitespace-nowrap">
-        <span className="text-[11.5px] font-medium text-muted-foreground">Ruta del día</span>
-        <span className="text-[10.5px] text-muted-foreground">{visits.pending} pendientes</span>
+        <span className="text-[13px] font-medium text-muted-foreground">Ruta del día</span>
+        <span className="text-[13px] text-muted-foreground">{visits.pending} pendientes</span>
       </div>
 
       <ol className="relative">
         {dayStart != null && (
           <li className={STOP_ROW} onClick={() => onJumpTo(dayStart)}>
-            <div className="pt-2 text-right text-[11px] tabular-nums text-foreground/70">
+            <div className="pt-2 text-right text-[13px] tabular-nums text-foreground/70">
               {startText}
             </div>
             <Rail done>
               <div className={NODE} style={{ borderColor: palette.ink2 }} />
             </Rail>
             <div className="min-w-0 pb-2.5 pt-1.5">
-              <div className="text-[12.5px] font-semibold leading-[1.3] text-foreground">
+              <div className="text-[13px] font-semibold leading-[1.3] text-foreground">
                 Inicio de jornada
               </div>
-              <div className="mt-0.5 text-[11.5px] text-muted-foreground">Check-in app</div>
+              <div className="mt-0.5 text-[13px] text-muted-foreground">Check-in app</div>
             </div>
           </li>
         )}
@@ -342,7 +342,7 @@ export default function AdvisorDetail({
             >
               <div
                 className={cn(
-                  "pt-2 text-right text-[11px] tabular-nums",
+                  "pt-2 text-right text-[13px] tabular-nums",
                   scheduled ? "text-muted-foreground" : "text-foreground/70"
                 )}
               >
@@ -364,14 +364,14 @@ export default function AdvisorDetail({
               <div className="min-w-0 pb-2.5 pt-1.5">
                 <div
                   className={cn(
-                    "text-[12.5px] leading-[1.3]",
+                    "text-[13px] leading-[1.3]",
                     scheduled ? "font-medium text-foreground/70" : "font-semibold text-foreground"
                   )}
                 >
                   {!scheduled && `${n}. `}
                   {v.client_name}
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-[3px] text-[11.5px] text-muted-foreground">
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-[3px] text-[13px] text-muted-foreground">
                   {scheduled ? (
                     <>
                       <span className="whitespace-nowrap">{v.client_nit}</span>
@@ -384,7 +384,7 @@ export default function AdvisorDetail({
                     </>
                   ) : inProgress ? (
                     <>
-                      <span className="whitespace-nowrap rounded bg-[#cbe71e] px-1.5 text-[11px] font-semibold text-[#141414]">
+                      <span className="whitespace-nowrap rounded bg-[#cbe71e] px-1.5 text-[13px] font-semibold text-[#141414]">
                         {v.status_name}
                       </span>
                       {started != null && (
@@ -394,7 +394,7 @@ export default function AdvisorDetail({
                   ) : (
                     <>
                       <span
-                        className="whitespace-nowrap text-[11px] font-semibold"
+                        className="whitespace-nowrap text-[13px] font-semibold"
                         style={{ color: visitColor }}
                       >
                         {v.status_name}
@@ -414,14 +414,14 @@ export default function AdvisorDetail({
         {/* Actividades de visitas que la ruta no trae: al final, sin visita que las sostenga. */}
         {orphans.length > 0 && (
           <li className={STATIC_ROW}>
-            <div className="pt-2 text-right text-[11px] tabular-nums text-muted-foreground">
+            <div className="pt-2 text-right text-[13px] tabular-nums text-muted-foreground">
               {orphans.length}
             </div>
             <Rail done={false}>
               <div className={NODE} style={{ borderColor: palette.ink2 }} />
             </Rail>
             <div className="min-w-0 pb-2.5 pt-1.5">
-              <div className="text-[12.5px] font-semibold leading-[1.3] text-foreground">
+              <div className="text-[13px] font-semibold leading-[1.3] text-foreground">
                 Actividades sin visita
               </div>
               <RegisterRows rows={orphans} onJumpTo={onJumpTo} />

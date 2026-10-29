@@ -22,6 +22,8 @@ import { useVisitFormCreators, useVisitFormStatuses } from "../../hooks/useVisit
 interface SurveysFilterModalProps {
   value: IVisitFormsFilters;
   onChange: (next: IVisitFormsFilters) => void;
+  /** En el header compartido: chips a la izquierda de Filtrar (DESIGN.md §6). */
+  inHeader?: boolean;
 }
 
 const toStatuses = (items?: FilterOptionItem[]) =>
@@ -33,7 +35,11 @@ const toIds = (items?: FilterOptionItem[]) => (items ?? []).map((o) => Number(o.
  * creador y fecha de actualización. Las opciones salen del backend y los
  * filtros viajan como query de GET /visit-forms.
  */
-export default function SurveysFilterModal({ value, onChange }: SurveysFilterModalProps) {
+export default function SurveysFilterModal({
+  value,
+  onChange,
+  inHeader
+}: SurveysFilterModalProps) {
   const statuses = useVisitFormStatuses();
   const creators = useVisitFormCreators();
   // El draft interno de FilterModal sólo cubre categorías de opciones, así que
@@ -89,6 +95,7 @@ export default function SurveysFilterModal({ value, onChange }: SurveysFilterMod
 
   return (
     <FilterModal
+      inHeader={inHeader}
       categories={categories}
       value={selection}
       formatTagValue={(_cat, items) => items.map((i) => i.name).join(", ")}

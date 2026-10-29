@@ -94,7 +94,7 @@ export default function TaskGroup({
           <span className="truncate font-semibold">{group.label}</span>
           <span className="shrink-0 text-cp-ink-3">{group.count}</span>
           {group.critical_count > 0 && (
-            <span className="shrink-0 text-[12px] font-semibold text-cp-magenta">
+            <span className="shrink-0 text-[13px] font-semibold text-cp-magenta">
               · {group.critical_count} {group.critical_count === 1 ? "crítica" : "críticas"}
             </span>
           )}
@@ -129,7 +129,7 @@ export default function TaskGroup({
               type="button"
               onClick={more.loadMore}
               disabled={more.isLoading}
-              className="flex h-9 w-full cursor-pointer items-center border-0 border-b border-solid border-cp-line bg-transparent px-4 text-left text-[12.5px] font-semibold text-cp-ink-3 hover:text-cp-ink disabled:cursor-default disabled:opacity-60"
+              className="flex h-9 w-full cursor-pointer items-center border-0 border-b border-solid border-cp-line bg-transparent px-4 text-left text-[13px] font-semibold text-cp-ink-3 hover:text-cp-ink disabled:cursor-default disabled:opacity-60"
             >
               {more.isLoading
                 ? "Cargando…"

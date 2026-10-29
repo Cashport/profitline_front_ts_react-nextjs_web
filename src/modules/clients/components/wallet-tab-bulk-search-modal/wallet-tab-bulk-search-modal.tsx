@@ -274,7 +274,7 @@ const WalletTabBulkSearchModal = ({
       title: (
         <span
           className={cn(
-            "text-xs",
+            "text-[13px]",
             index === stepIndex ? "font-semibold" : "font-medium",
             isReached ? "text-foreground" : "text-[#8a8a8a]"
           )}
@@ -285,7 +285,7 @@ const WalletTabBulkSearchModal = ({
       icon: (
         <span
           className={cn(
-            "mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full align-top text-[11px] font-semibold",
+            "mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full align-top text-[13px] font-semibold",
             isReached ? "bg-foreground text-white" : "bg-[#ececec] text-[#8a8a8a]"
           )}
         >
@@ -309,7 +309,9 @@ const WalletTabBulkSearchModal = ({
   const busyLabels =
     busyKind === "search"
       ? [
-          inputIds ? `Subiendo ${formatNumber(inputIds.length)} registros` : `Subiendo ${file?.name}`,
+          inputIds
+            ? `Subiendo ${formatNumber(inputIds.length)} registros`
+            : `Subiendo ${file?.name}`,
           "Cargando tabla temporal",
           "Cruzando con la cartera del cliente",
           "Preparando resultados"
@@ -355,12 +357,14 @@ const WalletTabBulkSearchModal = ({
               <div className="mr-auto min-w-0 max-w-full">
                 <h3 className="text-base font-semibold">Búsqueda masiva</h3>
                 {clientName && (
-                  <p className="truncate text-xs text-muted-foreground">{clientName}</p>
+                  <p className="truncate text-[13px] text-muted-foreground">{clientName}</p>
                 )}
               </div>
               {/* Con iconos propios, colorPrimary sólo pinta la línea tras los pasos terminados */}
               <ConfigProvider
-                theme={{ components: { Steps: { colorPrimary: "#d6d6d6", colorSplit: "#d6d6d6" } } }}
+                theme={{
+                  components: { Steps: { colorPrimary: "#d6d6d6", colorSplit: "#d6d6d6" } }
+                }}
               >
                 <Steps
                   size="small"
@@ -370,7 +374,12 @@ const WalletTabBulkSearchModal = ({
                   className="!w-auto max-w-full"
                 />
               </ConfigProvider>
-              <Button type="text" aria-label="Cerrar" icon={<X size={14} />} onClick={handleClose} />
+              <Button
+                type="text"
+                aria-label="Cerrar"
+                icon={<X size={14} />}
+                onClick={handleClose}
+              />
             </header>
 
             {step === "input" && (

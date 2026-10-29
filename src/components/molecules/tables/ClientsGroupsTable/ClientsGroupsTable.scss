@@ -52,6 +52,9 @@
     }
 
     .buttonNewProject {
+        // Mismo alto que el buscador de la barra (DESIGN.md §8).
+        height: var(--control-h) !important;
+        font-size: 14px;
         background-color: $secondary;
         color: black;
         font-weight: 600;

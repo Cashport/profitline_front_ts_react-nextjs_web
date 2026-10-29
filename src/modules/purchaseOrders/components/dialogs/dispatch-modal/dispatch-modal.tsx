@@ -57,8 +57,7 @@ export function DispatchModal({
       mutateOrderDetail();
       onOpenChange(false);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error al despachar la orden";
+      const errorMessage = error instanceof Error ? error.message : "Error al despachar la orden";
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
@@ -105,7 +104,7 @@ export function DispatchModal({
               <AlertTriangle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-blue-900">Orden de compra: {orderNumber}</p>
-                <p className="text-xs text-blue-700 mt-1">
+                <p className="text-[13px] text-blue-700 mt-1">
                   El estado cambiará a &quot;En despacho&quot; una vez confirmado
                 </p>
               </div>

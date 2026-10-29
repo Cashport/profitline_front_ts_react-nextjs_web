@@ -143,7 +143,7 @@ function FlatBody({ config, columns, grid, onOpen }: BodyProps) {
           onOpen={onOpen}
         />
       ))}
-      <div className="flex h-[var(--table-total-h)] items-center gap-3 bg-cp-subtle px-4 text-[12px] text-cp-ink-3">
+      <div className="flex h-[var(--table-total-h)] items-center gap-3 bg-cp-subtle px-4 text-[13px] text-cp-ink-3">
         <span>
           {items.length} de {total} tareas
         </span>
@@ -152,7 +152,7 @@ function FlatBody({ config, columns, grid, onOpen }: BodyProps) {
             type="button"
             onClick={loadMore}
             disabled={isLoadingMore}
-            className="cursor-pointer border-0 bg-transparent p-0 text-[12.5px] font-semibold text-cp-ink hover:underline disabled:cursor-default disabled:opacity-60"
+            className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cp-ink hover:underline disabled:cursor-default disabled:opacity-60"
           >
             {isLoadingMore ? "Cargando…" : "Cargar más"}
           </button>

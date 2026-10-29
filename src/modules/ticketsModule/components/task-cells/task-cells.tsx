@@ -129,7 +129,7 @@ export function TaskCell({
             {t.title}
           </span>
           {t.incident_id && (
-            <span className="shrink-0 rounded-[5px] bg-cp-muted px-1.5 text-[11px] text-cp-ink-3">
+            <span className="shrink-0 rounded-[5px] bg-cp-muted px-1.5 text-[13px] text-cp-ink-3">
               Novedad #{t.incident_id}
             </span>
           )}
@@ -153,7 +153,7 @@ export function TaskCell({
       );
     case "country":
       return t.country_code ? (
-        <span className="text-[11px] font-semibold text-cp-ink-2" title={t.country_name ?? ""}>
+        <span className="text-[13px] font-semibold text-cp-ink-2" title={t.country_name ?? ""}>
           {t.country_code}
         </span>
       ) : (

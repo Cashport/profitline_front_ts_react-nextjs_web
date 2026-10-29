@@ -45,12 +45,12 @@ function RecaudoChrome({ children }: { children: React.ReactNode }) {
               })
         },
         components: {
-          // Prototype sizes (antd controls default to 14px): 12px for selects, search and
-          // buttons, 11px for small buttons and the Segmented.
-          Select: { fontSize: 12, optionFontSize: 12 },
-          Input: { fontSize: 12 },
-          Button: { contentFontSize: 12, contentFontSizeSM: 11 },
-          Segmented: { fontSize: 11 },
+          // Prototype sizes (antd controls default to 14px), floored at the 13px app minimum
+          // (docs/DESIGN.md §1) for selects, search, buttons and the Segmented.
+          Select: { fontSize: 13, optionFontSize: 13 },
+          Input: { fontSize: 13 },
+          Button: { contentFontSize: 13, contentFontSizeSM: 13 },
+          Segmented: { fontSize: 13 },
           // The root theme pins Popover's colorBgElevated (#F7F7F7) at component level, which
           // beats the global token above; re-declare it so the filters panel follows the dark theme.
           ...(isDark && { Popover: { colorBgElevated: DARK_ELEVATED_BG } }),

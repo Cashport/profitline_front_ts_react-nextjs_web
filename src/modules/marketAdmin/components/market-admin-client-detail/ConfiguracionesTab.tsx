@@ -199,7 +199,7 @@ export default function ConfiguracionesTab({
         {/* Ejecutivo, Coordinador, KAM y KAM líder */}
         {USER_SELECTS.map(({ key, label }) => (
           <div key={key}>
-            <label className="text-xs font-bold text-[#141414] block mb-1.5">{label}</label>
+            <label className="text-[13px] font-bold text-[#141414] block mb-1.5">{label}</label>
             <Select
               showSearch
               allowClear
@@ -222,7 +222,7 @@ export default function ConfiguracionesTab({
 
         {/* Mercado */}
         <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Mercado</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Mercado</label>
           <Select
             showSearch
             allowClear
@@ -256,7 +256,7 @@ export default function ConfiguracionesTab({
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
             {/* Cupo de crédito */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
                 Cupo de crédito
               </label>
               <div className="relative">
@@ -277,7 +277,7 @@ export default function ConfiguracionesTab({
 
             {/* Descuento pronto pago */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
                 Descuento pronto pago
               </label>
               <div className="relative">
@@ -298,7 +298,7 @@ export default function ConfiguracionesTab({
 
             {/* Condición de pago */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
                 Condición de pago
               </label>
               <input
@@ -313,7 +313,9 @@ export default function ConfiguracionesTab({
 
             {/* Tipo de pago */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">Tipo de pago</label>
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
+                Tipo de pago
+              </label>
               <select
                 disabled={isLoading}
                 value={form.payment_type}
@@ -331,7 +333,7 @@ export default function ConfiguracionesTab({
 
             {/* Bodega por defecto */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
                 Bodega por defecto
               </label>
               <WarehouseSelect
@@ -344,7 +346,7 @@ export default function ConfiguracionesTab({
 
             {/* Lista de precios */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
                 Lista de precios
               </label>
               <input
@@ -360,7 +362,7 @@ export default function ConfiguracionesTab({
 
             {/* Recibe parciales de lotes */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
                 Recibe parciales de lotes
               </label>
               <input
@@ -375,7 +377,7 @@ export default function ConfiguracionesTab({
 
             {/* Lotes mayores a */}
             <div>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
                 Lotes mayores a
               </label>
               <input

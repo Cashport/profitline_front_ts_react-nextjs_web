@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Pagination } from "antd";
-import { Download, Search, TrendingDown, TrendingUp } from "lucide-react";
+import { Download, TrendingDown, TrendingUp } from "lucide-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -11,17 +11,18 @@ import { useDashboardSalesClientDetail } from "@/modules/commerce/hooks/revenue-
 import type { IDashboardSalesClientDetailItem } from "@/types/dashboardSales/IDashboardSales";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
+import SearchField from "@/components/ui/search-field/search-field";
 
 const PAGE_SIZE = 25;
 
 const PctBadge = ({ value }: { value: number | null }) => {
   if (value === null || value === undefined) {
-    return <span className="text-xs text-muted-foreground">—</span>;
+    return <span className="text-[13px] text-muted-foreground">—</span>;
   }
   const positive = value >= 0;
   return (
     <span
-      className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
+      className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[13px] font-medium ${
         positive
           ? "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400"
           : "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400"
@@ -35,7 +36,7 @@ const PctBadge = ({ value }: { value: number | null }) => {
 
 const RoiCell = ({ value }: { value: number | null }) => {
   if (value === null || value === undefined) {
-    return <span className="text-xs text-muted-foreground">—</span>;
+    return <span className="text-[13px] text-muted-foreground">—</span>;
   }
   const positive = value >= 0;
   return (
@@ -108,26 +109,22 @@ export default function DashboardClientsDetailsTable() {
   const items = data?.items ?? [];
 
   return (
-    <Card className="bg-background border-0 shadow-sm py-0 gap-0">
-      <CardHeader className="sm:p-6 !pb-0">
+    <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
+      <CardHeader className="sm:px-[18px] sm:pt-[14px] !pb-0">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <CardTitle className="text-base sm:text-lg font-semibold">Detalle por Cliente</CardTitle>
           <div className="flex items-center gap-2 sm:ml-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar..."
-                className="w-full sm:w-56 pl-9 pr-3 py-2 text-sm bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
-              />
-            </div>
+            <SearchField
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar..."
+              className="sm:w-56"
+            />
             <button
               type="button"
               onClick={() => exportToCsv(items)}
               disabled={items.length === 0}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-background border border-border rounded-lg hover:bg-secondary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex h-[var(--control-h)] items-center gap-2 px-4 text-sm font-medium bg-background border border-border rounded-lg hover:bg-secondary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="h-4 w-4" />
               Export
@@ -135,7 +132,7 @@ export default function DashboardClientsDetailsTable() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-0 sm:p-6">
+      <CardContent className="p-0 sm:px-[18px] sm:py-[14px]">
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[400px]">
             <p>Cargando datos...</p>
@@ -149,29 +146,29 @@ export default function DashboardClientsDetailsTable() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-cashport-black dark:border-border bg-gray-50 dark:bg-secondary">
-                    <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                  <tr className="border-b border-cp-line bg-cp-surface">
+                    <th className="text-left py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       Cliente
                     </th>
-                    <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                    <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       Ventas mes
                     </th>
-                    <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                    <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       Meta
                     </th>
-                    <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                    <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       Prom. mens.
                     </th>
-                    <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                    <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       Mes ant.
                     </th>
-                    <th className="hidden lg:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                    <th className="hidden lg:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       YTD ant.
                     </th>
-                    <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                    <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       YTD
                     </th>
-                    <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                    <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                       % YTD
                     </th>
                   </tr>
@@ -182,13 +179,13 @@ export default function DashboardClientsDetailsTable() {
                       key={item.client_id}
                       className="border-b border-gray-100 dark:border-border hover:bg-gray-50 dark:hover:bg-secondary/50 transition-colors"
                     >
-                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold truncate max-w-[180px]">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm font-semibold truncate max-w-[180px]">
                         {item.client_name}
                       </td>
-                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right font-semibold">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right font-semibold">
                         {formatMoney(item.ventas_mes, { hideDecimals: true })}
                       </td>
-                      <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                      <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                         <div className="flex items-center justify-end gap-1 sm:gap-2">
                           <span className="text-muted-foreground">
                             {formatMoney(item.meta, { hideDecimals: true })}
@@ -196,25 +193,25 @@ export default function DashboardClientsDetailsTable() {
                           <PctBadge value={item.meta_pct} />
                         </div>
                       </td>
-                      <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                      <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                         <div className="flex items-center justify-end gap-1 sm:gap-2">
                           <span>{formatMoney(item.prom_mensual, { hideDecimals: true })}</span>
                           <PctBadge value={item.prom_mensual_pct} />
                         </div>
                       </td>
-                      <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                      <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                         <div className="flex items-center justify-end gap-1 sm:gap-2">
                           <span>{formatMoney(item.mes_anterior, { hideDecimals: true })}</span>
                           <PctBadge value={item.mes_anterior_pct} />
                         </div>
                       </td>
-                      <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right text-muted-foreground">
+                      <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right text-muted-foreground">
                         {formatMoney(item.ytd_anterior, { hideDecimals: true })}
                       </td>
-                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right font-semibold">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right font-semibold">
                         {formatMoney(item.ytd_actual, { hideDecimals: true })}
                       </td>
-                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                         <RoiCell value={item.roi_ytd_pct} />
                       </td>
                     </tr>
@@ -224,7 +221,7 @@ export default function DashboardClientsDetailsTable() {
             </div>
             {(data?.total ?? 0) > PAGE_SIZE && (
               <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 px-2 sm:px-0 pt-4 pb-4 sm:pb-0">
-                <p className="text-xs sm:text-sm text-muted-foreground">
+                <p className="text-[13px] sm:text-sm text-muted-foreground">
                   Mostrando {(page - 1) * PAGE_SIZE + 1} a{" "}
                   {Math.min(page * PAGE_SIZE, data?.total ?? 0)} de {data?.total ?? 0} resultados
                 </p>

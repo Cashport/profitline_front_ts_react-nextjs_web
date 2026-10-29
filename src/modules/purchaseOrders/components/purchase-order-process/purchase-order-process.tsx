@@ -90,14 +90,14 @@ export function PurchaseOrderProcess({
                       >
                         <StageIcon className="h-6 w-6" />
                       </div>
-                      <span className="text-xs mt-2 text-center max-w-[80px] text-cashport-black font-medium">
+                      <span className="text-[13px] mt-2 text-center max-w-[80px] text-cashport-black font-medium">
                         {stage.name}
                       </span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="bg-cashport-black text-white">
                     {stage.subValidations ? (
-                      <div className="text-xs space-y-2">
+                      <div className="text-[13px] space-y-2">
                         <p className="font-semibold mb-2">{stage.name}</p>
                         {stage.subValidations.map((subVal, idx) => (
                           <div
@@ -117,7 +117,7 @@ export function PurchaseOrderProcess({
                         ))}
                       </div>
                     ) : (
-                      <div className="text-xs">
+                      <div className="text-[13px]">
                         <p className="font-semibold mb-1">{stage.name}</p>
                         <p className="text-gray-400">Pendiente</p>
                       </div>

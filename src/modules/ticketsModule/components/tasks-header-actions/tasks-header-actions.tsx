@@ -10,7 +10,6 @@ import {
   type FilterChipItem
 } from "@/components/ui/page-header-controls/page-header-controls";
 import { useDebounce } from "@/hooks/useDeabouce";
-import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
 import type { ITaskConfig } from "@/types/tickets/ITickets";
 import { useTaskConfig } from "../../hooks/useTaskConfig";
 import { useTaskOptions } from "../../hooks/useTaskDetail";
@@ -24,7 +23,7 @@ import TasksFilterModal, {
 
 /**
  * Encabezado del gestor de tareas (DESIGN.md §4): "+ Nueva tarea", etiquetas
- * de filtros aplicados ("País: Colombia ×"), "Filtrar", buscador y tema.
+ * de filtros aplicados ("País: Colombia ×"), "Filtrar" y buscador. El tema va en el avatar.
  */
 export default function TasksHeaderActions() {
   const { config } = useTaskConfig();
@@ -92,7 +91,7 @@ function HeaderActions({ config }: { config: ITaskConfig }) {
       <button
         type="button"
         onClick={() => openCreate(createDraftFor(view))}
-        className="box-border flex h-[var(--control-h)] shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[11px] border-0 bg-cp-lime px-4 text-[16px] font-semibold text-[#141414] hover:bg-[#d8f032]"
+        className="box-border flex h-[var(--control-h)] shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[11px] border-0 bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-[#d8f032]"
       >
         <Plus className="h-4 w-4" strokeWidth={2.4} />
         Nueva tarea
@@ -100,7 +99,6 @@ function HeaderActions({ config }: { config: ITaskConfig }) {
       <FilterChips chips={chips} />
       <TasksFilterModal config={config} />
       <HeaderSearch value={term} onChange={setTerm} placeholder="Buscar tarea o cliente" />
-      <WalletThemeToggle />
     </>
   );
 }

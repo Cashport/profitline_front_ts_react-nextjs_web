@@ -171,7 +171,7 @@ export function BalancesTable({
         return (
           <Badge
             variant="outline"
-            className="text-xs"
+            className="text-[13px]"
             style={{
               color: eligibility.status_color,
               backgroundColor: eligibility.background_color,

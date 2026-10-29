@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 
 interface UsadosTableProps {
   data?: any[];
@@ -28,37 +29,34 @@ export const UsadosTable: React.FC<UsadosTableProps> = ({
     setSelectedIds((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
   };
 
-  const renderSortIcon = (field: string) => {
-    if (sortField === field) {
-      return <span className="text-[10px] text-gray-900 font-bold ml-1">{sortOrder === 'ASC' ? '▲' : '▼'}</span>;
-    }
-    return <span className="text-[10px] text-gray-400 ml-1">▲▼</span>;
-  };
+  const renderSortIcon = (field: string) => (
+    <SortArrows dir={sortField === field ? (sortOrder === 'ASC' ? 'asc' : 'desc') : null} />
+  );
 
   return (
     <div className="w-full bg-white overflow-visible">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
+        <table className="w-full text-left text-[13px] border-collapse">
           <thead>
-            <tr className="border-b border-gray-100 text-gray-800 font-bold select-none">
-              <th className="py-3 px-4 w-10"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></th>
+            <tr className="select-none">
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></th>
               
               {/* 👇 COLUMNA ORDENABLE: PRECINTO 👇 */}
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('IdPrecinto')}>
-                <div className="flex items-center">Precinto {renderSortIcon('IdPrecinto')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('IdPrecinto')}>
+                <span className="inline-flex items-center gap-1">Precinto{renderSortIcon('IdPrecinto')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold">Hasta</th>
-              <th className="py-3 px-4 font-bold">Cantidad</th>
-              <th className="py-3 px-4 font-bold">ID Devolución</th>
-              <th className="py-3 px-4 font-bold">Cliente</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Hasta</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Cantidad</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">ID devolución</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Cliente</th>
               
               {/* 👇 COLUMNA ORDENABLE: FECHA DE USO 👇 */}
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('FechaRegistro')}>
-                <div className="flex items-center">Fecha de uso {renderSortIcon('FechaRegistro')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('FechaRegistro')}>
+                <span className="inline-flex items-center gap-1">Fecha de uso{renderSortIcon('FechaRegistro')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold">Usado por</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Usado por</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 text-gray-700">
@@ -73,10 +71,10 @@ export const UsadosTable: React.FC<UsadosTableProps> = ({
                   
                   <td className="py-3 px-4">
                     <button type="button" onClick={() => onDevolucionClick && onDevolucionClick(item.IdDevolucion)} className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer" title={item.IdDevolucion}>
-                      {item.IdDevolucion ? `${item.IdDevolucion.substring(0, 15)}...` : 'Sin Devolución'}
+                      {item.IdDevolucion ? `${item.IdDevolucion.substring(0, 15)}...` : 'Sin devolución'}
                     </button>
                   </td>
-                  <td className="py-3 px-4 font-medium text-gray-800 uppercase text-[11px] tracking-wide">{item.ClienteNombre || 'Cliente no disponible'}</td>
+                  <td className="py-3 px-4 font-medium text-gray-800 text-[13px]">{item.ClienteNombre || 'Cliente no disponible'}</td>
                   <td className="py-3 px-4 font-medium text-gray-600">
                     {item.FechaUso ? new Date(item.FechaUso).toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (item.FechaRegistro ? new Date(item.FechaRegistro).toLocaleDateString('es-CO') : '-')}
                   </td>

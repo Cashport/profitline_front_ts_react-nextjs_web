@@ -1,25 +1,8 @@
 @import "@styles/variables.scss";
 
+// Tarjeta con las pestañas del proyecto; el marco y el header los pone ViewWrapper.
 .containerTabsAndContent {
     width: 100%;
-    height: 100%;
-    background-color: $white;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    overflow-y: scroll;
-    scrollbar-width: none;
-    background-color: $white;
-
-    .titleName {
-        margin: auto;
-        font-weight: 600;
-        width: 398px;
-        height: 32px;
-        color: #141414;
-        line-height: 124%;
-        font-style: normal;
-        font-size: 24px;
-    }
 
     .tabContent {
         width: 100%;
@@ -27,14 +10,7 @@
     }
 }
 
-.infoHeaderProject {
-    gap: 2rem;
-    margin-top: 0rem;
-}
-
 .tabsContainer {
     width: 100%;
-    border-radius: 0.5rem;
-    background-color: $white;
     scrollbar-width: none;
 }

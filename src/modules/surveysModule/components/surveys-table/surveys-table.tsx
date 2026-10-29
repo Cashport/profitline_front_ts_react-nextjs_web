@@ -70,7 +70,7 @@ export default function SurveysTable({ forms, sort, onSort, onOpen }: SurveysTab
             />
             <th
               scope="col"
-              className="border-b border-border bg-muted/40 px-3 py-2.5 text-right text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
+              className="border-b border-cp-line bg-cp-surface px-3 py-3 text-right text-[13.5px] font-semibold text-cp-ink"
             >
               Acciones
             </th>
@@ -120,7 +120,7 @@ export default function SurveysTable({ forms, sort, onSort, onOpen }: SurveysTab
                   <Link
                     href={`/surveys/${f.id}/answers`}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex h-8 items-center whitespace-nowrap rounded-md border border-border px-2.5 text-xs font-semibold text-foreground transition-colors hover:border-[#9bb514] hover:text-foreground"
+                    className="flex h-8 items-center whitespace-nowrap rounded-md border border-border px-2.5 text-[13px] font-semibold text-foreground transition-colors hover:border-[#9bb514] hover:text-foreground"
                   >
                     Ver respuestas
                   </Link>

@@ -1,6 +1,8 @@
-import React, { FC, useState } from "react";
-import { MagnifyingGlass, X } from "phosphor-react";
-import styles from "./search-input-long.module.scss";
+import React, { FC } from "react";
+
+import UiSearchInput from "@/components/ui/search-input/search-input";
+import type { SearchFieldSurface } from "@/components/ui/search-field/search-field";
+import { cn } from "@/utils/utils";
 
 interface UiSearchInputProps {
   id?: string;
@@ -9,60 +11,13 @@ interface UiSearchInputProps {
   className?: string;
   value?: string;
   showBorder?: boolean;
+  surface?: SearchFieldSurface;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const UiSearchInputLong: FC<UiSearchInputProps> = ({
-  id = "ui-search-input",
-  name,
-  placeholder,
-  className,
-  value,
-  showBorder = false,
-  onChange
-}) => {
-  const [inputValue, setInputValue] = useState("");
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-    if (onChange) {
-      onChange(event);
-    }
-  };
-
-  const handleClearClick = () => {
-    setInputValue("");
-    if (onChange) {
-      const event = {
-        target: { value: "" }
-      } as React.ChangeEvent<HTMLInputElement>;
-      onChange(event);
-    }
-  };
-
-  return (
-    <label
-      htmlFor={id}
-      className={[styles.inputBox, showBorder && styles.bordered, className]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <MagnifyingGlass className={styles.icon} weight="bold" />
-      <input
-        type="text"
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        value={value || inputValue}
-        onChange={handleInputChange}
-      />
-      {(inputValue || value) && (
-        <button onClick={handleClearClick} className={styles.clearButton} aria-label="Clear input">
-          <X weight="bold" />
-        </button>
-      )}
-    </label>
-  );
-};
+/** Buscador único (`SearchField`) a todo el ancho disponible. */
+const UiSearchInputLong: FC<UiSearchInputProps> = ({ className, ...props }) => (
+  <UiSearchInput {...props} className={cn("max-w-none", className)} />
+);
 
 export default UiSearchInputLong;
