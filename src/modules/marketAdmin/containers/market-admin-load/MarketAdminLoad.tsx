@@ -19,6 +19,7 @@ import {
   useProfitLoaders
 } from "@/modules/marketAdmin/hooks/useProfitLoaders";
 import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
+import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import { useMessageApi } from "@/context/MessageContext";
 import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
 
@@ -37,6 +38,7 @@ export default function MarketAdminLoad() {
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<number | null>(null);
+  const { runUpload, structureModals } = useIntakeStructureUpload();
 
   const { showMessage } = useMessageApi();
 
@@ -61,7 +63,10 @@ export default function MarketAdminLoad() {
 
     setUploadingId(targetId);
     try {
-      await uploadProfitLoaderFile(targetId, file);
+      const uploaded = await runUpload((useAsTemplate) =>
+        uploadProfitLoaderFile(targetId, file, useAsTemplate)
+      );
+      if (!uploaded) return;
       showMessage("success", `Archivo "${file.name}" cargado correctamente.`);
       await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
     } catch (error) {
@@ -227,6 +232,8 @@ export default function MarketAdminLoad() {
         onClose={() => setShowCreate(false)}
         onSend={handleCreateEtl}
       />
+
+      {structureModals}
     </div>
   );
 }

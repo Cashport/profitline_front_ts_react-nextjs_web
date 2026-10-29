@@ -661,9 +661,12 @@ export const uploadMassiveOrHistoricalFile = async ({
   }
 };
 
-export const uploadCatalogMaterial = async (file: File): Promise<any> => {
+export const uploadCatalogMaterial = async (file: File, useAsTemplate?: boolean): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
+  if (useAsTemplate !== undefined) {
+    formData.append("use_as_template", String(useAsTemplate));
+  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/catalog/materials/upload`,
@@ -776,9 +779,12 @@ export const getRegions = async (): Promise<IRegion[]> => {
   }
 };
 
-export const uploadPointsOfSaleFile = async (file: File): Promise<any> => {
+export const uploadPointsOfSaleFile = async (file: File, useAsTemplate?: boolean): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
+  if (useAsTemplate !== undefined) {
+    formData.append("use_as_template", String(useAsTemplate));
+  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/catalog/points-of-sale/upload`,
@@ -791,9 +797,15 @@ export const uploadPointsOfSaleFile = async (file: File): Promise<any> => {
   }
 };
 
-export const uploadPacksFile = async (file: File): Promise<IPacksUploadResult> => {
+export const uploadPacksFile = async (
+  file: File,
+  useAsTemplate?: boolean
+): Promise<IPacksUploadResult> => {
   const formData = new FormData();
   formData.append("file", file);
+  if (useAsTemplate !== undefined) {
+    formData.append("use_as_template", String(useAsTemplate));
+  }
   try {
     const response: GenericResponse<IPacksUploadResult> = await API.post(
       `${config.API_HOST}/data/catalog/material-packs/upload`,

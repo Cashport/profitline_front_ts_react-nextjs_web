@@ -28,6 +28,7 @@ import {
   uploadGmnOficiales,
   validateGmnOficiales
 } from "@/services/dataQuality/gmnOficiales";
+import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import type {
   IGmnOficialesLoadResult,
   IGmnOficialesLoadRow,
@@ -75,6 +76,9 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
   const [errorDetails, setErrorDetails] = useState<unknown>(null);
   const [status, setStatus] = useState<IGmnOficialesLoadRow | null>(null);
   const [isStatusLoading, setIsStatusLoading] = useState(false);
+  const { runUpload, structureModals } = useIntakeStructureUpload();
+  // Respuesta a "¿usar este archivo como template?" dada al validar.
+  const templateDecisionRef = useRef<boolean | undefined>(undefined);
   const submittingRef = useRef(false);
 
   const reset = useCallback(() => {
@@ -96,23 +100,36 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
       .finally(() => setIsStatusLoading(false));
   }, [isOpen, reset]);
 
-  const handleSelect = useCallback(async (selected: File) => {
-    setFile(selected);
-    setErrorMsg(null);
-    setErrorDetails(null);
-    setReport(null);
-    setResult(null);
-    setStage("validating");
-    try {
-      const validated = await validateGmnOficiales(selected);
-      setReport(validated);
-      setStage("preview");
-    } catch (error) {
-      setErrorMsg(errorMessageOf(error));
-      setErrorDetails((error as { data?: unknown })?.data ?? null);
-      setStage("invalid");
-    }
-  }, []);
+  const handleSelect = useCallback(
+    async (selected: File) => {
+      setFile(selected);
+      setErrorMsg(null);
+      setErrorDetails(null);
+      setReport(null);
+      setResult(null);
+      setStage("validating");
+      templateDecisionRef.current = undefined;
+      try {
+        const holder: { report?: IGmnOficialesValidationReport } = {};
+        const ok = await runUpload(async (useAsTemplate) => {
+          templateDecisionRef.current = useAsTemplate;
+          holder.report = await validateGmnOficiales(selected, useAsTemplate);
+        });
+        if (!ok || !holder.report) {
+          setFile(null);
+          setStage("idle");
+          return;
+        }
+        setReport(holder.report);
+        setStage("preview");
+      } catch (error) {
+        setErrorMsg(errorMessageOf(error));
+        setErrorDetails((error as { data?: unknown })?.data ?? null);
+        setStage("invalid");
+      }
+    },
+    [runUpload]
+  );
 
   const handleConfirm = useCallback(async () => {
     if (!file || submittingRef.current) return; // previene envios duplicados
@@ -120,7 +137,7 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
     setStage("processing");
     setErrorMsg(null);
     try {
-      const loaded = await uploadGmnOficiales(file);
+      const loaded = await uploadGmnOficiales(file, templateDecisionRef.current);
       setResult(loaded);
       setStage("result");
       onLoaded?.();
@@ -159,8 +176,10 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
   };
 
   const renderLastLoad = () => {
-    if (isStatusLoading) return <p className="text-xs text-gray-400">Consultando última carga...</p>;
-    if (!status) return <p className="text-xs text-gray-500">Aún no se ha cargado el catálogo oficial.</p>;
+    if (isStatusLoading)
+      return <p className="text-xs text-gray-400">Consultando última carga...</p>;
+    if (!status)
+      return <p className="text-xs text-gray-500">Aún no se ha cargado el catálogo oficial.</p>;
     return (
       <div className="rounded-lg border border-[#EEEEEE] p-3">
         <div className="flex items-center justify-between gap-2">
@@ -187,8 +206,8 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
       <p className="font-semibold text-[#141414]">Formato esperado</p>
       <p className="mt-1">
         Excel con hoja <span className="font-mono">{GMN_OFICIALES_SHEET_NAME}</span>. Obligatorias:{" "}
-        <span className="font-mono">{GMN_OFICIALES_REQUIRED_COLUMNS.join(", ")}</span>. Tamaño máximo{" "}
-        {GMN_OFICIALES_MAX_FILE_SIZE_MB} MB.
+        <span className="font-mono">{GMN_OFICIALES_REQUIRED_COLUMNS.join(", ")}</span>. Tamaño
+        máximo {GMN_OFICIALES_MAX_FILE_SIZE_MB} MB.
       </p>
       <p className="mt-1 text-[11px] text-gray-500">
         Columnas: <span className="font-mono">{GMN_OFICIALES_EXPECTED_COLUMNS.join(", ")}</span>
@@ -201,147 +220,154 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
   );
 
   return (
-    <Modal
-      open={isOpen}
-      onCancel={onClose}
-      title="Cargar Maestra Productos"
-      footer={null}
-      centered
-      width={620}
-      closable={stage !== "processing"}
-      maskClosable={stage !== "processing"}
-    >
-      <div className="flex flex-col gap-4">
-        <p className="text-sm text-[#4B5563]">
-          Carga el catálogo oficial de GMN usado para calcular el campo <b>MATCH</b>. La operación es
-          idempotente: actualiza e inserta por (país, GMN); no elimina los registros ausentes del
-          archivo.
-        </p>
+    <>
+      <Modal
+        open={isOpen}
+        onCancel={onClose}
+        title="Cargar Maestra Productos"
+        footer={null}
+        centered
+        width={620}
+        closable={stage !== "processing"}
+        maskClosable={stage !== "processing"}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-[#4B5563]">
+            Carga el catálogo oficial de GMN usado para calcular el campo <b>MATCH</b>. La operación
+            es idempotente: actualiza e inserta por (país, GMN); no elimina los registros ausentes
+            del archivo.
+          </p>
 
-        {stage === "idle" && (
-          <>
-            {renderLastLoad()}
-            {renderFormat()}
-            <UploadDropZone
-              onFileUpload={handleSelect}
-              allowedExtensions={[".xls", ".xlsx"]}
-              title="Arrastra el archivo oficial aquí"
-            />
-          </>
-        )}
+          {stage === "idle" && (
+            <>
+              {renderLastLoad()}
+              {renderFormat()}
+              <UploadDropZone
+                onFileUpload={handleSelect}
+                allowedExtensions={[".xls", ".xlsx"]}
+                title="Arrastra el archivo oficial aquí"
+              />
+            </>
+          )}
 
-        {stage === "validating" && (
-          <div className="flex flex-col items-center py-6">
-            <ProfitLoader size="medium" message="Validando archivo (sin escribir datos)..." />
-          </div>
-        )}
+          {stage === "validating" && (
+            <div className="flex flex-col items-center py-6">
+              <ProfitLoader size="medium" message="Validando archivo (sin escribir datos)..." />
+            </div>
+          )}
 
-        {stage === "invalid" && (
-          <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] p-3">
-            <div className="flex items-start gap-2">
-              <WarningCircle size={18} className="mt-0.5 text-[#DC2626]" />
-              <div>
-                <p className="text-sm font-medium text-[#7F1D1D]">No se puede cargar el archivo</p>
-                <p className="text-xs text-[#7F1D1D]">{errorMsg}</p>
-                {renderDetails()}
+          {stage === "invalid" && (
+            <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] p-3">
+              <div className="flex items-start gap-2">
+                <WarningCircle size={18} className="mt-0.5 text-[#DC2626]" />
+                <div>
+                  <p className="text-sm font-medium text-[#7F1D1D]">
+                    No se puede cargar el archivo
+                  </p>
+                  <p className="text-xs text-[#7F1D1D]">{errorMsg}</p>
+                  {renderDetails()}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {stage === "invalid" && (
-          <div className="flex justify-end gap-2">
-            <Button onClick={reset}>Elegir otro archivo</Button>
-          </div>
-        )}
-
-        {stage === "preview" && report && (
-          <>
-            <div className="rounded-lg border border-[#EEEEEE] p-3">
-              <p className="text-sm font-semibold text-[#141414]">{file?.name}</p>
-              <p className="text-xs text-[#6B7280]">
-                {formatBytesToMB(file?.size)} · Hoja {report.sheetName}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              <StatChip label="Filas leídas" value={fmt(report.rowsRead)} />
-              <StatChip label="Países" value={fmt(report.countries.length)} />
-              <StatChip label="Conservadas" value={fmt(report.rowsKept)} />
-              <StatChip label="Duplicados idénticos" value={fmt(report.rowsDuplicated)} />
-              <StatChip label="Claves multifila" value={fmt(report.duplicateGmnKeys)} />
-              <StatChip label="Filas omitidas" value={fmt(report.rowsSkipped)} />
-            </div>
-
-            {(report.duplicateGmnKeys ?? 0) > 0 && (
-              <p className="text-xs text-[#B45309]">
-                {report.duplicateGmnKeys} clave(s) país+GMN con varias filas distintas: se conservan
-                todas (no se colapsan).
-              </p>
-            )}
-
-            <div className="rounded-lg bg-[#F0FDF4] p-3 text-xs text-[#166534]">
-              Actualizará el catálogo oficial utilizado para calcular MATCH. Las filas idénticas se
-              deduplican; las distintas con el mismo país+GMN se conservan. Los registros que dejen de
-              aparecer en el archivo quedarán <b>inhabilitados</b>.
-            </div>
-
+          {stage === "invalid" && (
             <div className="flex justify-end gap-2">
               <Button onClick={reset}>Elegir otro archivo</Button>
-              <Button type="primary" onClick={handleConfirm}>
-                Confirmar carga
-              </Button>
             </div>
-          </>
-        )}
+          )}
 
-        {stage === "processing" && (
-          <div className="flex flex-col items-center py-6">
-            <ProfitLoader size="medium" message="Cargando catálogo oficial..." />
-          </div>
-        )}
-
-        {stage === "result" && result && (
-          <>
-            <div className="flex items-center gap-2 rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] p-3">
-              <CheckCircle size={18} className="text-[#16A34A]" />
-              <div>
-                <p className="text-sm font-medium text-[#166534]">Catálogo de GMN oficiales actualizado</p>
-                <p className="text-xs text-[#166534]">ID de carga: {result.loadId}</p>
+          {stage === "preview" && report && (
+            <>
+              <div className="rounded-lg border border-[#EEEEEE] p-3">
+                <p className="text-sm font-semibold text-[#141414]">{file?.name}</p>
+                <p className="text-xs text-[#6B7280]">
+                  {formatBytesToMB(file?.size)} · Hoja {report.sheetName}
+                </p>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              <StatChip label="Filas leídas" value={fmt(result.rowsRead)} />
-              <StatChip label="Conservadas" value={fmt(result.rowsKept)} />
-              <StatChip label="Insertadas" value={fmt(result.rowsInserted)} />
-              <StatChip label="Actualizadas" value={fmt(result.rowsUpdated)} />
-              <StatChip label="Sin cambios" value={fmt(result.rowsUnchanged)} />
-              <StatChip label="Inhabilitadas" value={fmt(result.rowsDeactivated)} />
-              <StatChip label="Duplicados idénticos" value={fmt(result.rowsDuplicated)} />
-              <StatChip label="Claves multifila" value={fmt(result.duplicateGmnKeys)} />
-              <StatChip label="Filas omitidas" value={fmt(result.rowsSkipped)} />
-            </div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <StatChip label="Filas leídas" value={fmt(report.rowsRead)} />
+                <StatChip label="Países" value={fmt(report.countries.length)} />
+                <StatChip label="Conservadas" value={fmt(report.rowsKept)} />
+                <StatChip label="Duplicados idénticos" value={fmt(report.rowsDuplicated)} />
+                <StatChip label="Claves multifila" value={fmt(report.duplicateGmnKeys)} />
+                <StatChip label="Filas omitidas" value={fmt(report.rowsSkipped)} />
+              </div>
 
-            {(result.duplicateGmnKeys ?? 0) > 0 && (
-              <p className="text-xs text-[#B45309]">
-                Se conservaron todas las filas de {result.duplicateGmnKeys} clave(s) país+GMN con
-                diferencias.
-              </p>
-            )}
+              {(report.duplicateGmnKeys ?? 0) > 0 && (
+                <p className="text-xs text-[#B45309]">
+                  {report.duplicateGmnKeys} clave(s) país+GMN con varias filas distintas: se
+                  conservan todas (no se colapsan).
+                </p>
+              )}
 
-            <div className="flex justify-end gap-2">
-              <Button icon={<UploadSimple size={16} />} onClick={reset}>
-                Cargar otro archivo
-              </Button>
-              <Button type="primary" onClick={onClose}>
-                Cerrar
-              </Button>
+              <div className="rounded-lg bg-[#F0FDF4] p-3 text-xs text-[#166534]">
+                Actualizará el catálogo oficial utilizado para calcular MATCH. Las filas idénticas
+                se deduplican; las distintas con el mismo país+GMN se conservan. Los registros que
+                dejen de aparecer en el archivo quedarán <b>inhabilitados</b>.
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button onClick={reset}>Elegir otro archivo</Button>
+                <Button type="primary" onClick={handleConfirm}>
+                  Confirmar carga
+                </Button>
+              </div>
+            </>
+          )}
+
+          {stage === "processing" && (
+            <div className="flex flex-col items-center py-6">
+              <ProfitLoader size="medium" message="Cargando catálogo oficial..." />
             </div>
-          </>
-        )}
-      </div>
-    </Modal>
+          )}
+
+          {stage === "result" && result && (
+            <>
+              <div className="flex items-center gap-2 rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] p-3">
+                <CheckCircle size={18} className="text-[#16A34A]" />
+                <div>
+                  <p className="text-sm font-medium text-[#166534]">
+                    Catálogo de GMN oficiales actualizado
+                  </p>
+                  <p className="text-xs text-[#166534]">ID de carga: {result.loadId}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <StatChip label="Filas leídas" value={fmt(result.rowsRead)} />
+                <StatChip label="Conservadas" value={fmt(result.rowsKept)} />
+                <StatChip label="Insertadas" value={fmt(result.rowsInserted)} />
+                <StatChip label="Actualizadas" value={fmt(result.rowsUpdated)} />
+                <StatChip label="Sin cambios" value={fmt(result.rowsUnchanged)} />
+                <StatChip label="Inhabilitadas" value={fmt(result.rowsDeactivated)} />
+                <StatChip label="Duplicados idénticos" value={fmt(result.rowsDuplicated)} />
+                <StatChip label="Claves multifila" value={fmt(result.duplicateGmnKeys)} />
+                <StatChip label="Filas omitidas" value={fmt(result.rowsSkipped)} />
+              </div>
+
+              {(result.duplicateGmnKeys ?? 0) > 0 && (
+                <p className="text-xs text-[#B45309]">
+                  Se conservaron todas las filas de {result.duplicateGmnKeys} clave(s) país+GMN con
+                  diferencias.
+                </p>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button icon={<UploadSimple size={16} />} onClick={reset}>
+                  Cargar otro archivo
+                </Button>
+                <Button type="primary" onClick={onClose}>
+                  Cerrar
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
+      {structureModals}
+    </>
   );
 };
 

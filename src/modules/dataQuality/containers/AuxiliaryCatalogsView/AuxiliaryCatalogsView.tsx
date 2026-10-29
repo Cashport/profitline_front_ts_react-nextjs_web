@@ -24,6 +24,7 @@ import {
   uploadPointsOfSaleFile,
   uploadPacksFile
 } from "@/services/dataQuality/dataQuality";
+import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 
 type UploadKind = "materials" | "pos" | "packs";
 
@@ -39,6 +40,7 @@ export default function AuxiliaryCatalogsView() {
   const [uploadKind, setUploadKind] = useState<UploadKind>("materials");
   const [uploading, setUploading] = useState(false);
   const [downloadingCatalog, setDownloadingCatalog] = useState(false);
+  const { runUpload, structureModals } = useIntakeStructureUpload();
 
   // Navegación determinista: sin data-readonly no existe "vista general", el landing
   // reducido de /data-quality expone el acceso a Auxiliares.
@@ -66,13 +68,12 @@ export default function AuxiliaryCatalogsView() {
   const handleUpload = async (file: File) => {
     setUploading(true);
     try {
-      if (uploadKind === "materials") {
-        await uploadCatalogMaterial(file);
-      } else if (uploadKind === "pos") {
-        await uploadPointsOfSaleFile(file);
-      } else {
-        await uploadPacksFile(file);
-      }
+      const uploaded = await runUpload((useAsTemplate) => {
+        if (uploadKind === "materials") return uploadCatalogMaterial(file, useAsTemplate);
+        if (uploadKind === "pos") return uploadPointsOfSaleFile(file, useAsTemplate);
+        return uploadPacksFile(file, useAsTemplate);
+      });
+      if (!uploaded) return;
       message.success("Archivo cargado exitosamente.");
       setUploadOpen(false);
     } catch (error) {
@@ -149,6 +150,8 @@ export default function AuxiliaryCatalogsView() {
         loading={uploading}
         allowedExtensions={uploadKind === "pos" ? [".xls", ".xlsx", ".csv"] : [".xls", ".xlsx"]}
       />
+
+      {structureModals}
     </div>
   );
 }

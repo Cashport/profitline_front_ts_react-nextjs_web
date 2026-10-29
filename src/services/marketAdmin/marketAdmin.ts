@@ -342,10 +342,14 @@ export const getProfitLoaderTimeline = async (loaderId: number) => {
 };
 
 // POST /profit-loader/etl/:id/upload — multipart/form-data, el archivo viaja en la key "file"
-export const uploadProfitLoaderFile = async (id: number, file: File) => {
+// `useAsTemplate` responde el 409 TEMPLATE_DECISION_REQUIRED (validacion de estructura).
+export const uploadProfitLoaderFile = async (id: number, file: File, useAsTemplate?: boolean) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
+    if (useAsTemplate !== undefined) {
+      formData.append("use_as_template", String(useAsTemplate));
+    }
 
     const response: GenericResponse<unknown> = await API.post(
       `/profit-loader/etl/${id}/upload`,
