@@ -132,7 +132,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   };
 
   const ESTETICA_MINIMUM = 1600000;
-  const ALASTIN_MINIMUM = 1000000;
+  const ALASTIN_MINIMUM = 1;
   const normalizedChannel = channelName?.trim().toLowerCase();
   const isAlastin = normalizedChannel === "alastin";
   const isEstetica = normalizedChannel === "estetica";
