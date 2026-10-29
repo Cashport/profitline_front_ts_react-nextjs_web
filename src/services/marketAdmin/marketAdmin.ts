@@ -20,6 +20,11 @@ import {
 } from "@/types/marketAdmin/IMarketAdmin";
 import instance, { API } from "@/utils/api/api";
 
+export const getMarketAdminMarkets = async (): Promise<string[]> => {
+  const response: GenericResponse<string[]> = await API.get("/marketplace-admin/clients/markets");
+  return response.data;
+};
+
 export const createBonification = async (body: ICreatePromotionBody) => {
   try {
     const response: GenericResponse<unknown> = await API.post("/promotion", body);

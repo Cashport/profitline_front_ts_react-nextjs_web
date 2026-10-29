@@ -22,6 +22,19 @@ interface AppStore
   resetStore: () => void;
 }
 
+// Storage seguro para Next.js (SSR friendly)
+const customStorage = createJSONStorage(() => {
+  if (typeof window !== "undefined") {
+    return localStorage;
+  }
+  // Storage dummy cuando se ejecuta en el Servidor (Node.js)
+  return {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+  };
+});
+
 export const useAppStore = create<AppStore>()(
   persist(
     (set, get) => ({
@@ -35,7 +48,9 @@ export const useAppStore = create<AppStore>()(
       ...purchaseOrderSlice(set),
       resetStore: () => {
         // Clear the session storage
-        localStorage.removeItem("project");
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("project");
+        }
         // Reset the Zustand store to initial state
         set({
           ...createUserSlice(set),
@@ -51,7 +66,7 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: "project",
-      storage: createJSONStorage(() => localStorage),
+      storage: customStorage, // <-- Usamos el customStorage seguro
       partialize: (state) => {
         const { createFiles, setCreateFiles, ...rest } = state;
         return rest;
