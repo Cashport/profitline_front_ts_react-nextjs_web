@@ -44,6 +44,11 @@ const SORTERS: Record<AlertsSort, (a: Row, b: Row) => number> = {
 
 const STATUS_TABS: AlertsStatusFilter[] = ["all", "blocked", "warning", "ok"];
 
+/** Toggle Clientes / Puntos de venta: en móvil, letra e íconos más pequeños para que quepa. */
+const VIEW_LABEL =
+  "flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold max-md:gap-1 max-md:text-[11.5px]";
+const VIEW_ICON = "h-3.5 w-3.5 shrink-0 max-md:h-3 max-md:w-3";
+
 /** Sin tildes ni mayúsculas: "exito" encuentra "Éxito". */
 const normalize = (text: string) =>
   text
@@ -165,7 +170,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
       <HeaderSearch
         value={store.search}
         onChange={store.setSearch}
-        className="max-md:w-auto max-md:flex-1 max-md:bg-cp-bg"
+        className="w-auto flex-1 bg-cp-bg"
         placeholder={
           clientId
             ? "Buscar punto de venta o ship-to"
@@ -203,37 +208,36 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
   );
 
   // Sin toggle en el listado acotado a un cliente (ahí solo hay puntos de venta).
-  const viewToggle = (block?: boolean) =>
-    !clientId &&
-    alerts && (
-      <Segmented<AlertsView>
-        block={block}
-        value={store.view}
-        onChange={store.setView}
-        options={[
-          {
-            value: "clients",
-            label: (
-              <span className="flex items-center justify-center gap-1.5 font-semibold max-md:text-[12.5px]">
-                <Building2 className="h-3.5 w-3.5 shrink-0" />
-                Clientes
-                <span className="font-medium opacity-60">{alerts.clients.length}</span>
-              </span>
-            )
-          },
-          {
-            value: "points_of_sale",
-            label: (
-              <span className="flex items-center justify-center gap-1.5 font-semibold max-md:text-[12.5px]">
-                <Store className="h-3.5 w-3.5 shrink-0" />
-                Puntos de venta
-                <span className="font-medium opacity-60">{alerts.points_of_sale.length}</span>
-              </span>
-            )
-          }
-        ]}
-      />
-    );
+  const viewToggle = !clientId && alerts && (
+    <Segmented<AlertsView>
+      block
+      className="max-md:[&_.ant-segmented-item-label]:!px-1.5"
+      value={store.view}
+      onChange={store.setView}
+      options={[
+        {
+          value: "clients",
+          label: (
+            <span className={VIEW_LABEL}>
+              <Building2 className={VIEW_ICON} />
+              Clientes
+              <span className="font-medium opacity-60">{alerts.clients.length}</span>
+            </span>
+          )
+        },
+        {
+          value: "points_of_sale",
+          label: (
+            <span className={VIEW_LABEL}>
+              <Store className={VIEW_ICON} />
+              Puntos de venta
+              <span className="font-medium opacity-60">{alerts.points_of_sale.length}</span>
+            </span>
+          )
+        }
+      ]}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-3 pb-6 max-md:px-4">
@@ -258,7 +262,6 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
             </span>
           )
         }
-        actions={searchControls}
         themeToggle={!clientId}
       />
 
@@ -281,21 +284,15 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
             caption={caption || undefined}
           />
 
-          <section
-            className={cn(
-              "rounded-[14px] bg-cp-surface px-3 pb-3 pt-3 md:px-4 md:pt-1",
-              MOBILE_TABS
-            )}
-          >
-            {/* Móvil (prototipo): vista, buscador y orden en filas sobre las pestañas de estado. */}
-            <div className="mb-1 flex flex-col gap-2.5 md:hidden">
-              {viewToggle(true)}
+          <section className={cn("rounded-[14px] bg-cp-surface p-3 md:p-4", MOBILE_TABS)}>
+            {/* Como el prototipo: vista, buscador y orden en filas sobre las pestañas de estado. */}
+            <div className="mb-1 flex flex-col gap-2.5">
+              {viewToggle}
               <div className="flex gap-2">{searchControls}</div>
             </div>
             <UiTab
               activeKey={store.status}
               onChangeTab={(key) => store.setStatus(key as AlertsStatusFilter)}
-              tabBarExtraContent={!clientId && <div className="max-md:hidden">{viewToggle()}</div>}
               tabs={STATUS_TABS.map((status) => ({
                 key: status,
                 label: (

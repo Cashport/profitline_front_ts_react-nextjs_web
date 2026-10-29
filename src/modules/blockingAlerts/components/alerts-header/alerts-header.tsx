@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 
 import Header from "@/components/organisms/header";
 import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
+import { cn } from "@/utils/utils";
 
 export interface AlertsCrumb {
   label: string;
@@ -18,23 +19,23 @@ interface AlertsHeaderProps {
   crumbs: AlertsCrumb[];
   /** Escritorio: a la derecha del título. Móvil: bajo el título de la pantalla principal. */
   info?: React.ReactNode;
-  /** Búsqueda, orden o acciones (solo escritorio; en móvil cada vista las pone en el contenido). */
-  actions?: React.ReactNode;
   /** Toggle de tema: solo en el listado general. */
   themeToggle?: boolean;
+  /** Escritorio sin sangría izquierda: en el detalle lo de abajo arranca en el borde. */
+  flush?: boolean;
 }
 
 /**
  * Escritorio: header compartido de Cashport (docs/DESIGN.md §4) con las migas del módulo.
  * Móvil: título (o migas) y el tema en pequeño, sin avatar, como el prototipo.
  */
-export default function AlertsHeader({ crumbs, info, actions, themeToggle }: AlertsHeaderProps) {
+export default function AlertsHeader({ crumbs, info, themeToggle, flush }: AlertsHeaderProps) {
   const current = crumbs[crumbs.length - 1];
 
   return (
     <>
       <Header
-        className="max-md:!hidden"
+        className={cn("max-md:!hidden", flush && "!pl-0")}
         title={current.label}
         titleNode={
           crumbs.length > 1 ? (
@@ -50,7 +51,7 @@ export default function AlertsHeader({ crumbs, info, actions, themeToggle }: Ale
                       {crumb.label}
                     </Link>
                   ) : (
-                    <h1 className="m-0 min-w-0 truncate text-[23px] font-semibold leading-[1.15] text-cp-ink">
+                    <h1 className="m-0 min-w-0 truncate text-[16px] font-semibold text-cp-ink">
                       {crumb.label}
                     </h1>
                   )}
@@ -60,12 +61,7 @@ export default function AlertsHeader({ crumbs, info, actions, themeToggle }: Ale
           ) : undefined
         }
         titleExtra={info}
-        actionsExtra={
-          <>
-            {actions}
-            {themeToggle && <WalletThemeToggle />}
-          </>
-        }
+        actionsExtra={themeToggle && <WalletThemeToggle />}
       />
 
       {/* En móvil el contenedor con scroll tiene 1rem de padding arriba y el sticky lo respeta:

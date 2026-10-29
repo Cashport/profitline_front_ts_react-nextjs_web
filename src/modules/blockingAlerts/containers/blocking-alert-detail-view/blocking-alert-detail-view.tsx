@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Alert, Empty, Skeleton } from "antd";
-import { ChevronRight, FileText, Info, Link2, Send, Store, X } from "lucide-react";
+import { ChevronRight, Download, Info, Link2, Send, Store, X } from "lucide-react";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiTab from "@/components/ui/ui-tab";
@@ -48,7 +48,7 @@ const SELECTED_NOUN: Record<SelectionKey, [string, string]> = {
   paid_invoices: ["pagada seleccionada", "pagadas seleccionadas"]
 };
 
-/** Acciones del cliente en móvil: botones redondos junto al nombre (prototipo). */
+/** Acciones del cliente: botones redondos, solo ícono, junto al nombre (prototipo). */
 const ROUND_BUTTON = cn(HEADER_BUTTON, "h-[38px] w-[38px] rounded-full px-0");
 
 const sum = <T extends { amount: number }>(list: T[]) => list.reduce((s, x) => s + x.amount, 0);
@@ -89,7 +89,7 @@ export default function BlockingAlertDetailView({
   if (!detail) {
     return (
       <div className="flex flex-col gap-3 pb-6 max-md:px-4">
-        <AlertsHeader crumbs={crumbs} />
+        <AlertsHeader crumbs={crumbs} flush />
         {error ? (
           <Empty description={error.message} />
         ) : (
@@ -252,61 +252,46 @@ export default function BlockingAlertDetailView({
   const meta = STATUS_META[detail.status];
   const isOk = detail.status === "ok";
   const showPay = !isOk && tab !== "paid_invoices";
-  const statusText = (
-    <span
-      className={cn("flex min-w-0 items-center gap-1.5 font-medium", isOk && "text-cp-ink-3")}
-      style={isOk ? undefined : { color: meta.color }}
-    >
-      {/* En móvil el ícono va en el círculo junto al nombre. */}
-      <meta.Icon className="h-3.5 w-3.5 shrink-0 max-md:hidden" strokeWidth={2.6} />
-      <span className="truncate">{statusLabel(detail)}</span>
-    </span>
-  );
 
   return (
     <div className="flex flex-col gap-3 pb-6 max-md:px-4">
-      <AlertsHeader
-        crumbs={crumbs}
-        info={statusText}
-        actions={
-          <>
-            <button type="button" className={HEADER_BUTTON} onClick={() => setModal("statement")}>
-              <FileText className="h-4 w-4" />
-              Estado de cuenta
-            </button>
-            <button type="button" className={HEADER_BUTTON} onClick={() => setModal("send")}>
-              <Send className="h-4 w-4" />
-              Enviar al cliente
-            </button>
-          </>
-        }
-      />
+      <AlertsHeader crumbs={crumbs} flush />
 
-      {/* Móvil (prototipo): estado, nombre y acciones; en escritorio van en el header. */}
-      <div className="flex items-center gap-3 md:hidden">
+      {/* Como el prototipo: estado, nombre y acciones (solo íconos) bajo las migas. */}
+      <div className="flex items-center gap-3">
         <span
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full md:h-11 md:w-11"
           style={{ background: meta.tint, color: meta.color }}
         >
           <meta.Icon className="h-[18px] w-[18px]" strokeWidth={2.4} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="m-0 truncate text-[17px] font-bold leading-tight text-cp-ink">
+          <p className="m-0 truncate text-[17px] font-bold leading-tight text-cp-ink md:text-[20px]">
             {detail.name}
           </p>
-          <div className="mt-0.5 text-[12.5px]">{statusText}</div>
+          <p
+            className={cn(
+              "m-0 mt-0.5 truncate text-[12.5px] font-medium md:text-[13px]",
+              isOk && "text-cp-ink-3"
+            )}
+            style={isOk ? undefined : { color: meta.color }}
+          >
+            {statusLabel(detail)}
+          </p>
         </div>
         <button
           type="button"
           aria-label="Estado de cuenta"
+          title="Estado de cuenta"
           className={ROUND_BUTTON}
           onClick={() => setModal("statement")}
         >
-          <FileText className="h-4 w-4" />
+          <Download className="h-4 w-4" />
         </button>
         <button
           type="button"
           aria-label="Enviar al cliente"
+          title="Enviar al cliente"
           className={ROUND_BUTTON}
           onClick={() => setModal("send")}
         >

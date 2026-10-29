@@ -17,7 +17,7 @@ export function KpiCard({ children, loading, className }: KpiCardProps) {
   return (
     <section
       className={cn(
-        "box-border flex min-w-0 flex-[1_1_300px] flex-col justify-between gap-2 rounded-[14px] bg-cp-surface px-[18px] py-[14px]",
+        "box-border flex min-w-0 flex-[1_1_300px] flex-col justify-between gap-2 rounded-[14px] bg-cp-surface px-[18px] py-[14px] text-cp-ink",
         className
       )}
     >
