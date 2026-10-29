@@ -4,6 +4,7 @@ import { Calendar, MoreHorizontal } from "lucide-react";
 import { Dropdown, Spin, message } from "antd";
 
 import { uploadAuxiliaryFile } from "@/services/dataQuality/dataQuality";
+import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import { useAuxiliaryFiles } from "../../hooks/useAuxiliaryFiles";
 import { AuxiliaryUploadModal } from "../AuxiliaryUploadModal/AuxiliaryUploadModal";
 
@@ -61,6 +62,7 @@ export function AuxiliaryFilesTable() {
   const [uploadTarget, setUploadTarget] = useState<IAuxiliaryFile | null>(null);
   const [uploadBatchId, setUploadBatchId] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const { runUpload, structureModals } = useIntakeStructureUpload();
 
   const showStatus = (auxiliaryFiles ?? []).some(
     (file) => file.async_upload || file.last_batch
@@ -75,9 +77,14 @@ export function AuxiliaryFilesTable() {
         setIsUploading(true);
         const hide = message.open({ type: "loading", content: "Cargando archivo...", duration: 0 });
         try {
-          await uploadAuxiliaryFile(id, file);
-          message.success("Archivo cargado exitosamente.");
-          mutate();
+          const uploaded = await runUpload(
+            (useAsTemplate) => uploadAuxiliaryFile(id, file, useAsTemplate),
+            { onPrompt: hide }
+          );
+          if (uploaded) {
+            message.success("Archivo cargado exitosamente.");
+            mutate();
+          }
         } catch (error) {
           message.error(
             error instanceof Error
@@ -290,6 +297,7 @@ export function AuxiliaryFilesTable() {
         }}
         onFinished={() => mutate()}
       />
+      {structureModals}
     </Spin>
   );
 }

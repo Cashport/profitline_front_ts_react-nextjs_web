@@ -862,9 +862,16 @@ export const deleteFileDateIntake = async (fileId: number): Promise<any> => {
   }
 };
 
-export const uploadAuxiliaryFile = async (id: number, file: File): Promise<any> => {
+export const uploadAuxiliaryFile = async (
+  id: number,
+  file: File,
+  useAsTemplate?: boolean
+): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
+  if (useAsTemplate !== undefined) {
+    formData.append("use_as_template", String(useAsTemplate));
+  }
   try {
     const response: GenericResponse<any> = await API.patch(
       `${config.API_HOST}/data/auxiliary-files/${id}`,
@@ -888,6 +895,8 @@ export interface IUploadAuxiliaryUploadRequest {
   fileCount: number;
   slotIndex: number;
   file: File;
+  /** Respuesta al 409 TEMPLATE_DECISION_REQUIRED (validacion de estructura). */
+  useAsTemplate?: boolean;
 }
 
 export const uploadAuxiliaryUpload = async ({
@@ -895,7 +904,8 @@ export const uploadAuxiliaryUpload = async ({
   batchId,
   fileCount,
   slotIndex,
-  file
+  file,
+  useAsTemplate
 }: IUploadAuxiliaryUploadRequest): Promise<{
   uploadId: number;
   batchId: string;
@@ -910,6 +920,9 @@ export const uploadAuxiliaryUpload = async ({
   formData.append("batch_id", batchId);
   formData.append("file_count", String(fileCount));
   formData.append("slot_index", String(slotIndex));
+  if (useAsTemplate !== undefined) {
+    formData.append("use_as_template", String(useAsTemplate));
+  }
 
   const response: GenericResponse<any> = await API.post(
     `${config.API_HOST}/data/auxiliary-files/${id}/uploads`,
