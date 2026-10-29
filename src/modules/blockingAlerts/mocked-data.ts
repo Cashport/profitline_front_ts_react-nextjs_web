@@ -525,6 +525,7 @@ const toDetail = (e: RawEntity, row: IBlockingAlertRow, idx: number): IBlockingA
     e.upcoming ?? split(215100 + idx * 97, row.current, [-6, -13, -21, -28], [0.31, 0.27, 0.23]);
   return {
     ...row,
+    cutoff_at: CUTOFF_AT,
     contact_name: e.contact_name,
     invoices: [...e.overdue.sort((a, b) => b.days - a.days), ...upcoming].map((i) => ({
       id: i.number,

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Segmented } from "antd";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import UiTab from "@/components/ui/ui-tab";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
+import { cn } from "@/utils/utils";
 
+import { MOBILE_TABS } from "../../constants";
 import { paymentLinkOf, plural } from "../../utils/blocking-alerts";
 import AlertModal from "../alert-modal/alert-modal";
 
@@ -48,15 +50,16 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
       title="Enviar al cliente"
       subtitle={`Para: ${detail.contact_name}`}
     >
-      <Segmented<Channel>
-        block
-        value={channel}
-        onChange={setChannel}
-        options={[
-          { label: "WhatsApp", value: "whatsapp" },
-          { label: "Correo", value: "email" }
-        ]}
-      />
+      <div className={cn("[&_.ant-tabs-nav]:!mb-0", MOBILE_TABS)}>
+        <UiTab
+          activeKey={channel}
+          onChangeTab={(key) => setChannel(key as Channel)}
+          tabs={[
+            { key: "whatsapp", label: "WhatsApp", children: null },
+            { key: "email", label: "Correo", children: null }
+          ]}
+        />
+      </div>
       <div className="flex flex-col gap-2 rounded-[12px] border border-cp-line p-3">
         <span className="text-[11px] font-semibold uppercase tracking-[.12em] text-cp-ink-4">
           Plantilla · Cobro con link de pago

@@ -92,6 +92,8 @@ export interface IBlockingAlertPaidInvoice {
 }
 
 export interface IBlockingAlertDetail extends IBlockingAlertRow {
+  /** Corte de la cartera (asunto del estado de cuenta). */
+  cutoff_at: string;
   contact_name: string;
   /** Vencidas y por vencer. */
   invoices: IBlockingAlertInvoice[];

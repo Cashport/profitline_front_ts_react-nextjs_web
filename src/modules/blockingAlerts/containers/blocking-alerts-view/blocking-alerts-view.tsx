@@ -250,7 +250,6 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
               ]
             : [{ label: "Alertas de bloqueo" }]
         }
-        back={clientId ? `${BLOCKING_ALERTS_PATH}/${clientId}` : undefined}
         info={
           alerts && (
             <span className="flex items-center gap-1.5">

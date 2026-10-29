@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import Header from "@/components/organisms/header";
 import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
@@ -16,8 +16,6 @@ export interface AlertsCrumb {
 interface AlertsHeaderProps {
   /** Ruta hasta la pantalla; con una sola miga es el título. */
   crumbs: AlertsCrumb[];
-  /** "‹": vuelve en el historial o, si se entró por URL, a esta ruta. */
-  back?: string;
   /** Escritorio: a la derecha del título. Móvil: bajo el título de la pantalla principal. */
   info?: React.ReactNode;
   /** Búsqueda, orden o acciones (solo escritorio; en móvil cada vista las pone en el contenido). */
@@ -30,13 +28,7 @@ interface AlertsHeaderProps {
  * Escritorio: header compartido de Cashport (docs/DESIGN.md §4) con las migas del módulo.
  * Móvil: título (o migas) y el tema en pequeño, sin avatar, como el prototipo.
  */
-export default function AlertsHeader({
-  crumbs,
-  back,
-  info,
-  actions,
-  themeToggle
-}: AlertsHeaderProps) {
+export default function AlertsHeader({ crumbs, info, actions, themeToggle }: AlertsHeaderProps) {
   const current = crumbs[crumbs.length - 1];
 
   return (
@@ -74,19 +66,11 @@ export default function AlertsHeader({
             {themeToggle && <WalletThemeToggle />}
           </>
         }
-        back={back}
       />
 
-      <header className="sticky top-0 z-20 -mx-4 flex items-center gap-2.5 bg-cp-bg px-4 pb-1 pt-1 md:hidden">
-        {back && (
-          <Link
-            href={back}
-            aria-label="Volver"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cp-line-2 bg-cp-surface text-cp-ink"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Link>
-        )}
+      {/* En móvil el contenedor con scroll tiene 1rem de padding arriba y el sticky lo respeta:
+          -top-4 lo pega al borde para que el contenido no asome por encima. */}
+      <header className="sticky -top-4 z-20 -mx-4 flex min-h-11 items-center gap-2.5 bg-cp-bg px-4 pb-1 pt-1 md:hidden">
         <div className="min-w-0 flex-1">
           {crumbs.length > 1 ? (
             <nav

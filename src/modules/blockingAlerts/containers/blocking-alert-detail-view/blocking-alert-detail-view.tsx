@@ -80,7 +80,6 @@ export default function BlockingAlertDetailView({
   const [modal, setModal] = useState<"payment" | "statement" | "send" | null>(null);
 
   const clientHref = `${BLOCKING_ALERTS_PATH}/${clientId}`;
-  const back = shipToCode ? clientHref : BLOCKING_ALERTS_PATH;
   const crumbs = [
     { label: "Alertas de bloqueo", href: BLOCKING_ALERTS_PATH },
     ...(shipToCode ? [{ label: detail?.client_name ?? "Cliente", href: clientHref }] : []),
@@ -90,7 +89,7 @@ export default function BlockingAlertDetailView({
   if (!detail) {
     return (
       <div className="flex flex-col gap-3 pb-6 max-md:px-4">
-        <AlertsHeader crumbs={crumbs} back={back} />
+        <AlertsHeader crumbs={crumbs} />
         {error ? (
           <Empty description={error.message} />
         ) : (
@@ -268,7 +267,6 @@ export default function BlockingAlertDetailView({
     <div className="flex flex-col gap-3 pb-6 max-md:px-4">
       <AlertsHeader
         crumbs={crumbs}
-        back={back}
         info={statusText}
         actions={
           <>
