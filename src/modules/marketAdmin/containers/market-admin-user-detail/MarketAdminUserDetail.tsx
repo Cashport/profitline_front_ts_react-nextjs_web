@@ -49,10 +49,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const { data: usuario, isLoading, error, mutate } = useMarketAdminUserDetail(id);
   const { data: allGrupos } = useClientsGroupsSimplified();
 
-  // El facturador solo aplica a vendedores (KAM). Se evita la consulta para otros roles.
-  const isSeller = usuario?.role_name === "KAM";
+  // El facturador se puede asignar a cualquier usuario, sin importar su rol.
   const { data: facturadores, isLoading: isLoadingFacturadores } =
-    useMarketAdminFacturadores(isSeller);
+    useMarketAdminFacturadores(!!usuario);
 
   const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "paises" | "configuraciones">(
     "clientes"
@@ -326,7 +325,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     ...(canManageUserCountries
       ? [{ id: "paises", label: `Países (${countryIds.length})`, icon: Globe }]
       : []),
-    ...(isSeller ? [{ id: "configuraciones", label: "Configuraciones", icon: Settings }] : [])
+    { id: "configuraciones", label: "Configuraciones", icon: Settings }
   ];
 
   return (
@@ -433,7 +432,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
                 onQuitar={quitarGrupo}
               />
             ))}
-          {activeTab === "configuraciones" && isSeller && (
+          {activeTab === "configuraciones" && (
             <ConfiguracionFacturadorTab
               currentBillerId={usuario.biller_id}
               facturadores={facturadores}
