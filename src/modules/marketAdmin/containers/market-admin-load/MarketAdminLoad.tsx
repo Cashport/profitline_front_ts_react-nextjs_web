@@ -152,7 +152,12 @@ export default function MarketAdminLoad() {
         { onValidationsRequired: askValidations(targetId, file.name) }
       );
       if (!uploaded) return;
-      showMessage("success", `Archivo "${file.name}" cargado correctamente.`);
+      // La carga es asincrona: el loader valida el contenido y procesa despues;
+      // el resultado aparece en el historial de cargues.
+      showMessage(
+        "success",
+        `Archivo "${file.name}" recibido. Se está validando y procesando; revisa el resultado en el historial.`
+      );
       await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
     } catch (error) {
       showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
