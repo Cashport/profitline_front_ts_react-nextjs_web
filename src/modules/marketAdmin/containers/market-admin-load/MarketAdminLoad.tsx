@@ -18,7 +18,17 @@ import {
   getProfitLoaderTimelineKey,
   useProfitLoaders
 } from "@/modules/marketAdmin/hooks/useProfitLoaders";
-import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
+import {
+  getLoaderValidations,
+  saveLoaderValidations,
+  uploadProfitLoaderFile
+} from "@/services/marketAdmin/marketAdmin";
+import { ModalLoaderValidations } from "@/components/molecules/modals/ModalIntakeStructure/ModalLoaderValidations";
+import {
+  IColumnProfile,
+  ILoaderValidationConfig,
+  IValidationsRequired
+} from "@/types/dataQuality/IIntakeStructure";
 import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import { useMessageApi } from "@/context/MessageContext";
 import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
@@ -39,6 +49,80 @@ export default function MarketAdminLoad() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<number | null>(null);
   const { runUpload, structureModals } = useIntakeStructureUpload();
+  const [validationsModal, setValidationsModal] = useState<{
+    loaderId: number;
+    loaderName: string | null;
+    fileName: string | null;
+    initial: ILoaderValidationConfig;
+    profiles?: IColumnProfile[];
+    mode: "upload" | "edit";
+    // eslint-disable-next-line no-unused-vars
+    resolve?: (saved: boolean) => void;
+  } | null>(null);
+
+  // 409 VALIDATIONS_REQUIRED: abre el asistente y espera a que se guarde.
+  const askValidations = (loaderId: number, fileName: string) => (data: IValidationsRequired) =>
+    new Promise<boolean>((resolve) => {
+      setValidationsModal({
+        loaderId,
+        loaderName: data.loader_name,
+        fileName,
+        initial: data.suggestion,
+        profiles: data.columns,
+        mode: "upload",
+        resolve
+      });
+    });
+
+  const closeValidations = (saved: boolean) => {
+    validationsModal?.resolve?.(saved);
+    setValidationsModal(null);
+  };
+
+  const handleSaveValidations = async (config: ILoaderValidationConfig) => {
+    if (!validationsModal) return;
+    await saveLoaderValidations(validationsModal.loaderId, config);
+    if (validationsModal.mode === "edit") {
+      showMessage("success", "Validaciones guardadas.");
+    }
+    closeValidations(true);
+  };
+
+  const openValidationsEditor = async (loader: IProfitLoader) => {
+    try {
+      const data = await getLoaderValidations(loader.id);
+      if (!data.has_template) {
+        showMessage(
+          "info",
+          "Este ETL todavía no tiene template: carga un archivo para crearlo y definir sus validaciones."
+        );
+        return;
+      }
+      setValidationsModal({
+        loaderId: loader.id,
+        loaderName: loader.display_name,
+        fileName: null,
+        mode: "edit",
+        initial: data.config ?? {
+          window: 6,
+          row_count: { tolerance_pct: 10, severity: "warning" },
+          columns: data.template_columns.map((name) => ({
+            name,
+            type: "any",
+            required: false,
+            calc: "none",
+            tolerance_pct: 5,
+            severity: "warning"
+          }))
+        }
+      });
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "No se pudieron leer las validaciones."
+      );
+    }
+  };
 
   const { showMessage } = useMessageApi();
 
@@ -63,8 +147,9 @@ export default function MarketAdminLoad() {
 
     setUploadingId(targetId);
     try {
-      const uploaded = await runUpload((useAsTemplate) =>
-        uploadProfitLoaderFile(targetId, file, useAsTemplate)
+      const uploaded = await runUpload(
+        (useAsTemplate) => uploadProfitLoaderFile(targetId, file, useAsTemplate),
+        { onValidationsRequired: askValidations(targetId, file.name) }
       );
       if (!uploaded) return;
       showMessage("success", `Archivo "${file.name}" cargado correctamente.`);
@@ -225,6 +310,7 @@ export default function MarketAdminLoad() {
         onClose={() => setDetailId(null)}
         onUpload={triggerUpload}
         onDownloadTemplate={descargarTemplate}
+        onEditValidations={openValidationsEditor}
       />
 
       <ModalNuevoEtl
@@ -234,6 +320,17 @@ export default function MarketAdminLoad() {
       />
 
       {structureModals}
+
+      <ModalLoaderValidations
+        open={!!validationsModal}
+        loaderName={validationsModal?.loaderName}
+        fileName={validationsModal?.fileName}
+        initial={validationsModal?.initial ?? null}
+        profiles={validationsModal?.profiles}
+        mode={validationsModal?.mode ?? "upload"}
+        onSave={handleSaveValidations}
+        onCancel={() => closeValidations(false)}
+      />
     </div>
   );
 }

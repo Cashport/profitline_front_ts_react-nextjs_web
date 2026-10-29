@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Spin } from "antd";
-import { ChevronsRight, Download, FileSpreadsheet, Info, Upload } from "lucide-react";
+import { ChevronsRight, Download, FileSpreadsheet, Info, ShieldCheck, Upload } from "lucide-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import {
   useProfitLoader,
@@ -18,6 +18,8 @@ type Props = {
   onClose: () => void;
   onUpload: (id: number) => void;
   onDownloadTemplate: (loader: IProfitLoader) => void;
+  /** Abre el asistente de validaciones de contenido del ETL. */
+  onEditValidations?: (loader: IProfitLoader) => void;
 };
 
 const sectionLabelClass = "text-xs font-semibold text-[#999999] uppercase tracking-wide mb-1";
@@ -30,7 +32,8 @@ export default function PanelDetalleCargue({
   isUploading,
   onClose,
   onUpload,
-  onDownloadTemplate
+  onDownloadTemplate,
+  onEditValidations
 }: Props) {
   const { loader, isLoading: loadingLoader } = useProfitLoader(open ? loaderId : null);
   const { timeline, isLoading: loadingTimeline } = useProfitLoaderTimeline(open ? loaderId : null);
@@ -132,6 +135,15 @@ export default function PanelDetalleCargue({
                 >
                   <Download size={14} /> Template
                 </button>
+                {onEditValidations && (
+                  <button
+                    type="button"
+                    onClick={() => onEditValidations(loader)}
+                    className="flex items-center justify-center gap-1.5 flex-1 px-4 py-2 rounded-lg text-sm font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
+                  >
+                    <ShieldCheck size={14} /> Validaciones
+                  </button>
+                )}
                 {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
                 <div className="h-10 flex-1">
                   <PrincipalButton

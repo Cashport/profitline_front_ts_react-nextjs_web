@@ -1,12 +1,5 @@
-import { Alert, Col, Modal, Row, Tag, Typography } from "antd";
-
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import { ITemplatePreview } from "@/types/dataQuality/IIntakeStructure";
-
-import "./modalIntakeStructure.scss";
-
-const { Title, Text } = Typography;
+import { PlCol, PlModalShell } from "./PlModalShell";
 
 interface Props {
   open: boolean;
@@ -17,88 +10,83 @@ interface Props {
 }
 
 /**
- * Se muestra cuando la regla del archivo aun no tiene template de estructura
+ * Se muestra cuando la carga aun no tiene template de estructura
  * (409 TEMPLATE_DECISION_REQUIRED).
  */
 export const ModalTemplateDecision = ({ open, preview, onAnswer }: Props) => {
   const detected = preview?.detected;
   const canUse = !!preview?.can_use_as_template;
   const headers = preview?.template?.fields.map((f) => f.name) ?? detected?.headers ?? [];
+  const meta = detected?.headerCell
+    ? `${detected.sheet ? `Hoja ${detected.sheet} · ` : ""}encabezados desde ${detected.headerCell}${
+        detected.delimiter ? ` · separador ${detected.delimiter}` : ""
+      }`
+    : null;
 
   return (
-    <Modal
+    <PlModalShell
       open={open}
-      onCancel={() => onAnswer(null)}
-      title={<Title level={4}>Este archivo aún no tiene template</Title>}
-      className="modalIntakeStructure"
-      width={640}
-      destroyOnClose
+      onClose={() => onAnswer(null)}
+      title="Este archivo aún no tiene template"
+      fileName={null}
+      meta={meta}
+      heading={canUse ? `${headers.length} columnas detectadas` : "No se puede usar como template"}
+      subheading={
+        canUse
+          ? "Si lo usas como template, los próximos archivos deberán traer estas mismas columnas, en el mismo orden y en la misma ubicación."
+          : "Corrige el archivo o cárgalo sin template."
+      }
       footer={
-        <Row gutter={8} style={{ width: "100%" }}>
-          <Col span={6}>
-            <SecondaryButton fullWidth onClick={() => onAnswer(null)}>
-              Cancelar
-            </SecondaryButton>
-          </Col>
-          <Col span={9}>
-            <SecondaryButton fullWidth onClick={() => onAnswer(false)}>
-              Cargar sin template
-            </SecondaryButton>
-          </Col>
-          <Col span={9}>
-            <PrincipalButton fullWidth disabled={!canUse} onClick={() => onAnswer(true)}>
-              Usar como template
-            </PrincipalButton>
-          </Col>
-        </Row>
+        <>
+          <button type="button" className="plBtn" onClick={() => onAnswer(null)}>
+            Cancelar cargue
+          </button>
+          <span className="plSpacer" />
+          <button type="button" className="plBtn" onClick={() => onAnswer(false)}>
+            Cargar sin template
+          </button>
+          <button
+            type="button"
+            className="plBtn plBtnPrimary"
+            disabled={!canUse}
+            onClick={() => onAnswer(true)}
+          >
+            Usar como template
+          </button>
+        </>
       }
     >
-      <Text>
-        ¿Quieres usar este archivo como template? Se guardarán sus encabezados y los próximos
-        archivos de este tipo deberán tener las mismas columnas, en el mismo orden y en la misma
-        ubicación.
-      </Text>
-
-      {canUse && detected && (
-        <div className="structureSummary">
-          <Text type="secondary">
-            {detected.sheet ? `Hoja '${detected.sheet}', ` : ""}
-            encabezados desde la celda {detected.headerCell}
-            {detected.delimiter ? `, separador '${detected.delimiter}'` : ""}
-          </Text>
-          <div className="headerTags">
+      {canUse && (
+        <div className="plCard" style={{ padding: "14px 18px" }}>
+          <div className="plTags">
             {headers.map((h, i) => (
-              <Tag key={`${h}-${i}`}>{h || "(sin nombre)"}</Tag>
+              <PlCol key={`${h}-${i}`}>{h || "(sin nombre)"}</PlCol>
             ))}
           </div>
         </div>
       )}
 
-      {!canUse && (
-        <Alert
-          className="structureAlert"
-          type="error"
-          showIcon
-          message="Este archivo no se puede usar como template"
-          description={preview?.errors.map((e) => e.message).join(" ")}
-        />
+      {!canUse && !!preview?.errors.length && (
+        <div className="plCard">
+          {preview.errors.map((e, i) => (
+            <div key={i} className="plItem">
+              <span className="plDot" />
+              <span style={{ flex: 1 }}>{e.message}</span>
+            </div>
+          ))}
+        </div>
       )}
 
       {canUse && !!preview?.warnings.length && (
-        <Alert
-          className="structureAlert"
-          type="warning"
-          showIcon
-          message="Revisa antes de confirmar"
-          description={
-            <ul>
-              {preview.warnings.map((w, i) => (
-                <li key={i}>{w.message}</li>
-              ))}
-            </ul>
-          }
-        />
+        <div className="plAlert">
+          <strong>Revisa antes de confirmar</strong>
+          <ul>
+            {preview.warnings.map((w, i) => (
+              <li key={i}>{w.message}</li>
+            ))}
+          </ul>
+        </div>
       )}
-    </Modal>
+    </PlModalShell>
   );
 };

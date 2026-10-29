@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { message } from "antd";
 
 import { ApiError } from "@/utils/api/api";
-import { ITemplatePreview } from "@/types/dataQuality/IIntakeStructure";
+import { ITemplatePreview, IValidationsRequired } from "@/types/dataQuality/IIntakeStructure";
 import { ModalTemplateDecision } from "./ModalTemplateDecision";
 import { IStructureErrorsState, ModalStructureErrors } from "./ModalStructureErrors";
 
@@ -12,7 +12,17 @@ export type IntakeUpload = (useAsTemplate?: boolean) => Promise<unknown>;
 interface RunOptions {
   /** Se llama antes de mostrar un modal (p. ej. para ocultar el mensaje de carga). */
   onPrompt?: () => void;
+  /**
+   * Cargas de ETL: 409 VALIDATIONS_REQUIRED. Debe abrir el asistente y
+   * resolver true cuando las validaciones quedaron guardadas (se reintenta la
+   * carga) o false si el usuario cancela.
+   */
+  // eslint-disable-next-line no-unused-vars
+  onValidationsRequired?: (data: IValidationsRequired) => Promise<boolean>;
 }
+
+const isValidationsRequired = (data: unknown): data is IValidationsRequired =>
+  !!data && typeof data === "object" && (data as { kind?: string }).kind === "VALIDATIONS_REQUIRED";
 
 const isTemplatePreview = (data: unknown): data is ITemplatePreview =>
   !!data && typeof data === "object" && "can_use_as_template" in data;
@@ -47,6 +57,7 @@ export const useIntakeStructureUpload = () => {
   const runUpload = async (upload: IntakeUpload, options: RunOptions = {}): Promise<boolean> => {
     let useAsTemplate: boolean | undefined;
     let hideRetry: (() => void) | undefined;
+    let validationsAsked = false;
     try {
       for (;;) {
         try {
@@ -54,6 +65,21 @@ export const useIntakeStructureUpload = () => {
           return true;
         } catch (error) {
           if (!(error instanceof ApiError)) throw error;
+
+          if (
+            error.status === 409 &&
+            isValidationsRequired(error.data) &&
+            options.onValidationsRequired &&
+            !validationsAsked
+          ) {
+            validationsAsked = true;
+            options.onPrompt?.();
+            hideRetry?.();
+            const saved = await options.onValidationsRequired(error.data);
+            if (!saved) return false;
+            hideRetry = message.loading("Subiendo archivo...", 0);
+            continue;
+          }
 
           if (
             error.status === 409 &&

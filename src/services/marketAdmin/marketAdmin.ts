@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ILoaderValidationConfig, ILoaderValidations } from "@/types/dataQuality/IIntakeStructure";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
@@ -361,6 +362,26 @@ export const uploadProfitLoaderFile = async (id: number, file: File, useAsTempla
     console.error("Error al cargar el archivo del loader:", error);
     throw error;
   }
+};
+
+// GET /profit-loader/etl/:id/validations — configuracion del asistente de validaciones
+export const getLoaderValidations = async (id: number): Promise<ILoaderValidations> => {
+  const response: GenericResponse<ILoaderValidations> = await API.get(
+    `/profit-loader/etl/${id}/validations`
+  );
+  return response.data;
+};
+
+// PUT /profit-loader/etl/:id/validations — reemplaza las reglas creadas con el asistente
+export const saveLoaderValidations = async (
+  id: number,
+  config: ILoaderValidationConfig
+): Promise<ILoaderValidations> => {
+  const response: GenericResponse<ILoaderValidations> = await API.put(
+    `/profit-loader/etl/${id}/validations`,
+    { config }
+  );
+  return response.data;
 };
 
 // ── Unidades de negocio ─────────────────────────────────────────────────────

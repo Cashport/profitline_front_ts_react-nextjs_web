@@ -1,11 +1,5 @@
-import { Alert, Modal, Tag, Typography } from "antd";
-
-import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { IStructureDetected, IStructureIssue } from "@/types/dataQuality/IIntakeStructure";
-
-import "./modalIntakeStructure.scss";
-
-const { Title, Text } = Typography;
+import { PlCol, PlModalShell } from "./PlModalShell";
 
 export interface IStructureErrorsState {
   message: string;
@@ -20,70 +14,76 @@ interface Props {
   onClose: () => void;
 }
 
-/** Errores de estructura del archivo (422): todos juntos y con su celda. */
+/** Etapa "Críticas": errores de estructura del archivo (422), todos juntos y con su celda. */
 export const ModalStructureErrors = ({ open, state, onClose }: Props) => {
   const detected = state?.detected;
+  const issues = state?.issues ?? [];
+  const count = issues.length;
 
   return (
-    <Modal
+    <PlModalShell
       open={open}
-      onCancel={onClose}
-      title={<Title level={4}>El archivo no tiene la estructura esperada</Title>}
-      className="modalIntakeStructure"
-      width={680}
-      destroyOnClose
+      onClose={onClose}
+      title="El archivo no tiene la estructura esperada"
+      meta={
+        detected?.headerCell
+          ? `${detected.format ? `${detected.format.toUpperCase()} · ` : ""}${
+              detected.sheet ? `hoja ${detected.sheet} · ` : ""
+            }encabezados desde ${detected.headerCell}`
+          : null
+      }
+      steps={[
+        { label: "1 · Críticas", state: "error" },
+        { label: "2 · Advertencias", state: "pending" },
+        { label: "3 · Confirmar", state: "pending" }
+      ]}
+      heading={`${count} ${count === 1 ? "alerta crítica" : "alertas críticas"}`}
+      subheading="Corrige el archivo y vuelve a cargarlo. No se procesó ningún dato."
       footer={
-        <FooterButtons
-          titleConfirm="Entendido"
-          showLeftButton={false}
-          onClose={onClose}
-          handleOk={onClose}
-        />
+        <>
+          <button type="button" className="plBtn" onClick={onClose}>
+            Cancelar cargue
+          </button>
+          <span className="plSpacer" />
+          <button type="button" className="plBtn plBtnPrimary" onClick={onClose}>
+            Entendido
+          </button>
+        </>
       }
     >
-      <Text>
-        {state?.message}. Corrige el archivo y vuelve a cargarlo; no se procesó ningún dato.
-      </Text>
-
-      <ul className="issueList">
-        {state?.issues.map((issue, i) => (
-          <li key={i}>
-            {issue.cell && <Tag color="red">{issue.cell}</Tag>}
-            <span>{issue.message}</span>
-          </li>
+      <div className="plCard">
+        {issues.map((issue, i) => (
+          <div key={i} className="plItem">
+            <span className="plDot" />
+            <span style={{ flex: 1 }}>
+              {issue.cell && <span className="plCellRef">{issue.cell}</span>}
+              {issue.message}
+            </span>
+          </div>
         ))}
-      </ul>
+      </div>
 
       {!!state?.warnings.length && (
-        <Alert
-          className="structureAlert"
-          type="warning"
-          showIcon
-          message="Advertencias"
-          description={
-            <ul>
-              {state.warnings.map((w, i) => (
-                <li key={i}>{w.message}</li>
-              ))}
-            </ul>
-          }
-        />
+        <div className="plAlert">
+          <strong>Advertencias</strong>
+          <ul>
+            {state.warnings.map((w, i) => (
+              <li key={i}>{w.message}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {!!detected?.headers.length && (
-        <div className="structureSummary">
-          <Text type="secondary">
-            Encabezados encontrados
-            {detected.sheet ? ` en la hoja '${detected.sheet}'` : ""}
-            {detected.headerCell ? ` desde la celda ${detected.headerCell}` : ""}:
-          </Text>
-          <div className="headerTags">
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span className="plNote">Encabezados encontrados en el archivo:</span>
+          <div className="plTags">
             {detected.headers.map((h, i) => (
-              <Tag key={`${h}-${i}`}>{h || "(sin nombre)"}</Tag>
+              <PlCol key={`${h}-${i}`}>{h || "(sin nombre)"}</PlCol>
             ))}
           </div>
         </div>
       )}
-    </Modal>
+    </PlModalShell>
   );
 };
