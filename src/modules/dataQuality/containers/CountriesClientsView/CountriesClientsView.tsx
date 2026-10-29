@@ -6,12 +6,14 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
-import { Button as AntButton, Modal, message } from "antd";
+import { Button as AntButton, message } from "antd";
 
 import {
   downloadUnifiedCatalogFile,
   downloadIqviaAuxCatalog,
+  downloadIqviaAuxProductCatalog,
   uploadIqviaAuxCatalog,
+  uploadIqviaAuxProductCatalog,
   uploadCatalogMaterial,
   uploadPointsOfSaleFile,
   uploadPacksFile
@@ -28,6 +30,7 @@ import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
 import { DataQualityGeneralFilter } from "../../components/general-filter";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
+import { IqviaUploadResultModal } from "../../components/IqviaUploadResultModal/IqviaUploadResultModal";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import Header from "@/components/organisms/header";
 
@@ -62,10 +65,14 @@ export default function CountriesClientsView() {
   const closeAllModals = () => setWhichModalIsOpen(0);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
   const [isDownloadIqviaLoading, setIsDownloadIqviaLoading] = useState(false);
+  const [isDownloadIqviaProductLoading, setIsDownloadIqviaProductLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
   const [isUploadIqviaLoading, setIsUploadIqviaLoading] = useState(false);
+  const [isUploadIqviaProductLoading, setIsUploadIqviaProductLoading] = useState(false);
   const [isUploadPacksLoading, setIsUploadPacksLoading] = useState(false);
   const [iqviaUploadResult, setIqviaUploadResult] = useState<IIqviaAuxUploadResult | null>(null);
+  const [iqviaProductUploadResult, setIqviaProductUploadResult] =
+    useState<IIqviaAuxUploadResult | null>(null);
 
   // El auxiliar IQVIA solo aplica a Brasil (id_country = 9).
   const isBrazil = String(countryId) === "9";
@@ -175,6 +182,63 @@ export default function CountriesClientsView() {
       message.error(error instanceof Error ? error.message : "Error al cargar el catálogo IQVIA");
     } finally {
       setIsUploadIqviaLoading(false);
+    }
+  };
+
+  const handleDownloadIqviaProductCatalog = async () => {
+    setIsDownloadIqviaProductLoading(true);
+
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando catálogo IQVIA Productos...",
+      duration: 0
+    });
+
+    try {
+      const res = await downloadIqviaAuxProductCatalog({ countryId });
+      window.open(res.url, "_blank");
+
+      message.success("Catálogo IQVIA Productos descargado exitosamente.");
+      closeAllModals();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al descargar el catálogo IQVIA Productos"
+      );
+    } finally {
+      hide();
+      setIsDownloadIqviaProductLoading(false);
+    }
+  };
+
+  const handleOpenIqviaProductUpload = () => {
+    setWhichModalIsOpen(7);
+  };
+
+  const handleUploadIqviaProductCatalog = async (file: File) => {
+    setIsUploadIqviaProductLoading(true);
+    try {
+      const res = await uploadIqviaAuxProductCatalog(file, countryId);
+      setIqviaProductUploadResult(res);
+      closeAllModals();
+
+      if (res.errores.length > 0) {
+        message.warning(
+          `Carga procesada con ${res.errores.length} error(es). ` +
+            `Insertados: ${res.insertados}, actualizados: ${res.actualizados}, ` +
+            `sin cambios: ${res.sin_cambios}.`
+        );
+      } else {
+        message.success(
+          `Carga completa. Insertados: ${res.insertados}, actualizados: ${res.actualizados}, ` +
+            `sin cambios: ${res.sin_cambios}.`
+        );
+      }
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el catálogo IQVIA Productos"
+      );
+    } finally {
+      setIsUploadIqviaProductLoading(false);
     }
   };
 
@@ -351,6 +415,9 @@ export default function CountriesClientsView() {
         onDownloadIqviaCatalog={isBrazil ? handleDownloadIqviaCatalog : undefined}
         isDownloadIqviaCatalogLoading={isDownloadIqviaLoading}
         onUploadIqviaCatalog={isBrazil ? handleOpenIqviaUpload : undefined}
+        onDownloadIqviaProductCatalog={isBrazil ? handleDownloadIqviaProductCatalog : undefined}
+        isDownloadIqviaProductCatalogLoading={isDownloadIqviaProductLoading}
+        onUploadIqviaProductCatalog={isBrazil ? handleOpenIqviaProductUpload : undefined}
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
         onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
         onUploadPacks={handleOpenPacksUpload}
@@ -402,67 +469,27 @@ export default function CountriesClientsView() {
         onFileUpload={handleUploadIqviaCatalog}
         loading={isUploadIqviaLoading}
         allowedExtensions={[".xlsx"]}
-        title="Cargar catálogo IQVIA"
+        title="Cargar catálogo IQVIA Clientes"
+      />
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 7}
+        onClose={closeAllModals}
+        onFileUpload={handleUploadIqviaProductCatalog}
+        loading={isUploadIqviaProductLoading}
+        allowedExtensions={[".xlsx"]}
+        title="Cargar catálogo IQVIA Productos"
       />
 
-      <Modal
-        open={iqviaUploadResult !== null}
-        onCancel={() => setIqviaUploadResult(null)}
-        title="Resultado de carga IQVIA"
-        footer={<AntButton onClick={() => setIqviaUploadResult(null)}>Cerrar</AntButton>}
-        width={760}
-        centered
-      >
-        {iqviaUploadResult && (
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <span>
-                Filas leídas: <b>{iqviaUploadResult.total_filas}</b>
-              </span>
-              <span>
-                Insertados: <b>{iqviaUploadResult.insertados}</b>
-              </span>
-              <span>
-                Actualizados: <b>{iqviaUploadResult.actualizados}</b>
-              </span>
-              <span>
-                Sin cambios: <b>{iqviaUploadResult.sin_cambios}</b>
-              </span>
-              <span className={iqviaUploadResult.errores.length ? "text-red-600" : ""}>
-                Errores: <b>{iqviaUploadResult.errores.length}</b>
-              </span>
-            </div>
-
-            {iqviaUploadResult.errores.length > 0 ? (
-              <div>
-                <p className="mb-2 text-sm font-semibold text-red-600">Errores por fila</p>
-                <div className="max-h-64 overflow-auto rounded border border-gray-200">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-cp-line bg-cp-surface">
-                        <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Fila</th>
-                        <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Cod_Iqvia</th>
-                        <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Motivo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {iqviaUploadResult.errores.map((error, index) => (
-                        <tr key={`${error.fila}-${index}`} className="border-t border-gray-100">
-                          <td className="px-3 py-2">{error.fila}</td>
-                          <td className="px-3 py-2">{error.cod_iqvia ?? "-"}</td>
-                          <td className="px-3 py-2">{error.motivo}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-green-700">El archivo se procesó sin errores.</p>
-            )}
-          </div>
-        )}
-      </Modal>
+      <IqviaUploadResultModal
+        title="Resultado de carga IQVIA Clientes"
+        result={iqviaUploadResult}
+        onClose={() => setIqviaUploadResult(null)}
+      />
+      <IqviaUploadResultModal
+        title="Resultado de carga IQVIA Productos"
+        result={iqviaProductUploadResult}
+        onClose={() => setIqviaProductUploadResult(null)}
+      />
     </div>
   );
 }
