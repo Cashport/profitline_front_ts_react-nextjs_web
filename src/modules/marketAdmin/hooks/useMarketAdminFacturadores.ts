@@ -5,7 +5,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { IMarketAdminFacturador } from "@/types/marketAdmin/IMarketAdmin";
 
 // GET /marketplace-admin/billers — usuarios con rol Facturador del proyecto actual.
-// `enabled` permite no consultar cuando el usuario no es vendedor (KAM).
+// `enabled` permite no consultar hasta que el detalle del usuario haya cargado.
 export const useMarketAdminFacturadores = (enabled = true) => {
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IMarketAdminFacturador[]>>(
     enabled ? "/marketplace-admin/billers" : null,
