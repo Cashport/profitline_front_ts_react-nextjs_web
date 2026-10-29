@@ -2,7 +2,7 @@
 
 .tabsContainer {
     .ant-tabs-nav {
-        background-color: $white;
+        background-color: rgb(var(--cp-surface)); // $white en claro; sigue el tema oscuro
         z-index: 2;
     }
 
@@ -27,7 +27,7 @@
         padding-bottom: 0.25rem !important;
 
         &.ant-tabs-tab-active .ant-tabs-tab-btn {
-            color: $black;
+            color: rgb(var(--cp-ink)); // $black en claro
             font-weight: 700;
         }
     }

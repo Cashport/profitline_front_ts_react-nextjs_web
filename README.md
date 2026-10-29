@@ -170,18 +170,19 @@ Rutas tomadas de `src/app/**/page.tsx`. El nombre de permiso es el `page_name` q
 
 Módulos presentes en el código que Cashport Brain todavía no describe:
 
-| Módulo                                                          | Rutas                                       | Código                                              | Permiso                                     |
-| --------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
-| Calidad de datos (ingesta por cliente/país, catálogos, alertas) | `/data-quality/**`                          | `src/modules/dataQuality/`                          | `DataQuality` (más permisos por componente) |
-| Cuentas médicas                                                 | `/cuentas-medicas`, `/cuentas-medicas/[id]` | `src/modules/medicalAccounts/`                      | `MedicalAccounts`                           |
-| Aprobaciones (flujos de aprobación por pasos)                   | `/aprobaciones`                             | `src/modules/aprobaciones/`                         | `Aprobaciones`                              |
-| Proveedores / terceros                                          | `/proveedores`, `/proveedores/[id]`         | `src/components/organisms/proveedores/`             | `Proveedores` (oculto en el menú)           |
-| Proyectos y configuración                                       | `/settings`, `/proyectos/**`                | `src/components/organisms/projects/`                | `Configuracion`                             |
-| Portal Cetaphil (marketplace para invitados)                    | `/cetaphil` (pública)                       | `src/modules/cetaphil/`                             | —                                           |
-| Portal de archivos (descarga por token)                         | `/portal-archivos` (pública)                | `src/app/portal-archivos/`                          | —                                           |
-| Torre de control                                                | `/torreControl`                             | `src/modules/torreControlModule/` (datos simulados) | oculto en el menú                           |
-| Nuevo dashboard                                                 | `/newDashboard`                             | `src/modules/new_dashboard/` (datos simulados)      | oculto en el menú                           |
-| Informes (informes HTML publicados para el equipo)              | `/reports`, `/reports/[id]`                 | `src/modules/reportsModule/`                        | `Reports`                                   |
+| Módulo                                                          | Rutas                                              | Código                                              | Permiso                                     |
+| --------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
+| Calidad de datos (ingesta por cliente/país, catálogos, alertas) | `/data-quality/**`                                 | `src/modules/dataQuality/`                          | `DataQuality` (más permisos por componente) |
+| Cuentas médicas                                                 | `/cuentas-medicas`, `/cuentas-medicas/[id]`        | `src/modules/medicalAccounts/`                      | `MedicalAccounts`                           |
+| Aprobaciones (flujos de aprobación por pasos)                   | `/aprobaciones`                                    | `src/modules/aprobaciones/`                         | `Aprobaciones`                              |
+| Proveedores / terceros                                          | `/proveedores`, `/proveedores/[id]`                | `src/components/organisms/proveedores/`             | `Proveedores` (oculto en el menú)           |
+| Proyectos y configuración                                       | `/settings`, `/proyectos/**`                       | `src/components/organisms/projects/`                | `Configuracion`                             |
+| Portal Cetaphil (marketplace para invitados)                    | `/cetaphil` (pública)                              | `src/modules/cetaphil/`                             | —                                           |
+| Portal de archivos (descarga por token)                         | `/portal-archivos` (pública)                       | `src/app/portal-archivos/`                          | —                                           |
+| Torre de control                                                | `/torreControl`                                    | `src/modules/torreControlModule/` (datos simulados) | oculto en el menú                           |
+| Nuevo dashboard                                                 | `/newDashboard`                                    | `src/modules/new_dashboard/` (datos simulados)      | oculto en el menú                           |
+| Informes (informes HTML publicados para el equipo)              | `/reports`, `/reports/[id]`                        | `src/modules/reportsModule/`                        | `Reports`                                   |
+| Alertas de bloqueo (clientes y puntos de venta por bloquear)    | `/blockingAlerts`, `/blockingAlerts/[clientId]/**` | `src/modules/blockingAlerts/` (datos simulados)     | `BlockingAlerts`                            |
 
 ---
 
