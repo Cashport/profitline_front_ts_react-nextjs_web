@@ -52,10 +52,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const { data: usuario, isLoading, error, mutate } = useMarketAdminUserDetail(id);
   const { data: allGrupos } = useClientsGroupsSimplified();
 
-  // El facturador solo aplica a vendedores (KAM). Se evita la consulta para otros roles.
-  const isSeller = usuario?.role_name === "KAM";
+  // El facturador se puede asignar a cualquier usuario, sin importar su rol.
   const { data: facturadores, isLoading: isLoadingFacturadores } =
-    useMarketAdminFacturadores(isSeller);
+    useMarketAdminFacturadores(!!usuario);
   const {
     data: productLines,
     isLoading: isLoadingProductLines,
@@ -461,15 +460,13 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
             ))}
           {activeTab === "configuraciones" && (
             <div className="cp-list-scroll space-y-10 pr-1">
-              {isSeller && (
-                <ConfiguracionFacturadorTab
-                  currentBillerId={usuario.biller_id}
-                  facturadores={facturadores}
-                  isLoading={isLoadingFacturadores}
-                  isSaving={isSavingBiller}
-                  onSave={saveBiller}
-                />
-              )}
+              <ConfiguracionFacturadorTab
+                currentBillerId={usuario.biller_id}
+                facturadores={facturadores}
+                isLoading={isLoadingFacturadores}
+                isSaving={isSavingBiller}
+                onSave={saveBiller}
+              />
               <LineasCategoriasSection
                 lines={productLines}
                 loading={isLoadingProductLines}
