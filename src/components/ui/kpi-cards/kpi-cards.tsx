@@ -35,7 +35,7 @@ const DOT: Record<KpiSeverity, string> = {
 
 export default function KpiCards({ cards, noun, selected, onSelect }: KpiCardsProps) {
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-3">
+    <div className="grid grid-cols-2 gap-[var(--card-gap)] md:grid-flow-col md:grid-cols-none md:auto-cols-[minmax(0,1fr)]">
       {cards.map((c) => {
         const activa = selected === c.id;
 
@@ -46,13 +46,15 @@ export default function KpiCards({ cards, noun, selected, onSelect }: KpiCardsPr
             aria-pressed={activa}
             onClick={() => onSelect(c.id)}
             className={cn(
-              "flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition-colors",
+              // Tarjeta de Clientes (DESIGN.md §3): radio 14, sin borde ni sombra. El estado activo
+              // y el hover van con outline para no sumar borde.
+              "flex flex-col rounded-[var(--card-radius)] border-0 px-[18px] py-[14px] text-left shadow-none outline outline-1 -outline-offset-1 transition-colors",
               activa
-                ? "border-wallet-accent bg-wallet-accent-soft ring-1 ring-inset ring-wallet-accent"
-                : "border-transparent hover:border-border"
+                ? "bg-wallet-accent-soft outline-wallet-accent"
+                : "bg-cp-surface outline-transparent hover:outline-cp-line-2"
             )}
           >
-            <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
               {c.sev && <span className={cn("h-2 w-2 shrink-0 rounded-full", DOT[c.sev])} />}
               {c.label}
             </div>
@@ -61,7 +63,7 @@ export default function KpiCards({ cards, noun, selected, onSelect }: KpiCardsPr
               {c.valor}
             </div>
 
-            <div className="mt-auto pt-2 text-[11.5px] text-muted-foreground">
+            <div className="mt-auto pt-2 text-[13px] text-muted-foreground">
               {c.conteo} {c.conteo === 1 ? noun[0] : noun[1]} · {c.pie}
             </div>
           </button>

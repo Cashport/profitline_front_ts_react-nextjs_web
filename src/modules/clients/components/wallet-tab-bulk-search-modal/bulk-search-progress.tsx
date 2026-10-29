@@ -39,7 +39,7 @@ const BulkSearchProgress = ({ title, progress, stepLabels, footnote }: Props) =>
               <li
                 key={label}
                 className={cn(
-                  "flex items-center gap-2.5 text-xs",
+                  "flex items-center gap-2.5 text-[13px]",
                   index <= current ? "text-foreground" : "text-[#9a9a9a]"
                 )}
               >
@@ -58,7 +58,7 @@ const BulkSearchProgress = ({ title, progress, stepLabels, footnote }: Props) =>
           })}
         </ul>
 
-        <span className="text-[11px] text-[#8a8a8a]">{footnote}</span>
+        <span className="text-[13px] text-[#8a8a8a]">{footnote}</span>
       </div>
     </div>
   );

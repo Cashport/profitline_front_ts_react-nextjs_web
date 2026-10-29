@@ -26,7 +26,7 @@ const BORDER: Record<string, string> = {
 };
 
 const BUTTON =
-  "flex-none rounded-md border border-border bg-card px-2.5 py-[3px] text-[11.5px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45";
+  "flex-none rounded-md border border-border bg-card px-2.5 py-[3px] text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45";
 
 export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
   const [resolviendo, setResolviendo] = useState(false);
@@ -64,9 +64,9 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
           {st.tiempo ?? st.estado}
         </StatusChip>
         {ticket.categoria && (
-          <span className="truncate text-[11.5px] text-muted-foreground">{ticket.categoria}</span>
+          <span className="truncate text-[13px] text-muted-foreground">{ticket.categoria}</span>
         )}
-        <span className="ml-auto flex-none font-mono text-[11px] text-muted-foreground">
+        <span className="ml-auto flex-none font-mono text-[13px] text-muted-foreground">
           {ticket.id}
         </span>
       </div>
@@ -76,16 +76,16 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
       </div>
 
       {ticket.comentario && (
-        <div className="text-[12px] leading-relaxed text-muted-foreground">{ticket.comentario}</div>
+        <div className="text-[13px] leading-relaxed text-muted-foreground">{ticket.comentario}</div>
       )}
 
       {ticket.estado === "resuelto" && ticket.comentarioResolucion && (
-        <div className="text-[12px] leading-relaxed text-muted-foreground">
+        <div className="text-[13px] leading-relaxed text-muted-foreground">
           <span className="font-semibold">Resolución:</span> {ticket.comentarioResolucion}
         </div>
       )}
 
-      <div className="flex items-center gap-2.5 text-[12px] text-muted-foreground">
+      <div className="flex items-center gap-2.5 text-[13px] text-muted-foreground">
         <span className="flex min-w-0 items-center gap-[7px] overflow-hidden whitespace-nowrap">
           <PersonBadge person={ticket.responsable} mini />
           <span className="opacity-45">·</span>
@@ -129,7 +129,7 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
               type="button"
               disabled={isSending}
               onClick={handleConfirmResolve}
-              className="flex-none rounded-md bg-cashport-green px-2.5 py-[3px] text-[11.5px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
+              className="flex-none rounded-md bg-cashport-green px-2.5 py-[3px] text-[13px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
             >
               {isSending ? "Resolviendo…" : "Confirmar"}
             </button>

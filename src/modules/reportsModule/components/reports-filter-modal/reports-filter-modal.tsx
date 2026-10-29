@@ -18,12 +18,12 @@ import type { IReportsFilters, IReportType } from "@/types/reports/IReports";
 
 import { EMPTY_REPORTS_FILTERS } from "../../constants";
 
-/** Misma altura y superficie que el buscador y el botón de tema. */
-
 interface ReportsFilterModalProps {
   value: IReportsFilters;
   onChange: (next: IReportsFilters) => void;
   types: IReportType[];
+  /** Pinta botón y chips como hijos directos del header compartido. */
+  inHeader?: boolean;
 }
 
 const toIds = (items?: FilterOptionItem[]) => (items ?? []).map((o) => Number(o.id));
@@ -32,7 +32,12 @@ const toIds = (items?: FilterOptionItem[]) => (items ?? []).map((o) => Number(o.
  * Botón "Filtrar" de Informes sobre el FilterModal compartido: tipo de informe
  * (multi) y fecha de publicación (periodo o rango).
  */
-export default function ReportsFilterModal({ value, onChange, types }: ReportsFilterModalProps) {
+export default function ReportsFilterModal({
+  value,
+  onChange,
+  types,
+  inHeader
+}: ReportsFilterModalProps) {
   // El draft interno de FilterModal sólo cubre categorías de opciones, así que
   // el rango de fechas se borra aquí y se confirma al aplicar.
   const [dateDraft, setDateDraft] = useState<DateDraft>({ from: value.from, to: value.to });
@@ -77,6 +82,7 @@ export default function ReportsFilterModal({ value, onChange, types }: ReportsFi
     <FilterModal
       categories={categories}
       value={selection}
+      inHeader={inHeader}
       formatTagValue={(_cat, items) => items.map((i) => i.name).join(", ")}
       onApply={(sel) => onChange({ report_type_ids: toIds(sel.tipo), ...dateDraft })}
       onValueChange={(sel) => onChange({ ...value, report_type_ids: toIds(sel.tipo) })}

@@ -1,34 +1,62 @@
 @import "@/styles/variables.scss";
 
+// Pestañas (diseño "Pedidos y Bancos"): fila de 48px con línea #ececec abajo; pestaña 12.5px
+// gris #8a8a8a/500, la activa #141414/600 con subrayado negro de 2px. 22px entre pestañas.
+// Siempre 16px antes del contenido: nada va pegado a la línea.
 .tabsContainer {
     .ant-tabs-nav {
-        background-color: $white;
+        min-height: 48px;
+        // 16px de aire entre la línea de las pestañas y el contenido (botones, tarjetas).
+        margin: 0 0 16px !important;
+        background-color: rgb(var(--cp-surface));
         z-index: 2;
+
+        &::before {
+            border-bottom-color: $cp-line !important;
+        }
+
+        .ant-tabs-nav-wrap {
+            align-items: flex-end;
+        }
     }
 
     &.-sticky {
         .ant-tabs-nav {
             position: sticky !important;
-            top: var(--sticky-offset, 1rem); // Use CSS variable for top offset
-            margin-left: -0.5rem !important;
-            margin-right: -0.5rem !important;
-            padding-left: 0.5rem;
+            top: var(--sticky-offset, 1rem);
             z-index: 11 !important;
         }
     }
 
-    .ant-tabs-nav .ant-tabs-tab .ant-tabs-tab-btn {
-        color: $dark-gray;
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
     .ant-tabs-nav .ant-tabs-tab {
-        padding-bottom: 0.25rem !important;
+        padding: 0 0 9px !important;
+
+        & + .ant-tabs-tab {
+            margin-left: 22px !important;
+        }
+
+        .ant-tabs-tab-btn {
+            color: $cp-ink-4;
+            font-size: 13.5px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
 
         &.ant-tabs-tab-active .ant-tabs-tab-btn {
-            color: $black;
-            font-weight: 700;
+            color: $cp-ink;
+            font-weight: 600;
+            text-shadow: none;
         }
+    }
+
+    .ant-tabs-ink-bar {
+        height: 2px !important;
+        background: $cp-ink !important;
+    }
+
+    // Acciones del módulo a la derecha de las pestañas (p. ej. "Reglas de banco" y "⋯").
+    .ant-tabs-extra-content {
+        align-self: flex-end;
+        padding-bottom: 8px;
     }
 }

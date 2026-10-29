@@ -357,28 +357,36 @@ export function PurchaseOrderProducts({
             </div>
           )}
           <table className="w-full">
-            <thead className="bg-cashport-gray-lighter border-b border-cashport-gray-light">
+            <thead className="bg-cp-surface border-b border-cp-line">
               <tr>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
                   Producto
                 </th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">Lote</th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+                  Lote
+                </th>
+                <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
                   Vencimiento lote
                 </th>
-                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
                   Unidades
                 </th>
-                <th className="text-right p-3 font-semibold text-cashport-black text-xs">Cajas</th>
-                <th className="text-right p-3 font-semibold text-cashport-black text-xs">Stock</th>
-                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+                  Cajas
+                </th>
+                <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+                  Stock
+                </th>
+                <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
                   Precio unitario
                 </th>
-                <th className="text-right p-3 font-semibold text-cashport-black text-xs">IVA</th>
-                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+                  IVA
+                </th>
+                <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
                   Precio total
                 </th>
-                <th className="p-3 w-10"></th>
+                <th className="px-3 py-3 w-10"></th>
               </tr>
             </thead>
             <tbody>
@@ -455,7 +463,7 @@ export function PurchaseOrderProducts({
                                   {field.product_description || "-"}
                                 </span>
                                 {field.product_sku && (
-                                  <span className="text-xs text-blue-600 mt-0.5">
+                                  <span className="text-[13px] text-blue-600 mt-0.5">
                                     SKU: {field.product_sku}
                                   </span>
                                 )}
@@ -512,7 +520,7 @@ export function PurchaseOrderProducts({
                                     <div className="flex flex-col py-0.5">
                                       <span className="font-semibold">{option.data.batch}</span>
                                       {option.data.batch_expiration_date && (
-                                        <span className="text-xs text-gray-500">
+                                        <span className="text-[13px] text-gray-500">
                                           Vence:{" "}
                                           {dayjs(option.data.batch_expiration_date)
                                             .utc()
@@ -532,7 +540,7 @@ export function PurchaseOrderProducts({
                                     {field.batch || "-"}
                                   </span>
                                   {field.batch_expiration_date && (
-                                    <span className="text-xs text-cashport-gray">
+                                    <span className="text-[13px] text-cashport-gray">
                                       {monthsUntilExpiration(field.batch_expiration_date)} meses
                                     </span>
                                   )}
@@ -632,11 +640,11 @@ export function PurchaseOrderProducts({
                               <div className="w-64 bg-white rounded-lg">
                                 <div className="bg-gray-100 px-3 py-2.5 flex items-center gap-2 rounded-t-lg">
                                   <Eye className="h-3.5 w-3.5 text-gray-500 shrink-0" />
-                                  <span className="text-xs font-semibold text-gray-900">
+                                  <span className="text-[13px] font-semibold text-gray-900">
                                     Datos originales del cliente
                                   </span>
                                 </div>
-                                <div className="text-xs px-3 pb-3">
+                                <div className="text-[13px] px-3 pb-3">
                                   <div className="flex justify-between gap-3 py-2.5">
                                     <span className="text-gray-500 shrink-0">Producto</span>
                                     <span className="text-right font-medium text-cashport-black break-all">
@@ -647,18 +655,14 @@ export function PurchaseOrderProducts({
                                     </span>
                                   </div>
                                   {data?.project_id === 204 &&
-                                    watchedProducts[index].purchase_order_original!
-                                      .po_sku && (
-                                    <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
-                                      <span className="text-gray-500 shrink-0">EAN</span>
-                                      <span className="text-right font-medium text-cashport-black break-all">
-                                        {
-                                          watchedProducts[index]
-                                            .purchase_order_original!.po_sku
-                                        }
-                                      </span>
-                                    </div>
-                                  )}
+                                    watchedProducts[index].purchase_order_original!.po_sku && (
+                                      <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
+                                        <span className="text-gray-500 shrink-0">EAN</span>
+                                        <span className="text-right font-medium text-cashport-black break-all">
+                                          {watchedProducts[index].purchase_order_original!.po_sku}
+                                        </span>
+                                      </div>
+                                    )}
                                   <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
                                     <span className="text-gray-500 shrink-0">Unidades</span>
                                     <span className="font-medium text-cashport-black">
@@ -701,7 +705,7 @@ export function PurchaseOrderProducts({
                               className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-gray-400 bg-white hover:bg-gray-50 transition-colors"
                               title="Ver datos originales del PDF"
                             >
-                              <span className="text-xs font-bold text-gray-500 leading-none">
+                              <span className="text-[13px] font-bold text-gray-500 leading-none">
                                 i
                               </span>
                             </button>

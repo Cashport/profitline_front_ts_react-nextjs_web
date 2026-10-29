@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { MedicalAccountsLayout } from "@/modules/medicalAccounts/containers/MedicalAccountsLayout/MedicalAccountsLayout";
 
 export const metadata: Metadata = {
   title: "Cuentas Médicas",
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const CuentasMedicasLayout = ({ children }: { children: React.ReactNode }) => {
-  return <ViewWrapper headerTitle="Cuentas Médicas">{children}</ViewWrapper>;
+  return <MedicalAccountsLayout>{children}</MedicalAccountsLayout>;
 };
 
 export default CuentasMedicasLayout;

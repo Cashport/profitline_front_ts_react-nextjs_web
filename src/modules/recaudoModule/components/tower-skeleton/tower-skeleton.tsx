@@ -7,7 +7,7 @@ const Bar = ({ className = "" }: { className?: string }) => (
 );
 
 const Card = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex flex-col rounded-xl bg-card p-4 shadow-sm">{children}</div>
+  <div className="cp-card flex flex-col px-[18px] py-[14px]">{children}</div>
 );
 
 /** Tarjeta de tabla a todo el ancho: título, línea de leyenda o chips y el cuerpo. */
@@ -26,8 +26,12 @@ const WideCard = ({ bodyClassName }: { bodyClassName: string }) => (
  */
 export default function TowerSkeleton() {
   return (
-    <div className="flex flex-col gap-3.5" aria-busy aria-label="Cargando la torre de control">
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)]">
+    <div
+      className="flex flex-col gap-[var(--section-gap)]"
+      aria-busy
+      aria-label="Cargando la torre de control"
+    >
+      <div className="grid grid-cols-1 gap-[var(--card-gap)] sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)]">
         {[0, 1, 2].map((i) => (
           <Card key={i}>
             <Bar className="h-3 w-24" />
@@ -40,7 +44,7 @@ export default function TowerSkeleton() {
       {[0, 1].map((row) => (
         <div
           key={row}
-          className="grid grid-cols-1 gap-3.5 min-[1180px]:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]"
+          className="grid grid-cols-1 gap-[var(--card-gap)] min-[1180px]:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]"
         >
           {[0, 1].map((i) => (
             <Card key={i}>

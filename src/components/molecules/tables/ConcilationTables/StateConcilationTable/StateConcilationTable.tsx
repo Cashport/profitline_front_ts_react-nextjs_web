@@ -304,7 +304,7 @@ export const StateConcilationTable = ({ invoices, clientId, setInvoices }: Props
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
             }
           />
-          <Text type="secondary" style={{ fontSize: "12px" }}>
+          <Text type="secondary" style={{ fontSize: "13px" }}>
             {selectedRows && selectedRows.length > 0
               ? `Se aplicará a ${selectedRows.length} factura(s) seleccionada(s)`
               : "Seleccione facturas para aplicar acción"}

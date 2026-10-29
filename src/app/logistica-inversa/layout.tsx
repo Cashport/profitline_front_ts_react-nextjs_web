@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const LogisticaInversaLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ViewWrapper headerTitle="Listado de devoluciones">
+    <ViewWrapper headerTitle="Listado de devoluciones" hideHeader>
       {/* ReverseLogisticsFiltersProvider mounted at the route layout so the
           devoluciones + aprobaciones tabs keep their filter / search / page /
           selection state when the user navigates between sibling

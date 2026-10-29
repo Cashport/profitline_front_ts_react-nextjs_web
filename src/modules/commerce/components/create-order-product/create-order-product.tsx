@@ -50,7 +50,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
         />
         {product.is_pack && (
           <span className={styles.packBadge}>
-            <SimpleTag text="Pack" colorTag="#141414" colorText="#ffffff" fontSize="0.7rem" />
+            <SimpleTag text="Pack" colorTag="#141414" colorText="#ffffff" fontSize="13px" />
           </span>
         )}
       </div>
@@ -71,7 +71,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
             text="Stock insuficiente"
             colorTag="#ff350d"
             colorText="#ffffff"
-            fontSize="0.75rem"
+            fontSize="13px"
           />
         )}
       </h4>

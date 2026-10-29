@@ -16,7 +16,7 @@ const TRAMO_CHIP = [
 export default function TramoChip({ tramo }: { tramo: TramoIndex }) {
   return (
     <span
-      className={`inline-block rounded-[5px] px-[7px] py-px text-[10.5px] font-bold tabular-nums ${TRAMO_CHIP[tramo]}`}
+      className={`inline-block rounded-[5px] px-[7px] py-px text-[13px] font-bold tabular-nums ${TRAMO_CHIP[tramo]}`}
     >
       {TRAMOS[tramo].short}
     </span>

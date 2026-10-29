@@ -218,7 +218,7 @@ export const ClientsProjectTable = () => {
   return (
     <main className="mainClientsProjectTable">
       {contextHolder}
-      <Flex justify="space-between" className="mainClientsProjectTable_header">
+      <Flex justify="space-between" align="center" className="mainClientsProjectTable_header">
         <Flex gap={"0.625rem"}>
           <UiSearchInput
             placeholder="Buscar clientes"
@@ -236,7 +236,7 @@ export const ClientsProjectTable = () => {
           className="buttonNewProject"
           size="large"
           onClick={onCreateClient}
-          icon={<Plus weight="bold" size={15} />}
+          icon={<Plus weight="bold" size={18} />}
         >
           Nuevo Cliente
         </Button>

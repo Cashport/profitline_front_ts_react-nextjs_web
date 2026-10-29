@@ -13,6 +13,7 @@ import { cn } from "@/utils/utils";
 import type { ITicket, TicketSituation } from "@/types/tickets/ITickets";
 import TicketBoardCard from "../../components/ticket-board-card/ticket-board-card";
 import TicketDetailModal from "../../components/ticket-detail-modal/ticket-detail-modal";
+import TicketsFilterModal from "../../components/tickets-filter-modal/tickets-filter-modal";
 import TicketsHeader from "../../components/tickets-header/tickets-header";
 import TicketsList from "../../components/tickets-list/tickets-list";
 import TicketsToolbar from "../../components/tickets-toolbar/tickets-toolbar";
@@ -90,47 +91,52 @@ export default function TicketsView() {
   const primeraCarga = !tickets && !error;
 
   return (
-    <div className="wallet-scope flex flex-col gap-4 pb-6">
-      <TicketsHeader fetchedAt={fetchedAt} onSearchChange={handleSearchChange} />
-
-      <div className="flex flex-wrap items-end gap-3.5">
-        <h2 className="text-lg font-semibold text-foreground">Bandeja de tickets</h2>
-
-        <div className="ml-auto flex overflow-hidden rounded-lg border border-border bg-card">
-          {VISTAS.map((v) => (
-            <button
-              key={v.key}
-              type="button"
-              aria-pressed={vista === v.key}
-              onClick={() => setVista(v.key)}
-              className={cn(
-                "border-r border-border px-3 py-1.5 text-xs transition-colors last:border-r-0",
-                vista === v.key
-                  ? "bg-secondary font-bold text-foreground"
-                  : "font-medium text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {v.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <TicketsToolbar
-        users={users}
-        categories={categories}
-        assignedToUserId={assignedToUserId}
-        categoryId={categoryId}
-        onAssignedToChange={handleAssignedToChange}
-        onCategoryChange={handleCategoryChange}
-        totalRows={pagination.totalRows}
+    <div className="wallet-scope cp-page pb-6">
+      <TicketsHeader
+        fetchedAt={fetchedAt}
+        onSearchChange={handleSearchChange}
+        filters={
+          <TicketsFilterModal
+            inHeader
+            users={users}
+            categories={categories}
+            assignedToUserId={assignedToUserId}
+            categoryId={categoryId}
+            onAssignedToChange={handleAssignedToChange}
+            onCategoryChange={handleCategoryChange}
+          />
+        }
       />
+
       <KpiCards
         cards={toKpiCards(summary)}
         noun={["ticket", "tickets"]}
         selected={situation}
         // Volver a pulsar la activa la apaga: sin tarjeta = todos.
         onSelect={handleSituationChange}
+      />
+      <TicketsToolbar
+        totalRows={pagination.totalRows}
+        actions={
+          <div className="flex overflow-hidden rounded-lg border border-border bg-card">
+            {VISTAS.map((v) => (
+              <button
+                key={v.key}
+                type="button"
+                aria-pressed={vista === v.key}
+                onClick={() => setVista(v.key)}
+                className={cn(
+                  "border-r border-border px-3 py-1.5 text-[13px] transition-colors last:border-r-0",
+                  vista === v.key
+                    ? "bg-secondary font-bold text-foreground"
+                    : "font-medium text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        }
       />
 
       {primeraCarga ? (

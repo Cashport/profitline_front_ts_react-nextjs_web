@@ -130,12 +130,12 @@ export const RequirementsView = () => {
     );
   return (
     <Flex vertical className="requirementsView" gap={"2rem"}>
-      <Flex gap={"0.5rem"}>
+      <Flex gap={"0.5rem"} align="center">
         <UiSearchInput className="search" placeholder="Buscar" />
         <Button
           className="button__actions"
           size="large"
-          icon={<DotsThree size={"1.5rem"} />}
+          icon={<DotsThree size={18} />}
           onClick={handleisGenerateActionOpen}
         >
           Generar acción

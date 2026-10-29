@@ -218,7 +218,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
 
   return (
     <main className="mainClientsGroupsTable">
-      <Flex justify="space-between" className="mainClientsGroupsTable_header">
+      <Flex justify="space-between" align="center" className="mainClientsGroupsTable_header">
         <Flex gap={"1.75rem"}>
           <UiSearchInput
             placeholder="Buscar grupos de clientes"
@@ -236,7 +236,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
           className="buttonNewProject"
           size="large"
           onClick={onCreateClientsGroup}
-          icon={<Plus weight="bold" size={15} />}
+          icon={<Plus weight="bold" size={18} />}
         >
           Crear Grupo de Clientes
         </Button>

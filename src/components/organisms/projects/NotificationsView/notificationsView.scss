@@ -3,11 +3,12 @@
 .notificationView {
     width: 100%;
     height: auto;
-    background-color: $white;
-    padding-bottom: 0;
-    padding: 1rem 2rem;
-    border-radius: 0.5rem;
-
+    // Tarjeta compartida (docs/DESIGN.md §3): blanca, radio 14, sin borde ni sombra.
+    background: rgb(var(--cp-surface));
+    padding: var(--card-pad);
+    border: 0;
+    border-radius: var(--card-radius);
+    box-shadow: none;
 
     .ant-tabs-nav .ant-tabs-tab .ant-tabs-tab-btn {
         color: $dark-gray;
@@ -38,6 +39,7 @@
 .searchBar__container {
     height: 48px;
     gap: 0.5rem;
+    align-items: center;
 }
 
 .notifications__container {
@@ -59,7 +61,7 @@
         font-size: 14px;
         font-weight: 400;
         line-height: 24px;
-        color: #0085FF;
+        color: #0085ff;
     }
 
     .ant-spin-container {
@@ -96,7 +98,7 @@
         align-items: center;
         padding: 4px;
         border-radius: 4px;
-        background-color: #DDDDDD;
+        background-color: #dddddd;
         cursor: pointer;
     }
 
@@ -113,6 +115,6 @@
         font-weight: 400;
         gap: 0.5rem;
         border-radius: 8px;
-        background-color: #F7F7F7;
+        background-color: #f7f7f7;
     }
 }

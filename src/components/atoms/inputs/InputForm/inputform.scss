@@ -14,7 +14,7 @@
 
     .input-form-title {
         color: #909090;
-        font-size: 0.75rem;
+        font-size: 13px;
         font-style: normal;
         font-weight: 600;
         line-height: normal;
@@ -77,19 +77,18 @@
         border-radius: 0.25rem;
         font-size: 1rem;
         font-weight: 300;
-    
+
         &::placeholder {
             color: $dark-gray !important;
         }
-    
+
         &:disabled {
             color: $dark-gray !important;
         }
-    
+
         &.-readOnly {
             background-color: $dark-gray;
             color: $darker-gray;
         }
     }
-
 }

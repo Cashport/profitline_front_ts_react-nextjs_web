@@ -1,10 +1,8 @@
 import React from "react";
-import { Card, Flex, Typography } from "antd";
+import { KpiCard } from "@/components/ui/kpi-card/kpi-card";
 
 import { IBotHealthSummary } from "@/types/bots/IBotHealth";
 import { BOT_STATUS_MAP } from "../botStatusMap";
-
-const { Text, Title } = Typography;
 
 interface BotSummaryCardsProps {
   summary?: IBotHealthSummary;
@@ -28,22 +26,29 @@ export const BotSummaryCards: React.FC<BotSummaryCardsProps> = ({ summary, loadi
     { label: "Total de bots", value: summary?.total, color: "#141414" },
     { label: "Operativo", value: summary?.operativo, color: BOT_STATUS_MAP["Operativo"].color },
     { label: "Con fallas", value: summary?.con_fallas, color: BOT_STATUS_MAP["Con fallas"].color },
-    { label: "En revisión", value: summary?.en_revision, color: BOT_STATUS_MAP["En revisión"].color },
+    {
+      label: "En revisión",
+      value: summary?.en_revision,
+      color: BOT_STATUS_MAP["En revisión"].color
+    },
     { label: "Ejecutando", value: summary?.ejecutando, color: BOT_STATUS_MAP["Ejecutando"].color }
   ];
 
   return (
-    <Flex gap="1rem" wrap="wrap">
+    <div className="cp-card-row">
       {items.map((item) => (
-        <Card key={item.label} loading={loading} style={{ flex: 1, minWidth: 180, borderRadius: 8 }}>
-          <Flex vertical gap={4}>
-            <Text style={{ color: "#8c8c8c", fontSize: 14 }}>{item.label}</Text>
-            <Title level={3} style={{ margin: 0, color: item.color }}>
+        <KpiCard key={item.label} loading={loading} className="flex-[1_1_180px]">
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <span className="truncate text-[13px] text-cp-ink-3">{item.label}</span>
+            <span
+              className="text-[26px] font-semibold leading-none tracking-[-0.6px]"
+              style={{ color: item.color }}
+            >
               {item.value ?? "—"}
-            </Title>
-          </Flex>
-        </Card>
+            </span>
+          </div>
+        </KpiCard>
       ))}
-    </Flex>
+    </div>
   );
 };

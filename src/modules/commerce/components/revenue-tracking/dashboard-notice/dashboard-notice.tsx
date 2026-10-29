@@ -19,7 +19,7 @@ interface DashboardNoticeProps {
  */
 export default function DashboardNotice({ message, onRetry }: DashboardNoticeProps) {
   return (
-    <div className="bg-card border border-border shadow-sm rounded-xl p-10 flex flex-col items-center text-center gap-3">
+    <div className="cp-card p-10 flex flex-col items-center text-center gap-3">
       <ShieldAlert className="w-10 h-10 text-[#FF6B00]" strokeWidth={1.5} />
       <h2 className="text-lg font-semibold text-foreground">No se pudo cargar el dashboard</h2>
       <p className="text-sm text-muted-foreground max-w-md">{message}</p>

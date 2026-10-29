@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { ArrowLeft, Gift, Plus } from "lucide-react";
+import { Gift, Plus } from "lucide-react";
+import Header from "@/components/organisms/header";
+import HeaderBackTitle from "../header-back-title/HeaderBackTitle";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { getClientsByProject } from "@/services/banksPayments/banksPayments";
@@ -90,39 +92,32 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
   const pendientes = asignaciones.filter((a) => a.estado === "pendiente").length;
 
   return (
-    <div className="min-h-screen">
-      <div className="bg-white rounded-lg overflow-hidden">
-        {/* Page header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEEEEE]">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="text-[#999999] hover:text-[#141414] transition-colors"
-            >
-              <ArrowLeft size={16} />
-            </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-[#141414]">Bonificados manuales</h1>
-                {pendientes > 0 && (
-                  <span className="px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">
-                    {pendientes} pendiente{pendientes > 1 ? "s" : ""}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-[#999999]">
-                Asignaciones por cliente con flujo de aprobación
-              </p>
-            </div>
-          </div>
+    <div className="cp-page min-h-full">
+      {/* Header compartido (docs/DESIGN.md §4): volver a la vista anterior + acción principal */}
+      <Header
+        title="Bonificados manuales"
+        titleNode={<HeaderBackTitle title="Bonificados manuales" onBack={onBack} />}
+        titleExtra={
+          <>
+            <span>Asignaciones por cliente con flujo de aprobación</span>
+            {pendientes > 0 && (
+              <span className="px-2 py-0.5 text-[13px] font-semibold bg-amber-100 text-amber-700 rounded-full">
+                {pendientes} pendiente{pendientes > 1 ? "s" : ""}
+              </span>
+            )}
+          </>
+        }
+        actionsExtra={
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
+            className="flex items-center gap-2 px-4 h-[var(--control-h)] bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
           >
-            <Plus size={14} /> Nueva asignación
+            <Plus size={18} /> Nueva asignación
           </button>
-        </div>
+        }
+      />
 
+      <div className="cp-card overflow-hidden">
         {/* Filters */}
         <AsignacionesFilters
           search={search}
@@ -133,12 +128,12 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
 
         {/* Table header */}
         <div className="grid grid-cols-[2fr_1.5fr_80px_80px_100px_120px] px-6 py-3 border-b border-[#EEEEEE] bg-[#FAFAFA]">
-          <span className="text-xs font-medium text-[#AAAAAA]">Cliente</span>
-          <span className="text-xs font-medium text-[#AAAAAA]">Producto bonificado</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-center">Asignadas</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-center">Disponibles</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-center">Estado</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-right">Acciones</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA]">Cliente</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA]">Producto bonificado</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Asignadas</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Disponibles</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Estado</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Acciones</span>
         </div>
 
         {filtradas.length === 0 ? (

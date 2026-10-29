@@ -107,15 +107,15 @@ export default function ControlMatrix({
   // Plegada por el drilldown, el pie es del cliente elegido; si no, son los
   // totales del servidor sobre la foto completa: la página es sólo un trozo.
   const tramoFooter = (i: number) =>
-    folded ? tramoTotal(visibleRows, i) : (totals?.byAging?.[AGING_BUCKETS[i]]?.total ?? 0);
+    folded ? tramoTotal(visibleRows, i) : totals?.byAging?.[AGING_BUCKETS[i]]?.total ?? 0;
 
   const totalFooter = folded
     ? visibleRows.reduce((a, r) => a + rowSegments(r).total, 0)
-    : (totals?.total ?? 0);
+    : totals?.total ?? 0;
 
   const vencidoFooter = folded
     ? visibleRows.reduce((a, r) => a + r.vencido.total, 0)
-    : (totals?.byAging?.[OVERDUE_BUCKET]?.total ?? 0);
+    : totals?.byAging?.[OVERDUE_BUCKET]?.total ?? 0;
   const vencidoFooterPct = pct(vencidoFooter, totalFooter);
 
   /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
@@ -166,7 +166,7 @@ export default function ControlMatrix({
   };
 
   return (
-    <section className="rounded-xl bg-card text-card-foreground shadow-sm">
+    <section className="cp-card text-card-foreground">
       <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
         <div>
           <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>
@@ -180,7 +180,7 @@ export default function ControlMatrix({
           </div>
           {/* Hasta que llega el catálogo ningún chip se puede elegir: la pista esperaría. */}
           {selectableEstados.length > 0 && (
-            <p className="mt-1.5 text-[11.5px] text-muted-foreground">
+            <p className="mt-1.5 text-[13px] text-muted-foreground">
               {estados.length === 0 ? (
                 "clic en un estado para filtrar · shift+clic para sumar varios"
               ) : (
@@ -208,7 +208,7 @@ export default function ControlMatrix({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
           />
-          <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
+          <p className="mt-1.5 text-right text-[13px] text-muted-foreground">
             {loading
               ? "Actualizando…"
               : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"}`}
@@ -229,7 +229,7 @@ export default function ControlMatrix({
             <ProfitLoader size="small" />
           </div>
         )}
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
               {/* Los `col` son los `sort_by` del API, así la vista los manda tal cual. */}
@@ -296,10 +296,10 @@ export default function ControlMatrix({
                       >
                         <span className="font-semibold text-foreground">{row.nombre}</span>
                         {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
-                        <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
+                        <span className="ml-2 whitespace-nowrap text-[13px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
                           {nombreActiva ? "quitar selección" : "ver grupos"}
                         </span>
-                        <div className="text-[11.5px] text-muted-foreground">
+                        <div className="text-[13px] text-muted-foreground">
                           NIT {row.nit} — {row.ejecutivo}
                         </div>
                       </td>
@@ -355,7 +355,7 @@ export default function ControlMatrix({
       {/* El orden es de lo que se ve; los totales del pie y el paginador, de la
           foto completa (salvo el pie con una fila plegada, que es de esa fila). */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
-        <span className="text-[11.5px] text-muted-foreground">
+        <span className="text-[13px] text-muted-foreground">
           Mostrando {visibleRows.length} de {totalClients}{" "}
           {totalClients === 1 ? "cliente" : "clientes"}
         </span>

@@ -7,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <ViewWrapper headerTitle="Proveedores">{children}</ViewWrapper>;
+  return (
+    <ViewWrapper headerTitle="Proveedores" hideHeader>
+      {children}
+    </ViewWrapper>
+  );
 }

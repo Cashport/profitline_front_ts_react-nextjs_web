@@ -110,32 +110,32 @@ export function TimelineHistoryModal({
                               {!event.is_resolved ? (
                                 <Badge
                                   variant="outline"
-                                  className="text-xs shrink-0 bg-orange-50 text-orange-700 border-orange-200"
+                                  className="text-[13px] shrink-0 bg-orange-50 text-orange-700 border-orange-200"
                                 >
                                   Abierta
                                 </Badge>
                               ) : (
                                 <Badge
                                   variant="outline"
-                                  className="text-xs shrink-0 bg-green-50 text-green-700 border-green-200"
+                                  className="text-[13px] shrink-0 bg-green-50 text-green-700 border-green-200"
                                 >
                                   Cerrada
                                 </Badge>
                               )}
                             </div>
 
-                            <div className="text-xs text-gray-500 mb-2">
+                            <div className="text-[13px] text-gray-500 mb-2">
                               {date} {time}
                             </div>
 
                             {event.created_by_name && (
-                              <div className="text-xs text-gray-600 mb-1">
+                              <div className="text-[13px] text-gray-600 mb-1">
                                 <span className="font-medium">Acción:</span> {event.created_by_name}
                               </div>
                             )}
 
                             {event.event_description && (
-                              <div className="text-xs text-gray-600">
+                              <div className="text-[13px] text-gray-600">
                                 <span className="font-medium">Comentario:</span>{" "}
                                 {event.event_description}
                               </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "antd";
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 import { ApiError } from "@/utils/api/api";
@@ -41,6 +41,7 @@ import ModalEditNovelty from "./modal-edit-novelty";
 import ModalLinkNovelty from "./modal-link-novelty";
 import type { NoveltyModalMode } from "./novelty-drawer";
 import type { IWalletDocument, IWalletGroupDetail, IWalletTicket, SortState } from "../../types";
+import SearchField from "@/components/ui/search-field/search-field";
 
 interface GroupDetailModalProps {
   /**
@@ -102,7 +103,7 @@ const TabButton = ({
     {children}
     <span
       className={cn(
-        "rounded-full px-1.5 text-[10.5px] font-bold leading-[17px] tabular-nums",
+        "rounded-full px-1.5 text-[13px] font-bold leading-[17px] tabular-nums",
         active ? "bg-cashport-green text-cashport-black" : "bg-muted text-muted-foreground"
       )}
     >
@@ -347,7 +348,7 @@ function GroupDetailBody({
         {isLoadingIncident ? (
           <ProfitLoader size="small" />
         ) : (
-          <p className="px-6 text-center text-[12.5px] text-destructive">
+          <p className="px-6 text-center text-[13px] text-destructive">
             {(incidentError as Error)?.message || "No se pudo cargar la novedad."}
           </p>
         )}
@@ -443,22 +444,18 @@ function GroupDetailBody({
             </TabButton>
 
             {tab === "facturas" && (
-              <label className="ml-auto flex min-w-[160px] max-w-[260px] flex-1 items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5">
-                <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={query}
-                  placeholder="Buscar factura…"
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="min-w-0 flex-1 bg-transparent text-[12.5px] text-foreground outline-none placeholder:text-muted-foreground"
-                />
-              </label>
+              <SearchField
+                value={query}
+                onChange={setQuery}
+                placeholder="Buscar factura…"
+                className="ml-auto min-w-[160px] max-w-[260px] flex-1"
+              />
             )}
           </div>
 
           {tab === "facturas" ? (
             invoicesError ? (
-              <p className="flex flex-1 items-center justify-center px-6 text-center text-[12.5px] text-destructive">
+              <p className="flex flex-1 items-center justify-center px-6 text-center text-[13px] text-destructive">
                 {(invoicesError as Error)?.message || "No se pudieron cargar las facturas."}
               </p>
             ) : isLoadingInvoices && !matrixDetail ? (
@@ -482,7 +479,7 @@ function GroupDetailBody({
               />
             )
           ) : !incidentId ? (
-            <p className="flex flex-1 items-center justify-center px-6 text-center text-[12.5px] text-muted-foreground">
+            <p className="flex flex-1 items-center justify-center px-6 text-center text-[13px] text-muted-foreground">
               El seguimiento solo está disponible para grupos con novedad.
             </p>
           ) : (
@@ -490,7 +487,7 @@ function GroupDetailBody({
               <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col overflow-auto">
                 <div className="mt-auto w-full px-[22px] pb-2.5 pt-[22px]">
                   {isLoadingIncident ? (
-                    <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+                    <p className="text-[13px] leading-relaxed text-muted-foreground">
                       Cargando seguimiento…
                     </p>
                   ) : (

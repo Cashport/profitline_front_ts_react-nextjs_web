@@ -22,10 +22,10 @@ interface TicketDetailModalProps {
 
 const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div>
-    <div className="mb-0.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+    <div className="mb-0.5 text-[13px] font-semibold text-muted-foreground">
       {label}
     </div>
-    <div className="text-[12.5px] text-foreground">{children}</div>
+    <div className="text-[13px] text-foreground">{children}</div>
   </div>
 );
 
@@ -40,10 +40,10 @@ function TicketDetailBody({ ticket: t }: { ticket: ITicket }) {
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[11.5px] text-muted-foreground">{t.ticket_code}</span>
+        <span className="font-mono text-[13px] text-muted-foreground">{t.ticket_code}</span>
         <StatusChip sev={e.sev}>{e.estado}</StatusChip>
         {e.tiempo && e.tsev && <StatusChip sev={e.tsev}>{e.tiempo}</StatusChip>}
-        <span className="ml-auto text-[11.5px] text-muted-foreground">
+        <span className="ml-auto text-[13px] text-muted-foreground">
           Prioridad · {TICKET_PRIORITY_LABEL[t.priority]}
         </span>
       </div>
@@ -53,7 +53,7 @@ function TicketDetailBody({ ticket: t }: { ticket: ITicket }) {
       <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3.5">
         <Field label="Cliente">
           {t.client_name}
-          <div className="font-mono text-[11.5px] text-muted-foreground">{t.client_id}</div>
+          <div className="font-mono text-[13px] text-muted-foreground">{t.client_id}</div>
         </Field>
         <Field label="Monto">
           <span className="font-semibold tabular-nums">{fmtFull(t.amount)}</span>
@@ -118,7 +118,7 @@ export default function TicketDetailModal({ ticketId, onClose }: TicketDetailMod
             {isLoading ? (
               <ProfitLoader size="small" />
             ) : (
-              <p className="px-6 text-center text-[12.5px] text-destructive">
+              <p className="px-6 text-center text-[13px] text-destructive">
                 {(error as Error)?.message || "No se pudo cargar el ticket."}
               </p>
             )}

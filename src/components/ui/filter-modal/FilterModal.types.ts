@@ -60,6 +60,12 @@ export interface FilterModalProps {
   barEnd?: ReactNode;
   /** Hide the applied-filter chips next to the trigger (when the page shows its own). */
   hideTags?: boolean;
+  /**
+   * Inside the shared page header (docs/DESIGN.md §4): the applied filters render as one-line
+   * chips to the LEFT of "Filtrar" (with "+N"), and the trigger/chips/barEnd are emitted as
+   * direct children so the header lays them out.
+   */
+  inHeader?: boolean;
   /** Fired on every draft change, so wrappers can narrow other categories' options (cascades). */
   onDraftChange?: (draft: FilterSelection) => void;
 }

@@ -41,9 +41,9 @@ export default function TicketsList({ items, loading, onOpenDetail }: TicketsLis
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
 
   return (
-    <section className="rounded-xl bg-card shadow-sm">
+    <section className="cp-card">
       <div className={cn("overflow-x-auto", loading && "pointer-events-none opacity-60")}>
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
               <SortableTh col="ticket" label="Ticket" sort={sort} onSort={onSort} />
@@ -78,12 +78,12 @@ export default function TicketsList({ items, loading, onOpenDetail }: TicketsLis
                       <span className="font-mono font-semibold text-foreground">
                         {t.ticket_code}
                       </span>
-                      <div className="text-[11.5px] text-muted-foreground">{t.title}</div>
+                      <div className="text-[13px] text-muted-foreground">{t.title}</div>
                     </td>
 
                     <td className="px-3 py-2.5 text-foreground">
                       {corto(t.client_name)}
-                      <div className="font-mono text-[11.5px] text-muted-foreground">
+                      <div className="font-mono text-[13px] text-muted-foreground">
                         {t.client_id}
                       </div>
                     </td>
@@ -92,7 +92,7 @@ export default function TicketsList({ items, loading, onOpenDetail }: TicketsLis
                       {fmtM(t.amount)}
                     </td>
 
-                    <td className="px-3 py-2.5 text-[11.5px] text-muted-foreground">
+                    <td className="px-3 py-2.5 text-[13px] text-muted-foreground">
                       {t.category_name ?? "—"}
                     </td>
 

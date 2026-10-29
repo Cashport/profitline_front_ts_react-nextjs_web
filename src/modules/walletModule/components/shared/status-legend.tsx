@@ -37,7 +37,7 @@ export default function StatusLegend({
     <div
       role={onSelect ? "group" : undefined}
       aria-label={onSelect ? "Filtrar por estado" : undefined}
-      className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[11.5px] text-muted-foreground"
+      className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-muted-foreground"
     >
       {estados.map((e) => {
         const activa = selected.includes(e);

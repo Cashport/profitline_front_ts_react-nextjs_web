@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { Table, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { ChevronLeft } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -22,6 +20,7 @@ import {
 } from "@/services/marketAdmin/marketAdmin";
 import { IMarketAdminClient } from "@/types/marketAdmin/IMarketAdmin";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
+import Header from "@/components/organisms/header";
 
 function LineasBadges({ lineas }: { lineas: string[] }) {
   return (
@@ -39,7 +38,7 @@ function LineasBadges({ lineas }: { lineas: string[] }) {
               zIndex: lineas.length - i,
               position: "relative"
             }}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold ring-2 ring-white flex-shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold ring-2 ring-white flex-shrink-0"
           >
             {lineaAbrev(l)}
           </span>
@@ -79,7 +78,7 @@ function Ciudades({ value }: { value: string | null }) {
       <span className="text-sm text-[#141414]">{visibles.join(", ")}</span>
       {ocultas.length > 0 && (
         <Tooltip title={ciudades.join(", ")}>
-          <span className="text-xs font-semibold text-[#999999] cursor-default">
+          <span className="text-[13px] font-semibold text-[#999999] cursor-default">
             (+{ocultas.length})
           </span>
         </Tooltip>
@@ -254,12 +253,12 @@ export default function MarketAdminClients() {
       render: (isActive: 1 | 0, c: IMarketAdminClient) =>
         c.in_marketplace === 0 ? (
           // Sin registro en client_marketplace: no hay estado que editar.
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit bg-[#F0F0F0] text-[#999999]">
+          <span className="text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit bg-[#F0F0F0] text-[#999999]">
             Sin marketplace
           </span>
         ) : (
           <span
-            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
+            className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${
               isActive === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
             }`}
           >
@@ -277,18 +276,12 @@ export default function MarketAdminClients() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Clientes</h1>
+    <div className="cp-page min-h-full">
+      <Header title="Clientes" back="/market-admin" />
 
-      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
-          <Link
-            href="/market-admin"
-            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
-          >
-            <ChevronLeft size={18} />
-          </Link>
           <UiSearchInput
             placeholder="Buscar..."
             onChange={(e) => {

@@ -9,6 +9,37 @@
         margin-left: 2rem;
         font-size: 1.25rem;
         font-weight: 600;
+        color: #141414;
+    }
+
+    // Contiene la grilla y el aviso "Ver más proyectos" superpuesto abajo.
+    &__body {
+        position: relative;
+    }
+
+    &__more {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 6px;
+        height: 72px;
+        padding-bottom: 10px;
+        border: 0;
+        // Degradado desde el fondo del modal: insinúa que la grilla sigue.
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #ffffff 70%);
+        color: #4a4a4a;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover {
+            color: #141414;
+        }
     }
     &__projects {
         padding: 0.5rem 2rem;
@@ -19,7 +50,8 @@
         margin-top: 1rem;
         max-height: 480px;
         overflow-y: auto;
-        scrollbar-width: none;
+        scrollbar-width: thin;
+        scrollbar-color: #d6d8de transparent;
 
         .project {
             border-radius: 8px;
@@ -43,10 +75,11 @@
                 background-color: $background;
                 border-radius: 4px;
                 padding: 0 auto;
-                font-size: 0.625rem;
+                font-size: 13px;
                 font-weight: 400;
                 text-align: center;
                 width: 100%;
+                color: #141414;
 
                 &.-selected {
                     background-color: $secondary;
@@ -55,6 +88,50 @@
 
             .imageWithoutImage {
                 background-color: $secondary !important;
+            }
+        }
+    }
+}
+
+// Modo oscuro (los módulos con tema marcan <body>; el modal va en un portal fuera del <main>).
+// Las tarjetas siguen blancas para que los logos —casi todos sobre fondo claro— se lean.
+body.comercio-dark,
+body.wallet-dark,
+body.dashboard-dark {
+    .modalProjectSelector {
+        .ant-modal-content {
+            background-color: #1f1f1f;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+        }
+
+        .ant-modal-close {
+            color: rgba(255, 255, 255, 0.65);
+
+            &:hover {
+                color: #ffffff;
+                background-color: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        &__title {
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        &__more {
+            background: linear-gradient(to bottom, rgba(31, 31, 31, 0), #1f1f1f 70%);
+            color: rgba(255, 255, 255, 0.7);
+
+            &:hover {
+                color: #ffffff;
+            }
+        }
+
+        &__projects {
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+            .project {
+                background-color: #ffffff;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
             }
         }
     }

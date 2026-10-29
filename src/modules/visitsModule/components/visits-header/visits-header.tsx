@@ -1,8 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { Dayjs } from "dayjs";
 
-import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
+import Header from "@/components/organisms/header";
 
 import VisitsDateNav from "../visits-date-nav/visits-date-nav";
 
@@ -10,17 +11,20 @@ interface VisitsHeaderProps {
   day: Dayjs;
   today: Dayjs;
   onDayChange: (day: Dayjs) => void;
+  /** A la derecha, antes del tema y el avatar: chips, "Filtrar" y el buscador (DESIGN.md §4). */
+  tools?: ReactNode;
 }
 
-/** Barra superior del módulo: título, día que se mira y tema. */
-export default function VisitsHeader({ day, today, onDayChange }: VisitsHeaderProps) {
+/**
+ * Header compartido de Cashport (docs/DESIGN.md §4): título y día que se mira a la
+ * izquierda; filtros, buscador, tema y avatar (cerrar sesión) a la derecha.
+ */
+export default function VisitsHeader({ day, today, onDayChange, tools }: VisitsHeaderProps) {
   return (
-    <header className="flex flex-wrap items-center gap-3.5 border-b border-border pb-3">
-      <h1 className="text-base font-semibold text-foreground">Visitas</h1>
-      <VisitsDateNav day={day} today={today} onChange={onDayChange} />
-      <div className="ml-auto flex items-center gap-3">
-        <WalletThemeToggle />
-      </div>
-    </header>
+    <Header
+      title="Visitas"
+      titleExtra={<VisitsDateNav day={day} today={today} onChange={onDayChange} />}
+      actionsExtra={<>{tools}</>}
+    />
   );
 }

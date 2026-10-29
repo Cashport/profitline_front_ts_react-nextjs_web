@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import { useParams } from "next/navigation";
+import { UserPlus } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
+import Header from "@/components/organisms/header";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { useDebounce } from "@/hooks/useDeabouce";
 import ClientPreview from "../../components/ClientPreview/ClientPreview";
@@ -14,7 +15,6 @@ import { useClientCommunication } from "../../hooks/useClientCommunication";
 import type { IPreviewClient } from "@/types/communications/ICommunications";
 
 export default function MassComunicationsTableView() {
-  const router = useRouter();
   const { communicationId } = useParams<{ communicationId: string }>();
   const isEmail = /^\d+$/.test(communicationId);
 
@@ -39,30 +39,20 @@ export default function MassComunicationsTableView() {
   };
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-semibold text-[#141414] mb-4">Envio masivo de comunicacion</h1>
-      <div className="bg-white rounded-xl px-8 py-6">
+    <div className="cp-page">
+      <Header title="Envío masivo de comunicación" back="/mass-communications" />
+      <div className="cp-card px-[18px] py-[14px]">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => {
-                router.push("/mass-communications");
-              }}
-              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#141414] transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Inicio
-            </button>
             <UiSearchInput placeholder="Buscar cliente..." onChange={handleSearch} />
           </div>
           <Button
             size="sm"
-            className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold gap-1.5 px-5 h-9"
+            className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold gap-1.5 px-5 h-[var(--control-h)]"
             onClick={() => setIsAddClientOpen(true)}
           >
-            <UserPlus className="w-3.5 h-3.5" />
+            <UserPlus className="size-[18px]" />
             +Añadir cliente
           </Button>
         </div>

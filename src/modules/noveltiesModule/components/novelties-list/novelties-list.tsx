@@ -40,9 +40,9 @@ export default function NoveltiesList({
   onOpenDetail
 }: NoveltiesListProps) {
   return (
-    <section className="rounded-xl bg-card shadow-sm">
+    <section className="cp-card">
       <div className={cn("overflow-x-auto", loading && "pointer-events-none opacity-60")}>
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
               <SortableTh col="id" label="Novedad" sort={sort} onSort={onSort} />
@@ -50,7 +50,7 @@ export default function NoveltiesList({
               {/* El API no ordena por número de facturas. */}
               <th
                 scope="col"
-                className="whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-right text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
+                className="whitespace-nowrap border-b border-cp-line bg-cp-surface px-3 py-3 text-right text-[13.5px] font-semibold text-cp-ink"
               >
                 Fact.
               </th>
@@ -90,7 +90,7 @@ export default function NoveltiesList({
                       <span className="font-mono font-semibold text-foreground">
                         {noveltyCode(n)}
                       </span>
-                      <div className="text-[11.5px] text-muted-foreground">
+                      <div className="text-[13px] text-muted-foreground">
                         {n.novelty_name}
                         {n.next_action_title && ` · ${n.next_action_title}`}
                       </div>

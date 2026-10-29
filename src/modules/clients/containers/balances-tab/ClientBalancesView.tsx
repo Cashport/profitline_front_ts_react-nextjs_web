@@ -88,8 +88,8 @@ export function ClientBalancesView() {
         />
       )}
       <div className="clientBalancesView">
-        <Flex justify="space-between" className="clientStickyHeader">
-          <Flex gap={"0.5rem"}>
+        <Flex justify="space-between" align="center" className="clientStickyHeader">
+          <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar"

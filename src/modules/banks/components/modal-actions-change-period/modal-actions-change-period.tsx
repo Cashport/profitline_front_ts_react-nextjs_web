@@ -90,8 +90,8 @@ const ModalActionsChangePeriod = ({ isOpen, onClose, selectedRows, onSuccess }: 
     >
       <Flex vertical gap="0.75rem">
         <Text type="secondary">
-          Se actualizará el periodo contable de {selectedRows?.length ?? 0} pago(s). No se
-          modifica la fecha de ingreso ni el estado del pago.
+          Se actualizará el periodo contable de {selectedRows?.length ?? 0} pago(s). No se modifica
+          la fecha de ingreso ni el estado del pago.
         </Text>
         <InputForm
           titleInput="Periodo contable (YYYY-MM)"

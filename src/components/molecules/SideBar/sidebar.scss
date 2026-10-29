@@ -1,10 +1,10 @@
 @import "@styles/variables.scss";
 
-// Ancho abierto: ~190 px visibles (÷ zoom 0.75).
-$rail-open-w: 252px;
+// Diseño "Menu Lateral Cashport" 6e: riel de 64px cerrado y 240px abierto.
+$rail-open-w: 240px;
 
 // .main reserva el ancho del riel en el layout; .railPanel es el riel en sí, que al pasar
-// el mouse se abre ENCIMA del contenido (no lo empuja). Fijado, .main crece y sí lo empuja.
+// el mouse se abre ENCIMA del contenido (con sombra). Fijado, .main crece y lo empuja (sin sombra).
 .main {
     position: relative;
     flex-shrink: 0;
@@ -23,12 +23,10 @@ $rail-open-w: 252px;
         width: var(--rail-w);
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        padding: 16px 0 12px;
+        padding: 14px 12px;
         overflow: hidden;
         background-color: $white;
         border-right: 1px solid $cp-line;
-        // Al cerrar: inmediato. Al abrir (abajo): con un retraso corto para no abrir al cruzar.
         transition:
             width 0.18s ease,
             box-shadow 0.18s ease;
@@ -36,8 +34,7 @@ $rail-open-w: 252px;
         &:hover,
         &:has(:focus-visible) {
             width: $rail-open-w;
-            box-shadow: 12px 0 32px rgba(0, 0, 0, 0.08);
-            transition-delay: 0.12s;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
         }
     }
 
@@ -46,47 +43,106 @@ $rail-open-w: 252px;
         box-shadow: none;
     }
 
-    // logo + module-buttons group: allow it to shrink below its content height so the
-    // buttons list can scroll instead of clipping / pushing the bottom buttons off-screen
+    // Logo + módulos: puede encogerse para que la lista haga scroll en vez de empujar el pie.
     .modulesGroup {
+        flex: 1 1 auto;
         min-height: 0;
         width: 100%;
     }
 
-    // keep the bottom buttons anchored/visible when the module list overflows
+    // Pie fijo: Configuración, Fijar menú y Cerrar sesión.
     .exit {
         flex-shrink: 0;
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 1px;
         width: 100%;
-        padding: 8px calc((var(--rail-w) - 40px) / 2) 0;
+        padding-top: 6px;
         border-top: 1px solid $cp-line;
     }
 
+    // Proyecto: fila de 48px. Cerrado, el cuadro queda centrado en el riel (margen -4px);
+    // abierto, se corre 10px y aparece el nombre.
     .logoContainer {
         display: flex;
-        align-self: flex-start;
-        margin: 0 0 10px calc((var(--rail-w) - 48px) / 2);
-        border: none;
-        cursor: pointer;
-        flex-shrink: 0; // keep the logo full size; only the button list absorbs the shrink
-        border: 1px solid transparent;
-        transition: all 0.3s ease;
-        border-radius: 8px;
+        align-items: center;
+        gap: 10px;
+        flex: none;
+        height: 48px;
+        margin: 0 0 10px -4px;
+        padding: 0;
+        border: 0;
         background: transparent;
+        cursor: pointer;
+        white-space: nowrap;
+        text-align: left;
+        font-family: $font-poppins, sans-serif;
+        color: $cp-ink;
+        // Sin contorno ni borde: ni al pasar el mouse ni al volver del modal de proyectos.
+        outline: none;
+        transition: margin 0.18s ease;
 
-        &__image {
-            border-radius: inherit;
-            width: 48px;
-            height: 40px;
-            object-fit: scale-down;
-            background-color: $white;
+        &:hover,
+        &:focus,
+        &:focus-visible,
+        &:active {
+            outline: none;
+            border: 0;
+            background: transparent;
         }
 
-        &:hover {
-            opacity: 0.9;
-            border: 1px solid $black;
+        &__tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+            width: 48px;
+            height: 48px;
+            padding: 6px;
+            border: 0;
+            border-radius: 10px;
+            background-color: $white;
+            box-shadow: none;
+            transition: box-shadow 0.18s ease;
+        }
+
+        &__image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        // Una línea si cabe; si no, dos y elipsis.
+        &__name {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            flex: none;
+            width: 140px;
+            overflow: hidden;
+            white-space: normal;
+            text-wrap: pretty;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.25;
+            opacity: 0;
+            transition: opacity 0.12s ease;
+        }
+    }
+
+    .railPanel:hover .logoContainer,
+    .railPanel:has(:focus-visible) .logoContainer,
+    &.railPinned .logoContainer {
+        margin-left: 10px;
+
+        .logoContainer__tile {
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.04),
+                0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .logoContainer__name {
+            opacity: 1;
         }
     }
 
@@ -184,8 +240,8 @@ $rail-open-w: 252px;
             box-shadow: 12px 0 32px rgba(0, 0, 0, 0.45);
         }
 
-        .logoContainer:hover {
-            border-color: rgb(var(--sidebar-border));
+        .logoContainer {
+            color: rgb(var(--sidebar-foreground));
         }
 
         .exit {

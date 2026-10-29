@@ -1,34 +1,54 @@
 .filterCascader {
-    height: 100%;
+    // Mismo alto que el buscador de la barra de herramientas (--control-h).
+    height: var(--control-h) !important;
 
+    // Mismo botón "Filtrar" que el header (DESIGN.md §8): sin borde. Va dentro de tarjetas
+    // blancas, así que el relleno es el gris de la app (como el buscador sobre blanco).
     .ant-select-selector {
-        border: 1px solid #a5a5a5 !important;
-        color: #a5a5a5;
-        font-size: 16px;
-        font-weight: 600;
+        min-height: var(--control-h) !important;
+        height: var(--control-h) !important;
+        align-items: center;
+        border: 0 !important;
+        border-radius: 11px !important;
+        background-color: rgb(var(--cp-bg)) !important;
+        color: rgb(var(--cp-ink-4));
+        font-size: 14px;
+        font-weight: 500;
 
         .ant-select-selection-overflow {
             flex-wrap: nowrap !important;
         }
 
         .ant-select-selection-placeholder {
-            color: #9d9c9c !important;
+            color: rgb(var(--cp-ink-4)) !important;
         }
     }
 
     .ant-select-arrow {
-        color: #a5a5a5 !important;
+        color: rgb(var(--cp-ink-4)) !important;
     }
 
     &.ant-select-focused .ant-select-selector,
     &.ant-select-open .ant-select-selector {
-        border-color: #a5a5a5 !important;
-        box-shadow: 0 0 0 2px rgba(165, 165, 165, 0.2);
+        box-shadow: none !important;
     }
 
     .ant-select-selection-item {
-        background-color: #f0f0f0;
-        color: #a5a5a5;
+        background-color: rgb(var(--cp-surface));
+        color: rgb(var(--cp-ink));
+    }
+}
+
+// En el header (fondo gris de la página): relleno blanco y alto de control, como Filtrar.
+.cp-on-page .filterCascader {
+    height: var(--control-h) !important;
+
+    .ant-select-selector {
+        min-height: var(--control-h) !important;
+        height: var(--control-h) !important;
+        background-color: rgb(var(--cp-surface)) !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
     }
 }
 
@@ -38,6 +58,19 @@
 }
 
 .filterActivePaymentsTab {
+    // En el header (fondo gris de la página): relleno blanco y alto de control, como Filtrar.
+    .cp-on-page .filterCascader {
+        height: var(--control-h) !important;
+
+        .ant-select-selector {
+            min-height: var(--control-h) !important;
+            height: var(--control-h) !important;
+            background-color: rgb(var(--cp-surface)) !important;
+            font-size: 13px !important;
+            border-radius: 8px !important;
+        }
+    }
+
     .ant-cascader-menu {
         height: fit-content;
         max-height: 250px;

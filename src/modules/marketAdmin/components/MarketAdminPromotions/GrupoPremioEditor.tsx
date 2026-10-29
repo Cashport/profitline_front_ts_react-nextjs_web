@@ -70,18 +70,18 @@ export default function GrupoPremioEditor({
         <div className="flex items-center gap-2">
           {esPool ? (
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-[#92400E]">El cliente elige</span>
+              <span className="text-[13px] text-[#92400E]">El cliente elige</span>
               <input
                 type="number"
                 min={1}
                 value={grupo.unidadesPool ?? 5}
                 onChange={(e) => updatePool(parseInt(e.target.value) || 1)}
-                className="w-10 px-1.5 py-0.5 text-xs font-semibold text-[#92400E] bg-white border border-[#FDE68A] rounded text-center outline-none"
+                className="w-10 px-1.5 py-0.5 text-[13px] font-semibold text-[#92400E] bg-white border border-[#FDE68A] rounded text-center outline-none"
               />
-              <span className="text-[10px] text-[#92400E]">und. entre:</span>
+              <span className="text-[13px] text-[#92400E]">und. entre:</span>
             </div>
           ) : (
-            <span className="text-[10px] text-[#666666] font-medium">Fijo</span>
+            <span className="text-[13px] text-[#666666] font-medium">Fijo</span>
           )}
         </div>
         {canRemove && (
@@ -106,8 +106,8 @@ export default function GrupoPremioEditor({
               className="[&_.ant-select-selector]:!bg-white [&_.ant-select-selector]:!border-[#EEEEEE]"
             />
             {!esPool && (
-              <div className="flex items-center border border-[#EEEEEE] rounded overflow-hidden w-[72px] flex-shrink-0">
-                <span className="px-1.5 py-1 text-[10px] text-[#999999] bg-[#F7F7F7] border-r border-[#EEEEEE]">
+              <div className="flex items-center border border-[#EEEEEE] rounded overflow-hidden w-[76px] flex-shrink-0">
+                <span className="px-1.5 py-1 text-[13px] text-[#999999] bg-[#F7F7F7] border-r border-[#EEEEEE]">
                   und.
                 </span>
                 <input
@@ -132,7 +132,7 @@ export default function GrupoPremioEditor({
         <button
           onClick={addProducto}
           disabled={grupo.productos.length >= products.length}
-          className="flex items-center gap-1 text-[10px] text-[#6AB000] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+          className="flex items-center gap-1 text-[13px] text-[#6AB000] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
         >
           <Plus size={9} /> Agregar producto
         </button>

@@ -11,9 +11,7 @@ const CreateOrderMarket: FC = () => {
   const { isCartVisible, toggleCart } = useContext(OrderViewContext);
 
   return (
-    <div
-      className={`${styles.marketLayout} ${isCartVisible ? styles.marketLayoutWithCart : ""}`}
-    >
+    <div className={`${styles.marketLayout} ${isCartVisible ? styles.marketLayoutWithCart : ""}`}>
       <CreateOrderProducts />
       {isCartVisible && <CreateOrderCart onClose={toggleCart} />}
     </div>

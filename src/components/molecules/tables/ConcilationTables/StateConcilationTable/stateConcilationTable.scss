@@ -7,10 +7,13 @@
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    background-color: #ffffff;
-    padding: 1rem 1rem;
-    margin-top: 0.2rem;
-    border-radius: 8px;
+    // Tarjeta de contenido (DESIGN.md §3): igual que Clientes.
+    background-color: rgb(var(--cp-surface));
+    padding: var(--card-pad);
+    margin-top: 0;
+    border: 0;
+    box-shadow: none;
+    border-radius: var(--card-radius);
     gap: 0.5rem;
 
     .select__container {

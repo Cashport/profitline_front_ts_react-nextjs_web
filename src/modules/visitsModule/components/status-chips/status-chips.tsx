@@ -32,13 +32,16 @@ export default function StatusChips({ counts, selected, onToggle, palette }: Sta
             aria-pressed={active}
             onClick={() => onToggle(s)}
             className={cn(
-              "flex h-[30px] shrink-0 select-none items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-[11px] text-xs font-medium text-muted-foreground transition-colors hover:text-foreground max-[1200px]:px-2",
+              "flex h-[30px] shrink-0 select-none items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-[11px] text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground max-[1200px]:px-2",
               active && "border-wallet-accent bg-wallet-accent-soft text-foreground"
             )}
           >
-            <span className="h-[7px] w-[7px] rounded-full" style={{ background: palette.status[s] }} />
+            <span
+              className="h-[7px] w-[7px] rounded-full"
+              style={{ background: palette.status[s] }}
+            />
             {STATUS_LABELS[s]}
-            <span className="text-[10px] text-muted-foreground max-[1200px]:hidden">
+            <span className="text-[13px] text-muted-foreground max-[1200px]:hidden">
               {counts[s] ?? 0}
             </span>
           </button>

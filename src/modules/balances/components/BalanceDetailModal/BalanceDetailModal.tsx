@@ -186,7 +186,7 @@ export function BalanceDetailModal({
               </button>
             )}
             <Badge
-              className="text-xs px-2.5 py-1 whitespace-nowrap"
+              className="text-[13px] px-2.5 py-1 whitespace-nowrap"
               style={{
                 backgroundColor: "transparent",
                 color: "#000",
@@ -205,11 +205,11 @@ export function BalanceDetailModal({
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
             <div>
-              <p className="text-xs text-gray-400">Cliente</p>
+              <p className="text-[13px] text-gray-400">Cliente</p>
               <p className="text-sm font-semibold text-cashport-black">{saldoData.client_name}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Tipo</p>
+              <p className="text-[13px] text-gray-400">Tipo</p>
               {isEditing ? (
                 <Controller
                   control={control}
@@ -234,18 +234,18 @@ export function BalanceDetailModal({
             </div>
             {saldoData.kam_name && (
               <div>
-                <p className="text-xs text-gray-400">KAM</p>
+                <p className="text-[13px] text-gray-400">KAM</p>
                 <p className="text-sm font-semibold text-cashport-black">{saldoData.kam_name}</p>
               </div>
             )}
             <div>
-              <p className="text-xs text-gray-400">Fecha creación</p>
+              <p className="text-[13px] text-gray-400">Fecha creación</p>
               <p className="text-sm font-semibold text-cashport-black">
                 {formatDate(saldoData.created_at)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Procedencia</p>
+              <p className="text-[13px] text-gray-400">Procedencia</p>
               {isEditing ? (
                 <Controller
                   control={control}
@@ -271,7 +271,7 @@ export function BalanceDetailModal({
               ) : saldoData.eligibility_status ? (
                 <Badge
                   variant="outline"
-                  className="text-xs"
+                  className="text-[13px]"
                   style={{
                     color: saldoData.eligibility_status.status_color,
                     backgroundColor: saldoData.eligibility_status.background_color,
@@ -289,7 +289,7 @@ export function BalanceDetailModal({
           <div className="h-px bg-gray-100" />
 
           <div>
-            <p className="text-xs text-gray-400">Descripción</p>
+            <p className="text-[13px] text-gray-400">Descripción</p>
             <p className="text-sm font-semibold text-cashport-black">
               {saldoData.COMMENTS ?? saldoData.comments ?? "-"}
             </p>
@@ -299,7 +299,7 @@ export function BalanceDetailModal({
             <>
               <div className="h-px bg-gray-100" />
               <div>
-                <p className="text-xs text-gray-400">Observación auditoría</p>
+                <p className="text-[13px] text-gray-400">Observación auditoría</p>
                 {isEditing ? (
                   <Controller
                     control={control}
@@ -326,7 +326,7 @@ export function BalanceDetailModal({
             <>
               <div className="h-px bg-gray-100" />
               <div>
-                <p className="text-xs text-gray-400">Documento cliente</p>
+                <p className="text-[13px] text-gray-400">Documento cliente</p>
                 <div className="space-y-2 mt-1">
                   {saldoData.client_documents.map((doc, index) =>
                     isEditing ? (
@@ -358,13 +358,13 @@ export function BalanceDetailModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-gray-400">Saldo inicial</p>
+              <p className="text-[13px] text-gray-400">Saldo inicial</p>
               <p className="text-base font-bold text-cashport-black">
                 {formatCurrency(saldoData.initial_amount)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Pendiente</p>
+              <p className="text-[13px] text-gray-400">Pendiente</p>
               <p className="text-base font-bold text-cashport-black">
                 {formatCurrency(saldoData.pending_amount)}
               </p>
@@ -375,7 +375,7 @@ export function BalanceDetailModal({
 
           {saldoData.audit_file_url && (
             <div>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+              <p className="text-[13px] font-medium text-gray-400 mb-3">
                 Soportes
               </p>
               <div className="flex items-center gap-2">
@@ -404,7 +404,9 @@ export function BalanceDetailModal({
                 />
               </div>
               {editFile && (
-                <p className="text-xs text-muted-foreground mt-1">Nuevo archivo: {editFile.name}</p>
+                <p className="text-[13px] text-muted-foreground mt-1">
+                  Nuevo archivo: {editFile.name}
+                </p>
               )}
             </div>
           )}

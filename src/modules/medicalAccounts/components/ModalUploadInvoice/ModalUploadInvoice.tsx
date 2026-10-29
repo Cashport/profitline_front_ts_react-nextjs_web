@@ -21,21 +21,13 @@ interface ModalUploadInvoiceProps {
 
 const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
-function FileChip({
-  file,
-  label,
-  onRemove
-}: {
-  file: File;
-  label: string;
-  onRemove: () => void;
-}) {
+function FileChip({ file, label, onRemove }: { file: File; label: string; onRemove: () => void }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border-2 border-emerald-200 bg-emerald-50/40 p-3">
       <FileText size={24} className="shrink-0 text-red-400" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-cashport-black">{file.name}</p>
-        <p className="text-xs text-gray-500">
+        <p className="text-[13px] text-gray-500">
           {label} · {formatFileSize(file.size)}
         </p>
       </div>
@@ -142,7 +134,7 @@ export function ModalUploadInvoice({
         </p>
 
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
             Número de factura <span className="text-red-500">*</span>
           </p>
           <Input
@@ -153,7 +145,7 @@ export function ModalUploadInvoice({
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
             PDF de la factura <span className="text-red-500">*</span>
           </p>
           {pdfFile ? (
@@ -169,8 +161,9 @@ export function ModalUploadInvoice({
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-            ZIP de la factura <span className="font-normal normal-case text-gray-400">(opcional)</span>
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
+            ZIP de la factura{" "}
+            <span className="font-normal normal-case text-gray-400">(opcional)</span>
           </p>
           {zipFile ? (
             <FileChip file={zipFile} label="ZIP" onRemove={() => setZipFile(null)} />

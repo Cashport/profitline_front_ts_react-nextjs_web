@@ -72,11 +72,7 @@ const ModalActionsConfirmCompensation = ({ isOpen, onClose, selectedRow, onSucce
       </Typography.Title>
       <Flex vertical gap="1rem" className="modalActionsConfirmCompensation__body">
         <InputForm titleInput="Id pago" nameInput="id_erp" control={control} />
-        <InputForm
-          titleInput="Id compensación"
-          nameInput="id_erp_compensation"
-          control={control}
-        />
+        <InputForm titleInput="Id compensación" nameInput="id_erp_compensation" control={control} />
       </Flex>
       <div className="modalActionsConfirmCompensation__footer">
         <SecondaryButton onClick={onClose}>No confirmar</SecondaryButton>

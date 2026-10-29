@@ -19,7 +19,7 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
   const receivedPercent = 0;
 
   return (
-    <Card className="bg-white overflow-hidden flex flex-col p-6" style={{ borderColor: "#E5E7EB" }}>
+    <Card className="cp-card rounded-[var(--card-radius)] border-0 bg-cp-surface shadow-none flex flex-col overflow-hidden px-[18px] py-[14px]">
       <div className="flex items-center mb-5">
         <h3 className="text-sm font-semibold flex-1" style={{ color: "#000000" }}>
           Estado de archivos
@@ -30,7 +30,7 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
             <button
               key={v}
               onClick={() => setView(v)}
-              className="px-3 py-1 text-xs font-medium rounded-md transition-all"
+              className="px-3 py-1 text-[13px] font-medium rounded-md transition-all"
               style={{
                 backgroundColor: view === v ? "#ffffff" : "transparent",
                 color: view === v ? "#111827" : "#6B7280",
@@ -43,7 +43,7 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
         </div>
 
         <div className="flex items-center gap-2 flex-1 justify-end">
-          <span className="text-xs" style={{ color: "#9CA3AF" }}>
+          <span className="text-[13px]" style={{ color: "#9CA3AF" }}>
             Estado general
           </span>
           <div
@@ -63,40 +63,34 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
 
       <table className="w-full">
         <thead>
-          <tr className="border-b" style={{ borderColor: "#E5E7EB" }}>
+          <tr className="border-b border-cp-line bg-cp-surface">
             <th
-              className="text-left px-3 py-3 text-xs font-medium"
-              style={{ color: "#6B7280" }}
+              className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
             >
               {view === "tipo" ? "Tipo" : "País"}
             </th>
             <th
-              className="text-left px-3 py-3 text-xs font-medium w-40"
-              style={{ color: "#6B7280" }}
+              className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink w-40"
             >
               Estado
             </th>
             <th
-              className="text-center px-3 py-3 text-xs font-medium"
-              style={{ color: "#6B7280" }}
+              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
             >
               Esperados
             </th>
             <th
-              className="text-center px-3 py-3 text-xs font-medium"
-              style={{ color: "#6B7280" }}
+              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
             >
               Transformados
             </th>
             <th
-              className="text-center px-3 py-3 text-xs font-medium"
-              style={{ color: "#6B7280" }}
+              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
             >
               Novedades
             </th>
             <th
-              className="text-center px-3 py-3 text-xs font-medium"
-              style={{ color: "#6B7280" }}
+              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
             >
               Pendientes
             </th>
@@ -123,7 +117,7 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
                       />
                     </div>
                     <span
-                      className="text-xs font-semibold tabular-nums w-8 text-right"
+                      className="text-[13px] font-semibold tabular-nums w-10 text-right"
                       style={{ color: "#111827" }}
                     >
                       {pct}%

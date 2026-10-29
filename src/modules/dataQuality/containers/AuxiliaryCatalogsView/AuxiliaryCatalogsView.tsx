@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { message } from "antd";
 
 import Header from "@/components/organisms/header";
@@ -11,11 +10,9 @@ import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadF
 import { ModalGmnOficiales } from "../../components/ModalGmnOficiales/ModalGmnOficiales";
 
 import { Button } from "@/modules/chat/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Card } from "@/modules/chat/ui/card";
 
 import { useAppStore } from "@/lib/store/store";
-import { canManageAuxiliaries, canReadDataQuality } from "@/utils/utils";
+import { canManageAuxiliaries } from "@/utils/utils";
 import {
   downloadUnifiedCatalogFile,
   downloadCatalogFile,
@@ -28,10 +25,8 @@ import {
 type UploadKind = "materials" | "pos" | "packs";
 
 export default function AuxiliaryCatalogsView() {
-  const router = useRouter();
   const selectedProject = useAppStore((projects) => projects.selectedProject);
   const canManage = canManageAuxiliaries(selectedProject);
-  const canSeeGeneral = canReadDataQuality(selectedProject);
 
   const [actionsOpen, setActionsOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -39,10 +34,6 @@ export default function AuxiliaryCatalogsView() {
   const [uploadKind, setUploadKind] = useState<UploadKind>("materials");
   const [uploading, setUploading] = useState(false);
   const [downloadingCatalog, setDownloadingCatalog] = useState(false);
-
-  // Navegación determinista: sin data-readonly no existe "vista general", el landing
-  // reducido de /data-quality expone el acceso a Auxiliares.
-  const handleGoBack = () => router.push("/data-quality");
 
   const runDownload = async (fn: () => Promise<{ url: string }>, ok: string) => {
     const hide = message.open({ type: "loading", content: "Descargando...", duration: 0 });
@@ -83,22 +74,14 @@ export default function AuxiliaryCatalogsView() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <Header title="Auxiliares LATAM" />
-      {/* Main Content */}
-      <Card className="border-none gap-2 p-6">
-        <div className="flex items-center justify-between">
-          <Button
-            onClick={handleGoBack}
-            variant="ghost"
-            size="sm"
-            className="text-gray-700 hover:text-gray-900 w-fit"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            {canSeeGeneral ? "Volver a vista general" : "Volver"}
-          </Button>
-
-          {canManage && (
+    <div className="cp-page">
+      {/* Sin data-readonly no existe "vista general": el landing reducido de /data-quality
+          expone el acceso a Auxiliares, por eso "‹" vuelve allí. */}
+      <Header
+        title="Auxiliares LATAM"
+        back="/data-quality"
+        actionsExtra={
+          canManage && (
             <Button
               variant="outline"
               className="text-[#141414]"
@@ -106,11 +89,13 @@ export default function AuxiliaryCatalogsView() {
             >
               Acciones
             </Button>
-          )}
-        </div>
-
+          )
+        }
+      />
+      {/* Main Content */}
+      <div className="cp-card flex flex-col gap-2 px-[18px] py-[14px]">
         <AuxiliaryFilesTable />
-      </Card>
+      </div>
 
       {canManage && (
         <CountryClientsActionsModal

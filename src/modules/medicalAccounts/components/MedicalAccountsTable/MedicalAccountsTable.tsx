@@ -90,7 +90,9 @@ export function MedicalAccountsTable({
       render: (_: unknown, record: IMedicalAccountListItem) => (
         <div className="flex min-w-0 flex-col" style={{ maxWidth: 200 }}>
           <span className="truncate text-sm text-cashport-black">{record.patient_name ?? "-"}</span>
-          <span className="truncate text-xs text-gray-500">{record.document_number ?? "-"}</span>
+          <span className="truncate text-[13px] text-gray-500">
+            {record.document_number ?? "-"}
+          </span>
         </div>
       )
     },
@@ -159,7 +161,11 @@ export function MedicalAccountsTable({
       width: 96,
       render: (_: unknown, record: IMedicalAccountListItem) => (
         <Flex gap={4} align="center">
-          <Button type="text" onClick={() => onOpenDetail?.(record)} icon={<Eye size={"1.3rem"} />} />
+          <Button
+            type="text"
+            onClick={() => onOpenDetail?.(record)}
+            icon={<Eye size={"1.3rem"} />}
+          />
           <Popconfirm
             title="Eliminar cuenta médica"
             description="¿Seguro que deseas eliminar esta cuenta médica?"

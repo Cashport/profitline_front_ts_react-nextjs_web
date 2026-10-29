@@ -27,7 +27,8 @@ export default function IvaToggle() {
           : "Los valores son netos (sin IVA). Click para incluir IVA."
       }
       onClick={() => setIncludeIva(!includeIva)}
-      className="shrink-0 flex items-center gap-2.5 bg-card border border-border px-4 py-2.5 rounded-xl text-foreground hover:bg-secondary transition-colors shadow-sm"
+      // Control del header (DESIGN.md §4): mismo alto, radio y borde que "Filtrar".
+      className="box-border flex h-[var(--control-h)] shrink-0 items-center gap-2.5 rounded-lg border-0 bg-cp-surface px-4 text-cp-ink transition-colors hover:bg-cp-muted"
     >
       <Receipt className="w-4 h-4" />
       <span className="text-sm font-medium whitespace-nowrap">

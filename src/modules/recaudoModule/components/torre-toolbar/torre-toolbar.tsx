@@ -1,15 +1,15 @@
 "use client";
 
 import { AutoComplete, ConfigProvider, Input, Select } from "antd";
-import { Search } from "lucide-react";
 
+import { SearchFieldIcon, searchFieldAntdClass } from "@/components/ui/search-field/search-field";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { clientOptions, matchesClient } from "../../utils/filters";
 import FiltersPopover from "../filters-popover/filters-popover";
 
 /** Mismo alto que "Filtrar" y el botón de tema (--control-h del header compartido). */
-const HEADER_THEME = { token: { controlHeight: 43, borderRadius: 11 } };
+const HEADER_THEME = { token: { controlHeight: 36, borderRadius: 8 } };
 
 /** Herramientas de la torre en el encabezado: buscador de clientes, periodo y filtros. */
 export default function TorreToolbar({ data }: { data?: ICollectionTower }) {
@@ -18,7 +18,7 @@ export default function TorreToolbar({ data }: { data?: ICollectionTower }) {
   return (
     <ConfigProvider theme={HEADER_THEME}>
       <AutoComplete
-        className="w-[240px] max-[900px]:flex-[1_1_180px]"
+        className="w-[var(--search-w)] max-[900px]:flex-[1_1_180px]"
         value={filters.search}
         options={data ? clientOptions(data.catalogs, filters) : []}
         filterOption={matchesClient}
@@ -29,7 +29,8 @@ export default function TorreToolbar({ data }: { data?: ICollectionTower }) {
           allowClear
           aria-label="Buscar cliente"
           placeholder="Buscar cliente o NIT"
-          prefix={<Search className="h-3.5 w-3.5 text-muted-foreground" />}
+          className={searchFieldAntdClass("page")}
+          prefix={<SearchFieldIcon />}
         />
       </AutoComplete>
       <Select

@@ -64,12 +64,12 @@ export default function ClientPreview({
           </button>
         </div>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-bold">
+          <div className="w-8 h-8 rounded-full bg-[#141414] text-white flex items-center justify-center text-[13px] font-bold">
             {clientName.charAt(0).toUpperCase()}
           </div>
           <div>
             <p className="text-sm font-semibold text-[#141414]">{clientName}</p>
-            <p className="text-xs text-gray-500">{primaryRecipient}</p>
+            <p className="text-[13px] text-gray-500">{primaryRecipient}</p>
           </div>
         </div>
       </div>
@@ -85,13 +85,13 @@ export default function ClientPreview({
             {!loading && data && (
               <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden mx-auto">
                 <div className="bg-[#141414] px-5 py-3">
-                  <p className="text-xs text-gray-400 font-medium">
+                  <p className="text-[13px] text-gray-400 font-medium">
                     Correo personalizado para {clientName}
                   </p>
                 </div>
                 <div className="p-6">
                   <div className="border-b border-[#EEEEEE] pb-3 mb-4">
-                    <p className="text-[11px] text-gray-400 mb-0.5">
+                    <p className="text-[13px] text-gray-400 mb-0.5">
                       Para: {recipients.join(", ")}
                     </p>
                     <p className="text-base font-semibold text-[#141414]">
@@ -110,12 +110,12 @@ export default function ClientPreview({
                   )}
                   {attachments.length > 0 && (
                     <div className="mt-5 pt-4 border-t border-[#EEEEEE]">
-                      <p className="text-xs text-gray-500 font-medium mb-2">Adjuntos:</p>
+                      <p className="text-[13px] text-gray-500 font-medium mb-2">Adjuntos:</p>
                       <div className="flex flex-wrap gap-2">
                         {attachments.map((att, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1.5 text-xs bg-gray-50 text-gray-700 border border-[#EEEEEE] px-3 py-1.5 rounded-md"
+                            className="inline-flex items-center gap-1.5 text-[13px] bg-gray-50 text-gray-700 border border-[#EEEEEE] px-3 py-1.5 rounded-md"
                           >
                             <Paperclip className="w-3 h-3 text-gray-400" />
                             {att.name}

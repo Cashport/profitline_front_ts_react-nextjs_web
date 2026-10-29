@@ -53,7 +53,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ doc, handleDelete, handleUp
           {doc ? <FileArrowUp size={16} /> : <FileArrowDown size={16} color="#7B7B7B" />}
           <Flex vertical>
             <Text>{doc?.name || "Seleccionar archivo"}</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text type="secondary" style={{ fontSize: 13 }}>
               {doc?.uploadedAt || "PDF, Word, PNG. (Tamaño max 30MB)"}
             </Text>
           </Flex>

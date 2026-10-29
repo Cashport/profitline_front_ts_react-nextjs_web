@@ -90,14 +90,14 @@ function NoActivities({
     <div className="wallet-scope flex max-h-[calc(100*var(--vh)-40px)] flex-col bg-card text-foreground">
       <div className="flex items-center gap-3 border-b border-border px-5 py-4">
         <div
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 bg-secondary text-xs font-semibold"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 bg-secondary text-[13px] font-semibold"
           style={{ borderColor: color }}
         >
           {initialsOf(d.user.userName)}
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[17px] font-semibold">{d.user.userName}</h3>
-          <p className="mt-px flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          <p className="mt-px flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground">
             {d.zones.length > 0 && (
               <span className="whitespace-nowrap">Zona {d.zones.join(", ")}</span>
             )}
@@ -175,14 +175,14 @@ function DayContent({
     <div className="wallet-scope flex max-h-[calc(100*var(--vh)-40px)] flex-col bg-card text-foreground">
       <div className="flex items-center gap-3 border-b border-border px-5 py-4">
         <div
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 bg-secondary text-xs font-semibold"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 bg-secondary text-[13px] font-semibold"
           style={{ borderColor: color }}
         >
           {initialsOf(d.user.userName)}
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[17px] font-semibold">{d.user.userName}</h3>
-          <p className="mt-px flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          <p className="mt-px flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground">
             {d.zones.length > 0 && (
               <span className="whitespace-nowrap">Zona {d.zones.join(", ")}</span>
             )}
@@ -206,7 +206,7 @@ function DayContent({
         {/* Mismo negro con verde de marca en ambos temas. */}
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-4 gap-y-1.5 rounded-[14px] bg-[#141414] px-[18px] py-4 text-white">
           <div>
-            <div className="text-xs text-[#bdbdbd]">Actividades efectivas</div>
+            <div className="text-[13px] text-[#bdbdbd]">Actividades efectivas</div>
             <div className="text-[52px] font-bold leading-[0.95] tracking-[-0.04em] text-[#cbe71e] max-[520px]:text-[42px]">
               {activities.effective}
               <small className="ml-1 text-lg font-medium tracking-normal text-[#bdbdbd]">
@@ -218,7 +218,7 @@ function DayContent({
             <b className="block text-[28px] font-bold leading-none">
               {ranking.position != null ? `#${ranking.position}` : "—"}
             </b>
-            <span className="text-[11.5px] text-[#bdbdbd]">de {ranking.total} en el ranking</span>
+            <span className="text-[13px] text-[#bdbdbd]">de {ranking.total} en el ranking</span>
           </div>
           <div className="relative col-span-2 mt-2.5 h-2.5 rounded-[5px] bg-[#333]">
             {activities.projection_pct != null && (
@@ -233,7 +233,7 @@ function DayContent({
             />
             <u className="absolute -top-1 left-[calc(100%-2px)] h-[18px] w-0.5 bg-white" />
           </div>
-          <div className="col-span-2 flex flex-wrap justify-between gap-2 text-[11.5px] text-[#bdbdbd]">
+          <div className="col-span-2 flex flex-wrap justify-between gap-2 text-[13px] text-[#bdbdbd]">
             <span className="whitespace-nowrap">
               <b className="font-semibold text-white">{fmtNumber(activities.goal_pct)}%</b> de la
               meta
@@ -254,11 +254,11 @@ function DayContent({
         <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
           {miniKpis.map((k) => (
             <div key={k.label} className="rounded-[10px] bg-secondary px-[11px] py-[9px]">
-              <span className="block text-[11px] text-muted-foreground">{k.label}</span>
+              <span className="block text-[13px] text-muted-foreground">{k.label}</span>
               <b className="text-lg font-semibold">
                 {k.value}
                 {k.suffix && (
-                  <small className="ml-0.5 text-[11px] font-medium text-muted-foreground">
+                  <small className="ml-0.5 text-[13px] font-medium text-muted-foreground">
                     {k.suffix}
                   </small>
                 )}
@@ -268,9 +268,9 @@ function DayContent({
         </div>
 
         <div className="rounded-xl border border-border px-3.5 py-3">
-          <h4 className="mb-2 flex justify-between gap-2 text-[12.5px] font-semibold">
+          <h4 className="mb-2 flex justify-between gap-2 text-[13px] font-semibold">
             Actividades por hora
-            <span className="text-[11.5px] font-normal text-muted-foreground">
+            <span className="text-[13px] font-normal text-muted-foreground">
               {activities.best_hour
                 ? `Mejor hora ${activities.best_hour.hour}:00 · ${activities.best_hour.count}`
                 : "Sin actividades aún"}
@@ -286,7 +286,7 @@ function DayContent({
                   title={`${hour}:00 · ${count}`}
                   className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-[3px]"
                 >
-                  <b className="text-[10px] font-semibold">{count || ""}</b>
+                  <b className="text-[13px] font-semibold">{count || ""}</b>
                   <i
                     className={cn(
                       "block w-full min-h-[2px] rounded-t-[3px]",
@@ -298,7 +298,7 @@ function DayContent({
                     )}
                     style={{ height: future ? 18 : (count / maxHour) * 62 }}
                   />
-                  <em className="text-[9.5px] not-italic text-muted-foreground">{hour}</em>
+                  <em className="text-[13px] not-italic text-muted-foreground">{hour}</em>
                 </div>
               );
             })}
@@ -306,9 +306,9 @@ function DayContent({
         </div>
 
         <div>
-          <h4 className="mb-2 flex justify-between gap-2 text-[12.5px] font-semibold">
+          <h4 className="mb-2 flex justify-between gap-2 text-[13px] font-semibold">
             Registro del día
-            <span className="text-[11.5px] font-normal text-muted-foreground">
+            <span className="text-[13px] font-normal text-muted-foreground">
               {activities.registered} registradas · {activities.effective} efectivas
             </span>
           </h4>
@@ -317,9 +317,9 @@ function DayContent({
               d.register.map((r) => (
                 <li
                   key={r.response_id}
-                  className="grid grid-cols-[42px_10px_minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-0.5 py-[7px] text-[12.5px] last:border-b-0 max-[520px]:grid-cols-[38px_10px_minmax(0,1fr)]"
+                  className="grid grid-cols-[42px_10px_minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-0.5 py-[7px] text-[13px] last:border-b-0 max-[520px]:grid-cols-[38px_10px_minmax(0,1fr)]"
                 >
-                  <span className="text-[11.5px] text-muted-foreground">
+                  <span className="text-[13px] text-muted-foreground">
                     {fmtClock(minutesOfDay(r.at))}
                   </span>
                   <i
@@ -329,13 +329,13 @@ function DayContent({
                     )}
                   />
                   <span className="truncate">{r.client_name}</span>
-                  <span className="whitespace-nowrap text-[11px] text-muted-foreground max-[520px]:hidden">
+                  <span className="whitespace-nowrap text-[13px] text-muted-foreground max-[520px]:hidden">
                     {r.effective ? "Efectiva" : "No efectiva"}
                   </span>
                 </li>
               ))
             ) : (
-              <li className="py-[7px] text-[12.5px] text-muted-foreground">
+              <li className="py-[7px] text-[13px] text-muted-foreground">
                 Aún no hay actividades registradas.
               </li>
             )}

@@ -10,7 +10,7 @@ interface NoveltyDocumentsTableProps {
 }
 
 const TH =
-  "border-b border-border bg-muted px-3 py-2 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
+  "border-b border-cp-line bg-cp-surface px-3 py-3 text-left text-[13.5px] font-semibold text-cp-ink";
 
 /**
  * Tabla "Facturas incluidas" de los paneles de novedad: los documentos
@@ -21,7 +21,7 @@ export default function NoveltyDocumentsTable({ documentos }: NoveltyDocumentsTa
 
   return (
     <div className="overflow-hidden rounded-md border border-border">
-      <table className="w-full border-collapse text-[12.5px]">
+      <table className="w-full border-collapse text-[13px]">
         <thead>
           <tr>
             <th scope="col" className={TH}>

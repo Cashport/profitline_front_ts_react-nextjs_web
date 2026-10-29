@@ -179,7 +179,7 @@ export function ModalAddMaterialEquivalences({
               )}
             />
             {errors.material_code && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.material_code.message}
               </span>
             )}
@@ -212,7 +212,7 @@ export function ModalAddMaterialEquivalences({
                 )}
               />
               {errors.conversion_factor && (
-                <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                   {errors.conversion_factor.message}
                 </span>
               )}
@@ -234,7 +234,7 @@ export function ModalAddMaterialEquivalences({
                 )}
               />
               {errors.valid_from && (
-                <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                   {errors.valid_from.message}
                 </span>
               )}
@@ -247,7 +247,7 @@ export function ModalAddMaterialEquivalences({
               >
                 Hasta
                 {isActive === 1 && (
-                  <span className="ml-1 text-xs font-normal" style={{ color: "#BBBBBB" }}>
+                  <span className="ml-1 text-[13px] font-normal" style={{ color: "#BBBBBB" }}>
                     (bloqueado — vigente)
                   </span>
                 )}
@@ -269,7 +269,7 @@ export function ModalAddMaterialEquivalences({
                 )}
               />
               {errors.valid_to && (
-                <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                   {errors.valid_to.message}
                 </span>
               )}

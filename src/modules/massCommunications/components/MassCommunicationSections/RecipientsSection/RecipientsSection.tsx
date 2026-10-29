@@ -25,9 +25,7 @@ interface RecipientsSectionProps {
   onValidatedCountChange: (count: number) => void;
 }
 
-export default function RecipientsSection({
-  onValidatedCountChange
-}: RecipientsSectionProps) {
+export default function RecipientsSection({ onValidatedCountChange }: RecipientsSectionProps) {
   const [rawIds, setRawIds] = useState("");
   const [hasValidated, setHasValidated] = useState(false);
   const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
@@ -121,9 +119,9 @@ export default function RecipientsSection({
   }, [getExportClientList]);
 
   return (
-    <section className="bg-white rounded-lg p-6">
+    <section className="cp-card px-[18px] py-[14px]">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-bold">
+        <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-[13px] font-bold">
           2
         </div>
         <Text strong className="text-[15px]">
@@ -199,7 +197,7 @@ export default function RecipientsSection({
                 {invalidIds.length} no encontrados
               </Tag>
             )}
-            <Text type="secondary" className="text-xs">
+            <Text type="secondary" className="text-[13px]">
               de {(validClients.length + invalidIds.length).toLocaleString()} clientes totales
             </Text>
           </Flex>
@@ -207,7 +205,7 @@ export default function RecipientsSection({
             size="small"
             onClick={handleDownloadReport}
             icon={<FileDown size={14} />}
-            className="!bg-[#fafafa] !font-medium !text-xs"
+            className="!bg-[#fafafa] !font-medium !text-[13px]"
             style={{ height: 31 }}
             loading={isExporting}
           >

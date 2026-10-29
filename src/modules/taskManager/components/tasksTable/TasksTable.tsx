@@ -1,13 +1,14 @@
 "use client";
 
 import { FC } from "react";
-import { ArrowUpDown, Eye, Sparkles } from "lucide-react";
+import { Eye, Sparkles } from "lucide-react";
 import { Spin } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { formatTime } from "@/modules/chat/utils/format";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 import { ITask } from "@/types/tasks/ITasks";
@@ -75,6 +76,7 @@ const TasksTable: FC<ITasksTableProps> = ({
   onToggleSelection,
   onSelectAll,
   onViewTask,
+  sortConfig,
   onSort,
   isLoading = false,
   onTaskStatusChanged
@@ -93,10 +95,10 @@ const TasksTable: FC<ITasksTableProps> = ({
       )}
       <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
         <table className="w-full min-w-full">
-          <thead className="bg-white border-b border-gray-200 sticky top-0 z-[5]">
+          <thead className="bg-cp-surface border-b border-cp-line sticky top-0 z-[5]">
             <tr>
               {/* Checkbox - hidden on mobile */}
-              <th className="hidden md:table-cell text-left p-4 font-bold text-black w-12">
+              <th className="hidden md:table-cell text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-12">
                 <Checkbox
                   checked={isAllSelected}
                   onCheckedChange={(checked) => onSelectAll(!!checked)}
@@ -110,82 +112,82 @@ const TasksTable: FC<ITasksTableProps> = ({
                   }}
                 />
               </th>
-              <th className="text-left p-2 md:p-4 font-bold text-black">
+              <th className="text-left px-2 py-3 md:px-4 text-[13.5px] font-semibold text-cp-ink">
                 <button
                   onClick={() => onSort("id")}
-                  className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
+                  className="inline-flex items-center gap-1"
                 >
                   ID
-                  <ArrowUpDown className="h-3 w-3" />
+                  <SortArrows dir={sortConfig?.key === "id" ? sortConfig.direction : null} />
                 </button>
               </th>
-              <th className="text-left p-2 md:p-4 font-bold text-black whitespace-nowrap">
+              <th className="text-left px-2 py-3 md:px-4 text-[13.5px] font-semibold text-cp-ink whitespace-nowrap">
                 <button
                   onClick={() => onSort("created_at")}
-                  className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
+                  className="inline-flex items-center gap-1"
                 >
                   Fecha
-                  <ArrowUpDown className="h-3 w-3" />
+                  <SortArrows dir={sortConfig?.key === "created_at" ? sortConfig.direction : null} />
                 </button>
               </th>
-              <th className="text-left p-2 md:p-4 font-bold text-black w-[60%] md:w-auto">
+              <th className="text-left px-2 py-3 md:px-4 text-[13.5px] font-semibold text-cp-ink w-[60%] md:w-auto">
                 <button
                   onClick={() => onSort("client_name")}
-                  className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
+                  className="inline-flex items-center gap-1"
                 >
                   Cliente
-                  <ArrowUpDown className="h-3 w-3" />
+                  <SortArrows dir={sortConfig?.key === "client_name" ? sortConfig.direction : null} />
                 </button>
               </th>
-              <th className="text-left p-2 md:p-4 font-bold text-black w-[30%] md:w-auto">
+              <th className="text-left px-2 py-3 md:px-4 text-[13.5px] font-semibold text-cp-ink w-[30%] md:w-auto">
                 <button
                   onClick={() => onSort("task_type")}
-                  className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
+                  className="inline-flex items-center gap-1"
                 >
                   Tipo de tarea
-                  <ArrowUpDown className="h-3 w-3" />
+                  <SortArrows dir={sortConfig?.key === "task_type" ? sortConfig.direction : null} />
                 </button>
               </th>
               {/* Descripción - hidden on mobile */}
-              <th className="hidden lg:table-cell text-left p-4 font-bold text-black">
+              <th className="hidden lg:table-cell text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
                 <button
                   onClick={() => onSort("description")}
-                  className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+                  className="inline-flex items-center gap-1"
                 >
                   Descripción
-                  <ArrowUpDown className="h-3 w-3" />
+                  <SortArrows dir={sortConfig?.key === "description" ? sortConfig.direction : null} />
                 </button>
               </th>
-              <th className="hidden md:table-cell p-4 font-bold text-black">
+              <th className="hidden md:table-cell px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
                 <button
                   onClick={() => onSort("status")}
-                  className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
+                  className="inline-flex items-center gap-1"
                 >
                   Estado
-                  <ArrowUpDown className="h-3 w-3" />
+                  <SortArrows dir={sortConfig?.key === "status" ? sortConfig.direction : null} />
                 </button>
               </th>
               {/* Usuario - hidden on mobile */}
-              <td className="hidden md:table-cell text-left p-4 font-bold text-black">
+              <th className="hidden md:table-cell text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
                 <button
                   onClick={() => onSort("user_name")}
-                  className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+                  className="inline-flex items-center gap-1"
                 >
                   Usuario
-                  <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </td>
-              {/* Monto - hidden on mobile */}
-              <th className="hidden lg:table-cell text-right p-4 font-bold text-black">
-                <button
-                  onClick={() => onSort("amount")}
-                  className="flex items-center justify-end gap-1 hover:text-gray-600 transition-colors w-full"
-                >
-                  Monto
-                  <ArrowUpDown className="h-3 w-3" />
+                  <SortArrows dir={sortConfig?.key === "user_name" ? sortConfig.direction : null} />
                 </button>
               </th>
-              <th className="p-2 md:p-4 w-[10%] md:w-16"></th>
+              {/* Monto - hidden on mobile */}
+              <th className="hidden lg:table-cell text-right px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
+                <button
+                  onClick={() => onSort("amount")}
+                  className="inline-flex flex-row-reverse items-center gap-1"
+                >
+                  Monto
+                  <SortArrows dir={sortConfig?.key === "amount" ? sortConfig.direction : null} />
+                </button>
+              </th>
+              <th className="px-2 py-3 md:px-4 w-[10%] md:w-16"></th>
             </tr>
           </thead>
           <tbody>
@@ -207,18 +209,18 @@ const TasksTable: FC<ITasksTableProps> = ({
                     />
                   </td>
                   {/* ID */}
-                  <td className="p-2 md:p-4 text-gray-900 font-medium text-xs md:text-sm">
+                  <td className="p-2 md:p-4 text-gray-900 font-medium text-[13px] md:text-sm">
                     {task.purchase_order_package_id ? task.purchase_order_package_id : task.id}
                   </td>
                   {/* Fecha */}
-                  <td className="p-2 md:p-4 text-gray-600 text-xs md:text-sm whitespace-nowrap">
+                  <td className="p-2 md:p-4 text-gray-600 text-[13px] md:text-sm whitespace-nowrap">
                     {formatTaskDate(task.created_at)}
                   </td>
                   {/* Cliente - always visible */}
                   <td className="p-2 md:p-4 text-gray-900 font-medium">
                     {task.client_name ? (
                       <div
-                        className="truncate text-xs md:text-sm max-w-[150px] md:max-w-xs"
+                        className="truncate text-[13px] md:text-sm max-w-[150px] md:max-w-xs"
                         title={task.client_name}
                       >
                         {task.client_name}
@@ -226,7 +228,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                     ) : (
                       <Badge
                         variant="outline"
-                        className="bg-gray-50 text-gray-500 border-dashed font-normal text-xs"
+                        className="bg-gray-50 text-gray-500 border-dashed font-normal text-[13px]"
                       >
                         Sin asignar
                       </Badge>
@@ -237,7 +239,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                     {task.task_type ? (
                       <Badge
                         variant="outline"
-                        className="bg-gray-50 text-gray-700 border-gray-200 truncate block max-w-[100px] md:max-w-none text-xs"
+                        className="bg-gray-50 text-gray-700 border-gray-200 truncate block max-w-[100px] md:max-w-none text-[13px]"
                         title={task.task_type}
                       >
                         {task.task_type}
@@ -245,7 +247,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                     ) : (
                       <Badge
                         variant="outline"
-                        className="bg-gray-50 text-gray-500 border-dashed text-xs"
+                        className="bg-gray-50 text-gray-500 border-dashed text-[13px]"
                       >
                         Sin asignar
                       </Badge>
@@ -264,7 +266,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                   {/* Estado */}
                   <td className="hidden md:table-cell p-4">
                     <Badge
-                      className="font-medium px-2 md:px-3 py-1 flex items-center w-fit whitespace-nowrap text-xs"
+                      className="font-medium px-2 md:px-3 py-1 flex items-center w-fit whitespace-nowrap text-[13px]"
                       style={{
                         backgroundColor: task.status?.backgroundColor || "#F3F4F6",
                         color: task.status?.color || "#374151"

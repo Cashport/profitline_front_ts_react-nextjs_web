@@ -24,7 +24,7 @@ function DescuentoCell({
   const enabled = max > 0;
 
   if (!enabled) {
-    return <span className="text-xs text-[#999999] italic">Sin desc.</span>;
+    return <span className="text-[13px] text-[#999999] italic">Sin desc.</span>;
   }
 
   return (
@@ -51,9 +51,9 @@ function DescuentoCell({
                 setEditing(false);
               }
             }}
-            className="w-12 text-center text-xs font-semibold border border-[#141414] rounded px-1 py-0.5 outline-none bg-white"
+            className="w-12 text-center text-[13px] font-semibold border border-[#141414] rounded px-1 py-0.5 outline-none bg-white"
           />
-          <span className="text-xs text-[#666666]">%</span>
+          <span className="text-[13px] text-[#666666]">%</span>
         </div>
       ) : (
         <button
@@ -61,7 +61,7 @@ function DescuentoCell({
             setDraft(String(value));
             setEditing(true);
           }}
-          className="flex items-center gap-0.5 text-xs font-semibold text-red-500 hover:underline"
+          className="flex items-center gap-0.5 text-[13px] font-semibold text-red-500 hover:underline"
         >
           -{value}%
           <Pencil size={10} className="text-[#999999]" />
@@ -226,7 +226,7 @@ export default function ProductsTable({
           style={{ gridTemplateColumns }}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-white bg-[#141414] rounded px-1.5 py-0.5 flex-shrink-0">
+            <span className="text-[13px] font-semibold text-white bg-[#141414] rounded px-1.5 py-0.5 flex-shrink-0">
               Pack
             </span>
             <p className="text-sm font-medium text-[#141414] truncate" title={pack.description}>
@@ -235,9 +235,9 @@ export default function ProductsTable({
           </div>
           {!compact && (
             <>
-              <p className="text-xs text-[#CCCCCC] text-right">{pack.sku}</p>
+              <p className="text-[13px] text-[#CCCCCC] text-right">{pack.sku}</p>
               <p
-                className={`text-xs text-right ${
+                className={`text-[13px] text-right ${
                   pack.discountPct > 0 ? "text-[#CCCCCC] line-through" : "text-[#CCCCCC]"
                 }`}
               >
@@ -245,9 +245,11 @@ export default function ProductsTable({
               </p>
               <div className="flex justify-center">
                 {pack.discountPct > 0 ? (
-                  <span className="text-xs font-semibold text-red-500">-{pack.discountPct}%</span>
+                  <span className="text-[13px] font-semibold text-red-500">
+                    -{pack.discountPct}%
+                  </span>
                 ) : (
-                  <span className="text-xs text-[#999999] italic">Sin desc.</span>
+                  <span className="text-[13px] text-[#999999] italic">Sin desc.</span>
                 )}
               </div>
               <p className="text-sm font-semibold text-[#141414] text-right">
@@ -260,8 +262,9 @@ export default function ProductsTable({
             {formatPrice(packTotal)}
           </p>
           {multiEntrega && !compact && <span />}
-          {showActionsColumn && !compact && (
-            pack.onRemove ? (
+          {showActionsColumn &&
+            !compact &&
+            (pack.onRemove ? (
               <button
                 onClick={pack.onRemove}
                 title="Eliminar pack"
@@ -271,8 +274,7 @@ export default function ProductsTable({
               </button>
             ) : (
               <span />
-            )
-          )}
+            ))}
         </div>
 
         {/* Sub-tabla con los productos contenidos en el pack. Usa el mismo
@@ -285,7 +287,7 @@ export default function ProductsTable({
             style={{ gridTemplateColumns }}
           >
             <span
-              className="text-[10px] font-semibold uppercase tracking-widest text-[#AAAAAA] col-span-full"
+              className="text-[13px] font-semibold text-[#AAAAAA] col-span-full"
               style={{ gridColumn: "1 / -1" }}
             >
               Productos del pack
@@ -302,16 +304,14 @@ export default function ProductsTable({
                 style={{ gridTemplateColumns }}
               >
                 <p
-                  className={`text-sm text-[#141414] truncate pr-3 ${
-                    compact ? "min-w-0" : ""
-                  }`}
+                  className={`text-sm text-[#141414] truncate pr-3 ${compact ? "min-w-0" : ""}`}
                   title={sub.description}
                 >
                   {sub.description}
                 </p>
                 {!compact && (
                   <>
-                    <p className="text-xs text-[#999999] text-right">{sub.sku}</p>
+                    <p className="text-[13px] text-[#999999] text-right">{sub.sku}</p>
                     {/* P. Original - no aplica al sub-producto */}
                     <span />
                     {/* Descuento - no aplica al sub-producto */}
@@ -325,9 +325,7 @@ export default function ProductsTable({
                 {/* Cant. - no se muestra individual para sub-productos */}
                 <span className={compact ? "" : "hidden"} />
                 {/* Total - cantidad × subtotal del sub-producto */}
-                <p className="text-sm font-semibold text-[#141414] text-right">
-                  {sub.quantity}
-                </p>
+                <p className="text-sm font-semibold text-[#141414] text-right">{sub.quantity}</p>
                 <p className="text-sm font-semibold text-[#141414] text-right">
                   {formatPrice(subTotal)}
                 </p>
@@ -353,8 +351,8 @@ export default function ProductsTable({
         </p>
         {!compact && (
           <>
-            <p className="text-xs text-[#CCCCCC] text-right">{row.sku}</p>
-            <p className="text-xs text-[#CCCCCC] line-through text-right">
+            <p className="text-[13px] text-[#CCCCCC] text-right">{row.sku}</p>
+            <p className="text-[13px] text-[#CCCCCC] line-through text-right">
               {formatPrice(row.originalPrice)}
             </p>
             <div className="flex justify-center">
@@ -365,9 +363,9 @@ export default function ProductsTable({
                   onChange={row.onDiscountChange}
                 />
               ) : row.discountPct > 0 ? (
-                <span className="text-xs font-semibold text-red-500">-{row.discountPct}%</span>
+                <span className="text-[13px] font-semibold text-red-500">-{row.discountPct}%</span>
               ) : (
-                <span className="text-xs text-[#999999] italic">Sin desc.</span>
+                <span className="text-[13px] text-[#999999] italic">Sin desc.</span>
               )}
             </div>
             <p className="text-sm font-semibold text-[#141414] text-right">
@@ -418,19 +416,19 @@ export default function ProductsTable({
           className="grid px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE] rounded-t-xl flex-shrink-0"
           style={{ gridTemplateColumns }}
         >
-          <span className="text-xs font-medium text-[#AAAAAA]">Producto</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA]">Producto</span>
           {!compact && (
             <>
-              <span className="text-xs font-medium text-[#AAAAAA] text-right">SKU</span>
-              <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Original</span>
-              <span className="text-xs font-medium text-[#AAAAAA] text-center">Descuento</span>
-              <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Final</span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">SKU</span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">P. Original</span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Descuento</span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">P. Final</span>
             </>
           )}
-          <span className="text-xs font-medium text-[#AAAAAA] text-right">Cant.</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-right">Total</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Cant.</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Total</span>
           {multiEntrega && !compact && (
-            <span className="text-xs font-medium text-[#AAAAAA] text-right">Rest.</span>
+            <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Rest.</span>
           )}
           {showActionsColumn && !compact && <span />}
         </div>
@@ -453,7 +451,7 @@ export default function ProductsTable({
                 key: String(category.key),
                 className: gIdx > 0 ? "border-t border-[#EEEEEE]" : "",
                 label: (
-                  <span className="text-[10px] font-semibold text-[#AAAAAA] uppercase tracking-widest">
+                  <span className="text-[13px] font-semibold text-[#AAAAAA]">
                     {category.name}
                   </span>
                 ),
@@ -467,7 +465,7 @@ export default function ProductsTable({
                 className={gIdx > 0 ? "border-t border-[#EEEEEE]" : ""}
               >
                 <div className="px-4 pt-3 pb-1">
-                  <span className="text-[10px] font-semibold text-[#AAAAAA] uppercase tracking-widest">
+                  <span className="text-[13px] font-semibold text-[#AAAAAA]">
                     {category.name}
                   </span>
                 </div>
@@ -480,7 +478,7 @@ export default function ProductsTable({
           {showPacks && (
             <>
               <div className="flex items-center gap-3 px-4 py-2 bg-[#F4F4F4] border-t border-[#EEEEEE]">
-                <span className="text-[11px] font-semibold text-[#141414] uppercase tracking-wide">
+                <span className="text-[13px] font-semibold text-[#141414]">
                   Packs
                 </span>
               </div>
@@ -493,7 +491,7 @@ export default function ProductsTable({
             <>
               <div className="flex items-center gap-3 px-4 py-2 bg-[#F7FDE8] border-t border-[#EEEEEE]">
                 <Gift size={12} className="text-[#6AB000] flex-shrink-0" />
-                <span className="text-[11px] font-semibold text-[#6AB000] uppercase tracking-wide">
+                <span className="text-[13px] font-semibold text-[#6AB000]">
                   Productos bonificados
                 </span>
               </div>
@@ -509,7 +507,7 @@ export default function ProductsTable({
                   <div className="flex items-center gap-2 pr-4 min-w-0">
                     <p className="text-sm font-medium text-[#141414] truncate">{b.description}</p>
                     <span
-                      className={`flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                      className={`flex-shrink-0 text-[13px] font-semibold px-1.5 py-0.5 rounded-full ${
                         b.fixed ? "bg-[#E8F5C0] text-[#4A7A00]" : "bg-[#EEF4FF] text-[#3B5BDB]"
                       }`}
                     >
@@ -521,7 +519,7 @@ export default function ProductsTable({
                       <span />
                       <span />
                       <div className="flex justify-center">
-                        <span className="text-xs font-semibold text-[#6AB000]">100% desc.</span>
+                        <span className="text-[13px] font-semibold text-[#6AB000]">100% desc.</span>
                       </div>
                       <p className="text-sm font-semibold text-[#6AB000] text-right">
                         {formatPrice(0)}
@@ -557,7 +555,7 @@ export default function ProductsTable({
           className="grid items-center px-4 py-3 bg-[#FAFAFA] border-t border-[#EEEEEE] rounded-b-xl flex-shrink-0"
           style={{ gridTemplateColumns }}
         >
-          <span className="text-xs font-semibold text-[#141414]">Totales</span>
+          <span className="text-[13px] font-semibold text-[#141414]">Totales</span>
           {!compact && (
             <>
               <span />

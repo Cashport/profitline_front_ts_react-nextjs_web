@@ -16,7 +16,7 @@ interface GroupTicketFormProps {
 }
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="mb-1 block text-[11.5px] font-semibold text-muted-foreground">{children}</label>
+  <label className="mb-1 block text-[13px] font-semibold text-muted-foreground">{children}</label>
 );
 
 /** Alta de una acción (ticket) de la novedad: POST /invoice/incident/:id/actions. */
@@ -55,7 +55,7 @@ export default function GroupTicketForm({
 
   return (
     <div className="border-t border-border px-[18px] pb-4 pt-3.5">
-      <h4 className="mb-[11px] text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+      <h4 className="mb-[11px] text-[13px] font-semibold text-muted-foreground">
         Nuevo ticket
       </h4>
 
@@ -117,14 +117,14 @@ export default function GroupTicketForm({
             type="button"
             disabled={isSending}
             onClick={onCancel}
-            className="rounded-md border border-border bg-card px-2.5 py-[3px] text-[11.5px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45"
+            className="rounded-md border border-border bg-card px-2.5 py-[3px] text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={isSending || !titulo.trim()}
-            className="rounded-md bg-cashport-green px-2.5 py-[3px] text-[11.5px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
+            className="rounded-md bg-cashport-green px-2.5 py-[3px] text-[13px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
           >
             {isSending ? "Creando…" : "Crear ticket"}
           </button>

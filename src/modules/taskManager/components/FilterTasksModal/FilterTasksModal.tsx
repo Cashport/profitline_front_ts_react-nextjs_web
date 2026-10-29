@@ -15,6 +15,8 @@ interface FilterTasksModalProps {
   value: ISelectFilterTasks;
   onChange: (next: ISelectFilterTasks) => void;
   isLoading?: boolean;
+  /** En el header compartido: chips a la izquierda de "Filtrar" (ver FilterModal). */
+  inHeader?: boolean;
 }
 
 // The parent stores dates as a single "from|to" range string; the date panel works with a DateDraft.
@@ -35,7 +37,8 @@ export default function FilterTasksModal({
   taskTypes,
   value,
   onChange,
-  isLoading
+  isLoading,
+  inHeader
 }: FilterTasksModalProps) {
   // Draft for the custom "Fechas" category — owned here, seeded from the committed value.
   const [dateDraft, setDateDraft] = useState<DateDraft>(datesToDraft(value.dates));
@@ -65,7 +68,7 @@ export default function FilterTasksModal({
       renderPanel: () => <TaskDateTab value={dateDraft} onChange={setDateDraft} />,
       renderTag: () =>
         hasCommittedDate ? (
-          <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-xs">
+          <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-[13px]">
             <span className="text-muted-foreground font-medium">Fecha:</span>
             <span className="font-bold text-foreground">{dateTagValue}</span>
             <button
@@ -90,7 +93,10 @@ export default function FilterTasksModal({
       categories={categories}
       value={selection}
       isLoading={isLoading}
-      formatTagValue={(_cat, items) => (items.length === 1 ? items[0].name : `${items.length} tipos`)}
+      inHeader={inHeader}
+      formatTagValue={(_cat, items) =>
+        items.length === 1 ? items[0].name : `${items.length} tipos`
+      }
       onApply={(sel) =>
         onChange({
           ...value,

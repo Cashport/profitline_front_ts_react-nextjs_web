@@ -20,10 +20,22 @@
 
         .header {
             height: 48px;
+            align-items: center;
             gap: 0.5rem;
+
+            // Mismo alto que el buscador y Filtrar (--control-h).
+            .generateActionButton {
+                display: flex;
+                align-items: center;
+                height: var(--control-h) !important;
+                padding: 0 14px;
+                font-size: 14px;
+            }
 
             .ctaButton {
                 margin-left: auto;
+                height: var(--control-h) !important;
+                font-size: 14px;
             }
         }
     }

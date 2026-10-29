@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import { useSWRConfig } from "swr";
-import { ChevronLeft, Download, Plus, Upload } from "lucide-react";
+import { Download, Plus, Upload } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -21,6 +20,7 @@ import {
 import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
 import { useMessageApi } from "@/context/MessageContext";
 import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+import Header from "@/components/organisms/header";
 
 dayjs.extend(utc);
 
@@ -89,7 +89,7 @@ export default function MarketAdminLoad() {
       render: (_, loader) => (
         <div className="min-w-0">
           <p className="text-sm font-medium text-[#141414] truncate">{loader.display_name}</p>
-          <p className="text-xs text-[#999999] break-words mt-0.5">{loader.description}</p>
+          <p className="text-[13px] text-[#999999] break-words mt-0.5">{loader.description}</p>
         </div>
       )
     },
@@ -141,7 +141,7 @@ export default function MarketAdminLoad() {
             type="button"
             onClick={() => descargarTemplate(loader)}
             title="Descargar template"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
             <Download size={13} /> Template
           </button>
@@ -150,7 +150,7 @@ export default function MarketAdminLoad() {
             onClick={() => triggerUpload(loader.id)}
             disabled={uploadingId === loader.id}
             title="Cargar archivo"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload size={13} /> {uploadingId === loader.id ? "Cargando..." : "Cargar"}
           </button>
@@ -161,8 +161,8 @@ export default function MarketAdminLoad() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Cargue de información</h1>
+    <div className="cp-page min-h-full">
+      <Header title="Cargue de información" back="/market-admin" />
 
       <input
         ref={fileInputRef}
@@ -172,15 +172,9 @@ export default function MarketAdminLoad() {
         onChange={handleFileSelected}
       />
 
-      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
-          <Link
-            href="/market-admin"
-            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
-          >
-            <ChevronLeft size={18} />
-          </Link>
           <p className="text-sm text-[#999999] flex-1">
             ETLs manuales para alimentar el app cuando la sincronización automática falla.
           </p>

@@ -133,9 +133,7 @@ export const BanksTable = ({
       render: (ID_ERP, record) => (
         <div className="accountBankTextContainer">
           <Text>{ID_ERP}</Text>
-          {record.initial_document && (
-            <p className="accountBankText">{record.initial_document}</p>
-          )}
+          {record.initial_document && <p className="accountBankText">{record.initial_document}</p>}
         </div>
       ),
       sorter: (a, b) => Number(a.ID_ERP ?? 0) - Number(b.ID_ERP ?? 0),

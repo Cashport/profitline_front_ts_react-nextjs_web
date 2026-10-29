@@ -79,7 +79,7 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
     >
       <div className="flex flex-col gap-3 py-2">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-[#666666]">Ciudad</label>
+          <label className="text-[13px] font-semibold text-[#666666]">Ciudad</label>
           <CitiesSelect
             cities={warehouseCities}
             isLoading={isCityLoading}
@@ -92,7 +92,7 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-[#666666]">Dirección de despacho</label>
+          <label className="text-[13px] font-semibold text-[#666666]">Dirección de despacho</label>
           <input
             type="text"
             placeholder="Cl. 76 9-88"
@@ -104,10 +104,10 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
             }}
             className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
           />
-          <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+          <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-[#666666]">Bodega de despacho</label>
+          <label className="text-[13px] font-semibold text-[#666666]">Bodega de despacho</label>
           <WarehouseSelect
             warehouseForced={warehouseForced}
             value={newWarehouseId}

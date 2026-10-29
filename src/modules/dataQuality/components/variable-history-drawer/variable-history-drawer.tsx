@@ -52,7 +52,11 @@ export function VariableHistoryDrawer({ archiveId, isOpen, onClose }: VariableHi
       width={420}
       destroyOnClose
       styles={{ body: { padding: 24 } }}
-      title={<h3 className="text-lg font-semibold text-cashport-black">Historial de variables de configuración</h3>}
+      title={
+        <h3 className="text-lg font-semibold text-cashport-black">
+          Historial de variables de configuración
+        </h3>
+      }
     >
       {isLoading && (
         <div className="flex justify-center py-6">
@@ -93,18 +97,22 @@ export function VariableHistoryDrawer({ archiveId, isOpen, onClose }: VariableHi
                 <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-cashport-black">{entry.variable_key}</p>
-                    <p className="mt-0.5 text-xs" style={{ color: BOT_MUTED_TEXT_COLOR }}>
-                      por {entry.changed_by_email || "usuario desconocido"} · {formatTimestamp(entry.created_at)}
+                    <p className="mt-0.5 text-[13px]" style={{ color: BOT_MUTED_TEXT_COLOR }}>
+                      por {entry.changed_by_email || "usuario desconocido"} ·{" "}
+                      {formatTimestamp(entry.created_at)}
                     </p>
                     {entry.change_type === "UPDATED" && (
-                      <p className="mt-1 whitespace-pre-wrap break-words text-xs" style={{ color: "#141414" }}>
+                      <p
+                        className="mt-1 whitespace-pre-wrap break-words text-[13px]"
+                        style={{ color: "#141414" }}
+                      >
                         {formatValue(entry.old_value)} → {formatValue(entry.new_value)}
                       </p>
                     )}
                   </div>
                   <Badge
                     variant="secondary"
-                    className="shrink-0 gap-1 text-xs"
+                    className="shrink-0 gap-1 text-[13px]"
                     style={{ backgroundColor: meta.bg, color: meta.color }}
                   >
                     {meta.label}

@@ -124,12 +124,11 @@ export default function VisitsTimeline({
     return {
       title: `${fmtClock(m)} · ${current ? STATUS_LABELS[current.kind] : "Sin puntos"}`,
       rows: [
-        ...SEGMENT_KINDS.filter((k) => totals[k])
-          .map((k) => ({
-            color: palette.status[k],
-            label: `${STATUS_LABELS[k]} acumulado`,
-            value: fmtDuration(totals[k] ?? 0)
-          })),
+        ...SEGMENT_KINDS.filter((k) => totals[k]).map((k) => ({
+          color: palette.status[k],
+          label: `${STATUS_LABELS[k]} acumulado`,
+          value: fmtDuration(totals[k] ?? 0)
+        })),
         // Las actividades aún no llegan del backend.
         { color: palette.ink, label: "Actividades", value: MISSING }
       ]
@@ -156,7 +155,7 @@ export default function VisitsTimeline({
   });
 
   return (
-    <div className="grid h-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3.5 rounded-2xl border border-border bg-card px-4">
+    <div className="grid h-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3.5 cp-card px-[18px]">
       <div className="flex items-center gap-1.5">
         <button
           type="button"
@@ -174,13 +173,13 @@ export default function VisitsTimeline({
           type="button"
           aria-label="Velocidad de reproducción"
           onClick={onToggleSpeed}
-          className="rounded-[5px] border border-border px-1.5 py-[3px] text-[10.5px] text-muted-foreground transition-colors hover:text-foreground"
+          className="rounded-[5px] border border-border px-1.5 py-[3px] text-[13px] text-muted-foreground transition-colors hover:text-foreground"
         >
           ×{speed}
         </button>
       </div>
 
-      <div ref={wrapRef} className="relative h-[76px]">
+      <div ref={wrapRef} className="relative h-[80px]">
         <div
           ref={trackRef}
           className="absolute inset-x-0 top-0.5 h-[38px] cursor-pointer touch-none"
@@ -289,7 +288,7 @@ export default function VisitsTimeline({
           </div>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 top-[46px] h-3 text-[9.5px] text-muted-foreground">
+        <div className="pointer-events-none absolute inset-x-0 top-[45px] h-4 text-[13px] leading-4 text-muted-foreground">
           {hours.map((h) => (
             <span key={h} className="absolute -translate-x-1/2" style={{ left: `${pct(h * 60)}%` }}>
               {h}:00
@@ -297,10 +296,13 @@ export default function VisitsTimeline({
           ))}
         </div>
 
-        <div className="absolute left-0 top-[62px] flex max-w-full flex-nowrap gap-2.5 overflow-hidden text-[10px] text-muted-foreground">
+        <div className="absolute left-0 top-[63px] flex max-w-full flex-nowrap gap-2.5 overflow-hidden text-[13px] leading-4 text-muted-foreground">
           {SEGMENT_KINDS.map((s) => (
             <span key={s} className="flex items-center gap-1 whitespace-nowrap">
-              <i className="h-[7px] w-[7px] rounded-[2px]" style={{ background: palette.status[s] }} />
+              <i
+                className="h-[7px] w-[7px] rounded-[2px]"
+                style={{ background: palette.status[s] }}
+              />
               {STATUS_LABELS[s]}
             </span>
           ))}
@@ -308,7 +310,7 @@ export default function VisitsTimeline({
 
         {tooltip && (
           <div
-            className="pointer-events-none absolute bottom-[46px] z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border bg-popover px-2.5 py-[7px] text-[11px] text-muted-foreground shadow-[0_8px_22px_rgba(0,0,0,0.14)]"
+            className="pointer-events-none absolute bottom-[46px] z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border bg-popover px-2.5 py-[7px] text-[13px] text-muted-foreground shadow-[0_8px_22px_rgba(0,0,0,0.14)]"
             style={{ left: tooltip.x }}
           >
             <div className="mb-[3px] font-semibold text-foreground">{tooltip.title}</div>
@@ -327,13 +329,13 @@ export default function VisitsTimeline({
         type="button"
         disabled={isLive}
         onClick={onGoLive}
-        className="flex items-center gap-1.5 whitespace-nowrap rounded-md border border-border bg-card px-2.5 py-1.5 text-[10.5px] font-semibold tracking-[0.04em] text-muted-foreground transition-colors enabled:hover:border-[color:var(--live)] enabled:hover:text-[color:var(--live)] disabled:cursor-default disabled:opacity-35"
+        className="flex items-center gap-1.5 whitespace-nowrap rounded-md border border-border bg-card px-2.5 py-1.5 text-[13px] font-semibold tracking-[0.04em] text-muted-foreground transition-colors enabled:hover:border-[color:var(--live)] enabled:hover:text-[color:var(--live)] disabled:cursor-default disabled:opacity-35"
         style={{ "--live": palette.status.IN_VISIT } as React.CSSProperties}
       >
         <svg width="8" height="8" aria-hidden>
           <circle cx="4" cy="4" r="4" fill="currentColor" />
         </svg>
-        {dayMode === "today" ? "EN VIVO" : "IR A HOY"}
+        {dayMode === "today" ? "En vivo" : "Ir a hoy"}
       </button>
     </div>
   );
