@@ -140,6 +140,11 @@ export default function FilterOptionsList({
                   />
                 </span>
                 <span className="truncate">{opt.name}</span>
+                {opt.count !== undefined && (
+                  <span className="ml-auto shrink-0 pl-2 text-[12px] tabular-nums text-cp-ink-4">
+                    {opt.count}
+                  </span>
+                )}
               </button>
             );
           })}
