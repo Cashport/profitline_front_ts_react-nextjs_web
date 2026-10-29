@@ -31,17 +31,17 @@ const buildGiftOptions = (premios: IPremioOpcion[], isSku: boolean): IPromotionG
   }));
 
 // Condición de combinación → product_groups.
-// Producto individual: un grupo con min_distincts 1 y min_qty = cantidad.
-// Paquete: un grupo con min_qty = unidades, min_distincts = productos diferentes.
+// Producto individual: un grupo con min_distinct_products 1 y min_qty = cantidad.
+// Paquete: un grupo con min_qty = unidades, min_distinct_products = productos diferentes.
 const buildProductGroups = (nivel: INivel): IPromotionProductGroup[] => {
   const individuales: IPromotionProductGroup[] = (nivel.productosCondicion ?? []).map((pc) => ({
     min_qty: pc.cantidad,
-    min_distincts: 1,
+    min_distinct_products: 1,
     product_ids: [pc.productId]
   }));
   const paquetes: IPromotionProductGroup[] = (nivel.paquetesCondicion ?? []).map((pak) => ({
     min_qty: pak.unidades,
-    min_distincts: pak.minProductos,
+    min_distinct_products: pak.minProductos,
     product_ids: pak.productos.map((p) => p.productId)
   }));
   return [...individuales, ...paquetes];
@@ -61,9 +61,7 @@ export const buildPromotionPayload = (promo: IPromocion): ICreatePromotionBody =
 
   const base = {
     name: promo.nombre,
-    type: (promo.tipoCondicion === "monto" ? "AMOUNT" : "SKU") as
-      | "AMOUNT"
-      | "SKU",
+    type: (promo.tipoCondicion === "monto" ? "AMOUNT" : "SKU") as "AMOUNT" | "SKU",
     active: promo.activa ? 1 : 0,
     accumulable: promo.accumulable ?? 0,
     start_date: `${promo.fechaInicio ?? ""} 00:00:00`,
@@ -77,11 +75,13 @@ export const buildPromotionPayload = (promo: IPromocion): ICreatePromotionBody =
     // enviamos 0 para que el backend deshabilite los descuentos
     // secundarios en el cálculo del paquete.
     apply_cross_selling: promo.applyCrossSelling === false ? 0 : 1,
-    is_promotion_compatible_with_all_negotiations: promo.isPromotionCompatibleWithAllNegotiations ? 1 : 0,
+    is_promotion_compatible_with_all_negotiations: promo.isPromotionCompatibleWithAllNegotiations
+      ? 1
+      : 0,
     max_usage_per_order: maxUsagePerOrder,
     max_usage_per_client: maxUsagePerClient,
     max_usage_per_client_per_month: maxUsagePerClientPerMonth,
-    max_global_usage: maxGlobalUsage,
+    max_global_usage: maxGlobalUsage
   };
 
   if (promo.tipoCondicion === "monto") {

@@ -294,7 +294,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
         }
       />
 
-      <div className="cp-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
         {/* Información general */}
         <div>
           <p className="text-sm font-bold text-[#141414] mb-4">Información general</p>
@@ -347,7 +347,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
         </div>
 
         {/* Tab content */}
-        <div>
+        <div className="cp-fill">
           {activeTab === "promociones" && (
             <PromocionesTab
               descuentos={descuentos}

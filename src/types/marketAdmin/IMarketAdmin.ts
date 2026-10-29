@@ -14,7 +14,7 @@ export interface IProductoCondicion {
 export interface IPaqueteCondicion {
   id: string;
   unidades: number; // ej: 8 unidades totales (min_qty)
-  minProductos: number; // ej: entre 5 productos diferentes (min_distincts)
+  minProductos: number; // ej: entre 5 productos diferentes (min_distinct_products)
   productos: { id: string; productId: number }[]; // productos elegibles del paquete
 }
 
@@ -105,7 +105,7 @@ export interface IPromotionGiftOption {
 
 export interface IPromotionProductGroup {
   min_qty: number;
-  min_distincts: number;
+  min_distinct_products: number;
   product_ids: number[];
 }
 
@@ -121,9 +121,12 @@ export interface ICreatePromotionBody {
   name: string;
   type: "AMOUNT" | "SKU";
   start_date: string;
-  end_date: string;
+  end_date?: string;
   accumulable: number;
   active: number;
+  restricted_customer_id?: string;
+  restricted_channel_id?: number;
+  restricted_zone_id?: number;
   max_usage_per_order?: number; // SKU only
   max_usage_per_client?: number;
   max_usage_per_client_per_month?: number;
@@ -140,6 +143,96 @@ export interface ICreatePromotionBody {
   // true → la promoción se acumula con precios negociados del cliente.
   is_promotion_compatible_with_all_negotiations?: number;
   ranges: IPromotionRange[];
+}
+
+export type PromotionApprovalStatus =
+  | "BORRADOR"
+  | "EN_APROBACION"
+  | "APROBADA"
+  | "RECHAZADA"
+  | "CANCELADA"
+  | "NO_APLICA";
+
+// GET /promotion
+export interface IPromotionListItem {
+  id: number;
+  name: string;
+  type: "AMOUNT" | "SKU";
+  active: number;
+  start_date: string;
+  end_date: string | null;
+  accumulable: number;
+  business_unit: string | null;
+  is_flex: number;
+  ranges_count: number;
+  approval_entity_status_id: number | null;
+  approval_status: PromotionApprovalStatus | null;
+}
+
+// GET /promotion/:id
+export interface IPromotionDetailProduct {
+  product_id: number;
+  sku: string;
+  description: string;
+}
+
+export interface IPromotionDetailGiftItem {
+  product_id: number | null;
+  category_id: number | null;
+  qty: number;
+  sku: string | null;
+  description: string | null;
+  category_description: string | null;
+}
+
+export interface IPromotionDetailRange {
+  id: number;
+  range_number: number;
+  min_amount: number | null;
+  conditions: (IPromotionDetailProduct & { min_qty: number })[];
+  product_groups: {
+    id: number;
+    min_qty: number;
+    min_distinct_products: number | null;
+    product_ids: number[];
+    products: IPromotionDetailProduct[];
+  }[];
+  gift_options: {
+    id: number;
+    option_number: number;
+    items: {
+      id: number;
+      subgroup_number: number;
+      max_selection_qty: number;
+      fixed: boolean;
+      items: IPromotionDetailGiftItem[];
+    }[];
+  }[];
+}
+
+export interface IPromotionDetail {
+  id: number;
+  name: string;
+  type: "AMOUNT" | "SKU";
+  active: number;
+  start_date: string;
+  end_date: string | null;
+  accumulable: number;
+  max_usage_per_order: number | null;
+  max_usage_per_client: number | null;
+  max_usage_per_client_per_month: number | null;
+  max_global_usage: number | null;
+  restricted_customer_id: string | null;
+  restricted_channel_id: number | null;
+  restricted_zone_id: number | null;
+  business_unit: string | null;
+  is_flex: number;
+  take_first_eligible_range_discount: number;
+  apply_cross_selling: number;
+  is_promotion_compatible_with_all_negotiations: number;
+  approval_entity_status_id: number | null;
+  approval_status: PromotionApprovalStatus | null;
+  ranges: IPromotionDetailRange[];
 }
 
 // ── Bonificados manuales por cliente ────────────────────────────────────────
@@ -233,6 +326,7 @@ export interface IManagerBonificationGroup {
   consumed_qty: number;
   expiration_date: string | null;
   created_at: string;
+  approval_entity_status_id?: number | null;
   consumptions: {
     applied_qty: number;
     reversed_qty: number;
@@ -565,6 +659,29 @@ export interface IMarketAdminFacturador {
   id: number;
   name: string;
   email: string;
+}
+
+// GET/PUT /users/:id/product-categories — líneas x categoría asignadas (products_vendor)
+export interface IMarketAdminVendorProduct {
+  id: number;
+  sku: string;
+  description: string;
+  is_available: boolean;
+}
+
+export interface IMarketAdminVendorCategory {
+  id: number;
+  description: string;
+  category_alias: string | null;
+  assigned: boolean;
+  products: IMarketAdminVendorProduct[];
+}
+
+export interface IMarketAdminVendorLine {
+  id: number;
+  description: string;
+  line_alias: string | null;
+  categories: IMarketAdminVendorCategory[];
 }
 
 // POST /users/:id/clients — el grupo personal lo crea el backend si no existe

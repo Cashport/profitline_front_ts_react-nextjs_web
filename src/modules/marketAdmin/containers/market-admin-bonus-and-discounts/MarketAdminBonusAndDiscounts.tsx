@@ -64,7 +64,7 @@ export default function MarketAdminBonusAndDiscounts({ initialTab }: Props) {
     <div className="cp-page min-h-full">
       <Header title="Descuentos y bonificados" back="/market-admin" />
 
-      <div className="cp-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         <UiTab tabs={tabs} activeKey={activeTab} onChangeTab={setActiveTab} />
       </div>
 

@@ -43,6 +43,7 @@ export default function UsuariosTab({ usuarios, isLoading }: Props) {
 
   return (
     <Table
+      className="cp-list-scroll"
       columns={columns}
       dataSource={usuarios}
       rowKey="id"

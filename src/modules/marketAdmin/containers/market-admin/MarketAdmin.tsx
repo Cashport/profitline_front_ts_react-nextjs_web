@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { ComponentType } from "react";
-import { Users, User, Package, Tag, UploadCloud, Settings, ChevronRight } from "lucide-react";
+import {
+  Users,
+  User,
+  Package,
+  Boxes,
+  Tag,
+  UploadCloud,
+  Settings,
+  ChevronRight
+} from "lucide-react";
 import { Chats } from "@phosphor-icons/react";
 import Header from "@/components/organisms/header";
 
@@ -32,6 +41,12 @@ const sections: Section[] = [
     icon: Package,
     label: "Productos",
     description: "Revisa el catálogo: líneas, canales, SKUs, lotes, precios e imágenes."
+  },
+  {
+    href: "/market-admin/packs",
+    icon: Boxes,
+    label: "Packs de productos",
+    description: "Arma packs con productos del catálogo: SKU propio, imagen y cantidades."
   },
   {
     href: "/market-admin/bonusAndDiscounts",

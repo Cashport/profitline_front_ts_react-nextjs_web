@@ -7,11 +7,13 @@ import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminUserDetail } from "@/modules/marketAdmin/hooks/useMarketAdminUserDetail";
 import { useMarketAdminFacturadores } from "@/modules/marketAdmin/hooks/useMarketAdminFacturadores";
+import { useMarketAdminUserProductCategories } from "@/modules/marketAdmin/hooks/useMarketAdminUserProductCategories";
 import {
   assignClientToMarketAdminUser,
   assignMarketAdminUserBiller,
   removeClientFromMarketAdminUser,
-  removeMarketAdminUserBiller
+  removeMarketAdminUserBiller,
+  updateMarketAdminUserProductCategories
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
@@ -28,6 +30,7 @@ import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-deta
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
 import PaisesSection from "@/modules/marketAdmin/components/market-admin-user-detail/PaisesSection";
 import ConfiguracionFacturadorTab from "@/modules/marketAdmin/components/market-admin-user-detail/ConfiguracionFacturadorTab";
+import LineasCategoriasSection from "@/modules/marketAdmin/components/market-admin-user-detail/LineasCategoriasSection";
 import Header from "@/components/organisms/header";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
@@ -52,6 +55,13 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   // El facturador se puede asignar a cualquier usuario, sin importar su rol.
   const { data: facturadores, isLoading: isLoadingFacturadores } =
     useMarketAdminFacturadores(!!usuario);
+  const {
+    data: productLines,
+    isLoading: isLoadingProductLines,
+    error: productLinesError,
+    mutate: mutateProductLines
+  } = useMarketAdminUserProductCategories(id);
+  const [isSavingCategories, setIsSavingCategories] = useState(false);
 
   const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "paises" | "configuraciones">(
     "clientes"
@@ -303,6 +313,22 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     }
   };
 
+  const saveProductCategories = async (categoryIds: number[]) => {
+    try {
+      setIsSavingCategories(true);
+      await updateMarketAdminUserProductCategories(id, categoryIds);
+      await mutateProductLines();
+      showMessage("success", "Líneas y categorías actualizadas correctamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al actualizar las categorías."
+      );
+    } finally {
+      setIsSavingCategories(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -343,7 +369,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         }
       />
 
-      <div className="cp-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
         {/* Información general + Asignaciones */}
         <div className="grid grid-cols-2 gap-8">
           <div className="flex flex-col gap-5">
@@ -381,9 +407,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         </div>
 
         {/* Tab content */}
-        <div>
+        <div className="cp-fill">
           {activeTab === "clientes" && (
-            <div className="flex flex-col gap-6">
+            <div className="cp-fill">
               <ClientesTab
                 clientes={asignados}
                 onAgregar={agregar}
@@ -433,13 +459,23 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               />
             ))}
           {activeTab === "configuraciones" && (
-            <ConfiguracionFacturadorTab
-              currentBillerId={usuario.biller_id}
-              facturadores={facturadores}
-              isLoading={isLoadingFacturadores}
-              isSaving={isSavingBiller}
-              onSave={saveBiller}
-            />
+            <div className="cp-list-scroll space-y-10 pr-1">
+              <ConfiguracionFacturadorTab
+                currentBillerId={usuario.biller_id}
+                facturadores={facturadores}
+                isLoading={isLoadingFacturadores}
+                isSaving={isSavingBiller}
+                onSave={saveBiller}
+              />
+              <LineasCategoriasSection
+                lines={productLines}
+                loading={isLoadingProductLines}
+                error={productLinesError ? "No se pudo cargar las líneas y categorías." : null}
+                isSaving={isSavingCategories}
+                onRetry={() => void mutateProductLines()}
+                onSave={saveProductCategories}
+              />
+            </div>
           )}
         </div>
       </div>
