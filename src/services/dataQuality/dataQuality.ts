@@ -569,6 +569,42 @@ export const uploadIqviaAuxCatalog = async (
   }
 };
 
+export const downloadIqviaAuxProductCatalog = async ({
+  countryId
+}: {
+  countryId?: number | string;
+}) => {
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await API.get(`${config.API_HOST}/data/iqvia/aux-product/download${queryString}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const uploadIqviaAuxProductCatalog = async (
+  file: File,
+  countryId?: number | string
+): Promise<IIqviaAuxUploadResult> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<IIqviaAuxUploadResult> = await API.post(
+      `${config.API_HOST}/data/iqvia/aux-product/upload${queryString}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading IQVIA product auxiliary file:", error);
+    throw error;
+  }
+};
+
 export const convertMaterialToPack = async (materialId: number): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.put(
