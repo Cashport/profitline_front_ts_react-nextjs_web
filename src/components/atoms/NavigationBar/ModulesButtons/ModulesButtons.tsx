@@ -15,6 +15,7 @@ import {
 } from "phosphor-react";
 import {
   ChatCircleDots,
+  ClipboardText,
   HandTap,
   Robot,
   ShoppingCartSimple,
@@ -157,6 +158,14 @@ const MODULES: RailModule[] = [
     icon: <MapPin size={ICON_SIZE} />,
     visible: can("Visits"),
     isActive: (p) => p.startsWith("/visits")
+  },
+  {
+    href: "/surveys",
+    label: "Encuestas",
+    group: "Comercial",
+    icon: <ClipboardText size={ICON_SIZE} />,
+    visible: can("Surveys"),
+    isActive: (p) => p.startsWith("/surveys")
   },
   {
     href: "/logistica-inversa",
