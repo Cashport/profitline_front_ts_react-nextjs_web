@@ -84,7 +84,7 @@ export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, 
   ];
 
   return (
-    <div>
+    <div className="cp-fill">
       <div className="flex items-center justify-between gap-4 mb-4">
         <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
         <button
@@ -96,6 +96,7 @@ export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, 
       </div>
 
       <Table
+        className="cp-list-scroll"
         columns={columns}
         dataSource={filtrados}
         rowKey="nit"

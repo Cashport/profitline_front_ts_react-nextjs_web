@@ -7,6 +7,8 @@ import useSWR from "swr";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import ProfitLoader from "@/components/ui/profit-loader";
+import ApprovalStatusPill from "@/components/ui/approval-status-pill";
+import { getApprovalEntityStatusLabel } from "@/constants/approvalEntityStatus";
 import { getAllDiscounts } from "@/services/discount/discount.service";
 import { MARKET_ADMIN_DISCOUNTS_BASE } from "@/components/organisms/discounts/constants/routes";
 import { useAppStore } from "@/lib/store/store";
@@ -104,6 +106,18 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       sorter: (a, b) => (a.end_date ?? "").localeCompare(b.end_date ?? ""),
       onHeaderCell: headerCell,
       render: (v: string | null) => <DateCell value={v} />
+    },
+    {
+      title: "Aprobación",
+      dataIndex: "approval_entity_status_id",
+      key: "approval_entity_status_id",
+      width: 140,
+      sorter: (a, b) =>
+        getApprovalEntityStatusLabel(a.approval_entity_status_id).localeCompare(
+          getApprovalEntityStatusLabel(b.approval_entity_status_id)
+        ),
+      onHeaderCell: headerCell,
+      render: (statusId: number | null) => <ApprovalStatusPill statusId={statusId} />
     },
     {
       title: "Estado",

@@ -114,7 +114,7 @@ export default function DireccionesTab({
   ];
 
   return (
-    <div>
+    <div className="cp-fill">
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-[#666666]">
           {direcciones.length} {direcciones.length === 1 ? "dirección" : "direcciones"} registradas
@@ -130,6 +130,7 @@ export default function DireccionesTab({
       </div>
 
       <Table
+        className="cp-list-scroll"
         columns={columns}
         dataSource={direcciones}
         rowKey="id"

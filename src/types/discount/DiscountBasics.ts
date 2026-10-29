@@ -17,6 +17,7 @@ export interface DiscountBasics {
   contract_archive: any;
   status: number;
   is_deleted: number;
+  approval_entity_status_id?: number | null;
 }
 
 // GET /discount/by-client — same row as the list plus audit/extra columns

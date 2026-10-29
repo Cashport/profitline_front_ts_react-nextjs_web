@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <ViewWrapper headerTitle="" gapTitle="0" hideHeader>
+    <ViewWrapper headerTitle="" gapTitle="0" hideHeader contentClassName="cp-scroll-cards">
       {children}
     </ViewWrapper>
   );

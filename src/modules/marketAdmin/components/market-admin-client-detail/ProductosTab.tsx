@@ -74,7 +74,7 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
   }
 
   return (
-    <div>
+    <div className="cp-list-scroll">
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-[#666666]">
           {totalProductos} productos en {grupos.length} categorías

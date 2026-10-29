@@ -279,7 +279,7 @@ export default function MarketAdminClients() {
     <div className="cp-page min-h-full">
       <Header title="Clientes" back="/market-admin" />
 
-      <div className="cp-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
           <UiSearchInput
@@ -343,6 +343,7 @@ export default function MarketAdminClients() {
         </div>
 
         <Table
+          className="cp-list-scroll"
           columns={columns}
           dataSource={clientes}
           rowKey="client_id"

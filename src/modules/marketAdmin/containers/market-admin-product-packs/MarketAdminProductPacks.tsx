@@ -191,8 +191,8 @@ export default function MarketAdminProductPacks() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col gap-3">
-      <div className="flex h-[58px] items-center gap-3">
+    <div className="flex min-h-full flex-col gap-3">
+      <div className="flex h-[58px] shrink-0 items-center gap-3">
         <Link
           href="/market-admin"
           className="flex h-8 w-8 items-center justify-center text-[#141414]"
@@ -210,7 +210,7 @@ export default function MarketAdminProductPacks() {
         </button>
       </div>
 
-      <div className="rounded-[14px] bg-white px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-list-card rounded-[14px] bg-white px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         <div className="mb-3 flex items-center gap-3">
           <p className="text-[18px] font-semibold text-[#141414]">Packs</p>
           <div className="flex rounded-lg bg-[#f7f7f7] p-0.5">
@@ -245,6 +245,7 @@ export default function MarketAdminProductPacks() {
         </div>
 
         <Table
+          className="cp-list-scroll"
           columns={columns}
           dataSource={data}
           rowKey="id"

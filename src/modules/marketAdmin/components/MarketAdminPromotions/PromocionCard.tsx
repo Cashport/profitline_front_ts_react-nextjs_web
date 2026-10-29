@@ -112,7 +112,7 @@ export default function PromocionCard({
   products: Product[];
   businessUnits: string[];
   onChange: (p: IPromocion) => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }) {
   const [expanded, setExpanded] = useState(true);
   const [showBehavior, setShowBehavior] = useState(false);
@@ -184,12 +184,14 @@ export default function PromocionCard({
           label="Promoción activa"
         />
 
-        <button
-          onClick={onDelete}
-          className="w-7 h-7 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
-        >
-          <Trash2 size={14} />
-        </button>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="w-7 h-7 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
 
         <button
           onClick={() => setExpanded(!expanded)}

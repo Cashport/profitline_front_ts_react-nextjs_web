@@ -107,7 +107,7 @@ export default function PaisesSection({
   }
 
   return (
-    <div>
+    <div className="cp-fill">
       <p className="text-sm font-bold text-[#141414] mb-4">Países</p>
       <div className="flex items-center justify-between gap-4 mb-4">
         <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
@@ -121,6 +121,7 @@ export default function PaisesSection({
       </div>
 
       <Table
+        className="cp-list-scroll"
         columns={columns}
         dataSource={filtrados}
         rowKey="id"
