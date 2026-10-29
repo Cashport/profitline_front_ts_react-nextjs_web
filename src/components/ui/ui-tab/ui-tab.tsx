@@ -4,7 +4,7 @@ import { Tabs } from "antd";
 
 interface ITab {
   key: string;
-  label: string;
+  label: ReactNode;
   children: ReactNode;
 }
 
