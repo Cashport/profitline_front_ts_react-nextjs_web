@@ -86,7 +86,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Filtros Avanzados</h3>
+              <h3 className="text-lg font-bold text-gray-900">Filtros avanzados</h3>
               <p className="text-sm text-gray-400">Encuentra y selecciona múltiples opciones</p>
             </div>
           </div>
@@ -120,11 +120,11 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                   <span>{tab.label}</span>
                   <div className="flex items-center gap-2">
                     {count > 0 && (
-                      <span className="w-5 h-5 rounded-full bg-[#c2f012] text-black text-xs font-extrabold flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-full bg-[#c2f012] text-black text-[13px] font-extrabold flex items-center justify-center">
                         {count}
                       </span>
                     )}
-                    <span className="text-xs text-gray-400">›</span>
+                    <span className="text-[13px] text-gray-400">›</span>
                   </div>
                 </button>
               );

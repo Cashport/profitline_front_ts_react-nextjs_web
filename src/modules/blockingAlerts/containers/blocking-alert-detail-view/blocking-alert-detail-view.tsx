@@ -241,7 +241,7 @@ export default function BlockingAlertDetailView({
               showIcon
               icon={<Info className="h-4 w-4" />}
               message="En depuración SAP · no suman a la cartera ni se cobran"
-              className="my-2 text-[12px]"
+              className="my-2 text-[13px]"
             />
           }
         />
@@ -271,7 +271,7 @@ export default function BlockingAlertDetailView({
           </p>
           <p
             className={cn(
-              "m-0 mt-0.5 truncate text-[12.5px] font-medium md:text-[13px]",
+              "m-0 mt-0.5 truncate text-[13px] font-medium",
               isOk && "text-cp-ink-3"
             )}
             style={isOk ? undefined : { color: meta.color }}
@@ -332,7 +332,7 @@ export default function BlockingAlertDetailView({
           {showPay && (
             <section className="flex items-center justify-between gap-3 rounded-[14px] bg-cp-surface px-[18px] py-[14px]">
               <span className="min-w-0">
-                <span className="block text-[12px] font-medium text-cp-ink-3">Pago vencido</span>
+                <span className="block text-[13px] font-medium text-cp-ink-3">Pago vencido</span>
                 <span className="block truncate text-[18px] font-semibold tabular-nums text-cp-ink md:text-[20px]">
                   {money(detail.past_due)}
                 </span>
@@ -373,7 +373,7 @@ export default function BlockingAlertDetailView({
       {barItems.length > 0 && (
         <div className="sticky bottom-2 z-10 flex items-center gap-3 rounded-[14px] border border-cp-line bg-cp-surface px-4 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
           <span className="min-w-0 flex-1">
-            <span className="block text-[12px] text-cp-ink-3">
+            <span className="block text-[13px] text-cp-ink-3">
               {plural(barItems.length, ...SELECTED_NOUN[barKey])}
             </span>
             <span className="block truncate text-[16px] font-semibold tabular-nums text-cp-ink">
@@ -383,7 +383,7 @@ export default function BlockingAlertDetailView({
           <button
             type="button"
             onClick={() => setPicked((p) => ({ ...p, [barKey]: [] }))}
-            className="flex shrink-0 cursor-pointer items-center gap-1 border-0 bg-transparent text-[12px] font-medium text-cp-ink-4 hover:text-cp-ink"
+            className="flex shrink-0 cursor-pointer items-center gap-1 border-0 bg-transparent text-[13px] font-medium text-cp-ink-4 hover:text-cp-ink"
           >
             <X className="h-3 w-3" />
             Limpiar

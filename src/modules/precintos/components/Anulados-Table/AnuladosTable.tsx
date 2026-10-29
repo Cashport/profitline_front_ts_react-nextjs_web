@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 
 interface AnuladosTableProps {
   data?: any[];
@@ -26,36 +27,33 @@ export const AnuladosTable: React.FC<AnuladosTableProps> = ({
     setSelectedIds((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
   };
 
-  const renderSortIcon = (field: string) => {
-    if (sortField === field) {
-      return <span className="text-[10px] text-gray-900 font-bold ml-1">{sortOrder === 'ASC' ? '▲' : '▼'}</span>;
-    }
-    return <span className="text-[10px] text-gray-400 ml-1">▲▼</span>;
-  };
+  const renderSortIcon = (field: string) => (
+    <SortArrows dir={sortField === field ? (sortOrder === 'ASC' ? 'asc' : 'desc') : null} />
+  );
 
   return (
     <div className="w-full bg-white overflow-visible">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
+        <table className="w-full text-left text-[13px] border-collapse">
           <thead>
-            <tr className="border-b border-gray-100 text-gray-800 font-bold select-none">
-              <th className="py-3 px-4 w-10"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></th>
+            <tr className="select-none">
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></th>
               
               {/* 👇 COLUMNA ORDENABLE: PRECINTO 👇 */}
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('IdPrecinto')}>
-                <div className="flex items-center">Desde {renderSortIcon('IdPrecinto')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('IdPrecinto')}>
+                <span className="inline-flex items-center gap-1">Desde{renderSortIcon('IdPrecinto')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold">Hasta</th>
-              <th className="py-3 px-4 font-bold">Cantidad</th>
-              <th className="py-3 px-4 font-bold">Motivo</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Hasta</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Cantidad</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Motivo</th>
               
               {/* 👇 COLUMNA ORDENABLE: FECHA DE ANULACIÓN 👇 */}
-              <th className="py-3 px-4 font-bold cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onSort && onSort('FechaRegistro')}>
-                <div className="flex items-center">Fecha de anulación {renderSortIcon('FechaRegistro')}</div>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('FechaRegistro')}>
+                <span className="inline-flex items-center gap-1">Fecha de anulación{renderSortIcon('FechaRegistro')}</span>
               </th>
               
-              <th className="py-3 px-4 font-bold">Anulado por</th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Anulado por</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 text-gray-700">

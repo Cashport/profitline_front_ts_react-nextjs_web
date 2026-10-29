@@ -21,9 +21,9 @@ type StatementMode = "download" | "email";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const FIELD_LABEL =
-  "w-12 shrink-0 text-[12px] font-medium text-cp-ink-4 max-md:w-11 max-md:text-[11px]";
+  "w-12 shrink-0 text-[13px] font-medium text-cp-ink-4 max-md:w-11";
 const SECTION_LABEL =
-  "text-[11px] font-semibold uppercase tracking-[.12em] text-cp-ink-4 max-md:text-[10px]";
+  "text-[13px] font-semibold text-cp-ink-4";
 
 interface AccountStatementModalProps {
   detail: IBlockingAlertDetail;
@@ -105,10 +105,10 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
                 )}
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-semibold max-md:text-[12.5px]">
+                  <span className="block text-[13px] font-semibold">
                     {s.label}
                   </span>
-                  <span className="block truncate text-[12px] text-cp-ink-3 max-md:text-[11px]">
+                  <span className="block truncate text-[13px] text-cp-ink-3">
                     {s.meta}
                   </span>
                 </span>
@@ -172,8 +172,8 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
               <Icon className="h-4 w-4 max-md:h-3.5 max-md:w-3.5" />
             </span>
             <span>
-              <span className="block text-[13px] font-semibold max-md:text-[12.5px]">{label}</span>
-              <span className="block text-[11.5px] leading-snug text-cp-ink-3 max-md:text-[10.5px]">
+              <span className="block text-[13px] font-semibold">{label}</span>
+              <span className="block text-[13px] leading-snug text-cp-ink-3">
                 {sub}
               </span>
             </span>
@@ -201,28 +201,28 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
                   status={field.label === "Para" && badEmail ? "error" : undefined}
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
-                  className="!px-0 !text-[13px] max-md:!text-[12.5px]"
+                  className="!px-0 !text-[13px] max-md:!text-[13px]"
                 />
               </label>
             ))}
             <div className="flex items-start gap-2.5 py-3 max-md:py-2">
               <span className={FIELD_LABEL}>Asunto</span>
-              <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-cp-ink max-md:text-[12px]">
+              <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-cp-ink">
                 Estado de cuenta · {detail.name} · corte {fmtDay(detail.cutoff_at, true)}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 rounded-[11px] bg-cp-muted px-3 py-2.5 max-md:py-2">
-            <span className="shrink-0 text-[10px] font-bold text-cp-orange">
+            <span className="shrink-0 text-[13px] font-bold text-cp-orange">
               {format === "pdf" ? "PDF" : "XLS"}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-cp-ink max-md:text-[11.5px]">
+            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-cp-ink">
               {fileName}
             </span>
-            <span className="shrink-0 text-[11px] text-cp-ink-4">Adjunto</span>
+            <span className="shrink-0 text-[13px] text-cp-ink-4">Adjunto</span>
           </div>
           {badEmail && (
-            <span className="text-[12px] text-cp-red max-md:text-[11.5px]">
+            <span className="text-[13px] text-cp-red">
               Escribe un correo válido para enviar.
             </span>
           )}

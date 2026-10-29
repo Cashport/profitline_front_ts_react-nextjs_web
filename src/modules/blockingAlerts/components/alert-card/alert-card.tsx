@@ -40,7 +40,7 @@ export default function AlertCard({ row, href, matchedStore, showClient }: Alert
           {formatMoney(isOk ? row.portfolio : row.past_due, { hideDecimals: true })}
         </span>
       </span>
-      <span className="flex items-center justify-between gap-2.5 text-[12px]">
+      <span className="flex items-center justify-between gap-2.5 text-[13px]">
         <span
           className="flex min-w-0 items-center gap-1 truncate font-medium text-cp-ink-3"
           style={isOk ? undefined : { color: meta.color }}
@@ -48,13 +48,13 @@ export default function AlertCard({ row, href, matchedStore, showClient }: Alert
           <meta.Icon className="h-3 w-3 shrink-0" strokeWidth={2.6} />
           {statusLabel(row)}
         </span>
-        <span className="shrink-0 text-[11px] text-cp-ink-4">
+        <span className="shrink-0 text-[13px] text-cp-ink-4">
           {isOk ? "cartera al día" : "pago vencido"}
         </span>
       </span>
 
       {(row.ship_to_code || matchedStore || (pos && pos.total > 1)) && (
-        <span className="mt-1 flex min-w-0 items-center gap-1 truncate text-[11px] text-cp-ink-4">
+        <span className="mt-1 flex min-w-0 items-center gap-1 truncate text-[13px] text-cp-ink-4">
           {row.ship_to_code ? (
             <>
               <Tag className="h-3 w-3 shrink-0" />

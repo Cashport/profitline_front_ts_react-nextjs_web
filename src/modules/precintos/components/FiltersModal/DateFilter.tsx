@@ -97,8 +97,8 @@ export const DateFilter: React.FC<DateFilterProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-gray-100/80 py-3 px-4 rounded-xl text-center text-xs font-semibold text-gray-600 tracking-wide uppercase">
-        SELECCIONA UN PERIODO (FABRICACIÓN, ASIGNACIÓN, USO O ANULACIÓN)
+      <div className="bg-gray-100/80 py-3 px-4 rounded-xl text-center text-[13px] font-semibold text-gray-600">
+        Selecciona un periodo (fabricación, asignación, uso o anulación)
       </div>
 
       <div>
@@ -131,7 +131,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-gray-500 font-medium mb-1.5">Desde</label>
+            <label className="block text-[13px] text-gray-500 font-medium mb-1.5">Desde</label>
             <input
               type="date"
               value={fromDate}
@@ -143,7 +143,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 font-medium mb-1.5">Hasta</label>
+            <label className="block text-[13px] text-gray-500 font-medium mb-1.5">Hasta</label>
             <input
               type="date"
               value={toDate}

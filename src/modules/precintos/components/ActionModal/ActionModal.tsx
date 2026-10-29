@@ -43,10 +43,10 @@ const ActionCard: React.FC<ActionCardProps> = ({
         {icon}
       </div>
       <div className="space-y-0.5 min-w-0">
-        <h4 className={`text-xs font-bold truncate ${disabled ? 'text-gray-400' : 'text-gray-900'}`}>
+        <h4 className={`text-[13px] font-bold truncate ${disabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {title}
         </h4>
-        <p className={`text-[11.5px] leading-tight ${disabled ? 'text-gray-300' : 'text-gray-400'}`}>
+        <p className={`text-[13px] leading-tight ${disabled ? 'text-gray-300' : 'text-gray-400'}`}>
           {subtitle}
         </p>
       </div>
@@ -79,7 +79,7 @@ export const ActionModal: React.FC<ActionModalProps> = ({
         <div className="p-5 pb-3 flex items-start justify-between">
           <div>
             <h3 className="text-lg font-extrabold text-gray-900">Generar acción</h3>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-[13px] text-gray-400 mt-0.5">
               {selectedCount > 0 ? `${selectedCount} precintos seleccionados` : 'Selecciona la acción que vas a realizar'}
             </p>
           </div>
@@ -91,9 +91,9 @@ export const ActionModal: React.FC<ActionModalProps> = ({
         <div className="p-5 pt-1 space-y-5 overflow-y-auto">
           {/* ASIGNACIÓN */}
           <div className="space-y-2.5">
-            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-800 tracking-wider uppercase">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-gray-800">
               <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-              <span>ASIGNACIÓN</span>
+              <span>Asignación</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ActionCard icon="+" iconBg="bg-blue-50 text-blue-600" title="Ingresar a bodega" subtitle="Crear precintos nuevos" onClick={() => handleActionClick('ingresar')} />
@@ -105,9 +105,9 @@ export const ActionModal: React.FC<ActionModalProps> = ({
 
           {/* BAJA */}
           <div className="space-y-2.5 pt-1.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-800 tracking-wider uppercase">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-gray-800">
               <span className="w-2 h-2 rounded-full bg-pink-600"></span>
-              <span>BAJA</span>
+              <span>Baja</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <ActionCard 
@@ -123,9 +123,9 @@ export const ActionModal: React.FC<ActionModalProps> = ({
 
           {/* DESCARGAS */}
           <div className="space-y-2.5 pt-1.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-800 tracking-wider uppercase">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-gray-800">
               <span className="w-2 h-2 rounded-full bg-[#9ec400]"></span>
-              <span>DESCARGAS</span>
+              <span>Descargas</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <ActionCard 

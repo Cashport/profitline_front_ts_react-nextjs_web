@@ -59,7 +59,7 @@ export default function AlertModal({ onClose, title, subtitle, children }: Alert
           <div className="mr-auto min-w-0">
             <h3 className="m-0 text-[15px] font-semibold leading-tight">{title}</h3>
             {subtitle && (
-              <p className="m-0 truncate text-[12px] leading-tight text-cp-ink-3">{subtitle}</p>
+              <p className="m-0 truncate text-[13px] leading-tight text-cp-ink-3">{subtitle}</p>
             )}
           </div>
           <Button type="text" aria-label="Cerrar" icon={<X size={14} />} onClick={onClose} />

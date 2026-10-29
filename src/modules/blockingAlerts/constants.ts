@@ -76,4 +76,4 @@ export const HEADER_BUTTON =
 
 /** UiTab en móvil (prototipo): pestañas más pequeñas y juntas, que se deslizan en vez del "⋯". */
 export const MOBILE_TABS =
-  "max-md:[&_.ant-tabs-tab-btn]:!text-[12.5px] max-md:[&_.ant-tabs-tab+.ant-tabs-tab]:!ml-4 max-md:[&_.ant-tabs-nav-operations]:!hidden max-md:[&_.ant-tabs-tab:not(.ant-tabs-tab-active)_.ant-tabs-tab-btn]:!text-cp-ink-3";
+  "max-md:[&_.ant-tabs-tab-btn]:!text-[13px] max-md:[&_.ant-tabs-tab+.ant-tabs-tab]:!ml-4 max-md:[&_.ant-tabs-nav-operations]:!hidden max-md:[&_.ant-tabs-tab:not(.ant-tabs-tab-active)_.ant-tabs-tab-btn]:!text-cp-ink-3";

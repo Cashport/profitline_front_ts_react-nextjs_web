@@ -30,7 +30,7 @@ type NumericLimit =
 function Field({ label, soon, children }: { label: string; soon?: boolean; children: ReactNode }) {
   const field = (
     <div className="flex min-w-0 flex-col gap-1">
-      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+      <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
       {children}
     </div>
   );
@@ -161,7 +161,7 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
                       type="button"
                       onClick={() => toggleFileType(ext)}
                       className={cn(
-                        "h-7 rounded-md border px-2.5 text-xs font-semibold transition-colors",
+                        "h-7 rounded-md border px-2.5 text-[13px] font-semibold transition-colors",
                         on
                           ? "border-[#cbe71e] bg-[#cbe71e] text-[#141414]"
                           : "border-border bg-card text-muted-foreground hover:text-foreground"

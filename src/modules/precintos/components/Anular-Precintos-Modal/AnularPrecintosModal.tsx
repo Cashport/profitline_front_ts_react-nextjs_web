@@ -70,7 +70,7 @@ export const AnularPrecintosModal: React.FC<AnularPrecintosModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-extrabold text-gray-900">Anular precintos</h3>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-[13px] text-gray-400 mt-0.5">
                 {precintosSeleccionados.slice(0, 3).join(', ')}
                 {precintosSeleccionados.length > 3 && ` ... y ${precintosSeleccionados.length - 3} más`} · {precintosSeleccionados.length} precintos · no se podrán reasignar
               </p>
@@ -82,7 +82,7 @@ export const AnularPrecintosModal: React.FC<AnularPrecintosModalProps> = ({
         <div className="p-6 space-y-5">
           {/* Motivo */}
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-gray-900 uppercase tracking-wider">Motivo <span className="text-pink-500">*</span></label>
+            <label className="block text-[13px] font-bold text-gray-900">Motivo <span className="text-pink-500">*</span></label>
             <div className="relative">
               <select 
                 value={motivo} 
@@ -94,13 +94,13 @@ export const AnularPrecintosModal: React.FC<AnularPrecintosModalProps> = ({
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
-              <span className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 text-xs">▼</span>
+              <span className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 text-[13px]">▼</span>
             </div>
           </div>
 
           {/* Observación */}
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-gray-900 uppercase tracking-wider">
+            <label className="block text-[13px] font-bold text-gray-900">
               Observación {motivo === 'Otro' ? <span className="text-pink-500">*</span> : <span className="text-gray-400 font-normal">(opcional)</span>}
             </label>
             <textarea 
@@ -113,7 +113,7 @@ export const AnularPrecintosModal: React.FC<AnularPrecintosModalProps> = ({
           </div>
 
           {errorModal && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs font-medium p-3 rounded-xl flex items-start gap-2 animate-in fade-in">
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-[13px] font-medium p-3 rounded-xl flex items-start gap-2 animate-in fade-in">
               <span className="text-yellow-500 text-sm">⚠️</span>
               <div>{errorModal}</div>
             </div>
@@ -121,10 +121,10 @@ export const AnularPrecintosModal: React.FC<AnularPrecintosModalProps> = ({
         </div>
 
         <div className="p-5 px-6 border-t border-gray-100 flex items-center justify-between bg-white">
-          <span className="text-xs text-gray-400 font-medium">Listo para anular</span>
+          <span className="text-[13px] text-gray-400 font-medium">Listo para anular</span>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={onClose} disabled={isLoading} className="px-5 py-2.5 text-xs font-bold text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50">Cancelar</button>
-            <button type="button" disabled={isLoading} onClick={handleAnular} className={`px-6 py-2.5 text-xs font-bold rounded-xl transition-colors cursor-pointer ${!isLoading ? 'bg-[#e6007e] text-white hover:bg-[#c2006a] shadow-sm' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>
+            <button type="button" onClick={onClose} disabled={isLoading} className="px-5 py-2.5 text-[13px] font-bold text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50">Cancelar</button>
+            <button type="button" disabled={isLoading} onClick={handleAnular} className={`px-6 py-2.5 text-[13px] font-bold rounded-xl transition-colors cursor-pointer ${!isLoading ? 'bg-[#e6007e] text-white hover:bg-[#c2006a] shadow-sm' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>
               {isLoading ? 'Anulando...' : `Anular ${precintosSeleccionados.length} precintos`}
             </button>
           </div>

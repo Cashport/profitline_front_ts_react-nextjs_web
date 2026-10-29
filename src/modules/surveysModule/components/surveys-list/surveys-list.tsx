@@ -88,7 +88,7 @@ export default function SurveysList({
       <div className="flex flex-wrap items-baseline justify-between gap-2.5 px-1 pb-3">
         <h2 className="text-sm font-semibold text-foreground">Encuestas</h2>
         {!isLoading && !error && (
-          <span className="text-xs text-muted-foreground">{fmtCount(forms.length, total)}</span>
+          <span className="text-[13px] text-muted-foreground">{fmtCount(forms.length, total)}</span>
         )}
       </div>
       {renderContent()}

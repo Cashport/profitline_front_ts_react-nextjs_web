@@ -21,21 +21,21 @@ export default function TaskBoardCard({ ticket: t, config, onOpen }: TaskBoardCa
 
   return (
     <BoardCard sev={severityOf(config, t)} onClick={() => onOpen(t.id)}>
-      <div className="flex items-center gap-1.5 text-[10.5px] text-muted-foreground">
+      <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
         <span className="font-mono">{t.ticket_code}</span>
         {t.incident_id && <span>· Novedad #{t.incident_id}</span>}
         {t.country_code && <span className="ml-auto font-semibold">{t.country_code}</span>}
       </div>
 
-      <div className="mb-[5px] mt-1 text-[12.5px] font-semibold leading-[1.3] text-foreground">
+      <div className="mb-[5px] mt-1 text-[13px] font-semibold leading-[1.3] text-foreground">
         {t.title}
       </div>
 
       {context && (
-        <div className="mb-1.5 truncate text-[11.5px] text-muted-foreground">{context}</div>
+        <div className="mb-1.5 truncate text-[13px] text-muted-foreground">{context}</div>
       )}
 
-      <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+      <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
         <PriorityLabel config={config} ticket={t} />
         <span className="ml-auto flex items-center gap-2">
           <AgeLabel config={config} ticket={t} />
