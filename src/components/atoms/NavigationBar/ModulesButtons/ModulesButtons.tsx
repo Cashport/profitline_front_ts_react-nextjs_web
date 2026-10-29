@@ -9,7 +9,7 @@ import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 import styles from "./ModulesButtons.module.scss";
 
 /* Íconos del riel (diseño "Menu Lateral Cashport" 6e): trazo 1.6, 19px, puntas redondeadas.
-   Los cuatro últimos no estaban en el diseño y siguen el mismo estilo. */
+   Los seis últimos no estaban en el diseño y siguen el mismo estilo. */
 export const RAIL_ICON_PATHS = {
   cartera: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6",
   carteraEdad: "M3 6h18v12H3zM7 10h3M7 14h6M15 10h2",
@@ -38,7 +38,9 @@ export const RAIL_ICON_PATHS = {
   aplicacionPagos: "M3 6h18v12H3zM3 10h18M7 15h4",
   aprobaciones: "M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2",
   tickets: "M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4zM14 7v10",
-  informes: "M3 4h18v12H3zM12 16v4M8 20h8M7 12l3-3 3 2 4-4"
+  informes: "M3 4h18v12H3zM12 16v4M8 20h8M7 12l3-3 3 2 4-4",
+  alertasBloqueo: "M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4M12 15v2",
+  encuestas: "M8 4h8v3H8zM8 5.5H5V21h14V5.5h-3M9 12h6M9 16h4"
 } as const;
 
 export const RailIcon = ({ name }: { name: keyof typeof RAIL_ICON_PATHS }) => (
@@ -115,6 +117,14 @@ const MODULES: RailModule[] = [
     isActive: (p) => p.startsWith("/balances")
   },
   {
+    href: "/blockingAlerts",
+    label: "Alertas de bloqueo",
+    group: "Cartera",
+    icon: <RailIcon name="alertasBloqueo" />,
+    visible: can("BlockingAlerts"),
+    isActive: (p) => p.startsWith("/blockingAlerts")
+  },
+  {
     href: "/cuentas-medicas",
     label: "Cuentas médicas",
     group: "Cartera",
@@ -171,6 +181,14 @@ const MODULES: RailModule[] = [
     isActive: (p) => p.startsWith("/visits")
   },
   {
+    href: "/surveys",
+    label: "Encuestas",
+    group: "Comercial",
+    icon: <RailIcon name="encuestas" />,
+    visible: can("Surveys"),
+    isActive: (p) => p.startsWith("/surveys")
+  },
+  {
     href: "/logistica-inversa",
     label: "Logística inversa",
     group: "Comercial",
@@ -221,7 +239,7 @@ const MODULES: RailModule[] = [
   },
   {
     href: "/tickets",
-    label: "Tickets",
+    label: "Tareas",
     group: "Gestión",
     icon: <RailIcon name="tickets" />,
     visible: can("Tickets"),

@@ -44,7 +44,8 @@ export default function FilterModal({
   barEnd,
   hideTags,
   inHeader,
-  onDraftChange
+  onDraftChange,
+  footerSummary
 }: FilterModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(categories[0]?.key ?? "");
@@ -247,6 +248,7 @@ export default function FilterModal({
               onClearAll={clearDraft}
               onCancel={() => setIsOpen(false)}
               onApply={applyFilters}
+              summary={footerSummary}
             />
           </div>
         </div>

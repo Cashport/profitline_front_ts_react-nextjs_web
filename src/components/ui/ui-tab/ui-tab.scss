@@ -8,7 +8,7 @@
         min-height: 48px;
         // 16px de aire entre la línea de las pestañas y el contenido (botones, tarjetas).
         margin: 0 0 16px !important;
-        background-color: rgb(var(--cp-surface));
+        background-color: rgb(var(--cp-surface)); // $white en claro; sigue el tema oscuro
         z-index: 2;
 
         &::before {
@@ -43,7 +43,7 @@
         }
 
         &.ant-tabs-tab-active .ant-tabs-tab-btn {
-            color: $cp-ink;
+            color: rgb(var(--cp-ink)); // $black en claro
             font-weight: 600;
             text-shadow: none;
         }

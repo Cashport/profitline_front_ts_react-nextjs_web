@@ -18,7 +18,8 @@ export const PERMISSION_ROUTE_MAP: Record<string, string> = {
   DataQuality: "/data-quality",
   MedicalAccounts: "/cuentas-medicas",
   Visits: "/visits",
-  Reports: "/reports"
+  Reports: "/reports",
+  BlockingAlerts: "/blockingAlerts"
 };
 
 const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
@@ -38,7 +39,8 @@ const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
   "/data-quality": "DataQuality",
   "/cuentas-medicas": "MedicalAccounts",
   "/visits": "Visits",
-  "/reports": "Reports"
+  "/reports": "Reports",
+  "/blockingAlerts": "BlockingAlerts"
 };
 
 export const getFirstPermittedRoute = (selectedProject: ISelectedProject | undefined): string => {

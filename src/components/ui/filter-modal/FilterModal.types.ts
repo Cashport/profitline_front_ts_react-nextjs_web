@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-/** A selectable option inside a filter category. */
-export type FilterOptionItem = { id: string; name: string };
+/** A selectable option inside a filter category. `count` shows on the right when present. */
+export type FilterOptionItem = { id: string; name: string; count?: number };
 
 /** Committed/draft selection: category key -> selected items. */
 export type FilterSelection = Record<string, FilterOptionItem[]>;
@@ -68,4 +68,6 @@ export interface FilterModalProps {
   inHeader?: boolean;
   /** Fired on every draft change, so wrappers can narrow other categories' options (cascades). */
   onDraftChange?: (draft: FilterSelection) => void;
+  /** Shown next to "Limpiar todo" (e.g. "49 tareas coinciden" for the current draft). */
+  footerSummary?: ReactNode;
 }

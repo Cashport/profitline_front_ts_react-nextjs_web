@@ -6,6 +6,8 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import { PAYMENT_TYPES } from "@/constants/documentTypes";
 import { useProjectUsers } from "@/hooks/useProjectUsers";
+import { useMessageApi } from "@/context/MessageContext";
+import { useMarketAdminMarkets } from "@/modules/marketAdmin/hooks/useMarketAdminMarkets";
 import {
   IMarketAdminClientConfig,
   IUpdateMarketAdminClientConfigBody
@@ -104,6 +106,18 @@ export default function ConfiguracionesTab({
   const [isSaving, setIsSaving] = useState(false);
   // Todos los usuarios del proyecto, no solo los asociados al cliente.
   const { users, isLoading: isLoadingUsers } = useProjectUsers();
+  const { showMessage } = useMessageApi();
+  const {
+    data: markets,
+    isLoading: isLoadingMarkets,
+    error: marketsError
+  } = useMarketAdminMarkets();
+
+  useEffect(() => {
+    if (marketsError) {
+      showMessage("error", "No fue posible cargar los mercados disponibles");
+    }
+  }, [marketsError, showMessage]);
 
   useEffect(() => {
     setForm(toForm(config));
@@ -119,6 +133,21 @@ export default function ConfiguracionesTab({
         })),
     [users]
   );
+
+  const marketOptions = markets.map((market) => ({
+    value: market,
+    label: market,
+    disabled: false
+  }));
+  // Solo representa el valor actual; desaparece al cambiarlo y no se puede seleccionar.
+  if (form.market && !markets.includes(form.market)) {
+    marketOptions.unshift({
+      value: form.market,
+      label:
+        marketsError || isLoadingMarkets ? form.market : `${form.market} (actual — no disponible)`,
+      disabled: true
+    });
+  }
 
   // Solo se envía lo que cambió respecto a la configuración actual.
   const buildBody = (): IUpdateMarketAdminClientConfigBody => {
@@ -140,7 +169,8 @@ export default function ConfiguracionesTab({
       body.lots_greater_than = toNonZeroNumberOrNull(form.lots_greater_than);
     // Los datos del cliente se guardan tal cual; vacío se envía como null para limpiarlos.
     CLIENT_DATA_KEYS.forEach((key) => {
-      if (form[key] !== current[key]) body[key] = form[key].trim() || null;
+      if (form[key] !== current[key])
+        body[key] = (key === "market" ? form[key] : form[key].trim()) || null;
     });
     return body;
   };
@@ -193,14 +223,23 @@ export default function ConfiguracionesTab({
         {/* Mercado */}
         <div>
           <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Mercado</label>
-          <input
-            type="text"
+          <Select
+            showSearch
+            allowClear
+            size="large"
             placeholder="Mercado del cliente"
-            maxLength={255}
-            disabled={isLoading}
-            value={form.market}
-            onChange={(e) => setForm((f) => ({ ...f, market: e.target.value }))}
-            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+            className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
+            popupClassName="[&_.ant-select-item]:!text-sm"
+            value={form.market || undefined}
+            options={marketOptions}
+            loading={isLoadingMarkets}
+            disabled={isLoading || isLoadingMarkets || !!marketsError}
+            status={marketsError ? "error" : undefined}
+            notFoundContent="Sin mercados disponibles"
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+            onChange={(market?: string) => setForm((f) => ({ ...f, market: market ?? "" }))}
           />
         </div>
       </div>
