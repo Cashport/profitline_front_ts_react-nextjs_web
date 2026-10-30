@@ -65,7 +65,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
                 display: "flex",
                 alignItems: "center",
                 fontWeight: 500,
-                fontSize: "0.75rem",
+                fontSize: "13px",
                 backgroundColor: `${backgroundColor}`,
                 color: color,
                 borderRadius: "42px",
@@ -131,7 +131,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
                 <Typography.Text style={{ fontSize: 16, fontWeight: 400 }}>
                   Formulario
                 </Typography.Text>
-                <Typography.Text style={{ fontSize: 10, fontWeight: 300 }}>
+                <Typography.Text style={{ fontSize: 13, fontWeight: 300 }}>
                   10 Preguntas
                 </Typography.Text>
               </Flex>

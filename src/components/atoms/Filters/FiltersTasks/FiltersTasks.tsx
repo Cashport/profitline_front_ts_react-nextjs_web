@@ -247,8 +247,7 @@ export default function FiltersTasks({
       }}
       className="filterCascader"
       popupClassName="filterActivePaymentsTab"
-      style={{ width: "180px", height: "48px" }}
-      size="large"
+      style={{ width: "180px" }}
       multiple
       maxTagCount="responsive"
       placeholder="Filtrar"

@@ -109,7 +109,7 @@ export default function ModalPurchaseOrderInfo({
             status={numberError ? "error" : undefined}
           />
           {numberError && (
-            <Text type="danger" className="text-xs">
+            <Text type="danger" className="text-[13px]">
               Ingresa el # de orden de compra
             </Text>
           )}

@@ -443,7 +443,11 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         defaultPosition={defaultPositionDragModal}
       />
       <div className={`applyContainerTab ${className}`}>
-        <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
+        <Flex
+          justify="space-between"
+          align="center"
+          className="applyContainerTab__header clientStickyHeader"
+        >
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
@@ -455,7 +459,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
             <Button
               className="button__actions"
               size="large"
-              icon={<DotsThree size={"1.5rem"} />}
+              icon={<DotsThree size={18} />}
               onClick={() => handleOpenModal(3)}
             >
               Generar acción

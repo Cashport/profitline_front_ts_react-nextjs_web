@@ -20,9 +20,17 @@ interface MedicalAccountInfoPanelProps {
 const inputCls =
   "w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-md px-2.5 py-1.5 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-200 transition-colors";
 
-const Field = ({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) => (
+const Field = ({
+  label,
+  value,
+  mono = false
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) => (
   <div className="min-w-0">
-    <p className="mb-1 text-xs font-medium text-gray-400">{label}</p>
+    <p className="mb-1 text-[13px] font-medium text-gray-400">{label}</p>
     <p
       className={`text-sm font-medium leading-tight text-gray-800 ${mono ? "font-mono font-normal" : ""}`}
     >
@@ -33,7 +41,7 @@ const Field = ({ label, value, mono = false }: { label: string; value: string; m
 
 const EditField = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="min-w-0">
-    <p className="mb-1 text-xs font-medium text-gray-400">{label}</p>
+    <p className="mb-1 text-[13px] font-medium text-gray-400">{label}</p>
     {children}
   </div>
 );

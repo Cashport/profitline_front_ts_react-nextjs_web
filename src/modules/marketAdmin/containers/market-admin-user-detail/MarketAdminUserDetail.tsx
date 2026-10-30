@@ -1,18 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, Globe, Layers, Settings, Users } from "lucide-react";
+import { Globe, Layers, Settings, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminUserDetail } from "@/modules/marketAdmin/hooks/useMarketAdminUserDetail";
 import { useMarketAdminFacturadores } from "@/modules/marketAdmin/hooks/useMarketAdminFacturadores";
+import { useMarketAdminUserProductCategories } from "@/modules/marketAdmin/hooks/useMarketAdminUserProductCategories";
 import {
   assignClientToMarketAdminUser,
   assignMarketAdminUserBiller,
   removeClientFromMarketAdminUser,
-  removeMarketAdminUserBiller
+  removeMarketAdminUserBiller,
+  updateMarketAdminUserProductCategories
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
@@ -29,11 +30,13 @@ import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-deta
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
 import PaisesSection from "@/modules/marketAdmin/components/market-admin-user-detail/PaisesSection";
 import ConfiguracionFacturadorTab from "@/modules/marketAdmin/components/market-admin-user-detail/ConfiguracionFacturadorTab";
+import LineasCategoriasSection from "@/modules/marketAdmin/components/market-admin-user-detail/LineasCategoriasSection";
+import Header from "@/components/organisms/header";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-[#999999]">{label}</span>
+      <span className="text-[13px] text-[#999999]">{label}</span>
       <span className="text-sm font-bold text-[#141414]">{value}</span>
     </div>
   );
@@ -49,14 +52,20 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const { data: usuario, isLoading, error, mutate } = useMarketAdminUserDetail(id);
   const { data: allGrupos } = useClientsGroupsSimplified();
 
-  // El facturador solo aplica a vendedores (KAM). Se evita la consulta para otros roles.
-  const isSeller = usuario?.role_name === "KAM";
+  // El facturador se puede asignar a cualquier usuario, sin importar su rol.
   const { data: facturadores, isLoading: isLoadingFacturadores } =
-    useMarketAdminFacturadores(isSeller);
+    useMarketAdminFacturadores(!!usuario);
+  const {
+    data: productLines,
+    isLoading: isLoadingProductLines,
+    error: productLinesError,
+    mutate: mutateProductLines
+  } = useMarketAdminUserProductCategories(id);
+  const [isSavingCategories, setIsSavingCategories] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<
-    "clientes" | "grupos" | "paises" | "configuraciones"
-  >("clientes");
+  const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "paises" | "configuraciones">(
+    "clientes"
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingBiller, setIsSavingBiller] = useState(false);
   const [isSavingGrupos, setIsSavingGrupos] = useState(false);
@@ -304,6 +313,22 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     }
   };
 
+  const saveProductCategories = async (categoryIds: number[]) => {
+    try {
+      setIsSavingCategories(true);
+      await updateMarketAdminUserProductCategories(id, categoryIds);
+      await mutateProductLines();
+      showMessage("success", "Líneas y categorías actualizadas correctamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al actualizar las categorías."
+      );
+    } finally {
+      setIsSavingCategories(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -326,29 +351,25 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     ...(canManageUserCountries
       ? [{ id: "paises", label: `Países (${countryIds.length})`, icon: Globe }]
       : []),
-    ...(isSeller ? [{ id: "configuraciones", label: "Configuraciones", icon: Settings }] : [])
+    { id: "configuraciones", label: "Configuraciones", icon: Settings }
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">{usuario.name}</h1>
-
-      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
-          <Link
-            href="/market-admin/usuarios"
-            className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] transition-colors"
-          >
-            <ArrowLeft size={14} /> Volver
-          </Link>
+    <div className="cp-page min-h-full">
+      {/* Volver y rol van en el header compartido (docs/DESIGN.md §4) */}
+      <Header
+        title={usuario.name}
+        back="/market-admin/usuarios"
+        actionsExtra={
           <span
-            className={`text-xs font-semibold px-3 py-1 rounded-full ${ROL_STYLES[usuario.role_name] ?? "bg-[#F5F5F5] text-[#666666]"}`}
+            className={`text-[13px] font-semibold px-3 py-1 rounded-full ${ROL_STYLES[usuario.role_name] ?? "bg-[#F5F5F5] text-[#666666]"}`}
           >
             {usuario.role_name || "—"}
           </span>
-        </div>
+        }
+      />
 
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
         {/* Información general + Asignaciones */}
         <div className="grid grid-cols-2 gap-8">
           <div className="flex flex-col gap-5">
@@ -386,9 +407,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         </div>
 
         {/* Tab content */}
-        <div>
+        <div className="cp-fill">
           {activeTab === "clientes" && (
-            <div className="flex flex-col gap-6">
+            <div className="cp-fill">
               <ClientesTab
                 clientes={asignados}
                 onAgregar={agregar}
@@ -404,8 +425,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               allPaises={allPaises}
               loading={!paisesLoaded || isLoadingCountries}
               error={
-                paisesError ||
-                (countriesError ? "No se pudo cargar el catálogo de países." : null)
+                paisesError || (countriesError ? "No se pudo cargar el catálogo de países." : null)
               }
               onRetry={() => {
                 void loadPaises();
@@ -438,14 +458,24 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
                 onQuitar={quitarGrupo}
               />
             ))}
-          {activeTab === "configuraciones" && isSeller && (
-            <ConfiguracionFacturadorTab
-              currentBillerId={usuario.biller_id}
-              facturadores={facturadores}
-              isLoading={isLoadingFacturadores}
-              isSaving={isSavingBiller}
-              onSave={saveBiller}
-            />
+          {activeTab === "configuraciones" && (
+            <div className="cp-list-scroll space-y-10 pr-1">
+              <ConfiguracionFacturadorTab
+                currentBillerId={usuario.biller_id}
+                facturadores={facturadores}
+                isLoading={isLoadingFacturadores}
+                isSaving={isSavingBiller}
+                onSave={saveBiller}
+              />
+              <LineasCategoriasSection
+                lines={productLines}
+                loading={isLoadingProductLines}
+                error={productLinesError ? "No se pudo cargar las líneas y categorías." : null}
+                isSaving={isSavingCategories}
+                onRetry={() => void mutateProductLines()}
+                onSave={saveProductCategories}
+              />
+            </div>
           )}
         </div>
       </div>

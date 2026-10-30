@@ -25,6 +25,8 @@ import type { INoveltiesFilters } from "../../types";
 interface NoveltiesFilterModalProps {
   value: INoveltiesFilters;
   onChange: (next: INoveltiesFilters) => void;
+  /** En el header compartido: chips a la izquierda de "Filtrar" (ver FilterModal). */
+  inHeader?: boolean;
 }
 
 /** Selección de una categoría "single" a partir del valor confirmado. */
@@ -44,7 +46,11 @@ const toText = (items?: FilterOptionItem[]) => items?.[0]?.id ?? null;
  * de novedad sale de ese mismo catálogo, con los inactivos, para poder filtrar
  * novedades viejas.
  */
-export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilterModalProps) {
+export default function NoveltiesFilterModal({
+  value,
+  onChange,
+  inHeader
+}: NoveltiesFilterModalProps) {
   const { statuses, isLoading: isLoadingStatuses } = useNoveltyStatuses();
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
@@ -172,6 +178,7 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
       onClearAll={() => onChange(EMPTY_NOVELTIES_FILTERS)}
       onOpen={() => setDateDraft({ from: value.date_from, to: value.date_to })}
       onClearDraft={() => setDateDraft({ from: null, to: null })}
+      inHeader={inHeader}
     />
   );
 }

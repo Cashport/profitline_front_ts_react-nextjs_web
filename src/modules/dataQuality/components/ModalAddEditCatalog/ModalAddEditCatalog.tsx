@@ -177,7 +177,7 @@ export default function ModalAddEditCatalog({
               )}
             />
             {errors.customer_product_cod && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.customer_product_cod.message}
               </span>
             )}
@@ -203,7 +203,7 @@ export default function ModalAddEditCatalog({
               )}
             />
             {errors.customer_product_description && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.customer_product_description.message}
               </span>
             )}
@@ -232,7 +232,7 @@ export default function ModalAddEditCatalog({
               )}
             />
             {errors.material_code && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.material_code.message}
               </span>
             )}
@@ -260,7 +260,7 @@ export default function ModalAddEditCatalog({
               )}
             />
             {errors.product_type && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.product_type.message}
               </span>
             )}
@@ -288,7 +288,7 @@ export default function ModalAddEditCatalog({
               )}
             />
             {errors.type_vol && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.type_vol.message}</span>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>{errors.type_vol.message}</span>
             )}
           </div>
 
@@ -319,7 +319,7 @@ export default function ModalAddEditCatalog({
               )}
             />
             {errors.factor && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.factor.message}</span>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>{errors.factor.message}</span>
             )}
           </div>
 
@@ -333,11 +333,7 @@ export default function ModalAddEditCatalog({
               control={control}
               render={({ field }) => (
                 <div className="flex items-center gap-2">
-                  <Switch
-                    id="excluded"
-                    checked={!!field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch id="excluded" checked={!!field.value} onCheckedChange={field.onChange} />
                   <span style={{ color: field.value ? "#cf1322" : "#141414" }}>
                     {field.value ? "Excluido" : "Incluido"}
                   </span>

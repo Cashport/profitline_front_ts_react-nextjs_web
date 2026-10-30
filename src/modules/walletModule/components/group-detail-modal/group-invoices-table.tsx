@@ -37,12 +37,9 @@ interface GroupInvoicesTableProps {
   pagination?: GroupInvoicesPagination;
 }
 
-// bg-muted opaco (no /40): la cabecera es sticky y las filas pasan por debajo.
+// Mismo aspecto que SortableTh; fondo opaco porque la cabecera es sticky.
 const TH =
-  "border-b border-border bg-muted px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
-
-/** Lo mismo para los encabezados ordenables, que traen su propio bg-muted/40. */
-const SORTABLE_TH = "bg-muted";
+  "border-b border-cp-line bg-cp-surface px-3 py-3 text-left text-[13.5px] font-semibold text-cp-ink";
 
 /** Documentos del grupo, con selección y totales de lo que se está viendo. */
 export default function GroupInvoicesTable({
@@ -93,7 +90,7 @@ export default function GroupInvoicesTable({
   return (
     <>
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead className="sticky top-0 z-[1]">
             <tr>
               <th scope="col" className={cn(TH, "w-[38px]")}>
@@ -111,28 +108,24 @@ export default function GroupInvoicesTable({
                 label="Factura"
                 sort={sort}
                 onSort={onSort}
-                className={SORTABLE_TH}
               />
               <SortableTh
                 col="document_date"
                 label="Fecha doc."
                 sort={sort}
                 onSort={onSort}
-                className={SORTABLE_TH}
               />
               <SortableTh
                 col="type"
                 label="Tipo"
                 sort={sort}
                 onSort={onSort}
-                className={SORTABLE_TH}
               />
               <SortableTh
                 col="status"
                 label="Estado"
                 sort={sort}
                 onSort={onSort}
-                className={SORTABLE_TH}
               />
               <SortableTh
                 col="initial_amount"
@@ -140,7 +133,6 @@ export default function GroupInvoicesTable({
                 align="right"
                 sort={sort}
                 onSort={onSort}
-                className={SORTABLE_TH}
               />
               <SortableTh
                 col="amount"
@@ -148,7 +140,6 @@ export default function GroupInvoicesTable({
                 align="right"
                 sort={sort}
                 onSort={onSort}
-                className={SORTABLE_TH}
               />
               <th className={cn(TH, "w-10")} />
             </tr>
@@ -226,14 +217,14 @@ export default function GroupInvoicesTable({
             <tr>
               <th
                 colSpan={5}
-                className="px-3 pb-2.5 text-left text-[11.5px] font-medium text-muted-foreground"
+                className="px-3 pb-2.5 text-left text-[13px] font-medium text-muted-foreground"
               >
                 {fac(visibles.length)}
                 {visibles.length !== totalConocido ? ` de ${totalConocido}` : ""}
               </th>
               <th
                 colSpan={2}
-                className="whitespace-nowrap px-3 pb-2.5 text-right text-[11.5px] font-medium tabular-nums text-muted-foreground"
+                className="whitespace-nowrap px-3 pb-2.5 text-right text-[13px] font-medium tabular-nums text-muted-foreground"
               >
                 Recuperado {fmtFull(recuperadoVista)}
               </th>
@@ -243,7 +234,7 @@ export default function GroupInvoicesTable({
         </table>
       </div>
 
-      <div className="flex flex-none items-center gap-3 border-t border-border px-5 py-3.5 text-[12.5px] text-muted-foreground">
+      <div className="flex flex-none items-center gap-3 border-t border-border px-5 py-3.5 text-[13px] text-muted-foreground">
         {pagination && pagination.total > pagination.pageSize && (
           <Pagination
             size="small"

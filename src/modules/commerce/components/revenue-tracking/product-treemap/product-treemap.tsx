@@ -59,7 +59,7 @@ function measureTextWidth(text: string, fontWeight: number) {
     measureFontFamily = getComputedStyle(document.body).fontFamily || "sans-serif";
   }
   if (!measureCtx) return text.length * 6.5;
-  measureCtx.font = `${fontWeight} 12px ${measureFontFamily}`;
+  measureCtx.font = `${fontWeight} 13px ${measureFontFamily}`;
   return measureCtx.measureText(text).width;
 }
 
@@ -182,7 +182,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
           <text
             x={x + 4}
             y={labelY}
-            fontSize={12}
+            fontSize={13}
             fontWeight={400}
             style={{
               fill: itemTextFill,
@@ -204,7 +204,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
             <text
               x={parent.x + 8}
               y={parent.y + 15}
-              fontSize={12}
+              fontSize={13}
               fontWeight={500}
               style={{ fill: headerTextFill }}
             >
@@ -246,12 +246,12 @@ function TreemapRender({
             return (
               <div className="bg-popover/95 text-popover-foreground border border-border p-3 rounded-lg shadow-xl backdrop-blur-md">
                 {node.group ? (
-                  <div className="text-xs text-muted-foreground mb-0.5">{node.group}</div>
+                  <div className="text-[13px] text-muted-foreground mb-0.5">{node.group}</div>
                 ) : null}
                 <div className="font-bold text-base">{node.name}</div>
                 <div className="text-primary">{formatCurrency(node.value)}</div>
                 {typeof node.percentage === "number" ? (
-                  <div className="text-xs text-muted-foreground mt-0.5">
+                  <div className="text-[13px] text-muted-foreground mt-0.5">
                     {node.percentage.toFixed(1)}% del total
                   </div>
                 ) : null}
@@ -270,12 +270,7 @@ export default function ProductTreemap() {
   const [activeDim1, setActiveDim1] = useState<DimensionKey>("linea");
   const [activeDim2, setActiveDim2] = useState<DimensionKey>("producto");
 
-  const { data, isLoading } = useDashboardSalesTreemap(
-    activeDim1,
-    activeDim2,
-    filters,
-    includeIva
-  );
+  const { data, isLoading } = useDashboardSalesTreemap(activeDim1, activeDim2, filters, includeIva);
 
   const chartData = useMemo(
     () => ({
@@ -322,8 +317,8 @@ export default function ProductTreemap() {
 
   return (
     <Dialog.Root open={isFullscreen} onOpenChange={setIsFullscreen}>
-      <div className="bg-card border-none rounded-2xl flex flex-col overflow-hidden">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 shrink-0 bg-card z-10 border-t border-l border-r border-border rounded-t-2xl">
+      <div className="cp-card flex flex-col overflow-hidden">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-[18px] py-[14px] shrink-0 bg-cp-surface z-10">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Análisis cruzado (Treemap 2D)</h3>
             <p className="text-sm text-muted-foreground mt-1">
@@ -335,7 +330,7 @@ export default function ProductTreemap() {
             <div className="flex items-center gap-2">
               <div className="relative bg-card border border-border rounded-lg">
                 <select
-                  className="appearance-none bg-transparent text-foreground text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none w-32 sm:w-36 cursor-pointer"
+                  className="appearance-none bg-transparent text-foreground text-[13px] rounded-lg pl-3 pr-8 py-1.5 focus:outline-none w-32 sm:w-36 cursor-pointer"
                   value={activeDim1}
                   onChange={(e) => setActiveDim1(e.target.value as DimensionKey)}
                 >
@@ -348,11 +343,11 @@ export default function ProductTreemap() {
                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               </div>
 
-              <span className="text-muted-foreground text-xs font-bold opacity-30">x</span>
+              <span className="text-muted-foreground text-[13px] font-bold opacity-30">x</span>
 
               <div className="relative bg-card border border-border rounded-lg">
                 <select
-                  className="appearance-none bg-transparent text-foreground text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none w-32 sm:w-36 cursor-pointer"
+                  className="appearance-none bg-transparent text-foreground text-[13px] rounded-lg pl-3 pr-8 py-1.5 focus:outline-none w-32 sm:w-36 cursor-pointer"
                   value={activeDim2}
                   onChange={(e) => setActiveDim2(e.target.value as DimensionKey)}
                 >

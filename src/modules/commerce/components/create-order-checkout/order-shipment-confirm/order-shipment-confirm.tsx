@@ -601,12 +601,12 @@ export default function OrderShipmentConfirm({
             <h2 className="text-sm font-bold text-[#141414]">
               {multiEntrega ? "Múltiples entregas" : "Datos de envío"}
             </h2>
-            <p className="text-xs text-[#999999]">{client?.name}</p>
+            <p className="text-[13px] text-[#999999]">{client?.name}</p>
           </div>
           {!multiEntrega ? (
             <button
               onClick={activarMultiEntrega}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:text-[#141414] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:text-[#141414] transition-colors"
             >
               <GitBranch size={12} />
               Dividir entregas
@@ -614,7 +614,7 @@ export default function OrderShipmentConfirm({
           ) : (
             <button
               onClick={desactivarMultiEntrega}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-red-400 hover:text-red-500 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-red-400 hover:text-red-500 transition-colors"
             >
               <X size={12} />
               Un solo envío
@@ -627,7 +627,9 @@ export default function OrderShipmentConfirm({
           {!multiEntrega && (
             <div className="px-5 py-5 flex flex-col gap-3">
               <div ref={addressRef} className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#666666]">Dirección de entrega</label>
+                <label className="text-[13px] font-semibold text-[#666666]">
+                  Dirección de entrega
+                </label>
                 <select
                   value={singleForm.addressSelectValue}
                   onChange={(e) =>
@@ -647,7 +649,7 @@ export default function OrderShipmentConfirm({
                   ))}
                 </select>
                 {showFieldError("address") && (
-                  <p className="text-[10px] text-red-500">
+                  <p className="text-[13px] text-red-500">
                     {singleForm.addressSelectValue === ""
                       ? "Selecciona una dirección de entrega"
                       : "La dirección seleccionada no tiene bodega asociada"}
@@ -656,7 +658,7 @@ export default function OrderShipmentConfirm({
               </div>
 
               <div ref={cityRef} className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#666666]">Ciudad</label>
+                <label className="text-[13px] font-semibold text-[#666666]">Ciudad</label>
                 <CitiesSelect
                   cities={warehouseCities}
                   isLoading={isCityLoading}
@@ -667,12 +669,12 @@ export default function OrderShipmentConfirm({
                   status={showFieldError("city") ? "error" : undefined}
                 />
                 {showFieldError("city") && (
-                  <p className="text-[10px] text-red-500">Ingresa la ciudad</p>
+                  <p className="text-[13px] text-red-500">Ingresa la ciudad</p>
                 )}
               </div>
 
               <div ref={dispatchAddressRef} className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#666666]">
+                <label className="text-[13px] font-semibold text-[#666666]">
                   Dirección de despacho
                 </label>
                 <input
@@ -689,17 +691,19 @@ export default function OrderShipmentConfirm({
                   )}`}
                 />
                 {showFieldError("dispatch_address") ? (
-                  <p className="text-[10px] text-red-500">Ingresa la dirección de despacho</p>
+                  <p className="text-[13px] text-red-500">Ingresa la dirección de despacho</p>
                 ) : (
                   isNewAddressSingle && (
-                    <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+                    <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
                   )
                 )}
               </div>
 
               {isNewAddressSingle && (
                 <div ref={warehouseRef} className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-[#666666]">Bodega de despacho</label>
+                  <label className="text-[13px] font-semibold text-[#666666]">
+                    Bodega de despacho
+                  </label>
                   <WarehouseSelect
                     warehouseForced={warehouseForced}
                     value={singleForm.warehouse_id}
@@ -709,13 +713,15 @@ export default function OrderShipmentConfirm({
                     status={showFieldError("warehouse") ? "error" : undefined}
                   />
                   {showFieldError("warehouse") && (
-                    <p className="text-[10px] text-red-500">Selecciona una bodega de despacho</p>
+                    <p className="text-[13px] text-red-500">Selecciona una bodega de despacho</p>
                   )}
                 </div>
               )}
 
               <div ref={emailRef} className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#666666]">Correo electrónico</label>
+                <label className="text-[13px] font-semibold text-[#666666]">
+                  Correo electrónico
+                </label>
                 <input
                   type="email"
                   placeholder="correo@ejemplo.com"
@@ -726,7 +732,7 @@ export default function OrderShipmentConfirm({
                   )}`}
                 />
                 {(isSingleEmailInvalid || showFieldError("email")) && (
-                  <p className="text-[10px] text-red-500">
+                  <p className="text-[13px] text-red-500">
                     {singleForm.email.trim() === ""
                       ? "Ingresa un correo electrónico"
                       : "Correo electrónico no válido"}
@@ -735,7 +741,9 @@ export default function OrderShipmentConfirm({
               </div>
 
               <div ref={phoneRef} className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#666666]">Teléfono de contacto</label>
+                <label className="text-[13px] font-semibold text-[#666666]">
+                  Teléfono de contacto
+                </label>
                 <div className="flex gap-2">
                   <select
                     value={singleForm.indicativo}
@@ -766,7 +774,7 @@ export default function OrderShipmentConfirm({
                   />
                 </div>
                 {(isSinglePhoneInvalid || showFieldError("phone")) && (
-                  <p className="text-[10px] text-red-500">
+                  <p className="text-[13px] text-red-500">
                     {singleForm.telefono.trim() === ""
                       ? "Ingresa un teléfono de contacto"
                       : phoneErrorMessage(singleForm.indicativo)}
@@ -775,7 +783,7 @@ export default function OrderShipmentConfirm({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#666666]">Observaciones</label>
+                <label className="text-[13px] font-semibold text-[#666666]">Observaciones</label>
                 <textarea
                   placeholder="Ingresar un comentario"
                   maxLength={35}
@@ -786,7 +794,7 @@ export default function OrderShipmentConfirm({
                   rows={1}
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
                 />
-                <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+                <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
               </div>
             </div>
           )}
@@ -800,10 +808,10 @@ export default function OrderShipmentConfirm({
                   className="border border-[#EEEEEE] rounded-xl overflow-hidden"
                 >
                   <div className="flex items-center gap-2 px-3 py-2.5 bg-[#F7F7F7] border-b border-[#EEEEEE]">
-                    <span className="w-5 h-5 rounded-full bg-[#141414] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-[#141414] text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">
                       {eIdx + 1}
                     </span>
-                    <p className="flex-1 text-xs font-medium text-[#141414] truncate">
+                    <p className="flex-1 text-[13px] font-medium text-[#141414] truncate">
                       {entrega.dispatch_address || "Sin dirección"}
                     </p>
                     <button
@@ -829,11 +837,11 @@ export default function OrderShipmentConfirm({
                           key={`${item.product_sku}::${idx}`}
                           className="flex items-center gap-2 px-3 py-2"
                         >
-                          <p className="flex-1 text-[11px] text-[#666666] line-clamp-1">
+                          <p className="flex-1 text-[13px] text-[#666666] line-clamp-1">
                             {item.description}
                           </p>
                           <span
-                            className={`text-[11px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#141414]"}`}
+                            className={`text-[13px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#141414]"}`}
                           >
                             {asignado}
                           </span>
@@ -845,7 +853,7 @@ export default function OrderShipmentConfirm({
                     <>
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F7FDE8] border-t border-[#F0F9D8]">
                         <Gift size={10} className="text-[#6AB000] flex-shrink-0" />
-                        <span className="text-[10px] font-semibold text-[#6AB000] uppercase tracking-wide">
+                        <span className="text-[13px] font-semibold text-[#6AB000]">
                           Bonificados
                         </span>
                       </div>
@@ -857,11 +865,11 @@ export default function OrderShipmentConfirm({
                               key={`promo-${item.product_sku}`}
                               className="flex items-center gap-2 px-3 py-2"
                             >
-                              <p className="flex-1 text-[11px] text-[#666666] line-clamp-1">
+                              <p className="flex-1 text-[13px] text-[#666666] line-clamp-1">
                                 {item.description}
                               </p>
                               <span
-                                className={`text-[11px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#6AB000]"}`}
+                                className={`text-[13px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#6AB000]"}`}
                               >
                                 {asignado}
                               </span>
@@ -875,11 +883,11 @@ export default function OrderShipmentConfirm({
                               key={`other-${item.product_sku}`}
                               className="flex items-center gap-2 px-3 py-2"
                             >
-                              <p className="flex-1 text-[11px] text-[#666666] line-clamp-1">
+                              <p className="flex-1 text-[13px] text-[#666666] line-clamp-1">
                                 {item.description}
                               </p>
                               <span
-                                className={`text-[11px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#6AB000]"}`}
+                                className={`text-[13px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#6AB000]"}`}
                               >
                                 {asignado}
                               </span>
@@ -892,12 +900,12 @@ export default function OrderShipmentConfirm({
                   {(entrega.telefono || entrega.observaciones) && (
                     <div className="px-3 py-2 bg-[#FAFAFA] border-t border-[#F0F0F0] flex flex-col gap-0.5">
                       {entrega.telefono && (
-                        <p className="text-[10px] text-[#999999]">
+                        <p className="text-[13px] text-[#999999]">
                           {entrega.indicativo} {entrega.telefono}
                         </p>
                       )}
                       {entrega.observaciones && (
-                        <p className="text-[10px] text-[#999999] italic line-clamp-1">
+                        <p className="text-[13px] text-[#999999] italic line-clamp-1">
                           {entrega.observaciones}
                         </p>
                       )}
@@ -908,7 +916,7 @@ export default function OrderShipmentConfirm({
 
               <button
                 onClick={openNewModal}
-                className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-xs text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-[13px] text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors"
               >
                 <Plus size={12} />
                 Agregar destino
@@ -924,7 +932,7 @@ export default function OrderShipmentConfirm({
                 <button
                   onClick={onOpenPurchaseOrder}
                   disabled={loadingFinish || loadingDraft}
-                  className="flex-1 text-left text-xs text-[#141414] truncate hover:underline disabled:cursor-not-allowed"
+                  className="flex-1 text-left text-[13px] text-[#141414] truncate hover:underline disabled:cursor-not-allowed"
                   title="Editar orden de compra"
                 >
                   {purchaseOrderNumber || purchaseOrderFile?.name}
@@ -942,7 +950,7 @@ export default function OrderShipmentConfirm({
               <button
                 onClick={onOpenPurchaseOrder}
                 disabled={loadingFinish || loadingDraft}
-                className={`flex items-center justify-center gap-1.5 w-full py-2.5 border border-dashed rounded-xl text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                className={`flex items-center justify-center gap-1.5 w-full py-2.5 border border-dashed rounded-xl text-[13px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                   showFieldError("purchaseOrder")
                     ? "border-red-400 text-red-500"
                     : "border-[#DDDDDD] text-[#999999] hover:border-[#141414] hover:text-[#141414]"
@@ -954,7 +962,7 @@ export default function OrderShipmentConfirm({
               </button>
             )}
             {showFieldError("purchaseOrder") && (
-              <p className="mt-1 text-[10px] text-red-500">
+              <p className="mt-1 text-[13px] text-red-500">
                 Obligatorio para el canal {businessUnit}
               </p>
             )}
@@ -989,7 +997,7 @@ export default function OrderShipmentConfirm({
               <p>Subtotal</p>
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </div>
-            <div className="flex justify-between text-xs text-[#999999]">
+            <div className="flex justify-between text-[13px] text-[#999999]">
               <p>Descuentos ({selectedDiscount?.name})</p>
               {confirmOrderData?.discounts ? (
                 <p>-${formatNumber(descuentoDeProductos)}</p>
@@ -998,13 +1006,13 @@ export default function OrderShipmentConfirm({
               )}
             </div>
 
-            <div className="flex justify-between text-xs text-[#999999]">
+            <div className="flex justify-between text-[13px] text-[#999999]">
               <p>Descuento de orden</p>
               <p>-${formatNumber(descuentoDeOrden)}</p>
             </div>
 
             {totalDescuento > 0 && (
-              <div className="flex justify-between text-xs text-[#999999]">
+              <div className="flex justify-between text-[13px] text-[#999999]">
                 <span>Descuentos aplicados</span>
                 <span>-{formatNumber(totalDescuento)}</span>
               </div>

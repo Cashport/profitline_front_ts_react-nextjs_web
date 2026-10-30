@@ -45,7 +45,7 @@ export default function OptionCard({
       </div>
       <div>
         <p className="text-sm font-semibold text-[#141414]">{title}</p>
-        <p className="text-xs text-[#999999] mt-0.5">{description}</p>
+        <p className="text-[13px] text-[#999999] mt-0.5">{description}</p>
       </div>
     </button>
   );

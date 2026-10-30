@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import useSWR from "swr";
-import { ChevronDown, ChevronRight, TrendingUp } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSalesDashboard } from "@/services/commerce/commerce";
 
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import { Tooltip, TooltipProvider, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
@@ -44,7 +45,7 @@ export default function SalesTable() {
 
   if (isLoading) {
     return (
-      <Card className="bg-background border-0 shadow-sm py-0 gap-0">
+      <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
         <div className="flex items-center justify-center min-h-[400px]">
           <p>Cargando datos...</p>
         </div>
@@ -54,7 +55,7 @@ export default function SalesTable() {
 
   if (!salesData) {
     return (
-      <Card className="bg-background border-0 shadow-sm py-0 gap-0">
+      <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
         <div className="flex items-center justify-center min-h-[400px]">
           <p>No hay datos disponibles</p>
         </div>
@@ -85,16 +86,13 @@ export default function SalesTable() {
     }
   };
 
-  const renderSortIcon = (column: SortColumn) => {
-    if (sortColumn !== column) {
-      return <TrendingUp className="ml-1 h-3 w-3 inline opacity-40" />;
-    }
-    return sortDirection === "asc" ? (
-      <ChevronDown className="ml-1 h-3 w-3 inline" />
-    ) : (
-      <ChevronRight className="ml-1 h-3 w-3 inline" />
-    );
-  };
+  // Rótulo ordenable: columnas a la derecha, flechas a la izquierda del texto
+  const renderSortLabel = (label: string, column: SortColumn) => (
+    <span className="inline-flex flex-row-reverse items-center gap-1">
+      {label}
+      <SortArrows dir={sortColumn === column ? sortDirection : null} />
+    </span>
+  );
 
   const getAvanceBgColor = (avance: number) => {
     if (avance >= 100) return "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400";
@@ -191,59 +189,59 @@ export default function SalesTable() {
   });
 
   return (
-    <Card className="bg-background border-0 shadow-sm py-0 gap-0">
-      <CardHeader className="sm:p-6 !pb-0">
+    <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
+      <CardHeader className="sm:px-[18px] sm:pt-[14px] !pb-0">
         <CardTitle className="text-base sm:text-lg font-semibold">
           Resumen de ventas por regional y vendedor
         </CardTitle>
-        <CardDescription className="text-xs sm:text-sm">
+        <CardDescription className="text-[13px] sm:text-sm">
           Ventas agrupadas por región con detalle de vendedores
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-0 sm:p-6">
+      <CardContent className="p-0 sm:px-[18px] sm:py-[14px]">
         <div className="overflow-x-auto">
           <TooltipProvider>
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-cashport-black dark:border-border bg-gray-50 dark:bg-secondary">
-                  <th className="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                <tr className="border-b border-cp-line bg-cp-surface">
+                  <th className="text-center py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                     Regional / Vendedor
                   </th>
-                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                  <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                     Borrador
                   </th>
-                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
+                  <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
                     Cartera
                   </th>
                   <th
-                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
+                    className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_sales_in_process")}
                   >
-                    En proceso {renderSortIcon("total_sales_in_process")}
+                    {renderSortLabel("En proceso", "total_sales_in_process")}
                   </th>
                   <th
-                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
+                    className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_sales_invoiced")}
                   >
-                    Facturado {renderSortIcon("total_sales_invoiced")}
+                    {renderSortLabel("Facturado", "total_sales_invoiced")}
                   </th>
                   <th
-                    className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
+                    className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_sales")}
                   >
-                    Total {renderSortIcon("total_sales")}
+                    {renderSortLabel("Total", "total_sales")}
                   </th>
                   <th
-                    className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
+                    className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_cuota")}
                   >
-                    Meta {renderSortIcon("total_cuota")}
+                    {renderSortLabel("Meta", "total_cuota")}
                   </th>
                   <th
-                    className="hidden lg:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
+                    className="hidden lg:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("pending_cuota")}
                   >
-                    Monto faltante {renderSortIcon("pending_cuota")}
+                    {renderSortLabel("Monto faltante", "pending_cuota")}
                   </th>
                 </tr>
               </thead>
@@ -257,7 +255,7 @@ export default function SalesTable() {
                             className="bg-blue-50 dark:bg-secondary border-b border-gray-200 dark:border-border cursor-pointer hover:bg-blue-100 dark:hover:bg-secondary/80 transition-colors"
                             onClick={() => toggleSellerLeader(sellerLeader.seller_leader)}
                           >
-                            <td className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm flex items-center">
+                            <td className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-[13px] sm:text-sm flex items-center">
                               {expandedSellerLeaders.has(sellerLeader.seller_leader) ? (
                                 <ChevronDown className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                               ) : (
@@ -265,51 +263,51 @@ export default function SalesTable() {
                               )}
                               <span className="truncate">{sellerLeader.seller_leader}</span>
                             </td>
-                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                               {formatMoney(sellerLeader.total_sales_pending, {
                                 hideDecimals: true
                               })}
                             </td>
-                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                               {formatMoney(sellerLeader.total_sales_wallet, {
                                 hideDecimals: true
                               })}
                             </td>
-                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                               {formatMoney(sellerLeader.total_sales_in_process, {
                                 hideDecimals: true
                               })}
                             </td>
-                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                            <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                               {formatMoney(sellerLeader.total_sales_invoiced, {
                                 hideDecimals: true
                               })}
                             </td>
-                            <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                            <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                               {formatMoney(sellerLeader.total_sales, {
                                 hideDecimals: true
                               })}
                             </td>
-                            <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                            <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                               <div className="flex items-center justify-end gap-1 sm:gap-2">
                                 <span className="hidden sm:inline">
                                   {formatMoney(sellerLeader.total_cuota, {
                                     hideDecimals: true
                                   })}
                                 </span>
-                                <span className="sm:hidden text-xs">
+                                <span className="sm:hidden text-[13px]">
                                   {formatMoney(sellerLeader.total_cuota, {
                                     hideDecimals: true
                                   }).replace(/\s/g, "")}
                                 </span>
                                 <span
-                                  className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(sellerLeader.percentage_cuota)}`}
+                                  className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[13px] font-medium ${getAvanceBgColor(sellerLeader.percentage_cuota)}`}
                                 >
                                   {sellerLeader.percentage_cuota.toFixed(0)}%
                                 </span>
                               </div>
                             </td>
-                            <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                            <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                               {formatMoney(sellerLeader.pending_cuota, {
                                 hideDecimals: true
                               })}
@@ -338,54 +336,54 @@ export default function SalesTable() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <tr className="border-b border-gray-100 dark:border-border hover:bg-gray-50 dark:hover:bg-secondary/50 transition-colors cursor-pointer">
-                                <td className="py-2 sm:py-3 px-2 sm:px-4 pl-6 sm:pl-12 text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 pl-6 sm:pl-12 text-[13px] sm:text-sm text-gray-700 dark:text-gray-300 truncate">
                                   {seller.seller}
                                 </td>
-                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                                   {formatMoney(seller.total_sales_pending, {
                                     hideDecimals: true
                                   })}
                                 </td>
-                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                                   {formatMoney(seller.total_sales_wallet, {
                                     hideDecimals: true
                                   })}
                                 </td>
-                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                                   {formatMoney(seller.total_sales_in_process, {
                                     hideDecimals: true
                                   })}
                                 </td>
-                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                                <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                                   {formatMoney(seller.total_sales_invoiced, {
                                     hideDecimals: true
                                   })}
                                 </td>
-                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                                   {formatMoney(seller.total_sales, {
                                     hideDecimals: true
                                   })}
                                 </td>
-                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                                   <div className="flex items-center justify-end gap-1 sm:gap-2">
                                     <span className="hidden sm:inline">
                                       {formatMoney(seller.total_cuota, {
                                         hideDecimals: true
                                       })}
                                     </span>
-                                    <span className="sm:hidden text-xs">
+                                    <span className="sm:hidden text-[13px]">
                                       {formatMoney(seller.total_cuota, {
                                         hideDecimals: true
                                       }).replace(/\s/g, "")}
                                     </span>
                                     <span
-                                      className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(seller.percentage_cuota)}`}
+                                      className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[13px] font-medium ${getAvanceBgColor(seller.percentage_cuota)}`}
                                     >
                                       {seller.percentage_cuota.toFixed(0)}%
                                     </span>
                                   </div>
                                 </td>
-                                <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                                <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                                   {formatMoney(seller.pending_cuota, {
                                     hideDecimals: true
                                   })}
@@ -414,52 +412,52 @@ export default function SalesTable() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <tr className="border-t-2 border-cashport-black dark:border-border bg-gray-100 dark:bg-secondary font-bold cursor-pointer">
-                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Total</td>
-                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm">Total</td>
+                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           {formatMoney(iaTotal.total_sales_pending, {
                             hideDecimals: true
                           })}
                         </td>
-                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           {formatMoney(iaTotal.total_sales_wallet, {
                             hideDecimals: true
                           })}
                         </td>
-                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           {formatMoney(iaTotal.total_sales_in_process, {
                             hideDecimals: true
                           })}
                         </td>
-                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           {formatMoney(iaTotal.total_sales_invoiced, {
                             hideDecimals: true
                           })}
                         </td>
-                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           {formatMoney(iaTotal.total_sales, {
                             hideDecimals: true
                           })}
                         </td>
-                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           <div className="flex items-center justify-end gap-1 sm:gap-2">
                             <span className="hidden sm:inline">
                               {formatMoney(iaTotal.total_cuota, {
                                 hideDecimals: true
                               })}
                             </span>
-                            <span className="sm:hidden text-xs">
+                            <span className="sm:hidden text-[13px]">
                               {formatMoney(iaTotal.total_cuota, {
                                 hideDecimals: true
                               }).replace(/\s/g, "")}
                             </span>
                             <span
-                              className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(iaTotal.percentage_cuota)}`}
+                              className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[13px] font-medium ${getAvanceBgColor(iaTotal.percentage_cuota)}`}
                             >
                               {iaTotal.percentage_cuota.toFixed(0)}%
                             </span>
                           </div>
                         </td>
-                        <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
+                        <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           {formatMoney(iaTotal.pending_cuota, {
                             hideDecimals: true
                           })}

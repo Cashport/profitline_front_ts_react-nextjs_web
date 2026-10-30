@@ -40,7 +40,7 @@
 }
 
 .selectLabel {
-    font-size: 12px;
+    font-size: 13px;
     color: #666666;
     margin: 0;
 }
@@ -61,7 +61,9 @@
     border: 1px solid #eeeeee;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
     text-align: left;
     font-size: 13px;
     font-weight: 500;
@@ -117,7 +119,9 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition:
+        background 0.15s,
+        color 0.15s;
 
     &:hover {
         color: #141414;
@@ -151,7 +155,10 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        color 0.15s;
 
     &:hover {
         border-color: #cccccc;
@@ -174,7 +181,7 @@
 }
 
 .sectionLabel {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     color: #666666;
     margin: 0;
@@ -190,7 +197,7 @@
 .tab {
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     background: #f5f5f5;
     color: #666666;
@@ -234,7 +241,7 @@
     padding: 6px 10px;
     background: #fef9e7;
     border-bottom: 1px solid #fde68a;
-    font-size: 11px;
+    font-size: 13px;
     color: #92400e;
 }
 
@@ -257,13 +264,13 @@
     padding: 6px 10px;
     background: #e8f5e9;
     border-bottom: 1px solid #d4edda;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
     color: #2e7d32;
 }
 
 .fixedBadge {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 700;
     color: #ffffff;
     background: #4caf50;
@@ -306,7 +313,7 @@
 }
 
 .otrosGroupTitle {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #141414;
 }
@@ -319,7 +326,7 @@
 
 .cellName {
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: 13px;
     color: #141414;
     background: #ffffff;
 }
@@ -336,7 +343,7 @@
     text-align: right;
     width: 4rem;
     background: #ffffff;
-    font-size: 0.75rem;
+    font-size: 13px;
     font-weight: 600;
 }
 
@@ -349,7 +356,7 @@
 }
 
 .saldoHint {
-    font-size: 10px;
+    font-size: 13px;
     color: #999999;
     margin-left: 6px;
 }
@@ -373,7 +380,7 @@
     color: #666666;
     background: #ffffff;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1;
     transition: background 0.15s;
 
@@ -390,7 +397,7 @@
 .counterVal {
     width: 16px;
     text-align: center;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #141414;
 }
@@ -398,7 +405,7 @@
 .counterInput {
     width: 36px;
     text-align: center;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #141414;
     background: #ffffff;
@@ -429,7 +436,7 @@
 }
 
 .footerTotal {
-    font-size: 12px;
+    font-size: 13px;
     color: #666666;
     margin: 0;
 
@@ -441,7 +448,7 @@
 .confirmBtn {
     padding: 6px 16px;
     background: #cbe71e;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #141414;
     border: none;

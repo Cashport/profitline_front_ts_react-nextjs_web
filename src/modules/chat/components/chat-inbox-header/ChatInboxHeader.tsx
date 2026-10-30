@@ -28,7 +28,7 @@ export default function ChatInboxHeader({
       <div className="flex items-center gap-3 px-4 py-3">
         <Chat className="h-5 w-5" />
         <h1 className="text-lg font-semibold">Conversaciones</h1>
-        <Badge className="rounded-full bg-[#F7F7F7] text-xs text-[#141414]" variant="secondary">
+        <Badge className="rounded-full bg-[#F7F7F7] text-[13px] text-[#141414]" variant="secondary">
           WhatsApp
         </Badge>
       </div>

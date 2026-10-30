@@ -56,7 +56,7 @@ export default function ChatInbox() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full w-full bg-white text-[#141414] rounded-lg">
+    <div className="cp-card flex min-h-0 w-full flex-1 flex-col overflow-hidden text-[#141414]">
       <div className="grid h-full min-h-0 grid-cols-1 md:grid-cols-12">
         <AllChats
           activeConversation={activeConversation}

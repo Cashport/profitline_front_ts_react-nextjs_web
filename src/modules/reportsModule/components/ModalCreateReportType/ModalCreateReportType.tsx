@@ -70,7 +70,7 @@ export function ModalCreateReportType({ isOpen, onClose, onSuccess }: ModalCreat
       destroyOnClose
     >
       <Flex vertical gap="0.5rem" style={{ marginBottom: "1rem" }}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <p className="text-[13px] font-semibold text-gray-500">
           Nombre del tipo de informe <span className="text-red-500">*</span>
         </p>
         <Input

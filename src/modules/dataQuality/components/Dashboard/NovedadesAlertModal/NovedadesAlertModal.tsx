@@ -45,11 +45,8 @@ export const NovedadesAlertModal = ({ alert, onClose }: NovedadesAlertModalProps
         <div className="overflow-auto max-h-[480px]">
           <table className="w-full">
             <thead>
-              <tr className="border-b" style={{ borderColor: "#EEEEEE" }}>
-                <th
-                  className="text-xs font-medium text-left py-2"
-                  style={{ color: "#6B7280" }}
-                >
+              <tr className="border-b border-cp-line bg-cp-surface">
+                <th className="py-3 text-left text-[13.5px] font-semibold text-cp-ink">
                   Cliente
                 </th>
               </tr>

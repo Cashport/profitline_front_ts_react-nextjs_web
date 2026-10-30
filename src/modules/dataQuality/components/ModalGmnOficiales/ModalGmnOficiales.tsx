@@ -58,7 +58,7 @@ const errorMessageOf = (error: unknown): string =>
 
 const StatChip: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
   <div className="rounded-lg bg-[#F5F5F4] px-3 py-2">
-    <p className="text-[11px] text-[#6B7280]">{label}</p>
+    <p className="text-[13px] text-[#6B7280]">{label}</p>
     <p className="text-sm font-semibold text-[#141414]">{value}</p>
   </div>
 );
@@ -158,7 +158,7 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
     };
     if (!details.missing && !details.ambiguous) return null;
     return (
-      <div className="mt-2 space-y-1 text-xs text-[#7F1D1D]">
+      <div className="mt-2 space-y-1 text-[13px] text-[#7F1D1D]">
         {details.missing && details.missing.length > 0 && (
           <p>
             <span className="font-semibold">Países no reconocidos:</span>{" "}
@@ -183,36 +183,36 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
     return (
       <div className="rounded-lg border border-[#EEEEEE] p-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-semibold text-[#141414]">Última carga</p>
+          <p className="text-[13px] font-semibold text-[#141414]">Última carga</p>
           <Tag color={status.status === "COMPLETED" ? "green" : "red"}>{status.status}</Tag>
         </div>
-        <p className="mt-1 text-xs text-[#6B7280]">
+        <p className="mt-1 text-[13px] text-[#6B7280]">
           {status.file_name} · {fmtDate(status.created_at)}
         </p>
-        <p className="text-xs text-[#6B7280]">
+        <p className="text-[13px] text-[#6B7280]">
           Insertadas: {fmt(status.rows_inserted)} · Actualizadas: {fmt(status.rows_updated)} ·
           Conflictos: {fmt(status.rows_conflict)} · Omitidas: {fmt(status.rows_skipped)}
         </p>
-        <p className="text-[11px] text-gray-400">ID de carga: {status.id}</p>
+        <p className="text-[13px] text-gray-400">ID de carga: {status.id}</p>
         {status.error_message && (
-          <p className="mt-1 text-[11px] text-[#DC2626]">{status.error_message}</p>
+          <p className="mt-1 text-[13px] text-[#DC2626]">{status.error_message}</p>
         )}
       </div>
     );
   };
 
   const renderFormat = () => (
-    <div className="rounded-lg bg-[#FAFAF9] p-3 text-xs text-[#4B5563]">
+    <div className="rounded-lg bg-[#FAFAF9] p-3 text-[13px] text-[#4B5563]">
       <p className="font-semibold text-[#141414]">Formato esperado</p>
       <p className="mt-1">
         Excel con hoja <span className="font-mono">{GMN_OFICIALES_SHEET_NAME}</span>. Obligatorias:{" "}
         <span className="font-mono">{GMN_OFICIALES_REQUIRED_COLUMNS.join(", ")}</span>. Tamaño
         máximo {GMN_OFICIALES_MAX_FILE_SIZE_MB} MB.
       </p>
-      <p className="mt-1 text-[11px] text-gray-500">
+      <p className="mt-1 text-[13px] text-gray-500">
         Columnas: <span className="font-mono">{GMN_OFICIALES_EXPECTED_COLUMNS.join(", ")}</span>
       </p>
-      <p className="mt-1 text-[11px] text-gray-500">
+      <p className="mt-1 text-[13px] text-gray-500">
         El GMN oficial es <span className="font-mono">Material_Num</span> (se conserva como texto).
         Los registros <span className="font-mono">INACTIVE</span> también cuentan como oficiales.
       </p>

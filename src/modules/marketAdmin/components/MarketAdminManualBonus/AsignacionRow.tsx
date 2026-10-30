@@ -25,7 +25,7 @@ export default function AsignacionRow({
         <p className="text-sm font-medium text-[#141414] truncate" title={asignacion.clienteNombre}>
           {asignacion.clienteNombre}
         </p>
-        <p className="text-xs text-[#999999]">NIT: {asignacion.clienteNit}</p>
+        <p className="text-[13px] text-[#999999]">NIT: {asignacion.clienteNit}</p>
       </div>
       <p
         className="text-sm text-[#141414] truncate pr-2"
@@ -42,7 +42,7 @@ export default function AsignacionRow({
         {asignacion.unidadesDisponibles}
       </p>
       <div className="flex justify-center">
-        <span className={`px-2 py-1 text-[11px] font-semibold rounded-lg ${cfg.className}`}>
+        <span className={`px-2 py-1 text-[13px] font-semibold rounded-lg ${cfg.className}`}>
           {cfg.label}
         </span>
       </div>
@@ -51,19 +51,19 @@ export default function AsignacionRow({
           <>
             <button
               onClick={onAprobar}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
             >
               <Check size={11} /> Aprobar
             </button>
             <button
               onClick={onRechazar}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
             >
               <X size={11} /> Rechazar
             </button>
           </>
         ) : (
-          <span className="text-xs text-[#CCCCCC]">{asignacion.creadoEn}</span>
+          <span className="text-[13px] text-[#CCCCCC]">{asignacion.creadoEn}</span>
         )}
       </div>
     </div>

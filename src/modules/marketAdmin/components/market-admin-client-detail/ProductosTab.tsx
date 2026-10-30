@@ -74,7 +74,7 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
   }
 
   return (
-    <div>
+    <div className="cp-list-scroll">
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-[#666666]">
           {totalProductos} productos en {grupos.length} categorías
@@ -82,9 +82,9 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
         <div className="relative">
           <button
             onClick={() => setShowLineaPicker((v) => !v)}
-            className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
           >
-            <Plus size={14} /> Agregar línea
+            <Plus size={18} /> Agregar línea
           </button>
           {showLineaPicker && (
             <div className="absolute right-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-20 min-w-[200px] py-1">
@@ -103,7 +103,7 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-[#F5F5F5] text-left transition-colors"
                     >
                       <span
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold"
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold"
                         style={{ backgroundColor: c.bg, color: c.text }}
                       >
                         {lineaAbrev(l)}
@@ -130,19 +130,19 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
           <div key={grupo.key} className="mb-5 border border-[#EEEEEE] rounded-xl overflow-hidden">
             <div className="flex items-center gap-2.5 px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE]">
               <span
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold flex-shrink-0"
                 style={{ backgroundColor: c.bg, color: c.text }}
               >
                 {lineaAbrev(grupo.nombre)}
               </span>
               <span className="text-sm font-bold text-[#141414]">{grupo.nombre}</span>
-              <span className="text-xs text-[#999999] ml-auto">
+              <span className="text-[13px] text-[#999999] ml-auto">
                 {grupo.productos.length} productos
               </span>
             </div>
             <div className="grid grid-cols-[1fr_80px] gap-4 px-4 py-2 border-b border-[#F5F5F5]">
-              <span className="text-xs font-bold text-[#141414]">Producto</span>
-              <span className="text-xs font-bold text-[#141414]">Activo</span>
+              <span className="text-[13px] font-bold text-[#141414]">Producto</span>
+              <span className="text-[13px] font-bold text-[#141414]">Activo</span>
             </div>
             {grupo.productos.map((p) => {
               const activo = !inactivos.has(p.key);

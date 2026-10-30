@@ -58,16 +58,16 @@ export default function RankingPanel({
         <h2 className="min-w-0 truncate text-[15px] font-semibold text-foreground">
           Ranking · Actividades
         </h2>
-        <span className="whitespace-nowrap text-[11.5px] text-muted-foreground">{counter}</span>
+        <span className="whitespace-nowrap text-[13px] text-muted-foreground">{counter}</span>
       </div>
 
       <div className="grid grid-cols-4 gap-1.5">
         {tiles.map((tile) => (
           <div key={tile.label} className="min-w-0 rounded-[10px] bg-secondary px-2.5 py-2">
-            <span className="block truncate text-[10.5px] text-muted-foreground">{tile.label}</span>
+            <span className="block truncate text-[13px] text-muted-foreground">{tile.label}</span>
             <div className="whitespace-nowrap text-base font-semibold tabular-nums tracking-[-0.02em] text-foreground">
               {tile.value}
-              <small className="ml-px text-[10.5px] font-medium text-muted-foreground">
+              <small className="ml-px text-[13px] font-medium text-muted-foreground">
                 {tile.suffix}
               </small>
             </div>
@@ -90,7 +90,7 @@ export default function RankingPanel({
             />
           ))
         ) : (
-          <li className="px-2 py-3.5 text-xs text-muted-foreground">{emptyText}</li>
+          <li className="px-2 py-3.5 text-[13px] text-muted-foreground">{emptyText}</li>
         )}
       </ol>
     </div>

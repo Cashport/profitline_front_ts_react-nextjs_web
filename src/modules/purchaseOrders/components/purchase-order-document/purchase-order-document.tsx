@@ -125,7 +125,7 @@ export function PurchaseOrderDocument({
                   <p className="text-sm text-muted-foreground mb-4">
                     {archivoOriginal || `factura-${numeroFactura}.pdf`}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[13px] text-muted-foreground">
                     El PDF original no está disponible para visualización
                   </p>
                 </div>

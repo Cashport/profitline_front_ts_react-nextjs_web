@@ -87,7 +87,7 @@ export const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
                   <TableCell>
                     <Badge
                       variant="secondary"
-                      className="text-xs text-white"
+                      className="text-[13px] text-white"
                       style={{ backgroundColor: file.data_type.color }}
                     >
                       {file.data_type.description}

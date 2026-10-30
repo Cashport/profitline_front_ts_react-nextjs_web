@@ -22,7 +22,7 @@ type Props = {
   onEditValidations?: (loader: IProfitLoader) => void;
 };
 
-const sectionLabelClass = "text-xs font-semibold text-[#999999] uppercase tracking-wide mb-1";
+const sectionLabelClass = "text-[13px] font-semibold text-[#999999] mb-1";
 const iconButtonClass =
   "flex items-center justify-center w-6 h-6 rounded-md text-[#999999] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0";
 
@@ -73,7 +73,7 @@ export default function PanelDetalleCargue({
           </button>
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-[#141414]">{loader?.display_name}</h2>
-            <p className="text-xs text-[#999999] mt-0.5">{loader?.description}</p>
+            <p className="text-[13px] text-[#999999] mt-0.5">{loader?.description}</p>
           </div>
         </div>
 
@@ -197,7 +197,7 @@ export default function PanelDetalleCargue({
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-[#999999] mt-0.5">
+                        <p className="text-[13px] text-[#999999] mt-0.5">
                           {formatDateTime(item.uploaded_at)} · {item.uploaded_by}
                         </p>
                       </div>

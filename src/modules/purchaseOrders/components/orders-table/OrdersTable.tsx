@@ -4,9 +4,6 @@ import { useState, useMemo, Fragment } from "react";
 import { Pagination as AntPagination, Spin, Flex, Button } from "antd";
 import {
   AlertCircle,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
   ChevronDown,
   ChevronRight
 } from "lucide-react";
@@ -20,9 +17,13 @@ import { useAppStore } from "@/lib/store/store";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { Eye, WarningDiamond } from "@phosphor-icons/react";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
 import "./OrdersTable.scss";
+
+// Encabezado de Clientes (docs/DESIGN.md §7)
+const TH = "border-b border-cp-line bg-cp-surface px-4 py-3 text-[13.5px] font-semibold text-cp-ink";
 
 type SortDirection = "asc" | "desc" | null;
 type SortableColumn =
@@ -58,9 +59,7 @@ const renderStatusBadge = (
   // Abbott (204): si la OC tiene la novedad "OC duplicada", el fondo del badge
   // se pinta rojo. Solo color; texto, estado y lógica sin cambios.
   const isAbbottDuplicate =
-    projectId === 204 &&
-    typeof noveltyTypes === "string" &&
-    noveltyTypes.includes("OC duplicada");
+    projectId === 204 && typeof noveltyTypes === "string" && noveltyTypes.includes("OC duplicada");
   const badgeBackground = isAbbottDuplicate ? "#FF0000" : statusColor || "#B0BEC5";
 
   return (
@@ -74,7 +73,7 @@ const renderStatusBadge = (
                 className="text-white font-medium border-transparent"
                 style={{
                   backgroundColor: badgeBackground,
-                  fontSize: "12px",
+                  fontSize: "13px",
                   padding: "4px 12px",
                   borderRadius: "8px"
                 }}
@@ -97,7 +96,7 @@ const renderStatusBadge = (
           className="text-white font-medium border-transparent"
           style={{
             backgroundColor: badgeBackground,
-            fontSize: "12px",
+            fontSize: "13px",
             padding: "4px 12px",
             borderRadius: "8px"
           }}
@@ -121,7 +120,7 @@ const renderInvoices = (invoices: IinvoicePurchaseOrder[] | null) => {
       <TooltipTrigger asChild>
         <span className="cursor-help text-gray-700">
           {invoices[0].invoice_id}
-          <span className="ml-1.5 text-xs text-gray-600 border border-gray-300 rounded px-1.5 py-0.5 bg-gray-50">
+          <span className="ml-1.5 text-[13px] text-gray-600 border border-gray-300 rounded px-1.5 py-0.5 bg-gray-50">
             +{invoices.length - 1}
           </span>
         </span>
@@ -214,26 +213,17 @@ export function OrdersTable({
     align: "left" | "right" = "left",
     extraClass = ""
   ) => {
-    const isActive = sortConfig.column === column;
-    const icon = isActive ? (
-      sortConfig.direction === "asc" ? (
-        <ArrowUp className="h-3.5 w-3.5" />
-      ) : (
-        <ArrowDown className="h-3.5 w-3.5" />
-      )
-    ) : (
-      <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />
-    );
+    const dir = sortConfig.column === column ? sortConfig.direction : null;
 
     return (
       <th
-        className={`${align === "right" ? "text-right" : "text-left"} p-4 font-bold text-black cursor-pointer select-none ${extraClass}`}
+        className={`${align === "right" ? "text-right" : "text-left"} ${TH} cursor-pointer select-none ${extraClass}`}
         onClick={() => handleSort(column)}
       >
-        <div className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}>
-          <span>{label}</span>
-          {icon}
-        </div>
+        <span className={`inline-flex items-center gap-1 ${align === "right" ? "flex-row-reverse" : ""}`}>
+          {label}
+          <SortArrows dir={dir} />
+        </span>
       </th>
     );
   };
@@ -308,9 +298,9 @@ export function OrdersTable({
     <div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-white border-b border-gray-200">
+          <thead>
             <tr>
-              <th className="text-left p-4 font-bold text-black cursor-pointer select-none">
+              <th className={`text-left ${TH} cursor-pointer select-none`}>
                 <div className="flex items-center gap-2">
                   {onRowSelect && (
                     <div onClick={(e) => e.stopPropagation()}>
@@ -326,26 +316,20 @@ export function OrdersTable({
                     onClick={() => handleSort("packageNumber")}
                   >
                     <span>ID Pedido</span>
-                    {sortConfig.column === "packageNumber" ? (
-                      sortConfig.direction === "asc" ? (
-                        <ArrowUp className="h-3.5 w-3.5" />
-                      ) : (
-                        <ArrowDown className="h-3.5 w-3.5" />
-                      )
-                    ) : (
-                      <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />
-                    )}
+                    <SortArrows
+                      dir={sortConfig.column === "packageNumber" ? sortConfig.direction : null}
+                    />
                   </div>
                 </div>
               </th>
-              <th className="text-left p-4 font-bold text-black">Orden de compra</th>
+              <th className={`text-left ${TH}`}>Orden de compra</th>
               {renderSortableHeader("Cliente", "customerName")}
               {renderSortableHeader("Entrega", "deliveryDate")}
               {renderSortableHeader("Estado", "status")}
-              <th className="text-left p-4 font-bold text-black">Factura</th>
+              <th className={`text-left ${TH}`}>Factura</th>
               {renderSortableHeader("Productos", "totalProducts", "right")}
               {renderSortableHeader("Monto", "totalAmount", "right", "w-28")}
-              <th className="p-4 w-16" />
+              <th className={`${TH} w-16`} />
             </tr>
           </thead>
           <tbody>
@@ -413,7 +397,12 @@ export function OrdersTable({
                         })()}
                       </td>
                       <td className="p-4">
-                        {renderStatusBadge(pkg.status, pkg.statusColor, pkg.noveltyTypes, selectedProjectId)}
+                        {renderStatusBadge(
+                          pkg.status,
+                          pkg.statusColor,
+                          pkg.noveltyTypes,
+                          selectedProjectId
+                        )}
                       </td>
                       <td className="p-4">{renderInvoices(pkg.invoices)}</td>
                       <td className="p-4 text-right font-semibold text-cashport-black">
@@ -470,7 +459,7 @@ export function OrdersTable({
                         <td className="p-4">
                           <div className="flex flex-col">
                             <span className="text-cashport-black">{order.orderNumber || "-"}</span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-[13px] text-gray-500">
                               {(() => {
                                 const d = formatDate(order.orderDate);
                                 return typeof d === "object" ? d.date : d;
@@ -487,7 +476,7 @@ export function OrdersTable({
                             </span>
                             {order.deliveryAddress && (
                               <span
-                                className="text-xs text-gray-500 truncate"
+                                className="text-[13px] text-gray-500 truncate"
                                 title={order.deliveryAddress}
                               >
                                 {order.deliveryAddress}
@@ -505,7 +494,9 @@ export function OrdersTable({
                             return (
                               <div className="flex flex-col">
                                 <span>{d.date}</span>
-                                {d.time && <span className="text-xs text-gray-500">{d.time}</span>}
+                                {d.time && (
+                                  <span className="text-[13px] text-gray-500">{d.time}</span>
+                                )}
                               </div>
                             );
                           })()}
@@ -513,7 +504,12 @@ export function OrdersTable({
 
                         {/* Estado */}
                         <td className="p-4">
-                          {renderStatusBadge(order.status, order.statusColor, order.noveltyTypes, selectedProjectId)}
+                          {renderStatusBadge(
+                            order.status,
+                            order.statusColor,
+                            order.noveltyTypes,
+                            selectedProjectId
+                          )}
                         </td>
 
                         {/* Factura */}

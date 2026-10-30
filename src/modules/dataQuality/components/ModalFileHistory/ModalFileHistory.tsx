@@ -117,7 +117,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
             <div className="pt-1">
               <Badge
                 variant="secondary"
-                className="text-xs text-white"
+                className="text-[13px] text-white"
                 style={{ backgroundColor: file.data_type.color }}
               >
                 {file.data_type.description}
@@ -169,7 +169,10 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-sm font-medium" style={{ color: "#141414" }}>
                           {event.event_description}
-                          <span className="ml-2 text-xs font-normal" style={{ color: "#6B7280" }}>
+                          <span
+                            className="ml-2 text-[13px] font-normal"
+                            style={{ color: "#6B7280" }}
+                          >
                             v{event.version}
                           </span>
                         </span>
@@ -186,7 +189,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
                         )}
                       </div>
                       <p
-                        className="text-xs mt-0.5 flex items-center gap-1"
+                        className="text-[13px] mt-0.5 flex items-center gap-1"
                         style={{ color: "#6B7280" }}
                       >
                         <ActorIcon className="h-3 w-3" />

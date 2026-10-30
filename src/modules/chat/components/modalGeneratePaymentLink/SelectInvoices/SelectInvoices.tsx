@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from "react";
-import { Checkbox, Dropdown, Empty, Input, Spin } from "antd";
+import { Checkbox, Dropdown, Empty, Spin } from "antd";
 import dayjs from "dayjs";
-import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react";
+import { CaretDown } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 
 import { IApplicationInvoice } from "@/types/invoices/IInvoices";
 
 import "./selectInvoices.scss";
+import SearchField from "@/components/ui/search-field/search-field";
 
 interface SelectInvoicesProps {
   invoices: IApplicationInvoice[];
@@ -103,14 +104,7 @@ const SelectInvoices: React.FC<SelectInvoicesProps> = ({
       ) : (
         <>
           <div className="selectInvoices__search">
-            <Input
-              allowClear
-              size="middle"
-              prefix={<MagnifyingGlass size={16} />}
-              placeholder="Buscar por ID"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <SearchField value={search} onChange={setSearch} placeholder="Buscar por ID" />
           </div>
           <div className="selectInvoices__all" onClick={toggleAll}>
             <Checkbox

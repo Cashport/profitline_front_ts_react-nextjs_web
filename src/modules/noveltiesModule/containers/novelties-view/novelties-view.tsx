@@ -95,7 +95,7 @@ export default function NoveltiesView() {
   const primeraCarga = !items && !error;
 
   return (
-    <div className="wallet-scope flex flex-col gap-4 pb-6">
+    <div className="wallet-scope cp-page pb-6">
       <NoveltiesHeader
         fetchedAt={fetchedAt}
         search={search}
@@ -104,31 +104,31 @@ export default function NoveltiesView() {
         onFiltersChange={handleFiltersChange}
       />
 
-      <div className="flex flex-wrap items-end gap-3.5">
-        <h2 className="text-lg font-semibold text-foreground">Bandeja de novedades</h2>
-
-        <div className="ml-auto flex overflow-hidden rounded-lg border border-border bg-card">
-          {VISTAS.map((v) => (
-            <button
-              key={v.key}
-              type="button"
-              aria-pressed={vista === v.key}
-              onClick={() => setVista(v.key)}
-              className={cn(
-                "border-r border-border px-3 py-1.5 text-xs transition-colors last:border-r-0",
-                vista === v.key
-                  ? "bg-secondary font-bold text-foreground"
-                  : "font-medium text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {v.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <NoveltiesToolbar totalRows={pagination.totalRows} summary={summary} />
       <NoveltiesKpiCards kpis={kpis} selected={card} onSelect={handleCardChange} />
+      <NoveltiesToolbar
+        totalRows={pagination.totalRows}
+        summary={summary}
+        actions={
+          <div className="flex overflow-hidden rounded-lg border border-border bg-card">
+            {VISTAS.map((v) => (
+              <button
+                key={v.key}
+                type="button"
+                aria-pressed={vista === v.key}
+                onClick={() => setVista(v.key)}
+                className={cn(
+                  "border-r border-border px-3 py-1.5 text-[13px] transition-colors last:border-r-0",
+                  vista === v.key
+                    ? "bg-secondary font-bold text-foreground"
+                    : "font-medium text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {primeraCarga ? (
         <ProfitLoader size="small" />

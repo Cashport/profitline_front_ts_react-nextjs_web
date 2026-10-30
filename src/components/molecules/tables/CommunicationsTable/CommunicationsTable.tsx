@@ -208,16 +208,19 @@ export const CommunicationsTable = ({
 
   return (
     <main className="mainCommunicationsTable">
-      <Flex justify="space-between">
-        <Flex gap={"0.625rem"}>
+      <Flex justify="space-between" align="center">
+        <Flex gap={"0.625rem"} align="center">
           <UiSearchInput className="search" placeholder="Buscar" />
           <UiFilterDropdown />
           <DotsDropdown items={items} />
         </Flex>
-        <PrincipalButton onClick={onCreateCommunication}>
-          Crear Comunicación
-          <Plus weight="bold" size={15} />
-        </PrincipalButton>
+        {/* PrincipalButton toma el 100% del alto: el contenedor lo deja en --control-h. */}
+        <div style={{ height: "var(--control-h)" }}>
+          <PrincipalButton onClick={onCreateCommunication} customStyles={{ fontSize: 14 }}>
+            Crear Comunicación
+            <Plus weight="bold" size={18} />
+          </PrincipalButton>
+        </div>
       </Flex>
 
       {loading ? (

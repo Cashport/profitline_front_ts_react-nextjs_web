@@ -68,7 +68,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.375rem;
-        font-size: 0.75rem;
+        font-size: 13px;
         color: $darker-gray;
 
         strong {
@@ -88,7 +88,7 @@
         .ant-table-thead > tr > th {
             background-color: transparent !important;
             border-bottom: 1px solid $dark-gray !important;
-            font-size: 0.75rem;
+            font-size: 13px;
             color: $darker-gray;
 
             // AntD draws a vertical separator between headers with this pseudo element
@@ -117,7 +117,7 @@
             // color comes from the catalog, inline. Smaller than a regular cell so the longest
             // label still fits the 150px column on one line
             &.-status {
-                font-size: 0.75rem;
+                font-size: 13px;
                 font-weight: 500;
             }
         }
@@ -145,7 +145,7 @@
         em {
             margin-left: 0.375rem;
             padding: 0 0.25rem;
-            font-size: 0.625rem;
+            font-size: 13px;
             font-style: normal;
             border-radius: 4px;
             color: $darker-gray;
@@ -175,7 +175,7 @@
     &__fieldError {
         // matches AntD's 11px inner padding, so the error lines up with the control's own text
         padding-inline: 0.6875rem;
-        font-size: 0.625rem;
+        font-size: 13px;
         line-height: 1.2;
         color: $error;
     }
@@ -216,7 +216,7 @@
     &__saveBtn.ant-btn {
         height: 1.75rem;
         padding-inline: 0.5rem;
-        font-size: 0.75rem;
+        font-size: 13px;
         font-weight: 500;
         border-color: $secondary;
         background-color: rgba(203, 230, 30, 0.2);
@@ -237,7 +237,7 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 0.75rem;
+        font-size: 13px;
         color: $darker-gray;
         background-color: transparent;
 

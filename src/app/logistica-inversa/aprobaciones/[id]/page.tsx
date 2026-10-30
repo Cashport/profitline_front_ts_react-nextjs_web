@@ -7,7 +7,11 @@ interface PageProps {
 
 export default function AprobacionResumenPage({ params }: PageProps) {
   return (
-    <ReverseLogisticsView activeTab="aprobaciones">
+    <ReverseLogisticsView
+      activeTab="aprobaciones"
+      title="Aprobación de lotes"
+      back="/logistica-inversa/aprobaciones"
+    >
       <AprobacionDetalleView id={params.id} />
     </ReverseLogisticsView>
   );

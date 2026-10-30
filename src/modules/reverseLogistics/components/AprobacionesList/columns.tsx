@@ -24,7 +24,7 @@ export const getApprovalsColumns = (
       return (
         <div>
           <div className="text-sm text-gray-700">{date}</div>
-          {time && <div className="text-xs text-gray-400 mt-0.5">{time}</div>}
+          {time && <div className="text-[13px] text-gray-400 mt-0.5">{time}</div>}
         </div>
       );
     }
@@ -38,7 +38,7 @@ export const getApprovalsColumns = (
         <div className="text-gray-900 text-sm leading-tight" title={record.cliente}>
           {record.cliente}
         </div>
-        <div className="text-xs text-gray-400 mt-0.5" title={record.codigoCliente}>
+        <div className="text-[13px] text-gray-400 mt-0.5" title={record.codigoCliente}>
           {record.codigoCliente}
         </div>
       </div>
@@ -89,7 +89,9 @@ export const getApprovalsColumns = (
     width: 80,
     align: "right",
     sorter: (a, b) => a.unidades - b.unidades,
-    render: (unidades: number) => <span className="text-sm text-gray-900">{fmtNumber(unidades)}</span>
+    render: (unidades: number) => (
+      <span className="text-sm text-gray-900">{fmtNumber(unidades)}</span>
+    )
   },
   {
     title: "Monto",

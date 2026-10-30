@@ -6,6 +6,8 @@ import type { ColumnsType } from "antd/es/table";
 import { Plus, Paperclip } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import ProfitLoader from "@/components/ui/profit-loader";
+import ApprovalStatusPill from "@/components/ui/approval-status-pill";
+import { getApprovalEntityStatusLabel } from "@/constants/approvalEntityStatus";
 import NuevaAsignacionModal from "@/modules/marketAdmin/components/MarketAdminManualBonus/NuevaAsignacionModal";
 import ModalCreateDiscount from "@/modules/marketAdmin/components/market-admin-client-detail/ModalCreateDiscount";
 import {
@@ -128,6 +130,18 @@ export default function PromocionesTab({
       render: (v: string | null) => <DateCell value={v} />
     },
     {
+      title: "Aprobación",
+      dataIndex: "approval_entity_status_id",
+      key: "approval_entity_status_id",
+      width: 140,
+      sorter: (a, b) =>
+        getApprovalEntityStatusLabel(a.approval_entity_status_id).localeCompare(
+          getApprovalEntityStatusLabel(b.approval_entity_status_id)
+        ),
+      onHeaderCell: headerCell,
+      render: (statusId: number | null) => <ApprovalStatusPill statusId={statusId} />
+    },
+    {
       title: "Estado",
       dataIndex: "status",
       key: "status",
@@ -169,13 +183,13 @@ export default function PromocionesTab({
   ];
 
   return (
-    <div>
+    <div className="cp-list-scroll">
       <div className="flex items-center justify-end mb-4">
         <button
           onClick={handleCreateDiscount}
-          className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
+          className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
         >
-          <Plus size={14} /> Crear descuento
+          <Plus size={18} /> Crear descuento
         </button>
       </div>
 
@@ -200,18 +214,17 @@ export default function PromocionesTab({
           <div className="flex items-baseline gap-3">
             <p className="text-sm font-bold text-[#141414]">Bonificados manuales</p>
             {bonificadosTotals && (
-              <span className="text-xs text-[#999999]">
-                {bonificadosTotals.total_assigned} asignadas ·{" "}
-                {bonificadosTotals.total_available} disponibles ·{" "}
-                {bonificadosTotals.total_consumed} consumidas
+              <span className="text-[13px] text-[#999999]">
+                {bonificadosTotals.total_assigned} asignadas · {bonificadosTotals.total_available}{" "}
+                disponibles · {bonificadosTotals.total_consumed} consumidas
               </span>
             )}
           </div>
           <button
             onClick={handleCreateBonus}
-            className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
           >
-            <Plus size={14} /> Crear bonificado
+            <Plus size={18} /> Crear bonificado
           </button>
         </div>
 

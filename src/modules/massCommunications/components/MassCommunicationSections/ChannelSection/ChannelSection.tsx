@@ -28,9 +28,9 @@ const channels: { key: ChannelType; icon: typeof Mail; label: string; descriptio
 
 export default function ChannelSection({ channel, onChannelChange }: ChannelSectionProps) {
   return (
-    <section className="bg-white rounded-lg p-6">
+    <section className="cp-card px-[18px] py-[14px]">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-bold">
+        <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-[13px] font-bold">
           1
         </div>
         <Text strong className="text-[15px]">
@@ -57,7 +57,7 @@ export default function ChannelSection({ channel, onChannelChange }: ChannelSect
                 <Text strong className="text-[13px]">
                   {label}
                 </Text>
-                <Text type="secondary" className="block text-xs">
+                <Text type="secondary" className="block text-[13px]">
                   {description}
                 </Text>
               </div>

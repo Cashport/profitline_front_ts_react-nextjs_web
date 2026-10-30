@@ -13,7 +13,8 @@ interface MapOverlaysProps {
   palette: IVisitsPalette;
 }
 
-const GLASS = "border border-border bg-card/95 backdrop-blur-sm";
+/** Vidrio de las píldoras sobre el mapa (también lo usa el reloj de la esquina). */
+export const GLASS = "border border-border bg-card/95 backdrop-blur-sm";
 
 interface LayerChip {
   key: keyof IVisitsLayers;
@@ -65,7 +66,10 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
         {
           label: "Por visitar",
           mark: (
-            <span className="w-3.5 border-t-2 border-dashed" style={{ borderColor: palette.bone }} />
+            <span
+              className="w-3.5 border-t-2 border-dashed"
+              style={{ borderColor: palette.bone }}
+            />
           )
         },
         ...results
@@ -100,7 +104,7 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
               aria-pressed={layers[c.key]}
               onClick={() => onToggleLayer(c.key)}
               className={cn(
-                "flex items-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-2 py-[3px] text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground",
+                "flex items-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-2 py-[3px] text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground",
                 layers[c.key] && "border-wallet-accent bg-wallet-accent-soft text-foreground"
               )}
             >
@@ -114,7 +118,7 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
 
       <div
         className={cn(
-          "absolute bottom-10 left-3 z-[2] flex max-w-[calc(100%-90px)] flex-wrap gap-x-3 gap-y-1 rounded-lg px-2.5 py-[7px] text-[11px] text-foreground/80 max-[1200px]:hidden",
+          "absolute bottom-10 left-3 z-[2] flex max-w-[calc(100%-90px)] flex-wrap gap-x-3 gap-y-1 rounded-lg px-2.5 py-[7px] text-[13px] text-foreground/80 max-[1200px]:hidden",
           GLASS
         )}
       >

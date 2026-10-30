@@ -10,7 +10,7 @@ export function MedicalAccountStatusTag({ statusCode, statusName }: MedicalAccou
 
   return (
     <span
-      className="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium"
+      className="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[13px] font-medium"
       style={{
         color,
         borderColor: color,

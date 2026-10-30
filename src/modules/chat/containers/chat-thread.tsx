@@ -295,7 +295,7 @@ export default function ChatThread({
                 {conversation.client_name ? conversation.client_name : conversation.customer}
               </p>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               {channel === "whatsapp"
                 ? `${conversation.phone} - ${conversation.customer}`
                 : conversation.email ?? "sin correo"}

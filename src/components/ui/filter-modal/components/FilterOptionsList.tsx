@@ -3,6 +3,7 @@ import { Loader2, Search, X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 import type { FilterCategoryConfig, FilterOptionItem } from "../FilterModal.types";
+import SearchField from "@/components/ui/search-field/search-field";
 
 interface FilterOptionsListProps {
   category: FilterCategoryConfig;
@@ -21,7 +22,7 @@ const MetaBar = ({ children }: { children: React.ReactNode }) => (
 );
 
 const MetaLabel = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-[10.5px] font-semibold uppercase tracking-[.6px] text-cp-ink-2">
+  <span className="text-[13px] font-semibold text-cp-ink-2">
     {children}
   </span>
 );
@@ -72,16 +73,12 @@ export default function FilterOptionsList({
 
   return (
     <div className="min-w-0 flex-1 overflow-auto px-[22px] py-[18px] text-cp-ink">
-      <div className="mb-3 flex h-10 items-center gap-2.5 rounded-[10px] border border-cp-line-2 bg-cp-subtle px-3">
-        <Search className="h-[15px] w-[15px] shrink-0 text-cp-ink-4" strokeWidth={2} />
-        <input
-          type="text"
-          placeholder={`Buscar en ${category.label.toLowerCase()}...`}
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="min-w-0 flex-1 border-0 bg-transparent text-[13px] text-cp-ink outline-none placeholder:text-cp-ink-4"
-        />
-      </div>
+      <SearchField
+        value={searchTerm}
+        onChange={onSearchChange}
+        placeholder={`Buscar en ${category.label.toLowerCase()}...`}
+        className="mb-3"
+      />
 
       <MetaBar>
         <MetaLabel>{category.metaLabel ?? `${filteredOptions.length} resultados`}</MetaLabel>
@@ -89,7 +86,7 @@ export default function FilterOptionsList({
           <button
             type="button"
             onClick={() => onToggleAll(filteredOptions, isAllSelected)}
-            className="cursor-pointer border-0 bg-transparent text-xs font-semibold text-[#8aa30f]"
+            className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-[#8aa30f]"
           >
             {isAllSelected ? "Deseleccionar todos" : "Seleccionar todos"}
           </button>
@@ -108,7 +105,7 @@ export default function FilterOptionsList({
           <button
             type="button"
             onClick={onRetry}
-            className="cursor-pointer border-0 bg-transparent text-xs font-semibold text-[#8aa30f]"
+            className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-[#8aa30f]"
           >
             Reintentar
           </button>
@@ -140,6 +137,11 @@ export default function FilterOptionsList({
                   />
                 </span>
                 <span className="truncate">{opt.name}</span>
+                {opt.count !== undefined && (
+                  <span className="ml-auto shrink-0 pl-2 text-[13px] tabular-nums text-cp-ink-4">
+                    {opt.count}
+                  </span>
+                )}
               </button>
             );
           })}

@@ -1,8 +1,8 @@
 "use client";
 
-import { Search } from "lucide-react";
 import { EstadoAprobacion } from "@/types/marketAdmin/IMarketAdmin";
 import { ESTADO_CONFIG } from "./estadoConfig";
+import SearchField from "@/components/ui/search-field/search-field";
 
 const FILTROS = ["todos", "pendiente", "aprobado", "rechazado"] as const;
 
@@ -19,22 +19,18 @@ export default function AsignacionesFilters({
 }) {
   return (
     <div className="flex items-center gap-3 px-6 py-3 border-b border-[#EEEEEE]">
-      <div className="flex items-center gap-2 px-3 py-2 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg">
-        <Search size={13} className="text-[#999999]" />
-        <input
-          type="text"
-          placeholder="Buscar cliente o producto..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="text-sm outline-none bg-transparent text-[#141414] placeholder:text-[#999999] w-56"
-        />
-      </div>
+      <SearchField
+        value={search}
+        onChange={onSearchChange}
+        placeholder="Buscar cliente o producto..."
+        className="w-72"
+      />
       <div className="flex items-center gap-1">
         {FILTROS.map((estado) => (
           <button
             key={estado}
             onClick={() => onFiltroChange(estado)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors capitalize ${
+            className={`px-3 py-1.5 text-[13px] font-medium rounded-lg transition-colors capitalize ${
               filtroEstado === estado
                 ? "bg-[#141414] text-white"
                 : "text-[#666666] hover:bg-[#F7F7F7]"

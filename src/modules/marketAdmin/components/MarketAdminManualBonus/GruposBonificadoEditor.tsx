@@ -51,7 +51,7 @@ export default function GruposBonificadoEditor({
         <button
           type="button"
           onClick={() => addGrupo("fijo")}
-          className="flex items-center gap-1 text-[10px] text-[#666666] hover:text-[#141414] hover:underline"
+          className="flex items-center gap-1 text-[13px] text-[#666666] hover:text-[#141414] hover:underline"
         >
           <Plus size={9} /> Agregar grupo fijo
         </button>
@@ -59,7 +59,7 @@ export default function GruposBonificadoEditor({
         <button
           type="button"
           onClick={() => addGrupo("pool")}
-          className="flex items-center gap-1 text-[10px] text-[#92400E] hover:underline"
+          className="flex items-center gap-1 text-[13px] text-[#92400E] hover:underline"
         >
           <Plus size={9} /> Agregar grupo a elegir
         </button>

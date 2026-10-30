@@ -81,11 +81,11 @@ export default function NuevaAsignacionModal({
       <div className="flex flex-col gap-4">
         {/* Cliente */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-[#666666]">Cliente</label>
+          <label className="text-[13px] font-medium text-[#666666]">Cliente</label>
           {clienteFijo ? (
             <div className="px-3 py-2.5 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg">
               <p className="text-sm text-[#141414]">{clienteFijo.nombre}</p>
-              <p className="text-xs text-[#999999]">NIT: {clienteFijo.nit}</p>
+              <p className="text-[13px] text-[#999999]">NIT: {clienteFijo.nit}</p>
             </div>
           ) : (
             <ClienteSearchSelect
@@ -99,8 +99,8 @@ export default function NuevaAsignacionModal({
         {/* Productos bonificados (grupos fijos / a elegir) */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-[#666666]">Productos bonificados</label>
-            <span className="text-xs text-[#999999]">
+            <label className="text-[13px] font-medium text-[#666666]">Productos bonificados</label>
+            <span className="text-[13px] text-[#999999]">
               Total a asignar: <span className="font-semibold text-[#141414]">{totalUnidades}</span>{" "}
               und.
             </span>
@@ -111,7 +111,7 @@ export default function NuevaAsignacionModal({
         {/* Fechas */}
         <div className="flex gap-3">
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-[#666666]">Fecha de expiración</label>
+            <label className="text-[13px] font-medium text-[#666666]">Fecha de expiración</label>
             <input
               type="date"
               value={fechaExpiracion}
@@ -120,7 +120,7 @@ export default function NuevaAsignacionModal({
             />
           </div>
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-[#666666]">Fecha de fin</label>
+            <label className="text-[13px] font-medium text-[#666666]">Fecha de fin</label>
             <input
               type="date"
               value={fechaFin}
@@ -133,7 +133,7 @@ export default function NuevaAsignacionModal({
 
         {/* Nota / comentarios */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-[#666666]">Comentarios (opcional)</label>
+          <label className="text-[13px] font-medium text-[#666666]">Comentarios (opcional)</label>
           <textarea
             rows={2}
             placeholder="Motivo de la asignación..."

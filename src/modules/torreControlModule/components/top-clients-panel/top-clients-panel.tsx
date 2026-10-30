@@ -9,16 +9,20 @@ interface TopClientsPanelProps {
   clientes: ITorreCliente[];
 }
 
-const TH = "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.03em]";
+const TH = "bg-cp-surface px-3 py-3 text-left text-[13.5px] font-semibold text-cp-ink";
 
 /** Los ocho clientes con más saldo vencido que nadie ha tocado. */
 export default function TopClientsPanel({ clientes }: TopClientsPanelProps) {
   return (
-    <PanelCard title="Clientes con más saldo sin conciliar" hint="vencido sin acuerdo ni novedad" flush>
+    <PanelCard
+      title="Clientes con más saldo sin conciliar"
+      hint="vencido sin acuerdo ni novedad"
+      flush
+    >
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead>
-            <tr className="border-b border-border text-muted-foreground">
+            <tr className="border-b border-cp-line">
               <th className={TH}>Cliente</th>
               <th className={TH}>Ejecutivo</th>
               <th className={`${TH} text-right`}>Vencido</th>

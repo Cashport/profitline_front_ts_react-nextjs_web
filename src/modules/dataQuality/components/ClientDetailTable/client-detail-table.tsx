@@ -19,10 +19,7 @@ import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalInt
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
 import { ModalFileHistory } from "../ModalFileHistory";
 import { useAppStore } from "@/lib/store/store";
-import {
-  canUploadDataFiles,
-  hasDataQualityManagementPermission
-} from "@/utils/utils";
+import { canUploadDataFiles, hasDataQualityManagementPermission } from "@/utils/utils";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -423,7 +420,7 @@ export function ClientDetailTable({
                 <TableCell>
                   <Badge
                     variant="secondary"
-                    className="text-xs text-white"
+                    className="text-[13px] text-white"
                     style={{ backgroundColor: file.data_type.color }}
                   >
                     {file.data_type.description}
@@ -464,7 +461,7 @@ export function ClientDetailTable({
                       <TooltipTrigger asChild>
                         <Badge
                           variant="outline"
-                          className="text-xs cursor-help"
+                          className="text-[13px] cursor-help"
                           style={{
                             color: file.status_color,
                             backgroundColor: file.status_bg_color,
@@ -475,13 +472,13 @@ export function ClientDetailTable({
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent className="bg-cashport-black text-white">
-                        <p className="text-xs">{file.last_novelty}</p>
+                        <p className="text-[13px]">{file.last_novelty}</p>
                       </TooltipContent>
                     </Tooltip>
                   ) : (
                     <Badge
                       variant="outline"
-                      className="text-xs"
+                      className="text-[13px]"
                       style={{
                         color: file.status_color,
                         backgroundColor: file.status_bg_color,

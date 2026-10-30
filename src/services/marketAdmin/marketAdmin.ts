@@ -12,14 +12,22 @@ import {
   IMarketAdminClientsBatchBody,
   IMarketAdminClientsMassiveUpdateResponse,
   IMarketAdminFacturador,
+  IMarketAdminVendorLine,
   IProductInventoryItem,
   IProfitLoader,
   IProfitLoaderTimelineResponse,
+  IPromotionDetail,
+  IPromotionListItem,
   IUpdateMarketAdminClientAddressBody,
   IUpdateMarketAdminClientConfigBody,
   IUpdateMarketAdminProductBody
 } from "@/types/marketAdmin/IMarketAdmin";
 import instance, { API } from "@/utils/api/api";
+
+export const getMarketAdminMarkets = async (): Promise<string[]> => {
+  const response: GenericResponse<string[]> = await API.get("/marketplace-admin/clients/markets");
+  return response.data;
+};
 
 export const createBonification = async (body: ICreatePromotionBody) => {
   try {
@@ -29,6 +37,24 @@ export const createBonification = async (body: ICreatePromotionBody) => {
     console.error("Error al crear la promoción:", error);
     throw error;
   }
+};
+
+export const getAdminPromotions = async (params?: { active?: number; search?: string }) => {
+  const response: GenericResponse<IPromotionListItem[]> = await API.get("/promotion", { params });
+  return response.data;
+};
+
+export const getAdminPromotionDetail = async (id: number) => {
+  const response: GenericResponse<IPromotionDetail> = await API.get(`/promotion/${id}`);
+  return response.data;
+};
+
+export const updatePromotion = async (id: number, body: ICreatePromotionBody) => {
+  const response: GenericResponse<{ promotionId: number }> = await API.put(
+    `/promotion/${id}`,
+    body
+  );
+  return response.data;
 };
 
 export const createManualBonus = async (body: ICreateManualBonusBody) => {
@@ -301,6 +327,23 @@ export const removeMarketAdminUserBiller = async (userId: string | number) => {
     return response.data;
   } catch (error) {
     console.error("Error al quitar el facturador del usuario:", error);
+    throw error;
+  }
+};
+
+// PUT /marketplace-admin/users/:id/product-categories — reemplaza las categorías asignadas
+export const updateMarketAdminUserProductCategories = async (
+  userId: string | number,
+  categoryIds: number[]
+) => {
+  try {
+    const response: GenericResponse<IMarketAdminVendorLine[]> = await API.put(
+      `/marketplace-admin/users/${userId}/product-categories`,
+      { category_ids: categoryIds }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar las categorías del usuario:", error);
     throw error;
   }
 };

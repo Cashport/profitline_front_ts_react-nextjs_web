@@ -168,3 +168,50 @@ export const downloadWalletMatrixExcel = async (filters?: IWalletMatrixFilters):
     throw new Error(message || "No se pudo descargar el Excel de la cartera.");
   }
 };
+
+/**
+ * Descarga el Excel de "Novedades" (Matriz de control): 3 hojas desde las
+ * vistas `vw_novedades_*`. Viaja la misma query que `/portfolio/matrix`; el
+ * backend aplica el alcance del usuario y los filtros de la pantalla.
+ *
+ * Devuelve el nombre del archivo para mostrarlo en el aviso de éxito.
+ */
+export const downloadNoveltiesExcel = async (
+  filters?: IWalletMatrixFilters
+): Promise<string> => {
+  try {
+    const response = await instance.get(
+      `/portfolio/matrix/novelties-export?${buildMatrixQuery(filters)}`,
+      {
+        responseType: "blob",
+        // Las vistas agregan ~170k documentos; el archivo tarda unos segundos.
+        timeout: 120000
+      }
+    );
+
+    const disposition = (response.headers["content-disposition"] as string) || "";
+    const filename =
+      disposition.match(/filename="?([^";]+)"?/)?.[1] ||
+      `Novedades_${new Date().toLocaleDateString("en-CA")}.xlsx`;
+
+    const url = window.URL.createObjectURL(response.data as Blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    return filename;
+  } catch (error) {
+    let message: string | undefined;
+    if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+      try {
+        message = JSON.parse(await error.response.data.text())?.message;
+      } catch {
+        // Cuerpo que no es JSON (p. ej. un 502 del gateway).
+      }
+    }
+    throw new Error(message || "No se pudo descargar el Excel de novedades.");
+  }
+};

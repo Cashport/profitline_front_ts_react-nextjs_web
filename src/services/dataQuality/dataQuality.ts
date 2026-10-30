@@ -31,7 +31,9 @@ import {
   IBotRunNowResult,
   IBotHistoryList,
   IVariableHistoryEntry,
-  IAuxiliaryUploadBatch
+  IAuxiliaryUploadBatch,
+  IReprocessArchiveDatesRequest,
+  IReprocessArchiveDatesResult
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -579,6 +581,42 @@ export const uploadIqviaAuxCatalog = async (
   }
 };
 
+export const downloadIqviaAuxProductCatalog = async ({
+  countryId
+}: {
+  countryId?: number | string;
+}) => {
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await API.get(`${config.API_HOST}/data/iqvia/aux-product/download${queryString}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const uploadIqviaAuxProductCatalog = async (
+  file: File,
+  countryId?: number | string
+): Promise<IIqviaAuxUploadResult> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<IIqviaAuxUploadResult> = await API.post(
+      `${config.API_HOST}/data/iqvia/aux-product/upload${queryString}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading IQVIA product auxiliary file:", error);
+    throw error;
+  }
+};
+
 export const convertMaterialToPack = async (materialId: number): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.put(
@@ -846,6 +884,26 @@ export const createNewFileDate = async (
     return response.data;
   } catch (error) {
     console.error("Error creating new file date:", error);
+    throw error;
+  }
+};
+
+/**
+ * Reprocesa las fechas de archivo del cliente desde el inicio del mes o desde una fecha
+ * específica, hasta el final del mes actual. El payload se construye con
+ * `buildReprocessPayload` para que `from_date` no viaje con "month_start".
+ */
+export const reprocessArchiveDates = async (
+  payload: IReprocessArchiveDatesRequest
+): Promise<IReprocessArchiveDatesResult> => {
+  try {
+    const response: GenericResponse<IReprocessArchiveDatesResult> = await API.post(
+      `${config.API_HOST}/data/archive-dates/reprocess`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error reprocessing archive dates:", error);
     throw error;
   }
 };

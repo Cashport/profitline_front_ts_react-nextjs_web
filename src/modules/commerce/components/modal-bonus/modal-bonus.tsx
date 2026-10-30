@@ -137,12 +137,7 @@ const ModalBonus = ({
   // Otros pool: análogo a `updatePool`/`setPoolValue` pero indexado por
   // `group_item_id` del subgrupo de Otros. La suma de las cantidades de los
   // productos del subgrupo nunca puede superar `max_selection_qty`.
-  const updateOtherPool = (
-    groupItemId: number,
-    productId: number,
-    delta: number,
-    max: number
-  ) => {
+  const updateOtherPool = (groupItemId: number, productId: number, delta: number, max: number) => {
     setOtherPoolQty((prev) => {
       const group = prev[groupItemId] ?? {};
       const current = group[productId] ?? 0;
@@ -525,9 +520,7 @@ const ModalBonus = ({
   // bonificados comunes en fijo (cuadro verde + header "Incluido"), pero el
   // item es ajustable: arranca con el `qty` que manda el backend y se puede
   // mover entre 0 y `max_selection_qty` con la misma regla de suma del pool.
-  const renderOtherFixedSubgroup = (
-    subgroup: IOtherBonusGroup["items"][number]
-  ) => {
+  const renderOtherFixedSubgroup = (subgroup: IOtherBonusGroup["items"][number]) => {
     const groupTotal = getOtherPoolGroupTotal(subgroup.group_item_id);
     return (
       <div key={subgroup.group_item_id} className={styles.fixedTable}>
@@ -540,8 +533,7 @@ const ModalBonus = ({
         <table className={styles.table}>
           <tbody>
             {subgroup.items.map((item, idx) => {
-              const qty =
-                otherPoolQty[subgroup.group_item_id]?.[item.product_id] ?? item.qty ?? 0;
+              const qty = otherPoolQty[subgroup.group_item_id]?.[item.product_id] ?? item.qty ?? 0;
               return (
                 <tr
                   key={item.product_id}
@@ -623,9 +615,7 @@ const ModalBonus = ({
               {group.items
                 .filter((sub) => !sub.fixed)
                 .map((sub) => renderOtherPoolSubgroup(group, sub))}
-              {group.items
-                .filter((sub) => sub.fixed)
-                .map((sub) => renderOtherFixedSubgroup(sub))}
+              {group.items.filter((sub) => sub.fixed).map((sub) => renderOtherFixedSubgroup(sub))}
             </div>
           </div>
         ))}

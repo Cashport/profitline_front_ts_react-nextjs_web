@@ -76,15 +76,16 @@
   --page-pad-x: 16px;
   --page-pad-bottom: 11px;
   --header-h: 77px;
-  --card-gap: 13px;
-  --section-gap: 16px;
-  --card-radius: 16px;
-  --card-pad: 15px 21px;
+  /* Medidas reales de Clientes (la referencia): tarjetas a 12px entre sí, radio 14, 14/18 de padding. */
+  --card-gap: 12px;
+  --section-gap: 12px;
+  --card-radius: 14px;
+  --card-pad: 14px 18px;
   --kpi-h: 112px;
-  --control-h: 43px;
-  --search-w: 293px;
+  --control-h: 36px; /* diseño "Corte y Proyeccion": Filtrar, buscador y botones del header */
+  --search-w: 300px;
   --chip-h: 35px;
-  --avatar: 37px;
+  --avatar: 34px;
   --table-title-h: 48px;
   --table-head-h: 43px;
   --table-row-h: 56px;
@@ -309,7 +310,7 @@
   border: 1px solid rgb(var(--border));
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   font-family: var(--font-poppins), sans-serif;
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.35;
 }
 
@@ -356,4 +357,102 @@
 
 .dark .visits-map .mapboxgl-ctrl-attrib a {
   color: rgb(var(--foreground));
+}
+
+/* docs/DESIGN.md §3 — piezas de página compartidas. Úsalas en vez de repetir clases a mano:
+   así todas las pantallas quedan iguales a Clientes y un cambio aquí llega a todas. */
+@layer components {
+  /* Contenedor de una vista: columna con --section-gap entre bloques. El header compartido,
+     si es su primer hijo, no suma ese gap: el contenido arranca justo debajo (como Clientes). */
+  .cp-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-gap);
+    min-width: 0;
+  }
+
+  /* Fila de KPIs / tarjetas resumen. */
+  .cp-card-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--card-gap);
+  }
+}
+
+/* Tarjeta de contenido: blanca, radio 14, sin borde ni sombra. Va FUERA de @layer a propósito:
+   así le gana a utilidades que traen componentes como Card de chat/ui (rounded-xl, border,
+   shadow-sm) y `cp-card` siempre significa exactamente la tarjeta de Clientes. */
+.cp-card {
+  background-color: rgb(var(--cp-surface));
+  border: 0;
+  border-radius: var(--card-radius);
+  box-shadow: none;
+  min-width: 0;
+}
+
+/* Tarjeta de lista con scroll interno (DESIGN.md §7: "el cuerpo hace scroll interno"). La
+   página no scrollea (globals.scss): la tarjeta toma el alto que deja el header y solo la
+   tabla (`cp-list-scroll`) desplaza sus filas, con el encabezado y la paginación fijos.
+   Uso: <div className="cp-card cp-list-card"> … <Table className="cp-list-scroll" /> </div>
+   `cp-fill` es la misma columna para los contenedores intermedios (cuerpo de pestañas, raíz de
+   una pestaña) y las pestañas de antd (UiTab) heredan el alto dentro de la tarjeta. Un contenedor
+   con `cp-list-scroll` que no sea tabla (formularios, tarjetas) debe ser bloque, no flex: un hijo
+   con overflow-hidden se encogería en vez de desbordar. */
+.cp-list-card,
+.cp-fill,
+.cp-list-card .tabsContainer,
+.cp-list-card .tabsContainer .ant-tabs,
+.cp-list-card .tabsContainer .ant-tabs-content-holder,
+.cp-list-card .tabsContainer .ant-tabs-content,
+.cp-list-card .tabsContainer .ant-tabs-tabpane-active {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-list-scroll,
+.cp-list-card .ant-tabs-tabpane-active > .ant-table-wrapper {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d6d8de transparent;
+}
+
+.cp-list-scroll .ant-table-thead > tr > th,
+.cp-list-card .ant-tabs-tabpane-active > .ant-table-wrapper .ant-table-thead > tr > th {
+  position: sticky !important;
+  top: 0;
+  z-index: 3;
+}
+
+.cp-list-scroll .ant-table-pagination,
+.cp-list-card .ant-tabs-tabpane-active > .ant-table-wrapper .ant-table-pagination {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  margin: 0 !important;
+  padding: 12px 0;
+  background: rgb(var(--cp-surface));
+}
+
+/* Vistas de tarjetas sueltas (formularios, menús, detalle): si la tarjeta no cabe en el alto que
+   deja el header, scrollea por dentro en vez de recortarse (`overflow-hidden` de `cp-card`). Se
+   activa con `cp-scroll-cards` en el contenedor de la vista (layout de la ruta). */
+.cp-scroll-cards .cp-page > .cp-card {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d6d8de transparent;
+}
+
+/* Relleno de controles sin borde (Filtrar, ⋯) siempre al contrario de la superficie
+   (DESIGN.md §8): gris sobre tarjetas blancas, blanco sobre el gris de la página (header o
+   cualquier contenedor con `cp-on-page`). */
+.cp-control-fill {
+  background-color: rgb(var(--cp-bg));
+}
+
+.cp-on-page .cp-control-fill {
+  background-color: rgb(var(--cp-surface));
 }

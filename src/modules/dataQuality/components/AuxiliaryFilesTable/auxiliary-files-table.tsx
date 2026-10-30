@@ -64,9 +64,7 @@ export function AuxiliaryFilesTable() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const { runUpload, structureModals } = useIntakeStructureUpload();
 
-  const showStatus = (auxiliaryFiles ?? []).some(
-    (file) => file.async_upload || file.last_batch
-  );
+  const showStatus = (auxiliaryFiles ?? []).some((file) => file.async_upload || file.last_batch);
 
   const openLegacyUpload = (id: number) => {
     const input = document.createElement("input");
@@ -198,7 +196,7 @@ export function AuxiliaryFilesTable() {
                   <TableCell>
                     <Badge
                       variant="secondary"
-                      className="text-xs text-white"
+                      className="text-[13px] text-white"
                       style={{ backgroundColor: file.file_type_color }}
                     >
                       {file.file_type}
@@ -230,7 +228,10 @@ export function AuxiliaryFilesTable() {
                   {showStatus && (
                     <TableCell>
                       {statusView ? (
-                        <span className="flex items-center gap-2 text-xs" style={{ color: "#141414" }}>
+                        <span
+                          className="flex items-center gap-2 text-[13px]"
+                          style={{ color: "#141414" }}
+                        >
                           <span
                             className="inline-block size-2 rounded-full"
                             style={{ backgroundColor: statusView.color }}
@@ -238,7 +239,7 @@ export function AuxiliaryFilesTable() {
                           {statusView.label}
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-400">-</span>
+                        <span className="text-[13px] text-gray-400">-</span>
                       )}
                     </TableCell>
                   )}

@@ -7,5 +7,10 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ViewWrapper headerTitle="Bancos">{children}</ViewWrapper>;
+  // BanksView pinta su propio Header: el buscador y Filtrar los pone la pestaña activa.
+  return (
+    <ViewWrapper headerTitle="Bancos" hideHeader>
+      {children}
+    </ViewWrapper>
+  );
 }

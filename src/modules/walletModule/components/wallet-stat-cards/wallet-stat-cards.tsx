@@ -121,11 +121,17 @@ export default function WalletStatCards({ summary, totals }: WalletStatCardsProp
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-[var(--card-gap)] md:grid-cols-[repeat(6,minmax(0,1fr))]">
       {cards.map((c) => (
-        <div key={c.key} className="flex flex-col rounded-xl bg-card p-4 shadow-sm">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground">
-            {c.label}
+        <div key={c.key} className="cp-card flex flex-col px-[18px] py-[14px]">
+          <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap text-[13px] font-medium text-muted-foreground">
+            {/* Seis tarjetas en una fila (como los KPIs de Clientes): lo que no cabe se corta. */}
+            <span
+              className="flex min-w-0 items-center gap-1.5 truncate"
+              title={typeof c.label === "string" ? c.label : undefined}
+            >
+              {c.label}
+            </span>
             {/* El margen negativo anula el padding del chip: la fila no crece y el
                 valor queda alineado con el de las demás tarjetas. */}
             {c.badge && (
@@ -134,11 +140,11 @@ export default function WalletStatCards({ summary, totals }: WalletStatCardsProp
               </StatusChip>
             )}
           </div>
-          <div className="mt-1.5 text-[21px] font-medium leading-none tracking-tight tabular-nums text-foreground">
+          <div className="mt-1.5 truncate text-[21px] font-medium leading-none tracking-tight tabular-nums text-foreground">
             {c.value}
           </div>
           {c.bar}
-          <div className="mt-auto pt-2 text-[11.5px] text-muted-foreground">{c.foot}</div>
+          <div className="mt-auto truncate pt-2 text-[13px] text-muted-foreground">{c.foot}</div>
         </div>
       ))}
     </div>

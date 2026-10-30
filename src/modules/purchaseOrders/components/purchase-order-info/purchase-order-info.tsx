@@ -184,14 +184,16 @@ export function PurchaseOrderInfo({
           <div className="grid grid-cols-3 gap-4">
             {!isCreating && (
               <div>
-                <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
                   ID Interno OC
                 </label>
-                <p className="text-sm font-semibold text-cashport-black mt-1">{data?.id ?? "xxxx"}</p>
+                <p className="text-sm font-semibold text-cashport-black mt-1">
+                  {data?.id ?? "xxxx"}
+                </p>
               </div>
             )}
             <div>
-              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+              <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
                 Orden de compra
               </label>
               <Controller
@@ -211,7 +213,7 @@ export function PurchaseOrderInfo({
                       </p>
                     )}
                     {errors.purchase_order_number && (
-                      <span className="text-xs text-red-500">
+                      <span className="text-[13px] text-red-500">
                         {errors.purchase_order_number.message}
                       </span>
                     )}
@@ -220,7 +222,7 @@ export function PurchaseOrderInfo({
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+              <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
                 Canal
               </label>
               <Controller
@@ -248,7 +250,7 @@ export function PurchaseOrderInfo({
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
+            <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
               Cliente
             </label>
             <Controller
@@ -292,14 +294,14 @@ export function PurchaseOrderInfo({
                     <p className="text-sm font-semibold text-cashport-black mt-1">{field.value}</p>
                   )}
                   {errors.client_name && (
-                    <span className="text-xs text-red-500">{errors.client_name.message}</span>
+                    <span className="text-[13px] text-red-500">{errors.client_name.message}</span>
                   )}
                 </>
               )}
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
+            <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
               Fecha orden de compra
             </label>
             {isCreating ? (
@@ -312,9 +314,7 @@ export function PurchaseOrderInfo({
                       <DatePicker
                         format="YYYY-MM-DD"
                         value={field.value ? dayjs.utc(field.value) : null}
-                        onChange={(date) =>
-                          field.onChange(date ? date.format("YYYY-MM-DD") : "")
-                        }
+                        onChange={(date) => field.onChange(date ? date.format("YYYY-MM-DD") : "")}
                         className="mt-1 h-8 text-sm font-semibold w-full"
                         placeholder="Seleccionar fecha"
                       />
@@ -324,7 +324,7 @@ export function PurchaseOrderInfo({
                       </p>
                     )}
                     {errors.order_date && (
-                      <span className="text-xs text-red-500">{errors.order_date.message}</span>
+                      <span className="text-[13px] text-red-500">{errors.order_date.message}</span>
                     )}
                   </>
                 )}
@@ -350,7 +350,7 @@ export function PurchaseOrderInfo({
                       </p>
                     )}
                     {errors.created_at && (
-                      <span className="text-xs text-red-500">{errors.created_at.message}</span>
+                      <span className="text-[13px] text-red-500">{errors.created_at.message}</span>
                     )}
                   </>
                 )}
@@ -359,7 +359,7 @@ export function PurchaseOrderInfo({
           </div>
           {!isCreating && (
             <div>
-              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+              <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
                 Facturas
               </label>
 
@@ -387,7 +387,7 @@ export function PurchaseOrderInfo({
         <h3 className="text-lg font-semibold text-cashport-black mb-4">Información de Entrega</h3>
         <div className="space-y-4">
           <div className="mt-4">
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
+            <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
               Fecha/Hora entrega
             </label>
             <Controller
@@ -414,14 +414,14 @@ export function PurchaseOrderInfo({
                     </p>
                   )}
                   {errors.delivery_date && (
-                    <span className="text-xs text-red-500">{errors.delivery_date.message}</span>
+                    <span className="text-[13px] text-red-500">{errors.delivery_date.message}</span>
                   )}
                 </>
               )}
             />
           </div>
           <div className="!mt-4">
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
+            <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
               Dirección completa
             </label>
             <Controller
@@ -468,7 +468,7 @@ export function PurchaseOrderInfo({
                         )}
                       />
                       {addressesError && (
-                        <span className="text-xs text-red-500 mt-1">{addressesError}</span>
+                        <span className="text-[13px] text-red-500 mt-1">{addressesError}</span>
                       )}
                     </>
                   ) : (
@@ -477,14 +477,16 @@ export function PurchaseOrderInfo({
                     </p>
                   )}
                   {errors.delivery_address && (
-                    <span className="text-xs text-red-500">{errors.delivery_address.message}</span>
+                    <span className="text-[13px] text-red-500">
+                      {errors.delivery_address.message}
+                    </span>
                   )}
                 </>
               )}
             />
           </div>
           <div className="4">
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
+            <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
               Observación
             </label>
             <Controller
@@ -514,7 +516,7 @@ export function PurchaseOrderInfo({
                     </Tooltip>
                   )}
                   {errors.observations && (
-                    <span className="text-xs text-red-500">{errors.observations.message}</span>
+                    <span className="text-[13px] text-red-500">{errors.observations.message}</span>
                   )}
                 </>
               )}

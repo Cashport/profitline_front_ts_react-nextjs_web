@@ -92,7 +92,7 @@ export default function ModalDetailClientCommunication({
           <Text style={{ color: "#fff", fontSize: 14, fontWeight: 600, display: "block" }}>
             {client.client_name}
           </Text>
-          <Text style={{ color: "#999", fontSize: 11 }}>
+          <Text style={{ color: "#999", fontSize: 13 }}>
             {recipients.length} destinatario{recipients.length !== 1 ? "s" : ""}
           </Text>
         </div>
@@ -111,7 +111,7 @@ export default function ModalDetailClientCommunication({
             <Flex wrap="wrap" gap={8}>
               {recipients.map((address, i) => (
                 <Tag key={i} style={{ borderRadius: 20, padding: "4px 12px", margin: 0 }}>
-                  <Text style={{ fontSize: 12, color: "#2563EB" }}>{address}</Text>
+                  <Text style={{ fontSize: 13, color: "#2563EB" }}>{address}</Text>
                 </Tag>
               ))}
             </Flex>
@@ -133,10 +133,8 @@ export default function ModalDetailClientCommunication({
               >
                 <Text
                   style={{
-                    fontSize: 10,
-                    color: "#999",
-                    textTransform: "uppercase",
-                    letterSpacing: 1
+                    fontSize: 13,
+                    color: "#999"
                   }}
                 >
                   Asunto
@@ -182,10 +180,8 @@ export default function ModalDetailClientCommunication({
                 >
                   <Text
                     style={{
-                      fontSize: 10,
+                      fontSize: 13,
                       color: "#999",
-                      textTransform: "uppercase",
-                      letterSpacing: 1,
                       display: "block",
                       marginBottom: 8
                     }}

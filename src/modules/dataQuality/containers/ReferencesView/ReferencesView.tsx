@@ -1,12 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Select } from "antd";
-import { ArrowLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import Header from "@/components/organisms/header";
-import { Card } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
 import {
   ICreateReferenceFormValues,
@@ -42,7 +41,6 @@ import {
 const CONTEXT_SCOPES: IReferenceScopeLevel[] = ["client", "country", "region"];
 
 export default function ReferencesView() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // ---------------------------------------------------------------------------
@@ -63,8 +61,7 @@ export default function ReferencesView() {
           ? searchParams.get("id_region")
           : null;
   const parsedOwner = rawOwner != null ? Number(rawOwner) : NaN;
-  const isContextMode =
-    contextScope !== null && Number.isFinite(parsedOwner) && parsedOwner > 0;
+  const isContextMode = contextScope !== null && Number.isFinite(parsedOwner) && parsedOwner > 0;
   const contextOwnerId = isContextMode ? parsedOwner : null;
 
   const [filters, setFilters] = useState<IReferenceFilesFilters>({});
@@ -96,13 +93,10 @@ export default function ReferencesView() {
     mutate: mutateContext
   } = useReferenceContext(contextQuery);
 
-  const {
-    referenceFiles,
-    isLoading,
-    isValidating,
-    error,
-    mutate
-  } = useReferenceFiles(filters, !isContextMode);
+  const { referenceFiles, isLoading, isValidating, error, mutate } = useReferenceFiles(
+    filters,
+    !isContextMode
+  );
 
   const catalogs = useMemo(
     () => ({
@@ -124,9 +118,7 @@ export default function ReferencesView() {
         id_region: contextScope === "region" ? contextOwnerId : null
       }
     : null;
-  const contextOwnerLabel = contextOwner
-    ? resolveReferenceOwnerLabel(contextOwner, catalogs)
-    : "";
+  const contextOwnerLabel = contextOwner ? resolveReferenceOwnerLabel(contextOwner, catalogs) : "";
 
   const ownReferences = referenceContext?.own ?? [];
   const inheritedReferences = referenceContext?.inherited ?? [];
@@ -220,28 +212,17 @@ export default function ReferencesView() {
     .map((reference) => reference.id);
 
   return (
-    <div className="flex flex-col gap-4">
-      <Header title="Data Quality" />
-      <Card className="border-none gap-3 p-6">
-        <Button
-          onClick={() => router.back()}
-          variant="ghost"
-          size="sm"
-          className="text-gray-700 hover:text-gray-900 w-fit"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Volver
-        </Button>
-
+    <div className="cp-page">
+      <Header title="Referencias" back />
+      <div className="cp-card flex flex-col gap-3 px-[18px] py-[14px]">
         {isContextMode && (
           <div className="rounded-lg bg-[#F5F5F4] p-4">
             <p className="text-sm font-semibold text-[#141414]">
-              Referencias — {scopeLabel(contextScope as IReferenceScopeLevel)}:{" "}
-              {contextOwnerLabel}
+              Referencias — {scopeLabel(contextScope as IReferenceScopeLevel)}: {contextOwnerLabel}
             </p>
-            <p className="text-xs text-[#6B7280] mt-1">
-              Se muestran las referencias propias de este ámbito y las heredadas que
-              aplican (precedencia cliente → país → región).
+            <p className="text-[13px] text-[#6B7280] mt-1">
+              Se muestran las referencias propias de este ámbito y las heredadas que aplican
+              (precedencia cliente → país → región).
             </p>
           </div>
         )}
@@ -338,9 +319,9 @@ export default function ReferencesView() {
               <h3 className="text-sm font-semibold text-[#141414]">
                 Heredadas que aplican a {contextOwnerLabel}
               </h3>
-              <p className="text-xs text-[#6B7280]">
-                Se marcan como «Efectiva» cuando son las que resuelven por precedencia para
-                su tipo de referencia.
+              <p className="text-[13px] text-[#6B7280]">
+                Se marcan como «Efectiva» cuando son las que resuelven por precedencia para su tipo
+                de referencia.
               </p>
               <ReferencesTable
                 references={inheritedReferences}
@@ -367,7 +348,7 @@ export default function ReferencesView() {
             onToggle={setToggleReference}
           />
         )}
-      </Card>
+      </div>
 
       <ModalReferenceForm
         isOpen={createOpen}

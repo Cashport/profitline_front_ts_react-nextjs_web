@@ -21,14 +21,14 @@ export const ESTADO_FILTER_OPTIONS = [
   { value: "0", label: "Inactivo" }
 ];
 
-// 48px de alto para igualar el buscador; el line-height descuenta los 2px de borde.
+// Mismo alto que el buscador (--control-h); el line-height descuenta los 2px de borde.
 export const ESTADO_SELECT_CLASSNAME = [
-  "!h-12",
-  "[&_.ant-select-selector]:!h-12",
+  "!h-[var(--control-h)]",
+  "[&_.ant-select-selector]:!h-[var(--control-h)]",
   "[&_.ant-select-selector]:!rounded-lg",
   "[&_.ant-select-selector]:!border-[#E0E0E0]",
-  "[&_.ant-select-selection-item]:!leading-[46px]",
-  "[&_.ant-select-selection-placeholder]:!leading-[46px]"
+  "[&_.ant-select-selection-item]:!leading-[calc(var(--control-h)-2px)]",
+  "[&_.ant-select-selection-placeholder]:!leading-[calc(var(--control-h)-2px)]"
 ].join(" ");
 
 export const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
@@ -45,7 +45,7 @@ export const StatusPill = ({ active }: { active: number }) => {
   const label = getStatusLabel(active);
   return (
     <span
-      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${ESTADO_STYLES[label] ?? ""}`}
+      className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${ESTADO_STYLES[label] ?? ""}`}
     >
       {label}
     </span>
@@ -54,7 +54,7 @@ export const StatusPill = ({ active }: { active: number }) => {
 
 export const TypePill = ({ tipo }: { tipo: string }) => (
   <span
-    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${TIPO_STYLES[tipo] ?? "bg-[#F0F0F0] text-[#666666]"}`}
+    className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${TIPO_STYLES[tipo] ?? "bg-[#F0F0F0] text-[#666666]"}`}
   >
     {tipo}
   </span>

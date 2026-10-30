@@ -50,7 +50,7 @@ export default function ConfiguracionFacturadorTab({
       </p>
 
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-bold text-[#141414]">Facturador</label>
+        <label className="text-[13px] font-bold text-[#141414]">Facturador</label>
         <Select
           showSearch
           size="large"

@@ -7,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <ViewWrapper headerTitle="" hideHeader>
-      {children}
-    </ViewWrapper>
-  );
+  return <ViewWrapper headerTitle="">{children}</ViewWrapper>;
 }

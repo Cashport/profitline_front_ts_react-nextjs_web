@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { DownloadSimple } from "@phosphor-icons/react";
 
-import { Card, CardContent } from "@/modules/chat/ui/card";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { downloadMedicalAccountsReport } from "@/services/medicalAccounts/medicalAccounts";
@@ -79,71 +78,69 @@ export function MedicalAccountsView() {
   return (
     <>
       <main>
-        <Card className="bg-cashport-white border-0 shadow-sm">
-          <CardContent>
-            <MedicalAccountsToolbar
-              onSearch={setSearchTerm}
-              statusFilter={statusFilter}
-              onStatusChange={(value) => {
-                setStatusFilter(value);
-                setPage(1);
-              }}
-              epsFilter={epsFilter}
-              onEpsChange={(value) => {
-                setEpsFilter(value);
-                setPage(1);
-              }}
-              dateRange={dateRange}
-              onDateRangeChange={(start, end) => {
-                setDateRange({ start: start || null, end: end || null });
-                setPage(1);
-              }}
-              onClearDateRange={() => {
-                setDateRange({ start: null, end: null });
-                setPage(1);
-              }}
-              onAdd={() => setIsAddModalOpen(true)}
-            />
+        <div className="cp-card px-[18px] py-[14px]">
+          <MedicalAccountsToolbar
+            onSearch={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusChange={(value) => {
+              setStatusFilter(value);
+              setPage(1);
+            }}
+            epsFilter={epsFilter}
+            onEpsChange={(value) => {
+              setEpsFilter(value);
+              setPage(1);
+            }}
+            dateRange={dateRange}
+            onDateRangeChange={(start, end) => {
+              setDateRange({ start: start || null, end: end || null });
+              setPage(1);
+            }}
+            onClearDateRange={() => {
+              setDateRange({ start: null, end: null });
+              setPage(1);
+            }}
+            onAdd={() => setIsAddModalOpen(true)}
+          />
 
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <Button
-                  type="primary"
-                  onClick={() => setShowBulkRadiate(true)}
-                  disabled={selectedIds.length === 0}
-                >
-                  Radicación masiva{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
-                </Button>
-                <Button
-                  icon={<DownloadSimple size={16} />}
-                  onClick={handleDownloadReport}
-                  loading={isDownloadingReport}
-                >
-                  Descargar reporte
-                </Button>
-              </div>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Button
+                type="primary"
+                onClick={() => setShowBulkRadiate(true)}
+                disabled={selectedIds.length === 0}
+              >
+                Radicación masiva{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
+              </Button>
+              <Button
+                icon={<DownloadSimple size={16} />}
+                onClick={handleDownloadReport}
+                loading={isDownloadingReport}
+              >
+                Descargar reporte
+              </Button>
             </div>
+          </div>
 
-            <MedicalAccountsTable
-              data={data}
-              loading={isLoading}
-              onOpenDetail={handleOpenDetail}
-              onDeleted={() => {
-                setSelectedIds([]);
-                mutate();
-              }}
-              selectedRowKeys={selectedIds}
-              onSelectionChange={(keys) => setSelectedIds(keys.map(Number))}
-              currentPage={page}
-              pageSize={limit}
-              total={pagination.totalRows}
-              onPageChange={(p, ps) => {
-                setPage(p);
-                setLimit(ps);
-              }}
-            />
-          </CardContent>
-        </Card>
+          <MedicalAccountsTable
+            data={data}
+            loading={isLoading}
+            onOpenDetail={handleOpenDetail}
+            onDeleted={() => {
+              setSelectedIds([]);
+              mutate();
+            }}
+            selectedRowKeys={selectedIds}
+            onSelectionChange={(keys) => setSelectedIds(keys.map(Number))}
+            currentPage={page}
+            pageSize={limit}
+            total={pagination.totalRows}
+            onPageChange={(p, ps) => {
+              setPage(p);
+              setLimit(ps);
+            }}
+          />
+        </div>
       </main>
 
       <ModalAddMedicalAccount

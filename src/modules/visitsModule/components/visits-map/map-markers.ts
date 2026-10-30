@@ -14,12 +14,13 @@ const setClass = (el: Element, value: string) => {
 };
 
 const ADVISOR_BODY =
-  "relative grid h-[30px] w-[30px] place-items-center rounded-full border-2 border-solid border-[color:var(--sc)] bg-card text-[9.5px] font-semibold text-foreground shadow-[0_0_0_3px_rgb(var(--card)),0_4px_12px_rgba(0,0,0,0.3)] transition-[transform,opacity] duration-150";
+  "relative grid h-[30px] w-[30px] place-items-center rounded-full border-2 border-solid border-[color:var(--sc)] bg-card text-[13px] font-semibold text-foreground shadow-[0_0_0_3px_rgb(var(--card)),0_4px_12px_rgba(0,0,0,0.3)] transition-[transform,opacity] duration-150";
 const ADVISOR_RING =
   "visits-ring pointer-events-none absolute -inset-1.5 rounded-full border-2 border-[color:var(--sc)]";
 const BADGE =
-  "pointer-events-none absolute -top-2.5 left-5 grid h-5 min-w-[22px] place-items-center whitespace-nowrap rounded-[10px] border-2 border-[#141414] bg-[#cbe71e] px-1.5 text-[11px] font-bold leading-none text-[#141414] shadow-[0_3px_8px_rgba(0,0,0,0.25)] transition-transform";
-const BADGE_LEADER = "-top-3 h-[22px] min-w-[26px] border-[#cbe71e] bg-[#141414] text-xs text-[#cbe71e]";
+  "pointer-events-none absolute -top-2.5 left-5 grid h-5 min-w-[22px] place-items-center whitespace-nowrap rounded-[10px] border-2 border-[#141414] bg-[#cbe71e] px-1.5 text-[13px] font-bold leading-none text-[#141414] shadow-[0_3px_8px_rgba(0,0,0,0.25)] transition-transform";
+const BADGE_LEADER =
+  "-top-3 h-[22px] min-w-[26px] border-[#cbe71e] bg-[#141414] text-[13px] text-[#cbe71e]";
 const BADGE_ZERO = "border-border bg-card text-muted-foreground";
 
 export interface AdvisorMarkerHandles {
@@ -80,7 +81,7 @@ export function applyAdvisorMarkerState(h: AdvisorMarkerHandles, s: AdvisorMarke
 }
 
 const STOP_BASE =
-  "grid h-[22px] w-[22px] cursor-pointer place-items-center rounded-full text-[10px] font-semibold";
+  "grid h-[22px] w-[22px] cursor-pointer place-items-center rounded-full text-[13px] font-semibold";
 const STOP_PHASE = {
   done: "bg-[color:var(--rc)] text-card shadow-[0_0_0_2px_rgb(var(--card))]",
   now: "bg-[#cbe71e] text-[#141414] shadow-[0_0_0_2px_#141414]",
@@ -130,7 +131,7 @@ export function tooltipContent(title: string, detail?: string): HTMLElement {
   root.append(strong);
   if (detail) {
     const small = document.createElement("small");
-    small.className = "block text-[10px] text-muted-foreground";
+    small.className = "block text-[13px] text-muted-foreground";
     small.textContent = detail;
     root.append(small);
   }

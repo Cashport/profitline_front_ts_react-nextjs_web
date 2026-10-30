@@ -12,7 +12,6 @@ import { ModalBalancesActions } from "../../components/ModalBalancesActions/Moda
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
-import { Card, CardContent } from "@/modules/chat/ui/card";
 import { BalanceDetailModal } from "../../components/BalanceDetailModal/BalanceDetailModal";
 import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
 import { useSaldos } from "../../context/saldos-context";
@@ -69,8 +68,14 @@ export function BalancesView() {
     })();
   }, []);
 
-  const { state, setFilter, toggleSaldoSelection, selectAllSaldos, deselectSaldos, clearSelection } =
-    useSaldos();
+  const {
+    state,
+    setFilter,
+    toggleSaldoSelection,
+    selectAllSaldos,
+    deselectSaldos,
+    clearSelection
+  } = useSaldos();
 
   const { selectedBalances, totalPending } = useSelectedBalances(
     balancesData,
@@ -111,69 +116,67 @@ export function BalancesView() {
             initialPosition={{ x: 0, y: 0 }}
           />
         )}
-        <Card className="bg-cashport-white border-0 shadow-sm">
-          <CardContent>
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <UiSearchInput
-                  placeholder="Buscar"
-                  onChange={(e) => setSearchTerm(normalizeSearch(e.target.value))}
-                />
-
-                <GenerateActionButton
-                  onClick={() => {
-                    setIsActionsOpen(true);
-                  }}
-                />
-
-                <FilterBalancesView
-                  users={balancesFilters?.users ?? []}
-                  clients={balancesFilters?.clients ?? []}
-                  motives={motives ?? []}
-                  eligibilityStatuses={eligibilityStatuses}
-                  value={balancesFilter}
-                  onChange={setBalancesFilter}
-                  isLoading={filtersLoading || motivesLoading}
-                />
-              </div>
-            </div>
-
-            {/* Grouped tables by state */}
-            {balancesLoading ? (
-              <div style={{ display: "flex", justifyContent: "center", margin: "2rem 0" }}>
-                <Spin />
-              </div>
-            ) : (
-              <Collapse
-                defaultActiveKey={filteredGroups[0]?.balance_status_id}
-                items={filteredGroups.map((group) => ({
-                  key: group.balance_status_id,
-                  label: (
-                    <LabelCollapse
-                      status={group.balance_status}
-                      color={group.color}
-                      quantity={group.balances_count}
-                      total={group.pending_total}
-                    />
-                  ),
-                  children: (
-                    <BalancesTable
-                      data={group.balances}
-                      loading={balancesLoading}
-                      context="balances"
-                      selectedSaldoIds={state.selectedSaldoIds}
-                      onToggleSelection={toggleSaldoSelection}
-                      onSelectAll={selectAllSaldos}
-                      onDeselectAll={deselectSaldos}
-                      onOpenDetail={openDetailSheet}
-                      onUploaded={mutateBalances}
-                    />
-                  )
-                }))}
+        <div className="cp-card px-[18px] py-[14px]">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <UiSearchInput
+                placeholder="Buscar"
+                onChange={(e) => setSearchTerm(normalizeSearch(e.target.value))}
               />
-            )}
-          </CardContent>
-        </Card>
+
+              <GenerateActionButton
+                onClick={() => {
+                  setIsActionsOpen(true);
+                }}
+              />
+
+              <FilterBalancesView
+                users={balancesFilters?.users ?? []}
+                clients={balancesFilters?.clients ?? []}
+                motives={motives ?? []}
+                eligibilityStatuses={eligibilityStatuses}
+                value={balancesFilter}
+                onChange={setBalancesFilter}
+                isLoading={filtersLoading || motivesLoading}
+              />
+            </div>
+          </div>
+
+          {/* Grouped tables by state */}
+          {balancesLoading ? (
+            <div style={{ display: "flex", justifyContent: "center", margin: "2rem 0" }}>
+              <Spin />
+            </div>
+          ) : (
+            <Collapse
+              defaultActiveKey={filteredGroups[0]?.balance_status_id}
+              items={filteredGroups.map((group) => ({
+                key: group.balance_status_id,
+                label: (
+                  <LabelCollapse
+                    status={group.balance_status}
+                    color={group.color}
+                    quantity={group.balances_count}
+                    total={group.pending_total}
+                  />
+                ),
+                children: (
+                  <BalancesTable
+                    data={group.balances}
+                    loading={balancesLoading}
+                    context="balances"
+                    selectedSaldoIds={state.selectedSaldoIds}
+                    onToggleSelection={toggleSaldoSelection}
+                    onSelectAll={selectAllSaldos}
+                    onDeselectAll={deselectSaldos}
+                    onOpenDetail={openDetailSheet}
+                    onUploaded={mutateBalances}
+                  />
+                )
+              }))}
+            />
+          )}
+        </div>
       </main>
 
       {/* Detail Sheet */}
