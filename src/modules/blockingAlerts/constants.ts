@@ -2,15 +2,16 @@ import { Check, Lock, TriangleAlert, type LucideIcon } from "lucide-react";
 
 import type {
   BlockingAlertStatus,
-  IBlockingAlertAging
+  IBlockingAlertAging,
+  IBlockingAlertsSummary
 } from "@/types/blockingAlerts/IBlockingAlerts";
 
 export const BLOCKING_ALERTS_PATH = "/blockingAlerts";
 
 export const PAGE_SIZE = 30;
 
-export const BLOCKING_RULES =
-  "Bloqueo: facturas de +60 días o cupo superado · Alerta desde 45 días";
+export const blockingRulesNote = ({ blockDays, warningDays }: IBlockingAlertsSummary["rules"]) =>
+  `Bloqueo: facturas de +${blockDays} días o cupo superado · Alerta desde ${warningDays} días`;
 
 /** Semáforo por estado (docs/DESIGN.md §1). Al día no se pinta: su texto va en gris. */
 export const STATUS_META: Record<
@@ -23,13 +24,13 @@ export const STATUS_META: Record<
     tint: "rgb(var(--cp-red) / 0.12)",
     Icon: Lock
   },
-  warning: {
+  to_be_blocked: {
     tab: "Por bloquear",
     color: "rgb(var(--cp-orange))",
     tint: "rgb(var(--cp-orange) / 0.14)",
     Icon: TriangleAlert
   },
-  ok: {
+  up_to_date: {
     tab: "Al día",
     color: "rgb(var(--cp-lime-dark))",
     tint: "rgb(var(--cp-lime) / 0.22)",
@@ -39,13 +40,13 @@ export const STATUS_META: Record<
 
 /** Tramos de la cartera, por el campo del API (escala de mora de docs/DESIGN.md §1). */
 export const AGING_SEGMENTS: {
-  key: keyof Pick<IBlockingAlertAging, "current" | "past_due_1_60" | "past_due_60_plus">;
+  key: keyof Pick<IBlockingAlertAging, "current" | "pastDue1To60" | "pastDueOver60">;
   label: string;
   color: string;
 }[] = [
   { key: "current", label: "Al día", color: "rgb(var(--cp-lime))" },
-  { key: "past_due_1_60", label: "Vencida 1–60 días", color: "rgb(var(--cp-orange))" },
-  { key: "past_due_60_plus", label: "Vencida +60 días", color: "rgb(var(--cp-red))" }
+  { key: "pastDue1To60", label: "Vencida 1–60 días", color: "rgb(var(--cp-orange))" },
+  { key: "pastDueOver60", label: "Vencida +60 días", color: "rgb(var(--cp-red))" }
 ];
 
 export type AlertsSort =
@@ -55,12 +56,23 @@ export type AlertsSort =
   | "oldest_overdue_days"
   | "name";
 
-export const SORT_OPTIONS: { key: AlertsSort; label: string }[] = [
-  { key: "urgency", label: "Más urgente primero" },
-  { key: "past_due_desc", label: "Mayor pago vencido" },
-  { key: "past_due_asc", label: "Menor pago vencido" },
-  { key: "oldest_overdue_days", label: "Más días de mora" },
-  { key: "name", label: "Nombre A–Z" }
+/** Opciones del menú Ordenar con el `sort_by` / `sort_dir` que entiende el API. */
+export const SORT_OPTIONS: {
+  key: AlertsSort;
+  label: string;
+  sortBy: "urgency" | "pastDue" | "oldestOverdueDays" | "name";
+  sortDir?: "asc" | "desc";
+}[] = [
+  { key: "urgency", label: "Más urgente primero", sortBy: "urgency" },
+  { key: "past_due_desc", label: "Mayor pago vencido", sortBy: "pastDue", sortDir: "desc" },
+  { key: "past_due_asc", label: "Menor pago vencido", sortBy: "pastDue", sortDir: "asc" },
+  {
+    key: "oldest_overdue_days",
+    label: "Más días de mora",
+    sortBy: "oldestOverdueDays",
+    sortDir: "desc"
+  },
+  { key: "name", label: "Nombre A–Z", sortBy: "name", sortDir: "asc" }
 ];
 
 /** Punto de cada tipo de nota crédito; un tipo nuevo sale en gris. */

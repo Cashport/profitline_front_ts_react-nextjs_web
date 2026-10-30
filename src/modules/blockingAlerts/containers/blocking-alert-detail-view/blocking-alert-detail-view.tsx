@@ -250,7 +250,7 @@ export default function BlockingAlertDetailView({
   ];
 
   const meta = STATUS_META[detail.status];
-  const isOk = detail.status === "ok";
+  const isOk = detail.status === "up_to_date";
   const showPay = !isOk && tab !== "paid_invoices";
 
   return (
@@ -334,7 +334,7 @@ export default function BlockingAlertDetailView({
               <span className="min-w-0">
                 <span className="block text-[12px] font-medium text-cp-ink-3">Pago vencido</span>
                 <span className="block truncate text-[18px] font-semibold tabular-nums text-cp-ink md:text-[20px]">
-                  {money(detail.past_due)}
+                  {money(detail.pastDue)}
                 </span>
               </span>
               <PrincipalButton
@@ -394,7 +394,7 @@ export default function BlockingAlertDetailView({
       {modal === "payment" && (
         <PaymentLinkModal
           detail={detail}
-          pastDue={{ count: overdue.length, total: Math.max(0, detail.past_due) }}
+          pastDue={{ count: overdue.length, total: Math.max(0, detail.pastDue) }}
           selected={{ count: selectedInvoices.length, total: sum(selectedInvoices) }}
           onClose={() => setModal(null)}
         />

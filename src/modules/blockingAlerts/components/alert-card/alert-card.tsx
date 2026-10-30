@@ -5,26 +5,30 @@ import { Store, Tag } from "lucide-react";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { useAppStore } from "@/lib/store/store";
-import type { IBlockingAlertRow } from "@/types/blockingAlerts/IBlockingAlerts";
+import type {
+  IBlockingAlertsClient,
+  IBlockingAlertsPointOfSale
+} from "@/types/blockingAlerts/IBlockingAlerts";
 
 import { AGING_SEGMENTS, STATUS_META } from "../../constants";
-import { plural, statusLabel } from "../../utils/blocking-alerts";
+import { plural } from "../../utils/blocking-alerts";
 
 interface AlertCardProps {
-  row: IBlockingAlertRow;
+  row: IBlockingAlertsClient | IBlockingAlertsPointOfSale;
   href: string;
-  /** Punto de venta del cliente que coincide con la búsqueda. */
-  matchedStore?: IBlockingAlertRow;
   /** En el listado general de puntos de venta se nombra el cliente. */
   showClient?: boolean;
 }
 
 /** Tarjeta de un cliente o punto de venta: monto, estado, puntos de venta y tramos. */
-export default function AlertCard({ row, href, matchedStore, showClient }: AlertCardProps) {
+export default function AlertCard({ row, href, showClient }: AlertCardProps) {
   const formatMoney = useAppStore((s) => s.formatMoney);
   const meta = STATUS_META[row.status];
-  const isOk = row.status === "ok";
-  const pos = row.points_of_sale_count;
+  const isOk = row.status === "up_to_date";
+  const store = "code" in row ? row : null;
+  const client = "code" in row ? null : row;
+  const pos = client?.pointsOfSale;
+  const matched = client?.matchedPointOfSale;
 
   return (
     <Link
@@ -37,7 +41,7 @@ export default function AlertCard({ row, href, matchedStore, showClient }: Alert
           className="shrink-0 text-[14px] font-semibold tabular-nums"
           style={isOk ? undefined : { color: meta.color }}
         >
-          {formatMoney(isOk ? row.portfolio : row.past_due, { hideDecimals: true })}
+          {formatMoney(row.amount, { hideDecimals: true })}
         </span>
       </span>
       <span className="flex items-center justify-between gap-2.5 text-[12px]">
@@ -46,26 +50,26 @@ export default function AlertCard({ row, href, matchedStore, showClient }: Alert
           style={isOk ? undefined : { color: meta.color }}
         >
           <meta.Icon className="h-3 w-3 shrink-0" strokeWidth={2.6} />
-          {statusLabel(row)}
+          {row.statusLabel}
         </span>
         <span className="shrink-0 text-[11px] text-cp-ink-4">
           {isOk ? "cartera al día" : "pago vencido"}
         </span>
       </span>
 
-      {(row.ship_to_code || matchedStore || (pos && pos.total > 1)) && (
+      {(store?.code || matched || (pos && pos.total > 1)) && (
         <span className="mt-1 flex min-w-0 items-center gap-1 truncate text-[11px] text-cp-ink-4">
-          {row.ship_to_code ? (
+          {store ? (
             <>
               <Tag className="h-3 w-3 shrink-0" />
-              <b className="font-semibold text-cp-ink-3">Ship-to {row.ship_to_code}</b>
-              {showClient && row.client_name !== row.name && <span>· {row.client_name}</span>}
+              <b className="font-semibold text-cp-ink-3">Ship-to {store.code}</b>
+              {showClient && <span>· {store.clientName}</span>}
             </>
-          ) : matchedStore ? (
+          ) : matched ? (
             <>
               <Tag className="h-3 w-3 shrink-0" />
               <b className="font-semibold text-cp-ink-3">
-                Coincide · Ship-to {matchedStore.ship_to_code} · {matchedStore.name}
+                Coincide · Ship-to {matched.code} · {matched.name}
               </b>
             </>
           ) : (
@@ -78,12 +82,12 @@ export default function AlertCard({ row, href, matchedStore, showClient }: Alert
                     · {plural(pos.blocked, "bloqueado", "bloqueados")}
                   </b>
                 )}
-                {pos.warning > 0 && (
-                  <b className="font-semibold" style={{ color: STATUS_META.warning.color }}>
-                    · {pos.warning} por bloquear
+                {pos.to_be_blocked > 0 && (
+                  <b className="font-semibold" style={{ color: STATUS_META.to_be_blocked.color }}>
+                    · {pos.to_be_blocked} por bloquear
                   </b>
                 )}
-                {!pos.blocked && !pos.warning && <span>· todos al día</span>}
+                {!pos.blocked && !pos.to_be_blocked && <span>· todos al día</span>}
               </>
             )
           )}

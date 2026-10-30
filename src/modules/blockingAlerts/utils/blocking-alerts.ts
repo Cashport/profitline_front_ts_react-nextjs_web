@@ -10,21 +10,21 @@ export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 
 export const statusLabel = (row: IBlockingAlertRow): string => {
   if (row.status === "blocked")
     return `Bloqueado hace ${plural(row.blocked_days ?? 0, "día", "días")}`;
-  if (row.status === "warning") {
+  if (row.status === "to_be_blocked") {
     if (row.days_to_block === 0) return "Se bloquea hoy";
     if (row.days_to_block === 1) return "Se bloquea mañana";
     return `Se bloquea en ${row.days_to_block} días`;
   }
-  return row.past_due < 0 ? "Al día · saldo a favor" : "Al día";
+  return row.pastDue < 0 ? "Al día · saldo a favor" : "Al día";
 };
 
-const STATUS_RANK = { blocked: 0, warning: 1, ok: 2 };
+const STATUS_RANK = { blocked: 0, to_be_blocked: 1, up_to_date: 2 };
 
 /** Bloqueados primero, luego los más cercanos al bloqueo y, a igual estado, el mayor vencido. */
 export const byUrgency = (a: IBlockingAlertRow, b: IBlockingAlertRow) =>
   STATUS_RANK[a.status] - STATUS_RANK[b.status] ||
-  (a.status === "warning" ? (a.days_to_block ?? 0) - (b.days_to_block ?? 0) : 0) ||
-  b.past_due - a.past_due;
+  (a.status === "to_be_blocked" ? (a.days_to_block ?? 0) - (b.days_to_block ?? 0) : 0) ||
+  b.pastDue - a.pastDue;
 
 /** "24/09/2026 · 08:00" */
 export const fmtCutoff = (iso: string) => dayjs(iso).format("DD/MM/YYYY · HH:mm");

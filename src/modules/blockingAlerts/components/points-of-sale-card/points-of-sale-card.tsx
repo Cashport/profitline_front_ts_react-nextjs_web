@@ -19,11 +19,11 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
   if (!pos) return null;
 
   const allHref = `${BLOCKING_ALERTS_PATH}/${detail.client_id}/points-of-sale`;
-  const atRisk = detail.points_of_sale.filter((s) => s.status !== "ok").sort(byUrgency);
+  const atRisk = detail.points_of_sale.filter((s) => s.status !== "up_to_date").sort(byUrgency);
   const legend = [
     { key: "blocked", n: pos.blocked, label: pos.blocked === 1 ? "Bloqueado" : "Bloqueados" },
-    { key: "warning", n: pos.warning, label: "Por bloquear" },
-    { key: "ok", n: pos.total - pos.blocked - pos.warning, label: "Al día" }
+    { key: "to_be_blocked", n: pos.to_be_blocked, label: "Por bloquear" },
+    { key: "up_to_date", n: pos.total - pos.blocked - pos.to_be_blocked, label: "Al día" }
   ] as const;
 
   return (
@@ -93,7 +93,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
                     className="block text-[13px] font-semibold tabular-nums"
                     style={{ color: meta.color }}
                   >
-                    {formatMoney(s.past_due, { hideDecimals: true })}
+                    {formatMoney(s.pastDue, { hideDecimals: true })}
                   </span>
                   <span className="block text-[11px] text-cp-ink-4">pago vencido</span>
                 </span>

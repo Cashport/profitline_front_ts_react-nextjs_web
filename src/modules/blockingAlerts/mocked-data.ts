@@ -1,11 +1,10 @@
 /* ============================================================
-   DATOS SIMULADOS — SE REEMPLAZAN POR EL API
+   DATOS SIMULADOS DEL DETALLE — SE REEMPLAZAN POR EL API
    ------------------------------------------------------------
-   Ejemplo del prototipo de producto (corte 24/09/2026): siete clientes
-   —cinco con sus puntos de venta— y ~65 tiendas generadas para que el
-   listado pagine. Aquí se aplican las reglas de bloqueo (facturas de
-   +60 días o cupo superado; alerta desde 45 días) y se arman los
-   totales, porque en producción el backend los entrega ya calculados.
+   El listado ya lee el API (/portfolio/blocking-alerts/*). Esto queda
+   para el detalle de cliente y punto de venta (subtareas 03 y 04):
+   ejemplo del prototipo de producto (corte 24/09/2026), siete clientes
+   —cinco con sus puntos de venta— y ~65 tiendas generadas.
    ============================================================ */
 import type {
   BlockingAlertStatus,
@@ -14,9 +13,7 @@ import type {
   IBlockingAlertDetail,
   IBlockingAlertPaidInvoice,
   IBlockingAlertPayment,
-  IBlockingAlertRow,
-  IBlockingAlertsResponse,
-  IBlockingAlertsTotals
+  IBlockingAlertRow
 } from "@/types/blockingAlerts/IBlockingAlerts";
 
 const CUTOFF_AT = "2026-09-24T08:00:00-05:00";
@@ -488,10 +485,10 @@ const STORE_SPEC: Record<string, StoreSpec> = {
 const toRow = (e: RawEntity): IBlockingAlertRow => {
   const oldest = Math.max(0, ...e.overdue.map((i) => i.days));
   const overQuota = e.quota ? Math.max(0, e.portfolio - e.quota) : 0;
-  let status: BlockingAlertStatus = "ok";
+  let status: BlockingAlertStatus = "up_to_date";
   if (e.past_due > 0) {
     if (oldest > BLOCK_DAYS || overQuota > 0 || e.blocked_days) status = "blocked";
-    else if (oldest >= WARN_DAYS) status = "warning";
+    else if (oldest >= WARN_DAYS) status = "to_be_blocked";
   }
   const pastDue = Math.max(0, e.past_due);
   const pastDue60 = sum(
@@ -505,13 +502,13 @@ const toRow = (e: RawEntity): IBlockingAlertRow => {
     name: e.name,
     status,
     blocked_days: status === "blocked" ? e.blocked_days ?? Math.max(1, oldest - BLOCK_DAYS) : null,
-    days_to_block: status === "warning" ? BLOCK_DAYS - oldest : null,
+    days_to_block: status === "to_be_blocked" ? BLOCK_DAYS - oldest : null,
     oldest_overdue_days: oldest,
     portfolio: e.portfolio,
     current: e.portfolio - pastDue,
-    past_due: e.past_due,
-    past_due_1_60: pastDue - pastDue60,
-    past_due_60_plus: pastDue60,
+    pastDue: e.past_due,
+    pastDue1To60: pastDue - pastDue60,
+    pastDueOver60: pastDue60,
     points_of_sale_count: null
   };
 };
@@ -543,20 +540,8 @@ const toDetail = (e: RawEntity, row: IBlockingAlertRow, idx: number): IBlockingA
   };
 };
 
-const totalsOf = (rows: IBlockingAlertRow[]): IBlockingAlertsTotals => ({
-  count: rows.length,
-  alerts: rows.filter((r) => r.status !== "ok").length,
-  portfolio: sum(rows, (r) => r.portfolio),
-  current: sum(rows, (r) => r.current),
-  past_due: sum(rows, (r) => Math.max(0, r.past_due)),
-  past_due_1_60: sum(rows, (r) => r.past_due_1_60),
-  past_due_60_plus: sum(rows, (r) => r.past_due_60_plus)
-});
-
-const RESPONSE: IBlockingAlertsResponse = (() => {
+(() => {
   let mirrorShipTo = 910001;
-  const clients: IBlockingAlertRow[] = [];
-  const pointsOfSale: IBlockingAlertRow[] = [];
   CLIENTS.forEach((client, idx) => {
     const row = toRow(client);
     const detail = toDetail(client, row, idx);
@@ -575,21 +560,11 @@ const RESPONSE: IBlockingAlertsResponse = (() => {
     row.points_of_sale_count = {
       total: storeRows.length,
       blocked: storeRows.filter((s) => s.status === "blocked").length,
-      warning: storeRows.filter((s) => s.status === "warning").length
+      to_be_blocked: storeRows.filter((s) => s.status === "to_be_blocked").length
     };
     DETAILS.set(detailKey(client.client_id), { ...detail, ...row, points_of_sale: storeRows });
-    clients.push(row);
-    pointsOfSale.push(...storeRows);
   });
-  return {
-    cutoff_at: CUTOFF_AT,
-    totals: { clients: totalsOf(clients), points_of_sale: totalsOf(pointsOfSale) },
-    clients,
-    points_of_sale: pointsOfSale
-  };
 })();
-
-export const getBlockingAlertsMock = async (): Promise<IBlockingAlertsResponse> => RESPONSE;
 
 export const getBlockingAlertDetailMock = async (
   clientId: string,

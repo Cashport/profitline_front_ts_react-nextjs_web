@@ -1,25 +1,87 @@
-/* Contrato esperado del API de Alertas de bloqueo (aún no existe): el módulo lee
-   datos simulados con esta misma forma (src/modules/blockingAlerts/mocked-data.ts).
-   Montos en pesos y fechas ISO (yyyy-mm-dd), como en el resto de la cartera. */
+/* API de Alertas de bloqueo (`/portfolio/blocking-alerts/*`): el backend clasifica,
+   filtra, ordena y pagina; el front solo pinta. El detalle (cliente y punto de venta)
+   todavía lee datos simulados (src/modules/blockingAlerts/mocked-data.ts). */
 
-/** blocked: facturas de +60 días o cupo superado · warning: alguna vencida desde 45 días. */
-export type BlockingAlertStatus = "blocked" | "warning" | "ok";
+export type BlockingAlertStatus = "blocked" | "to_be_blocked" | "up_to_date";
 
-/** Cartera por tramo. `past_due` negativa es saldo a favor (y los tramos vencidos van en 0). */
+/** Cartera por tramo. `pastDue` negativa es saldo a favor. */
 export interface IBlockingAlertAging {
   portfolio: number;
   current: number;
-  past_due: number;
-  past_due_1_60: number;
-  past_due_60_plus: number;
+  pastDue: number;
+  pastDue1To60: number;
+  pastDueOver60: number;
 }
 
 /** Puntos de venta de un cliente por estado. */
 export interface IBlockingAlertPosCount {
   total: number;
   blocked: number;
-  warning: number;
+  to_be_blocked: number;
 }
+
+/** Conteos por estado de una vista; `alerts` = bloqueados + por bloquear. */
+export type IBlockingAlertsCounts = Record<BlockingAlertStatus | "all" | "alerts", number>;
+
+export interface IBlockingAlertsSummary {
+  cutoffAt: string;
+  referenceDate: string;
+  rules: { blockDays: number; warningDays: number };
+  /** Solo al pedir el resumen de un cliente (`client_uuid`). */
+  client: { clientUuid: string; name: string } | null;
+  portfolio: IBlockingAlertAging;
+  clients: IBlockingAlertsCounts;
+  pointsOfSale: IBlockingAlertsCounts;
+}
+
+interface IBlockingAlertsState extends IBlockingAlertAging {
+  status: BlockingAlertStatus;
+  statusLabel: string;
+  blockReason: "overdue" | "quota" | null;
+  blockedDays: number | null;
+  daysToBlock: number | null;
+  oldestOverdueDays: number;
+  /** Pago vencido en alerta; cartera si está al día. */
+  amount: number;
+}
+
+export interface IBlockingAlertsClient extends IBlockingAlertsState {
+  clientUuid: string | null;
+  clientId: string;
+  name: string;
+  pointsOfSale: IBlockingAlertPosCount;
+  /** Punto de venta que coincide con la búsqueda cuando el cliente no coincide por nombre. */
+  matchedPointOfSale: { code: string | null; name: string } | null;
+}
+
+export interface IBlockingAlertsPointOfSale extends IBlockingAlertsState {
+  /** null: documentos sin ship-to, el punto de venta es el mismo cliente. */
+  code: string | null;
+  name: string;
+  clientUuid: string | null;
+  clientId: string;
+  clientName: string;
+}
+
+export interface IBlockingAlertsPage<T> {
+  cutoffAt: string;
+  rows: T[];
+  pagination: { total: number; page: number; limit: number };
+}
+
+/** Filtros del listado: se envían tal cual al API. */
+export interface IBlockingAlertsListQuery {
+  /** Acota los puntos de venta a un cliente. */
+  clientUuid?: string;
+  status: BlockingAlertStatus | null;
+  search: string;
+  sortBy: "urgency" | "pastDue" | "oldestOverdueDays" | "name";
+  sortDir?: "asc" | "desc";
+  page: number;
+  limit: number;
+}
+
+/* Detalle (datos simulados hasta conectar las subtareas 03 y 04). */
 
 /** Fila del listado: un cliente o uno de sus puntos de venta (ship-to). */
 export interface IBlockingAlertRow extends IBlockingAlertAging {
@@ -37,19 +99,6 @@ export interface IBlockingAlertRow extends IBlockingAlertAging {
   oldest_overdue_days: number;
   /** Solo en la fila de un cliente. */
   points_of_sale_count: IBlockingAlertPosCount | null;
-}
-
-export interface IBlockingAlertsTotals extends IBlockingAlertAging {
-  count: number;
-  /** Bloqueados más por bloquear. */
-  alerts: number;
-}
-
-export interface IBlockingAlertsResponse {
-  cutoff_at: string;
-  totals: { clients: IBlockingAlertsTotals; points_of_sale: IBlockingAlertsTotals };
-  clients: IBlockingAlertRow[];
-  points_of_sale: IBlockingAlertRow[];
 }
 
 export interface IBlockingAlertInvoice {

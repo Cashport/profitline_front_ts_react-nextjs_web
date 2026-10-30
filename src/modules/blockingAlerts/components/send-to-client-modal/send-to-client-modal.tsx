@@ -31,7 +31,7 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
   const message = pastDue.length
     ? [
         greeting,
-        `Tienen ${plural(pastDue.length, "factura vencida", "facturas vencidas")} por ${formatMoney(detail.past_due, { hideDecimals: true })}.`,
+        `Tienen ${plural(pastDue.length, "factura vencida", "facturas vencidas")} por ${formatMoney(detail.pastDue, { hideDecimals: true })}.`,
         "Pueden pagar el valor vencido aquí:",
         paymentLinkOf(detail),
         "Adjuntamos el estado de cuenta."
