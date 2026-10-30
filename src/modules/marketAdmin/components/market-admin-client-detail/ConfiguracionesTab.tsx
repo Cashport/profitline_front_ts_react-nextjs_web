@@ -191,7 +191,7 @@ export default function ConfiguracionesTab({
   };
 
   return (
-    <div>
+    <div className="cp-list-scroll">
       {/* Ajustes datos del cliente */}
       <p className="text-sm font-bold text-[#141414] mb-4">Ajustes datos del cliente</p>
 
@@ -404,7 +404,7 @@ export default function ConfiguracionesTab({
       )}
 
       {/* Save button */}
-      <div className="flex justify-end mt-8">
+      <div className="sticky bottom-0 z-[3] mt-8 flex justify-end bg-white pt-3">
         <PrincipalButton
           onClick={handleSave}
           disabled={!isDirty || isSaving || isLoading}

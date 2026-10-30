@@ -7,6 +7,7 @@ export interface DiscountPackage {
   projectId: number;
   active: number;
   discountType: string;
+  approvalEntityStatusId?: number | null;
 }
 
 export interface Discount {

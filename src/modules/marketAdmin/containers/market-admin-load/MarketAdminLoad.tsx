@@ -172,7 +172,7 @@ export default function MarketAdminLoad() {
         onChange={handleFileSelected}
       />
 
-      <div className="cp-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
           <p className="text-sm text-[#999999] flex-1">
@@ -188,6 +188,7 @@ export default function MarketAdminLoad() {
         </div>
 
         <Table
+          className="cp-list-scroll"
           columns={columns}
           dataSource={loaders}
           rowKey="id"

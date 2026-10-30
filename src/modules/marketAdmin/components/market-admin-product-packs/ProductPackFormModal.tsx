@@ -38,7 +38,7 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
   const isEdit = packId !== null;
   const { data: pack, isLoading: isLoadingPack } = useProductPackDetail(packId);
   const { data: lines } = useMarketAdminProductLines();
-  const { data: categories } = useMarketAdminProductCategories();
+  const { data: categories } = useMarketAdminProductCategories(true);
 
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");

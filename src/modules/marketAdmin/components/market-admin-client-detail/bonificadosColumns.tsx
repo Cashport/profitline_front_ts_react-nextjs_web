@@ -1,4 +1,5 @@
 import type { ColumnsType } from "antd/es/table";
+import ApprovalStatusPill from "@/components/ui/approval-status-pill";
 import {
   DateCell,
   TextCell,
@@ -106,6 +107,14 @@ export const bonificadosColumns: ColumnsType<IManagerBonificationGroup> = [
     width: 120,
     onHeaderCell: headerCell,
     render: (status: string) => <StatusPill status={status} />
+  },
+  {
+    title: "Aprobación",
+    dataIndex: "approval_entity_status_id",
+    key: "approval_entity_status_id",
+    width: 140,
+    onHeaderCell: headerCell,
+    render: (statusId: number | null) => <ApprovalStatusPill statusId={statusId} />
   },
   {
     title: "Vence",

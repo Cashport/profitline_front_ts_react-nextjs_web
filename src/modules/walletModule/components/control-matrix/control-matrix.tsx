@@ -2,6 +2,7 @@
 
 import { useMemo, type KeyboardEvent } from "react";
 import { Pagination } from "antd";
+import { Download } from "lucide-react";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import UiSearchInput from "@/components/ui/search-input";
@@ -60,6 +61,9 @@ interface ControlMatrixProps {
   // eslint-disable-next-line no-unused-vars
   onEstadoSelect: (estado: EstadoId, additive: boolean) => void;
   onEstadosClear: () => void;
+  /** Descarga el Excel de novedades (3 hojas) con los filtros activos. */
+  onDownloadNovelties?: () => void;
+  downloadingNovelties?: boolean;
 }
 
 /** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
@@ -85,7 +89,9 @@ export default function ControlMatrix({
   estados,
   selectableEstados,
   onEstadoSelect,
-  onEstadosClear
+  onEstadosClear,
+  onDownloadNovelties,
+  downloadingNovelties
 }: ControlMatrixProps) {
   // Ni la búsqueda ni el orden se resuelven aquí: la tabla sólo tiene la
   // página cargada, 15 de miles de clientes. Filtrar daría "sin resultados"
@@ -201,13 +207,27 @@ export default function ControlMatrix({
         </div>
 
         {/* UiSearchInput es flex:1, así que el ml-auto va en el contenedor. */}
-        <div className="ml-auto w-full max-w-[270px]">
-          <UiSearchInput
-            id="wallet-matrix-search"
-            placeholder="Buscar cliente, NIT, factura o ejecutivo…"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
+        <div className="ml-auto flex w-full max-w-[320px] flex-col">
+          <div className="flex items-center gap-1.5">
+            <div className="min-w-0 flex-1">
+              <UiSearchInput
+                id="wallet-matrix-search"
+                placeholder="Buscar cliente, NIT, factura o ejecutivo…"
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onDownloadNovelties}
+              disabled={downloadingNovelties}
+              title="Descargar"
+              aria-label="Descargar novedades en Excel"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Download className="h-[15px] w-[15px]" />
+            </button>
+          </div>
           <p className="mt-1.5 text-right text-[13px] text-muted-foreground">
             {loading
               ? "Actualizando…"
