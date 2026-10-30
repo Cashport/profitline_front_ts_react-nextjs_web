@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Chats } from "@phosphor-icons/react";
 import Header from "@/components/organisms/header";
+import BranchesIcon from "@/modules/branches/components/branches-icon/branches-icon";
 
 type Section = {
   href: string;
@@ -59,6 +60,12 @@ const sections: Section[] = [
     icon: UploadCloud,
     label: "Cargue de información",
     description: "Alimenta el app con ETLs manuales: inventario, precios, clientes y más."
+  },
+  {
+    href: "/branches",
+    icon: BranchesIcon,
+    label: "Sucursales",
+    description: "Consulta las sucursales de devolución: lista de precios, estado y ejecutivos."
   },
   {
     href: "/mass-communications",
