@@ -21,13 +21,9 @@ const BASE = `${config.API_HOST}/data`;
  * verifica estructura, paises y duplicados para mostrarlos antes de confirmar.
  */
 export const validateGmnOficiales = async (
-  file: File,
-  useAsTemplate?: boolean
+  file: File
 ): Promise<IGmnOficialesValidationReport> => {
   const formData = buildGmnOficialesFormData(file);
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   const response: GenericResponse<IGmnOficialesValidationReport> = await API.post(
     `${BASE}/catalog/material-master/validate`,
     formData
@@ -36,14 +32,8 @@ export const validateGmnOficiales = async (
 };
 
 /** Carga transaccional e idempotente del catalogo oficial de GMN. */
-export const uploadGmnOficiales = async (
-  file: File,
-  useAsTemplate?: boolean
-): Promise<IGmnOficialesLoadResult> => {
+export const uploadGmnOficiales = async (file: File): Promise<IGmnOficialesLoadResult> => {
   const formData = buildGmnOficialesFormData(file);
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   const response: GenericResponse<IGmnOficialesLoadResult> = await API.post(
     `${BASE}/catalog/material-master/upload`,
     formData

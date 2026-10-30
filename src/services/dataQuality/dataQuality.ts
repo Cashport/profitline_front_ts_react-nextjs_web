@@ -312,15 +312,10 @@ export const deleteCatalog = async (catalogId: number): Promise<any> => {
   }
 };
 
-/**
- * `useAsTemplate` responde la pregunta del backend cuando la regla del archivo
- * aun no tiene template de estructura (409 TEMPLATE_DECISION_REQUIRED).
- */
 export const uploadIntakeFile = async (
   id_archives_client_data: number,
   file: File,
-  evidence?: File,
-  useAsTemplate?: boolean
+  evidence?: File
 ): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
@@ -328,9 +323,6 @@ export const uploadIntakeFile = async (
     formData.append("evidence", evidence);
   }
   formData.append("id_archives_client_data", id_archives_client_data.toString());
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/create-intake`,
@@ -345,15 +337,11 @@ export const uploadIntakeFile = async (
 
 export const uploadGenericIntakeFile = async (
   id_archives_client_data: number,
-  file: File,
-  useAsTemplate?: boolean
+  file: File
 ): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("id_archives_client_data", id_archives_client_data.toString());
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/create-intake-generic`,
@@ -699,12 +687,9 @@ export const uploadMassiveOrHistoricalFile = async ({
   }
 };
 
-export const uploadCatalogMaterial = async (file: File, useAsTemplate?: boolean): Promise<any> => {
+export const uploadCatalogMaterial = async (file: File): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/catalog/materials/upload`,
@@ -817,12 +802,9 @@ export const getRegions = async (): Promise<IRegion[]> => {
   }
 };
 
-export const uploadPointsOfSaleFile = async (file: File, useAsTemplate?: boolean): Promise<any> => {
+export const uploadPointsOfSaleFile = async (file: File): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/catalog/points-of-sale/upload`,
@@ -835,15 +817,9 @@ export const uploadPointsOfSaleFile = async (file: File, useAsTemplate?: boolean
   }
 };
 
-export const uploadPacksFile = async (
-  file: File,
-  useAsTemplate?: boolean
-): Promise<IPacksUploadResult> => {
+export const uploadPacksFile = async (file: File): Promise<IPacksUploadResult> => {
   const formData = new FormData();
   formData.append("file", file);
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   try {
     const response: GenericResponse<IPacksUploadResult> = await API.post(
       `${config.API_HOST}/data/catalog/material-packs/upload`,
@@ -920,16 +896,9 @@ export const deleteFileDateIntake = async (fileId: number): Promise<any> => {
   }
 };
 
-export const uploadAuxiliaryFile = async (
-  id: number,
-  file: File,
-  useAsTemplate?: boolean
-): Promise<any> => {
+export const uploadAuxiliaryFile = async (id: number, file: File): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
   try {
     const response: GenericResponse<any> = await API.patch(
       `${config.API_HOST}/data/auxiliary-files/${id}`,
@@ -953,8 +922,6 @@ export interface IUploadAuxiliaryUploadRequest {
   fileCount: number;
   slotIndex: number;
   file: File;
-  /** Respuesta al 409 TEMPLATE_DECISION_REQUIRED (validacion de estructura). */
-  useAsTemplate?: boolean;
 }
 
 export const uploadAuxiliaryUpload = async ({
@@ -962,8 +929,7 @@ export const uploadAuxiliaryUpload = async ({
   batchId,
   fileCount,
   slotIndex,
-  file,
-  useAsTemplate
+  file
 }: IUploadAuxiliaryUploadRequest): Promise<{
   uploadId: number;
   batchId: string;
@@ -978,9 +944,6 @@ export const uploadAuxiliaryUpload = async ({
   formData.append("batch_id", batchId);
   formData.append("file_count", String(fileCount));
   formData.append("slot_index", String(slotIndex));
-  if (useAsTemplate !== undefined) {
-    formData.append("use_as_template", String(useAsTemplate));
-  }
 
   const response: GenericResponse<any> = await API.post(
     `${config.API_HOST}/data/auxiliary-files/${id}/uploads`,

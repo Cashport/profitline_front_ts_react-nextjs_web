@@ -21,7 +21,6 @@ import {
   uploadPointsOfSaleFile,
   uploadPacksFile
 } from "@/services/dataQuality/dataQuality";
-import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 
 type UploadKind = "materials" | "pos" | "packs";
 
@@ -35,7 +34,6 @@ export default function AuxiliaryCatalogsView() {
   const [uploadKind, setUploadKind] = useState<UploadKind>("materials");
   const [uploading, setUploading] = useState(false);
   const [downloadingCatalog, setDownloadingCatalog] = useState(false);
-  const { runUpload, structureModals } = useIntakeStructureUpload();
 
   const runDownload = async (fn: () => Promise<{ url: string }>, ok: string) => {
     const hide = message.open({ type: "loading", content: "Descargando...", duration: 0 });
@@ -59,12 +57,13 @@ export default function AuxiliaryCatalogsView() {
   const handleUpload = async (file: File) => {
     setUploading(true);
     try {
-      const uploaded = await runUpload((useAsTemplate) => {
-        if (uploadKind === "materials") return uploadCatalogMaterial(file, useAsTemplate);
-        if (uploadKind === "pos") return uploadPointsOfSaleFile(file, useAsTemplate);
-        return uploadPacksFile(file, useAsTemplate);
-      });
-      if (!uploaded) return;
+      if (uploadKind === "materials") {
+        await uploadCatalogMaterial(file);
+      } else if (uploadKind === "pos") {
+        await uploadPointsOfSaleFile(file);
+      } else {
+        await uploadPacksFile(file);
+      }
       message.success("Archivo cargado exitosamente.");
       setUploadOpen(false);
     } catch (error) {
@@ -136,8 +135,6 @@ export default function AuxiliaryCatalogsView() {
         loading={uploading}
         allowedExtensions={uploadKind === "pos" ? [".xls", ".xlsx", ".csv"] : [".xls", ".xlsx"]}
       />
-
-      {structureModals}
     </div>
   );
 }
