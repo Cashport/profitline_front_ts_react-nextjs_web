@@ -10,6 +10,7 @@ import {
 import { useDebounce } from "@/hooks/useDeabouce";
 import {
   buildMatrixQuery,
+  downloadNoveltiesExcel,
   downloadWalletMatrixExcel,
   getWalletMatrixStatusCatalog,
   refreshWalletMatrix
@@ -78,6 +79,7 @@ export default function WalletView() {
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [downloadingExcel, setDownloadingExcel] = useState(false);
+  const [downloadingNovelties, setDownloadingNovelties] = useState(false);
   /**
    * Foto vigente en el momento de disparar la actualización. La corrida
    * terminó cuando aparece una DISTINTA a esta.
@@ -293,6 +295,27 @@ export default function WalletView() {
     }
   };
 
+  // Descarga el Excel de Novedades (3 hojas). A diferencia del anterior, este
+  // es el que pide la HU junto al buscador de la Matriz de control.
+  const handleDownloadNovelties = async () => {
+    if (downloadingNovelties) return;
+
+    const hide = messageApi.open({ type: "loading", content: "Descargando Excel…", duration: 0 });
+    try {
+      setDownloadingNovelties(true);
+      const filename = await downloadNoveltiesExcel(filters);
+      showMessage("success", `Archivo descargado: ${filename}`);
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "No se pudo descargar el Excel de novedades."
+      );
+    } finally {
+      hide();
+      setDownloadingNovelties(false);
+    }
+  };
+
   // Cuando cambia la consulta (filtros, búsqueda o proyección) la celda
   // elegida deja de tener sentido y la página vuelve a la primera: el conjunto
   // y el orden de los clientes ya no son los que eran. Se observa la query
@@ -424,6 +447,8 @@ export default function WalletView() {
           selectableEstados={selectableEstados}
           onEstadoSelect={handleEstadoSelect}
           onEstadosClear={handleEstadosClear}
+          onDownloadNovelties={handleDownloadNovelties}
+          downloadingNovelties={downloadingNovelties}
         />
       )}
 
