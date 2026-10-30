@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Spin } from "antd";
+import { Spin, message } from "antd";
+import { DownloadSimple } from "phosphor-react";
 import { useInView } from "react-intersection-observer";
 import { useShallow } from "zustand/react/shallow";
 
@@ -14,6 +15,7 @@ import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import ProgressVsGoal from "@/components/ui/progress-vs-goal/progress-vs-goal";
 import StatusBadge from "@/components/ui/status-badge/status-badge";
 import { getAppZoom } from "@/utils/utils";
+import { downloadClientsHomeExcel } from "@/services/clientsHome/clientsHome";
 import type {
   ClientsHomeAgingBucket,
   ClientsHomeForecastStatus,
@@ -133,6 +135,7 @@ export default function ClientsHomeTable({
   const router = useRouter();
   const f = useClientsHomeFilters(
     useShallow((s) => ({
+      projectId: s.projectId,
       search: s.search,
       setSearch: s.setSearch,
       markets: s.markets,
@@ -141,6 +144,11 @@ export default function ClientsHomeTable({
       executives: s.executives,
       toggleExecutive: s.toggleExecutive,
       setExecutives: s.setExecutives,
+      coordinators: s.coordinators,
+      projectToMonthEnd: s.projectToMonthEnd,
+      dueFrom: s.dueFrom,
+      dueTo: s.dueTo,
+      aging: s.aging,
       forecastStatuses: s.forecastStatuses,
       toggleForecastStatus: s.toggleForecastStatus,
       setForecastStatuses: s.setForecastStatuses,
@@ -150,6 +158,7 @@ export default function ClientsHomeTable({
     }))
   );
 
+  const [downloading, setDownloading] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(1400);
   const [expAge, setExpAge] = useState(false);
@@ -160,6 +169,41 @@ export default function ClientsHomeTable({
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Descarga (HU) el Excel de cartera por cliente con los filtros activos.
+  // El backend aplica el alcance del usuario y devuelve el archivo en vivo.
+  const handleDownloadExcel = async () => {
+    if (!f.projectId || downloading) return;
+
+    setDownloading(true);
+    const hide = message.loading({
+      content: "Generando Excel de cartera…",
+      duration: 0
+    });
+    try {
+      const filename = await downloadClientsHomeExcel(f.projectId, {
+        projectToMonthEnd: f.projectToMonthEnd,
+        markets: f.markets,
+        executives: f.executives,
+        coordinators: f.coordinators,
+        dueFrom: f.dueFrom,
+        dueTo: f.dueTo,
+        search: f.search,
+        aging: f.aging,
+        forecastStatuses: f.forecastStatuses,
+        sortBy: f.sortBy,
+        sortDir: f.sortDir
+      });
+      message.success(`Archivo descargado: ${filename}`);
+    } catch (err) {
+      message.error(
+        err instanceof Error ? err.message : "No se pudo descargar el Excel de cartera por cliente."
+      );
+    } finally {
+      hide();
+      setDownloading(false);
+    }
+  };
 
   // Columnas según el ancho real de la tarjeta (no del viewport).
   useEffect(() => {
@@ -606,13 +650,27 @@ export default function ClientsHomeTable({
           </div>
         </div>
         <div className="flex min-w-[200px] flex-[0_1_340px] flex-col items-end gap-1.5">
-          <SearchField
-            value={f.search}
-            onChange={f.setSearch}
-            placeholder="Buscar cliente, NIT, ejecutivo"
-          />
+          <div className="flex w-full items-center gap-1.5">
+            <div className="min-w-0 flex-1">
+              <SearchField
+                value={f.search}
+                onChange={f.setSearch}
+                placeholder="Buscar cliente, NIT, ejecutivo"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleDownloadExcel}
+              disabled={downloading || !f.projectId}
+              title="Descargar Excel"
+              aria-label="Descargar cartera por cliente en Excel"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <DownloadSimple size={15} className={downloading ? "animate-pulse" : undefined} />
+            </button>
+          </div>
           <span className="whitespace-nowrap text-[13px] text-cp-ink-4">
-            {meta ? clientsLabel(total) : " "}
+            {meta ? clientsLabel(total) : " "}
           </span>
         </div>
       </div>
@@ -807,9 +865,7 @@ const QuickFilterPopover = ({
       style={{ left: x, top: y }}
     >
       <div className="flex flex-col gap-0.5">
-        <div className="px-2.5 pb-1 pt-2 text-[13px] font-semibold text-[#8a8a8a]">
-          {title}
-        </div>
+        <div className="px-2.5 pb-1 pt-2 text-[13px] font-semibold text-[#8a8a8a]">{title}</div>
         {options.map((o) => (
           <div
             key={o.key}
