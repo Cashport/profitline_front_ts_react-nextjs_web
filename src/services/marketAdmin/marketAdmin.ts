@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ILoaderValidationConfig, ILoaderValidations } from "@/types/dataQuality/IIntakeStructure";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
@@ -385,10 +386,14 @@ export const getProfitLoaderTimeline = async (loaderId: number) => {
 };
 
 // POST /profit-loader/etl/:id/upload — multipart/form-data, el archivo viaja en la key "file"
-export const uploadProfitLoaderFile = async (id: number, file: File) => {
+// `useAsTemplate` responde el 409 TEMPLATE_DECISION_REQUIRED (validacion de estructura).
+export const uploadProfitLoaderFile = async (id: number, file: File, useAsTemplate?: boolean) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
+    if (useAsTemplate !== undefined) {
+      formData.append("use_as_template", String(useAsTemplate));
+    }
 
     const response: GenericResponse<unknown> = await API.post(
       `/profit-loader/etl/${id}/upload`,
@@ -400,6 +405,26 @@ export const uploadProfitLoaderFile = async (id: number, file: File) => {
     console.error("Error al cargar el archivo del loader:", error);
     throw error;
   }
+};
+
+// GET /profit-loader/etl/:id/validations — configuracion del asistente de validaciones
+export const getLoaderValidations = async (id: number): Promise<ILoaderValidations> => {
+  const response: GenericResponse<ILoaderValidations> = await API.get(
+    `/profit-loader/etl/${id}/validations`
+  );
+  return response.data;
+};
+
+// PUT /profit-loader/etl/:id/validations — reemplaza las reglas creadas con el asistente
+export const saveLoaderValidations = async (
+  id: number,
+  config: ILoaderValidationConfig
+): Promise<ILoaderValidations> => {
+  const response: GenericResponse<ILoaderValidations> = await API.put(
+    `/profit-loader/etl/${id}/validations`,
+    { config }
+  );
+  return response.data;
 };
 
 // ── Unidades de negocio ─────────────────────────────────────────────────────
