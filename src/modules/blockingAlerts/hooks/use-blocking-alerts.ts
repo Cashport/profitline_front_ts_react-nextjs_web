@@ -2,12 +2,17 @@ import useSWR from "swr";
 
 import { useAppStore } from "@/lib/store/store";
 import {
+  blockingAlertsDetailPath,
+  blockingAlertsDocumentsPath,
   blockingAlertsListPath,
   blockingAlertsSummaryPath,
   type BlockingAlertsListView
 } from "@/services/blockingAlerts/blockingAlerts";
 import type {
+  BlockingAlertsDocumentTab,
   IBlockingAlertsClient,
+  IBlockingAlertsDetail,
+  IBlockingAlertsDocuments,
   IBlockingAlertsListQuery,
   IBlockingAlertsPage,
   IBlockingAlertsPointOfSale,
@@ -16,7 +21,7 @@ import type {
 import type { GenericResponse } from "@/types/global/IGlobal";
 import { fetcher } from "@/utils/api/api";
 
-import { getBlockingAlertDetailMock } from "../mocked-data";
+import { PAGE_SIZE } from "../constants";
 
 /** El proyecto va en el header: entra en la llave para no mezclar proyectos en la caché. */
 const useBlockingAlertsApi = <T>(path: string) => {
@@ -48,14 +53,23 @@ export const useBlockingAlertsList = (
   return { list: data, ...rest };
 };
 
-/** Detalle de un cliente o, con `shipToCode`, de uno de sus puntos de venta (simulado). */
-export const useBlockingAlertDetail = (clientId: string, shipToCode?: string) => {
-  const { data, error, isLoading } = useSWR(
-    shipToCode
-      ? `/blocking-alerts/${clientId}/points-of-sale/${shipToCode}`
-      : `/blocking-alerts/${clientId}`,
-    () => getBlockingAlertDetailMock(clientId, shipToCode),
-    { revalidateOnFocus: false }
+/** Detalle de un cliente o, con `shipToCode`, de uno de sus puntos de venta. */
+export const useBlockingAlertDetail = (clientUuid: string, shipToCode?: string) => {
+  const { data, ...rest } = useBlockingAlertsApi<IBlockingAlertsDetail>(
+    blockingAlertsDetailPath(clientUuid, shipToCode)
   );
-  return { detail: data, error: error as Error | undefined, isLoading };
+  return { detail: data, ...rest };
+};
+
+/** Una página de documentos de una pestaña del detalle. */
+export const useBlockingAlertDocuments = (
+  clientUuid: string,
+  shipToCode: string | undefined,
+  tab: BlockingAlertsDocumentTab,
+  page: number
+) => {
+  const { data, ...rest } = useBlockingAlertsApi<IBlockingAlertsDocuments>(
+    blockingAlertsDocumentsPath(clientUuid, shipToCode, { tab, page, limit: PAGE_SIZE })
+  );
+  return { documents: data, ...rest };
 };

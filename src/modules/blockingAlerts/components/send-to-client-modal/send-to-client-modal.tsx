@@ -6,7 +6,7 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import UiTab from "@/components/ui/ui-tab";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
-import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
+import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 import { cn } from "@/utils/utils";
 
 import { MOBILE_TABS } from "../../constants";
@@ -16,7 +16,7 @@ import AlertModal from "../alert-modal/alert-modal";
 type Channel = "whatsapp" | "email";
 
 interface SendToClientModalProps {
-  detail: IBlockingAlertDetail;
+  detail: IBlockingAlertsDetail;
   onClose: () => void;
 }
 
@@ -26,12 +26,13 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
   const { showMessage } = useMessageApi();
   const [channel, setChannel] = useState<Channel>("whatsapp");
 
-  const pastDue = detail.invoices.filter((i) => i.days_overdue > 0);
-  const greeting = `Hola, ${detail.contact_name.split("·")[0].trim()} de ${detail.name}.`;
-  const message = pastDue.length
+  // Sin contacto definido todavía (HU, pendiente 6): se saluda al cliente.
+  const pastDue = detail.tabs.past_due;
+  const greeting = `Hola, equipo de ${detail.name}.`;
+  const message = pastDue.count
     ? [
         greeting,
-        `Tienen ${plural(pastDue.length, "factura vencida", "facturas vencidas")} por ${formatMoney(detail.pastDue, { hideDecimals: true })}.`,
+        `Tienen ${plural(pastDue.count, "factura vencida", "facturas vencidas")} por ${formatMoney(detail.pastDue, { hideDecimals: true })}.`,
         "Pueden pagar el valor vencido aquí:",
         paymentLinkOf(detail),
         "Adjuntamos el estado de cuenta."
@@ -40,16 +41,12 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
   const channelLabel = channel === "whatsapp" ? "WhatsApp" : "correo";
 
   const send = () => {
-    showMessage("success", `Enviado por ${channelLabel} a ${detail.contact_name}`);
+    showMessage("success", `Enviado por ${channelLabel} a ${detail.name}`);
     onClose();
   };
 
   return (
-    <AlertModal
-      onClose={onClose}
-      title="Enviar al cliente"
-      subtitle={`Para: ${detail.contact_name}`}
-    >
+    <AlertModal onClose={onClose} title="Enviar al cliente" subtitle={`Para: ${detail.name}`}>
       <div className={cn("[&_.ant-tabs-nav]:!mb-0", MOBILE_TABS)}>
         <UiTab
           activeKey={channel}

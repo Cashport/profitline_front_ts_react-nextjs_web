@@ -5,21 +5,21 @@ import { ChevronRight, Store } from "lucide-react";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { useAppStore } from "@/lib/store/store";
-import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
+import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 
 import { BLOCKING_ALERTS_PATH, STATUS_META } from "../../constants";
-import { byUrgency, plural, statusLabel } from "../../utils/blocking-alerts";
-
-const TOP = 3;
+import { plural } from "../../utils/blocking-alerts";
 
 /** Puntos de venta del cliente por estado, los más urgentes y el acceso a todos. */
-export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDetail }) {
+export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDetail }) {
   const formatMoney = useAppStore((s) => s.formatMoney);
-  const pos = detail.points_of_sale_count;
+  const pos = detail.pointsOfSale;
   if (!pos) return null;
 
-  const allHref = `${BLOCKING_ALERTS_PATH}/${detail.client_id}/points-of-sale`;
-  const atRisk = detail.points_of_sale.filter((s) => s.status !== "up_to_date").sort(byUrgency);
+  const clientHref = `${BLOCKING_ALERTS_PATH}/${detail.client.clientUuid}`;
+  const allHref = `${clientHref}/points-of-sale`;
+  // Los más urgentes ya vienen ordenados del API.
+  const atRisk = pos.top;
   const legend = [
     { key: "blocked", n: pos.blocked, label: pos.blocked === 1 ? "Bloqueado" : "Bloqueados" },
     { key: "to_be_blocked", n: pos.to_be_blocked, label: "Por bloquear" },
@@ -68,24 +68,27 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
         </p>
       ) : (
         <div className="flex flex-col">
-          {atRisk.slice(0, TOP).map((s) => {
+          {atRisk.map((s) => {
             const meta = STATUS_META[s.status];
             return (
               <Link
-                key={s.ship_to_code}
-                href={`${allHref}/${s.ship_to_code}`}
+                key={s.code ?? s.clientId}
+                href={s.code ? `${allHref}/${s.code}` : clientHref}
                 className="flex items-center gap-2.5 border-t border-cp-line py-2 text-cp-ink hover:bg-cp-subtle"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] font-semibold">
-                    {s.name} <span className="font-normal text-cp-ink-4">· {s.ship_to_code}</span>
+                    {s.name}{" "}
+                    {s.code && (
+                      <span className="font-normal text-cp-ink-4">· Ship-to {s.code}</span>
+                    )}
                   </span>
                   <span
                     className="flex items-center gap-1 text-[11.5px] font-medium"
                     style={{ color: meta.color }}
                   >
                     <meta.Icon className="h-3 w-3 shrink-0" strokeWidth={2.6} />
-                    {statusLabel(s)}
+                    {s.statusLabel}
                   </span>
                 </span>
                 <span className="shrink-0 text-right">
@@ -93,7 +96,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
                     className="block text-[13px] font-semibold tabular-nums"
                     style={{ color: meta.color }}
                   >
-                    {formatMoney(s.pastDue, { hideDecimals: true })}
+                    {formatMoney(s.amount, { hideDecimals: true })}
                   </span>
                   <span className="block text-[11px] text-cp-ink-4">pago vencido</span>
                 </span>

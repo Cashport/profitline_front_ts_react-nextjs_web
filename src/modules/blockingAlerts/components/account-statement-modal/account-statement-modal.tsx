@@ -8,7 +8,7 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import UiTab from "@/components/ui/ui-tab";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
-import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
+import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 import { cn } from "@/utils/utils";
 
 import { MOBILE_TABS } from "../../constants";
@@ -26,7 +26,7 @@ const SECTION_LABEL =
   "text-[11px] font-semibold uppercase tracking-[.12em] text-cp-ink-4 max-md:text-[10px]";
 
 interface AccountStatementModalProps {
-  detail: IBlockingAlertDetail;
+  detail: IBlockingAlertsDetail;
   onClose: () => void;
 }
 
@@ -41,29 +41,28 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
   const [cc, setCc] = useState("");
 
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
-  const total = (list: { amount: number }[]) => money(list.reduce((s, x) => s + x.amount, 0));
-  const pastDue = detail.invoices.filter((i) => i.days_overdue > 0);
-  const upcoming = detail.invoices.filter((i) => i.days_overdue <= 0);
+  const { all, past_due: pastDue, balances, credit_notes: creditNotes } = detail.tabs;
+  const upcoming = { count: all.count - pastDue.count, total: all.total - pastDue.total };
   const sections = [
     {
       key: "past_due",
       label: "Facturas vencidas",
-      meta: `${plural(pastDue.length, "factura", "facturas")} · ${total(pastDue)}`
+      meta: `${plural(pastDue.count, "factura", "facturas")} · ${money(pastDue.total)}`
     },
     {
       key: "upcoming",
       label: "Facturas por vencer",
-      meta: `${plural(upcoming.length, "factura", "facturas")} · ${total(upcoming)}`
+      meta: `${plural(upcoming.count, "factura", "facturas")} · ${money(upcoming.total)}`
     },
     {
       key: "pending_balances",
       label: "Saldos pendientes",
-      meta: `${plural(detail.pending_balances.length, "movimiento", "movimientos")} · ${total(detail.pending_balances)}`
+      meta: `${plural(balances.count, "movimiento", "movimientos")} · ${money(balances.total)}`
     },
     {
       key: "credit_notes",
       label: "Notas crédito",
-      meta: `${plural(detail.credit_notes.length, "nota", "notas")} · ${total(detail.credit_notes)}`
+      meta: `${plural(creditNotes.count, "nota", "notas")} · ${money(creditNotes.total)}`
     }
   ];
 
@@ -208,7 +207,7 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
             <div className="flex items-start gap-2.5 py-3 max-md:py-2">
               <span className={FIELD_LABEL}>Asunto</span>
               <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-cp-ink max-md:text-[12px]">
-                Estado de cuenta · {detail.name} · corte {fmtDay(detail.cutoff_at, true)}
+                Estado de cuenta · {detail.name} · corte {fmtDay(detail.cutoffAt, true)}
               </span>
             </div>
           </div>

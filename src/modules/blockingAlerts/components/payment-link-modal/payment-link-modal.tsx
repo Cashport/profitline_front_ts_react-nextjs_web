@@ -8,7 +8,7 @@ import { CircleCheck, Link2, Mail, MessageCircle, QrCode } from "lucide-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
-import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
+import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 
 import { paymentLinkOf, plural } from "../../utils/blocking-alerts";
 import AlertModal from "../alert-modal/alert-modal";
@@ -16,7 +16,7 @@ import AlertModal from "../alert-modal/alert-modal";
 type PaymentMode = "past_due" | "selected";
 
 interface PaymentLinkModalProps {
-  detail: IBlockingAlertDetail;
+  detail: IBlockingAlertsDetail;
   /** Facturas vencidas y las elegidas en el detalle. */
   pastDue: { count: number; total: number };
   selected: { count: number; total: number };
@@ -44,7 +44,7 @@ export default function PaymentLinkModal({
   const expires = dayjs().add(48, "hour").locale("es").format("D MMM · HH:mm").replace(".", "");
 
   const share = (channel: string) => {
-    showMessage("success", `Link enviado por ${channel} a ${detail.contact_name}`);
+    showMessage("success", `Link enviado por ${channel} a ${detail.name}`);
     onClose();
   };
 
@@ -128,7 +128,6 @@ export default function PaymentLinkModal({
       <dl className="m-0 flex flex-col text-[13px]">
         {[
           ["Cliente", detail.name],
-          ["Contacto", detail.contact_name],
           ["Vence el link", `${expires} (48 h)`]
         ].map(([label, value]) => (
           <div
