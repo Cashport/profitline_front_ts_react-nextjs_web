@@ -15,7 +15,6 @@ import {
 } from "@/services/dataQuality/dataQuality";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
-import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
 import { ModalFileHistory } from "../ModalFileHistory";
 import { useAppStore } from "@/lib/store/store";
@@ -78,7 +77,6 @@ export function ClientDetailTable({
   const [isModalFileDetailOpen, setIsModalFileDetailOpen] = useState(false);
   const [fileURL, setFileURL] = useState("");
   const [isFileHistoryModalOpen, setIsFileHistoryModalOpen] = useState(false);
-  const { runUpload, structureModals } = useIntakeStructureUpload();
 
   const selectedProject = useAppStore((projects) => projects.selectedProject);
   const canUpload = canUploadDataFiles(selectedProject);
@@ -368,11 +366,7 @@ export function ClientDetailTable({
           duration: 0
         });
         try {
-          const uploaded = await runUpload(
-            (useAsTemplate) => uploadGenericIntakeFile(id, file, useAsTemplate),
-            { onPrompt: hide }
-          );
-          if (!uploaded) return;
+          await uploadGenericIntakeFile(id, file);
           message.success("Carga exitosa.");
           mutateDetail?.();
           onMutate?.();
@@ -597,7 +591,6 @@ export function ClientDetailTable({
         }}
         file={historyFile}
       />
-      {structureModals}
     </div>
   );
 }

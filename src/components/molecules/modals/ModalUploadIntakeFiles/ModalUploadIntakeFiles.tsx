@@ -6,7 +6,6 @@ import { UploadChangeParam } from "antd/es/upload";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
 import { uploadIntakeFile } from "@/services/dataQuality/dataQuality";
-import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 
 import "./modalUploadIntakeFiles.scss";
 
@@ -23,7 +22,6 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
   const [ingestaFile, setIngestaFile] = useState<File | undefined>();
   const [pruebaFile, setPruebaFile] = useState<File | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const { runUpload, structureModals } = useIntakeStructureUpload();
 
   const resetState = () => {
     setIngestaFile(undefined);
@@ -70,11 +68,7 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
       duration: 0
     });
     try {
-      const uploaded = await runUpload(
-        (useAsTemplate) => uploadIntakeFile(archiveId, ingestaFile, pruebaFile, useAsTemplate),
-        { onPrompt: hide }
-      );
-      if (!uploaded) return;
+      await uploadIntakeFile(archiveId, ingestaFile, pruebaFile);
       message.success("Archivo de ingesta subido exitosamente.");
       onSuccess?.();
       resetState();
@@ -92,54 +86,51 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
   };
 
   return (
-    <>
-      <Modal
-        open={isOpen}
-        onCancel={handleClose}
-        title={<Title level={4}>Subir archivos</Title>}
-        className="modalUploadIntakeFiles"
-        width={600}
-        footer={
-          <FooterButtons
-            titleConfirm="Enviar"
-            titleCancel="Cancelar"
-            onClose={handleClose}
-            handleOk={handleSubmit}
-            isConfirmDisabled={!ingestaFile}
-            isConfirmLoading={isLoading}
+    <Modal
+      open={isOpen}
+      onCancel={handleClose}
+      title={<Title level={4}>Subir archivos</Title>}
+      className="modalUploadIntakeFiles"
+      width={600}
+      footer={
+        <FooterButtons
+          titleConfirm="Enviar"
+          titleCancel="Cancelar"
+          onClose={handleClose}
+          handleOk={handleSubmit}
+          isConfirmDisabled={!ingestaFile}
+          isConfirmLoading={isLoading}
+        />
+      }
+      destroyOnClose
+    >
+      <div className="fileRow">
+        <Text className="label">Ingesta</Text>
+        <div className="documentButtonWrapper">
+          <DocumentButton
+            title="Ingesta"
+            fileName={ingestaFile?.name}
+            fileSize={ingestaFile?.size}
+            handleOnChange={handleChange(setIngestaFile)}
+            handleOnDelete={handleDelete(setIngestaFile)}
           />
-        }
-        destroyOnClose
-      >
-        <div className="fileRow">
-          <Text className="label">Ingesta</Text>
-          <div className="documentButtonWrapper">
-            <DocumentButton
-              title="Ingesta"
-              fileName={ingestaFile?.name}
-              fileSize={ingestaFile?.size}
-              handleOnChange={handleChange(setIngestaFile)}
-              handleOnDelete={handleDelete(setIngestaFile)}
-            />
-          </div>
         </div>
-        <div className="fileRow">
-          <div className="label">
-            <Text>Prueba</Text>
-            <em className="opt">*Opcional</em>
-          </div>
-          <div className="documentButtonWrapper">
-            <DocumentButton
-              title="Prueba"
-              fileName={pruebaFile?.name}
-              fileSize={pruebaFile?.size}
-              handleOnChange={handleChange(setPruebaFile)}
-              handleOnDelete={handleDelete(setPruebaFile)}
-            />
-          </div>
+      </div>
+      <div className="fileRow">
+        <div className="label">
+          <Text>Prueba</Text>
+          <em className="opt">*Opcional</em>
         </div>
-      </Modal>
-      {structureModals}
-    </>
+        <div className="documentButtonWrapper">
+          <DocumentButton
+            title="Prueba"
+            fileName={pruebaFile?.name}
+            fileSize={pruebaFile?.size}
+            handleOnChange={handleChange(setPruebaFile)}
+            handleOnDelete={handleDelete(setPruebaFile)}
+          />
+        </div>
+      </div>
+    </Modal>
   );
 };

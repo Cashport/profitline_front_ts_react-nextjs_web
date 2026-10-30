@@ -21,11 +21,7 @@ import ProfitLoader from "@/components/ui/profit-loader/profit-loader";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import { Button } from "@/modules/chat/ui/button";
 
-import {
-  retryAuxiliaryUpload,
-  uploadAuxiliaryUpload
-} from "@/services/dataQuality/dataQuality";
-import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
+import { retryAuxiliaryUpload, uploadAuxiliaryUpload } from "@/services/dataQuality/dataQuality";
 import { useAuxiliaryUploadBatch } from "../../hooks/useAuxiliaryUploadBatch";
 import {
   AuxiliaryUploadStatus,
@@ -83,9 +79,6 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
 }) => {
   const [selected, setSelected] = useState<File[]>([]);
   const [items, setItems] = useState<LocalItem[]>([]);
-  const { runUpload, structureModals } = useIntakeStructureUpload();
-  // Respuesta a "¿usar este archivo como template?" para el resto del lote.
-  const templateDecisionRef = useRef<boolean | undefined>(undefined);
   const [batchId, setBatchId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const notifiedRef = useRef(false);
@@ -148,28 +141,13 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
       let lastError = "";
       for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_FILE; attempt++) {
         try {
-          // Validacion de estructura: la decision sobre el template se toma una
-          // vez y se reutiliza para los demas archivos del lote.
-          const holder: {
-            result?: Awaited<ReturnType<typeof uploadAuxiliaryUpload>>;
-          } = {};
-          const accepted = await runUpload(async (useAsTemplate) => {
-            if (useAsTemplate !== undefined) templateDecisionRef.current = useAsTemplate;
-            holder.result = await uploadAuxiliaryUpload({
-              id,
-              batchId: targetBatchId,
-              fileCount,
-              slotIndex,
-              file,
-              useAsTemplate: useAsTemplate ?? templateDecisionRef.current
-            });
+          const result = await uploadAuxiliaryUpload({
+            id,
+            batchId: targetBatchId,
+            fileCount,
+            slotIndex,
+            file
           });
-          if (!accepted || !holder.result) {
-            // Rechazado por estructura o cancelado: no tiene sentido reintentar.
-            lastError = "No se cargó: la estructura del archivo no es válida o se canceló.";
-            break;
-          }
-          const result = holder.result;
           setItems((prev) =>
             prev.map((item) =>
               item.slotIndex === slotIndex
@@ -196,7 +174,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
       );
       return false;
     },
-    [auxiliaryFile?.id, runUpload]
+    [auxiliaryFile?.id]
   );
 
   const handleStart = async () => {
@@ -204,7 +182,6 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
 
     const targetBatchId = crypto.randomUUID();
     const fileCount = selected.length;
-    templateDecisionRef.current = undefined;
     const locals: LocalItem[] = selected.map((file, index) => ({
       slotIndex: index + 1,
       file,
@@ -485,7 +462,6 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
           </>
         )}
       </div>
-      {structureModals}
     </Modal>
   );
 };
