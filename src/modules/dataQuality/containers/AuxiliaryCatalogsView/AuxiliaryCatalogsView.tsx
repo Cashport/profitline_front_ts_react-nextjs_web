@@ -101,6 +101,7 @@ export default function AuxiliaryCatalogsView() {
         <CountryClientsActionsModal
           isOpen={actionsOpen}
           onClose={() => setActionsOpen(false)}
+          onlyGmnOficiales
           onDownloadCatalog={() => {
             setDownloadingCatalog(true);
             runDownload(
