@@ -2,23 +2,31 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Modal, Spin } from "antd";
-import Header from "@/components/organisms/header";
 import SearchField from "@/components/ui/search-field/search-field";
 import { MiniSwitch } from "@/components/ui/page-header-controls/page-header-controls";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { ApiError } from "@/utils/api/api";
-import { cn } from "@/utils/utils";
 import { updateProjectRoles } from "@/services/roles/projectRoles";
 import { IBlockedProjectRole, IProjectRole } from "@/types/roles/IProjectRoles";
 import { useProjectRoles } from "@/modules/platform/hooks/useProjectRoles";
 import { groupRoles } from "@/modules/platform/lib/roleGroups";
+import {
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  Notice,
+  PaneItem
+} from "@/modules/platform/components/shared/shared";
 
 const sameIds = (a: Set<number>, b: Set<number>) =>
   a.size === b.size && Array.from(a).every((id) => b.has(id));
 
-export default function ProjectRoles() {
-  const { isSuperAdmin, ID: currentProjectId } = useAppStore((s) => s.selectedProject);
+interface Props {
+  onOpenRole: (rolId: number) => void;
+}
+
+export default function ProjectRolesTab({ onOpenRole }: Props) {
+  const currentProjectId = useAppStore((s) => s.selectedProject?.ID);
   const projects = useAppStore((s) => s.projectsBasicInfo);
   const { showMessage } = useMessageApi();
 
@@ -27,7 +35,7 @@ export default function ProjectRoles() {
   const [draft, setDraft] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
 
-  const { config, isLoading, error, mutate } = useProjectRoles(isSuperAdmin ? projectId : null);
+  const { config, isLoading, error, mutate } = useProjectRoles(projectId);
 
   const savedIds = useMemo(
     () => new Set((config?.roles ?? []).filter((r) => r.enabled).map((r) => r.rol_id)),
@@ -51,17 +59,6 @@ export default function ProjectRoles() {
   const changes = (config?.roles ?? []).filter(
     (r) => draft.has(r.rol_id) !== savedIds.has(r.rol_id)
   ).length;
-
-  if (!isSuperAdmin) {
-    return (
-      <div className="cp-page min-h-full">
-        <Header title="Roles por proyecto" back="/market-admin" />
-        <div className="cp-card p-[var(--card-pad)] text-[17px] text-cp-ink-2">
-          Esta sección es solo para administradores de Profitline.
-        </div>
-      </div>
-    );
-  }
 
   const selectProject = (id: number) => {
     if (id === projectId) return;
@@ -123,32 +120,22 @@ export default function ProjectRoles() {
   const groups = groupRoles(config?.roles ?? []);
 
   return (
-    <div className="cp-page min-h-full">
-      <Header title="Roles por proyecto" back="/market-admin" />
-
-      <div className="grid min-h-0 grid-cols-1 gap-[var(--card-gap)] md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
-        <div className="cp-card flex min-w-0 flex-col gap-3 p-[var(--card-pad)]">
-          <p className="text-[18px] font-semibold text-cp-ink">Proyectos</p>
+    <div className="cp-fill">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
+        <div className="flex min-h-0 min-w-0 flex-col gap-3 border-cp-line pr-[18px] md:border-r">
           <SearchField
             value={projectSearch}
             onChange={setProjectSearch}
             placeholder="Buscar proyecto"
           />
-          <div className="flex max-h-[70vh] flex-col overflow-y-auto">
+          <div className="cp-list-scroll">
             {sortedProjects.map((project) => (
-              <button
+              <PaneItem
                 key={project.ID}
-                type="button"
+                active={project.ID === projectId}
                 onClick={() => selectProject(project.ID)}
-                className={cn(
-                  "flex h-[44px] items-center border-0 border-l-[3px] bg-transparent px-3 text-left text-[17px] text-cp-ink-2 transition-colors hover:bg-cp-bg",
-                  project.ID === projectId
-                    ? "border-cp-lime bg-cp-bg font-semibold text-cp-ink"
-                    : "border-transparent"
-                )}
-              >
-                <span className="truncate">{project.NAME}</span>
-              </button>
+                title={project.NAME}
+              />
             ))}
             {sortedProjects.length === 0 && (
               <p className="px-3 py-2 text-[15px] text-cp-ink-3">Sin resultados</p>
@@ -156,7 +143,7 @@ export default function ProjectRoles() {
           </div>
         </div>
 
-        <div className="cp-card flex min-w-0 flex-col gap-4 p-[var(--card-pad)]">
+        <div className="flex min-h-0 min-w-0 flex-col gap-4 md:pl-[18px]">
           <div className="flex min-h-[48px] flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-[18px] font-semibold text-cp-ink">
@@ -173,7 +160,7 @@ export default function ProjectRoles() {
               type="button"
               disabled={!dirty || saving}
               onClick={() => setDraft(new Set(savedIds))}
-              className="h-[var(--control-h)] rounded-lg border border-cp-line-2 bg-cp-surface px-4 text-[14px] font-semibold text-cp-ink-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className={BTN_SECONDARY}
             >
               Descartar
             </button>
@@ -181,17 +168,17 @@ export default function ProjectRoles() {
               type="button"
               disabled={!dirty || saving}
               onClick={save}
-              className="h-[var(--control-h)] rounded-[10px] border-0 bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-cp-lime-dark disabled:cursor-not-allowed disabled:opacity-50"
+              className={BTN_PRIMARY}
             >
               {saving ? "Guardando…" : "Guardar cambios"}
             </button>
           </div>
 
           {config && !config.configured && (
-            <div className="rounded-lg bg-cp-bg px-4 py-3 text-[15px] text-cp-ink-2">
+            <Notice>
               Este proyecto todavía no tiene una lista propia: hoy ve los {config.roles.length}{" "}
               roles. Al guardar, solo verá los que dejes habilitados.
-            </div>
+            </Notice>
           )}
 
           {isLoading && (
@@ -206,55 +193,64 @@ export default function ProjectRoles() {
             </p>
           )}
 
-          {config &&
-            groups.map(({ group, roles }) => (
-              <section key={group} className="flex flex-col">
-                <div className="flex items-baseline gap-2 border-b border-cp-line pb-2">
-                  <p className="text-[17px] font-semibold text-cp-ink">{group}</p>
-                  <p className="text-[15px] text-cp-ink-3">
-                    {roles.filter((r) => draft.has(r.rol_id)).length} de {roles.length}
-                  </p>
-                </div>
-                {roles.map((role) => {
-                  const checked = draft.has(role.rol_id);
-                  const changed = checked !== savedIds.has(role.rol_id);
-                  return (
-                    <div
-                      key={role.rol_id}
-                      className="grid min-h-[45px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-cp-muted px-1"
-                    >
-                      <p className="truncate text-[17px] text-cp-ink">
-                        {role.rol_name}
-                        {changed && (
-                          <span className="ml-2 rounded-[5px] bg-cp-muted px-1.5 py-px text-[14px] font-semibold text-cp-ink-2">
-                            Sin guardar
-                          </span>
-                        )}
-                      </p>
-                      <p className="whitespace-nowrap text-right text-[15px] text-cp-ink-3">
-                        {role.active_users === 1
-                          ? "1 usuario activo"
-                          : `${role.active_users} usuarios activos`}
-                      </p>
-                      <MiniSwitch
-                        checked={checked}
-                        onChange={(value) => toggleRole(role, value)}
-                        title={
-                          checked && role.active_users > 0
-                            ? "Tiene usuarios activos: cámbialos de rol antes de ocultarlo"
-                            : undefined
-                        }
-                        label={
-                          <span className="w-[72px] text-[15px] text-cp-ink-2">
-                            {checked ? "Visible" : "Oculto"}
-                          </span>
-                        }
-                      />
-                    </div>
-                  );
-                })}
-              </section>
-            ))}
+          <div className="cp-list-scroll pr-1">
+            {config &&
+              groups.map(({ group, roles }) => (
+                <section key={group} className="mb-4 flex flex-col">
+                  <div className="flex items-baseline gap-2 border-b border-cp-line pb-2">
+                    <p className="text-[17px] font-semibold text-cp-ink">{group}</p>
+                    <p className="text-[15px] text-cp-ink-3">
+                      {roles.filter((r) => draft.has(r.rol_id)).length} de {roles.length}
+                    </p>
+                  </div>
+                  {roles.map((role) => {
+                    const checked = draft.has(role.rol_id);
+                    const changed = checked !== savedIds.has(role.rol_id);
+                    return (
+                      <div
+                        key={role.rol_id}
+                        className="grid min-h-[45px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-cp-muted px-1"
+                      >
+                        <p className="min-w-0 truncate text-[17px]">
+                          <button
+                            type="button"
+                            onClick={() => onOpenRole(role.rol_id)}
+                            className="border-0 bg-transparent p-0 text-left text-cp-blue hover:text-cp-blue-hover hover:underline"
+                            title="Ver qué puede hacer este rol"
+                          >
+                            {role.rol_name}
+                          </button>
+                          {changed && (
+                            <span className="ml-2 rounded-[5px] bg-cp-muted px-1.5 py-px text-[14px] font-semibold text-cp-ink-2">
+                              Sin guardar
+                            </span>
+                          )}
+                        </p>
+                        <p className="whitespace-nowrap text-right text-[15px] text-cp-ink-3">
+                          {role.active_users === 1
+                            ? "1 usuario activo"
+                            : `${role.active_users} usuarios activos`}
+                        </p>
+                        <MiniSwitch
+                          checked={checked}
+                          onChange={(value) => toggleRole(role, value)}
+                          title={
+                            checked && role.active_users > 0
+                              ? "Tiene usuarios activos: cámbialos de rol antes de ocultarlo"
+                              : undefined
+                          }
+                          label={
+                            <span className="w-[72px] text-[15px] text-cp-ink-2">
+                              {checked ? "Visible" : "Oculto"}
+                            </span>
+                          }
+                        />
+                      </div>
+                    );
+                  })}
+                </section>
+              ))}
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,10 @@
-import ProjectRoles from "@/modules/platform/containers/project-roles/ProjectRoles";
+import { Suspense } from "react";
+import RolesConsole from "@/modules/platform/containers/roles-console/RolesConsole";
 
 export default function Page() {
-  return <ProjectRoles />;
+  return (
+    <Suspense>
+      <RolesConsole />
+    </Suspense>
+  );
 }

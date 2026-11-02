@@ -80,8 +80,8 @@ const superAdminSections: Section[] = [
   {
     href: "/plataforma/roles",
     icon: ShieldCheck,
-    label: "Roles por proyecto",
-    description: "Solo Profitline: elige qué roles ve y asigna cada proyecto."
+    label: "Roles y permisos",
+    description: "Solo Profitline: roles por proyecto, qué puede hacer cada rol y su catálogo."
   }
 ];
 
