@@ -56,7 +56,7 @@ export default function ProjectRoles() {
     return (
       <div className="cp-page min-h-full">
         <Header title="Roles por proyecto" back="/market-admin" />
-        <div className="cp-card text-[17px] text-cp-ink-2">
+        <div className="cp-card p-[var(--card-pad)] text-[17px] text-cp-ink-2">
           Esta sección es solo para administradores de Profitline.
         </div>
       </div>
@@ -127,7 +127,7 @@ export default function ProjectRoles() {
       <Header title="Roles por proyecto" back="/market-admin" />
 
       <div className="grid min-h-0 grid-cols-1 gap-[var(--card-gap)] md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
-        <div className="cp-card flex min-w-0 flex-col gap-3">
+        <div className="cp-card flex min-w-0 flex-col gap-3 p-[var(--card-pad)]">
           <p className="text-[18px] font-semibold text-cp-ink">Proyectos</p>
           <SearchField
             value={projectSearch}
@@ -156,7 +156,7 @@ export default function ProjectRoles() {
           </div>
         </div>
 
-        <div className="cp-card flex min-w-0 flex-col gap-4">
+        <div className="cp-card flex min-w-0 flex-col gap-4 p-[var(--card-pad)]">
           <div className="flex min-h-[48px] flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-[18px] font-semibold text-cp-ink">
