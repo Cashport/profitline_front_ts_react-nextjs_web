@@ -13,6 +13,8 @@ import PanelDetalleCargue from "@/modules/marketAdmin/components/market-admin-lo
 import ModalNuevoEtl, {
   NuevoEtlFormValues
 } from "@/modules/marketAdmin/components/market-admin-load/ModalNuevoEtl";
+import ModalValidacionCargue from "@/modules/marketAdmin/components/market-admin-load/ModalValidacionCargue";
+import ModalErroresCargue from "@/modules/marketAdmin/components/market-admin-load/ModalErroresCargue";
 import {
   getProfitLoaderTimelineKey,
   useProfitLoaders
@@ -30,7 +32,11 @@ import {
 } from "@/types/dataQuality/IIntakeStructure";
 import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import { useMessageApi } from "@/context/MessageContext";
-import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+import {
+  IProfitLoader,
+  IProfitLoaderTimelineItem,
+  IProfitLoaderUploadResult
+} from "@/types/marketAdmin/IMarketAdmin";
 import Header from "@/components/organisms/header";
 
 dayjs.extend(utc);
@@ -46,6 +52,16 @@ export default function MarketAdminLoad() {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [analysisModal, setAnalysisModal] = useState<{
+    loaderId: number;
+    analysisId: number;
+    loaderName: string | null;
+    templateUrl?: string;
+  } | null>(null);
+  const [errorsModal, setErrorsModal] = useState<{
+    loaderId: number;
+    item: IProfitLoaderTimelineItem;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<number | null>(null);
   const { runUpload, structureModals } = useIntakeStructureUpload();
@@ -137,6 +153,42 @@ export default function MarketAdminLoad() {
     fileInputRef.current?.click();
   };
 
+  const uploadFile = async (targetId: number, file: File) => {
+    setUploadingId(targetId);
+    try {
+      let result: IProfitLoaderUploadResult | undefined;
+      const uploaded = await runUpload(
+        async (useAsTemplate) => {
+          result = await uploadProfitLoaderFile(targetId, file, useAsTemplate);
+        },
+        { onValidationsRequired: askValidations(targetId, file.name) }
+      );
+      if (!uploaded) return;
+      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
+      // Cartera: validar -> justificar -> confirmar antes de aplicar el archivo.
+      if (result?.requires_analysis && result.analysis_id) {
+        const loader = loaders?.find((l) => l.id === targetId);
+        setAnalysisModal({
+          loaderId: targetId,
+          analysisId: result.analysis_id,
+          loaderName: loader?.display_name ?? null,
+          templateUrl: loader?.url_s3_template
+        });
+        return;
+      }
+      // La carga es asincrona: el loader valida el contenido y procesa despues;
+      // el resultado aparece en el historial de cargues.
+      showMessage(
+        "success",
+        `Archivo "${file.name}" recibido. Se está validando y procesando; revisa el resultado en el historial.`
+      );
+    } catch (error) {
+      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const targetId = uploadTargetRef.current;
@@ -144,26 +196,37 @@ export default function MarketAdminLoad() {
     e.target.value = "";
     uploadTargetRef.current = null;
     if (!file || !targetId) return;
+    await uploadFile(targetId, file);
+  };
 
-    setUploadingId(targetId);
-    try {
-      const uploaded = await runUpload(
-        (useAsTemplate) => uploadProfitLoaderFile(targetId, file, useAsTemplate),
-        { onValidationsRequired: askValidations(targetId, file.name) }
-      );
-      if (!uploaded) return;
-      // La carga es asincrona: el loader valida el contenido y procesa despues;
-      // el resultado aparece en el historial de cargues.
-      showMessage(
-        "success",
-        `Archivo "${file.name}" recibido. Se está validando y procesando; revisa el resultado en el historial.`
-      );
-      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
-    } catch (error) {
-      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
-    } finally {
-      setUploadingId(null);
+  const closeAnalysis = () => {
+    const loaderId = analysisModal?.loaderId;
+    setAnalysisModal(null);
+    if (loaderId) {
+      mutate();
+      globalMutate(getProfitLoaderTimelineKey(loaderId));
     }
+  };
+
+  const openLoadDetail = (loader: IProfitLoader, item: IProfitLoaderTimelineItem) => {
+    if (item.analysis_id) {
+      setAnalysisModal({
+        loaderId: loader.id,
+        analysisId: item.analysis_id,
+        loaderName: loader.display_name,
+        templateUrl: loader.url_s3_template
+      });
+      return;
+    }
+    setErrorsModal({ loaderId: loader.id, item });
+  };
+
+  const uploadCorrected = (file?: File) => {
+    const loaderId = analysisModal?.loaderId;
+    closeAnalysis();
+    if (!loaderId) return;
+    if (file) uploadFile(loaderId, file);
+    else triggerUpload(loaderId);
   };
 
   const descargarTemplate = (loader: IProfitLoader) => {
@@ -311,6 +374,24 @@ export default function MarketAdminLoad() {
         onUpload={triggerUpload}
         onDownloadTemplate={descargarTemplate}
         onEditValidations={openValidationsEditor}
+        onOpenDetail={openLoadDetail}
+      />
+
+      <ModalErroresCargue
+        open={!!errorsModal}
+        loaderId={errorsModal?.loaderId ?? null}
+        item={errorsModal?.item ?? null}
+        onClose={() => setErrorsModal(null)}
+      />
+
+      <ModalValidacionCargue
+        open={!!analysisModal}
+        loaderId={analysisModal?.loaderId ?? null}
+        analysisId={analysisModal?.analysisId ?? null}
+        loaderName={analysisModal?.loaderName ?? null}
+        templateUrl={analysisModal?.templateUrl}
+        onClose={closeAnalysis}
+        onUploadCorrected={uploadCorrected}
       />
 
       <ModalNuevoEtl
