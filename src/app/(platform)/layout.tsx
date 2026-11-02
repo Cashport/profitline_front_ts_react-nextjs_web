@@ -32,8 +32,8 @@ dayjs.extend(localeData);
 dayjs.extend(weekOfYear);
 dayjs.extend(weekYear);
 
-import "../styles/globals.scss";
-import "../styles/tailwind.css";
+import "../../styles/globals.scss";
+import "../../styles/tailwind.css";
 
 const queryClient = new QueryClient();
 
@@ -44,7 +44,7 @@ const poppins = Poppins({
 });
 
 const aptosNarrow = localFont({
-  src: "../../public/fonts/aptos-narrow.woff2", // Adjust the path to your font file
+  src: "../../../public/fonts/aptos-narrow.woff2", // Adjust the path to your font file
   variable: "--mono-space-font" // Define a CSS variable for aptosNarrow
 });
 

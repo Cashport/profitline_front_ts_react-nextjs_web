@@ -145,6 +145,22 @@ export const continueLoginAfterAuth = async (
   return { step: "success" };
 };
 
+// Same as signInWithPolicyCheck, but lets the Firebase error propagate so
+// callers that render their own error UI (the public landing login card)
+// can tell bad credentials apart from rate limiting or network failures.
+export const signInAndCheckPolicy = async (
+  email: string,
+  password: string,
+  router: AppRouterInstance
+): Promise<LoginOutcome> => {
+  localStorage.removeItem(STORAGE_TOKEN);
+  const { resetStore, setHydrated } = useAppStore.getState();
+  resetStore();
+  setHydrated();
+  await signInWithEmailAndPassword(auth, email.trim(), password);
+  return await continueLoginAfterAuth(router);
+};
+
 // Password-only login path (as opposed to the marketplace ?token= flow
 // still handled by getAuth below), gated by the periodic-OTP /
 // password-expiration policy instead of redirecting unconditionally.
@@ -156,13 +172,8 @@ export const signInWithPolicyCheck = async (
   openNotification: ({ api, title, message, placement }: IOpenNotificationProps) => void,
   api: NotificationInstance
 ): Promise<LoginOutcome> => {
-  localStorage.removeItem(STORAGE_TOKEN);
-  const { resetStore, setHydrated } = useAppStore.getState();
-  resetStore();
-  setHydrated();
   try {
-    await signInWithEmailAndPassword(auth, email.trim(), password);
-    return await continueLoginAfterAuth(router);
+    return await signInAndCheckPolicy(email, password, router);
   } catch (error) {
     console.error({ error });
     openNotification({
@@ -217,7 +228,7 @@ const logOut = async (router?: AppRouterInstance) => {
   } catch (error) {
     console.error("Error during logout:", error);
     // Fallback en caso de error
-    window.location.href = "/auth/login";
+    window.location.href = "/";
   }
 };
 

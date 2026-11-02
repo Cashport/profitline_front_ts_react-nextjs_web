@@ -20,7 +20,7 @@ import { formatNumber } from "@/utils/utils";
 import ModalShippingInfo from "../modal-shipping-info";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import CitiesSelect from "@/modules/commerce/components/cities-select";
-import { useCityWarehouse } from "@/app/comercio/pedido/hooks/useCityWarehouses";
+import { useCityWarehouse } from "@/app/(platform)/comercio/pedido/hooks/useCityWarehouses";
 import {
   NEW_ADDRESS_OPTION,
   getDefaultCommentForBusinessUnit,
