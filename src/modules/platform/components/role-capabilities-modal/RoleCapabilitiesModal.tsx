@@ -14,7 +14,8 @@ import {
   EndpointLine,
   EndpointStats,
   Notice,
-  SystemBadge
+  SystemBadge,
+  filterCatalog
 } from "@/modules/platform/components/shared/shared";
 
 interface Props {
@@ -25,7 +26,16 @@ interface Props {
 
 export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props) {
   const { detail, isLoading: loadingDetail, error: detailError } = useRoleDetail(rolId);
-  const { catalog, isLoading: loadingCatalog, error: catalogError } = useRolesCatalog();
+  const {
+    catalog: fullCatalog,
+    isLoading: loadingCatalog,
+    error: catalogError
+  } = useRolesCatalog();
+  const isTmsRole = (detail?.rol_name ?? "").toLowerCase().startsWith("tms-");
+  const catalog = useMemo(
+    () => (fullCatalog ? filterCatalog(fullCatalog, isTmsRole) : undefined),
+    [fullCatalog, isTmsRole]
+  );
   const { roles } = useAdminRoles();
   const [showMissing, setShowMissing] = useState(false);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -166,7 +176,7 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
                       <button
                         type="button"
                         onClick={() => toggle(component.component_id)}
-                        className="grid w-full grid-cols-[18px_minmax(0,1fr)_auto_64px] items-center gap-3 border-0 bg-transparent px-1 py-2 text-left"
+                        className="grid w-full grid-cols-[18px_minmax(0,1fr)_auto_84px] items-center gap-3 border-0 bg-transparent px-1 py-2 text-left"
                         disabled={component.endpoints.length === 0}
                       >
                         {component.endpoints.length > 0 ? (
@@ -185,8 +195,8 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
                         <span
                           className={
                             has
-                              ? "rounded-[5px] bg-cp-lime px-2 py-px text-center text-[13px] font-semibold text-[#141414]"
-                              : "rounded-[5px] bg-cp-muted px-2 py-px text-center text-[13px] font-semibold text-cp-ink-3"
+                              ? "whitespace-nowrap rounded-[5px] bg-cp-lime px-2 py-px text-center text-[13px] font-semibold text-[#141414]"
+                              : "whitespace-nowrap rounded-[5px] bg-cp-muted px-2 py-px text-center text-[13px] font-semibold text-cp-ink-3"
                           }
                         >
                           {has ? "Acceso" : "No"}

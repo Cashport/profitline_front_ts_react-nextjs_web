@@ -3,6 +3,7 @@ export interface ICatalogEndpoint {
   route: string;
   method: string;
   path: string;
+  mounted: boolean;
 }
 
 export interface ICatalogComponent {

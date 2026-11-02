@@ -21,7 +21,9 @@ import {
   EndpointStats,
   Notice,
   PaneItem,
-  SystemBadge
+  SystemBadge,
+  filterCatalog,
+  INCLUDE_OTHER_HINT
 } from "@/modules/platform/components/shared/shared";
 
 export const NEW_ROLE = "new" as const;
@@ -46,7 +48,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
     isLoading: loadingRoles,
     error: rolesError
   } = useAdminRoles();
-  const { catalog, mutate: mutateCatalog } = useRolesCatalog();
+  const { catalog: fullCatalog, mutate: mutateCatalog } = useRolesCatalog();
   const editingId = typeof selection === "number" ? selection : null;
   const { detail, mutate: mutateDetail, isLoading: loadingDetail } = useRoleDetail(editingId);
 
@@ -58,6 +60,11 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
   const [showTms, setShowTms] = useState(false);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
+
+  const catalog = useMemo(
+    () => (fullCatalog ? filterCatalog(fullCatalog, showTms) : undefined),
+    [fullCatalog, showTms]
+  );
 
   const baselineIds = useMemo(
     () => new Set(selection === NEW_ROLE ? [] : detail?.component_ids ?? []),
@@ -98,7 +105,6 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
   const visibleModules = useMemo(() => {
     const term = search.trim().toLowerCase();
     return (catalog ?? [])
-      .filter((m) => showTms || m.product !== "TMS")
       .map((m) => ({
         ...m,
         components: m.components.filter((c) => {
@@ -228,7 +234,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                     active={role.rol_id === editingId}
                     onClick={() => confirmLeave(() => onSelect(role.rol_id))}
                     title={role.rol_name}
-                    subtitle={`${role.components} funcionalidades · ${role.active_users} usuarios`}
+                    subtitle={`${role.components} func. · ${role.active_users} usuarios`}
                     badge={role.is_system ? <SystemBadge /> : undefined}
                   />
                 ))}
@@ -325,7 +331,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                 <SearchField
                   value={search}
                   onChange={setSearch}
-                  placeholder="Buscar funcionalidad o endpoint"
+                  placeholder="Buscar funcionalidad o ruta"
                   className="min-w-[260px] flex-1"
                 />
                 <MiniSwitch
@@ -336,7 +342,8 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                 <MiniSwitch
                   checked={showTms}
                   onChange={setShowTms}
-                  label={<span className="text-[15px] text-cp-ink-2">Mostrar TMS</span>}
+                  title={INCLUDE_OTHER_HINT}
+                  label={<span className="text-[15px] text-cp-ink-2">Incluir TMS</span>}
                 />
               </div>
 

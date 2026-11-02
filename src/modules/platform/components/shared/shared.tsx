@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/utils/utils";
-import { ICatalogComponent } from "@/types/roles/IRolesAdmin";
+import { ICatalogComponent, ICatalogModule } from "@/types/roles/IRolesAdmin";
 
 export const BTN_PRIMARY =
   "h-[var(--control-h)] whitespace-nowrap rounded-[10px] border-0 bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-cp-lime-dark disabled:cursor-not-allowed disabled:opacity-50";
@@ -49,6 +49,22 @@ export function EndpointLine({
     </div>
   );
 }
+
+export const filterCatalog = (catalog: ICatalogModule[], includeOther: boolean) =>
+  includeOther
+    ? catalog
+    : catalog
+        .filter((module) => module.product !== "TMS")
+        .map((module) => ({
+          ...module,
+          components: module.components.map((component) => ({
+            ...component,
+            endpoints: component.endpoints.filter((endpoint) => endpoint.mounted)
+          }))
+        }));
+
+export const INCLUDE_OTHER_HINT =
+  "Muestra las páginas TMS y las rutas del catálogo que este backend no atiende";
 
 export const endpointStats = (component: ICatalogComponent) => {
   const reads = component.endpoints.filter((e) => e.method === "GET").length;

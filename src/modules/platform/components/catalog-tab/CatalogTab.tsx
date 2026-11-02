@@ -15,7 +15,9 @@ import {
   EndpointStats,
   MethodTag,
   Notice,
-  PaneItem
+  PaneItem,
+  filterCatalog,
+  INCLUDE_OTHER_HINT
 } from "@/modules/platform/components/shared/shared";
 
 const LOCKED_ROUTE = "role";
@@ -34,20 +36,17 @@ export default function CatalogTab() {
   const [newPageId, setNewPageId] = useState<number | null>(null);
   const [newName, setNewName] = useState("");
 
-  const modules = useMemo(
-    () => (catalog ?? []).filter((m) => showTms || m.product !== "TMS"),
-    [catalog, showTms]
-  );
+  const modules = useMemo(() => filterCatalog(catalog ?? [], showTms), [catalog, showTms]);
 
   const index = useMemo(() => {
     const map = new Map<number, Located>();
-    (catalog ?? []).forEach((module) =>
+    modules.forEach((module) =>
       module.components.forEach((component) =>
         map.set(component.component_id, { module, component })
       )
     );
     return map;
-  }, [catalog]);
+  }, [modules]);
 
   const genericFirst = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -166,7 +165,7 @@ export default function CatalogTab() {
             <SearchField
               value={search}
               onChange={setSearch}
-              placeholder="Buscar funcionalidad o endpoint"
+              placeholder="Buscar funcionalidad o ruta"
               className="flex-1"
             />
             <button type="button" className={BTN_PRIMARY} onClick={() => setCreating(true)}>
@@ -178,7 +177,8 @@ export default function CatalogTab() {
           <MiniSwitch
             checked={showTms}
             onChange={setShowTms}
-            label={<span className="text-[15px] text-cp-ink-2">Mostrar TMS</span>}
+            title={INCLUDE_OTHER_HINT}
+            label={<span className="text-[15px] text-cp-ink-2">Incluir TMS</span>}
           />
           <div className="cp-list-scroll">
             {error && (
