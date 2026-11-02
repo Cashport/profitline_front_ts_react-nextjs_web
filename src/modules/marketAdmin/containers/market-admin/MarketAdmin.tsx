@@ -10,10 +10,12 @@ import {
   Tag,
   UploadCloud,
   Settings,
+  ShieldCheck,
   ChevronRight
 } from "lucide-react";
 import { Chats } from "@phosphor-icons/react";
 import Header from "@/components/organisms/header";
+import { useAppStore } from "@/lib/store/store";
 
 type Section = {
   href: string;
@@ -74,7 +76,19 @@ const sections: Section[] = [
   }
 ];
 
+const superAdminSections: Section[] = [
+  {
+    href: "/plataforma/roles",
+    icon: ShieldCheck,
+    label: "Roles por proyecto",
+    description: "Solo Profitline: elige qué roles ve y asigna cada proyecto."
+  }
+];
+
 export default function MarketAdmin() {
+  const isSuperAdmin = useAppStore((s) => Boolean(s.selectedProject?.isSuperAdmin));
+  const visibleSections = isSuperAdmin ? [...sections, ...superAdminSections] : sections;
+
   return (
     <div className="cp-page min-h-full">
       <Header title="Administración" />
@@ -82,7 +96,7 @@ export default function MarketAdmin() {
       {/* Single white card — full width, sized to its content */}
       <div className="cp-card overflow-hidden">
         <div className="grid grid-cols-2">
-          {sections.map(({ href, icon: Icon, label, description, disabled }) => {
+          {visibleSections.map(({ href, icon: Icon, label, description, disabled }) => {
             const inner = (
               <div
                 className={`group flex items-center gap-5 px-7 py-7 border-b border-r border-[#F0F0F0] transition-all h-full ${
