@@ -14,7 +14,6 @@ import {
   getFileTypes,
   uploadGenericIntakeFile
 } from "@/services/dataQuality/dataQuality";
-import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 
 import "../ModalCreateNewFile/modalCreateNewFile.scss";
 import "./modalUploadInTransitHaleon.scss";
@@ -46,7 +45,6 @@ const ModalUploadInTransitHaleon = ({
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [archiveDraft, setArchiveDraft] = useState<IArchiveDraft | null>(null);
-  const { runUpload, structureModals } = useIntakeStructureUpload();
 
   const {
     control,
@@ -110,12 +108,7 @@ const ModalUploadInTransitHaleon = ({
       }
 
       // Paso 3: subir el archivo por el flujo Universal (/transform/generic).
-      const archiveId = idArchivesClientData;
-      const uploaded = await runUpload(
-        (useAsTemplate) => uploadGenericIntakeFile(archiveId, file, useAsTemplate),
-        { onPrompt: hide }
-      );
-      if (!uploaded) return;
+      await uploadGenericIntakeFile(idArchivesClientData, file);
 
       message.success("Archivo cargado correctamente.");
       reset();
@@ -124,7 +117,9 @@ const ModalUploadInTransitHaleon = ({
       onSuccess?.();
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo."
+      );
     } finally {
       hide();
       setIsSubmitting(false);
@@ -139,61 +134,58 @@ const ModalUploadInTransitHaleon = ({
   };
 
   return (
-    <>
-      <Modal
-        className="modalCreateNewFile"
-        width={460}
-        footer={null}
-        open={isOpen}
-        closable={false}
-        maskClosable={!isSubmitting}
-      >
-        <button className="modalCreateNewFile__header" onClick={handleClose} type="button">
-          <CaretLeft size="1.25rem" />
-          <h4>Cargar &quot;In-Transit Haleon&quot;</h4>
-        </button>
+    <Modal
+      className="modalCreateNewFile"
+      width={460}
+      footer={null}
+      open={isOpen}
+      closable={false}
+      maskClosable={!isSubmitting}
+    >
+      <button className="modalCreateNewFile__header" onClick={handleClose} type="button">
+        <CaretLeft size="1.25rem" />
+        <h4>Cargar &quot;In-Transit Haleon&quot;</h4>
+      </button>
 
-        <form className="modalCreateNewFile__form">
-          <InputDateForm
-            titleInput="Fecha"
-            nameInput="date"
-            control={control}
-            error={errors.date}
-            placeholder="Seleccionar fecha"
-          />
-
-          <div className="modalUploadInTransitHaleon__file">
-            <p className="modalUploadInTransitHaleon__file-title">Archivo</p>
-            <label className="modalUploadInTransitHaleon__file-dropzone">
-              <input
-                type="file"
-                accept=".xls,.xlsx,.csv"
-                disabled={isSubmitting}
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                style={{ display: "none" }}
-              />
-              <FileArrowUp size="1.5rem" />
-              <span>Seleccionar archivo</span>
-            </label>
-            {file && (
-              <p className="modalUploadInTransitHaleon__file-name">
-                Archivo seleccionado: <strong>{file.name}</strong>
-              </p>
-            )}
-          </div>
-        </form>
-
-        <FooterButtons
-          handleOk={() => handleSubmit(handleUpload)()}
-          onClose={handleClose}
-          titleConfirm="Cargar"
-          titleCancel="Cancelar"
-          isConfirmLoading={isSubmitting}
-          isConfirmDisabled={!isValid || !file}
+      <form className="modalCreateNewFile__form">
+        <InputDateForm
+          titleInput="Fecha"
+          nameInput="date"
+          control={control}
+          error={errors.date}
+          placeholder="Seleccionar fecha"
         />
-      </Modal>
-      {structureModals}
-    </>
+
+        <div className="modalUploadInTransitHaleon__file">
+          <p className="modalUploadInTransitHaleon__file-title">Archivo</p>
+          <label className="modalUploadInTransitHaleon__file-dropzone">
+            <input
+              type="file"
+              accept=".xls,.xlsx,.csv"
+              disabled={isSubmitting}
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              style={{ display: "none" }}
+            />
+            <FileArrowUp size="1.5rem" />
+            <span>Seleccionar archivo</span>
+          </label>
+          {file && (
+            <p className="modalUploadInTransitHaleon__file-name">
+              Archivo seleccionado: <strong>{file.name}</strong>
+            </p>
+          )}
+        </div>
+      </form>
+
+      <FooterButtons
+        handleOk={() => handleSubmit(handleUpload)()}
+        onClose={handleClose}
+        titleConfirm="Cargar"
+        titleCancel="Cancelar"
+        isConfirmLoading={isSubmitting}
+        isConfirmDisabled={!isValid || !file}
+      />
+    </Modal>
   );
 };
 
