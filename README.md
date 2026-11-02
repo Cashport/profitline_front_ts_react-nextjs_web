@@ -79,8 +79,9 @@ yarn commit           # commit convencional asistido (git-cz)
 
 Abre [http://localhost:3000](http://localhost:3000).
 
-- Sin sesión, el middleware redirige a `/auth/login`.
-- Con sesión, `/` redirige a `/clientes/all`.
+- `/` (español) y `/en` (inglés) son la landing pública con el inicio de sesión. Ver [Landing pública (cashport.ai)](#landing-pública-cashportai).
+- Sin sesión, las rutas de la app redirigen a `/`. `/auth/login` también redirige a `/`, salvo el acceso por enlace externo `/auth/login?token=…`.
+- Con sesión, `/` y `/en` redirigen a `/clientes/all`.
 
 ### Docker
 
@@ -112,6 +113,15 @@ yarn build:check      # build completo sin tocar .next/
 
 La UI se valida a mano en el navegador con una sesión real, porque las rutas están protegidas por Firebase.
 
+La landing se valida sin sesión. Para revisar lo que leen buscadores e IA (HTML del servidor, sin JavaScript):
+
+```bash
+curl -A "GPTBot" http://localhost:3000/        # texto completo en español
+curl -A "GPTBot" http://localhost:3000/en      # texto completo en inglés
+curl http://localhost:3000/robots.txt          # bots de IA permitidos, rutas privadas bloqueadas
+curl -sI -H "Accept-Language: en-US" http://localhost:3000/   # 307 a /en (idioma automático)
+```
+
 ---
 
 ## Estructura del repositorio
@@ -125,11 +135,17 @@ La UI se valida a mano en el navegador con una sesión real, porque las rutas es
 ├── tailwind.config.js          Tokens de diseño (CSS variables)
 ├── dockerfile
 ├── public/                     fuentes, imágenes, gifs
+│   ├── assets/                 Logos y og:image de la landing
+│   └── sitemap.xml, llms.txt   Archivos públicos de la landing para buscadores e IA
 └── src/
-    ├── middleware.ts           CSP + protección de rutas por cookie de sesión
-    ├── app/                    Rutas (App Router). Las páginas son delgadas y renderizan un container
+    ├── middleware.ts           CSP, protección de rutas por cookie de sesión, idioma de la landing y noindex
+    ├── app/                    Rutas (App Router). Dos tipos de layout raíz:
+    │   ├── (platform)/         La app. Layout raíz de cliente (Ant Design, react-query). Las páginas son delgadas y renderizan un container
+    │   ├── (landing-es)/       Landing pública en `/` (layout raíz propio, server components)
+    │   ├── (landing-en)/en/    Landing pública en `/en`
+    │   ├── robots.ts           robots.txt generado con las rutas de (platform)
     │   └── api/auth/           Route handlers: login (POST), validación de sesión (GET), logout
-    ├── modules/                Módulos funcionales (components/ + containers/ + hooks/ …)
+    ├── modules/                Módulos funcionales (components/ + containers/ + hooks/ …). `landing/` es la landing pública
     ├── components/             Librería compartida: atoms/, molecules/, organisms/, ui/
     ├── services/               Funciones de API por dominio (llaman a API.get/post/…)
     ├── hooks/                  Hooks de datos (SWR / react-query) sobre los servicios
@@ -150,7 +166,7 @@ Las convenciones de código (estilos, nombres, cómo partir componentes) están 
 
 ## Módulos funcionales
 
-Rutas tomadas de `src/app/**/page.tsx`. El nombre de permiso es el `page_name` que decide si el botón aparece en el menú (ver [Permisos y modularidad](#permisos-y-modularidad)).
+Rutas tomadas de `src/app/(platform)/**/page.tsx`. Los grupos entre paréntesis no forman parte de la URL. El nombre de permiso es el `page_name` que decide si el botón aparece en el menú (ver [Permisos y modularidad](#permisos-y-modularidad)).
 
 | Módulo (Cashport Brain)  | Rutas                                                                                                                                                                                      | Código principal                                                                                        | Permiso de menú                             |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
@@ -178,11 +194,12 @@ Módulos presentes en el código que Cashport Brain todavía no describe:
 | Proveedores / terceros                                          | `/proveedores`, `/proveedores/[id]`                | `src/components/organisms/proveedores/`             | `Proveedores` (oculto en el menú)           |
 | Proyectos y configuración                                       | `/settings`, `/proyectos/**`                       | `src/components/organisms/projects/`                | `Configuracion`                             |
 | Portal Cetaphil (marketplace para invitados)                    | `/cetaphil` (pública)                              | `src/modules/cetaphil/`                             | —                                           |
-| Portal de archivos (descarga por token)                         | `/portal-archivos` (pública)                       | `src/app/portal-archivos/`                          | —                                           |
+| Portal de archivos (descarga por token)                         | `/portal-archivos` (pública)                       | `src/app/(platform)/portal-archivos/`               | —                                           |
 | Torre de control                                                | `/torreControl`                                    | `src/modules/torreControlModule/` (datos simulados) | oculto en el menú                           |
 | Nuevo dashboard                                                 | `/newDashboard`                                    | `src/modules/new_dashboard/` (datos simulados)      | oculto en el menú                           |
 | Informes (informes HTML publicados para el equipo)              | `/reports`, `/reports/[id]`                        | `src/modules/reportsModule/`                        | `Reports`                                   |
 | Alertas de bloqueo (clientes y puntos de venta por bloquear)    | `/blockingAlerts`, `/blockingAlerts/[clientId]/**` | `src/modules/blockingAlerts/` (datos simulados)     | `BlockingAlerts`                            |
+| Landing pública e inicio de sesión (ES/EN)                      | `/`, `/en` (públicas)                              | `src/modules/landing/`                              | —                                           |
 
 ---
 
@@ -227,7 +244,7 @@ flowchart LR
 
 ### Autenticación y sesión
 
-1. El usuario inicia sesión con Firebase en el cliente (`firebase-utils.ts`). El ID token se envía a `POST /api/auth`.
+1. El usuario inicia sesión en la tarjeta de la landing (`src/modules/landing/components/LandingLogin.tsx`) con Firebase en el cliente (`firebase-utils.ts`), aplicando la política de OTP periódico y contraseña vencida (`/auth/login-status`). El ID token se envía a `POST /api/auth`.
 2. El route handler hace lo siguiente:
    - Verifica el token con firebase-admin.
    - Consulta `GET {API_HOST}/role/permissions`.
@@ -235,8 +252,19 @@ flowchart LR
    - Fija una cookie de sesión `httpOnly` de 14 días (`src/app/api/auth/route.ts`).
 3. `src/middleware.ts` corre en cada navegación:
    - Arma la cabecera CSP.
-   - Deja pasar sin sesión las rutas públicas (`/auth`, `/mobile`, `/cetaphil`, `/portal-archivos`).
-   - En el resto, valida la cookie contra `GET /api/auth`.
+   - Deja pasar sin sesión la landing (`/`, `/en`), sus archivos públicos (`/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/assets/*`) y las rutas públicas (`/auth`, `/mobile`, `/cetaphil`, `/portal-archivos`).
+   - En el resto, valida la cookie contra `GET /api/auth`; si no es válida redirige a `/`.
+   - Marca todo lo que no es la landing con `X-Robots-Tag: noindex, nofollow`.
+
+### Landing pública (cashport.ai)
+
+- `/` (español) y `/en` (inglés) se generan estáticas (SSG): todo el texto llega en el HTML para buscadores y asistentes de IA. No usan el layout de la app, que es de cliente y muestra un loader antes del contenido.
+- El contenido está en un solo lugar, `src/modules/landing/content.ts`, del que salen el texto visible y el JSON-LD (`seo.ts`). Si cambias un texto, cambia en ambos. Los textos del login están en `login-copy.ts`.
+- Metadatos, `hreflang`, Open Graph y JSON-LD: `src/modules/landing/seo.ts`. `robots.txt`: `src/app/robots.ts`. `sitemap.xml` y `llms.txt`: `public/`.
+- La tarjeta de login (`LandingLogin.tsx`) reutiliza el flujo de `firebase-utils.ts` y carga Firebase solo cuando el usuario toca el formulario. En pantallas de menos de 1024 px se abre como modal.
+- Enlaces a las líneas de negocio de profitline.co con UTM: `src/modules/landing/links.ts`.
+- Idioma: en `/`, el middleware redirige a `/en` si el navegador prefiere inglés (`src/modules/landing/language.ts`). La elección manual ES | EN se guarda en la cookie `cp_lang` y los bots nunca se redirigen.
+- En escritorio (≥ 1024 px) la landing se ve al 75 %, el mismo criterio de la app.
 
 ### Llamadas al API
 
