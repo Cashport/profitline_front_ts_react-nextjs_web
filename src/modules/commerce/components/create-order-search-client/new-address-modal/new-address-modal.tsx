@@ -4,7 +4,7 @@ import { Modal } from "antd";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import CitiesSelect from "@/modules/commerce/components/cities-select";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
-import { useCityWarehouse } from "@/app/comercio/pedido/hooks/useCityWarehouses";
+import { useCityWarehouse } from "@/app/(platform)/comercio/pedido/hooks/useCityWarehouses";
 
 // New-address modal (Ant Design). Owns its own ciudad/dirección/bodega local state
 // and reports the result through onSave; resets on save/cancel.
