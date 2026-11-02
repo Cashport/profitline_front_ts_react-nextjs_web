@@ -216,7 +216,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
           </div>
           <div className="cp-list-scroll">
             {rolesError && (
-              <p className="px-3 py-2 text-[15px] text-cp-magenta">
+              <p className="px-3 py-2 text-[13px] text-cp-magenta">
                 No se pudieron cargar los roles: {rolesError.message}
               </p>
             )}
@@ -227,7 +227,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
             )}
             {groupedRoles.map(({ group, roles: items }) => (
               <section key={group} className="mb-3">
-                <p className="px-3 pb-1 text-[14px] font-semibold text-cp-ink-3">{group}</p>
+                <p className="px-3 pb-1 text-[13px] font-semibold text-cp-ink-3">{group}</p>
                 {items.map((role) => (
                   <PaneItem
                     key={role.rol_id}
@@ -272,7 +272,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                       ? "El código usa este rol por su nombre: no se puede renombrar"
                       : undefined
                   }
-                  className="h-[var(--control-h)] min-w-[220px] flex-1 rounded-lg border border-cp-line-2 bg-cp-surface px-3 text-[17px] font-semibold text-cp-ink outline-none focus:border-cp-ink-4 disabled:bg-cp-bg"
+                  className="h-[var(--control-h)] min-w-[220px] flex-1 rounded-lg border border-cp-line-2 bg-cp-surface px-3 text-[14px] font-semibold text-cp-ink outline-none focus:border-cp-ink-4 disabled:bg-cp-bg"
                 />
                 <Select
                   placeholder="Copiar funcionalidades de…"
@@ -315,7 +315,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                 </button>
               </div>
 
-              <p className="text-[15px] text-cp-ink-3">
+              <p className="text-[13px] text-cp-ink-3">
                 {draft.size} funcionalidades · {endpointCount} endpoints
                 {summary &&
                   ` · ${summary.active_users} usuarios activos en ${summary.projects} proyectos`}
@@ -337,19 +337,19 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                 <MiniSwitch
                   checked={onlySelected}
                   onChange={setOnlySelected}
-                  label={<span className="text-[15px] text-cp-ink-2">Solo las que tiene</span>}
+                  label={<span className="text-[13px] text-cp-ink-2">Solo las que tiene</span>}
                 />
                 <MiniSwitch
                   checked={showTms}
                   onChange={setShowTms}
                   title={INCLUDE_OTHER_HINT}
-                  label={<span className="text-[15px] text-cp-ink-2">Incluir TMS</span>}
+                  label={<span className="text-[13px] text-cp-ink-2">Incluir TMS</span>}
                 />
               </div>
 
               <div className="cp-list-scroll pr-1">
                 {visibleModules.length === 0 && (
-                  <p className="py-4 text-[15px] text-cp-ink-3">
+                  <p className="py-4 text-[13px] text-cp-ink-3">
                     No hay funcionalidades con ese filtro.
                   </p>
                 )}
@@ -361,17 +361,17 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                       <label className="flex cursor-pointer items-center gap-3 border-b border-cp-line pb-2">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 accent-[#9bb514]"
+                          className="h-4 w-4 accent-[#cbe71e]"
                           checked={selected === ids.length}
                           ref={(el) => {
                             if (el) el.indeterminate = selected > 0 && selected < ids.length;
                           }}
                           onChange={(e) => setComponents(ids, e.target.checked)}
                         />
-                        <span className="text-[17px] font-semibold text-cp-ink">
+                        <span className="text-[13.5px] font-semibold text-cp-ink">
                           {module.page_name}
                         </span>
-                        <span className="text-[15px] text-cp-ink-3">
+                        <span className="text-[13px] text-cp-ink-3">
                           {selected} de {ids.length}
                         </span>
                       </label>
@@ -384,7 +384,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                             <div className="grid min-h-[45px] grid-cols-[18px_18px_minmax(0,1fr)_auto] items-center gap-3 px-1">
                               <input
                                 type="checkbox"
-                                className="h-4 w-4 accent-[#9bb514]"
+                                className="h-4 w-4 accent-[#cbe71e]"
                                 checked={checked}
                                 aria-label={component.component_name}
                                 onChange={(e) =>
@@ -400,7 +400,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                               >
                                 {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                               </button>
-                              <span className="truncate text-[16px] text-cp-ink">
+                              <span className="truncate text-[13px] text-cp-ink">
                                 {component.component_name}
                                 {changed && (
                                   <span className="ml-2 rounded-[5px] bg-cp-muted px-1.5 py-px text-[13px] font-semibold text-cp-ink-2">

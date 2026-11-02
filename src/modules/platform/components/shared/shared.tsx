@@ -42,7 +42,7 @@ export function EndpointLine({
   return (
     <div className="flex min-w-0 items-center gap-2 py-1">
       <MethodTag method={method} />
-      <span className="truncate font-mono text-[14px] text-cp-ink-2" title={`/${route}${path}`}>
+      <span className="truncate font-mono text-[13px] text-cp-ink-2" title={`/${route}${path}`}>
         /{route}
         {path}
       </span>
@@ -75,7 +75,7 @@ export function EndpointStats({ component }: { component: ICatalogComponent }) {
   if (component.endpoints.length === 0) {
     return (
       <span
-        className="whitespace-nowrap text-[14px] text-cp-ink-3"
+        className="whitespace-nowrap text-[13px] text-cp-ink-3"
         title="No tiene endpoints: solo controla si la pantalla o el botón se muestran"
       >
         Solo visual
@@ -84,7 +84,7 @@ export function EndpointStats({ component }: { component: ICatalogComponent }) {
   }
   const { reads, writes } = endpointStats(component);
   return (
-    <span className="whitespace-nowrap text-[14px] text-cp-ink-3">
+    <span className="whitespace-nowrap text-[13px] text-cp-ink-3">
       {reads} lectura{reads === 1 ? "" : "s"} · {writes} escritura{writes === 1 ? "" : "s"}
     </span>
   );
@@ -115,13 +115,13 @@ export function PaneItem({
       <span className="flex min-w-0 flex-1 flex-col">
         <span
           className={cn(
-            "truncate text-[17px]",
+            "truncate text-[13.5px]",
             active ? "font-semibold text-cp-ink" : "text-cp-ink-2"
           )}
         >
           {title}
         </span>
-        {subtitle && <span className="truncate text-[14px] text-cp-ink-3">{subtitle}</span>}
+        {subtitle && <span className="truncate text-[13px] text-cp-ink-3">{subtitle}</span>}
       </span>
       {badge}
     </button>
@@ -147,7 +147,7 @@ export function Notice({
   children: ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-2 rounded-lg bg-cp-bg px-4 py-3 text-[15px] text-cp-ink-2">
+    <div className="flex items-start gap-2 rounded-lg bg-cp-bg px-4 py-3 text-[13px] text-cp-ink-2">
       {tone === "warning" && (
         <AlertTriangle size={18} className="mt-0.5 shrink-0 text-cp-orange" aria-hidden />
       )}

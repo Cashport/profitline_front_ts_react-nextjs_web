@@ -106,7 +106,7 @@ export default function CatalogTab() {
       title: `¿Mover ${endpoint.method} /${endpoint.route}${endpoint.path}?`,
       width: 560,
       content: (
-        <div className="flex flex-col gap-2 text-[15px]">
+        <div className="flex flex-col gap-2 text-[13px]">
           <p>
             Pasa de <b>{from.component_name}</b> a <b>{toLabel}</b>.
           </p>
@@ -178,11 +178,11 @@ export default function CatalogTab() {
             checked={showTms}
             onChange={setShowTms}
             title={INCLUDE_OTHER_HINT}
-            label={<span className="text-[15px] text-cp-ink-2">Incluir TMS</span>}
+            label={<span className="text-[13px] text-cp-ink-2">Incluir TMS</span>}
           />
           <div className="cp-list-scroll">
             {error && (
-              <p className="px-3 py-2 text-[15px] text-cp-magenta">
+              <p className="px-3 py-2 text-[13px] text-cp-magenta">
                 No se pudo cargar el catálogo: {error.message}
               </p>
             )}
@@ -223,7 +223,7 @@ export default function CatalogTab() {
                   <p className="truncate text-[18px] font-semibold text-cp-ink">
                     {selected.module.page_name} · {selected.component.component_name}
                   </p>
-                  <p className="text-[15px] text-cp-ink-3">
+                  <p className="text-[13px] text-cp-ink-3">
                     {selected.component.is_generic
                       ? "Cualquier rol puede usar estos endpoints"
                       : `${selected.component.roles_with_access} roles tienen acceso`}{" "}
@@ -233,7 +233,7 @@ export default function CatalogTab() {
                 <MiniSwitch
                   checked={onlyWrites}
                   onChange={setOnlyWrites}
-                  label={<span className="text-[15px] text-cp-ink-2">Solo escrituras</span>}
+                  label={<span className="text-[13px] text-cp-ink-2">Solo escrituras</span>}
                 />
               </div>
 
@@ -246,7 +246,7 @@ export default function CatalogTab() {
 
               <div className="cp-list-scroll pr-1">
                 {endpoints.length === 0 && (
-                  <p className="py-4 text-[15px] text-cp-ink-3">No hay endpoints con ese filtro.</p>
+                  <p className="py-4 text-[13px] text-cp-ink-3">No hay endpoints con ese filtro.</p>
                 )}
                 {endpoints.map((endpoint) => {
                   const locked = endpoint.route.toLowerCase() === LOCKED_ROUTE;
@@ -257,7 +257,7 @@ export default function CatalogTab() {
                     >
                       <MethodTag method={endpoint.method} />
                       <span
-                        className="truncate font-mono text-[14px] text-cp-ink-2"
+                        className="truncate font-mono text-[13px] text-cp-ink-2"
                         title={`/${endpoint.route}${endpoint.path}`}
                       >
                         /{endpoint.route}
@@ -265,7 +265,7 @@ export default function CatalogTab() {
                       </span>
                       {locked ? (
                         <span
-                          className="flex items-center gap-1 text-[14px] text-cp-ink-3"
+                          className="flex items-center gap-1 text-[13px] text-cp-ink-3"
                           title="Si se mueve, se perdería el acceso a esta consola"
                         >
                           <Lock size={14} aria-hidden /> Bloqueado
@@ -299,7 +299,7 @@ export default function CatalogTab() {
         cancelText="Cancelar"
       >
         <div className="flex flex-col gap-3">
-          <p className="text-[15px] text-cp-ink-2">
+          <p className="text-[13px] text-cp-ink-2">
             Úsala para separar endpoints que necesitan un permiso propio. Después mueve aquí esos
             endpoints y asígnala en la pestaña Roles.
           </p>
@@ -316,7 +316,7 @@ export default function CatalogTab() {
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Nombre, por ejemplo Reversar pagos"
             maxLength={255}
-            className="h-[var(--control-h)] rounded-lg border border-cp-line-2 bg-[#fafafa] px-3 text-[15px] outline-none focus:border-cp-ink-4"
+            className="h-[var(--control-h)] rounded-lg border border-cp-line-2 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-cp-ink-4"
           />
         </div>
       </Modal>

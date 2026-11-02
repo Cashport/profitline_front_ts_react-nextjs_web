@@ -28,7 +28,7 @@ export default function RolesConsole() {
     return (
       <div className="cp-page min-h-full">
         <Header title="Roles y permisos" back="/market-admin" />
-        <div className="cp-card p-[var(--card-pad)] text-[17px] text-cp-ink-2">
+        <div className="cp-card p-[var(--card-pad)] text-[13.5px] text-cp-ink-2">
           Esta sección es solo para administradores de Profitline.
         </div>
       </div>

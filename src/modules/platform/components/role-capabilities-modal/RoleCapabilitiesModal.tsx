@@ -91,7 +91,7 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
       destroyOnClose
       title={
         <div className="flex flex-wrap items-center gap-2 pr-6">
-          <span className="text-[20px] font-semibold text-cp-ink">
+          <span className="text-[18px] font-semibold text-cp-ink">
             {detail?.rol_name ?? summary?.rol_name ?? "Rol"}
           </span>
           {detail?.is_system && <SystemBadge />}
@@ -105,14 +105,14 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
       )}
 
       {(detailError || catalogError) && !loadingDetail && !loadingCatalog && (
-        <p className="text-[15px] text-cp-magenta">
+        <p className="text-[13px] text-cp-magenta">
           No se pudo cargar el rol: {(detailError || catalogError)?.message}
         </p>
       )}
 
       {detail && catalog && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-3 text-[15px] text-cp-ink-3">
+          <div className="flex flex-wrap items-center gap-3 text-[13px] text-cp-ink-3">
             <span>{granted.size} funcionalidades</span>
             {summary && (
               <>
@@ -131,15 +131,15 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
           </div>
 
           <div>
-            <p className="mb-2 text-[15px] font-semibold text-cp-ink">Pantallas que ve</p>
+            <p className="mb-2 text-[13px] font-semibold text-cp-ink">Pantallas que ve</p>
             <div className="flex flex-wrap gap-2">
               {screens.length === 0 && (
-                <span className="text-[15px] text-cp-ink-3">Ninguna pantalla</span>
+                <span className="text-[13px] text-cp-ink-3">Ninguna pantalla</span>
               )}
               {screens.map((screen) => (
                 <span
                   key={screen}
-                  className="rounded-[7px] bg-cp-bg px-2.5 py-1 text-[14px] text-cp-ink-2"
+                  className="rounded-[7px] bg-cp-bg px-2.5 py-1 text-[13px] text-cp-ink-2"
                 >
                   {screen}
                 </span>
@@ -154,18 +154,18 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
           </Notice>
 
           <div className="flex items-center justify-between">
-            <p className="text-[15px] font-semibold text-cp-ink">Funcionalidades</p>
+            <p className="text-[13px] font-semibold text-cp-ink">Funcionalidades</p>
             <MiniSwitch
               checked={showMissing}
               onChange={setShowMissing}
-              label={<span className="text-[15px] text-cp-ink-2">Mostrar lo que no tiene</span>}
+              label={<span className="text-[13px] text-cp-ink-2">Mostrar lo que no tiene</span>}
             />
           </div>
 
           <div className="max-h-[50vh] overflow-y-auto pr-1">
             {modules.map((module) => (
               <section key={module.page_id} className="mb-3">
-                <p className="border-b border-cp-line pb-1 text-[16px] font-semibold text-cp-ink">
+                <p className="border-b border-cp-line pb-1 text-[13px] font-semibold text-cp-ink">
                   {module.page_name}
                 </p>
                 {module.components.map((component) => {
@@ -188,7 +188,7 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
                         ) : (
                           <span />
                         )}
-                        <span className="truncate text-[16px] text-cp-ink">
+                        <span className="truncate text-[13px] text-cp-ink">
                           {component.component_name}
                         </span>
                         <EndpointStats component={component} />

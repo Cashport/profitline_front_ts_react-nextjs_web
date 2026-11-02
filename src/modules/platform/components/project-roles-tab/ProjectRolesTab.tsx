@@ -138,7 +138,7 @@ export default function ProjectRolesTab({ onOpenRole }: Props) {
               />
             ))}
             {sortedProjects.length === 0 && (
-              <p className="px-3 py-2 text-[15px] text-cp-ink-3">Sin resultados</p>
+              <p className="px-3 py-2 text-[13px] text-cp-ink-3">Sin resultados</p>
             )}
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function ProjectRolesTab({ onOpenRole }: Props) {
                 {selectedProjectName || "Elige un proyecto"}
               </p>
               {config && (
-                <p className="text-[15px] text-cp-ink-3">
+                <p className="text-[13px] text-cp-ink-3">
                   {savedIds.size} de {config.roles.length} roles visibles
                   {dirty && ` · ${changes} cambio(s) sin guardar`}
                 </p>
@@ -188,7 +188,7 @@ export default function ProjectRolesTab({ onOpenRole }: Props) {
           )}
 
           {error && !isLoading && (
-            <p className="text-[15px] text-cp-magenta">
+            <p className="text-[13px] text-cp-magenta">
               No se pudieron cargar los roles de este proyecto.
             </p>
           )}
@@ -198,8 +198,8 @@ export default function ProjectRolesTab({ onOpenRole }: Props) {
               groups.map(({ group, roles }) => (
                 <section key={group} className="mb-4 flex flex-col">
                   <div className="flex items-baseline gap-2 border-b border-cp-line pb-2">
-                    <p className="text-[17px] font-semibold text-cp-ink">{group}</p>
-                    <p className="text-[15px] text-cp-ink-3">
+                    <p className="text-[13.5px] font-semibold text-cp-ink">{group}</p>
+                    <p className="text-[13px] text-cp-ink-3">
                       {roles.filter((r) => draft.has(r.rol_id)).length} de {roles.length}
                     </p>
                   </div>
@@ -211,7 +211,7 @@ export default function ProjectRolesTab({ onOpenRole }: Props) {
                         key={role.rol_id}
                         className="grid min-h-[45px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-cp-muted px-1"
                       >
-                        <p className="min-w-0 truncate text-[17px]">
+                        <p className="min-w-0 truncate text-[13.5px]">
                           <button
                             type="button"
                             onClick={() => onOpenRole(role.rol_id)}
@@ -221,12 +221,12 @@ export default function ProjectRolesTab({ onOpenRole }: Props) {
                             {role.rol_name}
                           </button>
                           {changed && (
-                            <span className="ml-2 rounded-[5px] bg-cp-muted px-1.5 py-px text-[14px] font-semibold text-cp-ink-2">
+                            <span className="ml-2 rounded-[5px] bg-cp-muted px-1.5 py-px text-[13px] font-semibold text-cp-ink-2">
                               Sin guardar
                             </span>
                           )}
                         </p>
-                        <p className="whitespace-nowrap text-right text-[15px] text-cp-ink-3">
+                        <p className="whitespace-nowrap text-right text-[13px] text-cp-ink-3">
                           {role.active_users === 1
                             ? "1 usuario activo"
                             : `${role.active_users} usuarios activos`}
@@ -240,7 +240,7 @@ export default function ProjectRolesTab({ onOpenRole }: Props) {
                               : undefined
                           }
                           label={
-                            <span className="w-[72px] text-[15px] text-cp-ink-2">
+                            <span className="w-[72px] text-[13px] text-cp-ink-2">
                               {checked ? "Visible" : "Oculto"}
                             </span>
                           }
