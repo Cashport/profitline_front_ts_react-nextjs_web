@@ -34,7 +34,7 @@ export default function OptionCard({
       }`}
     >
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
+        className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 transition-colors"
         style={{ backgroundColor: bg }}
         onMouseEnter={(e) => {
           if (!disabled) e.currentTarget.style.backgroundColor = bgHover;

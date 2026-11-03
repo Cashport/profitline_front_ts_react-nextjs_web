@@ -65,7 +65,7 @@ export default function MarketAdminBonusAndPromotions() {
                 className="group text-left cp-card outline outline-1 outline-transparent -outline-offset-1 p-5 flex flex-col gap-4 hover:outline-[#141414] transition-all"
               >
                 <div className="flex items-start justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-[#F7F7F7] flex items-center justify-center group-hover:bg-[#CBE71E] transition-colors">
+                  <div className="w-10 h-10 rounded-[10px] bg-cp-muted flex items-center justify-center group-hover:bg-cp-lime transition-colors">
                     <Icon size={18} className="text-[#141414]" />
                   </div>
                   <span
