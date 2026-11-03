@@ -1,8 +1,18 @@
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { IAdminRole, ICatalogModule, IRoleDetail } from "@/types/roles/IRolesAdmin";
-import { ROLES_ADMIN_KEY, ROLES_CATALOG_KEY, roleDetailKey } from "@/services/roles/rolesAdmin";
+import {
+  IAdminRole,
+  ICatalogModule,
+  IRoleDetail,
+  IUnregisteredRoute
+} from "@/types/roles/IRolesAdmin";
+import {
+  ROLES_ADMIN_KEY,
+  ROLES_CATALOG_KEY,
+  UNREGISTERED_ROUTES_KEY,
+  roleDetailKey
+} from "@/services/roles/rolesAdmin";
 
 const options = { revalidateOnFocus: false };
 
@@ -31,4 +41,13 @@ export const useRoleDetail = (rolId: number | null) => {
     options
   );
   return { detail: data?.data, error, isLoading, mutate };
+};
+
+export const useUnregisteredRoutes = () => {
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IUnregisteredRoute[]>>(
+    UNREGISTERED_ROUTES_KEY,
+    fetcher,
+    options
+  );
+  return { routes: data?.data, error, isLoading, mutate };
 };

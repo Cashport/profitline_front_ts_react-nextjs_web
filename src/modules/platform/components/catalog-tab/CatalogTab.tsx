@@ -1,15 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Modal, Select, Spin } from "antd";
-import { Lock, Plus } from "lucide-react";
+import { Dropdown, Modal, Select, Spin } from "antd";
+import { ChevronDown, Lock, Plus } from "lucide-react";
 import SearchField from "@/components/ui/search-field/search-field";
 import { MiniSwitch } from "@/components/ui/page-header-controls/page-header-controls";
 import { useMessageApi } from "@/context/MessageContext";
 import { ApiError } from "@/utils/api/api";
-import { createComponent, moveEndpoint } from "@/services/roles/rolesAdmin";
-import { useRolesCatalog } from "@/modules/platform/hooks/useRolesAdmin";
-import { ICatalogComponent, ICatalogEndpoint, ICatalogModule } from "@/types/roles/IRolesAdmin";
+import { createComponent, moveEndpoint, registerEndpoint } from "@/services/roles/rolesAdmin";
+import { useRolesCatalog, useUnregisteredRoutes } from "@/modules/platform/hooks/useRolesAdmin";
+import { matchesRoutePattern, parseEndpointInput } from "@/modules/platform/lib/endpointInput";
+import {
+  ICatalogComponent,
+  ICatalogEndpoint,
+  ICatalogModule,
+  IUnregisteredRoute
+} from "@/types/roles/IRolesAdmin";
 import {
   BTN_PRIMARY,
   EndpointStats,
@@ -21,35 +27,47 @@ import {
 } from "@/modules/platform/components/shared/shared";
 
 const LOCKED_ROUTE = "role";
+const UNREGISTERED = "unregistered" as const;
+const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
 type Located = { module: ICatalogModule; component: ICatalogComponent };
 
 export default function CatalogTab() {
   const { showMessage } = useMessageApi();
   const { catalog, isLoading, mutate, error } = useRolesCatalog();
+  const {
+    routes: unregistered,
+    mutate: mutateUnregistered,
+    error: unregisteredError
+  } = useUnregisteredRoutes();
 
   const [search, setSearch] = useState("");
   const [showTms, setShowTms] = useState(false);
   const [onlyWrites, setOnlyWrites] = useState(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | typeof UNREGISTERED | null>(null);
   const [creating, setCreating] = useState(false);
   const [newPageId, setNewPageId] = useState<number | null>(null);
   const [newName, setNewName] = useState("");
+  const [registering, setRegistering] = useState(false);
+  const [regMethod, setRegMethod] = useState("GET");
+  const [regUrl, setRegUrl] = useState("");
+  const [regComponentId, setRegComponentId] = useState<number | null>(null);
 
   const modules = useMemo(() => filterCatalog(catalog ?? [], showTms), [catalog, showTms]);
 
   const index = useMemo(() => {
     const map = new Map<number, Located>();
-    modules.forEach((module) =>
+    (catalog ?? []).forEach((module) =>
       module.components.forEach((component) =>
         map.set(component.component_id, { module, component })
       )
     );
     return map;
-  }, [modules]);
+  }, [catalog]);
+
+  const term = search.trim().toLowerCase();
 
   const genericFirst = useMemo(() => {
-    const term = search.trim().toLowerCase();
     const items = modules.flatMap((module) =>
       module.components
         .filter(
@@ -65,13 +83,29 @@ export default function CatalogTab() {
       ...items.filter((i) => i.component.is_generic),
       ...items.filter((i) => !i.component.is_generic)
     ];
-  }, [modules, search]);
+  }, [modules, term]);
 
-  const selected = selectedId ? index.get(selectedId) : genericFirst[0];
+  const unregisteredVisible = useMemo(
+    () =>
+      (unregistered ?? []).filter(
+        (r) =>
+          (!onlyWrites || r.method !== "GET") &&
+          (!term || `/${r.route}${r.path}`.toLowerCase().includes(term))
+      ),
+    [unregistered, onlyWrites, term]
+  );
+
+  const showingUnregistered =
+    selectedId === UNREGISTERED || (selectedId === null && (unregistered?.length ?? 0) > 0);
+  const selected =
+    typeof selectedId === "number"
+      ? index.get(selectedId)
+      : showingUnregistered
+        ? undefined
+        : genericFirst[0];
 
   const endpoints = useMemo(() => {
     if (!selected) return [];
-    const term = search.trim().toLowerCase();
     const matchesComponent =
       !term ||
       selected.module.page_name.toLowerCase().includes(term) ||
@@ -81,7 +115,7 @@ export default function CatalogTab() {
         (!onlyWrites || e.method !== "GET") &&
         (matchesComponent || `/${e.route}${e.path}`.toLowerCase().includes(term))
     );
-  }, [selected, onlyWrites, search]);
+  }, [selected, onlyWrites, term]);
 
   const targetOptions = useMemo(
     () =>
@@ -97,30 +131,49 @@ export default function CatalogTab() {
     [modules]
   );
 
+  const componentLabel = (componentId: number) => {
+    const target = index.get(componentId);
+    return target ? `${target.module.page_name} · ${target.component.component_name}` : "";
+  };
+
+  const accessNote = (componentId: number) => {
+    const target = index.get(componentId)?.component;
+    if (!target) return null;
+    if (target.is_generic) {
+      return <p>Quedará abierto a cualquier rol.</p>;
+    }
+    return (
+      <>
+        <p>
+          Lo podrán usar los roles que tengan {target.component_name} ({target.roles_with_access}).
+          Aplica en máximo un minuto.
+        </p>
+        {target.roles_with_access === 0 && (
+          <p className="font-semibold text-cp-magenta">
+            Ningún rol tiene esta funcionalidad: nadie podrá usar el endpoint hasta que se la
+            asignes a un rol.
+          </p>
+        )}
+      </>
+    );
+  };
+
+  const refresh = () => Promise.all([mutate(), mutateUnregistered()]);
+
   const askMove = (endpoint: ICatalogEndpoint, targetId: number) => {
     const from = selected?.component;
-    const target = index.get(targetId);
-    if (!from || !target) return;
-    const toLabel = `${target.module.page_name} · ${target.component.component_name}`;
+    if (!from || !index.get(targetId)) return;
+    const toLabel = componentLabel(targetId);
     Modal.confirm({
       title: `¿Mover ${endpoint.method} /${endpoint.route}${endpoint.path}?`,
       width: 560,
       content: (
         <div className="flex flex-col gap-2 text-[13px]">
           <p>
-            Pasa de <b>{from.component_name}</b> a <b>{toLabel}</b>.
+            Pasa de <b>{from.component_name}</b> a <b>{toLabel}</b>. Los roles que solo tenían{" "}
+            {from.component_name} lo pierden.
           </p>
-          <p>
-            Solo lo podrán usar los roles que tengan {target.component.component_name} (
-            {target.component.roles_with_access}). Los que solo tenían {from.component_name} lo
-            pierden. Aplica en máximo un minuto.
-          </p>
-          {target.component.roles_with_access === 0 && !target.component.is_generic && (
-            <p className="font-semibold text-cp-magenta">
-              Ningún rol tiene esta funcionalidad: nadie podrá usar el endpoint hasta que se la
-              asignes a un rol.
-            </p>
-          )}
+          {accessNote(targetId)}
         </div>
       ),
       okText: "Mover",
@@ -128,12 +181,48 @@ export default function CatalogTab() {
       onOk: async () => {
         try {
           await moveEndpoint(endpoint.endpoint_id, targetId);
-          await mutate();
+          await refresh();
           showMessage("success", `Endpoint movido a ${toLabel}.`);
         } catch (e) {
           showMessage("error", (e as ApiError)?.message || "No se pudo mover el endpoint.");
         }
       }
+    });
+  };
+
+  const doRegister = async (
+    input: { route: string; method: string; path: string },
+    componentId: number
+  ) => {
+    try {
+      const saved = await registerEndpoint({ ...input, component_id: componentId });
+      await refresh();
+      showMessage(
+        "success",
+        `${saved.method} /${saved.route}${saved.path} registrado en ${componentLabel(componentId)}.`
+      );
+      return true;
+    } catch (e) {
+      showMessage("error", (e as ApiError)?.message || "No se pudo registrar el endpoint.");
+      return false;
+    }
+  };
+
+  const askRegister = (route: IUnregisteredRoute, componentId: number) => {
+    Modal.confirm({
+      title: `¿Registrar ${route.method} /${route.route}${route.path}?`,
+      width: 560,
+      content: (
+        <div className="flex flex-col gap-2 text-[13px]">
+          <p>
+            Queda en <b>{componentLabel(componentId)}</b>.
+          </p>
+          {accessNote(componentId)}
+        </div>
+      ),
+      okText: "Registrar",
+      cancelText: "Cancelar",
+      onOk: () => doRegister(route, componentId)
     });
   };
 
@@ -157,6 +246,48 @@ export default function CatalogTab() {
     }
   };
 
+  const parsed = parseEndpointInput(regUrl);
+  const detected = useMemo(() => {
+    if (!parsed) return null;
+    const sameRoute = (route: string) => route.toLowerCase() === parsed.route.toLowerCase();
+    const missing = (unregistered ?? []).find(
+      (r) =>
+        sameRoute(r.route) && r.method === regMethod && matchesRoutePattern(r.path, parsed.path)
+    );
+    if (missing) return { kind: "missing" as const, route: missing };
+    for (const mod of catalog ?? []) {
+      for (const component of mod.components) {
+        const hit = component.endpoints.find(
+          (e) =>
+            sameRoute(e.route) && e.method === regMethod && matchesRoutePattern(e.path, parsed.path)
+        );
+        if (hit) {
+          return {
+            kind: "registered" as const,
+            label: `${mod.page_name} · ${component.component_name}`
+          };
+        }
+      }
+    }
+    return { kind: "unknown" as const };
+  }, [parsed, regMethod, unregistered, catalog]);
+
+  const submitRegister = async () => {
+    if (!parsed || !regComponentId) {
+      showMessage("warning", "Pega la URL o la ruta y elige la funcionalidad.");
+      return;
+    }
+    const input =
+      detected?.kind === "missing"
+        ? detected.route
+        : { route: parsed.route, method: regMethod, path: parsed.path };
+    if (await doRegister(input, regComponentId)) {
+      setRegistering(false);
+      setRegUrl("");
+      setRegComponentId(null);
+    }
+  };
+
   return (
     <div className="cp-fill">
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] md:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
@@ -168,11 +299,23 @@ export default function CatalogTab() {
               placeholder="Buscar funcionalidad o ruta"
               className="flex-1"
             />
-            <button type="button" className={BTN_PRIMARY} onClick={() => setCreating(true)}>
-              <span className="flex items-center gap-1">
-                <Plus size={16} aria-hidden /> Nueva
-              </span>
-            </button>
+            <Dropdown
+              trigger={["click"]}
+              menu={{
+                items: [
+                  { key: "component", label: "Funcionalidad" },
+                  { key: "endpoint", label: "Endpoint" }
+                ],
+                onClick: ({ key }) =>
+                  key === "endpoint" ? setRegistering(true) : setCreating(true)
+              }}
+            >
+              <button type="button" className={BTN_PRIMARY}>
+                <span className="flex items-center gap-1">
+                  <Plus size={16} aria-hidden /> Nuevo <ChevronDown size={14} aria-hidden />
+                </span>
+              </button>
+            </Dropdown>
           </div>
           <MiniSwitch
             checked={showTms}
@@ -191,10 +334,25 @@ export default function CatalogTab() {
                 <Spin />
               </div>
             )}
+            {unregistered && (
+              <PaneItem
+                active={showingUnregistered}
+                onClick={() => setSelectedId(UNREGISTERED)}
+                title={`Rutas sin registrar (${unregistered.length})`}
+                subtitle={
+                  unregistered.length
+                    ? "Responden 401 a todos hasta registrarlas"
+                    : "Todas las rutas están registradas"
+                }
+              />
+            )}
             {genericFirst.map(({ module, component }) => (
               <PaneItem
                 key={component.component_id}
-                active={component.component_id === selected?.component.component_id}
+                active={
+                  !showingUnregistered &&
+                  component.component_id === selected?.component.component_id
+                }
                 onClick={() => setSelectedId(component.component_id)}
                 title={
                   component.is_generic
@@ -215,8 +373,69 @@ export default function CatalogTab() {
         </div>
 
         <div className="flex min-h-0 min-w-0 flex-col gap-3 md:pl-[18px]">
-          {!selected && !isLoading && <Notice>Elige una funcionalidad.</Notice>}
-          {selected && (
+          {showingUnregistered && (
+            <>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[18px] font-semibold text-cp-ink">
+                    Rutas sin registrar
+                  </p>
+                  <p className="text-[13px] text-cp-ink-3">
+                    {unregistered?.length ?? 0} rutas del backend que piden rol y no están en el
+                    catálogo
+                  </p>
+                </div>
+                <MiniSwitch
+                  checked={onlyWrites}
+                  onChange={setOnlyWrites}
+                  label={<span className="text-[13px] text-cp-ink-2">Solo escrituras</span>}
+                />
+              </div>
+              <Notice tone="warning">
+                El backend las tiene, pero sin fila en el catálogo responden 401 a cualquier
+                usuario, incluso a un super admin. Regístralas en la funcionalidad que corresponda.
+              </Notice>
+              {unregisteredError && (
+                <p className="text-[13px] text-cp-magenta">
+                  No se pudieron cargar las rutas: {unregisteredError.message}
+                </p>
+              )}
+              <div className="cp-list-scroll pr-1">
+                {unregisteredVisible.length === 0 && (
+                  <p className="py-4 text-[13px] text-cp-ink-3">No hay rutas con ese filtro.</p>
+                )}
+                {unregisteredVisible.map((route) => (
+                  <div
+                    key={`${route.method} ${route.route}${route.path}`}
+                    className="grid min-h-[45px] grid-cols-[64px_minmax(0,1fr)_260px] items-center gap-3 border-b border-cp-muted"
+                  >
+                    <MethodTag method={route.method} />
+                    <span
+                      className="truncate font-mono text-[13px] text-cp-ink-2"
+                      title={`/${route.route}${route.path}`}
+                    >
+                      /{route.route}
+                      {route.path}
+                    </span>
+                    <Select
+                      placeholder="Registrar en…"
+                      value={null}
+                      showSearch
+                      optionFilterProp="label"
+                      options={targetOptions}
+                      onChange={(value) => value && askRegister(route, value)}
+                      popupMatchSelectWidth={360}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {!showingUnregistered && !selected && !isLoading && (
+            <Notice>Elige una funcionalidad.</Notice>
+          )}
+          {!showingUnregistered && selected && (
             <>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0 flex-1">
@@ -318,6 +537,75 @@ export default function CatalogTab() {
             maxLength={255}
             className="h-[var(--control-h)] rounded-lg border border-cp-line-2 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-cp-ink-4"
           />
+        </div>
+      </Modal>
+
+      <Modal
+        open={registering}
+        title="Registrar endpoint"
+        width={620}
+        onCancel={() => setRegistering(false)}
+        onOk={submitRegister}
+        okText="Registrar"
+        cancelText="Cancelar"
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-[13px] text-cp-ink-2">
+            Pega la URL que falla (con o sin dominio) o escribe la ruta. El backend solo acepta
+            rutas que existan en su código.
+          </p>
+          <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2">
+            <Select
+              value={regMethod}
+              onChange={setRegMethod}
+              options={METHODS.map((m) => ({ value: m, label: m }))}
+            />
+            <input
+              value={regUrl}
+              onChange={(e) => setRegUrl(e.target.value)}
+              placeholder="https://…/api/visit-forms/199/responses/export?format=xlsx"
+              className="h-[var(--control-h)] min-w-0 rounded-lg border border-cp-line-2 bg-[#fafafa] px-3 font-mono text-[13px] outline-none focus:border-cp-ink-4"
+            />
+          </div>
+          {parsed && detected && (
+            <div className="rounded-lg bg-cp-bg px-3 py-2 text-[13px] text-cp-ink-2">
+              {detected.kind === "missing" && (
+                <span className="flex flex-wrap items-center gap-2">
+                  Ruta encontrada en el backend:
+                  <MethodTag method={detected.route.method} />
+                  <span className="font-mono">
+                    /{detected.route.route}
+                    {detected.route.path}
+                  </span>
+                </span>
+              )}
+              {detected.kind === "registered" && (
+                <span>
+                  Ya está registrada en {detected.label}. Para cambiarla, usa &quot;Mover a…&quot;.
+                </span>
+              )}
+              {detected.kind === "unknown" && (
+                <span>
+                  No está entre las rutas sin registrar: revisa el método y la URL. Se intentará
+                  registrar /{parsed.route}
+                  {parsed.path}.
+                </span>
+              )}
+            </div>
+          )}
+          <Select
+            placeholder="Funcionalidad"
+            value={regComponentId}
+            onChange={setRegComponentId}
+            showSearch
+            optionFilterProp="label"
+            options={targetOptions}
+          />
+          {regComponentId && (
+            <div className="flex flex-col gap-1 text-[13px] text-cp-ink-2">
+              {accessNote(regComponentId)}
+            </div>
+          )}
         </div>
       </Modal>
     </div>

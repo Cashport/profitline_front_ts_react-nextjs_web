@@ -36,3 +36,10 @@ export interface IRoleDetail {
   is_system: boolean;
   component_ids: number[];
 }
+
+export interface IUnregisteredRoute {
+  route: string;
+  method: string;
+  path: string;
+  auth: "role" | "intrinsic";
+}
