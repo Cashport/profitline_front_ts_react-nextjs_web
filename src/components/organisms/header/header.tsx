@@ -19,7 +19,7 @@ interface HeaderProps {
    */
   back?: boolean | string;
   className?: string;
-  /** Muestra una flecha de volver antes del título (vistas de detalle). */
+  /** Intercepta "‹" (p. ej. cambios sin guardar); con él la flecha se muestra aunque no haya `back`. */
   onBack?: () => void;
 }
 
@@ -29,12 +29,17 @@ const Header: FC<HeaderProps> = ({
   titleExtra,
   actionsExtra,
   back,
-  className
+  className,
+  onBack
 }) => {
   const router = useRouter();
   const pathname = usePathname();
 
   const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
     if (window.history.length > 1) {
       router.back();
       return;
@@ -46,7 +51,7 @@ const Header: FC<HeaderProps> = ({
 
   return (
     <header className={`${styles.wrapper} ${className ?? ""}`}>
-      {back && (
+      {(back || onBack) && (
         <button type="button" className={styles.back} onClick={handleBack} title="Volver">
           <CaretLeft size={21} weight="bold" />
         </button>
