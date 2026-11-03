@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import env from "./config";
+import {
+  LANG_COOKIE,
+  LANG_COOKIE_MAX_AGE,
+  LANG_PARAM,
+  isBot,
+  isLang,
+  languageFromHeader
+} from "./modules/landing/language";
 
 const LANDING_ROUTES = ["/", "/en"];
 const PUBLIC_FILES = ["/robots.txt", "/sitemap.xml", "/llms.txt", "/assets"];
@@ -73,6 +81,13 @@ export async function middleware(request: NextRequest) {
     noIndex(
       withCsp(NextResponse.redirect(new URL(path, request.url), { headers: requestHeaders }))
     );
+  // Redirección que depende del visitante (idioma): ningún caché la comparte.
+  const privateRedirect = (path: string) => {
+    const res = withCsp(NextResponse.redirect(new URL(path, request.url), 307));
+    res.headers.set("Cache-Control", "private, no-store");
+    res.headers.set("Vary", "Accept-Language, Cookie");
+    return res;
+  };
   const isValidSession = async () => {
     if (!session) return false;
     //Call the API to validate the token
@@ -94,6 +109,33 @@ export async function middleware(request: NextRequest) {
   // se entra directo a la app, como antes.
   if (LANDING_ROUTES.includes(pathname)) {
     if (session && (await isValidSession())) return redirectTo(APP_HOME);
+
+    // ES | EN elegido a mano (?lang=): se guarda y se vuelve a la URL limpia.
+    const chosenParam = request.nextUrl.searchParams.get(LANG_PARAM);
+    if (isLang(chosenParam)) {
+      const res = privateRedirect(chosenParam === "en" ? "/en" : "/");
+      res.cookies.set(LANG_COOKIE, chosenParam, {
+        path: "/",
+        maxAge: LANG_COOKIE_MAX_AGE,
+        sameSite: "lax"
+      });
+      return res;
+    }
+
+    // En / se respeta el idioma del navegador (o la elección guardada); los
+    // bots nunca se redirigen. /en se respeta siempre: es un enlace explícito.
+    if (pathname === "/") {
+      const saved = request.cookies.get(LANG_COOKIE)?.value;
+      const lang = isLang(saved)
+        ? saved
+        : isBot(request.headers.get("user-agent"))
+          ? "es"
+          : languageFromHeader(request.headers.get("accept-language"));
+      if (lang === "en") return privateRedirect("/en");
+      const res = next();
+      res.headers.set("Vary", "Accept-Language, Cookie");
+      return res;
+    }
     return next();
   }
 
