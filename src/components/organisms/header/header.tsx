@@ -19,6 +19,8 @@ interface HeaderProps {
    */
   back?: boolean | string;
   className?: string;
+  /** Muestra una flecha de volver antes del título (vistas de detalle). */
+  onBack?: () => void;
 }
 
 const Header: FC<HeaderProps> = ({
