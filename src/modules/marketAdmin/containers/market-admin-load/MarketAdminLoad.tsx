@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useSWRConfig } from "swr";
-import { useTranslations } from "use-intl";
 import { Download, Plus, Upload } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -14,6 +13,8 @@ import PanelDetalleCargue from "@/modules/marketAdmin/components/market-admin-lo
 import ModalNuevoEtl, {
   NuevoEtlFormValues
 } from "@/modules/marketAdmin/components/market-admin-load/ModalNuevoEtl";
+import ModalValidacionCargue from "@/modules/marketAdmin/components/market-admin-load/ModalValidacionCargue";
+import ModalErroresCargue from "@/modules/marketAdmin/components/market-admin-load/ModalErroresCargue";
 import {
   getProfitLoaderTimelineKey,
   useProfitLoaders
@@ -31,7 +32,11 @@ import {
 } from "@/types/dataQuality/IIntakeStructure";
 import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import { useMessageApi } from "@/context/MessageContext";
-import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+import {
+  IProfitLoader,
+  IProfitLoaderTimelineItem,
+  IProfitLoaderUploadResult
+} from "@/types/marketAdmin/IMarketAdmin";
 import Header from "@/components/organisms/header";
 
 dayjs.extend(utc);
@@ -41,14 +46,22 @@ const PAGE_SIZE = 20;
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export default function MarketAdminLoad() {
-  const t = useTranslations("marketAdmin.load");
-  const tCommon = useTranslations("common.fields");
   const { loaders, isLoading, mutate } = useProfitLoaders();
   const { mutate: globalMutate } = useSWRConfig();
   const [page, setPage] = useState(1);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [analysisModal, setAnalysisModal] = useState<{
+    loaderId: number;
+    analysisId: number;
+    loaderName: string | null;
+    templateUrl?: string;
+  } | null>(null);
+  const [errorsModal, setErrorsModal] = useState<{
+    loaderId: number;
+    item: IProfitLoaderTimelineItem;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<number | null>(null);
   const { runUpload, structureModals } = useIntakeStructureUpload();
@@ -86,7 +99,7 @@ export default function MarketAdminLoad() {
     if (!validationsModal) return;
     await saveLoaderValidations(validationsModal.loaderId, config);
     if (validationsModal.mode === "edit") {
-      showMessage("success", t("feedback.validationsSaved"));
+      showMessage("success", "Validaciones guardadas.");
     }
     closeValidations(true);
   };
@@ -95,7 +108,10 @@ export default function MarketAdminLoad() {
     try {
       const data = await getLoaderValidations(loader.id);
       if (!data.has_template) {
-        showMessage("info", t("feedback.noTemplateYet"));
+        showMessage(
+          "info",
+          "Este ETL todavía no tiene template: carga un archivo para crearlo y definir sus validaciones."
+        );
         return;
       }
       setValidationsModal({
@@ -119,7 +135,7 @@ export default function MarketAdminLoad() {
     } catch (error) {
       showMessage(
         "error",
-        error instanceof Error ? error.message : t("feedback.validationsLoadError")
+        error instanceof Error ? error.message : "No se pudieron leer las validaciones."
       );
     }
   };
@@ -129,12 +145,48 @@ export default function MarketAdminLoad() {
   // No existe endpoint para crear ETLs todavía: el modal queda pero sin efecto en la lista.
   const handleCreateEtl = (_values: NuevoEtlFormValues) => {
     setShowCreate(false);
-    showMessage("info", t("feedback.createUnavailable"));
+    showMessage("info", "La creación de ETLs aún no está disponible.");
   };
 
   const triggerUpload = (id: number) => {
     uploadTargetRef.current = id;
     fileInputRef.current?.click();
+  };
+
+  const uploadFile = async (targetId: number, file: File) => {
+    setUploadingId(targetId);
+    try {
+      let result: IProfitLoaderUploadResult | undefined;
+      const uploaded = await runUpload(
+        async (useAsTemplate) => {
+          result = await uploadProfitLoaderFile(targetId, file, useAsTemplate);
+        },
+        { onValidationsRequired: askValidations(targetId, file.name) }
+      );
+      if (!uploaded) return;
+      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
+      // Cartera: validar -> justificar -> confirmar antes de aplicar el archivo.
+      if (result?.requires_analysis && result.analysis_id) {
+        const loader = loaders?.find((l) => l.id === targetId);
+        setAnalysisModal({
+          loaderId: targetId,
+          analysisId: result.analysis_id,
+          loaderName: loader?.display_name ?? null,
+          templateUrl: loader?.url_s3_template
+        });
+        return;
+      }
+      // La carga es asincrona: el loader valida el contenido y procesa despues;
+      // el resultado aparece en el historial de cargues.
+      showMessage(
+        "success",
+        `Archivo "${file.name}" recibido. Se está validando y procesando; revisa el resultado en el historial.`
+      );
+    } catch (error) {
+      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
+    } finally {
+      setUploadingId(null);
+    }
   };
 
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,28 +196,42 @@ export default function MarketAdminLoad() {
     e.target.value = "";
     uploadTargetRef.current = null;
     if (!file || !targetId) return;
+    await uploadFile(targetId, file);
+  };
 
-    setUploadingId(targetId);
-    try {
-      const uploaded = await runUpload(
-        (useAsTemplate) => uploadProfitLoaderFile(targetId, file, useAsTemplate),
-        { onValidationsRequired: askValidations(targetId, file.name) }
-      );
-      if (!uploaded) return;
-      // La carga es asincrona: el loader valida el contenido y procesa despues;
-      // el resultado aparece en el historial de cargues.
-      showMessage("success", t("feedback.fileReceived", { fileName: file.name }));
-      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
-    } catch (error) {
-      showMessage("error", t("feedback.uploadError"));
-    } finally {
-      setUploadingId(null);
+  const closeAnalysis = () => {
+    const loaderId = analysisModal?.loaderId;
+    setAnalysisModal(null);
+    if (loaderId) {
+      mutate();
+      globalMutate(getProfitLoaderTimelineKey(loaderId));
     }
+  };
+
+  const openLoadDetail = (loader: IProfitLoader, item: IProfitLoaderTimelineItem) => {
+    if (item.analysis_id) {
+      setAnalysisModal({
+        loaderId: loader.id,
+        analysisId: item.analysis_id,
+        loaderName: loader.display_name,
+        templateUrl: loader.url_s3_template
+      });
+      return;
+    }
+    setErrorsModal({ loaderId: loader.id, item });
+  };
+
+  const uploadCorrected = (file?: File) => {
+    const loaderId = analysisModal?.loaderId;
+    closeAnalysis();
+    if (!loaderId) return;
+    if (file) uploadFile(loaderId, file);
+    else triggerUpload(loaderId);
   };
 
   const descargarTemplate = (loader: IProfitLoader) => {
     if (!loader.url_s3_template) {
-      showMessage("error", t("feedback.noTemplate"));
+      showMessage("error", "No hay plantilla disponible para este ETL.");
       return;
     }
     window.open(loader.url_s3_template, "_blank", "noopener,noreferrer");
@@ -173,7 +239,7 @@ export default function MarketAdminLoad() {
 
   const columns: ColumnsType<IProfitLoader> = [
     {
-      title: tCommon("name"),
+      title: "Nombre",
       dataIndex: "display_name",
       key: "display_name",
       sorter: (a, b) => a.display_name.localeCompare(b.display_name),
@@ -186,12 +252,12 @@ export default function MarketAdminLoad() {
       )
     },
     {
-      title: t("columns.lastFile"),
+      title: "Último archivo cargado",
       key: "ultimoArchivo",
       onHeaderCell: headerCell,
       render: (_, loader) => {
         if (!loader.file_name) {
-          return <span className="text-sm text-[#BBBBBB]">{t("noUploadsYet")}</span>;
+          return <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>;
         }
         if (!loader.s3_url) {
           return <span className="text-sm text-[#141414]">{loader.file_name}</span>;
@@ -209,7 +275,7 @@ export default function MarketAdminLoad() {
       }
     },
     {
-      title: t("columns.lastUpload"),
+      title: "Último cargue",
       key: "ultimoCargue",
       width: 170,
       onHeaderCell: headerCell,
@@ -232,19 +298,19 @@ export default function MarketAdminLoad() {
           <button
             type="button"
             onClick={() => descargarTemplate(loader)}
-            title={t("downloadTemplate")}
+            title="Descargar template"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
-            <Download size={13} /> {t("template")}
+            <Download size={13} /> Template
           </button>
           <button
             type="button"
             onClick={() => triggerUpload(loader.id)}
             disabled={uploadingId === loader.id}
-            title={t("uploadFile")}
+            title="Cargar archivo"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload size={13} /> {uploadingId === loader.id ? t("uploading") : t("upload")}
+            <Upload size={13} /> {uploadingId === loader.id ? "Cargando..." : "Cargar"}
           </button>
           <GenericEyeButton onClick={() => setDetailId(loader.id)} />
         </div>
@@ -254,7 +320,7 @@ export default function MarketAdminLoad() {
 
   return (
     <div className="cp-page min-h-full">
-      <Header title={t("title")} back="/market-admin" />
+      <Header title="Cargue de información" back="/market-admin" />
 
       <input
         ref={fileInputRef}
@@ -267,7 +333,9 @@ export default function MarketAdminLoad() {
       <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
-          <p className="text-sm text-[#999999] flex-1">{t("subtitle")}</p>
+          <p className="text-sm text-[#999999] flex-1">
+            ETLs manuales para alimentar el app cuando la sincronización automática falla.
+          </p>
 
           {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
           {/* <div className="h-10 flex-shrink-0">
@@ -284,13 +352,13 @@ export default function MarketAdminLoad() {
           rowKey="id"
           loading={isLoading}
           showSorterTooltip={false}
-          locale={{ emptyText: t("empty") }}
+          locale={{ emptyText: "No hay ETLs configurados." }}
           pagination={{
             current: page,
             pageSize: PAGE_SIZE,
             showSizeChanger: false,
             position: ["bottomRight"],
-            showTotal: (total, range) => t("total", { from: range[0], to: range[1], total })
+            showTotal: (total, range) => `Mostrando ${range[0]}–${range[1]} de ${total} ETLs`
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);
@@ -306,6 +374,24 @@ export default function MarketAdminLoad() {
         onUpload={triggerUpload}
         onDownloadTemplate={descargarTemplate}
         onEditValidations={openValidationsEditor}
+        onOpenDetail={openLoadDetail}
+      />
+
+      <ModalErroresCargue
+        open={!!errorsModal}
+        loaderId={errorsModal?.loaderId ?? null}
+        item={errorsModal?.item ?? null}
+        onClose={() => setErrorsModal(null)}
+      />
+
+      <ModalValidacionCargue
+        open={!!analysisModal}
+        loaderId={analysisModal?.loaderId ?? null}
+        analysisId={analysisModal?.analysisId ?? null}
+        loaderName={analysisModal?.loaderName ?? null}
+        templateUrl={analysisModal?.templateUrl}
+        onClose={closeAnalysis}
+        onUploadCorrected={uploadCorrected}
       />
 
       <ModalNuevoEtl

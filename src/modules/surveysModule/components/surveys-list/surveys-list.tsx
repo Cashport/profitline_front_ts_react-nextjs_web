@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslations } from "use-intl";
-
 import ProfitLoader from "@/components/ui/profit-loader";
 import type { SortState } from "@/modules/walletModule/types";
 import type { IVisitFormListItem } from "@/types/surveys/ISurveys";
@@ -24,6 +22,12 @@ interface SurveysListProps {
   onClearCriteria: () => void;
 }
 
+/** "5 encuestas", o "2 de 5 encuestas" cuando la búsqueda recorta el listado. */
+const fmtCount = (shown: number, total: number) => {
+  const noun = total === 1 ? "encuesta" : "encuestas";
+  return shown === total ? `${total} ${noun}` : `${shown} de ${total} ${noun}`;
+};
+
 /** Tarjeta del listado: tabla en escritorio y tarjetas en pantallas angostas. */
 export default function SurveysList({
   forms,
@@ -36,29 +40,30 @@ export default function SurveysList({
   onOpen,
   onClearCriteria
 }: SurveysListProps) {
-  const t = useTranslations("surveys.list");
   const renderContent = () => {
     if (isLoading) return <ProfitLoader size="small" />;
     if (error) {
       return (
         <p className="p-9 text-center text-sm text-destructive">
-          {error.message || t("loadError")}
+          {error.message || "No se pudieron cargar las encuestas."}
         </p>
       );
     }
     if (!total && !hasFilters) {
-      return <p className="p-9 text-center text-sm text-muted-foreground">{t("empty")}</p>;
+      return <p className="p-9 text-center text-sm text-muted-foreground">Aún no hay encuestas.</p>;
     }
     if (!forms.length) {
       return (
         <div className="flex flex-col items-center gap-2 p-9 text-center">
-          <p className="text-[13.5px] font-semibold text-foreground">{t("noMatch")}</p>
+          <p className="text-[13.5px] font-semibold text-foreground">
+            No hay encuestas con esos criterios.
+          </p>
           <button
             type="button"
             onClick={onClearCriteria}
             className="text-[13px] font-medium text-[#1677ff] hover:underline"
           >
-            {t("clearCriteria")}
+            Limpiar búsqueda y filtros
           </button>
         </div>
       );
@@ -79,15 +84,11 @@ export default function SurveysList({
   };
 
   return (
-    <section className="rounded-xl bg-card p-4 shadow-sm">
-      <div className="flex flex-wrap items-baseline justify-between gap-2.5 px-1 pb-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
+    <section className="cp-card px-[18px] pb-[14px]">
+      <div className="flex h-[var(--table-title-h)] items-center justify-between gap-2.5">
+        <h2 className="text-[18px] font-semibold text-cp-ink">Encuestas</h2>
         {!isLoading && !error && (
-          <span className="text-[13px] text-muted-foreground">
-            {forms.length === total
-              ? t("count", { total })
-              : t("countFiltered", { shown: forms.length, total })}
-          </span>
+          <span className="text-[14px] text-cp-ink-4">{fmtCount(forms.length, total)}</span>
         )}
       </div>
       {renderContent()}

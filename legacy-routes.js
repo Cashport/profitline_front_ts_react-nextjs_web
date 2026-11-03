@@ -44,6 +44,7 @@ const LEGACY_ROUTES = [
   ["/proyectos", "/projects"],
   ["/salud-automatizaciones", "/bot-health"],
   ["/torreControl", "/control-tower"],
+  ["/plataforma", "/platform"],
 ];
 
 module.exports = LEGACY_ROUTES.map(([source, destination]) => ({

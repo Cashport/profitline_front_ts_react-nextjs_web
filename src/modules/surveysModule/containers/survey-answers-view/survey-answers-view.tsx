@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "use-intl";
 
+import Header from "@/components/organisms/header";
 import Pagination from "@/components/ui/pagination";
 import ProfitLoader from "@/components/ui/profit-loader";
 import StatCards, { type StatCardItem } from "@/components/ui/stat-cards/stat-cards";
 
 import ResponsesDownloadCard from "../../components/responses-download-card/responses-download-card";
 import ResponsesTable from "../../components/responses-table/responses-table";
-import SurveyPageHeader from "../../components/survey-page-header/survey-page-header";
 import SurveyResponseModal from "../../components/survey-response-modal/survey-response-modal";
 import { RESPONSES_PAGE_SIZE } from "../../constants";
 import { useVisitForm } from "../../hooks/useVisitForm";
@@ -20,7 +19,6 @@ import { useVisitFormResponses } from "../../hooks/useVisitFormResponses";
  * periodo y el listado paginado; cada fila abre la respuesta completa.
  */
 export default function SurveyAnswersView({ formId }: { formId: number }) {
-  const t = useTranslations("surveys.answers");
   const { form } = useVisitForm(formId);
   const { responsesPage, page, setPage, isLoading, error } = useVisitFormResponses(formId);
   const [openResponseId, setOpenResponseId] = useState<number | null>(null);
@@ -31,21 +29,21 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
   const cards: StatCardItem[] = [
     {
       id: "total",
-      label: t("stats.total"),
+      label: "Total respuestas",
       value: fmt(responsesPage?.total),
-      foot: t("stats.totalFoot")
+      foot: "Completas y parciales"
     },
     {
       id: "month",
-      label: t("stats.month"),
+      label: "Este mes",
       value: fmt(responsesPage?.month_total),
-      foot: t("stats.monthFoot")
+      foot: "Desde el día 1"
     },
     {
       id: "users",
-      label: t("stats.users"),
+      label: "Asesores",
       value: fmt(responsesPage?.user_count),
-      foot: t("stats.usersFoot")
+      foot: "Han respondido la encuesta"
     }
   ];
 
@@ -54,35 +52,39 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
     if (error) {
       return (
         <p className="p-9 text-center text-sm text-destructive">
-          {error.message || t("loadError")}
+          {error.message || "No se pudieron cargar las respuestas."}
         </p>
       );
     }
     if (!total) {
-      return <p className="p-9 text-center text-sm text-muted-foreground">{t("empty")}</p>;
+      return (
+        <p className="p-9 text-center text-sm text-muted-foreground">
+          Esta encuesta aún no tiene respuestas.
+        </p>
+      );
     }
     return <ResponsesTable responses={responses} onOpen={setOpenResponseId} />;
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
-      <SurveyPageHeader
-        backHref={`/surveys/${formId}`}
-        backLabel={form?.name ?? t("backFallback")}
-        title={t("title")}
+    <div className="cp-page pb-6">
+      <Header
+        title={form?.name ? `Respuestas · ${form.name}` : "Respuestas"}
+        back={`/surveys/${formId}`}
       />
 
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
+      {/* KPIs y descarga en una fila del mismo alto; la descarga, más ancha, es la acción de la vista. */}
+      <div className="grid gap-[var(--card-gap)] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <StatCards cards={cards} />
         <ResponsesDownloadCard formId={formId} />
       </div>
 
-      <section className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm">
-        <div className="flex flex-wrap items-baseline justify-between gap-2.5 px-1">
-          <h2 className="text-sm font-semibold text-foreground">{t("recent")}</h2>
+      <section className="cp-card flex flex-col gap-1 px-[18px] pb-[14px]">
+        <div className="flex h-[var(--table-title-h)] items-center justify-between gap-2.5">
+          <h2 className="text-[18px] font-semibold text-cp-ink">Respuestas recientes</h2>
           {responsesPage && (
-            <span className="text-[13px] text-muted-foreground">
-              {t("showing", { shown: responses.length, total: total.toLocaleString("es-CO") })}
+            <span className="text-[14px] text-cp-ink-4">
+              Mostrando {responses.length} de {total.toLocaleString("es-CO")}
             </span>
           )}
         </div>

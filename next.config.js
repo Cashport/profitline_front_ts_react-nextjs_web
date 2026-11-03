@@ -26,12 +26,8 @@ const nextConfig = {
     ]
   },
   swcMinify: false,
-  // 👇 AGREGA ESTO PARA EVITAR QUE EL BUILD FALLE POR ERRORES DE TIPOS EN OTROS MÓDULOS
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.resolve.alias.canvas = false;

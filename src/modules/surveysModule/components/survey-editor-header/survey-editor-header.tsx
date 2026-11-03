@@ -1,12 +1,11 @@
 "use client";
 
 import { Eye, EyeOff, Pencil, Table2 } from "lucide-react";
-import { useTranslations } from "use-intl";
 
+import Header from "@/components/organisms/header";
 import type { IVisitFormStatus } from "@/types/surveys/ISurveys";
 
 import ActionButton from "../shared/action-button";
-import SurveyPageHeader from "../survey-page-header/survey-page-header";
 import SurveyStatus from "../survey-status/survey-status";
 
 interface SurveyEditorHeaderProps {
@@ -48,13 +47,11 @@ export default function SurveyEditorHeader({
   onEdit,
   onAnswers
 }: SurveyEditorHeaderProps) {
-  const t = useTranslations("surveys.editorHeader");
-  const tCommon = useTranslations("common");
-  const title = name.trim() || (isNew ? t("newSurvey") : t("untitled"));
+  const title = name.trim() || (isNew ? "Nueva encuesta" : "Encuesta sin título");
 
   const narrowPreview = (
     <ActionButton className="lg:hidden" icon={<Eye />} onClick={onOpenPreview}>
-      {t("preview")}
+      Vista previa
     </ActionButton>
   );
 
@@ -66,41 +63,37 @@ export default function SurveyEditorHeader({
           icon={previewOpen ? <EyeOff /> : <Eye />}
           onClick={onTogglePreview}
         >
-          {previewOpen ? t("hidePreview") : t("preview")}
+          {previewOpen ? "Ocultar vista previa" : "Vista previa"}
         </ActionButton>
         {narrowPreview}
-        <ActionButton onClick={onExit}>
-          {isNew ? tCommon("actions.cancel") : t("exitEditor")}
-        </ActionButton>
+        <ActionButton onClick={onExit}>{isNew ? "Cancelar" : "Salir del editor"}</ActionButton>
         <ActionButton
           variant="primary"
           loading={isSaving}
           disabled={!isReady || (!isNew && !isDirty)}
           onClick={onPublish}
         >
-          {isNew ? t("publish") : isDirty ? t("publishChanges") : t("published")}
+          {isNew ? "Publicar" : isDirty ? "Publicar cambios" : "Publicada"}
         </ActionButton>
       </>
     ) : (
       <>
         {narrowPreview}
         <ActionButton disabled={!isReady} icon={<Table2 />} onClick={onAnswers}>
-          {t("viewResponses")}
+          Ver respuestas
         </ActionButton>
         <ActionButton variant="primary" disabled={!isReady} icon={<Pencil />} onClick={onEdit}>
-          {tCommon("actions.edit")}
+          Editar
         </ActionButton>
       </>
     );
 
   return (
-    <SurveyPageHeader
-      backHref="/surveys"
-      backLabel={t("backLabel")}
-      onBack={onBack}
+    <Header
       title={title}
+      onBack={onBack}
       titleExtra={!isNew && isReady ? <SurveyStatus status={status} /> : null}
-      actions={actions}
+      actionsExtra={actions}
     />
   );
 }

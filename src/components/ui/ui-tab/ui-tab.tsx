@@ -6,6 +6,7 @@ interface ITab {
   key: string;
   label: ReactNode;
   children: ReactNode;
+  disabled?: boolean;
 }
 
 interface UiTabProps {

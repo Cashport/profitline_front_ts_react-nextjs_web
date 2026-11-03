@@ -19,7 +19,7 @@ export default function SurveyMeta({ editor, isEdit }: SurveyMetaProps) {
   const required = draft.questions.filter((q) => q.required).length;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-card p-5 shadow-sm">
+    <div className="cp-card flex flex-col gap-3 px-[18px] py-[14px]">
       {isEdit ? (
         <>
           <Input

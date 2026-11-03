@@ -730,6 +730,9 @@ export interface IProfitLoaderTimelineItem {
   status: string;
   label: string;
   color: string;
+  analysis_id: number | null;
+  analysis_status: ILoadAnalysisStatus | null;
+  error_count: number;
   executions: IProfitLoaderExecution[];
 }
 
@@ -743,4 +746,141 @@ export interface IProfitLoaderTimelineResponse {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+// POST /profit-loader/etl/:id/upload
+export interface IProfitLoaderUploadResult {
+  batch_id: number;
+  file_id: number;
+  loader_id: number;
+  loader_name: string;
+  status: "PENDING" | "ANALYZING";
+  requires_analysis: boolean;
+  analysis_id: number | null;
+}
+
+// Validación de cargue de cartera (validar -> justificar -> confirmar)
+export type ILoadAnalysisStatus =
+  | "ANALYZING"
+  | "CRITICAL"
+  | "READY"
+  | "APPLYING"
+  | "APPLIED"
+  | "FAILED"
+  | "CANCELLED";
+
+export type ILoadAnalysisMeasureKey = "total_balance" | "active_clients" | "documents";
+
+export interface ILoadAnalysisCritical {
+  code: "MISSING_COLUMNS" | "DUPLICATES" | "INVALID_TYPE" | "UNKNOWN_CLIENTS" | "VALIDATION" | string;
+  message: string;
+  count: number;
+  columns?: string[];
+  sample_rows?: number[];
+  sample_values?: string[];
+}
+
+export interface ILoadAnalysisPoint {
+  date: string;
+  value: number;
+}
+
+export interface ILoadAnalysisMeasure {
+  key: ILoadAnalysisMeasureKey;
+  label: string;
+  unit: "currency" | "count";
+  value: number;
+  level: "NORMAL" | "WARNING" | "NO_BASELINE";
+  mean: number | null;
+  std_dev: number | null;
+  z_score: number | null;
+  delta_pct: number | null;
+  requires_justification: boolean;
+  justification: {
+    measure_key: ILoadAnalysisMeasureKey;
+    justification: string;
+    created_by: string | null;
+    updated_at: string;
+  } | null;
+  history: ILoadAnalysisPoint[];
+  mean_30d: number | null;
+  history_30d: ILoadAnalysisPoint[];
+}
+
+export interface ILoadAnalysis {
+  analysis_id: number;
+  batch_id: number;
+  file_id: number;
+  loader_name: string;
+  file_name: string;
+  status: ILoadAnalysisStatus;
+  step: "READING" | "VALIDATING" | "MATCHING_CLIENTS" | "MEASURING" | "DONE" | null;
+  progress: number;
+  rows_raw: number | null;
+  error_message: string | null;
+  created_by: string | null;
+  created_at: string;
+  analyzed_at: string | null;
+  confirmed_by: string | null;
+  confirmed_at: string | null;
+  applied_at: string | null;
+  history_days: number;
+  summary_days: number;
+  criticals: ILoadAnalysisCritical[];
+  measures: ILoadAnalysisMeasure[];
+  warnings_count: number;
+  justified_count: number;
+  can_confirm: boolean;
+  can_force: boolean;
+  critical_override: {
+    justification: string;
+    created_by: string | null;
+    updated_at: string;
+  } | null;
+}
+
+// GET /profit-loader/etl/:loaderId/batches/:batchId/timeline
+export interface IProfitLoaderBatchError {
+  id: number;
+  file_id: number | null;
+  row_number: number | null;
+  field_name: string | null;
+  error_level: string;
+  error_type: string;
+  error_message: string;
+  is_fatal: 0 | 1;
+  created_at: string;
+}
+
+export interface IProfitLoaderBatchValidation {
+  id: number;
+  validation_name: string;
+  validation_type: string;
+  target_column: string | null;
+  status: "PASS" | "FAIL" | "ANOMALY" | "SKIPPED" | "ERROR";
+  severity: "INFO" | "WARNING" | "ERROR" | "FATAL";
+  message: string | null;
+}
+
+export interface IProfitLoaderBatchDetail {
+  batch: {
+    id: number;
+    status: string;
+    triggered_by: string | null;
+    started_at: string | null;
+    finished_at: string | null;
+    notes: string | null;
+  };
+  files: {
+    id: number;
+    file_name: string;
+    status: string;
+    error_message: string | null;
+    rows_raw: number;
+    rows_loaded: number;
+    rows_failed: number;
+  }[];
+  executions: (IProfitLoaderExecution & { file_id: number | null })[];
+  errors: IProfitLoaderBatchError[];
+  validations: IProfitLoaderBatchValidation[];
 }

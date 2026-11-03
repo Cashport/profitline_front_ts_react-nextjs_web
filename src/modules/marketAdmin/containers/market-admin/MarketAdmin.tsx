@@ -10,18 +10,18 @@ import {
   Tag,
   UploadCloud,
   Settings,
+  ShieldCheck,
   ChevronRight
 } from "lucide-react";
 import { Chats } from "@phosphor-icons/react";
-import { useTranslations } from "use-intl";
 import Header from "@/components/organisms/header";
-import type { Messages } from "@/i18n/types";
+import { useAppStore } from "@/lib/store/store";
 
 type Section = {
   href: string;
   icon: ComponentType<{ size?: string | number; className?: string }>;
-  /** Clave en marketAdmin.home.sections */
-  key: keyof Messages["marketAdmin"]["home"]["sections"];
+  label: string;
+  description: string;
   disabled?: boolean;
 };
 
@@ -29,105 +29,123 @@ const sections: Section[] = [
   {
     href: "/market-admin/clients",
     icon: Users,
-    key: "clients"
+    label: "Clientes",
+    description: "Gestiona clientes, sus productos, descuentos y usuarios asignados."
   },
   {
     href: "/market-admin/users",
     icon: User,
-    key: "users"
+    label: "Usuarios",
+    description: "Administra los usuarios del Marketplace, roles y clientes asociados."
   },
   {
     href: "/market-admin/products",
     icon: Package,
-    key: "products"
+    label: "Productos",
+    description: "Revisa el catálogo: líneas, canales, SKUs, lotes, precios e imágenes."
   },
   {
     href: "/market-admin/packs",
     icon: Boxes,
-    key: "packs"
+    label: "Packs de productos",
+    description: "Arma packs con productos del catálogo: SKU propio, imagen y cantidades."
   },
   {
     href: "/market-admin/bonuses-and-discounts",
     icon: Tag,
-    key: "discounts"
+    label: "Descuentos y bonificados",
+    description: "Gestiona descuentos y bonificados: reglas, fechas, estado y categoría."
   },
   {
     href: "/market-admin/load",
     icon: UploadCloud,
-    key: "load"
+    label: "Cargue de información",
+    description: "Alimenta el app con ETLs manuales: inventario, precios, clientes y más."
+  },
+  {
+    href: "/seals",
+    icon: ShieldCheck,
+    label: "Precintos",
+    description: "Controla el inventario de precintos: bodega, ejecutivos y asignaciones."
   },
   {
     href: "/mass-communications",
     icon: Chats,
-    key: "massCommunications"
+    label: "Comunicaciones masivas",
+    description: "Envía comunicaciones masivas a los clientes en minutos."
   },
   {
     href: "/settings",
     icon: Settings,
-    key: "settings"
+    label: "Configuraciones",
+    description: "Gestión administrativa del proyecto."
+  }
+];
+
+const superAdminSections: Section[] = [
+  {
+    href: "/platform/roles",
+    icon: ShieldCheck,
+    label: "Roles y permisos",
+    description: "Solo Profitline: roles por proyecto, qué puede hacer cada rol y su catálogo."
   }
 ];
 
 export default function MarketAdmin() {
-  const t = useTranslations("marketAdmin.home");
+  const isSuperAdmin = useAppStore((s) => Boolean(s.selectedProject?.isSuperAdmin));
+  const visibleSections = isSuperAdmin ? [...sections, ...superAdminSections] : sections;
+
   return (
     <div className="cp-page min-h-full">
-      <Header title={t("title")} />
+      <Header title="Administración" />
 
-      {/* Single white card — full width, sized to its content */}
-      <div className="cp-card overflow-hidden">
-        <div className="grid grid-cols-2">
-          {sections.map(({ href, icon: Icon, key, disabled }) => {
-            const label = t(`sections.${key}.label`);
-            const description = t(`sections.${key}.description`);
+      {/* Una sola tarjeta; las líneas entre opciones salen del gap de 1px sobre --cp-line */}
+      <section className="cp-card overflow-hidden">
+        <div className="grid grid-cols-1 gap-px bg-cp-line md:grid-cols-2">
+          {sections.map(({ href, icon: Icon, label, description, disabled }) => {
             const inner = (
               <div
-                className={`group flex items-center gap-5 px-7 py-7 border-b border-r border-[#F0F0F0] transition-all h-full ${
-                  disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-[#FAFAFA] cursor-pointer"
+                className={`group flex h-full items-center gap-4 bg-cp-surface px-6 py-5 transition-colors ${
+                  disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-cp-subtle"
                 }`}
               >
-                {/* Icon */}
                 <div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                    disabled
-                      ? "bg-[#F5F5F5]"
-                      : "bg-[#F5F5F5] group-hover:bg-cashport-green group-active:bg-cashport-green"
+                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] bg-cp-muted transition-colors ${
+                    disabled ? "" : "group-hover:bg-cp-lime"
                   }`}
                 >
                   <Icon
-                    size={20}
+                    size={18}
                     className={`transition-colors ${
-                      disabled ? "text-[#AAAAAA]" : "text-[#141414]"
+                      disabled ? "text-cp-ink-4" : "text-cp-ink group-hover:text-[#141414]"
                     }`}
                   />
                 </div>
 
-                {/* Text */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#141414]">{label}</p>
-                  <p className="text-[13px] text-[#999999] mt-0.5 leading-relaxed">{description}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] font-semibold text-cp-ink">{label}</p>
+                  <p className="mt-0.5 text-[13px] leading-snug text-cp-ink-3">{description}</p>
                 </div>
 
-                {/* Arrow */}
                 {!disabled && (
                   <ChevronRight
                     size={16}
-                    className="text-[#CCCCCC] group-hover:text-[#141414] transition-colors flex-shrink-0"
+                    className="flex-shrink-0 text-cp-ink-4 transition-colors group-hover:text-cp-ink"
                   />
                 )}
               </div>
             );
 
             return disabled ? (
-              <div key={key}>{inner}</div>
+              <div key={label}>{inner}</div>
             ) : (
-              <Link key={key} href={href} className="block">
+              <Link key={label} href={href} className="block">
                 {inner}
               </Link>
             );
           })}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

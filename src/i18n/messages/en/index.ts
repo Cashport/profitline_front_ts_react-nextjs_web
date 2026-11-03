@@ -4,6 +4,7 @@ import common from "./common.json";
 import shell from "./shell.json";
 import auth from "./auth.json";
 import components from "./components.json";
+import platform from "./platform.json";
 import meta from "./meta.json";
 import shared from "./shared.json";
 import modals from "./modals.json";
@@ -44,6 +45,7 @@ const messages: Messages = {
   shell,
   auth,
   components,
+  platform,
   meta,
   shared,
   modals,

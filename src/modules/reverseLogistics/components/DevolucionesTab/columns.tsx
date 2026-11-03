@@ -2,35 +2,37 @@
 
 import type { ColumnsType } from "antd/es/table";
 import { Eye, FileText } from "lucide-react";
-import { useTranslations } from "use-intl";
 import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { CausalBadge } from "../CausalBadge/CausalBadge";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 import Link from "next/link";
 
-// Per-row action buttons. `record.idDevolucion` doubles as the approval id —
-// both endpoints surface the same GUID under different names.
+// Estado "Finalizado" de Pharma360 (logistica.Estados). Solo las finalizadas
+// tienen acta, y el detalle (ConsultarDevolucionesPdf) falla para el resto.
+const ESTADO_FINALIZADO = "7664364A-7228-4C88-87EC-676CAD88871D";
+
+// Per-row action buttons. `record.idDevolucion` is the GUID the devolución
+// detail (/logistica-inversa/devoluciones/:id) is loaded with.
 function ActionsCell({ record }: { record: ReturnRow }) {
-  const t = useTranslations("reverseLogistics.returns");
-  const tCommon = useTranslations("common");
+  const finalizada = record.IdEstado?.toUpperCase() === ESTADO_FINALIZADO;
   return (
     <div className="flex items-center gap-1">
       {record.pdfUrl ? (
         <button
           type="button"
           onClick={() => record.pdfUrl && window.open(record.pdfUrl, "_blank")}
-          aria-label={t("viewPdf")}
+          aria-label="Ver PDF"
           className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-red-400 hover:border-red-400 hover:text-red-600 transition-colors"
         >
           <FileText className="h-3.5 w-3.5" />
         </button>
       ) : null}
-      {record.haveApprove && record.idDevolucion ? (
+      {record.idDevolucion && finalizada ? (
         <Link
-          href={`/reverse-logistics/approvals/${record.idDevolucion}`}
+          href={`/reverse-logistics/returns/${record.idDevolucion}`}
           type="button"
-          aria-label={tCommon("actions.viewDetail")}
+          aria-label="Ver detalle"
           className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#1a3a6b] hover:text-[#1a3a6b] transition-colors"
         >
           <Eye className="h-3.5 w-3.5" />
@@ -42,24 +44,22 @@ function ActionsCell({ record }: { record: ReturnRow }) {
 
 // AntD columns for the Devoluciones table. The table is fed tree data (client groups
 // with `children`), so each render handles both the group (aggregated) and leaf rows.
-export const getReturnsColumns = (
-  t: ReturnType<typeof useTranslations<"reverseLogistics.returns">>
-): ColumnsType<ReturnRow> => [
+export const returnsColumns: ColumnsType<ReturnRow> = [
   {
-    title: t("columns.id"),
+    title: "Id",
     dataIndex: "idBoleto",
     width: 160,
     render: (_: unknown, record) =>
       record.isGroup ? (
         <span className="text-[13px] text-gray-400 font-normal whitespace-nowrap">
-          {t("groupCount", { count: record.devCount })}
+          {record.devCount} devs.
         </span>
       ) : (
         <span className="text-gray-900 text-sm whitespace-nowrap">{record.idBoleto}</span>
       )
   },
   {
-    title: t("columns.date"),
+    title: "Fecha",
     dataIndex: "fecha",
     width: 100,
     render: (_: unknown, record) => {
@@ -73,7 +73,7 @@ export const getReturnsColumns = (
     }
   },
   {
-    title: t("columns.customer"),
+    title: "Cliente",
     dataIndex: "cliente",
     sorter: (a, b) => a.cliente.localeCompare(b.cliente),
     render: (_: unknown, record) => {
@@ -96,7 +96,7 @@ export const getReturnsColumns = (
     }
   },
   {
-    title: t("columns.channelLine"),
+    title: "Canal / Línea",
     dataIndex: "canal",
     width: 110,
     render: (_: unknown, record) => (
@@ -107,7 +107,7 @@ export const getReturnsColumns = (
     )
   },
   {
-    title: t("columns.reason"),
+    title: "Causal",
     dataIndex: "causales",
     width: 180,
     // Group rows carry the distinct causales of their children, so both group
@@ -121,7 +121,7 @@ export const getReturnsColumns = (
     )
   },
   {
-    title: t("columns.status"),
+    title: "Estado",
     dataIndex: "estado",
     width: 150,
     render: (_: unknown, record) => {
@@ -142,7 +142,7 @@ export const getReturnsColumns = (
     }
   },
   {
-    title: t("columns.units"),
+    title: "Unid.",
     dataIndex: "unidades",
     width: 90,
     align: "right",
@@ -152,7 +152,7 @@ export const getReturnsColumns = (
     )
   },
   {
-    title: t("columns.amount"),
+    title: "Monto",
     dataIndex: "monto",
     width: 130,
     align: "right",

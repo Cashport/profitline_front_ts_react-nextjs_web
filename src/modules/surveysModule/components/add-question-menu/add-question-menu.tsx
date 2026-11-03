@@ -37,14 +37,14 @@ export default function AddQuestionMenu({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-sm font-semibold text-foreground transition-colors hover:border-[#9bb514]"
+        className="flex h-12 items-center justify-center gap-2 rounded-[var(--card-radius)] border-2 border-dashed border-border text-sm font-semibold text-foreground transition-colors hover:border-[#9bb514]"
       >
         <Plus className="h-4 w-4" />
         {t("button")}
       </button>
 
       {open && (
-        <div className="rounded-xl bg-card p-3 shadow-sm">
+        <div className="cp-card px-[18px] py-[14px]">
           <p className="mb-2 text-[13px] text-muted-foreground">
             {selectedNumber ? t("addBelow", { number: selectedNumber }) : t("addAtEnd")}
           </p>

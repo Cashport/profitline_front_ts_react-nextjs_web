@@ -2,31 +2,28 @@
 
 import Link from "next/link";
 import { ChevronRight, Store } from "lucide-react";
-import { useTranslations } from "use-intl";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { useAppStore } from "@/lib/store/store";
-import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
+import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 
 import { BLOCKING_ALERTS_PATH, STATUS_META } from "../../constants";
-import { byUrgency, statusLabel } from "../../utils/blocking-alerts";
-
-const TOP = 3;
+import { plural } from "../../utils/blocking-alerts";
 
 /** Puntos de venta del cliente por estado, los más urgentes y el acceso a todos. */
-export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDetail }) {
-  const t = useTranslations("blockingAlerts");
-  const tp = useTranslations("blockingAlerts.pointsOfSaleCard");
+export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDetail }) {
   const formatMoney = useAppStore((s) => s.formatMoney);
-  const pos = detail.points_of_sale_count;
+  const pos = detail.pointsOfSale;
   if (!pos) return null;
 
-  const allHref = `${BLOCKING_ALERTS_PATH}/${detail.client_id}/points-of-sale`;
-  const atRisk = detail.points_of_sale.filter((s) => s.status !== "ok").sort(byUrgency);
+  const clientHref = `${BLOCKING_ALERTS_PATH}/${detail.client.clientUuid}`;
+  const allHref = `${clientHref}/points-of-sale`;
+  // Los más urgentes ya vienen ordenados del API.
+  const atRisk = pos.top;
   const legend = [
-    { key: "blocked", n: pos.blocked, label: tp("blocked", { count: pos.blocked }) },
-    { key: "warning", n: pos.warning, label: t("status.warning") },
-    { key: "ok", n: pos.total - pos.blocked - pos.warning, label: t("status.ok") }
+    { key: "blocked", n: pos.blocked, label: pos.blocked === 1 ? "Bloqueado" : "Bloqueados" },
+    { key: "to_be_blocked", n: pos.to_be_blocked, label: "Por bloquear" },
+    { key: "up_to_date", n: pos.total - pos.blocked - pos.to_be_blocked, label: "Al día" }
   ] as const;
 
   return (
@@ -35,14 +32,14 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
         <span className="flex min-w-0 items-center gap-2">
           <Store className="h-4 w-4 shrink-0 text-cp-ink-3" />
           <span className="truncate text-[15px] font-semibold text-cp-ink">
-            {t("count.pointsOfSale", { count: pos.total })}
+            {plural(pos.total, "punto de venta", "puntos de venta")}
           </span>
         </span>
         <Link
           href={allHref}
           className="flex shrink-0 items-center gap-0.5 text-[13px] font-semibold text-cp-blue hover:underline"
         >
-          {tp("viewAll")}
+          Ver todos
           <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -67,28 +64,31 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
 
       {atRisk.length === 0 ? (
         <p className="m-0 border-t border-cp-line pt-2.5 text-[13px] text-cp-ink-3">
-          {tp("allCurrent")}
+          Todos sus puntos de venta están al día.
         </p>
       ) : (
         <div className="flex flex-col">
-          {atRisk.slice(0, TOP).map((s) => {
+          {atRisk.map((s) => {
             const meta = STATUS_META[s.status];
             return (
               <Link
-                key={s.ship_to_code}
-                href={`${allHref}/${s.ship_to_code}`}
+                key={s.code ?? s.clientId}
+                href={s.code ? `${allHref}/${s.code}` : clientHref}
                 className="flex items-center gap-2.5 border-t border-cp-line py-2 text-cp-ink hover:bg-cp-subtle"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] font-semibold">
-                    {s.name} <span className="font-normal text-cp-ink-4">· {s.ship_to_code}</span>
+                    {s.name}{" "}
+                    {s.code && (
+                      <span className="font-normal text-cp-ink-4">· Ship-to {s.code}</span>
+                    )}
                   </span>
                   <span
                     className="flex items-center gap-1 text-[13px] font-medium"
                     style={{ color: meta.color }}
                   >
                     <meta.Icon className="h-3 w-3 shrink-0" strokeWidth={2.6} />
-                    {statusLabel(s)}
+                    {s.statusLabel}
                   </span>
                 </span>
                 <span className="shrink-0 text-right">
@@ -96,9 +96,9 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
                     className="block text-[13px] font-semibold tabular-nums"
                     style={{ color: meta.color }}
                   >
-                    {formatMoney(s.past_due, { hideDecimals: true })}
+                    {formatMoney(s.amount, { hideDecimals: true })}
                   </span>
-                  <span className="block text-[13px] text-cp-ink-4">{tp("pastDue")}</span>
+                  <span className="block text-[13px] text-cp-ink-4">pago vencido</span>
                 </span>
               </Link>
             );
@@ -110,7 +110,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
         href={allHref}
         className="flex h-9 items-center justify-center rounded-[10px] border border-cp-line-2 text-[13px] font-semibold text-cp-ink hover:border-cp-ink"
       >
-        {tp("viewAllCount", { items: t("count.pointsOfSale", { count: pos.total }) })}
+        Ver los {plural(pos.total, "punto de venta", "puntos de venta")}
       </Link>
     </section>
   );

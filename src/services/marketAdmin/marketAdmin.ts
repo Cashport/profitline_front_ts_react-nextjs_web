@@ -16,6 +16,10 @@ import {
   IMarketAdminVendorLine,
   IProductInventoryItem,
   IProfitLoader,
+  ILoadAnalysis,
+  ILoadAnalysisMeasureKey,
+  IProfitLoaderUploadResult,
+  IProfitLoaderBatchDetail,
   IProfitLoaderTimelineResponse,
   IPromotionDetail,
   IPromotionListItem,
@@ -396,7 +400,7 @@ export const uploadProfitLoaderFile = async (id: number, file: File, useAsTempla
       formData.append("use_as_template", String(useAsTemplate));
     }
 
-    const response: GenericResponse<unknown> = await API.post(
+    const response: GenericResponse<IProfitLoaderUploadResult> = await API.post(
       `/profit-loader/etl/${id}/upload`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
@@ -424,6 +428,65 @@ export const saveLoaderValidations = async (
   const response: GenericResponse<ILoaderValidations> = await API.put(
     `/profit-loader/etl/${id}/validations`,
     { config }
+  );
+  return response.data;
+};
+
+// GET /profit-loader/etl/:loaderId/batches/:batchId/timeline — errores y ejecuciones de un cargue
+export const getProfitLoaderBatchDetail = async (loaderId: number, batchId: number) => {
+  const response: GenericResponse<IProfitLoaderBatchDetail> = await API.get(
+    `/profit-loader/etl/${loaderId}/batches/${batchId}/timeline`
+  );
+  return response.data;
+};
+
+// GET /profit-loader/etl/:id/analyses/:analysisId — estado de la validación de cargue
+export const getLoadAnalysis = async (loaderId: number, analysisId: number) => {
+  const response: GenericResponse<ILoadAnalysis> = await API.get(
+    `/profit-loader/etl/${loaderId}/analyses/${analysisId}`
+  );
+  return response.data;
+};
+
+// PUT /profit-loader/etl/:id/analyses/:analysisId/justifications/:measureKey
+export const saveLoadAnalysisJustification = async (
+  loaderId: number,
+  analysisId: number,
+  measureKey: ILoadAnalysisMeasureKey,
+  justification: string
+) => {
+  const response: GenericResponse<ILoadAnalysis> = await API.put(
+    `/profit-loader/etl/${loaderId}/analyses/${analysisId}/justifications/${measureKey}`,
+    { justification }
+  );
+  return response.data;
+};
+
+// POST /profit-loader/etl/:id/analyses/:analysisId/confirm
+export const confirmLoadAnalysis = async (loaderId: number, analysisId: number) => {
+  const response: GenericResponse<ILoadAnalysis> = await API.post(
+    `/profit-loader/etl/${loaderId}/analyses/${analysisId}/confirm`
+  );
+  return response.data;
+};
+
+// POST /profit-loader/etl/:id/analyses/:analysisId/force — carga pese a las alertas críticas
+export const forceLoadAnalysis = async (
+  loaderId: number,
+  analysisId: number,
+  justification: string
+) => {
+  const response: GenericResponse<ILoadAnalysis> = await API.post(
+    `/profit-loader/etl/${loaderId}/analyses/${analysisId}/force`,
+    { justification }
+  );
+  return response.data;
+};
+
+// POST /profit-loader/etl/:id/analyses/:analysisId/cancel
+export const cancelLoadAnalysis = async (loaderId: number, analysisId: number) => {
+  const response: GenericResponse<ILoadAnalysis> = await API.post(
+    `/profit-loader/etl/${loaderId}/analyses/${analysisId}/cancel`
   );
   return response.data;
 };

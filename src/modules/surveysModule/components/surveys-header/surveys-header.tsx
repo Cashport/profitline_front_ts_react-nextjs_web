@@ -1,12 +1,12 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
 import type { IVisitFormsFilters } from "@/types/surveys/ISurveys";
 
+import ActionButton from "../shared/action-button";
 import SurveysFilterModal from "../surveys-filter-modal/surveys-filter-modal";
 
 interface SurveysHeaderProps {
@@ -26,26 +26,16 @@ export default function SurveysHeader({
   onFiltersChange,
   onCreate
 }: SurveysHeaderProps) {
-  const t = useTranslations("surveys.header");
   return (
     <Header
-      title={t("title")}
+      title="Encuestas"
       actionsExtra={
         <>
-          <button
-            type="button"
-            onClick={onCreate}
-            className="flex h-[var(--control-h)] shrink-0 items-center gap-2 rounded-lg bg-primary px-4 text-[14px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            <Plus className="h-[18px] w-[18px]" />
-            {t("newSurvey")}
-          </button>
+          <ActionButton variant="primary" icon={<Plus />} onClick={onCreate}>
+            Nueva encuesta
+          </ActionButton>
           <SurveysFilterModal inHeader value={filters} onChange={onFiltersChange} />
-          <HeaderSearch
-            value={search}
-            onChange={onSearchChange}
-            placeholder={t("searchPlaceholder")}
-          />
+          <HeaderSearch value={search} onChange={onSearchChange} placeholder="Buscar encuesta" />
         </>
       }
     />
