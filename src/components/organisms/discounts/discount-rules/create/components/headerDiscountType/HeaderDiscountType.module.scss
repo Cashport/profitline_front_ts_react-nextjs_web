@@ -2,12 +2,13 @@
 
 .HeaderContainer {
     width: 100%;
-    margin: 0 0 32px 0;
-    background-color: $white;
-    padding: 2rem;
-    padding-left: 2.5rem;
-    border-radius: 1rem;
-    border: 1px solid $dark-gray;
+    margin: 0;
+    // Tarjeta (docs/DESIGN.md §3): blanca, radio 14, sin borde ni sombra.
+    background-color: rgb(var(--cp-surface));
+    padding: var(--card-pad);
+    border-radius: var(--card-radius);
+    border: 0;
+    box-shadow: none;
 
     .buttonContainer {
         display: flex;
@@ -21,7 +22,7 @@
             padding: 3rem 5rem;
             flex-direction: column;
             min-width: 100px; // Tamaño mínimo
-            max-width: 100%;  // Tamaño máximo para ser responsivo
+            max-width: 100%; // Tamaño máximo para ser responsivo
             @media (max-width: 768px) {
                 width: 230px;
             }

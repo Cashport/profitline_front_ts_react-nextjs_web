@@ -135,11 +135,6 @@ export function FilterAprobacionesTab({
       categories={categories}
       value={selection}
       isLoading={isLoading}
-      trigger={{
-        className:
-          "h-12 flex items-center gap-2 border border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent px-4 rounded-md",
-        showChevron: true
-      }}
       formatTagValue={(cat, items) =>
         items.length === 1 ? items[0].name : `${items.length} ${TAG_PLURALS[cat.key] ?? ""}`.trim()
       }

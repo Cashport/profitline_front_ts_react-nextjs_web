@@ -10,7 +10,7 @@ export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
     return (
       <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden">
         <div className="bg-[#075E54] px-4 py-3">
-          <p className="text-xs text-white/80 font-medium">Vista previa de WhatsApp</p>
+          <p className="text-[13px] text-white/80 font-medium">Vista previa de WhatsApp</p>
         </div>
         <div className="flex items-center justify-center p-8 bg-[#ECE5DD]">
           <p className="text-sm text-gray-500 text-center">
@@ -30,7 +30,7 @@ export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
   return (
     <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden">
       <div className="bg-[#075E54] px-4 py-3">
-        <p className="text-xs text-white/80 font-medium">Vista previa de WhatsApp</p>
+        <p className="text-[13px] text-white/80 font-medium">Vista previa de WhatsApp</p>
       </div>
       <div className="p-4 bg-[#ECE5DD]">
         <div className="max-w-[280px] bg-white rounded-lg p-3 shadow-sm">
@@ -42,13 +42,13 @@ export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
               {template.attachments.map((att) => (
                 <div key={att.name} className="flex items-center gap-2">
                   <Paperclip className="w-3 h-3 text-gray-400" />
-                  <p className="text-xs text-blue-600 underline">{att.name}</p>
-                  <span className="text-[9px] text-gray-400">{att.type}</span>
+                  <p className="text-[13px] text-blue-600 underline">{att.name}</p>
+                  <span className="text-[13px] text-gray-400">{att.type}</span>
                 </div>
               ))}
             </div>
           )}
-          <p className="text-[10px] text-gray-400 text-right mt-2">10:30 a.m.</p>
+          <p className="text-[13px] text-gray-400 text-right mt-2">10:30 a.m.</p>
         </div>
       </div>
     </div>

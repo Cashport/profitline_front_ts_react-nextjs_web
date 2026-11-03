@@ -42,7 +42,7 @@ interface DetailRowProps {
 function DetailRow({ label, value }: DetailRowProps) {
   return (
     <div>
-      <p className="text-xs font-medium" style={{ color: BOT_MUTED_TEXT_COLOR }}>
+      <p className="text-[13px] font-medium" style={{ color: BOT_MUTED_TEXT_COLOR }}>
         {label}
       </p>
       <p className="mt-0.5 whitespace-pre-wrap break-words text-sm" style={{ color: "#141414" }}>
@@ -93,7 +93,7 @@ export function BotHistoryDrawer({
     history,
     isLoading: isHistoryLoading,
     error: historyError
-  } = useBotHistory(isOpen ? (bot?.schedule_id ?? null) : null);
+  } = useBotHistory(isOpen ? bot?.schedule_id ?? null : null);
 
   // Reutiliza el mismo endpoint de la ficha de cliente solo para ubicar (por
   // tipo_archivo) la ingesta ya configurada de este bot y poder abrir "Ver ingesta".
@@ -159,7 +159,7 @@ export function BotHistoryDrawer({
       >
         <div className="mb-4 rounded-lg p-3" style={{ backgroundColor: "#F7F7F7" }}>
           <p
-            className="mb-1 text-xs font-semibold uppercase tracking-wide"
+            className="mb-1 text-[13px] font-semibold"
             style={{ color: BOT_MUTED_TEXT_COLOR }}
           >
             ¿Qué hace este bot?
@@ -172,7 +172,7 @@ export function BotHistoryDrawer({
         <div className="mb-4 grid grid-cols-2 gap-2.5">
           <div>
             <p
-              className="text-xs font-semibold uppercase tracking-wide"
+              className="text-[13px] font-semibold"
               style={{ color: BOT_MUTED_TEXT_COLOR }}
             >
               Última ejecución
@@ -183,7 +183,7 @@ export function BotHistoryDrawer({
           </div>
           <div>
             <p
-              className="text-xs font-semibold uppercase tracking-wide"
+              className="text-[13px] font-semibold"
               style={{ color: BOT_MUTED_TEXT_COLOR }}
             >
               Próxima
@@ -200,14 +200,20 @@ export function BotHistoryDrawer({
             className="flex-1"
             disabled={!matchingIntake}
             title={
-              matchingIntake ? undefined : "No se encontró una ingesta configurada para este tipo de archivo"
+              matchingIntake
+                ? undefined
+                : "No se encontró una ingesta configurada para este tipo de archivo"
             }
             onClick={() => setIsIntakeModalOpen(true)}
           >
             Ver ingesta
           </Button>
           <Button disabled={!canRun} onClick={() => onRun(bot)} className="flex-1">
-            {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+            {isRunning ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
             Ejecutar ahora
           </Button>
         </div>
@@ -225,7 +231,10 @@ export function BotHistoryDrawer({
         {hasExtraDiagnostics && (
           <div className="mb-6 rounded-lg border p-3" style={{ borderColor: "#DDDDDD" }}>
             <div className="mb-2.5 flex items-center gap-2">
-              <AlertTriangle className="h-3.5 w-3.5" style={{ color: BOT_STATUS_META.FALLIDO.color }} />
+              <AlertTriangle
+                className="h-3.5 w-3.5"
+                style={{ color: BOT_STATUS_META.FALLIDO.color }}
+              />
               <span className="text-sm font-medium text-cashport-black">Diagnóstico</span>
             </div>
             <div className="space-y-3">
@@ -233,8 +242,12 @@ export function BotHistoryDrawer({
               {bot.codigo_error && <DetailRow label="Código de error" value={bot.codigo_error} />}
               {bot.diagnostico && <DetailRow label="Diagnóstico" value={bot.diagnostico} />}
               {bot.paso_fallido && <DetailRow label="Paso fallido" value={bot.paso_fallido} />}
-              {bot.accion_requerida && <DetailRow label="Acción requerida" value={bot.accion_requerida} />}
-              {bot.detalle_tecnico && <DetailRow label="Detalle técnico" value={bot.detalle_tecnico} />}
+              {bot.accion_requerida && (
+                <DetailRow label="Acción requerida" value={bot.accion_requerida} />
+              )}
+              {bot.detalle_tecnico && (
+                <DetailRow label="Detalle técnico" value={bot.detalle_tecnico} />
+              )}
             </div>
           </div>
         )}
@@ -289,9 +302,12 @@ export function BotHistoryDrawer({
                         {formatTimestamp(run.fecha_inicio, "Sin fecha")}
                       </p>
                       <p
-                        className="mt-0.5 text-xs"
+                        className="mt-0.5 text-[13px]"
                         style={{
-                          color: run.estado === "FALLIDO" ? BOT_STATUS_META.FALLIDO.color : BOT_MUTED_TEXT_COLOR
+                          color:
+                            run.estado === "FALLIDO"
+                              ? BOT_STATUS_META.FALLIDO.color
+                              : BOT_MUTED_TEXT_COLOR
                         }}
                       >
                         {outcomeLabel}
@@ -304,11 +320,14 @@ export function BotHistoryDrawer({
                         title="Ver evidencia"
                         className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-gray-100"
                       >
-                        <ImageIcon className="h-3.5 w-3.5" style={{ color: BOT_MUTED_TEXT_COLOR }} />
+                        <ImageIcon
+                          className="h-3.5 w-3.5"
+                          style={{ color: BOT_MUTED_TEXT_COLOR }}
+                        />
                       </button>
                       <Badge
                         variant="secondary"
-                        className="gap-1 text-xs"
+                        className="gap-1 text-[13px]"
                         style={{ backgroundColor: runMeta.bg, color: runMeta.color }}
                       >
                         {runMeta.label}
@@ -344,5 +363,3 @@ export function BotHistoryDrawer({
     </>
   );
 }
-
-

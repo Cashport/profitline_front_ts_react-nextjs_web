@@ -1,10 +1,26 @@
 @import "@/styles/variables.scss";
 
 .banksRules {
+    .ctaWrapper {
+        margin-left: auto;
+        height: var(--control-h);
+    }
+
     .tableHeaderButtons {
         margin-top: 0.5rem;
         display: flex;
         height: 48px;
+        align-items: center;
         gap: 0.5rem;
+
+        // Filtrar al alto del buscador (--control-h), no al 100% de la fila.
+        :global(.filterCascader) {
+            height: var(--control-h) !important;
+
+            :global(.ant-select-selector) {
+                height: var(--control-h) !important;
+                min-height: var(--control-h) !important;
+            }
+        }
     }
 }

@@ -48,22 +48,22 @@ function ReadStatus({ mine, status }: { mine: boolean; status: string }) {
 
   const iconMap: Record<string, React.ReactNode> = {
     DELIVERED: (
-      <div className="text-[10px] text-muted-foreground">
+      <div className="text-[13px] text-muted-foreground">
         <Checks size={14} />
       </div>
     ),
     PENDING: (
-      <div className="text-[10px] text-muted-foreground">
+      <div className="text-[13px] text-muted-foreground">
         <Clock size={14} color="#9c9c9c" />
       </div>
     ),
     SENT: (
-      <div className="text-[10px] text-muted-foreground">
+      <div className="text-[13px] text-muted-foreground">
         <Check size={14} />
       </div>
     ),
     READ: (
-      <div className="text-[10px] text-green-500">
+      <div className="text-[13px] text-green-500">
         <Checks size={14} />
       </div>
     ),
@@ -97,7 +97,7 @@ function Footer({
   return (
     <div className="flex items-center justify-end gap-1 mt-1">
       {mine && <AuthorIcon authorType={authorType} />}
-      <div className="text-[11px] text-[#9c9c9c]">{formatTime(timestamp)}</div>
+      <div className="text-[13px] text-[#9c9c9c]">{formatTime(timestamp)}</div>
       <ReadStatus mine={mine} status={status} />
     </div>
   );
@@ -122,7 +122,7 @@ function BubbleWrapper({
     <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
       <div className="min-w-0 max-w-[80%] md:max-w-[70%]">
         {!mine && customerName && (
-          <div className="text-xs font-semibold text-[#141414] mb-2">{customerName}</div>
+          <div className="text-[13px] font-semibold text-[#141414] mb-2">{customerName}</div>
         )}
         <div className={`rounded-2xl text-sm ${bubbleClassName ?? defaultBubble} ${padding}`}>
           {children}
@@ -154,11 +154,11 @@ export default function BubbleMessage({
 
     return (
       <BubbleWrapper mine={mine} customerName={customerName} padding="px-3 py-2">
-        <div className="text-xs opacity-80">
+        <div className="text-[13px] opacity-80">
           Reaccionó <span className="text-base align-middle">{aditionals.reaction.emoji}</span> a:
         </div>
         <div
-          className={`mt-1 border-l-2 pl-2 text-xs ${mine ? "border-white/40" : "border-black/30"} opacity-80 ${quoteIsMissing ? "italic" : ""}`}
+          className={`mt-1 border-l-2 pl-2 text-[13px] ${mine ? "border-white/40" : "border-black/30"} opacity-80 ${quoteIsMissing ? "italic" : ""}`}
         >
           «{truncated}»
         </div>
@@ -231,7 +231,7 @@ export default function BubbleMessage({
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
-            <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
+            <div className="text-[13px] text-muted-foreground">Haz clic para abrir</div>
           </div>
         </button>
         {footer}
@@ -299,7 +299,7 @@ export default function BubbleMessage({
             href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+            className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-[13px] font-semibold text-[#141414] hover:opacity-90"
           >
             Ver detalle
           </a>

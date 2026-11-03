@@ -215,7 +215,7 @@ const CreateOrderSearchClient: FC = () => {
             <button
               type="button"
               onClick={handleClickNewClient}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#141414] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:bg-[#F7F7F7] transition-colors flex-shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-[#141414] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:bg-[#F7F7F7] transition-colors flex-shrink-0"
             >
               <Plus size={12} />
               Nuevo cliente
@@ -245,7 +245,7 @@ const CreateOrderSearchClient: FC = () => {
               disabled={!selectedClient || (selectedClient.client_bu?.length ?? 0) === 0}
             />
             {selectedClient && (selectedClient.client_bu?.length ?? 0) === 0 && (
-              <p className="text-xs text-[#999999] mt-1.5">
+              <p className="text-[13px] text-[#999999] mt-1.5">
                 Este cliente no tiene canales disponibles
               </p>
             )}

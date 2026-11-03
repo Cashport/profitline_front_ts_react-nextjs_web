@@ -1,6 +1,6 @@
 "use client";
 
-import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
+import Header from "@/components/organisms/header";
 import BoardSelector from "../board-selector/board-selector";
 
 interface RecaudoHeaderProps {
@@ -13,27 +13,23 @@ interface RecaudoHeaderProps {
 }
 
 /**
- * Encabezado del módulo de recaudo: selector de tableros, corte, herramientas
- * del tablero y tema. Queda fijo al hacer scroll.
- *
- * El contenedor que hace scroll (.rightContent de ViewWrapper) tiene 1rem de
- * padding arriba y el navegador deja lo sticky debajo de ese padding: con
- * top-0 quedaba una franja por donde se veía pasar el tablero. Con -top-4 sube
- * hasta el borde del contenedor y su pt-4 tapa la franja; el -mt-4 compensa ese
- * pt-4 para que, sin scroll, quede donde estaba. Su fondo es el de la página
- * (#f7f7f7 de ViewWrapper en claro, --background en oscuro).
+ * Encabezado del módulo de recaudo con el header compartido de Cashport (docs/DESIGN.md §4):
+ * el selector de tableros como título, el corte al lado y, a la derecha, las herramientas del
+ * tablero, el tema y el avatar. Queda fijo al hacer scroll junto con los chips de filtros.
  */
 export default function RecaudoHeader({ info, tools, below }: RecaudoHeaderProps) {
   return (
-    <div className="sticky -top-4 z-20 -mt-4 flex flex-col gap-2.5 bg-[#f7f7f7] pb-0.5 pt-4 dark:bg-background">
-      <header className="flex flex-wrap items-center gap-3.5 border-b border-border pb-3">
-        <BoardSelector />
-        {info}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          {tools}
-          <WalletThemeToggle />
-        </div>
-      </header>
+    // El Header va envuelto (fijo junto con los chips), así que .cp-page no lo reconoce como hijo
+    // directo: el margen negativo anula aquí el --section-gap de la vista, igual que hace .cp-page
+    // con el Header suelto. El contenido arranca justo bajo el header, como en Clientes.
+    <div className="sticky top-0 z-20 -mb-[var(--section-gap)] flex flex-col bg-cp-bg">
+      <Header
+        title="Torre de control de recaudo"
+        titleNode={<BoardSelector />}
+        titleExtra={info}
+        actionsExtra={<>{tools}</>}
+        className="!static"
+      />
       {below}
     </div>
   );

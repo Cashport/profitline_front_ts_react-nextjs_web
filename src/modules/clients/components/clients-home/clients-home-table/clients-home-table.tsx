@@ -1,16 +1,21 @@
 "use client";
 
+import SearchField from "@/components/ui/search-field/search-field";
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Spin } from "antd";
+import { Spin, message } from "antd";
+import { DownloadSimple } from "phosphor-react";
 import { useInView } from "react-intersection-observer";
 import { useShallow } from "zustand/react/shallow";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import ProgressVsGoal from "@/components/ui/progress-vs-goal/progress-vs-goal";
 import StatusBadge from "@/components/ui/status-badge/status-badge";
+import { getAppZoom } from "@/utils/utils";
+import { downloadClientsHomeExcel } from "@/services/clientsHome/clientsHome";
 import type {
   ClientsHomeAgingBucket,
   ClientsHomeForecastStatus,
@@ -70,18 +75,32 @@ const ROW_PAD = "10px 14px";
 const detailHref = (row: IClientsHomeRow) =>
   `/clientes/detail/${row.clientUuid}/project/${row.projectId}`;
 
+type Rect = Pick<DOMRect, "left" | "right" | "top" | "bottom">;
+
+/** Rect y viewport en px CSS: getBoundingClientRect/inner* vienen en px de pantalla (zoom global). */
+const cssRect = (b: DOMRect): Rect => {
+  const z = getAppZoom();
+  return { left: b.left / z, right: b.right / z, top: b.top / z, bottom: b.bottom / z };
+};
+const viewport = () => {
+  const z = getAppZoom();
+  return { width: window.innerWidth / z, height: window.innerHeight / z };
+};
+
 /** Ubica un popover debajo del botón o, si no cabe, encima. */
-const popY = (b: DOMRect, height: number) =>
-  b.bottom + 6 + height <= window.innerHeight - 8
+const popY = (b: Rect, height: number) => {
+  const vh = viewport().height;
+  return b.bottom + 6 + height <= vh - 8
     ? b.bottom + 6
-    : Math.max(8, Math.min(b.top - height - 6, window.innerHeight - height - 8));
+    : Math.max(8, Math.min(b.top - height - 6, vh - height - 8));
+};
 
 /** Tooltip debajo de la celda o, si no cabe, encima. */
-const tipPosition = (b: DOMRect, size: { width: number; height: number }) => {
-  const W = Math.min(size.width, window.innerWidth - 16);
-  const x = Math.max(8, Math.min(b.left, window.innerWidth - W - 8));
-  const y =
-    b.bottom + 8 + size.height > window.innerHeight ? b.top - size.height - 8 : b.bottom + 8;
+const tipPosition = (b: Rect, size: { width: number; height: number }) => {
+  const vp = viewport();
+  const W = Math.min(size.width, vp.width - 16);
+  const x = Math.max(8, Math.min(b.left, vp.width - W - 8));
+  const y = b.bottom + 8 + size.height > vp.height ? b.top - size.height - 8 : b.bottom + 8;
   return { x, y: Math.max(8, y) };
 };
 
@@ -116,6 +135,7 @@ export default function ClientsHomeTable({
   const router = useRouter();
   const f = useClientsHomeFilters(
     useShallow((s) => ({
+      projectId: s.projectId,
       search: s.search,
       setSearch: s.setSearch,
       markets: s.markets,
@@ -124,6 +144,11 @@ export default function ClientsHomeTable({
       executives: s.executives,
       toggleExecutive: s.toggleExecutive,
       setExecutives: s.setExecutives,
+      coordinators: s.coordinators,
+      projectToMonthEnd: s.projectToMonthEnd,
+      dueFrom: s.dueFrom,
+      dueTo: s.dueTo,
+      aging: s.aging,
       forecastStatuses: s.forecastStatuses,
       toggleForecastStatus: s.toggleForecastStatus,
       setForecastStatuses: s.setForecastStatuses,
@@ -133,6 +158,7 @@ export default function ClientsHomeTable({
     }))
   );
 
+  const [downloading, setDownloading] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(1400);
   const [expAge, setExpAge] = useState(false);
@@ -143,6 +169,41 @@ export default function ClientsHomeTable({
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Descarga (HU) el Excel de cartera por cliente con los filtros activos.
+  // El backend aplica el alcance del usuario y devuelve el archivo en vivo.
+  const handleDownloadExcel = async () => {
+    if (!f.projectId || downloading) return;
+
+    setDownloading(true);
+    const hide = message.loading({
+      content: "Generando Excel de cartera…",
+      duration: 0
+    });
+    try {
+      const filename = await downloadClientsHomeExcel(f.projectId, {
+        projectToMonthEnd: f.projectToMonthEnd,
+        markets: f.markets,
+        executives: f.executives,
+        coordinators: f.coordinators,
+        dueFrom: f.dueFrom,
+        dueTo: f.dueTo,
+        search: f.search,
+        aging: f.aging,
+        forecastStatuses: f.forecastStatuses,
+        sortBy: f.sortBy,
+        sortDir: f.sortDir
+      });
+      message.success(`Archivo descargado: ${filename}`);
+    } catch (err) {
+      message.error(
+        err instanceof Error ? err.message : "No se pudo descargar el Excel de cartera por cliente."
+      );
+    } finally {
+      hide();
+      setDownloading(false);
+    }
+  };
 
   // Columnas según el ancho real de la tarjeta (no del viewport).
   useEffect(() => {
@@ -197,7 +258,7 @@ export default function ClientsHomeTable({
 
   const openQf = (kind: "name" | "fc", e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    const b = e.currentTarget.getBoundingClientRect();
+    const b = cssRect(e.currentTarget.getBoundingClientRect());
     setQf((cur) =>
       cur?.kind === kind
         ? null
@@ -205,7 +266,7 @@ export default function ClientsHomeTable({
             kind,
             x: Math.max(
               8,
-              Math.min(kind === "name" ? b.left - 8 : b.right - 240, window.innerWidth - 248)
+              Math.min(kind === "name" ? b.left - 8 : b.right - 240, viewport().width - 248)
             ),
             y: popY(b, 300)
           }
@@ -218,7 +279,7 @@ export default function ClientsHomeTable({
     e: React.MouseEvent<HTMLElement>
   ) => {
     const pos = tipPosition(
-      e.currentTarget.getBoundingClientRect(),
+      cssRect(e.currentTarget.getBoundingClientRect()),
       kind === "aging" ? AGING_TIP_SIZE : COLLECTION_TIP_SIZE
     );
     setTip({ kind, id: row.clientId, ...pos });
@@ -258,11 +319,11 @@ export default function ClientsHomeTable({
               href={detailHref(row)}
               title={row.clientName}
               onClick={(e) => e.stopPropagation()}
-              className="block min-w-0 truncate text-[12.5px] font-medium leading-[1.3] text-[#1677ff] hover:text-[#0b5bd3] hover:underline"
+              className="block min-w-0 truncate text-[13px] font-medium leading-[1.3] text-[#1677ff] hover:text-[#0b5bd3] hover:underline"
             >
               {row.clientName}
             </Link>
-            <span className="truncate text-[10px] leading-[1.2] text-[#9a9a9a]">
+            <span className="truncate text-[13px] leading-[1.2] text-[#9a9a9a]">
               {row.executive.name ?? "Sin ejecutivo"} · {row.market.name ?? "Sin mercado"}
             </span>
           </div>
@@ -326,7 +387,7 @@ export default function ClientsHomeTable({
           >
             <div className="flex items-baseline justify-end gap-1.5 whitespace-nowrap text-[13px] leading-[1.1] tabular-nums">
               <span className="font-semibold">{fmt(c.collected)}</span>
-              <span className="text-[11px] text-[#8a8a8a]">{pctInt(c.collectedPct)}</span>
+              <span className="text-[13px] text-[#8a8a8a]">{pctInt(c.collectedPct)}</span>
             </div>
             <ProgressVsGoal
               height={4}
@@ -384,7 +445,7 @@ export default function ClientsHomeTable({
         const v = row.aging[column.key.slice(3) as ClientsHomeAgingBucket];
         return (
           <div
-            className="whitespace-nowrap text-right text-[12.5px] tabular-nums"
+            className="whitespace-nowrap text-right text-[13px] tabular-nums"
             style={{ color: v ? "#141414" : "#b5b5b5" }}
           >
             {money(v)}
@@ -403,7 +464,7 @@ export default function ClientsHomeTable({
         return (
           <div key={column.key} className="truncate whitespace-nowrap text-[13px] font-semibold">
             Total{" "}
-            <span className="text-[11.5px] font-normal text-[#8a8a8a]">
+            <span className="text-[13px] font-normal text-[#8a8a8a]">
               · {clientsLabel(totals.clients)}
             </span>
           </div>
@@ -449,7 +510,7 @@ export default function ClientsHomeTable({
             className="flex items-baseline justify-end gap-1.5 whitespace-nowrap text-[13px] tabular-nums"
           >
             <span className="font-semibold">{fmt(c.collected)}</span>
-            <span className="text-[11px] text-[#8a8a8a]">{pctInt(c.collectedPct)}</span>
+            <span className="text-[13px] text-[#8a8a8a]">{pctInt(c.collectedPct)}</span>
           </div>
         );
       case "fc": {
@@ -466,7 +527,7 @@ export default function ClientsHomeTable({
         return <div key={column.key} />;
       default:
         return (
-          <div key={column.key} className={`${num} text-[12.5px]`}>
+          <div key={column.key} className={`${num} text-[13px]`}>
             {money(totals.aging[column.key.slice(3) as ClientsHomeAgingBucket])}
           </div>
         );
@@ -485,18 +546,7 @@ export default function ClientsHomeTable({
         style={{ justifyContent: column.justify }}
       >
         {column.label}
-        {column.sort && (
-          <span className="ml-0.5 flex flex-col gap-px">
-            <span
-              className="h-0 w-0 border-x-[3.5px] border-b-4 border-x-transparent"
-              style={{ borderBottomColor: active && f.sortDir === "asc" ? "#141414" : "#c4c4c4" }}
-            />
-            <span
-              className="h-0 w-0 border-x-[3.5px] border-t-4 border-x-transparent"
-              style={{ borderTopColor: active && f.sortDir === "desc" ? "#141414" : "#c4c4c4" }}
-            />
-          </span>
-        )}
+        {column.sort && <SortArrows dir={active ? f.sortDir : null} />}
         {column.extra === "expand" && (
           <button
             type="button"
@@ -505,7 +555,7 @@ export default function ClientsHomeTable({
               e.stopPropagation();
               setExpAge((v) => !v);
             }}
-            className="ml-1 flex h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-[5px] p-0 text-xs font-semibold leading-none text-[#141414] hover:!border-[#141414]"
+            className="ml-1 flex h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-[5px] p-0 text-[13px] font-semibold leading-none text-[#141414] hover:!border-[#141414]"
             style={{
               border: `1px solid ${showAgeCols ? "#141414" : "#d6d6d6"}`,
               background: showAgeCols ? "#f4f9d2" : "#fff"
@@ -554,14 +604,14 @@ export default function ClientsHomeTable({
       ref={cardRef}
       className="box-border flex min-h-[320px] min-w-0 flex-1 flex-col rounded-[14px] bg-white px-2.5 pb-2 pt-3"
     >
-      {/* Título, mercados y buscador */}
+      {/* Título con ayuda, mercados debajo y, a la derecha, el buscador con el contador. */}
       <div className="flex flex-none flex-wrap items-start justify-between gap-x-4 gap-y-2.5 px-1.5 pb-3 pt-2">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1.5">
           <div className="flex min-w-0 flex-nowrap items-baseline gap-x-2.5 gap-y-1 leading-[1.35]">
-            <span className="whitespace-nowrap text-[15px] font-semibold text-[#141414]">
+            <span className="whitespace-nowrap text-[15px] font-semibold text-cp-ink">
               Cartera por cliente
             </span>
-            <span className="min-w-0 flex-[1_1_0] truncate text-[11.5px] leading-[1.35] text-[#8a8a8a]">
+            <span className="min-w-0 flex-[1_1_0] truncate text-[13px] leading-[1.35] text-cp-ink-4">
               {mkHint}
             </span>
           </div>
@@ -573,11 +623,11 @@ export default function ClientsHomeTable({
                   key={m.key}
                   type="button"
                   onClick={() => f.toggleMarket(m.key)}
-                  className="-ml-[7px] flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[7px] px-[7px] text-[12.5px] font-medium hover:!text-[#141414]"
+                  className="-ml-[7px] flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[7px] px-[7px] text-[13px] font-medium hover:!text-cp-ink"
                   style={{
                     border: `1px solid ${on ? "#cbe71e" : "transparent"}`,
-                    background: on ? "#f4f9d2" : "transparent",
-                    color: on ? "#141414" : anyMarket ? "#a8a8a8" : "#6b6b6b"
+                    background: on ? "#f7f7f7" : "transparent",
+                    color: on ? "#141414" : anyMarket ? "#a8a8a8" : "#4a4a4a"
                   }}
                 >
                   <span
@@ -592,7 +642,7 @@ export default function ClientsHomeTable({
               <button
                 type="button"
                 onClick={() => f.setMarkets([])}
-                className="cursor-pointer whitespace-nowrap border-0 bg-transparent px-1 text-xs font-semibold text-[#141414] hover:underline"
+                className="cursor-pointer whitespace-nowrap border-0 bg-transparent px-1 text-[13px] font-semibold text-cp-ink hover:underline"
               >
                 Quitar filtro
               </button>
@@ -600,28 +650,27 @@ export default function ClientsHomeTable({
           </div>
         </div>
         <div className="flex min-w-[200px] flex-[0_1_340px] flex-col items-end gap-1.5">
-          <div className="box-border flex h-10 w-full items-center gap-2.5 rounded-lg bg-[#f7f7f7] px-3.5">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#141414"
-              strokeWidth="2"
-              strokeLinecap="round"
+          <div className="flex w-full items-center gap-1.5">
+            <div className="min-w-0 flex-1">
+              <SearchField
+                value={f.search}
+                onChange={f.setSearch}
+                placeholder="Buscar cliente, NIT, ejecutivo"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleDownloadExcel}
+              disabled={downloading || !f.projectId}
+              title="Descargar Excel"
+              aria-label="Descargar cartera por cliente en Excel"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-            <input
-              value={f.search}
-              onChange={(e) => f.setSearch(e.target.value)}
-              placeholder="Buscar cliente, NIT, ejecutivo"
-              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] font-medium text-[#141414] outline-none placeholder:text-[#9a9a9a]"
-            />
+              <DownloadSimple size={15} className={downloading ? "animate-pulse" : undefined} />
+            </button>
           </div>
-          <span className="whitespace-nowrap text-[11.5px] text-[#8a8a8a]">
-            {meta ? clientsLabel(total) : " "}
+          <span className="whitespace-nowrap text-[13px] text-cp-ink-4">
+            {meta ? clientsLabel(total) : " "}
           </span>
         </div>
       </div>
@@ -812,13 +861,11 @@ const QuickFilterPopover = ({
   <>
     <div onClick={onClose} className="fixed inset-0 z-[70] cursor-default" />
     <div
-      className="fixed z-[71] box-border flex max-h-[min(420px,calc(100vh-140px))] w-60 cursor-default flex-col gap-0.5 overflow-y-auto rounded-xl border border-[#ececec] bg-white p-1.5 font-normal shadow-[0_12px_32px_rgba(0,0,0,.16)]"
+      className="fixed z-[71] box-border flex max-h-[min(420px,calc(100*var(--vh)-140px))] w-60 cursor-default flex-col gap-0.5 overflow-y-auto rounded-xl border border-[#ececec] bg-white p-1.5 font-normal shadow-[0_12px_32px_rgba(0,0,0,.16)]"
       style={{ left: x, top: y }}
     >
       <div className="flex flex-col gap-0.5">
-        <div className="px-2.5 pb-1 pt-2 text-[10.5px] font-semibold uppercase tracking-[.4px] text-[#8a8a8a]">
-          {title}
-        </div>
+        <div className="px-2.5 pb-1 pt-2 text-[13px] font-semibold text-[#8a8a8a]">{title}</div>
         {options.map((o) => (
           <div
             key={o.key}
@@ -838,7 +885,7 @@ const QuickFilterPopover = ({
               <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: o.dot }} />
             )}
             <span className="flex-1 truncate">{o.label}</span>
-            <span className="text-[11.5px] tabular-nums text-[#8a8a8a]">{o.n}</span>
+            <span className="text-[13px] tabular-nums text-[#8a8a8a]">{o.n}</span>
           </div>
         ))}
       </div>
@@ -846,7 +893,7 @@ const QuickFilterPopover = ({
       <button
         type="button"
         onClick={onClear}
-        className="h-8 cursor-pointer rounded-lg border-0 bg-transparent px-2.5 text-left text-[12.5px] font-semibold text-[#4a4a4a] hover:bg-[#f7f7f7]"
+        className="h-8 cursor-pointer rounded-lg border-0 bg-transparent px-2.5 text-left text-[13px] font-semibold text-[#4a4a4a] hover:bg-[#f7f7f7]"
       >
         Limpiar
       </button>
@@ -893,7 +940,7 @@ const CardList = ({
             key={key}
             type="button"
             onClick={() => sortByColumn(key)}
-            className="flex h-7 cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg bg-white px-2.5 text-xs font-semibold text-[#141414]"
+            className="flex h-7 cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg bg-white px-2.5 text-[13px] font-semibold text-[#141414]"
             style={{ border: `1px solid ${sortBy === key ? "#141414" : "#e3e3e3"}` }}
           >
             {label}
@@ -917,7 +964,7 @@ const CardList = ({
                 <span className="min-w-0 truncate text-[13px] font-medium text-[#1677ff]">
                   {row.clientName}
                 </span>
-                <span className="truncate text-[10px] text-[#9a9a9a]">
+                <span className="truncate text-[13px] text-[#9a9a9a]">
                   {row.executive.name ?? "Sin ejecutivo"} · {row.market.name ?? "Sin mercado"}
                 </span>
               </div>
@@ -926,11 +973,11 @@ const CardList = ({
               </span>
             </div>
             {portfolioBar(row, 5)}
-            <div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5 text-xs tabular-nums">
+            <div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5 text-[13px] tabular-nums">
               <span className="flex items-center gap-1.5 whitespace-nowrap text-[#6b6b6b]">
                 Vencida
                 <span
-                  className="rounded-md px-1.5 py-px text-[11px] font-semibold"
+                  className="rounded-md px-1.5 py-px text-[13px] font-semibold"
                   style={{ background: pill.bg, color: pill.color }}
                 >
                   {pct1(row.pastDuePct)}

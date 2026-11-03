@@ -23,9 +23,9 @@ export default function DiscountsToolbar({ onCrearNuevo, children }: DiscountsTo
       <div className="flex-1" />
       <button
         onClick={onCrearNuevo}
-        className="flex items-center gap-1.5 px-4 py-2 bg-[#CBE71E] text-[#141414] rounded-lg text-sm font-semibold hover:bg-[#b8d11a] transition-colors"
+        className="flex items-center gap-1.5 px-4 h-[var(--control-h)] bg-[#CBE71E] text-[#141414] rounded-lg text-sm font-semibold hover:bg-[#b8d11a] transition-colors"
       >
-        <Plus size={14} /> Crear nuevo
+        <Plus size={18} /> Crear nuevo
       </button>
     </div>
   );

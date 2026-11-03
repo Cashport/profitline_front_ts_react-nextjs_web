@@ -29,8 +29,8 @@ const Row = ({
   chip?: React.ReactNode;
 }) => (
   <div className="grid grid-cols-[max-content_minmax(0,1fr)_34px] items-center gap-x-[7px]">
-    <dt className="whitespace-nowrap text-[11.5px] text-muted-foreground">{label}</dt>
-    <dd className="m-0 truncate text-[12.5px] font-semibold leading-tight text-foreground">
+    <dt className="whitespace-nowrap text-[13px] text-muted-foreground">{label}</dt>
+    <dd className="m-0 truncate text-[13px] font-semibold leading-tight text-foreground">
       {value}
     </dd>
     <span className="flex items-center justify-end">{chip}</span>
@@ -110,7 +110,7 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
       )}
 
       {!nov && (
-        <p className="mt-2.5 text-[11.5px] leading-relaxed text-muted-foreground">
+        <p className="mt-2.5 text-[13px] leading-relaxed text-muted-foreground">
           {estadoMeta(detail.tipo).corta}.
         </p>
       )}

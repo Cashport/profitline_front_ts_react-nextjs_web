@@ -66,7 +66,7 @@ export const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
           No hay archivos disponibles para este cliente
         </div>
       ) : (
-        <div className="max-h-[60vh] overflow-y-auto">
+        <div className="max-h-[calc(60*var(--vh))] overflow-y-auto">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-white">
               <TableRow style={{ borderColor: "#DDDDDD" }}>
@@ -87,7 +87,7 @@ export const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
                   <TableCell>
                     <Badge
                       variant="secondary"
-                      className="text-xs text-white"
+                      className="text-[13px] text-white"
                       style={{ backgroundColor: file.data_type.color }}
                     >
                       {file.data_type.description}

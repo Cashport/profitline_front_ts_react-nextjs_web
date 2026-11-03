@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dropdown, Spin, message } from "antd";
 import { ChevronDown, Filter } from "lucide-react";
-import { Plus } from "phosphor-react";
+import { ArrowsClockwise, Plus } from "phosphor-react";
 
 import { useArchivesClientDataByType } from "../../hooks/useArchivesClientDataByType";
 
@@ -12,6 +12,7 @@ import { Button } from "@/modules/chat/ui/button";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 import { ClientDetailTable, ArchiveTypeCollapseLabel } from "../ClientDetailTable";
 import ModalCreateNewFile from "../ModalCreateNewFile/ModalCreateNewFile";
+import ModalReprocessDates from "../ModalReprocessDates/ModalReprocessDates";
 import { ModalDataIntake } from "../modal-data-intake";
 import { IModalMode } from "../modal-data-intake/modal-data-intake";
 import { IClientDetailDataArchive } from "@/types/dataQuality/IDataQuality";
@@ -42,6 +43,7 @@ export function ClientDetailArchives({
   const [showProcessed, setShowProcessed] = useState<number[]>([]);
   const [showFuture, setShowFuture] = useState<number[]>([]);
   const [isCreateFileModalOpen, setIsCreateFileModalOpen] = useState(false);
+  const [isReprocessDatesModalOpen, setIsReprocessDatesModalOpen] = useState(false);
   const [intakeModal, setIntakeModal] = useState({
     isOpen: false,
     mode: "create" as IModalMode
@@ -176,6 +178,17 @@ export function ClientDetailArchives({
               Crear nuevo archivo
             </Button>
           )}
+          {canManage && (
+            <Button
+              onClick={() => setIsReprocessDatesModalOpen(true)}
+              variant="ghost"
+              className="bg-transparent"
+              style={{ color: "#141414" }}
+            >
+              <ArrowsClockwise className="w-4 h-4 mr-1" />
+              Reprocesar fechas
+            </Button>
+          )}
         </div>
         <Dropdown dropdownRender={() => filterMenu} trigger={["click"]} placement="bottomRight">
           <Button
@@ -230,6 +243,16 @@ export function ClientDetailArchives({
         onClose={() => setIsCreateFileModalOpen(false)}
         clientId={clientId}
         clientNIT={clientNIT}
+        onSuccess={() => {
+          onMutateDetail();
+          mutateArchives();
+        }}
+      />
+
+      <ModalReprocessDates
+        isOpen={isReprocessDatesModalOpen}
+        onClose={() => setIsReprocessDatesModalOpen(false)}
+        clientId={clientId}
         onSuccess={() => {
           onMutateDetail();
           mutateArchives();

@@ -12,12 +12,10 @@ import {
   MoreHorizontal,
   Package,
   RefreshCw,
-  Search,
   XCircle
 } from "lucide-react";
 
 import { Card } from "@/modules/chat/ui/card";
-import { Input } from "@/modules/chat/ui/input";
 import {
   Select,
   SelectContent,
@@ -46,6 +44,7 @@ import {
   IDashboardSummaryClientStatusClient,
   IDashboardSummaryClientStatusFile
 } from "@/types/dataQuality/IDataQuality";
+import SearchField from "@/components/ui/search-field/search-field";
 
 interface DashboardIngestionStatusProps {
   clientStatus?: IDashboardSummaryClientStatus[];
@@ -131,7 +130,7 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
 
   return (
     <div>
-      <p className="text-xs font-semibold mb-2" style={{ color: "#000000" }}>
+      <p className="text-[13px] font-semibold mb-2" style={{ color: "#000000" }}>
         Historial de entregas — {file.type_archive} (
         {periodicity.charAt(0).toUpperCase() + periodicity.slice(1)})
       </p>
@@ -139,10 +138,10 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50" style={{ borderColor: "#D0D3D4" }}>
-              <TableHead className="text-[11px] font-semibold pl-3" style={{ color: "#000000" }}>
+              <TableHead className="text-[13px] font-semibold pl-3" style={{ color: "#000000" }}>
                 Fecha
               </TableHead>
-              <TableHead className="text-[11px] font-semibold" style={{ color: "#000000" }}>
+              <TableHead className="text-[13px] font-semibold" style={{ color: "#000000" }}>
                 Estado
               </TableHead>
               <TableHead className="w-8 pr-2" />
@@ -163,7 +162,7 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
                 >
                   <TableCell className="pl-3 py-2">
                     <span
-                      className="text-[11px]"
+                      className="text-[13px]"
                       style={{
                         color: status === "pendiente" ? "#8D979D" : "#000000",
                         fontWeight: isToday ? 600 : 400
@@ -172,7 +171,7 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
                       {entry.label}
                       {isToday && (
                         <span
-                          className="ml-1.5 text-[10px] font-semibold"
+                          className="ml-1.5 text-[13px] font-semibold"
                           style={{ color: "#30EA03" }}
                         >
                           hoy
@@ -182,7 +181,7 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
                   </TableCell>
                   <TableCell className="py-2">
                     <span
-                      className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full"
+                      className="inline-flex items-center gap-1.5 text-[13px] font-medium px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: cfg.bg, color: cfg.text }}
                     >
                       <span
@@ -202,14 +201,14 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
                           <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="text-xs">
-                        <DropdownMenuItem className="text-xs gap-2">
+                      <DropdownMenuContent align="end" className="text-[13px]">
+                        <DropdownMenuItem className="text-[13px] gap-2">
                           <DownloadCloud className="h-3.5 w-3.5" /> Descargar archivo
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs gap-2">
+                        <DropdownMenuItem className="text-[13px] gap-2">
                           <RefreshCw className="h-3.5 w-3.5" /> Reprocesar
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs gap-2 text-red-600">
+                        <DropdownMenuItem className="text-[13px] gap-2 text-red-600">
                           <Flag className="h-3.5 w-3.5" /> Reportar problema
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -262,14 +261,14 @@ function ClientDetailPanel({
               <SheetTitle className="text-base font-semibold" style={{ color: "#000000" }}>
                 {client.client_name}
               </SheetTitle>
-              <p className="text-xs text-gray-500 mt-0.5">{country.country_name}</p>
+              <p className="text-[13px] text-gray-500 mt-0.5">{country.country_name}</p>
             </div>
           </div>
         </SheetHeader>
 
         <div className="px-5 py-4 flex flex-col gap-5">
           <div>
-            <p className="text-xs font-semibold mb-2" style={{ color: "#000000" }}>
+            <p className="text-[13px] font-semibold mb-2" style={{ color: "#000000" }}>
               Detalle por tipo
             </p>
             <div className="rounded-lg border overflow-hidden" style={{ borderColor: "#D0D3D4" }}>
@@ -277,37 +276,37 @@ function ClientDetailPanel({
                 <TableHeader>
                   <TableRow className="bg-gray-50" style={{ borderColor: "#D0D3D4" }}>
                     <TableHead
-                      className="text-[11px] font-semibold pl-3"
+                      className="text-[13px] font-semibold pl-3"
                       style={{ color: "#333F48" }}
                     >
                       Tipo
                     </TableHead>
                     <TableHead
-                      className="text-[11px] font-semibold text-center"
+                      className="text-[13px] font-semibold text-center"
                       style={{ color: "#333F48" }}
                     >
                       %
                     </TableHead>
                     <TableHead
-                      className="text-[11px] font-semibold text-center"
+                      className="text-[13px] font-semibold text-center"
                       style={{ color: "#333F48" }}
                     >
                       Esperados
                     </TableHead>
                     <TableHead
-                      className="text-[11px] font-semibold text-center"
+                      className="text-[13px] font-semibold text-center"
                       style={{ color: "#333F48" }}
                     >
                       Transformados
                     </TableHead>
                     <TableHead
-                      className="text-[11px] font-semibold text-center"
+                      className="text-[13px] font-semibold text-center"
                       style={{ color: "#333F48" }}
                     >
                       Novedades
                     </TableHead>
                     <TableHead
-                      className="text-[11px] font-semibold text-center pr-3"
+                      className="text-[13px] font-semibold text-center pr-3"
                       style={{ color: "#333F48" }}
                     >
                       Pendientes
@@ -317,7 +316,7 @@ function ClientDetailPanel({
                 <TableBody>
                   {client.files.map((file) => (
                     <TableRow key={file.id_client_data_archives} style={{ borderColor: "#F3F3F3" }}>
-                      <TableCell className="text-xs pl-3 py-2" style={{ color: "#000000" }}>
+                      <TableCell className="text-[13px] pl-3 py-2" style={{ color: "#000000" }}>
                         {file.type_archive}
                       </TableCell>
                       <TableCell className="text-center py-2" />
@@ -334,7 +333,7 @@ function ClientDetailPanel({
 
           {totalNovedades > 0 && (
             <div className="rounded-lg p-3" style={{ backgroundColor: "#FEF2F2" }}>
-              <p className="text-xs font-semibold text-red-700 mb-1.5">
+              <p className="text-[13px] font-semibold text-red-700 mb-1.5">
                 {totalNovedades} novedades detectadas
               </p>
               <ul className="space-y-1">
@@ -343,7 +342,7 @@ function ClientDetailPanel({
                   .map((f) => (
                     <li
                       key={`o-${f.id_client_data_archives}`}
-                      className="text-[11px] text-red-600 flex items-start gap-1.5"
+                      className="text-[13px] text-red-600 flex items-start gap-1.5"
                     >
                       <XCircle className="h-3 w-3 mt-0.5 shrink-0" />
                       <span>
@@ -357,7 +356,7 @@ function ClientDetailPanel({
 
           {totalNovedades === 0 && (
             <div className="rounded-lg p-3" style={{ backgroundColor: "rgba(48,234,3,0.08)" }}>
-              <p className="text-xs font-medium" style={{ color: "#1a6600" }}>
+              <p className="text-[13px] font-medium" style={{ color: "#1a6600" }}>
                 Sin novedades. Todos los procesos completados.
               </p>
             </div>
@@ -427,7 +426,7 @@ function NovedadDetailPanel({
               <SheetTitle className="text-base font-semibold" style={{ color: "#000000" }}>
                 {client.client_name}
               </SheetTitle>
-              <p className="text-xs mt-0.5" style={{ color: "#8D979D" }}>
+              <p className="text-[13px] mt-0.5" style={{ color: "#8D979D" }}>
                 {country.country_name} · {file.type_archive}
               </p>
             </div>
@@ -441,21 +440,21 @@ function NovedadDetailPanel({
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold" style={{ color: "#000000" }}>
+                <span className="text-[13px] font-semibold" style={{ color: "#000000" }}>
                   {file.type_archive}
                 </span>
                 <span
-                  className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                  className="text-[13px] font-medium px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: colors.bg, color: colors.text }}
                 >
                   {etapa}
                 </span>
               </div>
             </div>
-            <p className="text-xs font-medium" style={{ color: "#333F48" }}>
+            <p className="text-[13px] font-medium" style={{ color: "#333F48" }}>
               {tipo}
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: "#8D979D" }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: "#8D979D" }}>
               {descripcion}
             </p>
           </div>
@@ -533,7 +532,7 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
   );
 
   return (
-    <Card className="overflow-hidden" style={{ borderColor: "#D0D3D4" }}>
+    <Card className="cp-card rounded-[var(--card-radius)] border-0 bg-cp-surface shadow-none overflow-hidden">
       <div
         className="bg-white px-5 py-3 flex items-center justify-between border-b"
         style={{ borderColor: "#D0D3D4" }}
@@ -542,23 +541,19 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
           Estado de Archivos por Cliente
         </h3>
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-            <Input
-              placeholder="Buscar cliente..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-8 w-48 text-xs"
-              style={{ borderColor: "#D0D3D4" }}
-            />
-          </div>
+          <SearchField
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar cliente..."
+            className="w-48"
+          />
           <Select
             value={statusFilter}
             onValueChange={(v) => setStatusFilter(v as "all" | "received" | "pending")}
             disabled
           >
             <SelectTrigger
-              className="w-[140px] h-8 text-xs"
+              className="w-[140px] h-8 text-[13px]"
               style={{ borderColor: "#D0D3D4", color: "#000000" }}
               disabled
             >
@@ -577,49 +572,55 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
           <TableHeader className="sticky top-0 z-10">
             <TableRow className="bg-white border-b" style={{ borderColor: "#E5E7EB" }}>
               <TableHead
-                className="text-xs font-medium bg-white pl-6 w-[280px]"
+                className="text-[13px] font-medium bg-white pl-6 w-[280px]"
                 style={{ color: "#6B7280" }}
               >
                 Pais / Cliente / Archivo
               </TableHead>
-              <TableHead className="text-xs font-medium bg-white w-32" style={{ color: "#6B7280" }}>
+              <TableHead
+                className="text-[13px] font-medium bg-white w-32"
+                style={{ color: "#6B7280" }}
+              >
                 Estado
               </TableHead>
-              <TableHead className="text-xs font-medium bg-white w-28" style={{ color: "#6B7280" }}>
+              <TableHead
+                className="text-[13px] font-medium bg-white w-28"
+                style={{ color: "#6B7280" }}
+              >
                 Categoria
               </TableHead>
               <TableHead
-                className="text-xs font-medium text-center bg-white w-20"
+                className="text-[13px] font-medium text-center bg-white w-20"
                 style={{ color: "#6B7280" }}
               >
                 %
               </TableHead>
               <TableHead
-                className="text-xs font-medium text-center bg-white w-24"
+                className="text-[13px] font-medium text-center bg-white w-24"
                 style={{ color: "#6B7280" }}
               >
                 Esperados
               </TableHead>
               <TableHead
-                className="text-xs font-medium text-center bg-white w-28"
+                className="text-[13px] font-medium text-center bg-white w-28"
                 style={{ color: "#6B7280" }}
               >
                 Transformados
               </TableHead>
               <TableHead
-                className="text-xs font-medium text-center bg-white w-24"
+                className="text-[13px] font-medium text-center bg-white w-24"
                 style={{ color: "#6B7280" }}
               >
                 Novedades
               </TableHead>
               <TableHead
-                className="text-xs font-medium text-center bg-white w-24"
+                className="text-[13px] font-medium text-center bg-white w-24"
                 style={{ color: "#6B7280" }}
               >
                 Pendientes
               </TableHead>
               <TableHead
-                className="text-xs font-medium bg-white w-24 pr-6"
+                className="text-[13px] font-medium bg-white w-24 pr-6"
                 style={{ color: "#6B7280" }}
               >
                 Acciones
@@ -654,13 +655,13 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                         )}
                       </span>
                       <span
-                        className="text-xs font-semibold uppercase tracking-wide"
+                        className="text-[13px] font-semibold"
                         style={{ color: "#111827" }}
                       >
                         {country.country_name}
                       </span>
                       <span
-                        className="text-xs px-2 py-0.5 rounded-md"
+                        className="text-[13px] px-2 py-0.5 rounded-md"
                         style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}
                       >
                         {country.clients_count} clientes · {country.files_count} archivos
@@ -670,27 +671,27 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                   <TableCell className="py-2.5" />
                   <TableCell className="py-2.5" />
                   <TableCell className="text-center py-2.5">
-                    <span className="text-xs font-bold" style={{ color: "#000000" }}>
+                    <span className="text-[13px] font-bold" style={{ color: "#000000" }}>
                       {country.estado}%
                     </span>
                   </TableCell>
                   <TableCell className="text-center py-2.5">
-                    <span className="text-xs font-semibold" style={{ color: "#8D979D" }}>
+                    <span className="text-[13px] font-semibold" style={{ color: "#8D979D" }}>
                       {country.esperados}
                     </span>
                   </TableCell>
                   <TableCell className="text-center py-2.5">
-                    <span className="text-xs font-semibold" style={{ color: "#30EA03" }}>
+                    <span className="text-[13px] font-semibold" style={{ color: "#30EA03" }}>
                       {country.transformados}
                     </span>
                   </TableCell>
                   <TableCell className="text-center py-2.5">
-                    <span className="text-xs font-semibold" style={{ color: "#FF28FF" }}>
+                    <span className="text-[13px] font-semibold" style={{ color: "#FF28FF" }}>
                       {country.novedades}
                     </span>
                   </TableCell>
                   <TableCell className="text-center py-2.5">
-                    <span className="text-xs font-semibold" style={{ color: "#FFA500" }}>
+                    <span className="text-[13px] font-semibold" style={{ color: "#FFA500" }}>
                       {country.pendientes}
                     </span>
                   </TableCell>
@@ -724,14 +725,14 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                               <span className="text-sm font-medium" style={{ color: "#000000" }}>
                                 {client.client_name}
                               </span>
-                              <span className="text-[11px]" style={{ color: "#8D979D" }}>
+                              <span className="text-[13px]" style={{ color: "#8D979D" }}>
                                 · {client.files_count} archivo{client.files_count !== 1 ? "s" : ""}
                               </span>
                             </div>
                           </TableCell>
                           <TableCell className="py-2.5">
                             <span
-                              className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full"
+                              className="inline-flex items-center gap-1.5 text-[13px] font-medium px-2 py-0.5 rounded-full"
                               style={{ backgroundColor: badgeCfg.bg, color: badgeCfg.text }}
                             >
                               <span
@@ -743,27 +744,39 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                           </TableCell>
                           <TableCell className="py-2.5" />
                           <TableCell className="text-center py-2.5">
-                            <span className="text-xs font-bold" style={{ color: "#000000" }}>
+                            <span className="text-[13px] font-bold" style={{ color: "#000000" }}>
                               {client.estado}%
                             </span>
                           </TableCell>
                           <TableCell className="text-center py-2.5">
-                            <span className="text-xs font-semibold" style={{ color: "#8D979D" }}>
+                            <span
+                              className="text-[13px] font-semibold"
+                              style={{ color: "#8D979D" }}
+                            >
                               {client.esperados}
                             </span>
                           </TableCell>
                           <TableCell className="text-center py-2.5">
-                            <span className="text-xs font-semibold" style={{ color: "#30EA03" }}>
+                            <span
+                              className="text-[13px] font-semibold"
+                              style={{ color: "#30EA03" }}
+                            >
                               {client.transformados}
                             </span>
                           </TableCell>
                           <TableCell className="text-center py-2.5">
-                            <span className="text-xs font-semibold" style={{ color: "#FF28FF" }}>
+                            <span
+                              className="text-[13px] font-semibold"
+                              style={{ color: "#FF28FF" }}
+                            >
                               {client.novedades}
                             </span>
                           </TableCell>
                           <TableCell className="text-center py-2.5">
-                            <span className="text-xs font-semibold" style={{ color: "#FFA500" }}>
+                            <span
+                              className="text-[13px] font-semibold"
+                              style={{ color: "#FFA500" }}
+                            >
                               {client.pendientes}
                             </span>
                           </TableCell>
@@ -800,14 +813,14 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                                       style={{ color: "#8D979D" }}
                                     />
                                     <span
-                                      className="text-xs font-medium"
+                                      className="text-[13px] font-medium"
                                       style={{ color: "#333F48" }}
                                     >
                                       {file.type_archive}
                                     </span>
                                     {file.periodicity && (
                                       <span
-                                        className="text-[10px] px-1.5 py-0.5 rounded-full capitalize"
+                                        className="text-[13px] px-1.5 py-0.5 rounded-full capitalize"
                                         style={{
                                           backgroundColor: "rgba(48,234,3,0.08)",
                                           color: "#1a6600"
@@ -832,21 +845,21 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                                         <MoreHorizontal className="h-4 w-4" />
                                       </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="text-xs">
+                                    <DropdownMenuContent align="end" className="text-[13px]">
                                       <DropdownMenuItem
-                                        className="text-xs gap-2"
+                                        className="text-[13px] gap-2"
                                         onClick={() => setSelectedClient({ country, client })}
                                       >
                                         <Eye className="h-3.5 w-3.5" /> Ver detalle
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem className="text-xs gap-2">
+                                      <DropdownMenuItem className="text-[13px] gap-2">
                                         <DownloadCloud className="h-3.5 w-3.5" /> Descargar archivo
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem className="text-xs gap-2">
+                                      <DropdownMenuItem className="text-[13px] gap-2">
                                         <RefreshCw className="h-3.5 w-3.5" /> Reprocesar
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
-                                        className="text-xs gap-2 text-red-600"
+                                        className="text-[13px] gap-2 text-red-600"
                                         onClick={() => setNovedadTarget({ country, client, file })}
                                       >
                                         <Flag className="h-3.5 w-3.5" /> Reportar problema
@@ -864,7 +877,7 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
         </Table>
       </div>
       <div
-        className="px-5 py-3 border-t text-xs text-gray-500 flex items-center gap-4"
+        className="px-5 py-3 border-t text-[13px] text-gray-500 flex items-center gap-4"
         style={{ borderColor: "#D0D3D4" }}
       >
         <span>{filtered.length} paises</span>

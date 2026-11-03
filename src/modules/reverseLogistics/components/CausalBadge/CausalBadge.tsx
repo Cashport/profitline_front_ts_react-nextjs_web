@@ -7,7 +7,7 @@ export function CausalBadge({ label, rgb }: { label: string; rgb?: string }) {
   const color = causalColor(rgb);
   return (
     <span
-      className="inline-flex items-center rounded px-2 py-0.5 text-xs leading-snug"
+      className="inline-flex items-center rounded px-2 py-0.5 text-[13px] leading-snug"
       style={{ color, border: `1px solid ${color}`, backgroundColor: `${color}14` }}
       title={label}
     >

@@ -70,7 +70,7 @@ const hasActivePhone = (user: IUser) => !!user.full_phone && !user.full_phone.in
 
 const Field = ({ label, children }: { label: string; children: ReactNode }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-[11px] text-muted-foreground">{label}</span>
+    <span className="text-[13px] text-muted-foreground">{label}</span>
     {children}
   </div>
 );
@@ -185,7 +185,7 @@ const BulkSearchActionStep = ({
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
               <span className="text-[13px] font-semibold">Aplicar a</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground">
                 {formatNumber(scopedRows.length)} facturas · {formatMillions(scopedAmount)}
               </span>
             </div>
@@ -198,7 +198,7 @@ const BulkSearchActionStep = ({
                     onConfigChange({ scope: { ...config.scope, [name]: event.target.checked } })
                   }
                   className={cn(
-                    "!flex h-[30px] !items-center whitespace-nowrap rounded-md border bg-white !px-2.5 !text-xs font-medium",
+                    "!flex h-[30px] !items-center whitespace-nowrap rounded-md border bg-white !px-2.5 !text-[13px] font-medium",
                     config.scope[name] ? "border-foreground" : "border-[#e3e3e3]"
                   )}
                 >
@@ -235,7 +235,7 @@ const BulkSearchActionStep = ({
                   <span className="block text-[13px] font-medium text-foreground">
                     {item.label}
                   </span>
-                  <span className="block text-[11px] text-[#8a8a8a]">{item.description}</span>
+                  <span className="block text-[13px] text-[#8a8a8a]">{item.description}</span>
                 </Radio>
               ))}
             </Radio.Group>
@@ -261,7 +261,7 @@ const BulkSearchActionStep = ({
                     {scopedRows.slice(0, VISIBLE_INVOICES).map((row) => (
                       <li
                         key={row.key}
-                        className="flex items-center gap-2 border-b border-[#f0f0f0] px-2.5 py-1.5 text-xs last:border-b-0"
+                        className="flex items-center gap-2 border-b border-[#f0f0f0] px-2.5 py-1.5 text-[13px] last:border-b-0"
                       >
                         <span
                           className="h-1.5 w-1.5 flex-none rounded-full"
@@ -275,13 +275,13 @@ const BulkSearchActionStep = ({
                     ))}
                   </ul>
                   {scopedRows.length > VISIBLE_INVOICES && (
-                    <span className="text-[11px] text-[#8a8a8a]">
+                    <span className="text-[13px] text-[#8a8a8a]">
                       y {formatNumber(scopedRows.length - VISIBLE_INVOICES)} más
                     </span>
                   )}
                 </Field>
               ) : (
-                <p className="text-xs text-[#444]">Ninguna factura en el alcance.</p>
+                <p className="text-[13px] text-[#444]">Ninguna factura en el alcance.</p>
               ))}
 
             {config.action === "novedad" && (
@@ -347,8 +347,10 @@ const BulkSearchActionStep = ({
                   >
                     <div className="flex flex-col items-center gap-1 px-3">
                       <UploadSimple size={18} />
-                      <span className="text-xs font-medium">Arrastra o selecciona archivos</span>
-                      <span className="text-[11px] text-[#8a8a8a]">
+                      <span className="text-[13px] font-medium">
+                        Arrastra o selecciona archivos
+                      </span>
+                      <span className="text-[13px] text-[#8a8a8a]">
                         Hasta {MAX_EVIDENCE_MB} MB por archivo
                       </span>
                     </div>
@@ -359,7 +361,7 @@ const BulkSearchActionStep = ({
                       className="flex items-center gap-2 rounded-md border border-[#e3e3e3] bg-white py-1 pe-1 ps-2.5"
                     >
                       <Paperclip size={12} className="flex-none text-[#8a8a8a]" />
-                      <span className="min-w-0 flex-1 truncate text-xs">{file.name}</span>
+                      <span className="min-w-0 flex-1 truncate text-[13px]">{file.name}</span>
                       <Button
                         type="text"
                         size="small"
@@ -388,20 +390,20 @@ const BulkSearchActionStep = ({
                 {config.statementMethod === "descargar" ? (
                   <Field label="Archivos">
                     {isStatementLoading ? (
-                      <span className="text-xs text-[#8a8a8a]">Cargando…</span>
+                      <span className="text-[13px] text-[#8a8a8a]">Cargando…</span>
                     ) : statementInfo?.attachments.length ? (
                       <div className="flex flex-wrap gap-1.5">
                         {statementInfo.attachments.map((file) => (
                           <span
                             key={file.id}
-                            className="rounded-md border border-[#e3e3e3] bg-white px-2.5 py-1 text-xs"
+                            className="rounded-md border border-[#e3e3e3] bg-white px-2.5 py-1 text-[13px]"
                           >
                             {file.name}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-[#8a8a8a]">Sin archivos adjuntos</span>
+                      <span className="text-[13px] text-[#8a8a8a]">Sin archivos adjuntos</span>
                     )}
                   </Field>
                 ) : (
@@ -422,7 +424,7 @@ const BulkSearchActionStep = ({
                   </Field>
                 )}
                 {hasStatementError && (
-                  <p className="text-xs text-[#c4321c]">
+                  <p className="text-[13px] text-[#c4321c]">
                     No se pudieron cargar los contactos ni los archivos del cliente.
                   </p>
                 )}
@@ -436,7 +438,7 @@ const BulkSearchActionStep = ({
                   onChange={(event) => onConfigChange({ comment: event.target.value })}
                   placeholder="Queda en el historial de cada factura"
                   rows={3}
-                  className="!text-xs"
+                  className="!text-[13px]"
                   style={{ resize: "none" }}
                 />
               </Field>

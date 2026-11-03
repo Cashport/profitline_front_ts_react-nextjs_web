@@ -33,7 +33,7 @@ export default function ApprovalsTypeDropdown({
         <Button
           variant="outline"
           className="gap-2 bg-transparent !font-semibold"
-          style={{ height: "3rem" }}
+          style={{ height: "var(--control-h)" }}
         >
           <ListFilter className="h-4 w-4" />
           Tipos

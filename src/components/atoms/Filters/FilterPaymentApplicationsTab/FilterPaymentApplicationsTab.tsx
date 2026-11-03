@@ -205,9 +205,8 @@ export const FilterPaymentApplicationsTab = ({
       }}
       className="filterCascader"
       popupClassName="filterPaymentApplicationsTab"
-      style={{ width: "16.5rem", height: "48px" }}
+      style={{ width: "16.5rem" }}
       multiple
-      size="large"
       removeIcon
       maxTagCount="responsive"
       placeholder="Filtrar"

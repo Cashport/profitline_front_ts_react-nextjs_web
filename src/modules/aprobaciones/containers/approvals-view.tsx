@@ -48,8 +48,8 @@ export default function ApprovalsView() {
   }, []);
 
   return (
-    <div className="bg-background rounded-lg">
-      <main className="p-6">
+    <div className="cp-card px-[18px] py-[14px]">
+      <main>
         <div className="mx-auto">
           <div className="space-y-4">
             {/* Responsive flex-col on mobile, flex-row on md+ */}

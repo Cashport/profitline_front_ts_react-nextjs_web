@@ -31,8 +31,6 @@ import type {
 } from "../../types";
 
 /** Misma superficie que el botón de tema y el buscador, a la misma altura. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface VisitsFilterModalProps {
   value: IVisitsFilters;
@@ -43,6 +41,8 @@ interface VisitsFilterModalProps {
   clients: IVisitsClient[];
   /** Contenido al final de la barra del botón y sus etiquetas (chips de estado, reloj). */
   barEnd?: ReactNode;
+  /** En el header compartido: chips a la izquierda de "Filtrar" (ver FilterModal). */
+  inHeader?: boolean;
 }
 
 /** Selección de una categoría multi a partir de los ids confirmados. */
@@ -69,7 +69,8 @@ export default function VisitsFilterModal({
   advisors,
   zones,
   clients,
-  barEnd
+  barEnd,
+  inHeader
 }: VisitsFilterModalProps) {
   const proyectoOptions: FilterOptionItem[] = PROJECT_ORDER.map((p) => ({
     id: p,
@@ -135,7 +136,6 @@ export default function VisitsFilterModal({
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ label: "Filtrar", className: TRIGGER_CLASS, showChevron: true }}
       formatTagValue={(_cat, items) =>
         items.length === 1 ? items[0].name : `${items.length} seleccionados`
       }
@@ -143,6 +143,7 @@ export default function VisitsFilterModal({
       onValueChange={(sel) => onChange(selectionToDomain(sel))}
       onClearAll={() => onChange(EMPTY_VISITS_FILTERS)}
       barEnd={barEnd}
+      inHeader={inHeader}
     />
   );
 }

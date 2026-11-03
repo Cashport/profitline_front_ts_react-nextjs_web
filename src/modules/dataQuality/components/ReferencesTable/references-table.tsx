@@ -38,7 +38,8 @@ interface ReferencesTableProps {
   onToggle: (reference: IReferenceFile) => void;
 }
 
-const formatDate = (value?: string | null) => (value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-");
+const formatDate = (value?: string | null) =>
+  value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-";
 
 export function ReferencesTable({
   references,
@@ -98,7 +99,7 @@ export function ReferencesTable({
                       {effectiveIds?.includes(reference.id) && (
                         <Badge
                           variant="secondary"
-                          className="text-[10px]"
+                          className="text-[13px]"
                           style={{ backgroundColor: "#DBEAFE", color: "#1D4ED8" }}
                         >
                           Efectiva
@@ -116,7 +117,7 @@ export function ReferencesTable({
                   <TableCell>
                     <Badge
                       variant="secondary"
-                      className="text-xs"
+                      className="text-[13px]"
                       style={{
                         backgroundColor: reference.is_active === 1 ? "#DCFCE7" : "#F3F4F6",
                         color: reference.is_active === 1 ? "#166534" : "#6B7280"
@@ -128,7 +129,7 @@ export function ReferencesTable({
                   <TableCell style={{ color: "#141414" }}>
                     <div className="flex flex-col">
                       <span>{formatDate(reference.updated_at || reference.created_at)}</span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-[13px] text-gray-400">
                         {formatBytesToMB(reference.size_bytes)}
                       </span>
                     </div>
@@ -138,7 +139,11 @@ export function ReferencesTable({
                       <Dropdown
                         menu={{
                           items: [
-                            { key: "detail", label: "Ver detalle", onClick: () => onDetail(reference) },
+                            {
+                              key: "detail",
+                              label: "Ver detalle",
+                              onClick: () => onDetail(reference)
+                            },
                             {
                               key: "replace",
                               label: "Reemplazar archivo",

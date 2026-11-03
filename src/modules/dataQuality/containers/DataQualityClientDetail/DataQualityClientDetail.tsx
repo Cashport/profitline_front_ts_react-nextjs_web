@@ -2,17 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { message } from "antd";
-import { ArrowLeft } from "lucide-react";
 import { BellSimpleRinging } from "@phosphor-icons/react";
 import { DotsThree } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
-import {
-  checkUserComponentPermission,
-  hasDataQualityManagementPermission
-} from "@/utils/utils";
+import { checkUserComponentPermission, hasDataQualityManagementPermission } from "@/utils/utils";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import {
   downloadUnifiedCatalogFile,
@@ -24,7 +20,6 @@ import {
 
 import Header from "@/components/organisms/header";
 import { Button } from "@/modules/chat/ui/button";
-import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailArchives } from "../../components/ClientDetailArchives";
@@ -37,7 +32,6 @@ import { ModalDataEmailRules } from "../../components/ModalDataRegisteredEmails/
 
 export default function DataQualityClientDetails() {
   const params = useParams();
-  const router = useRouter();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const selectedProject = useAppStore((projects) => projects.selectedProject);
   const canManage = hasDataQualityManagementPermission(selectedProject);
@@ -136,7 +130,9 @@ export default function DataQualityClientDetails() {
       setWhichModalIsOpen(0);
       mutate();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al cargar el archivo de packs.");
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo de packs."
+      );
     } finally {
       setIsUploadPacksLoading(false);
     }
@@ -184,8 +180,8 @@ export default function DataQualityClientDetails() {
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
-        <Header title="" />
+      <div className="cp-page">
+        <Header title="" back="/data-quality" />
         <div className="min-h-[400px] flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -199,8 +195,8 @@ export default function DataQualityClientDetails() {
   // Handle error state
   if (error) {
     return (
-      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
-        <Header title="" />
+      <div className="cp-page">
+        <Header title="" back="/data-quality" />
         <div className="min-h-[400px] flex items-center justify-center">
           <div className="text-center">
             <div className="text-red-600 mb-4">
@@ -217,8 +213,8 @@ export default function DataQualityClientDetails() {
   // Handle empty state
   if (!clientDetail) {
     return (
-      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
-        <Header title="" />
+      <div className="cp-page">
+        <Header title="" back="/data-quality" />
         <div className="min-h-[400px] flex items-center justify-center">
           <p className="text-gray-600">No se encontraron datos para este cliente.</p>
         </div>
@@ -230,97 +226,80 @@ export default function DataQualityClientDetails() {
   const countryName = clientDetail.country_name;
   const clientName = clientDetail.client_name;
 
-  const handleGoBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/data-quality");
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
-      <Header title={`${countryName} - ${clientName}` || ""} />
-      <main>
-        <Card className="border-none">
-          <CardContent>
-            <div className="flex items-center justify-between mb-6 ">
-              <Button
-                onClick={handleGoBack}
-                variant="ghost"
-                size="sm"
-                className="text-gray-700 hover:text-gray-900"
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Atrás
+    <div className="cp-page">
+      <Header
+        title={`${countryName} - ${clientName}` || ""}
+        back="/data-quality"
+        actionsExtra={
+          <>
+            {(canManage || canDownloadCatalog) && (
+              <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
+                <DotsThree size={"1.5rem"} />
+                Generar acción
               </Button>
-              <div className="flex items-center gap-3">
-                {(canManage || canDownloadCatalog) && (
-                  <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
-                    <DotsThree size={"1.5rem"} />
-                    Generar acción
-                  </Button>
-                )}
-                {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
-                  <Link
-                    href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <Button variant="outline" className="">
-                      <BellSimpleRinging size={18} />
-                      Alertas
-                    </Button>
-                  </Link>
-                )}
+            )}
+            {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+              <Link
+                href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Button variant="outline" className="">
+                  <BellSimpleRinging size={18} />
+                  Alertas
+                </Button>
+              </Link>
+            )}
 
-                {hasDataQualityManagementPermission(selectedProject) && (
-                  <Link
-                    href={`/data-quality/references?scope=client&id_client=${clientDetail.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <Button variant="outline" className="">
-                      Referencias
-                    </Button>
-                  </Link>
-                )}
+            {hasDataQualityManagementPermission(selectedProject) && (
+              <Link
+                href={`/data-quality/references?scope=client&id_client=${clientDetail.id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Button variant="outline" className="">
+                  Referencias
+                </Button>
+              </Link>
+            )}
 
-                {checkUserComponentPermission(selectedProject, "DataQuality", "data-readonly") && (
-                  <Link
-                    href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}&countryName=${clientDetail.country_name}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <Button
-                      className="text-sm font-medium"
-                      style={{
-                        backgroundColor: "#CBE71E",
-                        color: "#141414",
-                        border: "none"
-                      }}
-                    >
-                      Catálogos
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            <ClientDetailInfo
-              clientName={clientDetail?.client_name}
-              stakeholder={clientDetail?.stakeholder?.toString()}
-              setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
-              showEditButton={canManage}
-            />
-            <ClientDetailArchives
-              clientId={clientId}
-              clientName={clientName}
-              clientNIT={clientDetail.id_client}
-              idCountry={clientDetail.id_country}
-              intakes={clientDetail.client_data_archives}
-              onMutateDetail={() => mutate()}
-              onCountsChange={setArchiveCounts}
-            />
-          </CardContent>
-        </Card>
+            {checkUserComponentPermission(selectedProject, "DataQuality", "data-readonly") && (
+              <Link
+                href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}&countryName=${clientDetail.country_name}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Button
+                  className="text-sm font-medium"
+                  style={{
+                    backgroundColor: "#CBE71E",
+                    color: "#141414",
+                    border: "none"
+                  }}
+                >
+                  Catálogos
+                </Button>
+              </Link>
+            )}
+          </>
+        }
+      />
+      <main>
+        <div className="cp-card px-[18px] py-[14px]">
+          <ClientDetailInfo
+            clientName={clientDetail?.client_name}
+            stakeholder={clientDetail?.stakeholder?.toString()}
+            setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
+            showEditButton={canManage}
+          />
+          <ClientDetailArchives
+            clientId={clientId}
+            clientName={clientName}
+            clientNIT={clientDetail.id_client}
+            idCountry={clientDetail.id_country}
+            intakes={clientDetail.client_data_archives}
+            onMutateDetail={() => mutate()}
+            onCountsChange={setArchiveCounts}
+          />
+        </div>
 
         <div className="mt-4 text-sm" style={{ color: "#141414" }}>
           Mostrando {archiveCounts.shown} de {archiveCounts.total} archivos

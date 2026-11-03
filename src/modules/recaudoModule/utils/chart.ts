@@ -29,9 +29,12 @@ export const range = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
  */
 export const withAlpha = (color: string, alpha: number) => {
   const c = color.trim();
-  const hex = /^#[0-9a-f]{3}$/i.test(c)
-    ? "#" + c.slice(1).replace(/./g, (ch) => ch + ch)
-    : c;
+  const hex = /^#[0-9a-f]{3}$/i.test(c) ? "#" + c.slice(1).replace(/./g, (ch) => ch + ch) : c;
   if (!/^#[0-9a-f]{6}$/i.test(hex)) return color;
-  return hex + Math.round(alpha * 255).toString(16).padStart(2, "0");
+  return (
+    hex +
+    Math.round(alpha * 255)
+      .toString(16)
+      .padStart(2, "0")
+  );
 };

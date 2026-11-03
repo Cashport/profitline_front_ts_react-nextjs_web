@@ -32,7 +32,7 @@ function RunTimestamp({ isoDate, emptyLabel }: RunTimestampProps) {
   return (
     <div className="text-sm" style={{ color: "#141414" }}>
       {date}
-      <div className="text-xs text-gray-500">{time}</div>
+      <div className="text-[13px] text-gray-500">{time}</div>
     </div>
   );
 }
@@ -50,7 +50,7 @@ function RunError({ error, readableError, category }: RunErrorProps) {
   if (!summary) return null;
 
   const summaryText = (
-    <div className="mt-0.5 max-w-[140px] truncate text-xs text-[#DC2626]">{summary}</div>
+    <div className="mt-0.5 max-w-[140px] truncate text-[13px] text-[#DC2626]">{summary}</div>
   );
   if (!error) return summaryText;
 
@@ -63,10 +63,10 @@ function RunError({ error, readableError, category }: RunErrorProps) {
         className={cn(DARK_TOOLTIP_CONTENT, "max-w-[30rem] space-y-1 rounded-lg px-3 py-2.5")}
         arrowClassName={DARK_TOOLTIP_ARROW}
       >
-        <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
+        <p className="text-[13px] font-semibold opacity-70">
           Detalle del error{category ? ` - ${category}` : ""}
         </p>
-        <p className="overflow-y-auto whitespace-pre-wrap break-words text-xs">{error}</p>
+        <p className="overflow-y-auto whitespace-pre-wrap break-words text-[13px]">{error}</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -110,7 +110,7 @@ export const getGroupColumns = ({
         >
           {record.cliente}
         </button>
-        <p className="text-xs" style={{ color: BOT_MUTED_TEXT_COLOR }}>
+        <p className="text-[13px]" style={{ color: BOT_MUTED_TEXT_COLOR }}>
           {record.bots.length} bots
         </p>
       </div>
@@ -196,7 +196,7 @@ export const getBotColumns = ({
     title: "País",
     dataIndex: "pais",
     render: (text: string | null) => (
-      <Badge variant="outline" className="text-xs">
+      <Badge variant="outline" className="text-[13px]">
         {text || "No disponible"}
       </Badge>
     )
@@ -237,7 +237,8 @@ export const getBotColumns = ({
     title: "Acciones",
     width: 90,
     render: (_, record: IBotStatusItem) => {
-      const isRunning = record.estado === "EN_EJECUCION" || executingScheduleId === record.schedule_id;
+      const isRunning =
+        record.estado === "EN_EJECUCION" || executingScheduleId === record.schedule_id;
 
       return (
         <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
@@ -249,7 +250,11 @@ export const getBotColumns = ({
             onClick={() => onRun(record)}
             className="transition-colors hover:bg-[#F0FDF4] hover:text-[#16A34A]"
           >
-            {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+            {isRunning ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
           </Button>
           <Button
             variant="ghost"
@@ -265,4 +270,3 @@ export const getBotColumns = ({
     }
   }
 ];
-

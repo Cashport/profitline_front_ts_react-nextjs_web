@@ -1,56 +1,152 @@
 @import "@styles/variables.scss";
 
-.main {
-    width: 90px;
-    height: 100%;
-    background-color: $white;
-    border-radius: 0 1rem 1rem 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3rem 0;
-    padding-top: 4rem;
-    position: relative;
-    box-shadow: 7px 1px 5px 2px #f0f0f0;
+// Diseño "Menu Lateral Cashport" 6e: riel de 64px cerrado y 240px abierto.
+$rail-open-w: 240px;
 
-    // logo + module-buttons group: allow it to shrink below its content height so the
-    // buttons list can scroll instead of clipping / pushing the logout button off-screen
-    .modulesGroup {
-        min-height: 0;
+// .main reserva el ancho del riel en el layout; .railPanel es el riel en sí, que al pasar
+// el mouse se abre ENCIMA del contenido (con sombra). Fijado, .main crece y lo empuja (sin sombra).
+.main {
+    position: relative;
+    flex-shrink: 0;
+    width: var(--rail-w);
+    height: 100%;
+    transition: width 0.18s ease;
+
+    &.railPinned {
+        width: $rail-open-w;
     }
 
-    // keep the logout button anchored/visible when the module list overflows
+    .railPanel {
+        position: absolute;
+        inset: 0 auto 0 0;
+        z-index: 60;
+        width: var(--rail-w);
+        display: flex;
+        flex-direction: column;
+        padding: 14px 12px;
+        overflow: hidden;
+        background-color: $white;
+        border-right: 1px solid $cp-line;
+        transition:
+            width 0.18s ease,
+            box-shadow 0.18s ease;
+
+        &:hover,
+        &:has(:focus-visible) {
+            width: $rail-open-w;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+        }
+    }
+
+    &.railPinned .railPanel {
+        width: $rail-open-w;
+        box-shadow: none;
+    }
+
+    // Logo + módulos: puede encogerse para que la lista haga scroll en vez de empujar el pie.
+    .modulesGroup {
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+    }
+
+    // Pie fijo: Configuración, Fijar menú y Cerrar sesión.
     .exit {
         flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        width: 100%;
+        padding-top: 6px;
+        border-top: 1px solid $cp-line;
     }
 
+    // Proyecto: fila de 48px. Cerrado, el cuadro queda centrado en el riel (margen -4px);
+    // abierto, se corre 10px y aparece el nombre.
     .logoContainer {
         display: flex;
-        border: none;
+        align-items: center;
+        gap: 10px;
+        flex: none;
+        height: 48px;
+        margin: 0 0 10px -4px;
+        padding: 0;
+        border: 0;
+        background: transparent;
         cursor: pointer;
-        margin-bottom: 2rem;
-        flex-shrink: 0; // keep the logo full size; only the button list absorbs the shrink
-        border: 1px solid transparent;
-        transition: all 0.3s ease;
-        border-radius: 8px;
+        white-space: nowrap;
+        text-align: left;
+        font-family: $font-poppins, sans-serif;
+        color: $cp-ink;
+        // Sin contorno ni borde: ni al pasar el mouse ni al volver del modal de proyectos.
+        outline: none;
+        transition: margin 0.18s ease;
 
-        &__image {
-            border-radius: inherit;
-            width: 50px;
-            height: 50px;
-            object-fit: scale-down;
-            background-color: $white;
+        &:hover,
+        &:focus,
+        &:focus-visible,
+        &:active {
+            outline: none;
+            border: 0;
+            background: transparent;
         }
 
-        &:hover {
-            opacity: 0.9;
-            border: 1px solid $black;
+        &__tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+            width: 48px;
+            height: 48px;
+            padding: 6px;
+            border: 0;
+            border-radius: 10px;
+            background-color: $white;
+            box-shadow: none;
+            transition: box-shadow 0.18s ease;
+        }
+
+        &__image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        // Una línea si cabe; si no, dos y elipsis.
+        &__name {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            flex: none;
+            width: 140px;
+            overflow: hidden;
+            white-space: normal;
+            text-wrap: pretty;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.25;
+            opacity: 0;
+            transition: opacity 0.12s ease;
         }
     }
 
-    .buttonMenu,
-    .buttonExit {
+    .railPanel:hover .logoContainer,
+    .railPanel:has(:focus-visible) .logoContainer,
+    &.railPinned .logoContainer {
+        margin-left: 10px;
+
+        .logoContainer__tile {
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.04),
+                0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .logoContainer__name {
+            opacity: 1;
+        }
+    }
+
+    .buttonMenu {
         aspect-ratio: 1 / 1 !important;
         padding: 12px 6px;
     }
@@ -85,15 +181,29 @@
 
 @media (max-width: 768px) {
     .main {
+        display: flex;
+        align-items: center;
         width: 100%;
         height: auto;
-        flex-direction: row;
-        flex-wrap: wrap;
         padding: 1rem 2rem;
-        align-items: center;
-        border-radius: 0 0 1rem 1rem;
-        box-shadow: 0px 5px 16px -3px #f0f0f0;
-        position: relative;
+        border-bottom: 1px solid $cp-line;
+
+        .railPanel {
+            position: static;
+            width: auto;
+            padding: 0;
+            border-right: 0;
+
+            &:hover,
+            &:has(:focus-visible) {
+                width: auto;
+                box-shadow: none;
+            }
+        }
+
+        .modulesGroup {
+            width: auto;
+        }
 
         .logoContainer {
             margin: 0;
@@ -105,7 +215,6 @@
     .main {
         max-height: 42px;
         padding: 6px 16px;
-        align-content: center;
         .logoContainer {
             &__image {
                 width: 25px;
@@ -113,8 +222,7 @@
             }
         }
 
-        .buttonMenu,
-        .buttonExit {
+        .buttonMenu {
             padding: 4px 2px;
         }
     }
@@ -123,12 +231,21 @@
 // Dark theme overrides — active only when a .dark ancestor is present
 // (ComercioLayout sets it on the ViewWrapper root). Light mode is unchanged.
 .dark {
-    .sidebar.main {
+    .sidebar.main .railPanel {
         background-color: rgb(var(--sidebar));
-        box-shadow: 7px 1px 12px 2px rgba(0, 0, 0, 0.45);
+        border-right-color: rgb(var(--sidebar-border));
 
-        .logoContainer:hover {
-            border-color: rgb(var(--sidebar-border));
+        &:hover,
+        &:has(:focus-visible) {
+            box-shadow: 12px 0 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .logoContainer {
+            color: rgb(var(--sidebar-foreground));
+        }
+
+        .exit {
+            border-top-color: rgb(var(--sidebar-border));
         }
     }
 
@@ -138,10 +255,9 @@
         box-shadow: 1px 25px 58px -29px rgba(0, 0, 0, 0.7);
     }
 
-    .buttonExit,
     .buttonMenu {
-        // AntD text-buttons keep a dark color; force light so the logout arrow and the
-        // mobile hamburger-menu icon stay visible on the dark sidebar
+        // AntD text-buttons keep a dark color; force light so the mobile hamburger-menu
+        // icon stays visible on the dark sidebar
         color: rgb(var(--sidebar-foreground)) !important;
     }
 }

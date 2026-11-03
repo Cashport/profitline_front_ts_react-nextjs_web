@@ -22,7 +22,7 @@ export default function ActionsBar({
 }: ActionsBarProps) {
   return (
     <div className="sticky bottom-[-1rem] pt-2 pb-4 z-10 bg-[#F7F7F7]">
-      <Flex align="center" justify="space-between" className="bg-white  rounded-lg p-4 shadow-sm">
+      <Flex align="center" justify="space-between" className="cp-card px-[18px] py-[14px]">
         <Text className="text-[13px]">
           {recipientCount > 0 ? (
             <>

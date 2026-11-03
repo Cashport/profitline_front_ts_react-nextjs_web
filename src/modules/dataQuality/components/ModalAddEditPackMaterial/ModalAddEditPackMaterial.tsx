@@ -163,7 +163,7 @@ export default function ModalAddEditPackMaterial({
               )}
             />
             {errors.material_code && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.material_code.message}
               </span>
             )}
@@ -191,7 +191,7 @@ export default function ModalAddEditPackMaterial({
               )}
             />
             {errors.product_type && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.product_type.message}
               </span>
             )}
@@ -219,7 +219,7 @@ export default function ModalAddEditPackMaterial({
               )}
             />
             {errors.type_vol && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.type_vol.message}</span>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>{errors.type_vol.message}</span>
             )}
           </div>
 
@@ -250,7 +250,7 @@ export default function ModalAddEditPackMaterial({
               )}
             />
             {errors.factor && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.factor.message}</span>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>{errors.factor.message}</span>
             )}
           </div>
         </div>

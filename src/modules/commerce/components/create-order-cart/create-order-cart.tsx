@@ -132,7 +132,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   };
 
   const ESTETICA_MINIMUM = 1600000;
-  const ALASTIN_MINIMUM = 1000000;
+  const ALASTIN_MINIMUM = 1;
   const normalizedChannel = channelName?.trim().toLowerCase();
   const isAlastin = normalizedChannel === "alastin";
   const isEstetica = normalizedChannel === "estetica";
@@ -592,10 +592,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               className="w-full flex items-center gap-2 px-4 py-3 bg-[#FAFAFA] hover:bg-[#F3F3F3] transition-colors border border-[#EEEEEE] rounded-xl"
             >
               <Gift size={13} className="text-[#141414] flex-shrink-0" />
-              <span className="flex-1 text-xs font-semibold text-[#141414] text-left">
+              <span className="flex-1 text-[13px] font-semibold text-[#141414] text-left">
                 Bonificados
               </span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#CBE71E] text-[#141414] rounded-md">
+              <span className="px-1.5 py-0.5 text-[13px] font-bold bg-[#CBE71E] text-[#141414] rounded-md">
                 {confirmOrderData?.promotion?.active_range?.gift_options &&
                 (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1
                   ? `${confirmOrderData?.promotion?.active_range?.gift_options?.length} disp.`

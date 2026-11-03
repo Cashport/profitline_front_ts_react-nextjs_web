@@ -4,14 +4,14 @@
     }
 
     .ant-modal-content {
-        max-height: 80vh;
+        max-height: calc(80 * var(--vh));
         display: flex;
         flex-direction: column;
     }
 
     .modalContentScroll {
         overflow-y: auto;
-        max-height: calc(70vh - 112px);
+        max-height: calc(70 * var(--vh) - 112px);
         display: flex;
         flex-direction: column;
         gap: 0.5rem;

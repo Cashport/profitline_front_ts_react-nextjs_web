@@ -72,7 +72,6 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
     }[];
   }>({});
 
-
   const handleAddEditRule = async (data: any) => {
     // If editing a rule, we need to pass the ruleId
     if (showBankRuleModal.ruleId) {

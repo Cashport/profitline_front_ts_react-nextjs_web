@@ -30,12 +30,12 @@ export default function EmailPreview({ subject, body, tags, attachments = [] }: 
   return (
     <div className="bg-white rounded-lg overflow-hidden">
       <div className="bg-[#141414] px-4 py-2.5">
-        <p className="text-[11px] text-gray-400 uppercase tracking-wide">Vista previa del correo</p>
+        <p className="text-[13px] text-gray-400">Vista previa del correo</p>
       </div>
 
       <div className="p-4">
         <div className="border-b border-[#f0f0f0] pb-2.5 mb-3">
-          <p className="text-[10px] text-gray-400">Para: destinatario@ejemplo.com</p>
+          <p className="text-[13px] text-gray-400">Para: destinatario@ejemplo.com</p>
           <p className="text-sm font-semibold text-[#141414]">{renderedSubject || "Sin asunto"}</p>
         </div>
 
@@ -49,16 +49,16 @@ export default function EmailPreview({ subject, body, tags, attachments = [] }: 
 
         {attachments.length > 0 && (
           <div className="mt-4 pt-3 border-t border-[#f0f0f0]">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide">Adjuntos</p>
+            <p className="text-[13px] text-gray-400">Adjuntos</p>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {attachments.map((att) => (
                 <span
                   key={att.name}
-                  className="inline-flex items-center gap-1.5 text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded"
+                  className="inline-flex items-center gap-1.5 text-[13px] bg-gray-100 text-gray-700 px-2.5 py-1 rounded"
                 >
                   <Paperclip className="w-3 h-3" />
                   {att.name}
-                  <span className="text-[9px] text-gray-400">{att.type}</span>
+                  <span className="text-[13px] text-gray-400">{att.type}</span>
                 </span>
               ))}
             </div>

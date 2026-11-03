@@ -11,7 +11,7 @@
     &__reportButton {
         display: flex;
         align-items: center;
-        font-size: 0.75rem;
+        font-size: 13px;
         font-weight: 600;
         gap: 0.5rem;
         color: #ff5500;
@@ -36,9 +36,9 @@
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
-    
+
         &:hover {
-          text-decoration: underline;
+            text-decoration: underline;
         }
     }
 }

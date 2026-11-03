@@ -31,12 +31,12 @@ export default function WhatsAppTemplateCard({
         <Text strong className="text-[13px]">
           {template.name}
         </Text>
-        <Badge className="shrink-0 text-[10px] bg-green-100 text-green-700 border-green-200">
+        <Badge className="shrink-0 text-[13px] bg-green-100 text-green-700 border-green-200">
           Aprobada
         </Badge>
       </div>
 
-      <Text type="secondary" ellipsis className="text-xs block mb-2">
+      <Text type="secondary" ellipsis className="text-[13px] block mb-2">
         {template.body}
       </Text>
 
@@ -46,7 +46,7 @@ export default function WhatsAppTemplateCard({
             <Tag
               key={att.name}
               icon={<PaperclipIcon size={10} />}
-              className="!flex !items-center !gap-1 !text-[10px] !font-medium !text-black/70"
+              className="!flex !items-center !gap-1 !text-[13px] !font-medium !text-black/70"
             >
               {att.name}
             </Tag>

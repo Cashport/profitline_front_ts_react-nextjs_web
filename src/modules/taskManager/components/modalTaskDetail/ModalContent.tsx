@@ -188,7 +188,7 @@ export function ModalContent({
                     </div>
                     <Badge
                       variant="secondary"
-                      className="text-xs text-white"
+                      className="text-[13px] text-white"
                       style={{ backgroundColor: attachment.process_status_color }}
                     >
                       {attachment.process_status_name}
@@ -262,7 +262,7 @@ export function ModalContent({
         <div className="space-y-8 max-w-[700px]">
           {/* Custom Fields */}
           <div className="space-y-0">
-            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
+            <h3 className="text-sm font-semibold text-gray-600 mb-3">
               Campos personalizados
             </h3>
 
@@ -399,7 +399,7 @@ export function ModalContent({
               {/* Monto */}
               <div className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
-                  <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-xs">
+                  <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-[13px]">
                     $
                   </div>
                   <Label className="text-sm text-gray-700">Monto</Label>
@@ -446,8 +446,8 @@ export function ModalContent({
       {/* Right Column - Original Message */}
       <div className="overflow-y-auto px-10 py-8 pt-0 border-l border-gray-200 bg-white">
         <div className="space-y-6">
-          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 pt-[40px] z-10">
-            Mensaje Original
+          <h3 className="text-sm font-semibold text-gray-600 sticky top-0 bg-white py-2 pt-[40px] z-10">
+            Mensaje original
           </h3>
           {taskDetail.emailDetails ? (
             <EmailMessage emailDetails={taskDetail.emailDetails} />

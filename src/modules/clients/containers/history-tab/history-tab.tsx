@@ -75,8 +75,6 @@ const getEventMeta = (label: string) => {
 };
 
 /** Mismo botón "Filtrar" que TaskManager y Balances. */
-const TRIGGER_CLASS =
-  "h-12 flex items-center gap-2 border border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent px-4 rounded-md";
 
 /* Evento | Descripción | Usuario | acciones. Al reactivar Monto, volver a la rejilla
    de 5 columnas: grid-cols-[minmax(220px,1.4fr)_minmax(220px,2fr)_minmax(180px,1fr)_140px_32px] */
@@ -133,7 +131,7 @@ const FilterPill = ({ active, label, count, color, onClick }: FilterPillProps) =
     type="button"
     onClick={onClick}
     className={cn(
-      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors",
       active
         ? "border-cashport-black bg-cashport-black text-white"
         : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-cashport-black"
@@ -229,9 +227,11 @@ const HistoryEventRow = ({
             <span className="whitespace-nowrap text-sm font-medium" style={{ color }}>
               {row.event}
             </span>
-            {docRef && <span className="whitespace-nowrap text-xs text-gray-400">{docRef}</span>}
+            {docRef && (
+              <span className="whitespace-nowrap text-[13px] text-gray-400">{docRef}</span>
+            )}
           </div>
-          <span className="text-xs text-gray-400">{getTime(row.created_at)}</span>
+          <span className="text-[13px] text-gray-400">{getTime(row.created_at)}</span>
         </div>
       </div>
 
@@ -242,7 +242,7 @@ const HistoryEventRow = ({
 
       {/* Usuario */}
       <div className="flex min-w-0 items-center gap-2">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold text-gray-500">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[13px] font-semibold text-gray-500">
           {getInitials(row.user_name)}
         </span>
         <span className="truncate text-sm text-gray-600">{row.user_name}</span>
@@ -395,7 +395,6 @@ const HistoryTab = () => {
           categories={filterCategories}
           value={filters}
           isLoading={isLoading}
-          trigger={{ label: "Filtrar", showChevron: true, className: TRIGGER_CLASS }}
           formatTagValue={(_category, items) =>
             items.length === 1 ? items[0].name : `${items.length} seleccionados`
           }
@@ -431,10 +430,10 @@ const HistoryTab = () => {
         <>
           <div className="mt-5 overflow-hidden rounded-lg border border-gray-100 bg-white">
             <div className={cn(ROW_GRID, "border-b border-gray-100 py-2.5")}>
-              <span className="text-xs font-medium text-gray-400">Evento</span>
-              <span className="text-xs font-medium text-gray-400">Descripción</span>
-              <span className="text-xs font-medium text-gray-400">Usuario</span>
-              {/* <span className="text-right text-xs font-medium text-gray-400">Monto</span> */}
+              <span className="text-[13px] font-medium text-gray-400">Evento</span>
+              <span className="text-[13px] font-medium text-gray-400">Descripción</span>
+              <span className="text-[13px] font-medium text-gray-400">Usuario</span>
+              {/* <span className="text-right text-[13px] font-medium text-gray-400">Monto</span> */}
               <span />
             </div>
 
@@ -471,7 +470,7 @@ const HistoryTab = () => {
 
           {filtered.length > 0 && (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-gray-400">
+              <p className="text-[13px] text-gray-400">
                 Mostrando {pageItems.length} de {filtered.length} eventos
               </p>
               <Pagination

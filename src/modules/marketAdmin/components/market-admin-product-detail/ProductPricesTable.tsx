@@ -17,7 +17,7 @@ export default function ProductPricesTable({ prices }: Props) {
   if (!prices || prices.length === 0) {
     return (
       <div>
-        <p className="text-xs font-bold text-[#141414] mb-3">Listas de precio</p>
+        <p className="text-[13px] font-bold text-[#141414] mb-3">Listas de precio</p>
         <p className="text-sm text-[#999999]">Sin listas de precio asignadas.</p>
       </div>
     );
@@ -25,16 +25,13 @@ export default function ProductPricesTable({ prices }: Props) {
 
   return (
     <div>
-      <p className="text-xs font-bold text-[#141414] mb-3">Listas de precio</p>
+      <p className="text-[13px] font-bold text-[#141414] mb-3">Listas de precio</p>
       <div className={`${gridCols} pb-2`}>
-        <span className="text-xs font-bold text-[#141414]">Lista de precio</span>
-        <span className="text-xs font-bold text-[#141414] text-right">Precio</span>
+        <span className="text-[13px] font-bold text-[#141414]">Lista de precio</span>
+        <span className="text-[13px] font-bold text-[#141414] text-right">Precio</span>
       </div>
       {prices.map((p) => (
-        <div
-          key={p.id}
-          className={`${gridCols} py-3 border-t border-[#F5F5F5] items-center`}
-        >
+        <div key={p.id} className={`${gridCols} py-3 border-t border-[#F5F5F5] items-center`}>
           <span className="text-sm text-[#141414]">{p.description}</span>
           <span className="text-sm font-bold text-[#141414] text-right">
             {formatCurrencyMoney(p.price)}

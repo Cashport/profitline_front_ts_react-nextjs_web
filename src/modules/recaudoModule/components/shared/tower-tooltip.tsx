@@ -35,7 +35,7 @@ export function TipContent({ title, rows, total }: TipContentProps) {
   const withTag = rows.some((r) => !r.separator && r.tag !== undefined);
 
   return (
-    <div className="wallet-scope whitespace-nowrap text-[11.5px] leading-normal text-popover-foreground">
+    <div className="wallet-scope whitespace-nowrap text-[13px] leading-normal text-popover-foreground">
       <div className="mb-1.5 border-b border-border pb-[5px] font-bold">{title}</div>
 
       {rows.map((r) =>
@@ -63,7 +63,7 @@ export function TipContent({ title, rows, total }: TipContentProps) {
             {withTag && (
               <span
                 className={cn(
-                  "justify-self-end rounded px-[5px] text-[10px] font-bold tabular-nums",
+                  "justify-self-end rounded px-[5px] text-[13px] font-bold tabular-nums",
                   r.tag && (r.strong ? "bg-wallet-accent-soft" : "bg-muted")
                 )}
               >

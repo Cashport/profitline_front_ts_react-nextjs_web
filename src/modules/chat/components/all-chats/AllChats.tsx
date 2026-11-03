@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, CaretDown, MagnifyingGlass, Robot } from "@phosphor-icons/react";
+import { Bell, CaretDown, Robot } from "@phosphor-icons/react";
 import { Dropdown, MenuProps, Pagination } from "antd";
 import { cn, formatChatDate } from "@/utils/utils";
-import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
@@ -20,6 +19,7 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 import { IAddClientForm, ITicket } from "@/types/chat/IChat";
 import { ticketToConversation } from "@/modules/chat/lib/ticketToConversation";
 import { sendTemplate, updateTicketEscalation } from "@/services/chat/chat";
+import SearchField from "@/components/ui/search-field/search-field";
 
 const ESCALATE_REASON = "El cliente pidió hablar con un humano";
 const DE_ESCALATE_REASON = "El cliente ya no necesita hablar con un humano";
@@ -260,17 +260,12 @@ export default function AllChats({
       </div>
 
       <div className="px-3 py-2">
-        <div className="relative">
-          <MagnifyingGlass className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar cliente, telefono o mensaje..."
-            className="w-full bg-[#F7F7F7] pl-8"
-            style={{ borderColor: "#DDDDDD" }}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoComplete="off"
-          />
-        </div>
+        <SearchField
+          value={query}
+          onChange={setQuery}
+          placeholder="Buscar cliente, telefono o mensaje..."
+          autoComplete="off"
+        />
       </div>
 
       <Tabs
@@ -278,7 +273,7 @@ export default function AllChats({
         onValueChange={(v) => setActiveTab(v as typeof activeTab)}
         className="w-full px-3 pt-2"
       >
-        <TabsList className="grid w-full grid-cols-4 bg-[#F7F7F7] [&>button]:px-1 [&>button]:text-xs">
+        <TabsList className="grid w-full grid-cols-4 bg-[#F7F7F7] [&>button]:px-1 [&>button]:text-[13px]">
           <TabsTrigger value="abiertos">Abiertos</TabsTrigger>
           <TabsTrigger value="no-leidos">No leídos</TabsTrigger>
           <TabsTrigger value="todos">Todos</TabsTrigger>
@@ -347,18 +342,18 @@ export default function AllChats({
                         )}
                       </div>
 
-                      <span className="shrink-0 w-12 md:w-14 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
+                      <span className="shrink-0 w-12 md:w-14 text-right text-[13px] text-muted-foreground tabular-nums whitespace-nowrap">
                         {formatChatDate(c.lastMessageAt)}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-[11px] font-normal w-fit">{c.customer}</p>
+                      <p className="text-[13px] font-normal w-fit">{c.customer}</p>
 
                       <div className="flex items-center gap-1 shrink-0">
                         {c.hasUnreadUpdate && c.countMessages > 0 ? (
                           <p
-                            className="bg-primary text-black text-[12px] font-medium rounded-full w-[23px] h-[23px] flex items-center justify-center"
+                            className="bg-primary text-black text-[13px] font-medium rounded-full w-[23px] h-[23px] flex items-center justify-center"
                             style={{ minWidth: 24, textAlign: "center" }}
                           >
                             {c.countMessages}

@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import useSWR from "swr";
 
+import Header from "@/components/organisms/header";
+
 import {
   Select,
   SelectContent,
@@ -54,37 +56,33 @@ export function DashboardHeader() {
   const periods = useMemo(buildLastSixMonths, []);
 
   return (
-    <div
-      className="bg-white px-6 py-5 border-b"
-      style={{ borderColor: "#DDDDDD", margin: "-1rem -2rem", marginBottom: "0" }}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <h1 className="text-xl font-semibold" style={{ color: "#141414" }}>
-            Dashboard de Ingesta
-          </h1>
-          {/* Tabs */}
-          <div
-            className="flex items-center gap-1 rounded-lg p-1"
-            style={{ backgroundColor: "#F3F4F6" }}
-          >
-            {(["resumen", "detalle"] as TabType[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className="px-4 py-1.5 text-sm font-medium rounded-md transition-all capitalize"
-                style={{
-                  backgroundColor: activeTab === tab ? "#ffffff" : "transparent",
-                  color: activeTab === tab ? "#111827" : "#6B7280",
-                  boxShadow: activeTab === tab ? "0 1px 3px rgba(0,0,0,0.08)" : "none"
-                }}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+    <Header
+      title="Dashboard de Ingesta"
+      back="/data-quality"
+      titleExtra={
+        /* Tabs */
+        <div
+          className="flex items-center gap-1 rounded-lg p-1"
+          style={{ backgroundColor: "#F3F4F6" }}
+        >
+          {(["resumen", "detalle"] as TabType[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="px-4 py-1.5 text-sm font-medium rounded-md transition-all capitalize"
+              style={{
+                backgroundColor: activeTab === tab ? "#ffffff" : "transparent",
+                color: activeTab === tab ? "#111827" : "#6B7280",
+                boxShadow: activeTab === tab ? "0 1px 3px rgba(0,0,0,0.08)" : "none"
+              }}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
-        <div className="flex items-center gap-4">
+      }
+      actionsExtra={
+        <>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">Región</span>
             <Select value={selectedRegion} onValueChange={setSelectedRegion}>
@@ -140,8 +138,8 @@ export function DashboardHeader() {
               </SelectContent>
             </Select>
           </div>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }

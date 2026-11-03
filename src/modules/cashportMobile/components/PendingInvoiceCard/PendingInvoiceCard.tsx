@@ -54,7 +54,7 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
           backgroundColor: statusConfig.color
         }}
       />
-      <span style={{ color: statusConfig.color, fontSize: "12px", fontWeight: 500 }}>
+      <span style={{ color: statusConfig.color, fontSize: "13px", fontWeight: 500 }}>
         {statusConfig.text}
       </span>
     </Flex>

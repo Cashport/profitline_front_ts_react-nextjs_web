@@ -225,7 +225,7 @@ export const WalletTab = () => {
       <div className="walletTab">
         <div className="walletTab__header clientStickyHeader">
           {/* Alto fijo: PrincipalButton usa height 100% para igualar a los demás botones */}
-          <Flex gap={"0.5rem"} style={{ height: "3rem" }}>
+          <Flex gap={"0.5rem"} align="center" style={{ height: "var(--control-h)" }}>
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar por ID"
@@ -235,13 +235,14 @@ export const WalletTab = () => {
             <PrincipalButton
               icon={<ListMagnifyingGlass size={18} />}
               onClick={() => setIsBulkSearchOpen(true)}
+              customStyles={{ fontSize: 14 }}
             >
               Búsqueda masiva
             </PrincipalButton>
             <Button
               className="button__actions"
               size="large"
-              icon={<DotsThree size={"1.5rem"} />}
+              icon={<DotsThree size={18} />}
               disabled={isLoading}
               onClick={handleisGenerateActionOpen}
             >

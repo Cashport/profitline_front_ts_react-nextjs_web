@@ -13,8 +13,6 @@ import { estadoMeta } from "../../utils/estados";
 import type { EstadoId, IWalletMatrixModalFilters } from "../../types";
 
 /** Misma superficie que el botón de tema para que los dos lean como un par. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface ModalFilterMatrixProps {
   value: IWalletMatrixModalFilters;
@@ -23,6 +21,8 @@ interface ModalFilterMatrixProps {
   selectableEstados: EstadoId[];
   /** El catálogo de estados aún no llega. */
   estadosLoading?: boolean;
+  /** En el header compartido: chips a la izquierda de "Filtrar" (ver FilterModal). */
+  inHeader?: boolean;
 }
 
 type Loading = "loading" | undefined;
@@ -58,7 +58,8 @@ export default function ModalFilterMatrix({
   value,
   onChange,
   selectableEstados,
-  estadosLoading = false
+  estadosLoading = false,
+  inHeader
 }: ModalFilterMatrixProps) {
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
@@ -150,13 +151,13 @@ export default function ModalFilterMatrix({
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ className: TRIGGER_CLASS }}
       formatTagValue={(_cat, items) =>
         items.length === 1 ? items[0].name : `${items.length} seleccionados`
       }
       onApply={(sel) => onChange(selectionToDomain(sel))}
       onValueChange={(sel) => onChange(selectionToDomain(sel))}
       onClearAll={() => onChange(EMPTY_MATRIX_MODAL_FILTERS)}
+      inHeader={inHeader}
     />
   );
 }

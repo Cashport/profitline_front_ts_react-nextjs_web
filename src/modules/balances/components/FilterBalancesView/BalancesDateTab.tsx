@@ -47,7 +47,7 @@ export default function BalancesDateTab({ value, onChange }: BalancesDateTabProp
   return (
     <div className="space-y-4">
       <div className="mb-4">
-        <p className="text-xs font-bold text-foreground mb-3">Periodos Predefinidos</p>
+        <p className="text-[13px] font-bold text-foreground mb-3">Periodos Predefinidos</p>
         <div className="grid grid-cols-2 gap-2">
           {DATE_PRESETS.map((preset) => (
             <button
@@ -63,13 +63,13 @@ export default function BalancesDateTab({ value, onChange }: BalancesDateTabProp
       </div>
 
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-bold text-foreground mb-3 flex items-center gap-2">
+        <p className="text-[13px] font-bold text-foreground mb-3 flex items-center gap-2">
           <Calendar className="w-3 h-3" />
           Rango Personalizado
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Desde</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">Desde</label>
             <input
               type="date"
               value={value.from_date || ""}
@@ -78,7 +78,7 @@ export default function BalancesDateTab({ value, onChange }: BalancesDateTabProp
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Hasta</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">Hasta</label>
             <input
               type="date"
               value={value.to_date || ""}

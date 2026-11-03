@@ -1,13 +1,17 @@
 import React, { FC, useState } from "react";
-import { MagnifyingGlass, X } from "phosphor-react";
-import styles from "./search-input.module.scss";
+
+import SearchField, { type SearchFieldSurface } from "@/components/ui/search-field/search-field";
+import { cn } from "@/utils/utils";
 
 interface UiSearchInputProps {
   id?: string;
   name?: string;
   placeholder?: string;
   className?: string;
+  /** @deprecated El buscador único no lleva borde; se ignora. */
   showBorder?: boolean;
+  /** Fondo sobre el que va: "card" (tarjeta blanca, por defecto) o "page" (fondo gris). */
+  surface?: SearchFieldSurface;
   /**
    * Si se pasa, el input queda controlado por el padre. Sirve para tener dos
    * buscadores sobre la misma consulta sin que se desincronicen. Si se omite,
@@ -17,12 +21,13 @@ interface UiSearchInputProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+/** API histórica (eventos de cambio) sobre el buscador único `SearchField`. */
 const UiSearchInput: FC<UiSearchInputProps> = ({
   id = "ui-search-input",
   name,
   placeholder,
   className,
-  showBorder = false,
+  surface,
   value,
   onChange
 }) => {
@@ -30,45 +35,21 @@ const UiSearchInput: FC<UiSearchInputProps> = ({
   const [internalValue, setInternalValue] = useState("");
   const inputValue = isControlled ? value : internalValue;
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isControlled) setInternalValue(event.target.value);
-    if (onChange) {
-      onChange(event);
-    }
-  };
-
-  const handleClearClick = () => {
-    if (!isControlled) setInternalValue("");
-    if (onChange) {
-      const event = {
-        target: { value: "" }
-      } as React.ChangeEvent<HTMLInputElement>;
-      onChange(event);
-    }
+  const handleChange = (next: string) => {
+    if (!isControlled) setInternalValue(next);
+    onChange?.({ target: { value: next } } as React.ChangeEvent<HTMLInputElement>);
   };
 
   return (
-    <label
-      htmlFor={id}
-      className={[styles.inputBox, showBorder && styles.bordered, className]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <MagnifyingGlass className={styles.icon} weight="bold" />
-      <input
-        type="text"
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        value={inputValue}
-        onChange={handleInputChange}
-      />
-      {inputValue && (
-        <button onClick={handleClearClick} className={styles.clearButton} aria-label="Clear input">
-          <X weight="bold" />
-        </button>
-      )}
-    </label>
+    <SearchField
+      id={id}
+      name={name}
+      placeholder={placeholder}
+      surface={surface}
+      value={inputValue}
+      onChange={handleChange}
+      className={cn("max-w-[25rem] flex-1", className)}
+    />
   );
 };
 

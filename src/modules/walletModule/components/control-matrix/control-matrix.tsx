@@ -2,6 +2,7 @@
 
 import { useMemo, type KeyboardEvent } from "react";
 import { Pagination } from "antd";
+import { Download } from "lucide-react";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import UiSearchInput from "@/components/ui/search-input";
@@ -60,6 +61,9 @@ interface ControlMatrixProps {
   // eslint-disable-next-line no-unused-vars
   onEstadoSelect: (estado: EstadoId, additive: boolean) => void;
   onEstadosClear: () => void;
+  /** Descarga el Excel de novedades (3 hojas) con los filtros activos. */
+  onDownloadNovelties?: () => void;
+  downloadingNovelties?: boolean;
 }
 
 /** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
@@ -85,7 +89,9 @@ export default function ControlMatrix({
   estados,
   selectableEstados,
   onEstadoSelect,
-  onEstadosClear
+  onEstadosClear,
+  onDownloadNovelties,
+  downloadingNovelties
 }: ControlMatrixProps) {
   // Ni la búsqueda ni el orden se resuelven aquí: la tabla sólo tiene la
   // página cargada, 15 de miles de clientes. Filtrar daría "sin resultados"
@@ -107,15 +113,15 @@ export default function ControlMatrix({
   // Plegada por el drilldown, el pie es del cliente elegido; si no, son los
   // totales del servidor sobre la foto completa: la página es sólo un trozo.
   const tramoFooter = (i: number) =>
-    folded ? tramoTotal(visibleRows, i) : (totals?.byAging?.[AGING_BUCKETS[i]]?.total ?? 0);
+    folded ? tramoTotal(visibleRows, i) : totals?.byAging?.[AGING_BUCKETS[i]]?.total ?? 0;
 
   const totalFooter = folded
     ? visibleRows.reduce((a, r) => a + rowSegments(r).total, 0)
-    : (totals?.total ?? 0);
+    : totals?.total ?? 0;
 
   const vencidoFooter = folded
     ? visibleRows.reduce((a, r) => a + r.vencido.total, 0)
-    : (totals?.byAging?.[OVERDUE_BUCKET]?.total ?? 0);
+    : totals?.byAging?.[OVERDUE_BUCKET]?.total ?? 0;
   const vencidoFooterPct = pct(vencidoFooter, totalFooter);
 
   /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
@@ -166,7 +172,7 @@ export default function ControlMatrix({
   };
 
   return (
-    <section className="rounded-xl bg-card text-card-foreground shadow-sm">
+    <section className="cp-card text-card-foreground">
       <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
         <div>
           <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>
@@ -180,7 +186,7 @@ export default function ControlMatrix({
           </div>
           {/* Hasta que llega el catálogo ningún chip se puede elegir: la pista esperaría. */}
           {selectableEstados.length > 0 && (
-            <p className="mt-1.5 text-[11.5px] text-muted-foreground">
+            <p className="mt-1.5 text-[13px] text-muted-foreground">
               {estados.length === 0 ? (
                 "clic en un estado para filtrar · shift+clic para sumar varios"
               ) : (
@@ -201,14 +207,28 @@ export default function ControlMatrix({
         </div>
 
         {/* UiSearchInput es flex:1, así que el ml-auto va en el contenedor. */}
-        <div className="ml-auto w-full max-w-[270px]">
-          <UiSearchInput
-            id="wallet-matrix-search"
-            placeholder="Buscar cliente, NIT, factura o ejecutivo…"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-          <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
+        <div className="ml-auto flex w-full max-w-[320px] flex-col">
+          <div className="flex items-center gap-1.5">
+            <div className="min-w-0 flex-1">
+              <UiSearchInput
+                id="wallet-matrix-search"
+                placeholder="Buscar cliente, NIT, factura o ejecutivo…"
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onDownloadNovelties}
+              disabled={downloadingNovelties}
+              title="Descargar"
+              aria-label="Descargar novedades en Excel"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Download className="h-[15px] w-[15px]" />
+            </button>
+          </div>
+          <p className="mt-1.5 text-right text-[13px] text-muted-foreground">
             {loading
               ? "Actualizando…"
               : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"}`}
@@ -229,7 +249,7 @@ export default function ControlMatrix({
             <ProfitLoader size="small" />
           </div>
         )}
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
               {/* Los `col` son los `sort_by` del API, así la vista los manda tal cual. */}
@@ -296,10 +316,10 @@ export default function ControlMatrix({
                       >
                         <span className="font-semibold text-foreground">{row.nombre}</span>
                         {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
-                        <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
+                        <span className="ml-2 whitespace-nowrap text-[13px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
                           {nombreActiva ? "quitar selección" : "ver grupos"}
                         </span>
-                        <div className="text-[11.5px] text-muted-foreground">
+                        <div className="text-[13px] text-muted-foreground">
                           NIT {row.nit} — {row.ejecutivo}
                         </div>
                       </td>
@@ -355,7 +375,7 @@ export default function ControlMatrix({
       {/* El orden es de lo que se ve; los totales del pie y el paginador, de la
           foto completa (salvo el pie con una fila plegada, que es de esa fila). */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
-        <span className="text-[11.5px] text-muted-foreground">
+        <span className="text-[13px] text-muted-foreground">
           Mostrando {visibleRows.length} de {totalClients}{" "}
           {totalClients === 1 ? "cliente" : "clientes"}
         </span>

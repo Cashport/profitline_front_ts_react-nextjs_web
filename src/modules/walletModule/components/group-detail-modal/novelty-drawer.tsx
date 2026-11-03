@@ -9,13 +9,13 @@ import { useWalletTheme } from "../../contexts/wallet-theme-context";
 export type NoveltyModalMode = "crear" | "editar" | "vincular";
 
 export const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h4 className="mb-[11px] text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+  <h4 className="mb-[11px] text-[13px] font-semibold text-muted-foreground">
     {children}
   </h4>
 );
 
 export const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="mb-1 block text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+  <label className="mb-1 block text-[13px] font-semibold text-muted-foreground">
     {children}
   </label>
 );
@@ -56,7 +56,7 @@ export function NoveltyPanel({
           <h3 className="text-[17px] font-semibold leading-[1.2] tracking-[-0.015em] text-foreground">
             {title}
           </h3>
-          {subtitle && <p className="mt-1 text-[12.5px] text-muted-foreground">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-[13px] text-muted-foreground">{subtitle}</p>}
         </div>
         <button
           type="button"
@@ -78,7 +78,7 @@ export function NoveltyPanel({
           type="button"
           disabled={isSending}
           onClick={onClose}
-          className="rounded-md border border-border bg-card px-3 py-1.5 text-[12.5px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45"
+          className="rounded-md border border-border bg-card px-3 py-1.5 text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45"
         >
           Cancelar
         </button>
@@ -86,7 +86,7 @@ export function NoveltyPanel({
           type="button"
           disabled={isSending || submitDisabled}
           onClick={onSubmit}
-          className="rounded-md bg-cashport-green px-3 py-1.5 text-[12.5px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
+          className="rounded-md bg-cashport-green px-3 py-1.5 text-[13px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
         >
           {isSending ? sendingLabel : submitLabel}
         </button>

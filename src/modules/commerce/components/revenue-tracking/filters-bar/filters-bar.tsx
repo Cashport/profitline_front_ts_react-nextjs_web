@@ -4,11 +4,14 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
-import ThemeToggle from "@/modules/commerce/components/revenue-tracking/theme-toggle/theme-toggle";
 import IvaToggle from "@/modules/commerce/components/revenue-tracking/iva-toggle/iva-toggle";
 import { getDashboardSalesFilters } from "@/services/dashboardSales/dashboardSales";
 import type { IDashboardSalesFilter } from "@/types/dashboardSales/IDashboardSales";
 import { FilterModal } from "@/components/ui/filter-modal";
+import {
+  FilterChips,
+  type FilterChipItem
+} from "@/components/ui/page-header-controls/page-header-controls";
 import type {
   FilterCategoryConfig,
   FilterCategoryStatus,
@@ -86,7 +89,7 @@ export default function FiltersBar() {
       renderPanel: () => <DateRangeTab value={fechaDraft} onChange={setFechaDraft} />,
       renderTag: () =>
         filters.fecha?.[0] ? (
-          <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-xs">
+          <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-[13px]">
             <span className="text-muted-foreground font-medium">Fecha:</span>
             <span className="font-bold text-foreground">{filters.fecha[0].name}</span>
             <button
@@ -104,25 +107,56 @@ export default function FiltersBar() {
     ...ENTITY_CATEGORIES.slice(1).map(toEntityCategory)
   ];
 
+  // En el header el FilterModal no pinta chips de categorías custom (Fecha), así que los
+  // chips se arman aquí, con la fecha primero, y el modal va con hideTags.
+  const chips: FilterChipItem[] = [
+    ...(filters.fecha?.[0]
+      ? [
+          {
+            key: "fecha",
+            label: "Fecha",
+            value: filters.fecha[0].name,
+            onRemove: () => setFilters({ ...filters, fecha: [] })
+          }
+        ]
+      : []),
+    ...categories.flatMap((cat) => {
+      const items = cat.kind === "custom" ? [] : filters[cat.key] || [];
+      if (!items.length) return [];
+      return [
+        {
+          key: cat.key,
+          label: cat.label,
+          value: items.length === 1 ? items[0].name : `${items.length} seleccionados`,
+          onRemove: () => setFilters({ ...filters, [cat.key]: [] })
+        }
+      ];
+    })
+  ];
+
   return (
-    <FilterModal
-      categories={categories}
-      value={filters}
-      onApply={(sel) => {
-        const opt = fechaDraftToOption(fechaDraft);
-        setFilters({ ...sel, fecha: opt ? [opt] : [] });
-      }}
-      onValueChange={setFilters}
-      onOpen={() => setFechaDraft(fechaDraftFromOption(filters.fecha?.[0]))}
-      onClearDraft={() => setFechaDraft(null)}
-      onCategoryOpen={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key])}
-      onRetryCategory={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key], true)}
-      barEnd={
-        <div className="shrink-0 flex items-center gap-3 sm:ml-auto">
-          <IvaToggle />
-          <ThemeToggle />
-        </div>
-      }
-    />
+    <>
+      <FilterChips chips={chips} />
+      <FilterModal
+        categories={categories}
+        value={filters}
+        onApply={(sel) => {
+          const opt = fechaDraftToOption(fechaDraft);
+          setFilters({ ...sel, fecha: opt ? [opt] : [] });
+        }}
+        onValueChange={setFilters}
+        onOpen={() => setFechaDraft(fechaDraftFromOption(filters.fecha?.[0]))}
+        onClearDraft={() => setFechaDraft(null)}
+        onCategoryOpen={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key])}
+        onRetryCategory={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key], true)}
+        inHeader
+        hideTags
+        barEnd={
+          <>
+            <IvaToggle />
+          </>
+        }
+      />
+    </>
   );
 }

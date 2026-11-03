@@ -31,7 +31,7 @@ export function CanalBadge({ label, secondary = false }: { label: string; second
     (secondary ? { bg: "#EAB308", text: "#111827" } : { bg: "#1a2035", text: "#ffffff" });
   return (
     <span
-      className="inline-flex items-center justify-center w-8 h-8 rounded-full text-[10px] font-semibold leading-none select-none flex-shrink-0"
+      className="inline-flex items-center justify-center w-8 h-8 rounded-full text-[13px] font-semibold leading-none select-none flex-shrink-0"
       style={{ backgroundColor: colors.bg, color: colors.text }}
       title={label}
     >

@@ -5,12 +5,12 @@ import type { ColumnsType } from "antd/es/table";
 import { Eye, ArrowsClockwise } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 
-import Container from "@/components/atoms/Container/Container";
 import UiSearchInput from "@/components/ui/search-input";
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import { useMessageApi } from "@/context/MessageContext";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useBotsHealth } from "@/hooks/useBotsHealth";
+import { useConfirmBotExecution } from "@/hooks/useConfirmBotExecution";
 import { executeBotManually } from "@/services/bots/bots";
 import { IBotHealth } from "@/types/bots/IBotHealth";
 
@@ -66,6 +66,8 @@ export const BotHealthView: React.FC = () => {
     setExecutingId(null);
     if (success) mutate();
   };
+
+  const { requestExecution, confirmationModal } = useConfirmBotExecution(handleQuickExecute);
 
   const columns: ColumnsType<IBotHealth> = [
     {
@@ -131,7 +133,7 @@ export const BotHealthView: React.FC = () => {
             style={{ backgroundColor: "#F7F7F7" }}
             icon={<ArrowsClockwise size={20} color="#141414" weight="bold" />}
             loading={executingId === row.schedule_id}
-            onClick={() => handleQuickExecute(row)}
+            onClick={() => requestExecution(row)}
           />
           <IconButton
             style={{ backgroundColor: "#F7F7F7" }}
@@ -144,25 +146,27 @@ export const BotHealthView: React.FC = () => {
   ];
 
   return (
-    <Container style={{ gap: "1.5rem", overflowY: "auto" }}>
+    <div className="cp-page">
       <BotSummaryCards summary={summary} loading={isLoading} />
 
-      <Flex gap={8}>
-        <UiSearchInput placeholder="Buscar bot o cliente" onChange={handleSearch} />
-      </Flex>
+      <div className="cp-card flex flex-col gap-3 px-[18px] py-[14px]">
+        <Flex gap={8}>
+          <UiSearchInput placeholder="Buscar bot o cliente" onChange={handleSearch} />
+        </Flex>
 
-      <Table
-        columns={columns}
-        dataSource={data.map((bot) => ({ ...bot, key: bot.schedule_id }))}
-        loading={isLoading}
-        pagination={{
-          current: currentPage,
-          pageSize: PAGE_SIZE,
-          total,
-          onChange: setCurrentPage,
-          showSizeChanger: false
-        }}
-      />
+        <Table
+          columns={columns}
+          dataSource={data.map((bot) => ({ ...bot, key: bot.schedule_id }))}
+          loading={isLoading}
+          pagination={{
+            current: currentPage,
+            pageSize: PAGE_SIZE,
+            total,
+            onChange: setCurrentPage,
+            showSizeChanger: false
+          }}
+        />
+      </div>
 
       <BotDetailDrawer
         bot={selectedBot}
@@ -170,6 +174,7 @@ export const BotHealthView: React.FC = () => {
         onClose={closeDrawer}
         onExecuted={mutate}
       />
-    </Container>
+      {confirmationModal}
+    </div>
   );
 };

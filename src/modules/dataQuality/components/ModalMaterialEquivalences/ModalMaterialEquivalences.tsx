@@ -88,7 +88,7 @@ export function ModalMaterialEquivalences({
         <div className=" pt-4 pb-2 flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
             <span
-              className="text-[11px] font-medium px-1.5 py-0.5 rounded"
+              className="text-[13px] font-medium px-1.5 py-0.5 rounded"
               style={{ backgroundColor: "#F3F3F3", color: "#888" }}
             >
               Cod. cliente
@@ -99,7 +99,7 @@ export function ModalMaterialEquivalences({
           </div>
           <div className="flex items-center gap-2">
             <span
-              className="text-[11px] font-medium px-1.5 py-0.5 rounded"
+              className="text-[13px] font-medium px-1.5 py-0.5 rounded"
               style={{ backgroundColor: "#F3F3F3", color: "#888" }}
             >
               Producto cliente
@@ -114,34 +114,34 @@ export function ModalMaterialEquivalences({
         <div className=" pb-1">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: "1px solid #EEEEEE" }}>
+              <tr className="border-b border-cp-line bg-cp-surface">
                 <th
-                  className="text-left py-2.5 font-semibold text-sm"
-                  style={{ color: "#141414", minWidth: "320px" }}
+                  className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
+                  style={{ minWidth: "320px" }}
                 >
                   Nombre producto
                 </th>
                 <th
-                  className="text-left py-2.5 font-semibold text-sm"
-                  style={{ color: "#141414", width: "160px" }}
+                  className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
+                  style={{ width: "160px" }}
                 >
                   SKU
                 </th>
                 <th
-                  className="text-left py-2.5 font-semibold text-sm"
-                  style={{ color: "#141414", width: "60px" }}
+                  className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
+                  style={{ width: "60px" }}
                 >
                   Factor
                 </th>
                 <th
-                  className="text-left py-2.5 font-semibold text-sm"
-                  style={{ color: "#141414", width: "100px" }}
+                  className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
+                  style={{ width: "100px" }}
                 >
                   Desde
                 </th>
                 <th
-                  className="text-left py-2.5 font-semibold text-sm"
-                  style={{ color: "#141414", width: "100px" }}
+                  className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
+                  style={{ width: "100px" }}
                 >
                   Hasta
                 </th>
@@ -190,7 +190,7 @@ export function ModalMaterialEquivalences({
                       <td className="py-3">
                         {isActive ? (
                           <span
-                            className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                            className="text-[13px] font-semibold px-2 py-0.5 rounded-full"
                             style={{ backgroundColor: "#CBE71E", color: "#141414" }}
                           >
                             Vigente

@@ -34,7 +34,7 @@ interface GroupActionsMenuProps {
 // Sin color: el popup vive en un portal fuera de .dark/.wallet-scope, así que
 // los tokens de Tailwind darían el valor claro en tema oscuro. AntD ya lo tiñe.
 const titulo = (texto: string) => (
-  <span className="text-[10.5px] font-semibold uppercase tracking-[0.06em]">{texto}</span>
+  <span className="text-[13px] font-semibold">{texto}</span>
 );
 
 /** Acciones sobre el grupo y la selección.
@@ -90,7 +90,7 @@ export default function GroupActionsMenu({
                 style={{ backgroundColor: s.color }}
               />
               <span className="flex-1">{s.description}</span>
-              {actual && <span className="text-[10.5px] opacity-60">actual</span>}
+              {actual && <span className="text-[13px] opacity-60">actual</span>}
             </span>
           )
         };

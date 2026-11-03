@@ -10,7 +10,7 @@ import { useAppStore } from "@/lib/store/store";
 import { TabsEnum } from "@/lib/slices/providersViewSlice";
 import { fetcher } from "@/utils/api/api";
 
-import Container from "@/components/atoms/Container/Container";
+import Header from "@/components/organisms/header";
 import UiSearchInput from "@/components/ui/search-input";
 import { FilterClients } from "@/components/atoms/Filters/FilterClients/FilterClients";
 import { Tag } from "@/components/atoms/Tag/Tag";
@@ -142,41 +142,45 @@ const ThirdPartiesView: React.FC = () => {
   ];
 
   return (
-    <Container style={{ gap: "1.5rem", overflowY: "auto" }}>
-      <Tabs
-        defaultActiveKey={activeTab}
-        onChange={(key: string) => handleTabChange(key as TabsEnum)}
-        size="large"
-        style={{
-          fontSize: 16,
-          fontWeight: 700
-        }}
-      >
-        <Tabs.TabPane tab="Clientes" key={TabsEnum.Clients} />
-        <Tabs.TabPane tab="Proveedores" key={TabsEnum.Providers} />
-      </Tabs>
-      <Flex gap={8}>
-        <UiSearchInput
-          placeholder={`Buscar ${activeTab === TabsEnum.Clients ? "clientes" : "proveedores"}`}
-          onChange={handleSearch}
+    <div className="cp-page min-h-0 flex-1">
+      <Header title="Proveedores" />
+      {/* Tarjeta compartida (docs/DESIGN.md §3); el buscador es el de la tabla. */}
+      <div className="cp-card flex flex-col gap-6 overflow-y-auto px-[18px] py-[14px]">
+        <Tabs
+          defaultActiveKey={activeTab}
+          onChange={(key: string) => handleTabChange(key as TabsEnum)}
+          size="large"
+          style={{
+            fontSize: 16,
+            fontWeight: 700
+          }}
+        >
+          <Tabs.TabPane tab="Clientes" key={TabsEnum.Clients} />
+          <Tabs.TabPane tab="Proveedores" key={TabsEnum.Providers} />
+        </Tabs>
+        <Flex gap={8} align="center">
+          <UiSearchInput
+            placeholder={`Buscar ${activeTab === TabsEnum.Clients ? "clientes" : "proveedores"}`}
+            onChange={handleSearch}
+          />
+          <FilterClients setFilterClients={() => {}} />
+          <GenerateActionButton onClick={openModal} />
+        </Flex>
+        <Table
+          columns={columns}
+          dataSource={data?.data}
+          loading={isLoading}
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: data?.pagination?.totalRows || 0,
+            onChange: handlePaginationChange,
+            showSizeChanger: false
+          }}
         />
-        <FilterClients setFilterClients={() => {}} />
-        <GenerateActionButton onClick={openModal} />
-      </Flex>
-      <Table
-        columns={columns}
-        dataSource={data?.data}
-        loading={isLoading}
-        pagination={{
-          current: currentPage,
-          pageSize: pageSize,
-          total: data?.pagination?.totalRows || 0,
-          onChange: handlePaginationChange,
-          showSizeChanger: false
-        }}
-      />
+      </div>
       <ModalGenerateAction isOpen={isModalOpen} onClose={closeModal} />
-    </Container>
+    </div>
   );
 };
 

@@ -188,7 +188,6 @@ export const FilterUsers = ({ idProject, setSelectedUsers }: Props) => {
       className="filterCascader"
       style={{ width: "15rem" }}
       multiple
-      size="large"
       removeIcon
       maxTagCount="responsive"
       placeholder="Filtrar"

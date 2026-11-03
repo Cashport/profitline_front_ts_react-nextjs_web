@@ -11,6 +11,7 @@ import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import "./ClientsGroupsTable.scss";
 import { ModalChangeStatus } from "../../modals/ModalChangeStatus/ModalChangeStatus";
 import { useDebounce } from "@/hooks/useDeabouce";
+import { getAppZoom } from "@/utils/utils";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import GenericCascaderFilter, {
   FilterOption
@@ -30,7 +31,7 @@ interface PropsClientsGroupsTable {
 export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTable) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalStatus, setIsOpenModalStatus] = useState(false);
-  const [height, setHeight] = useState<number>(window.innerHeight);
+  const [height, setHeight] = useState<number>(window.innerHeight / getAppZoom());
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any>([]);
   const [page, setPage] = useState(1);
@@ -44,7 +45,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
 
   useEffect(() => {
     const handleResize = () => {
-      setHeight(window.innerHeight);
+      setHeight(window.innerHeight / getAppZoom());
     };
     window.addEventListener("resize", handleResize);
     return () => {
@@ -217,7 +218,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
 
   return (
     <main className="mainClientsGroupsTable">
-      <Flex justify="space-between" className="mainClientsGroupsTable_header">
+      <Flex justify="space-between" align="center" className="mainClientsGroupsTable_header">
         <Flex gap={"1.75rem"}>
           <UiSearchInput
             placeholder="Buscar grupos de clientes"
@@ -235,7 +236,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
           className="buttonNewProject"
           size="large"
           onClick={onCreateClientsGroup}
-          icon={<Plus weight="bold" size={15} />}
+          icon={<Plus weight="bold" size={18} />}
         >
           Crear Grupo de Clientes
         </Button>

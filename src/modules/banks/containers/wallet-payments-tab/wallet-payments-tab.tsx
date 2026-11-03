@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
-import { Button, Flex, Spin } from "antd";
-import { Bank, DotsThree } from "phosphor-react";
+import { Flex, Spin } from "antd";
+import { DotsThree } from "phosphor-react";
 import dayjs from "dayjs";
 
 import { useModalDetail } from "@/context/ModalContext";
@@ -11,7 +11,6 @@ import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransac
 import { approvePayment } from "@/services/banksPayments/banksPayments";
 import { markPaymentsAsUnidentified } from "@/services/applyTabClients/applyTabClients";
 
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import BanksTable from "../../components/banks-table/Banks-table";
@@ -24,10 +23,7 @@ import ModalActionsSplitPayment from "../../components/modal-actions-split-payme
 import ModalActionsChangeStatus from "../../components/modal-actions-change-status";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
-import {
-  FilterActivePaymentsTab,
-  IActivePaymentsFilters
-} from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
+import { IActivePaymentsFilters } from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
 import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 
 import { ISingleBank } from "@/types/banks/IBanks";
@@ -35,8 +31,9 @@ import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { IFormFilterDates } from "../../components/modal-filter-select-dates/modal-filter-select-dates";
 
 import styles from "./wallet-payments-tab.module.scss";
-import { FilterPaymentApplicationsTab } from "@/components/atoms/Filters/FilterPaymentApplicationsTab/FilterPaymentApplicationsTab";
 import ModalActionsWalletPayments from "../../components/modal-actions-wallet-payments";
+import { BanksSlot } from "../../contexts/banks-chrome-context";
+import BanksFilterModal from "../../components/banks-filter-modal/banks-filter-modal";
 
 interface WalletPaymentsTabProps {
   isActive: boolean;
@@ -114,24 +111,30 @@ export const WalletPaymentsTab: FC<WalletPaymentsTabProps> = ({ isActive }) => {
   return (
     <>
       <Flex className={styles.walletPaymentsTab} vertical>
-        <div className={`${styles.header} banksStickyHeader`}>
-          <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-          <FilterPaymentApplicationsTab
-            setSelectedFilters={setSelectedFilters}
-            handleOpenCustomDate={() => setWhichModalIsOpen(1)}
-            customDate={customDate}
-            setCustomDate={setCustomDate}
+        {/* Diseño "Pedidos y Bancos": buscador y Filtrar en el header; las acciones junto a las
+              pestañas (ver banks-chrome-context). */}
+        <BanksSlot to="header" active={isActive}>
+          <BanksFilterModal setSelectedFilters={setSelectedFilters} />
+          <OptimizedSearchComponent
+            title="Buscar referencia, valor…"
+            onSearch={handleSearch}
+            surface="page"
+            className="!w-[220px] !flex-none"
           />
-          <Button
-            className={styles.button__actions}
-            icon={<DotsThree size={"1.5rem"} />}
+        </BanksSlot>
+        <BanksSlot to="tabs" active={isActive}>
+          <button
+            type="button"
+            title="Generar acción"
+            aria-label="Generar acción"
             onClick={() => {
               setisGenerateActionOpen(true);
             }}
+            className="flex h-[var(--control-h)] w-[var(--control-h)] cursor-pointer items-center justify-center rounded-lg border border-cp-line-2 bg-cp-surface text-cp-ink hover:border-cp-ink"
           >
-            Generar acción
-          </Button>
-        </div>
+            <DotsThree size={18} weight="bold" />
+          </button>
+        </BanksSlot>
 
         {isLoading ? (
           <Flex justify="center">

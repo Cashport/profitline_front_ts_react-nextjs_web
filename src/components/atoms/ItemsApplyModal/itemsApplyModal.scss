@@ -1,74 +1,72 @@
 .item__apply__modal {
-  position: relative;
-  background-color: #F7F7F7;
-  padding: 4px 14px 4px 0px;
-  border-radius: 8px;
+    position: relative;
+    background-color: #f7f7f7;
+    padding: 4px 14px 4px 0px;
+    border-radius: 8px;
 
-  .head {
-    height: 64px;
-    display: flex;
-    align-items: center;
-    padding: 0 0 0 0px;
-
-
-    .texts {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-
-      .mainText {
+    .head {
+        height: 64px;
         display: flex;
-        column-gap: 8px;
+        align-items: center;
+        padding: 0 0 0 0px;
 
-        .name {
-          display: flex;
-          font-size: 16px;
-          column-gap: 8px;
-          font-weight: 600;
-          line-height: 24px;
+        .texts {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
 
-          span {
-            font-weight: 400;
-          }
+            .mainText {
+                display: flex;
+                column-gap: 8px;
+
+                .name {
+                    display: flex;
+                    font-size: 16px;
+                    column-gap: 8px;
+                    font-weight: 600;
+                    line-height: 24px;
+
+                    span {
+                        font-weight: 400;
+                    }
+                }
+
+                .legalice {
+                    height: 22px;
+                    display: flex;
+                    padding: 0 8px;
+                    font-size: 13px;
+                    font-weight: 300;
+                    line-height: 18px;
+                    border-radius: 4px;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: #f7f7f7;
+                }
+            }
         }
 
-        .legalice {
-          height: 22px;
-          display: flex;
-          padding: 0 8px;
-          font-size: 12px;
-          font-weight: 300;
-          line-height: 18px;
-          border-radius: 4px;
-          align-items: center;
-          justify-content: center;
-          background-color: #F7F7F7;
+        .mainValues {
+            display: flex;
+            column-gap: 16px;
+            flex-direction: column;
+
+            .value {
+                font-size: 18px;
+                font-weight: 500;
+                line-height: 20px;
+            }
+
+            .subValue {
+                font-size: 14px;
+                font-weight: 275;
+                line-height: 20px;
+                text-align: right;
+            }
         }
-      }
     }
 
-    .mainValues {
-      display: flex;
-      column-gap: 16px;
-      flex-direction: column;
-
-      .value {
-        font-size: 18px;
-        font-weight: 500;
-        line-height: 20px;
-      }
-
-      .subValue {
-        font-size: 14px;
-        font-weight: 275;
-        line-height: 20px;
-        text-align: right;
-      }
+    .divider__item {
+        margin-left: 0 !important;
     }
-  }
-
-
-  .divider__item {
-    margin-left: 0 !important;
-  }
 }

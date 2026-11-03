@@ -90,9 +90,19 @@ El `dockerfile` instala con Yarn, ejecuta `yarn build` y sirve con `yarn start` 
 
 ## Pruebas
 
-**No hay pruebas automatizadas**: no existe test runner configurado ni archivos `*.test.*` / `*.spec.*`.
+No hay un framework de pruebas configurado. La confirmación de ejecución manual
+de bots tiene pruebas puntuales con el runner integrado de Node.js:
 
-La verificación disponible es estática:
+```bash
+node --test tests/bot-execution-confirmation.test.cjs
+```
+
+Las tablas y los drawers de Data Quality y Salud de Bots solicitan confirmación
+antes de invocar el flujo manual existente. Cancelar o cerrar no ejecuta el bot;
+la confirmación queda bloqueada mientras se procesa la solicitud. Los servicios,
+mensajes de resultado y ejecuciones automáticas no cambian.
+
+La verificación estática y de compilación:
 
 ```bash
 npx tsc --noEmit      # tipos
@@ -160,17 +170,19 @@ Rutas tomadas de `src/app/**/page.tsx`. El nombre de permiso es el `page_name` q
 
 Módulos presentes en el código que Cashport Brain todavía no describe:
 
-| Módulo                                                          | Rutas                                       | Código                                              | Permiso                                     |
-| --------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
-| Calidad de datos (ingesta por cliente/país, catálogos, alertas) | `/data-quality/**`                          | `src/modules/dataQuality/`                          | `DataQuality` (más permisos por componente) |
-| Cuentas médicas                                                 | `/cuentas-medicas`, `/cuentas-medicas/[id]` | `src/modules/medicalAccounts/`                      | `MedicalAccounts`                           |
-| Aprobaciones (flujos de aprobación por pasos)                   | `/aprobaciones`                             | `src/modules/aprobaciones/`                         | `Aprobaciones`                              |
-| Proveedores / terceros                                          | `/proveedores`, `/proveedores/[id]`         | `src/components/organisms/proveedores/`             | `Proveedores` (oculto en el menú)           |
-| Proyectos y configuración                                       | `/settings`, `/proyectos/**`                | `src/components/organisms/projects/`                | `Configuracion`                             |
-| Portal Cetaphil (marketplace para invitados)                    | `/cetaphil` (pública)                       | `src/modules/cetaphil/`                             | —                                           |
-| Portal de archivos (descarga por token)                         | `/portal-archivos` (pública)                | `src/app/portal-archivos/`                          | —                                           |
-| Torre de control                                                | `/torreControl`                             | `src/modules/torreControlModule/` (datos simulados) | oculto en el menú                           |
-| Nuevo dashboard                                                 | `/newDashboard`                             | `src/modules/new_dashboard/` (datos simulados)      | oculto en el menú                           |
+| Módulo                                                          | Rutas                                              | Código                                              | Permiso                                     |
+| --------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
+| Calidad de datos (ingesta por cliente/país, catálogos, alertas) | `/data-quality/**`                                 | `src/modules/dataQuality/`                          | `DataQuality` (más permisos por componente) |
+| Cuentas médicas                                                 | `/cuentas-medicas`, `/cuentas-medicas/[id]`        | `src/modules/medicalAccounts/`                      | `MedicalAccounts`                           |
+| Aprobaciones (flujos de aprobación por pasos)                   | `/aprobaciones`                                    | `src/modules/aprobaciones/`                         | `Aprobaciones`                              |
+| Proveedores / terceros                                          | `/proveedores`, `/proveedores/[id]`                | `src/components/organisms/proveedores/`             | `Proveedores` (oculto en el menú)           |
+| Proyectos y configuración                                       | `/settings`, `/proyectos/**`                       | `src/components/organisms/projects/`                | `Configuracion`                             |
+| Portal Cetaphil (marketplace para invitados)                    | `/cetaphil` (pública)                              | `src/modules/cetaphil/`                             | —                                           |
+| Portal de archivos (descarga por token)                         | `/portal-archivos` (pública)                       | `src/app/portal-archivos/`                          | —                                           |
+| Torre de control                                                | `/torreControl`                                    | `src/modules/torreControlModule/` (datos simulados) | oculto en el menú                           |
+| Nuevo dashboard                                                 | `/newDashboard`                                    | `src/modules/new_dashboard/` (datos simulados)      | oculto en el menú                           |
+| Informes (informes HTML publicados para el equipo)              | `/reports`, `/reports/[id]`                        | `src/modules/reportsModule/`                        | `Reports`                                   |
+| Alertas de bloqueo (clientes y puntos de venta por bloquear)    | `/blockingAlerts`, `/blockingAlerts/[clientId]/**` | `src/modules/blockingAlerts/` (datos simulados)     | `BlockingAlerts`                            |
 
 ---
 
@@ -241,6 +253,23 @@ Cada proyecto (cliente) tiene permisos por rol: `views_permissions[].page_name` 
 - El menú (`src/components/atoms/NavigationBar/ModulesButtons/ModulesButtons.tsx`) muestra cada módulo con `checkUserViewPermissions`.
 - `src/utils/permissions/routePermissions.ts` protege por URL solo las rutas de `ROUTE_PREFIX_TO_PERMISSION`. Las rutas que no están en ese mapa no exigen permiso.
 - Hay comportamiento específico por cliente, controlado por IDs de proyecto en `src/utils/constants/globalConstants.ts` y algunos literales en el código.
+
+### Asignación de países a usuarios
+
+- Los países disponibles se consultan con `GET /country?project_id=<proyecto>`.
+  El detalle de `GET /user/:id` devuelve los asignados en `data.COUNTRY_IDS`.
+- Al registrar un usuario no administrador (roles distintos de 1 y 2), se exige
+  al menos un país para evitar crear una cuenta sin acceso a Data/Alertas.
+- Marketplace-admin usa `updateUserCountries`: antes de guardar consulta el perfil
+  y los grupos actuales y envía el payload completo requerido por `PUT /user`,
+  incluidos `zones` y `groups_id` aunque estén vacíos. No modifica las reglas de
+  negocio ni el estado activo.
+- Los errores de lectura no se interpretan como una lista vacía: se muestran con
+  opción de reintentar. Los errores de guardado se propagan para revertir el estado
+  optimista y evitar mensajes de éxito falsos. El formulario conserva los cambios
+  ante un error y distingue el 409 de correo duplicado.
+- Pruebas de regresión (sin llamadas al backend):
+  `node --test tests/user-countries.test.js`.
 
 ---
 

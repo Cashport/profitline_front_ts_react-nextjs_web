@@ -21,12 +21,12 @@ import { useNoveltyStatuses } from "../../hooks/useNoveltyStatuses";
 import type { INoveltiesFilters } from "../../types";
 
 /** Misma altura y superficie que los demás controles de la barra. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface NoveltiesFilterModalProps {
   value: INoveltiesFilters;
   onChange: (next: INoveltiesFilters) => void;
+  /** En el header compartido: chips a la izquierda de "Filtrar" (ver FilterModal). */
+  inHeader?: boolean;
 }
 
 /** Selección de una categoría "single" a partir del valor confirmado. */
@@ -46,7 +46,11 @@ const toText = (items?: FilterOptionItem[]) => items?.[0]?.id ?? null;
  * de novedad sale de ese mismo catálogo, con los inactivos, para poder filtrar
  * novedades viejas.
  */
-export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilterModalProps) {
+export default function NoveltiesFilterModal({
+  value,
+  onChange,
+  inHeader
+}: NoveltiesFilterModalProps) {
   const { statuses, isLoading: isLoadingStatuses } = useNoveltyStatuses();
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
@@ -161,7 +165,6 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ className: TRIGGER_CLASS }}
       formatTagValue={(_cat, items) => items[0]?.name ?? ""}
       onApply={(sel) =>
         onChange({
@@ -175,6 +178,7 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
       onClearAll={() => onChange(EMPTY_NOVELTIES_FILTERS)}
       onOpen={() => setDateDraft({ from: value.date_from, to: value.date_to })}
       onClearDraft={() => setDateDraft({ from: null, to: null })}
+      inHeader={inHeader}
     />
   );
 }

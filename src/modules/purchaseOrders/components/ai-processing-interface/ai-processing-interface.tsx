@@ -78,7 +78,7 @@ export function AIProcessingInterface({ file, onClose }: AIProcessingInterfacePr
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl bg-cashport-white border-cashport-gray-light max-h-[90vh] overflow-y-auto">
+      <Card className="w-full max-w-4xl bg-cashport-white border-cashport-gray-light max-h-[calc(90*var(--vh))] overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-cashport-green/10 rounded-lg">

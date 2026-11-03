@@ -68,6 +68,8 @@ export interface IUserData {
   USER_ZONES: UserZone[];
   UUID: string;
   is_super_admin: number;
+  // Países asignados al usuario en este proyecto (data.user_data_scope, client_id IS NULL)
+  COUNTRY_IDS: number[];
 }
 export interface ID {
   ID: number;

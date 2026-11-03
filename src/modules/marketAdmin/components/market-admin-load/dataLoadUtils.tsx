@@ -35,7 +35,7 @@ export const statusColorClasses = (color: string) => COLOR_STYLES[color] ?? COLO
 
 export const EstadoPill = ({ label, color }: { label: string; color: string }) => (
   <span
-    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${statusColorClasses(color)}`}
+    className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${statusColorClasses(color)}`}
   >
     {label}
   </span>

@@ -63,7 +63,7 @@ const BulkSearchInputStep = ({
         <div className="flex min-h-[240px] flex-col gap-2">
           <span className="text-[13px] font-semibold">Pega los identificadores</span>
           {file ? (
-            <div className="flex min-h-[200px] flex-1 items-center justify-center rounded-lg border border-[#ececec] bg-[#fafafa] p-4 text-center text-xs text-[#8a8a8a]">
+            <div className="flex min-h-[200px] flex-1 items-center justify-center rounded-lg border border-[#ececec] bg-[#fafafa] p-4 text-center text-[13px] text-[#8a8a8a]">
               Se usará el archivo cargado. Quítalo para pegar identificadores.
             </div>
           ) : (
@@ -75,7 +75,7 @@ const BulkSearchInputStep = ({
               style={{ minHeight: 200, lineHeight: 1.6, resize: "none" }}
             />
           )}
-          <span className="text-[11px] text-[#8a8a8a]">
+          <span className="text-[13px] text-[#8a8a8a]">
             Uno por línea, o separados por espacio, coma o punto y coma.
           </span>
         </div>
@@ -85,12 +85,12 @@ const BulkSearchInputStep = ({
           {file ? (
             <div className="flex min-h-[200px] flex-1 items-center justify-center rounded-lg border border-foreground p-4">
               <div className="flex min-w-0 max-w-full items-center gap-3">
-                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-[#f4f9d2] text-[10px] font-bold">
+                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-[#f4f9d2] text-[13px] font-bold">
                   {file.name.split(".").pop()?.slice(0, 3).toUpperCase()}
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-[13px] font-medium">{file.name}</span>
-                  <span className="block text-[11px] text-[#8a8a8a]">
+                  <span className="block text-[13px] text-[#8a8a8a]">
                     {file.ids ? `${formatNumber(file.ids.length)} registros` : "Se lee al buscar"}
                   </span>
                 </span>
@@ -113,16 +113,16 @@ const BulkSearchInputStep = ({
               <div className="flex flex-col items-center gap-2 px-4">
                 <UploadSimple size={26} />
                 <span className="text-[13px] font-medium">Arrastra o selecciona un archivo</span>
-                <span className="text-[11px] text-[#8a8a8a]">
+                <span className="text-[13px] text-[#8a8a8a]">
                   Excel o CSV · una columna con el ID de factura
                 </span>
               </div>
             </Upload.Dragger>
           )}
-          <div className="flex flex-wrap gap-x-3.5 gap-y-1 text-[11px]">
+          <div className="flex flex-wrap gap-x-3.5 gap-y-1 text-[13px]">
             <Typography.Link
               underline
-              className="!text-[11px]"
+              className="!text-[13px]"
               onClick={() =>
                 downloadCsv(
                   "plantilla_busqueda_masiva.csv",
@@ -138,7 +138,7 @@ const BulkSearchInputStep = ({
       </div>
 
       <footer className="flex flex-none items-center gap-2.5 border-t border-[#ececec] px-[22px] py-3.5">
-        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{summary}</span>
+        <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">{summary}</span>
         <Button type="text" size="large" onClick={onCancel}>
           Cancelar
         </Button>

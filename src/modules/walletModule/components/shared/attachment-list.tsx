@@ -13,7 +13,7 @@ interface AttachmentListProps {
 }
 
 const CHIP =
-  "inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-[7px] py-0.5 text-[11px] font-semibold text-foreground";
+  "inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-[7px] py-0.5 text-[13px] font-semibold text-foreground";
 
 export default function AttachmentList({ items, onRemove, className }: AttachmentListProps) {
   if (!items.length) return null;

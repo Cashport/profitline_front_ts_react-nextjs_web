@@ -35,7 +35,7 @@ const AddDiscountModal: FC<AddDiscountModalProps> = ({
       title={<Title level={4}>Agregar descuento</Title>}
       styles={{
         body: {
-          maxHeight: "85vh"
+          maxHeight: "calc(85 * var(--vh))"
         }
       }}
       footer={

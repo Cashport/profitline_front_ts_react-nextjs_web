@@ -1,5 +1,4 @@
 import React from "react";
-import { X } from "lucide-react";
 
 import type { FilterCategoryConfig, FilterOptionItem, FilterSelection } from "../FilterModal.types";
 
@@ -15,6 +14,7 @@ interface ActiveFilterTagsProps {
 const defaultFormat = (_cat: FilterCategoryConfig, items: FilterOptionItem[]) =>
   items.length === 1 ? items[0].name : `${items.length} seleccionados`;
 
+/** Chips de filtros aplicados, con el mismo estilo que los del header (docs/DESIGN.md §8). */
 export default function ActiveFilterTags({
   categories,
   value,
@@ -34,33 +34,36 @@ export default function ActiveFilterTags({
 
     const items = value[cat.key] || [];
     if (items.length === 0) return;
+    const text = formatTagValue(cat, items);
 
     tags.push(
-      <div
+      <span
         key={cat.key}
-        className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-xs"
+        title={`${cat.label}: ${text}`}
+        className="box-border flex h-[var(--chip-h)] max-w-full items-center gap-1.5 whitespace-nowrap rounded-[9px] border border-cp-line-2 bg-cp-surface pl-3 pr-1 text-[15px] text-cp-ink"
       >
-        <span className="text-muted-foreground font-medium">{cat.label}:</span>
-        <span className="font-bold text-foreground">{formatTagValue(cat, items)}</span>
+        <b className="shrink-0 font-semibold">{cat.label}:</b>
+        <span className="min-w-0 truncate">{text}</span>
         <button
           type="button"
           onClick={() => onClearCategory(cat.key)}
-          className="ml-1 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={`Quitar ${cat.label}`}
+          className="flex h-full shrink-0 cursor-pointer items-center border-0 bg-transparent px-1.5 text-[18px] leading-none text-cp-ink-4 hover:text-cp-ink"
         >
-          <X className="w-3 h-3" />
+          ×
         </button>
-      </div>
+      </span>
     );
   });
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
       {tags}
       {activeCount > 0 && (
         <button
           type="button"
           onClick={onClearAll}
-          className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline px-2"
+          className="cursor-pointer border-0 bg-transparent px-2 text-[14px] font-semibold text-cp-ink-2 hover:underline"
         >
           Limpiar todos
         </button>

@@ -28,7 +28,7 @@ export default function DiscountRulesTable({
 }: Readonly<IDiscountTable>) {
   return (
     <Table
-      scroll={{ y: "61dvh", x: undefined }}
+      scroll={{ y: "calc(61 * var(--vh))", x: undefined }}
       columns={discountsColumns({
         handleSelect: handleSelectToDelete,
         handleChangeStatus

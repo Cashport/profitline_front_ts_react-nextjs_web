@@ -2,24 +2,29 @@
 
 .mainWrapper {
     width: 100%;
-    height: 100vh;
+    height: calc(100 * var(--vh));
     display: flex;
     flex-direction: row;
     overflow: hidden;
 
+    // docs/DESIGN.md §3: fondo #f7f7f7, sin margen superior (el header es sticky).
     .rightContent {
         height: 100%;
         width: 100%;
-        background-color: $background;
-        padding: 1rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
+        min-width: 0;
+        background-color: $cp-bg;
+        padding: 0 var(--page-pad-x) var(--page-pad-bottom);
         overflow-y: auto;
+        overflow-x: hidden;
+        // Scroll delgado sin pista: la barra nativa de Windows pinta un gris distinto al fondo.
+        scrollbar-width: thin;
+        scrollbar-color: #d6d8de transparent;
     }
 
     &:global(.dark) {
         .rightContent {
             background-color: rgb(var(--background));
+            scrollbar-color: rgb(var(--cp-line-2)) transparent;
         }
     }
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { ChevronLeft, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -14,6 +13,7 @@ import FilterProductsModal, {
   IMarketAdminProductsFilter
 } from "@/modules/marketAdmin/components/market-admin-products/FilterProductsModal";
 import { IMarketAdminProduct } from "@/types/marketAdmin/IMarketAdmin";
+import Header from "@/components/organisms/header";
 
 const PAGE_SIZE = 20;
 
@@ -103,7 +103,7 @@ export default function MarketAdminProducts() {
         <div>
           <p className="text-sm text-[#141414] leading-snug">{p.description}</p>
           {p.price ? (
-            <p className="text-xs text-[#999999]">$ {p.price.toLocaleString("es-CO")}</p>
+            <p className="text-[13px] text-[#999999]">$ {p.price.toLocaleString("es-CO")}</p>
           ) : null}
         </div>
       )
@@ -140,7 +140,7 @@ export default function MarketAdminProducts() {
       onHeaderCell: headerCell,
       render: (isAvailable: 1 | 0) => (
         <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
+          className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${
             isAvailable === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
           }`}
         >
@@ -158,18 +158,12 @@ export default function MarketAdminProducts() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Productos</h1>
+    <div className="cp-page min-h-full">
+      <Header title="Productos" back="/market-admin" />
 
-      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
-          <Link
-            href="/market-admin"
-            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
-          >
-            <ChevronLeft size={18} />
-          </Link>
           <UiSearchInput
             placeholder="Buscar..."
             onChange={(e) => {
@@ -211,6 +205,7 @@ export default function MarketAdminProducts() {
         </div>
 
         <Table
+          className="cp-list-scroll"
           columns={columns}
           dataSource={productsData}
           rowKey="id"

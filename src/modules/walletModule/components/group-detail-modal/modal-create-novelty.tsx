@@ -148,7 +148,7 @@ function CreateNoveltyForm({
           placeholder="Ej.: el cliente pide el soporte firmado antes del viernes"
           onChange={(e) => setComment(e.target.value)}
         />
-        <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
           Queda como primera entrada en la línea de tiempo de la novedad. La próxima acción se abre
           como ticket con la fecha indicada.
         </p>

@@ -36,7 +36,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const inputClass =
   "w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors";
-const labelClass = "text-xs font-bold text-[#141414] block mb-1.5";
+const labelClass = "text-[13px] font-bold text-[#141414] block mb-1.5";
 
 export default function ModalCrearUsuario({ open, onClose, onSend, isLoading }: Props) {
   const [form, setForm] = useState<CrearUsuarioFormValues>(BLANK_USER);

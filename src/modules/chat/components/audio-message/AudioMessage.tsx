@@ -108,7 +108,7 @@ export default function AudioMessage({ src, mine }: AudioMessageProps) {
           }}
         />
       </div>
-      <span className="text-[11px] tabular-nums shrink-0" style={{ color: timeColor }}>
+      <span className="text-[13px] tabular-nums shrink-0" style={{ color: timeColor }}>
         {formatDuration(isPlaying || currentTime > 0 ? currentTime : duration)}
       </span>
     </div>

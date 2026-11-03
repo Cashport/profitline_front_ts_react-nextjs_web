@@ -8,6 +8,15 @@ import dayjs from "dayjs";
 
 dayjs.extend(utc);
 
+/**
+ * Current global UI zoom (`--app-zoom` in globals.scss). window.inner*, clientX and
+ * getBoundingClientRect are in screen px; divide by this to get the CSS px the layout uses.
+ */
+export const getAppZoom = (): number => {
+  if (typeof window === "undefined") return 1;
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("zoom")) || 1;
+};
+
 interface Subline {
   id: number;
   description: string;

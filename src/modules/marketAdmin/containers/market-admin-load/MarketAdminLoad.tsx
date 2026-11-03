@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import { useSWRConfig } from "swr";
-import { ChevronLeft, Download, Plus, Upload } from "lucide-react";
+import { Download, Plus, Upload } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -14,13 +13,31 @@ import PanelDetalleCargue from "@/modules/marketAdmin/components/market-admin-lo
 import ModalNuevoEtl, {
   NuevoEtlFormValues
 } from "@/modules/marketAdmin/components/market-admin-load/ModalNuevoEtl";
+import ModalValidacionCargue from "@/modules/marketAdmin/components/market-admin-load/ModalValidacionCargue";
+import ModalErroresCargue from "@/modules/marketAdmin/components/market-admin-load/ModalErroresCargue";
 import {
   getProfitLoaderTimelineKey,
   useProfitLoaders
 } from "@/modules/marketAdmin/hooks/useProfitLoaders";
-import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
+import {
+  getLoaderValidations,
+  saveLoaderValidations,
+  uploadProfitLoaderFile
+} from "@/services/marketAdmin/marketAdmin";
+import { ModalLoaderValidations } from "@/components/molecules/modals/ModalIntakeStructure/ModalLoaderValidations";
+import {
+  IColumnProfile,
+  ILoaderValidationConfig,
+  IValidationsRequired
+} from "@/types/dataQuality/IIntakeStructure";
+import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import { useMessageApi } from "@/context/MessageContext";
-import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+import {
+  IProfitLoader,
+  IProfitLoaderTimelineItem,
+  IProfitLoaderUploadResult
+} from "@/types/marketAdmin/IMarketAdmin";
+import Header from "@/components/organisms/header";
 
 dayjs.extend(utc);
 
@@ -35,8 +52,93 @@ export default function MarketAdminLoad() {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [analysisModal, setAnalysisModal] = useState<{
+    loaderId: number;
+    analysisId: number;
+    loaderName: string | null;
+    templateUrl?: string;
+  } | null>(null);
+  const [errorsModal, setErrorsModal] = useState<{
+    loaderId: number;
+    item: IProfitLoaderTimelineItem;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<number | null>(null);
+  const { runUpload, structureModals } = useIntakeStructureUpload();
+  const [validationsModal, setValidationsModal] = useState<{
+    loaderId: number;
+    loaderName: string | null;
+    fileName: string | null;
+    initial: ILoaderValidationConfig;
+    profiles?: IColumnProfile[];
+    mode: "upload" | "edit";
+    // eslint-disable-next-line no-unused-vars
+    resolve?: (saved: boolean) => void;
+  } | null>(null);
+
+  // 409 VALIDATIONS_REQUIRED: abre el asistente y espera a que se guarde.
+  const askValidations = (loaderId: number, fileName: string) => (data: IValidationsRequired) =>
+    new Promise<boolean>((resolve) => {
+      setValidationsModal({
+        loaderId,
+        loaderName: data.loader_name,
+        fileName,
+        initial: data.suggestion,
+        profiles: data.columns,
+        mode: "upload",
+        resolve
+      });
+    });
+
+  const closeValidations = (saved: boolean) => {
+    validationsModal?.resolve?.(saved);
+    setValidationsModal(null);
+  };
+
+  const handleSaveValidations = async (config: ILoaderValidationConfig) => {
+    if (!validationsModal) return;
+    await saveLoaderValidations(validationsModal.loaderId, config);
+    if (validationsModal.mode === "edit") {
+      showMessage("success", "Validaciones guardadas.");
+    }
+    closeValidations(true);
+  };
+
+  const openValidationsEditor = async (loader: IProfitLoader) => {
+    try {
+      const data = await getLoaderValidations(loader.id);
+      if (!data.has_template) {
+        showMessage(
+          "info",
+          "Este ETL todavía no tiene template: carga un archivo para crearlo y definir sus validaciones."
+        );
+        return;
+      }
+      setValidationsModal({
+        loaderId: loader.id,
+        loaderName: loader.display_name,
+        fileName: null,
+        mode: "edit",
+        initial: data.config ?? {
+          window: 6,
+          row_count: { tolerance_pct: 10, severity: "warning" },
+          columns: data.template_columns.map((name) => ({
+            name,
+            type: "any",
+            required: false,
+            calc: "none",
+            tolerance_pct: 5,
+            severity: "warning"
+          }))
+        }
+      });
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "No se pudieron leer las validaciones."
+      );
+    }
+  };
 
   const { showMessage } = useMessageApi();
 
@@ -51,6 +153,42 @@ export default function MarketAdminLoad() {
     fileInputRef.current?.click();
   };
 
+  const uploadFile = async (targetId: number, file: File) => {
+    setUploadingId(targetId);
+    try {
+      let result: IProfitLoaderUploadResult | undefined;
+      const uploaded = await runUpload(
+        async (useAsTemplate) => {
+          result = await uploadProfitLoaderFile(targetId, file, useAsTemplate);
+        },
+        { onValidationsRequired: askValidations(targetId, file.name) }
+      );
+      if (!uploaded) return;
+      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
+      // Cartera: validar -> justificar -> confirmar antes de aplicar el archivo.
+      if (result?.requires_analysis && result.analysis_id) {
+        const loader = loaders?.find((l) => l.id === targetId);
+        setAnalysisModal({
+          loaderId: targetId,
+          analysisId: result.analysis_id,
+          loaderName: loader?.display_name ?? null,
+          templateUrl: loader?.url_s3_template
+        });
+        return;
+      }
+      // La carga es asincrona: el loader valida el contenido y procesa despues;
+      // el resultado aparece en el historial de cargues.
+      showMessage(
+        "success",
+        `Archivo "${file.name}" recibido. Se está validando y procesando; revisa el resultado en el historial.`
+      );
+    } catch (error) {
+      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const targetId = uploadTargetRef.current;
@@ -58,17 +196,37 @@ export default function MarketAdminLoad() {
     e.target.value = "";
     uploadTargetRef.current = null;
     if (!file || !targetId) return;
+    await uploadFile(targetId, file);
+  };
 
-    setUploadingId(targetId);
-    try {
-      await uploadProfitLoaderFile(targetId, file);
-      showMessage("success", `Archivo "${file.name}" cargado correctamente.`);
-      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
-    } catch (error) {
-      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
-    } finally {
-      setUploadingId(null);
+  const closeAnalysis = () => {
+    const loaderId = analysisModal?.loaderId;
+    setAnalysisModal(null);
+    if (loaderId) {
+      mutate();
+      globalMutate(getProfitLoaderTimelineKey(loaderId));
     }
+  };
+
+  const openLoadDetail = (loader: IProfitLoader, item: IProfitLoaderTimelineItem) => {
+    if (item.analysis_id) {
+      setAnalysisModal({
+        loaderId: loader.id,
+        analysisId: item.analysis_id,
+        loaderName: loader.display_name,
+        templateUrl: loader.url_s3_template
+      });
+      return;
+    }
+    setErrorsModal({ loaderId: loader.id, item });
+  };
+
+  const uploadCorrected = (file?: File) => {
+    const loaderId = analysisModal?.loaderId;
+    closeAnalysis();
+    if (!loaderId) return;
+    if (file) uploadFile(loaderId, file);
+    else triggerUpload(loaderId);
   };
 
   const descargarTemplate = (loader: IProfitLoader) => {
@@ -89,7 +247,7 @@ export default function MarketAdminLoad() {
       render: (_, loader) => (
         <div className="min-w-0">
           <p className="text-sm font-medium text-[#141414] truncate">{loader.display_name}</p>
-          <p className="text-xs text-[#999999] break-words mt-0.5">{loader.description}</p>
+          <p className="text-[13px] text-[#999999] break-words mt-0.5">{loader.description}</p>
         </div>
       )
     },
@@ -141,7 +299,7 @@ export default function MarketAdminLoad() {
             type="button"
             onClick={() => descargarTemplate(loader)}
             title="Descargar template"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
             <Download size={13} /> Template
           </button>
@@ -150,7 +308,7 @@ export default function MarketAdminLoad() {
             onClick={() => triggerUpload(loader.id)}
             disabled={uploadingId === loader.id}
             title="Cargar archivo"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload size={13} /> {uploadingId === loader.id ? "Cargando..." : "Cargar"}
           </button>
@@ -161,8 +319,8 @@ export default function MarketAdminLoad() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Cargue de información</h1>
+    <div className="cp-page min-h-full">
+      <Header title="Cargue de información" back="/market-admin" />
 
       <input
         ref={fileInputRef}
@@ -172,15 +330,9 @@ export default function MarketAdminLoad() {
         onChange={handleFileSelected}
       />
 
-      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
-          <Link
-            href="/market-admin"
-            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
-          >
-            <ChevronLeft size={18} />
-          </Link>
           <p className="text-sm text-[#999999] flex-1">
             ETLs manuales para alimentar el app cuando la sincronización automática falla.
           </p>
@@ -194,6 +346,7 @@ export default function MarketAdminLoad() {
         </div>
 
         <Table
+          className="cp-list-scroll"
           columns={columns}
           dataSource={loaders}
           rowKey="id"
@@ -220,12 +373,44 @@ export default function MarketAdminLoad() {
         onClose={() => setDetailId(null)}
         onUpload={triggerUpload}
         onDownloadTemplate={descargarTemplate}
+        onEditValidations={openValidationsEditor}
+        onOpenDetail={openLoadDetail}
+      />
+
+      <ModalErroresCargue
+        open={!!errorsModal}
+        loaderId={errorsModal?.loaderId ?? null}
+        item={errorsModal?.item ?? null}
+        onClose={() => setErrorsModal(null)}
+      />
+
+      <ModalValidacionCargue
+        open={!!analysisModal}
+        loaderId={analysisModal?.loaderId ?? null}
+        analysisId={analysisModal?.analysisId ?? null}
+        loaderName={analysisModal?.loaderName ?? null}
+        templateUrl={analysisModal?.templateUrl}
+        onClose={closeAnalysis}
+        onUploadCorrected={uploadCorrected}
       />
 
       <ModalNuevoEtl
         open={showCreate}
         onClose={() => setShowCreate(false)}
         onSend={handleCreateEtl}
+      />
+
+      {structureModals}
+
+      <ModalLoaderValidations
+        open={!!validationsModal}
+        loaderName={validationsModal?.loaderName}
+        fileName={validationsModal?.fileName}
+        initial={validationsModal?.initial ?? null}
+        profiles={validationsModal?.profiles}
+        mode={validationsModal?.mode ?? "upload"}
+        onSave={handleSaveValidations}
+        onCancel={() => closeValidations(false)}
       />
     </div>
   );

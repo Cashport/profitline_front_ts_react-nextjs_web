@@ -7,9 +7,10 @@
         color: $black;
         display: flex;
         align-items: center;
-        font-size: 1rem;
+        font-size: 14px;
         font-weight: 600;
-        height: 3rem;
+        // Mismo alto que el buscador (--control-h).
+        height: var(--control-h);
 
         &:hover {
             color: $white;

@@ -176,9 +176,8 @@ export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
   return (
     <Cascader
       className="filterCascader"
-      style={{ width: "15rem", height: "46px" }}
+      style={{ width: "15rem" }}
       multiple
-      size="large"
       removeIcon
       maxTagCount="responsive"
       placeholder="Filtrar"

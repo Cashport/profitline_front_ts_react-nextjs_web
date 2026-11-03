@@ -26,11 +26,15 @@ interface StatCardsProps {
 export default function StatCards({ cards, className }: StatCardsProps) {
   return (
     <div
-      className={cn("grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-3", className)}
+      className={cn(
+        // Una sola fila en escritorio (como los KPIs de Clientes); en móvil, de a dos.
+        "grid grid-cols-2 gap-[var(--card-gap)] md:grid-flow-col md:grid-cols-none md:auto-cols-[minmax(0,1fr)]",
+        className
+      )}
     >
       {cards.map((c) => (
-        <div key={c.id} className="flex flex-col rounded-xl bg-card p-4 shadow-sm">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground">
+        <div key={c.id} className="cp-card flex flex-col px-[18px] py-[14px]">
+          <div className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
             {c.label}
           </div>
 
@@ -39,7 +43,7 @@ export default function StatCards({ cards, className }: StatCardsProps) {
               {c.value}
             </span>
             {c.suffix && (
-              <span className="text-[12.5px] font-medium tabular-nums text-muted-foreground">
+              <span className="text-[13px] font-medium tabular-nums text-muted-foreground">
                 {c.suffix}
               </span>
             )}
@@ -47,7 +51,7 @@ export default function StatCards({ cards, className }: StatCardsProps) {
 
           {c.bar}
 
-          <div className="mt-auto pt-2 text-[11.5px] text-muted-foreground">{c.foot}</div>
+          <div className="mt-auto pt-2 text-[13px] text-muted-foreground">{c.foot}</div>
         </div>
       ))}
     </div>

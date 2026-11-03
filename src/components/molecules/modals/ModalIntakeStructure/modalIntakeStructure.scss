@@ -1,0 +1,421 @@
+// Sistema visual "Validación de cargue" (diseño aprobado, Profitline).
+// PL Orange #FF5500 · PL Dark Blue #011822 · PL Dark Gray #334455 ·
+// rojo crítico #B3291A · verde Cashport #CBE71E.
+$pl-orange: #ff5500;
+$pl-blue: #011822;
+$pl-gray: #334455;
+$pl-muted: #6e848d;
+$pl-line: #e4e9eb;
+$pl-soft: #eef2f3;
+$pl-red: #b3291a;
+$pl-green: #cbe71e;
+$pl-amber: #b7791f;
+
+.plModal {
+    .ant-modal-content {
+        padding: 0;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow:
+            0 1px 2px rgba(1, 24, 34, 0.06),
+            0 18px 48px rgba(1, 24, 34, 0.14);
+    }
+}
+
+.plShell {
+    font-family: var(--pl-sans), system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: $pl-blue;
+    display: flex;
+    flex-direction: column;
+
+    span,
+    td,
+    div {
+        overflow-wrap: anywhere;
+    }
+
+    .plHeader {
+        padding: 22px 28px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .plTitleRow {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .plTitleBlock {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .plEyebrow {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        color: $pl-orange;
+    }
+
+    .plTitle {
+        margin: 0;
+        font-family: var(--pl-sora), sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: $pl-blue;
+    }
+
+    .plFileRow {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: $pl-muted;
+    }
+
+    .plFileChip {
+        font-family: var(--pl-mono), monospace;
+        font-size: 11.5px;
+        background: #f1f4f5;
+        color: $pl-gray;
+        padding: 3px 9px;
+        border-radius: 6px;
+    }
+
+    .plClose {
+        border: 0;
+        background: #f1f4f5;
+        border-radius: 10px;
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        color: $pl-gray;
+        cursor: pointer;
+        flex: none;
+    }
+
+    .plSteps {
+        display: grid;
+        gap: 6px;
+        padding-bottom: 16px;
+    }
+
+    .plStep {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+
+        .plStepBar {
+            height: 4px;
+            border-radius: 4px;
+            background: $pl-line;
+        }
+
+        .plStepLabel {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #8fa0a8;
+        }
+
+        &--active .plStepBar {
+            background: $pl-orange;
+        }
+        &--active .plStepLabel {
+            color: $pl-orange;
+            font-weight: 700;
+        }
+        &--error .plStepBar {
+            background: $pl-red;
+        }
+        &--error .plStepLabel {
+            color: $pl-red;
+            font-weight: 700;
+        }
+        &--done .plStepBar {
+            background: $pl-green;
+        }
+        &--done .plStepLabel {
+            color: $pl-gray;
+        }
+    }
+
+    .plBody {
+        padding: 22px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        background: #fafbfb;
+        border-top: 1px solid $pl-soft;
+        max-height: 62vh;
+        overflow-y: auto;
+    }
+
+    .plHeading {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        h3 {
+            margin: 0;
+            font-family: var(--pl-sora), sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: $pl-blue;
+        }
+
+        span {
+            font-size: 12.5px;
+            color: $pl-gray;
+        }
+    }
+
+    .plFooter {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 28px;
+        border-top: 1px solid $pl-soft;
+        flex-wrap: wrap;
+    }
+
+    .plSpacer {
+        margin-left: auto;
+    }
+
+    .plBtn {
+        border: 1px solid #c2cfd3;
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        color: $pl-blue;
+        cursor: pointer;
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        &:hover {
+            border-color: $pl-gray;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+    }
+
+    .plBtnPrimary {
+        background: $pl-orange;
+        border-color: $pl-orange;
+        color: #ffffff;
+        font-weight: 700;
+
+        &:hover {
+            background: #e64d00;
+            border-color: #e64d00;
+        }
+    }
+
+    .plCol {
+        font-family: var(--pl-mono), monospace;
+        font-size: 12px;
+        background: #f1f4f5;
+        color: $pl-blue;
+        padding: 1px 6px;
+        border-radius: 5px;
+    }
+
+    .plCard {
+        background: #ffffff;
+        border: 1px solid $pl-line;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .plItem {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px 18px;
+        border-bottom: 1px solid $pl-soft;
+
+        &:last-child {
+            border-bottom: 0;
+        }
+    }
+
+    .plDot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: $pl-red;
+        flex: none;
+        margin-top: 6px;
+
+        &--warning {
+            background: $pl-amber;
+        }
+    }
+
+    .plCellRef {
+        font-family: var(--pl-mono), monospace;
+        font-size: 11.5px;
+        color: $pl-red;
+        background: #fbecea;
+        padding: 1px 6px;
+        border-radius: 5px;
+        margin-right: 6px;
+    }
+
+    .plTags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .plNote {
+        font-size: 12px;
+        color: $pl-muted;
+    }
+
+    .plAlert {
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 12.5px;
+        background: #fff7e6;
+        border: 1px solid #f3d9a4;
+        color: #6b4a12;
+
+        &--error {
+            background: #fbecea;
+            border-color: #f0c2bc;
+            color: #7d1d12;
+        }
+
+        ul {
+            margin: 4px 0 0;
+            padding-left: 18px;
+        }
+    }
+
+    // Asistente de validaciones
+    .plRuleGrid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) 112px 64px 150px 84px 112px;
+        gap: 8px;
+        align-items: center;
+        padding: 10px 18px;
+        border-bottom: 1px solid $pl-soft;
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        &--head {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: #8fa0a8;
+            text-transform: uppercase;
+            padding-top: 12px;
+            padding-bottom: 8px;
+        }
+
+        select,
+        input[type="number"] {
+            width: 100%;
+            height: 34px;
+            border: 1px solid #c2cfd3;
+            border-radius: 8px;
+            padding: 0 8px;
+            font: inherit;
+            font-size: 12.5px;
+            color: $pl-blue;
+            background: #ffffff;
+
+            &:disabled {
+                background: #f1f4f5;
+                color: #8fa0a8;
+            }
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: $pl-orange;
+        }
+    }
+
+    .plColName {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .plHint {
+        font-size: 11px;
+        color: $pl-muted;
+    }
+
+    .plWindowRow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: $pl-gray;
+        flex-wrap: wrap;
+
+        select {
+            height: 34px;
+            border: 1px solid #c2cfd3;
+            border-radius: 8px;
+            padding: 0 8px;
+            font: inherit;
+        }
+    }
+
+    .plError {
+        font-size: 12.5px;
+        color: $pl-red;
+    }
+}
+
+// En pantallas angostas el asistente pasa a dos columnas por regla.
+@media (max-width: 760px) {
+    .plShell {
+        .plHeader,
+        .plBody,
+        .plFooter {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .plRuleGrid {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+            &--head {
+                display: none;
+            }
+        }
+
+        .plColName {
+            grid-column: 1 / -1;
+        }
+    }
+}

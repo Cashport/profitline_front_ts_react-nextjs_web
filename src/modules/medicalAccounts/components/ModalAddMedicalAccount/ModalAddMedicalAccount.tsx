@@ -109,7 +109,7 @@ export function ModalAddMedicalAccount({
 
         {/* Número de pedido */}
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
             Número de pedido <span className="text-red-500">*</span>
           </p>
           <Input
@@ -121,7 +121,7 @@ export function ModalAddMedicalAccount({
 
         {/* Tipo de servicio */}
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
             Tipo de servicio <span className="text-red-500">*</span>
           </p>
           <div className="grid grid-cols-5 gap-2">
@@ -143,7 +143,7 @@ export function ModalAddMedicalAccount({
                   )}
                   <span className="text-sm font-bold">{serviceType.code}</span>
                   <span
-                    className={`mt-0.5 text-[10px] leading-tight ${
+                    className={`mt-0.5 text-[13px] leading-tight ${
                       isSelected ? "text-gray-200" : "text-gray-500"
                     }`}
                   >
@@ -157,7 +157,7 @@ export function ModalAddMedicalAccount({
 
         {/* Archivo PDF */}
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
             Archivo PDF <span className="text-red-500">*</span>
           </p>
 
@@ -168,7 +168,7 @@ export function ModalAddMedicalAccount({
                 <p className="truncate text-sm font-medium text-cashport-black">
                   {selectedFile.name}
                 </p>
-                <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                <p className="text-[13px] text-gray-500">{formatFileSize(selectedFile.size)}</p>
               </div>
               <button
                 type="button"
@@ -187,15 +187,17 @@ export function ModalAddMedicalAccount({
                 title="Arrastra el PDF aquí"
                 subtitle="o haz clic para seleccionarlo desde tu equipo"
               />
-              <p className="mt-2 text-center text-xs text-gray-400">Solo PDF · Máx. 500 páginas</p>
+              <p className="mt-2 text-center text-[13px] text-gray-400">
+                Solo PDF · Máx. 500 páginas
+              </p>
             </>
           )}
 
-          {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+          {error && <p className="mt-2 text-[13px] text-red-500">{error}</p>}
         </div>
 
         {isLoading && (
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-[13px] text-gray-500">
             Procesando la cuenta médica, esto puede tardar hasta 90 segundos…
           </p>
         )}

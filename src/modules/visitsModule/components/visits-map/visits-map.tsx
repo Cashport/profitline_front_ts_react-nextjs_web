@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import mapboxgl, {
   type GeoJSONSource,
   type Map as MapboxMap,
@@ -68,6 +68,8 @@ interface VisitsMapProps {
   camera: VisitsCameraRequest;
   /** Aviso sobre el mapa cuando el día no trae datos. */
   notice: string | null;
+  /** Esquina superior derecha sobre el mapa: chips de estado y el reloj "En vivo". */
+  topRight?: ReactNode;
   onSelectAdvisor: (id: number, focus?: LngLat) => void;
   onJumpToRun: (run: ILiveRun) => void;
   onFlyTo: (center: LngLat) => void;
@@ -144,6 +146,7 @@ export default function VisitsMap(props: VisitsMapProps) {
     isDark,
     camera,
     notice,
+    topRight,
     onToggleLayer
   } = props;
 
@@ -490,7 +493,7 @@ export default function VisitsMap(props: VisitsMapProps) {
   const mapNotice = MAPBOX_TOKEN ? notice : "Mapa no disponible: falta el token de Mapbox";
 
   return (
-    <div className="visits-map relative h-full min-h-0 w-full overflow-hidden rounded-2xl border border-border bg-secondary">
+    <div className="visits-map relative h-full min-h-0 w-full overflow-hidden rounded-[var(--card-radius)] bg-secondary">
       {/* Mapbox fuerza position: relative en su contenedor (.mapboxgl-map), que le gana a
           `absolute inset-0` y lo deja en 0px: el tamaño sale del contenedor padre. */}
       <div ref={containerRef} className="h-full w-full" />
@@ -500,9 +503,14 @@ export default function VisitsMap(props: VisitsMapProps) {
         focused={advisors.some((a) => a.id === selectedId)}
         palette={palette}
       />
+      {topRight && (
+        <div className="absolute right-3 top-3 z-[2] flex max-w-[60%] items-center justify-end gap-2">
+          {topRight}
+        </div>
+      )}
       {mapNotice && (
         <div className="pointer-events-none absolute inset-0 z-[3] grid place-items-center p-4">
-          <span className="rounded-lg border border-border bg-card/95 px-3 py-2 text-xs font-medium text-muted-foreground backdrop-blur-sm">
+          <span className="rounded-lg border border-border bg-card/95 px-3 py-2 text-[13px] font-medium text-muted-foreground backdrop-blur-sm">
             {mapNotice}
           </span>
         </div>

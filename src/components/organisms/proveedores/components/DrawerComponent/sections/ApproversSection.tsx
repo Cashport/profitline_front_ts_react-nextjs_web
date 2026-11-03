@@ -37,7 +37,7 @@ const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
                   alignItems: "center",
                   gap: "4px",
                   fontWeight: 500,
-                  fontSize: "0.75rem",
+                  fontSize: "13px",
                   backgroundColor: `${backgroundColor}`,
                   color: color,
                   borderRadius: "42px",

@@ -26,7 +26,7 @@ export function DateRangeFilter({
   return (
     <div>
       {showLabel && (
-        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+        <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
           <Calendar className="h-3 w-3 inline mr-1" />
           {label}
         </label>
@@ -34,24 +34,20 @@ export function DateRangeFilter({
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-gray-600 mb-1 block">{startLabel}</label>
+            <label className="text-[13px] text-gray-600 mb-1 block">{startLabel}</label>
             <Input
               type="date"
               value={dateRange.start || ""}
-              onChange={(e) =>
-                onDateRangeChange(e.target.value, dateRange.end || "")
-              }
+              onChange={(e) => onDateRangeChange(e.target.value, dateRange.end || "")}
               className="bg-cashport-white border-cashport-gray-light text-sm"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-600 mb-1 block">{endLabel}</label>
+            <label className="text-[13px] text-gray-600 mb-1 block">{endLabel}</label>
             <Input
               type="date"
               value={dateRange.end || ""}
-              onChange={(e) =>
-                onDateRangeChange(dateRange.start || "", e.target.value)
-              }
+              onChange={(e) => onDateRangeChange(dateRange.start || "", e.target.value)}
               className="bg-cashport-white border-cashport-gray-light text-sm"
             />
           </div>

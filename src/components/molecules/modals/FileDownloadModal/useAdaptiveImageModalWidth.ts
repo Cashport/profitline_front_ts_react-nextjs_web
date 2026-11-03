@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getAppZoom } from "@/utils/utils";
 
 const PADDING = 48;
 const HARD_MAX = 1400;
@@ -6,7 +7,7 @@ const MIN_WIDTH = 320;
 const VIEWPORT_RATIO = 0.9;
 
 const computeWidth = (naturalWidth: number): number => {
-  const target = Math.min(naturalWidth + PADDING, window.innerWidth * VIEWPORT_RATIO, HARD_MAX);
+  const target = Math.min(naturalWidth + PADDING, (window.innerWidth / getAppZoom()) * VIEWPORT_RATIO, HARD_MAX);
   return Math.max(target, MIN_WIDTH);
 };
 

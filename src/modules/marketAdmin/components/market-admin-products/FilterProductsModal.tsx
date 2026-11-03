@@ -20,8 +20,6 @@ const ESTADO_OPTIONS: FilterOptionItem[] = [
   { id: "0", name: "Inactivo" }
 ];
 
-const TRIGGER_CLASS =
-  "h-12 flex items-center gap-2 border border-[#E0E0E0] rounded-lg px-4 bg-white text-[#141414] hover:bg-[#F0F0F0] transition-colors";
 
 interface FilterProductsModalProps {
   value: IMarketAdminProductsFilter;
@@ -104,7 +102,6 @@ export default function FilterProductsModal({ value, onChange }: FilterProductsM
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ className: TRIGGER_CLASS, showChevron: true }}
       // El tag de Categoría muestra el nombre pelado; con el prefijo de línea
       // queda demasiado largo para la barra de filtros activos.
       formatTagValue={(cat, items) =>

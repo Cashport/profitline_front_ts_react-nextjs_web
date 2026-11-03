@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { Avatar, Button, Flex } from "antd";
-import { usePathname, useRouter } from "next/navigation";
-import { ArrowLineRight, Clipboard, List } from "phosphor-react";
+import { usePathname } from "next/navigation";
+import { Clipboard, List } from "phosphor-react";
 
-import { logOut } from "../../../../firebase-utils";
+import { useLogoutConfirm } from "@/components/organisms/header/user-menu/logout-confirm";
 import { useAppStore } from "@/lib/store/store";
 import useStore from "@/lib/hook/useStore";
 import { getUserPermissions } from "@/services/permissions/userPermissions";
@@ -13,10 +13,18 @@ import { setProjectInApi } from "@/utils/api/api";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjectSelector";
-import { ModulesButtons } from "@/components/atoms/NavigationBar/ModulesButtons/ModulesButtons";
+import {
+  ModulesButtons,
+  RailIcon,
+  RailItem,
+  SettingsRailItem
+} from "@/components/atoms/NavigationBar/ModulesButtons/ModulesButtons";
 import { usePermissionRedirect } from "@/hooks/usePermissionRedirect";
 
 import "./sidebar.scss";
+
+/** Preferencia de este navegador: menú lateral fijado abierto. */
+const RAIL_PINNED_KEY = "cashport:rail-pinned";
 
 export const SideBar = () => {
   usePermissionRedirect();
@@ -24,8 +32,9 @@ export const SideBar = () => {
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const { askLogout, logoutModal } = useLogoutConfirm();
 
-  const router = useRouter();
   const path = usePathname();
   const height = useScreenHeight();
   const width = useScreenWidth();
@@ -50,6 +59,7 @@ export const SideBar = () => {
   } = useAppStore((state) => state);
 
   const LOGO = project?.LOGO;
+  const projectName = project?.NAME ?? "";
 
   // Click outside handler to close mobile menu
   useEffect(() => {
@@ -74,6 +84,11 @@ export const SideBar = () => {
 
   useEffect(() => {
     setIsComponentLoading(false);
+    try {
+      setPinned(localStorage.getItem(RAIL_PINNED_KEY) === "1");
+    } catch {
+      // sin almacenamiento: arranca cerrado
+    }
   }, []);
 
   useEffect(() => {
@@ -127,8 +142,18 @@ export const SideBar = () => {
     }
   }, [isHy]);
 
+  const togglePinned = () => {
+    const next = !pinned;
+    setPinned(next);
+    try {
+      localStorage.setItem(RAIL_PINNED_KEY, next ? "1" : "0");
+    } catch {
+      // sin almacenamiento (modo privado): queda fijado solo en esta visita
+    }
+  };
+
   return (
-    <div className="sidebar main" ref={mobileMenuRef}>
+    <div className={`sidebar main ${pinned && !isMobile ? "railPinned" : ""}`} ref={mobileMenuRef}>
       {isMobile && (
         <Button
           type="text"
@@ -141,45 +166,62 @@ export const SideBar = () => {
       {/* Mobile: Show ModulesButtons only when menu is open */}
       {isMobile && isModuleMenuOpen && (
         <div className="mobileMenuWrapper">
-          <ModulesButtons
-            path={path}
-            project={project}
-            isMobileMenu={true}
-          />
+          <ModulesButtons path={path} project={project} isMobileMenu={true} />
         </div>
       )}
-      <Flex vertical align="center" className="modulesGroup">
-        <button className="logoContainer" onClick={() => setModalProjectSelectorOpen(true)}>
-          {LOGO ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              alt="logo company"
-              src={`${LOGO.trim()}?v=${new Date().getTime()}`}
-              className="logoContainer__image"
-            />
-          ) : (
-            <Avatar shape="square" className="imageWithoutImage" size={50} icon={<Clipboard />} />
-          )}
-        </button>
+
+      {/* Riel de íconos que se abre encima del contenido al pasar el mouse (o fijado). */}
+      <div className="railPanel">
+        <Flex vertical className="modulesGroup">
+          {/* Proyecto: cuadro de 48×48 sin borde ni sombra con el riel cerrado; abierto, sombra
+              sutil y el nombre al lado (una línea si cabe, máximo dos). */}
+          <button
+            type="button"
+            className="logoContainer"
+            title="Cambiar proyecto"
+            onClick={() => setModalProjectSelectorOpen(true)}
+          >
+            <span className="logoContainer__tile">
+              {LOGO ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt={projectName || "Logo del proyecto"}
+                  src={`${LOGO.trim()}?v=${new Date().getTime()}`}
+                  className="logoContainer__image"
+                />
+              ) : (
+                <Avatar
+                  shape="square"
+                  className="imageWithoutImage"
+                  size={36}
+                  icon={<Clipboard />}
+                />
+              )}
+            </span>
+            {projectName && <span className="logoContainer__name">{projectName}</span>}
+          </button>
+
+          {!isMobile && <ModulesButtons path={path} project={project} isMobileMenu={false} />}
+        </Flex>
 
         {!isMobile && (
-          <ModulesButtons
-            path={path}
-            project={project}
-            isMobileMenu={false}
-          />
+          <div className="exit">
+            <SettingsRailItem path={path} project={project} />
+            <RailItem
+              label={pinned ? "Desfijar menú" : "Fijar menú"}
+              icon={<RailIcon name={pinned ? "desfijar" : "fijar"} />}
+              onClick={togglePinned}
+            />
+            <RailItem
+              label="Cerrar sesión"
+              icon={<RailIcon name="cerrarSesion" />}
+              onClick={askLogout}
+            />
+          </div>
         )}
-      </Flex>
+      </div>
 
-      <Flex className="exit">
-        <Button
-          type="text"
-          onClick={() => logOut(router)}
-          icon={<ArrowLineRight size={iconSize} />}
-          className="buttonExit"
-        >
-        </Button>
-      </Flex>
+      {logoutModal}
 
       <ModalProjectSelector
         isOpen={modalProjectSelectorOpen}

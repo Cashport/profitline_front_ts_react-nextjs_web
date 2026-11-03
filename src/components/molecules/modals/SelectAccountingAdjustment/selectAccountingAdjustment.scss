@@ -9,7 +9,7 @@
     flex-direction: column;
     gap: 0.5rem;
     scrollbar-width: thin;
-    max-height: 50vh;
+    max-height: calc(50 * var(--vh));
 }
 
 .modalContent {

@@ -12,6 +12,12 @@ type CountryClientsActionsModalProps = {
   onDownloadCatalog: () => void;
   isDownloadCatalogLoading: boolean;
   onUploadFile?: () => void;
+  onDownloadIqviaCatalog?: () => void;
+  isDownloadIqviaCatalogLoading?: boolean;
+  onUploadIqviaCatalog?: () => void;
+  onDownloadIqviaProductCatalog?: () => void;
+  isDownloadIqviaProductCatalogLoading?: boolean;
+  onUploadIqviaProductCatalog?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
   onUploadPointsOfSale?: () => void;
   onDownloadMaterials?: () => void;
@@ -22,6 +28,8 @@ type CountryClientsActionsModalProps = {
   onAddEmails?: () => void;
   isInDetailView?: boolean;
   downloadCatalogOnly?: boolean;
+  /** Deja en el modal únicamente la acción "Cargar Maestra Productos". */
+  onlyGmnOficiales?: boolean;
 };
 
 export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProps> = ({
@@ -30,6 +38,12 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onDownloadCatalog,
   isDownloadCatalogLoading,
   onUploadFile,
+  onDownloadIqviaCatalog,
+  isDownloadIqviaCatalogLoading = false,
+  onUploadIqviaCatalog,
+  onDownloadIqviaProductCatalog,
+  isDownloadIqviaProductCatalogLoading = false,
+  onUploadIqviaProductCatalog,
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale,
   onDownloadMaterials,
@@ -39,27 +53,73 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onUploadInTransitHaleon,
   onAddEmails,
   isInDetailView = false,
-  downloadCatalogOnly = false
+  downloadCatalogOnly = false,
+  onlyGmnOficiales = false
 }) => {
+  const gmnOficialesButton = onUploadGmnOficiales ? (
+    <ButtonGenerateAction
+      icon={<UploadSimple size={20} />}
+      title="Cargar Maestra Productos"
+      onClick={onUploadGmnOficiales}
+    />
+  ) : null;
+
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Selecciona la acción que vas a realizar"
+      title={
+        onlyGmnOficiales ? "Cargar Maestra Productos" : "Selecciona la acción que vas a realizar"
+      }
       footer={null}
       onCancel={onClose}
       className="countryClientsActionsModal"
       centered
     >
       <div className="modal-content">
+        {onlyGmnOficiales && gmnOficialesButton}
+        {!onlyGmnOficiales && (
+          <>
         <ButtonGenerateAction
           icon={<DownloadSimple size={20} />}
           title="Descargar catálogo"
           onClick={onDownloadCatalog}
           disabled={isDownloadCatalogLoading}
         />
-        {!downloadCatalogOnly && (
+        {onDownloadIqviaCatalog && (
+          <ButtonGenerateAction
+            icon={<DownloadSimple size={20} />}
+            title="Descargar catálogo IQVIA Clientes"
+            onClick={onDownloadIqviaCatalog}
+            disabled={isDownloadIqviaCatalogLoading}
+          />
+        )}
+        {onDownloadIqviaProductCatalog && (
+          <ButtonGenerateAction
+            icon={<DownloadSimple size={20} />}
+            title="Descargar catálogo IQVIA Productos"
+            onClick={onDownloadIqviaProductCatalog}
+            disabled={isDownloadIqviaProductCatalogLoading}
+          />
+        )}
+          </>
+        )}
+        {!downloadCatalogOnly && !onlyGmnOficiales && (
           <>
+            {onUploadIqviaCatalog && (
+              <ButtonGenerateAction
+                icon={<UploadSimple size={20} />}
+                title="Cargar catálogo IQVIA Clientes"
+                onClick={onUploadIqviaCatalog}
+              />
+            )}
+            {onUploadIqviaProductCatalog && (
+              <ButtonGenerateAction
+                icon={<UploadSimple size={20} />}
+                title="Cargar catálogo IQVIA Productos"
+                onClick={onUploadIqviaProductCatalog}
+              />
+            )}
             {onDownloadMaterials && (
               <ButtonGenerateAction
                 icon={<DownloadSimple size={20} />}
@@ -96,13 +156,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
               title="Cargar Packs"
               onClick={onUploadPacks}
             />
-            {onUploadGmnOficiales && (
-              <ButtonGenerateAction
-                icon={<UploadSimple size={20} />}
-                title="GMN oficiales"
-                onClick={onUploadGmnOficiales}
-              />
-            )}
+            {gmnOficialesButton}
             {isInDetailView && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}

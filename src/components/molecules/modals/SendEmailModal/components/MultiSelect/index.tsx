@@ -99,7 +99,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
               <Text style={{ fontSize: 14 }}>
                 {selectedOption ? selectedOption.name : option.data.value}
               </Text>
-              <Text style={{ fontSize: 10, color: "#14141452" }}>
+              <Text style={{ fontSize: 13, color: "#14141452" }}>
                 {selectedOption ? selectedOption.companyPosition : "Correo personalizado"}
               </Text>
             </Flex>

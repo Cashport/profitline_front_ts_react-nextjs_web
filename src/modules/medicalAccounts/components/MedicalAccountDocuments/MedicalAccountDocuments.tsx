@@ -68,7 +68,7 @@ function DocStatus({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-xs font-medium",
+        "inline-flex items-center gap-1 text-[13px] font-medium",
         DOC_STATUS_STYLES[statusCode] ?? "text-gray-500"
       )}
     >
@@ -99,13 +99,13 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
         <FileText className="h-12 w-12 text-gray-200" />
         <div>
           <p className="text-sm font-medium text-gray-500">Vista previa no disponible</p>
-          <p className="mt-1 text-xs text-gray-400">{message}</p>
+          <p className="mt-1 text-[13px] text-gray-400">{message}</p>
         </div>
         <button
           type="button"
           onClick={() => handleDownloadFile(fileUrl)}
           disabled={!fileUrl}
-          className="flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-[13px] text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="h-3.5 w-3.5" />
           Descargar
@@ -120,7 +120,7 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
         <div className="flex min-w-0 items-center gap-2">
           <FileText className="h-4 w-4 shrink-0 text-amber-400" />
           <span className="truncate text-sm font-semibold text-gray-700">{label}</span>
-          <span className="shrink-0 text-[11px] text-gray-400">
+          <span className="shrink-0 text-[13px] text-gray-400">
             — pág. {doc.page_start}–{doc.page_end}
           </span>
         </div>
@@ -128,7 +128,7 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
           type="button"
           onClick={() => handleDownloadFile(fileUrl)}
           disabled={!fileUrl}
-          className="ml-3 flex shrink-0 items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="ml-3 flex shrink-0 items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-[13px] text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           title="Descargar"
         >
           <Download className="h-3.5 w-3.5" />
@@ -151,7 +151,7 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
           <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
             <FileText className="h-12 w-12 text-gray-200" />
             <p className="text-sm font-medium text-gray-400">Documento no disponible</p>
-            <p className="text-xs text-gray-300">
+            <p className="text-[13px] text-gray-300">
               El PDF de este documento aún no está disponible.
             </p>
           </div>
@@ -294,14 +294,14 @@ export function MedicalAccountDocuments({
         <div className="flex min-h-[44px] items-center gap-3 border-b border-gray-100 px-5 py-3">
           {someSelected ? (
             <>
-              <span className="text-xs font-semibold text-gray-700">
+              <span className="text-[13px] font-semibold text-gray-700">
                 {selectedIds.size} seleccionado{selectedIds.size > 1 ? "s" : ""}
               </span>
               <button
                 type="button"
                 onClick={handleBulkDownload}
                 disabled={isMerging}
-                className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
               >
                 <Download className="h-3.5 w-3.5" />
                 {isMerging ? "Generando…" : `Descargar PDF${selectedIds.size > 1 ? "s" : ""}`}
@@ -309,7 +309,7 @@ export function MedicalAccountDocuments({
               <button
                 type="button"
                 onClick={clearSelection}
-                className="ml-auto inline-flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-gray-600"
+                className="ml-auto inline-flex items-center gap-1 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
               >
                 <X className="h-3.5 w-3.5" />
                 Limpiar
@@ -317,8 +317,10 @@ export function MedicalAccountDocuments({
             </>
           ) : (
             <>
-              <span className="text-xs font-semibold text-gray-600">Documentos clasificados</span>
-              <span className="text-[11px] font-medium text-gray-400">{documents.length}</span>
+              <span className="text-[13px] font-semibold text-gray-600">
+                Documentos clasificados
+              </span>
+              <span className="text-[13px] font-medium text-gray-400">{documents.length}</span>
             </>
           )}
         </div>
@@ -327,13 +329,15 @@ export function MedicalAccountDocuments({
           <div className="px-5 py-14 text-center">
             <FileText className="mx-auto mb-2 h-7 w-7 text-gray-200" />
             <p className="text-sm font-medium text-gray-400">Sin documentos clasificados</p>
-            <p className="mt-0.5 text-xs text-gray-300">Este archivo aún no ha sido procesado.</p>
+            <p className="mt-0.5 text-[13px] text-gray-300">
+              Este archivo aún no ha sido procesado.
+            </p>
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="w-10 px-4 py-2.5">
+              <tr className="border-b border-cp-line bg-cp-surface">
+                <th className="w-10 px-4 py-3">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -344,19 +348,19 @@ export function MedicalAccountDocuments({
                     className="h-3.5 w-3.5 cursor-pointer rounded border-gray-300 accent-cashport-black"
                   />
                 </th>
-                <th className="w-36 px-2 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                <th className="w-36 px-2 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
                   Tipo
                 </th>
-                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                <th className="px-4 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
                   Archivo
                 </th>
-                <th className="w-32 px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                <th className="w-32 px-4 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
                   Estado
                 </th>
-                <th className="w-24 px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                <th className="w-24 px-4 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
                   Novedades
                 </th>
-                <th className="w-12 px-4 py-2.5" />
+                <th className="w-12 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -391,7 +395,7 @@ export function MedicalAccountDocuments({
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-sm font-medium text-gray-700">{docLabel(doc)}</span>
-                      <p className="mt-0.5 font-mono text-[11px] text-gray-400">
+                      <p className="mt-0.5 font-mono text-[13px] text-gray-400">
                         pág. {doc.page_start}–{doc.page_end}
                       </p>
                     </td>
@@ -447,7 +451,7 @@ export function MedicalAccountDocuments({
             <button
               type="button"
               onClick={() => setShowUploadSupport(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-[13px] text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             >
               <FileUp className="h-3.5 w-3.5" />
               Cargar soporte
@@ -464,7 +468,7 @@ export function MedicalAccountDocuments({
           <div className="flex flex-1 flex-col items-center justify-center gap-2 bg-gray-50 px-6 text-center">
             <FileText className="h-8 w-8 text-gray-200" />
             <p className="text-sm font-medium text-gray-400">Ningún documento seleccionado</p>
-            <p className="text-xs text-gray-300">
+            <p className="text-[13px] text-gray-300">
               Haz clic en el ojo de un documento para verlo aquí.
             </p>
           </div>

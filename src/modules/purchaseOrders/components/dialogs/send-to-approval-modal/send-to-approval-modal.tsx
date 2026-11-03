@@ -3,10 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat
 import { Button } from "@/modules/chat/ui/button";
 import { Check, Loader2, AlertTriangle } from "lucide-react";
 import { message } from "antd";
-import {
-  getApprovers,
-  sendPackageToApproval
-} from "@/services/purchaseOrders/purchaseOrders";
+import { getApprovers, sendPackageToApproval } from "@/services/purchaseOrders/purchaseOrders";
 import { IApprover } from "@/types/purchaseOrders/purchaseOrders";
 
 interface SendToApprovalModalProps {
@@ -110,7 +107,7 @@ export function SendToApprovalModal({
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">{approver.user_name}</p>
-                      <p className="text-xs text-gray-500">{approver.user_rol}</p>
+                      <p className="text-[13px] text-gray-500">{approver.user_rol}</p>
                     </div>
                   </div>
                 </div>

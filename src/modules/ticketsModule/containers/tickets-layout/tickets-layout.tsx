@@ -10,6 +10,7 @@ import {
   WalletThemeProvider,
   useWalletTheme
 } from "@/modules/walletModule/contexts/wallet-theme-context";
+import TasksHeaderActions from "../../components/tasks-header-actions/tasks-header-actions";
 
 function TicketsChrome({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useWalletTheme();
@@ -52,7 +53,11 @@ function TicketsChrome({ children }: { children: React.ReactNode }) {
     >
       {/* Own message holder so toasts render under this theme, not the root (light) one. */}
       <MessageProvider>
-        <ViewWrapper headerTitle="Tickets" hideHeader className={isDark ? "dark" : ""}>
+        <ViewWrapper
+          headerTitle="Task manager"
+          headerActions={<TasksHeaderActions />}
+          className={isDark ? "dark" : ""}
+        >
           {children}
         </ViewWrapper>
       </MessageProvider>

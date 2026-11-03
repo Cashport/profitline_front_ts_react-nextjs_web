@@ -18,7 +18,7 @@ function ActiveBoard() {
   const View = (board?.enabled && BOARD_VIEWS[board.id]) || PendingBoard;
 
   return (
-    <div className="wallet-scope flex flex-col gap-3.5 pb-6">
+    <div className="wallet-scope cp-page pb-6">
       <View />
     </div>
   );

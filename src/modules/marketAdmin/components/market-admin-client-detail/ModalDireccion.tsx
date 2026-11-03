@@ -88,7 +88,7 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
     >
       <div className="space-y-4">
         <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Dirección</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Dirección</label>
           <input
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
             placeholder="Ej. Calle 100 # 15-20"
@@ -98,7 +98,7 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Ciudad</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Ciudad</label>
           <input
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
             placeholder="Ej. Bogotá"
@@ -107,7 +107,7 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Bodega</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Bodega</label>
           <WarehouseSelect
             value={form.warehouse_id ?? undefined}
             onChange={(warehouseId) => setForm((f) => ({ ...f, warehouse_id: warehouseId }))}
@@ -115,7 +115,7 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
             Código de dirección
           </label>
           <input
@@ -126,7 +126,9 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Centro de costo</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
+            Centro de costo
+          </label>
           <input
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
             placeholder="Opcional"

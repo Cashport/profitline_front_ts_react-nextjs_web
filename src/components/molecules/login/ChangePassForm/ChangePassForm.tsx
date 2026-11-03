@@ -103,7 +103,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
         message: "Tu contraseña ha sido restablecida"
       });
       setTimeout(() => {
-        router.push("/auth/login");
+        router.push("/");
       }, 1500);
     } catch (error) {
       let message = "Hubo un error al restablecer la contraseña, pruebe mandar otro correo";
@@ -132,7 +132,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
         message: "Tu contraseña ha sido creada"
       });
       setTimeout(() => {
-        router.push("/auth/login");
+        router.push("/");
       }, 1500);
     } catch (error) {
       let message = "Hubo un error al crear la contraseña, pruebe mandar otro correo";

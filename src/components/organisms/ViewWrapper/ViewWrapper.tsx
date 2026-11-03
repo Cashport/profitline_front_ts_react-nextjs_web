@@ -5,9 +5,12 @@ import styles from "./ViewWrapper.module.scss";
 
 interface IViewWrapper {
   headerTitle: string;
+  /** Línea pequeña bajo el título (corte, "Proyectar a cierre"…). */
   headerTitleExtra?: React.ReactNode;
-  /** Acciones del encabezado, a la izquierda del perfil (ej. "Filtrar"). */
+  /** Acciones del encabezado, a la izquierda del perfil (chips, "Filtrar", buscador). */
   headerActions?: React.ReactNode;
+  /** "‹" volver en pantallas de detalle; ver `back` en Header. */
+  headerBack?: boolean | string;
   children: React.ReactNode;
   gapTitle?: string;
   hideHeader?: boolean;
@@ -19,8 +22,9 @@ export default function ViewWrapper({
   headerTitle,
   headerTitleExtra,
   headerActions,
+  headerBack,
   children,
-  gapTitle = "1rem",
+  gapTitle = "0",
   hideHeader = false,
   className,
   headerClassName,
@@ -35,6 +39,7 @@ export default function ViewWrapper({
             title={headerTitle}
             titleExtra={headerTitleExtra}
             actionsExtra={headerActions}
+            back={headerBack}
             className={headerClassName}
           />
         ) : null}

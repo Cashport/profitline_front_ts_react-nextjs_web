@@ -46,6 +46,14 @@ export const fmtCutoff = (iso: string): string =>
     minute: "2-digit"
   });
 
+/** "30/09 · 09:06" (línea meta del header). */
+export const fmtCutoffShort = (iso: string): string => {
+  const d = new Date(iso);
+  const day = d.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit" });
+  const time = d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: false });
+  return `${day} · ${time}`;
+};
+
 /** "2026-09-28" → "28/09/2026" sin pasar por la zona horaria del navegador. */
 export const fmtIsoDate = (iso: string | null): string => {
   if (!iso) return "…";

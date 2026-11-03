@@ -82,13 +82,13 @@ export default function RankingRow({
       className="grid cursor-pointer grid-cols-[28px_minmax(0,1fr)_auto] items-start gap-[9px] rounded-[10px] border-b border-border py-[9px] pl-1.5 pr-1 transition-colors hover:bg-secondary"
     >
       <div
-        className="relative grid h-7 w-7 place-items-center rounded-full border-2 bg-secondary text-[9.5px] font-semibold text-foreground"
+        className="relative grid h-7 w-7 place-items-center rounded-full border-2 bg-secondary text-[13px] font-semibold text-foreground"
         style={{ borderColor: color }}
       >
         {a.initials}
         <span
           className={cn(
-            "absolute -left-1.5 -top-[5px] grid h-[15px] min-w-[15px] place-items-center rounded-full border border-border bg-card px-[3px] text-[9px] font-bold leading-none text-muted-foreground",
+            "absolute -left-2 -top-[7px] grid h-[18px] min-w-[18px] place-items-center rounded-full border border-border bg-card px-[3px] text-[13px] font-bold leading-none text-muted-foreground",
             podium === 1 && "border-0 bg-[#141414] text-[#cbe71e]",
             (podium === 2 || podium === 3) && "border-0 bg-[#cbe71e] text-[#141414]"
           )}
@@ -102,11 +102,11 @@ export default function RankingRow({
           <span className="min-w-0 truncate text-[13px] font-semibold text-foreground">
             {a.name}
           </span>
-          <span className="shrink-0 whitespace-nowrap rounded bg-secondary px-[5px] py-px text-[9.5px] font-semibold text-muted-foreground">
+          <span className="shrink-0 whitespace-nowrap rounded bg-secondary px-[5px] py-px text-[13px] font-semibold text-muted-foreground">
             {project?.name ?? MISSING}
           </span>
         </div>
-        <div className="truncate text-[11.5px] text-muted-foreground">
+        <div className="truncate text-[13px] text-muted-foreground">
           <b className="font-semibold text-foreground">
             <span
               className="mr-[5px] inline-block h-1.5 w-1.5 rounded-full align-[1px]"
@@ -116,7 +116,7 @@ export default function RankingRow({
           </b>
           {detail && ` · ${detail}`}
         </div>
-        <div className="flex min-w-0 items-center gap-1 text-[11.5px] text-muted-foreground">
+        <div className="flex min-w-0 items-center gap-1 text-[13px] text-muted-foreground">
           <MapPin className="h-[11px] w-[11px] shrink-0" />
           <span className="min-w-0 truncate">{where}</span>
         </div>
@@ -135,7 +135,7 @@ export default function RankingRow({
         >
           <b className="text-[15px] font-bold tracking-[-0.02em]">{a.total_activities}</b>
         </span>
-        <span className="whitespace-nowrap text-[10.5px] text-muted-foreground">
+        <span className="whitespace-nowrap text-[13px] text-muted-foreground">
           <b className="font-semibold text-foreground">
             {visitsPct != null ? `${visitsPct}%` : "—"}
           </b>

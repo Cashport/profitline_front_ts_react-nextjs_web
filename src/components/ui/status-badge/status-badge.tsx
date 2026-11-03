@@ -29,7 +29,7 @@ export default function StatusBadge({
     <span
       title={title}
       className={cn(
-        "box-border inline-block whitespace-nowrap rounded-md text-center text-[11px] font-semibold tabular-nums",
+        "box-border inline-block whitespace-nowrap rounded-md text-center text-[13px] font-semibold tabular-nums",
         width ? "py-0.5" : "min-w-[44px] px-[7px] py-0.5",
         !dot && className
       )}

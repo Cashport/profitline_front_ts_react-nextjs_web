@@ -88,7 +88,7 @@ function DiscountPage() {
               handleDeleteDiscount={modalDelete.handleOpen}
             />
           </Flex>
-          <Flex vertical style={{ width: "fit-content" }}>
+          <Flex vertical className={styles.ctaContainer} style={{ width: "fit-content" }}>
             <Link
               href={`/descuentos/${tabActive === "1" ? "paquete" : "regla"}/create`}
               passHref

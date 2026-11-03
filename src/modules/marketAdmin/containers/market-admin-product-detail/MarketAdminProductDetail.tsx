@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminProductDetail } from "@/modules/marketAdmin/hooks/useMarketAdminProductDetail";
 import { useMarketAdminRelatedSkus } from "@/modules/marketAdmin/hooks/useMarketAdminRelatedSkus";
@@ -17,6 +16,7 @@ import ProductImageUpload from "@/modules/marketAdmin/components/market-admin-pr
 import ProductSkusTable from "@/modules/marketAdmin/components/market-admin-product-detail/ProductSkusTable";
 import ProductPricesTable from "@/modules/marketAdmin/components/market-admin-product-detail/ProductPricesTable";
 import ProductLotes from "@/modules/marketAdmin/components/market-admin-product-detail/ProductLotes";
+import Header from "@/components/organisms/header";
 
 // Campos que el endpoint aún no devuelve → marcados como pendientes de backend.
 const MISSING = "XXXX";
@@ -123,19 +123,13 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
     imageFile !== null;
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">{nombreVisible}</h1>
-
-      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
-        {/* Card top bar: back + save */}
-        <div className="flex items-center justify-between">
-          <Link
-            href="/market-admin/productos"
-            className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] transition-colors"
-          >
-            <ArrowLeft size={14} /> Volver
-          </Link>
-          {(isDirty || saving || saved) && (
+    <div className="cp-page min-h-full">
+      {/* Volver y guardar van en el header compartido (docs/DESIGN.md §4) */}
+      <Header
+        title={nombreVisible}
+        back="/market-admin/productos"
+        actionsExtra={
+          (isDirty || saving || saved) && (
             <button
               onClick={handleSave}
               disabled={saving}
@@ -155,9 +149,11 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
                 "Guardar cambios"
               )}
             </button>
-          )}
-        </div>
+          )
+        }
+      />
 
+      <div className="cp-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
         <ProductInfoSection
           linea={product.line_name}
           canal={product.line_name}
@@ -183,14 +179,14 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
           <div className="flex flex-col gap-5">
             {/* Nombre editable */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs text-[#999999]">Nombre visible</label>
+              <label className="text-[13px] text-[#999999]">Nombre visible</label>
               <input
                 type="text"
                 value={nombreVisible}
                 onChange={(e) => setNombreVisible(e.target.value)}
                 className="w-full text-sm text-[#141414] border border-[#DDDDDD] rounded-lg px-3 py-2.5 outline-none focus:border-[#141414] transition-colors font-bold"
               />
-              <p className="text-[11px] text-[#AAAAAA]">Nombre interno: {product.sku}</p>
+              <p className="text-[13px] text-[#AAAAAA]">Nombre interno: {product.sku}</p>
             </div>
 
             <div className="border-t border-[#EEEEEE]" />

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
+import { getAppZoom } from "@/utils/utils";
 import { Collapse, Flex } from "antd";
 
 import { useAppStore } from "@/lib/store/store";
@@ -28,7 +29,7 @@ export const ModalResultAppy = ({
   const formatMoney = useAppStore((state) => state.formatMoney);
   const updateDefaultPosition = () => {
     const modalWidth = draggleRef.current?.offsetWidth || 240;
-    setDefaultPosition({ x: window.innerWidth - modalWidth - 20, y: 0 });
+    setDefaultPosition({ x: window.innerWidth / getAppZoom() - modalWidth - 20, y: 0 });
   };
 
   useEffect(() => {
@@ -47,16 +48,19 @@ export const ModalResultAppy = ({
     if (!targetRect) {
       return;
     }
+    // rect/client sizes are screen px; Draggable works in (zoomed) CSS px
+    const zoom = getAppZoom();
     setBounds({
-      left: -targetRect.left + uiData.x,
-      right: clientWidth - (targetRect.right - uiData.x),
-      top: -targetRect.top + uiData.y,
-      bottom: clientHeight - (targetRect.bottom - uiData.y)
+      left: -targetRect.left / zoom + uiData.x,
+      right: (clientWidth - targetRect.right) / zoom + uiData.x,
+      top: -targetRect.top / zoom + uiData.y,
+      bottom: (clientHeight - targetRect.bottom) / zoom + uiData.y
     });
   };
 
   return (
     <Draggable
+      scale={getAppZoom()}
       bounds={bounds}
       nodeRef={draggleRef}
       onStart={(event, uiData) => onStart(event, uiData)}

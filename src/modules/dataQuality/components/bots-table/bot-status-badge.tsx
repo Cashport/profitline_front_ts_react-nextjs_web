@@ -13,7 +13,7 @@ export function BotStatusBadge({ status }: { status: BotStatus }) {
   return (
     <Badge
       variant="secondary"
-      className="gap-1 text-xs"
+      className="gap-1 text-[13px]"
       style={{ backgroundColor: meta.bg, color: meta.color }}
     >
       <Icon className={cn("h-3 w-3", status === "EN_EJECUCION" && "animate-spin")} />
@@ -21,4 +21,3 @@ export function BotStatusBadge({ status }: { status: BotStatus }) {
     </Badge>
   );
 }
-
