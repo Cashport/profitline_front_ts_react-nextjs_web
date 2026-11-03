@@ -1,11 +1,17 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Info, Plus, Trash2 } from "lucide-react";
 
 import GeneralDropdown from "@/components/ui/dropdown/dropdown";
+import SearchField from "@/components/ui/search-field/search-field";
 import type { IBranchUser } from "@/types/branches/IBranches";
 
+import { normalize } from "../../utils/branches";
 import UserAvatar from "../user-avatar/user-avatar";
+
+/** Desde cuántos usuarios aparece el buscador: con pocos no hace falta. */
+const SEARCH_FROM = 5;
 
 interface BranchUsersCardProps {
   users: IBranchUser[];
@@ -13,10 +19,24 @@ interface BranchUsersCardProps {
   onAdd?: () => void;
   /** Sin acción no se muestra el botón de basura de cada usuario. */
   onRemove?: (user: IBranchUser) => void;
+  /** Aviso cuando la pantalla no permite agregar ni eliminar (proyecto de solo lectura). */
+  readOnlyNote?: string;
 }
 
 /** Usuarios asignados a la sucursal; agregar y eliminar aparecen solo si la pantalla los habilita. */
-export default function BranchUsersCard({ users, onAdd, onRemove }: BranchUsersCardProps) {
+export default function BranchUsersCard({
+  users,
+  onAdd,
+  onRemove,
+  readOnlyNote
+}: BranchUsersCardProps) {
+  const [query, setQuery] = useState("");
+
+  const visible = useMemo(() => {
+    const q = normalize(query.trim());
+    return q ? users.filter((u) => normalize(`${u.name} ${u.email}`).includes(q)) : users;
+  }, [users, query]);
+
   return (
     <section className="cp-card p-[var(--card-pad)]">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
@@ -26,21 +46,39 @@ export default function BranchUsersCard({ users, onAdd, onRemove }: BranchUsersC
             {users.length}
           </span>
         </div>
-        {onAdd && (
-          <button
-            type="button"
-            onClick={onAdd}
-            className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border-0 bg-cp-lime px-4 text-[13.5px] font-semibold text-[#141414] hover:bg-cp-lime-dark"
-          >
-            <Plus className="h-4 w-4" strokeWidth={2.4} />
-            Agregar Nuevo Usuario
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {users.length >= SEARCH_FROM && (
+            <div className="w-[260px] max-w-full">
+              <SearchField
+                value={query}
+                onChange={setQuery}
+                placeholder="Buscar por nombre o correo…"
+              />
+            </div>
+          )}
+          {onAdd && (
+            <button
+              type="button"
+              onClick={onAdd}
+              className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border-0 bg-cp-lime px-4 text-[13.5px] font-semibold text-[#141414] hover:bg-cp-lime-dark"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.4} />
+              Agregar Nuevo Usuario
+            </button>
+          )}
+        </div>
       </div>
 
+      {readOnlyNote && (
+        <p className="m-0 mt-2 flex items-center gap-1.5 rounded-lg bg-cp-bg px-3 py-2 text-[13px] text-cp-ink-3">
+          <Info className="h-4 w-4 shrink-0" />
+          {readOnlyNote}
+        </p>
+      )}
+
       <ul className="m-0 list-none p-0">
-        {users.length ? (
-          users.map((user) => (
+        {visible.length ? (
+          visible.map((user) => (
             <li
               key={user.id}
               className="flex items-center gap-3 border-b border-cp-line py-2.5 last:border-0"
@@ -79,7 +117,9 @@ export default function BranchUsersCard({ users, onAdd, onRemove }: BranchUsersC
           ))
         ) : (
           <li className="py-8 text-center text-[13px] text-cp-ink-3">
-            Esta sucursal no tiene usuarios asignados.
+            {users.length
+              ? `No hay usuarios que coincidan con “${query.trim()}”.`
+              : "Esta sucursal no tiene usuarios asignados."}
           </li>
         )}
       </ul>

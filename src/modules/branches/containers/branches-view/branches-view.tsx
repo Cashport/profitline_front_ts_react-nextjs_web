@@ -74,7 +74,11 @@ export default function BranchesView() {
             isValidating && !isLoading && "opacity-60"
           )}
         >
-          {!isLoading && <BranchesTable branches={branches} onClearAll={clearAll} />}
+          {isLoading ? (
+            <p className="m-0 p-9 text-center text-[13px] text-cp-ink-3">Cargando sucursales…</p>
+          ) : (
+            <BranchesTable branches={branches} hasQuery={hasQuery} onClearAll={clearAll} />
+          )}
         </div>
         {/* Solo aparece si hay más de una página. */}
         {total > PAGE_SIZE && (
@@ -85,6 +89,7 @@ export default function BranchesView() {
               pageSize={PAGE_SIZE}
               onPageChange={changePage}
               isLoading={isValidating}
+              showFirstPage
             />
           </div>
         )}

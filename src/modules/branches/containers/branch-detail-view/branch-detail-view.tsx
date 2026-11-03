@@ -52,7 +52,7 @@ export default function BranchDetailView({ branchId }: { branchId: string }) {
     );
   }
 
-  const { branch, users } = detail;
+  const { branch, users, canEdit } = detail;
 
   const handleAdd = async (picked: IBranchUser[]) => {
     try {
@@ -114,7 +114,17 @@ export default function BranchDetailView({ branchId }: { branchId: string }) {
   return (
     <div className="cp-page">
       <BranchInfoCard branch={branch} />
-      <BranchUsersCard users={users} onAdd={() => setAdding(true)} onRemove={setRemoving} />
+      {/* En proyectos de solo lectura no se ofrece agregar ni eliminar. */}
+      <BranchUsersCard
+        users={users}
+        onAdd={canEdit ? () => setAdding(true) : undefined}
+        onRemove={canEdit ? setRemoving : undefined}
+        readOnlyNote={
+          canEdit
+            ? undefined
+            : "Por ahora solo se pueden agregar o quitar usuarios en el proyecto de pruebas."
+        }
+      />
 
       {adding && (
         <AddUsersModal

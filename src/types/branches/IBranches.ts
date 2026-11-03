@@ -114,6 +114,8 @@ export interface IBranchRemoveUsersResult {
 /** Respuesta de GET /integration/profit360/branches/registeredUsers?id=<IdSucursalDevolucion>. */
 export interface IBranchRegisteredUsersApi {
   branch: IBranchApiRow;
+  /** Si en este proyecto se pueden agregar y quitar usuarios. */
+  PuedeEditar?: boolean;
   users: { IdUsuario: string; NombreEjecutivo: string; CorreoEjecutivo: string | null }[];
 }
 
@@ -121,4 +123,6 @@ export interface IBranchRegisteredUsersApi {
 export interface IBranchDetail {
   branch: IBranch;
   users: IBranchUser[];
+  /** false: el proyecto es de solo lectura, no se muestran agregar ni eliminar. */
+  canEdit: boolean;
 }

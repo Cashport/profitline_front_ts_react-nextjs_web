@@ -17,11 +17,13 @@ const TD = "px-3 py-2.5";
 
 interface BranchesTableProps {
   branches: IBranch[];
+  /** Hay búsqueda o filtros: sin resultados se ofrece limpiarlos; si no, el proyecto está vacío. */
+  hasQuery: boolean;
   onClearAll: () => void;
 }
 
 /** Tabla del listado: encabezado sticky, columnas ordenables y el ojo que abre el detalle. */
-export default function BranchesTable({ branches, onClearAll }: BranchesTableProps) {
+export default function BranchesTable({ branches, hasQuery, onClearAll }: BranchesTableProps) {
   const sort = useBranchesStore((s) => s.sort);
   const toggleSort = useBranchesStore((s) => s.toggleSort);
 
@@ -70,12 +72,22 @@ export default function BranchesTable({ branches, onClearAll }: BranchesTablePro
       </thead>
       <tbody>
         {branches.length ? (
-          branches.map((b) => (
+          branches.map((b, i) => (
             <tr
               key={b.id}
               className="border-b border-cp-line transition-colors last:border-b-0 hover:bg-cp-subtle"
             >
-              <td className={cn(TD, "truncate font-semibold")} title={b.client_name}>
+              {/* Mismo cliente que la fila de arriba: en gris, para que se note dónde empieza cada cliente. */}
+              <td
+                className={cn(
+                  TD,
+                  "truncate",
+                  b.client_name === branches[i - 1]?.client_name
+                    ? "font-medium text-cp-ink-4"
+                    : "font-semibold"
+                )}
+                title={b.client_name}
+              >
                 {b.client_name}
               </td>
               <td className={cn(TD, "truncate font-medium")} title={b.name}>
@@ -112,17 +124,30 @@ export default function BranchesTable({ branches, onClearAll }: BranchesTablePro
         ) : (
           <tr>
             <td colSpan={8} className="p-9 text-center">
-              <p className="m-0 text-[13.5px] font-semibold">No hay sucursales que coincidan</p>
-              <p className="m-0 mt-1 text-[13px] text-cp-ink-3">
-                Prueba con otra búsqueda o quita algunos filtros.
-              </p>
-              <button
-                type="button"
-                onClick={onClearAll}
-                className="mt-3 cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-cp-ink underline"
-              >
-                Limpiar búsqueda y filtros
-              </button>
+              {hasQuery ? (
+                <>
+                  <p className="m-0 text-[13.5px] font-semibold">No hay sucursales que coincidan</p>
+                  <p className="m-0 mt-1 text-[13px] text-cp-ink-3">
+                    Prueba con otra búsqueda o quita algunos filtros.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={onClearAll}
+                    className="mt-3 cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-cp-ink underline"
+                  >
+                    Limpiar búsqueda y filtros
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="m-0 text-[13.5px] font-semibold">
+                    Este proyecto no tiene sucursales de devolución configuradas
+                  </p>
+                  <p className="m-0 mt-1 text-[13px] text-cp-ink-3">
+                    Elige otro proyecto o pide que se configure su logística inversa.
+                  </p>
+                </>
+              )}
             </td>
           </tr>
         )}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { useAppStore } from "@/lib/store/store";
 
 import BranchesHeaderActions from "../../components/branches-header-actions/branches-header-actions";
 import { BRANCHES_PATH } from "../../constants";
@@ -80,6 +81,15 @@ export default function BranchesLayout({ children }: { children: React.ReactNode
   // Este marco sigue montado entre el listado y el detalle, y se desmonta al salir de
   // /branches: al volver, la tabla arranca en la página 1, sin búsqueda ni filtros.
   useEffect(() => reset, [reset]);
+
+  // Otro proyecto trae otras sucursales y otros filtros: la tabla vuelve a la página 1.
+  const { ID: projectId } = useAppStore((s) => s.selectedProject);
+  const lastProject = useRef(projectId);
+  useEffect(() => {
+    if (lastProject.current === projectId) return;
+    lastProject.current = projectId;
+    reset();
+  }, [projectId, reset]);
 
   return branchId ? (
     <DetailLayout branchId={branchId}>{children}</DetailLayout>

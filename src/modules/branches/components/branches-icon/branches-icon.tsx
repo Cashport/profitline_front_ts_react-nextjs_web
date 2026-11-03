@@ -3,7 +3,7 @@ interface BranchesIconProps {
   className?: string;
 }
 
-/** Ícono de Sucursales: una tienda con toldo (trazo como los de lucide). */
+/** Ícono de Sucursales de devolución: tienda con toldo y flecha de regreso (trazo como lucide). */
 export default function BranchesIcon({ size = 24, className }: BranchesIconProps) {
   return (
     <svg
@@ -19,13 +19,14 @@ export default function BranchesIcon({ size = 24, className }: BranchesIconProps
       className={className}
     >
       {/* Toldo */}
-      <path d="M2.5 9 4.2 3.5h15.6L21.5 9" />
-      <path d="M2.5 9a3.17 3.17 0 0 0 6.33 0 3.17 3.17 0 0 0 6.34 0 3.17 3.17 0 0 0 6.33 0" />
-      {/* Local */}
-      <path d="M4 12v8.5h16V12" />
-      {/* Ventana y puerta */}
-      <path d="M6.8 14h3.7v3.3H6.8z" />
-      <path d="M13.5 20.5v-6.5h3.7v6.5" />
+      <path d="M2 12.5 3.2 9h11.6l1.2 3.5" />
+      <path d="M2 12.5a2.33 2.33 0 0 0 4.67 0 2.33 2.33 0 0 0 4.66 0 2.33 2.33 0 0 0 4.67 0" />
+      {/* Local y puerta */}
+      <path d="M3 15v6h12v-6" />
+      <path d="M7.5 21v-3.5h3V21" />
+      {/* Flecha de devolución */}
+      <path d="M15.5 5.5a3 3 0 1 0 3-3" />
+      <path d="M19.8 1.2 18.5 2.5l1.3 1.3" />
     </svg>
   );
 }

@@ -7,6 +7,7 @@ import {
   removeBranchUsers
 } from "@/services/branches/branches";
 import type { IBranchDetail, IBranchUser } from "@/types/branches/IBranches";
+import { useAppStore } from "@/lib/store/store";
 import { ApiError } from "@/utils/api/api";
 
 import { toBranch } from "../utils/branches";
@@ -18,13 +19,15 @@ const SWR_OPTIONS = { revalidateOnFocus: false };
  * (GET /integration/profit360/branches/registeredUsers). `null` si la sucursal no existe.
  */
 export const useBranchDetail = (branchId: string) => {
+  const { ID: projectId } = useAppStore((s) => s.selectedProject);
   const { data, error, isLoading, mutate } = useSWR(
-    ["/integration/profit360/branches/registeredUsers", branchId],
+    projectId ? ["/integration/profit360/branches/registeredUsers", projectId, branchId] : null,
     async (): Promise<IBranchDetail | null> => {
       try {
         const res = await getBranchRegisteredUsers(branchId);
         return {
           branch: toBranch(res.data.branch),
+          canEdit: res.data.PuedeEditar === true,
           users: res.data.users.map((u) => ({
             id: u.IdUsuario,
             name: u.NombreEjecutivo || u.CorreoEjecutivo || "Sin nombre",
@@ -65,8 +68,9 @@ export const useBranchDetail = (branchId: string) => {
  * GET /integration/profit360/branches/AllUsers. Solo nombre y correo.
  */
 export const useAssignableUsers = (enabled: boolean) => {
+  const { ID: projectId } = useAppStore((s) => s.selectedProject);
   const { data, error, isLoading } = useSWR(
-    enabled ? "/integration/profit360/branches/AllUsers" : null,
+    enabled && projectId ? ["/integration/profit360/branches/AllUsers", projectId] : null,
     async (): Promise<IBranchUser[]> => {
       const res = await getBranchesAllUsers();
       return res.data.map((u) => ({
