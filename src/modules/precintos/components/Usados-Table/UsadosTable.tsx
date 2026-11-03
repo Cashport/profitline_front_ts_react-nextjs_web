@@ -34,12 +34,12 @@ export const UsadosTable: React.FC<UsadosTableProps> = ({
   );
 
   return (
-    <div className="w-full bg-white overflow-visible">
-      <div className="overflow-x-auto">
+    <div className="w-full min-w-0">
+      <div className="min-w-0">
         <table className="w-full text-left text-[13px] border-collapse">
           <thead>
             <tr className="select-none">
-              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-cp-line-2 accent-[#cbe71e] w-4 h-4 cursor-pointer" /></th>
               
               {/* 👇 COLUMNA ORDENABLE: PRECINTO 👇 */}
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('IdPrecinto')}>
@@ -59,26 +59,26 @@ export const UsadosTable: React.FC<UsadosTableProps> = ({
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Usado por</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50 text-gray-700">
+          <tbody className="divide-y divide-cp-muted text-cp-ink">
             {data.map((item) => {
               const isSelected = selectedIds.includes(item.Id);
               return (
-                <tr key={item.Id} className={`hover:bg-gray-50/70 transition-colors ${isSelected ? 'bg-gray-50/40' : ''}`}>
-                  <td className="py-3 px-4"><input type="checkbox" checked={isSelected} onChange={() => toggleSelectRow(item.Id)} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></td>
-                  <td className="py-3 px-4 font-bold text-gray-900">{item.IdPrecinto}</td>
-                  <td className="py-3 px-4 font-bold text-gray-900">{item.IdPrecintoHasta || ''}</td>
-                  <td className="py-3 px-4 font-medium text-gray-800">{item.Cantidad || 1}</td>
+                <tr key={item.Id} className={`hover:bg-cp-subtle transition-colors ${isSelected ? 'bg-cp-subtle' : ''}`}>
+                  <td className="py-3 px-4"><input type="checkbox" checked={isSelected} onChange={() => toggleSelectRow(item.Id)} className="rounded border-cp-line-2 accent-[#cbe71e] w-4 h-4 cursor-pointer" /></td>
+                  <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecinto}</td>
+                  <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecintoHasta || ''}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink">{item.Cantidad || 1}</td>
                   
                   <td className="py-3 px-4">
-                    <button type="button" onClick={() => onDevolucionClick && onDevolucionClick(item.IdDevolucion)} className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer" title={item.IdDevolucion}>
+                    <button type="button" onClick={() => onDevolucionClick && onDevolucionClick(item.IdDevolucion)} className="text-cp-blue hover:text-cp-blue-hover font-semibold cursor-pointer" title={item.IdDevolucion}>
                       {item.IdDevolucion ? `${item.IdDevolucion.substring(0, 15)}...` : 'Sin devolución'}
                     </button>
                   </td>
-                  <td className="py-3 px-4 font-medium text-gray-800 text-[13px]">{item.ClienteNombre || 'Cliente no disponible'}</td>
-                  <td className="py-3 px-4 font-medium text-gray-600">
+                  <td className="py-3 px-4 font-medium text-cp-ink text-[13px]">{item.ClienteNombre || 'Cliente no disponible'}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink-2">
                     {item.FechaUso ? new Date(item.FechaUso).toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (item.FechaRegistro ? new Date(item.FechaRegistro).toLocaleDateString('es-CO') : '-')}
                   </td>
-                  <td className="py-3 px-4 font-medium text-gray-800">{item.UsuarioAsignoNombre || 'Sin nombre'}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink">{item.UsuarioAsignoNombre || 'Sin nombre'}</td>
                 </tr>
               );
             })}

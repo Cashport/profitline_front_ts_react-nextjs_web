@@ -38,8 +38,8 @@ export const EjecutivosTable: React.FC<EjecutivosTableProps> = ({
   );
 
   return (
-    <div className="w-full bg-white overflow-visible">
-      <div className="overflow-x-auto">
+    <div className="w-full min-w-0">
+      <div className="min-w-0">
         <table className="w-full text-left text-[13px] border-collapse">
           <thead>
             <tr className="select-none">
@@ -76,34 +76,34 @@ export const EjecutivosTable: React.FC<EjecutivosTableProps> = ({
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-right text-[13.5px] font-semibold text-cp-ink"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50 text-gray-700">
+          <tbody className="divide-y divide-cp-muted text-cp-ink">
             {data.map((ejecutivo) => (
-              <tr key={ejecutivo.EjecutivoId} className="hover:bg-gray-50/70 transition-colors">
-                <td className="py-3 px-4 font-bold text-gray-900">
+              <tr key={ejecutivo.EjecutivoId} className="hover:bg-cp-subtle transition-colors">
+                <td className="py-3 px-4 font-semibold text-cp-ink">
                   {ejecutivo.EjecutivoNombre}
                 </td>
-                <td className="py-3 px-4 font-medium text-gray-600">
+                <td className="py-3 px-4 font-medium text-cp-ink-2">
                   {ejecutivo.UltimoEnvio ? new Date(ejecutivo.UltimoEnvio).toLocaleDateString('es-CO') : '-'}
                 </td>
-                <td className="py-3 px-4 font-medium text-gray-800">{ejecutivo.Recibidos}</td>
-                <td className="py-3 px-4 font-medium text-gray-800">{ejecutivo.Usados}</td>
-                <td className="py-3 px-4 font-medium text-pink-600">{ejecutivo.Anulados}</td>
+                <td className="py-3 px-4 font-medium text-cp-ink">{ejecutivo.Recibidos}</td>
+                <td className="py-3 px-4 font-medium text-cp-ink">{ejecutivo.Usados}</td>
+                <td className="py-3 px-4 font-medium text-cp-magenta">{ejecutivo.Anulados}</td>
                 
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="w-24 h-1 bg-cp-muted rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-[#c2f012]" 
+                        className="h-full bg-cp-lime" 
                         style={{ width: `${Math.min(ejecutivo.PorcentajeUso, 100)}%` }} 
                       />
                     </div>
-                    <span className="font-bold text-gray-700 text-[13px]">
+                    <span className="font-semibold text-cp-ink-2 text-[13px]">
                       {Math.round(ejecutivo.PorcentajeUso)}%
                     </span>
                   </div>
                 </td>
                 
-                <td className="py-3 px-4 font-bold text-gray-900">
+                <td className="py-3 px-4 font-semibold text-cp-ink">
                   {ejecutivo.Asignados}
                 </td>
                 
@@ -111,14 +111,14 @@ export const EjecutivosTable: React.FC<EjecutivosTableProps> = ({
                   <button 
                     type="button"
                     onClick={() => onVer && onVer(ejecutivo)} 
-                    className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer transition-colors"
+                    className="text-cp-blue hover:text-cp-blue-hover font-semibold cursor-pointer transition-colors"
                   >
                     Ver
                   </button>
                   <button 
                     type="button"
                     onClick={() => onMover && onMover(ejecutivo)} 
-                    className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer transition-colors"
+                    className="text-cp-blue hover:text-cp-blue-hover font-semibold cursor-pointer transition-colors"
                   >
                     Mover
                   </button>
@@ -128,7 +128,7 @@ export const EjecutivosTable: React.FC<EjecutivosTableProps> = ({
             
             {data.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-gray-400 text-sm">
+                <td colSpan={8} className="py-8 text-center text-cp-ink-3 text-[13px]">
                   No hay ejecutivos con precintos asignados.
                 </td>
               </tr>
