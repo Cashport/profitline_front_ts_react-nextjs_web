@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
   FilterCategoryConfig,
@@ -61,6 +63,7 @@ export default function ModalFilterMatrix({
   estadosLoading = false,
   inHeader
 }: ModalFilterMatrixProps) {
+  const t = useTranslations("wallet.filters");
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
   const coordinadorOptions = canonicalOptions(filters?.coordinator);
@@ -105,43 +108,43 @@ export default function ModalFilterMatrix({
   const categories: FilterCategoryConfig[] = [
     {
       key: "coordinador",
-      label: "Coordinador",
+      label: t("coordinator"),
       options: coordinadorOptions,
       status: filtersStatus
     },
     {
       key: "mercado",
-      label: "Mercado",
+      label: t("market"),
       options: mercadoOptions,
       status: filtersStatus
     },
     {
       key: "kam",
-      label: "KAM",
+      label: t("kam"),
       options: kamOptions,
       status: filtersStatus
     },
     {
       key: "kamLider",
-      label: "KAM líder",
+      label: t("kamLead"),
       options: kamLiderOptions,
       status: filtersStatus
     },
     {
       key: "ejecutivo",
-      label: "Ejecutivo",
+      label: t("collector"),
       options: ejecutivoOptions,
       status: filtersStatus
     },
     {
       key: "estado",
-      label: "Estado",
+      label: t("status"),
       options: estadoOptions,
       status: status(estadosLoading)
     },
     {
       key: "tipoNovedad",
-      label: "Tipo de novedad",
+      label: t("noveltyType"),
       options: tipoNovedadOptions,
       status: filtersStatus
     }
@@ -152,7 +155,7 @@ export default function ModalFilterMatrix({
       categories={categories}
       value={selection}
       formatTagValue={(_cat, items) =>
-        items.length === 1 ? items[0].name : `${items.length} seleccionados`
+        items.length === 1 ? items[0].name : t("selectedCount", { count: items.length })
       }
       onApply={(sel) => onChange(selectionToDomain(sel))}
       onValueChange={(sel) => onChange(selectionToDomain(sel))}

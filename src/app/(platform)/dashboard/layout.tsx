@@ -1,10 +1,7 @@
-import { Metadata } from "next";
 import RecaudoLayout from "@/modules/recaudoModule/containers/recaudo-layout/recaudo-layout";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Torre de control de recaudo",
-  description: "Meta, forecast, acuerdos de pago y PNA del mes"
-};
+export const generateMetadata = () => pageMetadata("collectionsTower");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return <RecaudoLayout>{children}</RecaudoLayout>;

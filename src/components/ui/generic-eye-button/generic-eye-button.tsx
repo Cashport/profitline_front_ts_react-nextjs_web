@@ -3,6 +3,7 @@
 import React, { FC } from "react";
 import Link from "next/link";
 import { Eye } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { cn } from "@/utils/utils";
 
 interface GenericEyeButtonProps {
@@ -29,10 +30,12 @@ const GenericEyeButton: FC<GenericEyeButtonProps> = ({
   href,
   onClick,
   size = 19,
-  title = "Ver detalle",
+  title: titleProp,
   className,
   disabled = false
 }) => {
+  const tCommon = useTranslations("common");
+  const title = titleProp ?? tCommon("actions.viewDetail");
   // Every call site sits inside a clickable table row, so the click must not bubble
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();

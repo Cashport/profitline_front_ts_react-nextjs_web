@@ -22,8 +22,11 @@ export const mapRawStatusToHealthStatus = (estado: BotRawStatus | string): BotHe
   }
 };
 
+// Clave en botHealth.status; el texto se traduce al renderizar.
+export type BotStatusLabelKey = "operational" | "failing" | "running" | "inReview" | "noStatus";
+
 export interface BotStatusDetails {
-  text: string;
+  labelKey: BotStatusLabelKey;
   color: string;
   backgroundColor: string;
   icon: ReactElement;
@@ -37,25 +40,25 @@ export interface BotStatusDetails {
 // ambar de "Pendiente"/"No clasificado" como placeholder, PENDIENTE de definición de diseño.
 export const BOT_STATUS_MAP: Record<BotHealthStatus, BotStatusDetails> = {
   Operativo: {
-    text: "Operativo",
+    labelKey: "operational",
     color: "#065f46",
     backgroundColor: "#d9f4e8",
     icon: <CheckCircle size={16} />
   },
   "Con fallas": {
-    text: "Con fallas",
+    labelKey: "failing",
     color: "#e7092b",
     backgroundColor: "#fce6e9",
     icon: <XCircle size={16} />
   },
   Ejecutando: {
-    text: "Ejecutando",
+    labelKey: "running",
     color: "#92400e",
     backgroundColor: "#fef2ca",
     icon: <Clock size={16} />
   },
   "En revisión": {
-    text: "En revisión",
+    labelKey: "inReview",
     color: "#2143b0",
     backgroundColor: "#e2ecfe",
     icon: <MagnifyingGlass size={16} />
@@ -63,7 +66,7 @@ export const BOT_STATUS_MAP: Record<BotHealthStatus, BotStatusDetails> = {
 };
 
 const FALLBACK_STATUS_DETAILS: BotStatusDetails = {
-  text: "Sin estado",
+  labelKey: "noStatus",
   color: "#595959",
   backgroundColor: "#f5f5f5",
   icon: <Clock size={16} />

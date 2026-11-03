@@ -1,5 +1,6 @@
 import { ArrowCircleRight, CheckCircle, X } from "phosphor-react";
 import { Eye } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -30,6 +31,7 @@ export function ArchiveTypeCollapseLabel({
   onToggleFuture,
   onViewIntake
 }: IArchiveTypeCollapseLabelProps) {
+  const t = useTranslations("dataQuality.archiveTypeLabel");
   return (
     <div className="flex items-center justify-between w-full pr-2">
       <div className="flex items-center gap-3">
@@ -45,7 +47,7 @@ export function ArchiveTypeCollapseLabel({
             {group.tipo_archivo}
           </Badge>
           <span className="text-[13px] pr-3 font-medium" style={{ color: "#141414", opacity: 0.5 }}>
-            {group.pending_archives} Pendientes
+            {t("pending", { count: group.pending_archives })}
           </span>
         </div>
         {intake && (
@@ -54,12 +56,14 @@ export function ArchiveTypeCollapseLabel({
               {intake.periodicity}
             </Badge>
             <p className="text-[13px]" style={{ color: "#141414" }}>
-              Se produce {intake.periodicity_json?.repeat?.frequency}{" "}
-              {intake.periodicity_json?.repeat?.interval} veces iniciando el{" "}
-              {intake.periodicity_json?.start_date}
+              {t("occurrence", {
+                frequency: intake.periodicity_json?.repeat?.frequency ?? "",
+                interval: intake.periodicity_json?.repeat?.interval ?? "",
+                startDate: intake.periodicity_json?.start_date ?? ""
+              })}
             </p>
             <span className="text-[13px] font-semibold" style={{ color: "#141414" }}>
-              Fuente:
+              {t("source")}
             </span>
             <span className="text-[13px]" style={{ color: "#141414" }}>
               {intake.intake_type?.description || "-"}
@@ -71,7 +75,7 @@ export function ArchiveTypeCollapseLabel({
         <button
           type="button"
           aria-pressed={active}
-          title={active ? "Ocultar procesados" : "Mostrar procesados"}
+          title={active ? t("hideProcessed") : t("showProcessed")}
           onClick={(e) => {
             e.stopPropagation();
             onToggle();
@@ -92,7 +96,7 @@ export function ArchiveTypeCollapseLabel({
         <button
           type="button"
           aria-pressed={futureActive}
-          title={futureActive ? "Ocultar futuros" : "Mostrar futuros"}
+          title={futureActive ? t("hideFuture") : t("showFuture")}
           onClick={(e) => {
             e.stopPropagation();
             onToggleFuture();
@@ -114,7 +118,7 @@ export function ArchiveTypeCollapseLabel({
           <Button
             variant="outline"
             size="icon"
-            title="Ver detalles"
+            title={t("viewDetails")}
             onClick={(e) => {
               e.stopPropagation();
               onViewIntake?.();

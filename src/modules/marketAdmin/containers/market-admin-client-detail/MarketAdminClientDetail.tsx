@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import { useSearchParams } from "next/navigation";
 import { Package, Tag, Users, MapPin, Settings } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -57,6 +58,8 @@ const splitLineas = (lineas: string | null | undefined) =>
 
 export default function MarketAdminClientDetail({ params }: { params: { id: string } }) {
   const { id } = params; // NIT del cliente (`client.NIT`)
+  const t = useTranslations("marketAdmin.clientDetail");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const searchParams = useSearchParams();
@@ -119,12 +122,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     try {
       await createMarketAdminClientAddress(scope, values);
       await mutateDirecciones();
-      showMessage("success", "Dirección creada correctamente.");
+      showMessage("success", t("feedback.addressCreated"));
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al crear la dirección."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.addressCreateError"));
       throw err;
     }
   };
@@ -136,12 +136,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     try {
       await updateMarketAdminClientAddress(scope, addressId, values);
       await mutateDirecciones();
-      showMessage("success", "Dirección actualizada correctamente.");
+      showMessage("success", t("feedback.addressUpdated"));
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al actualizar la dirección."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.addressUpdateError"));
       throw err;
     }
   };
@@ -150,12 +147,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     try {
       await deleteMarketAdminClientAddress(scope, addressId);
       await mutateDirecciones();
-      showMessage("success", "Dirección eliminada correctamente.");
+      showMessage("success", t("feedback.addressDeleted"));
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al eliminar la dirección."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.addressDeleteError"));
       throw err;
     }
   };
@@ -164,12 +158,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     try {
       await createManualBonus(buildManualBonusPayload(data));
       await mutateBonificados();
-      showMessage("success", "Bonificado creado exitosamente.");
+      showMessage("success", t("feedback.bonusCreated"));
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al crear el bonificado."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.bonusCreateError"));
       throw err;
     }
   };
@@ -185,12 +176,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
         [{ docReference: "Contrato", file: data.file }]
       );
       await mutateDescuentos();
-      showMessage("success", "Descuento creado exitosamente.");
+      showMessage("success", t("feedback.discountCreated"));
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al crear el descuento."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.discountCreateError"));
       throw err;
     }
   };
@@ -210,13 +198,13 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     try {
       const res = await changeStatus(discountId, newStatus);
       if (!res.success) throw new Error(res.message);
-      showMessage("success", `Descuento ${newStatus ? "activado" : "desactivado"} con éxito.`);
+      showMessage(
+        "success",
+        t("feedback.discountToggled", { active: newStatus ? "true" : "false" })
+      );
     } catch (err) {
       mutateDescuentos();
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al cambiar el estado."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.statusError"));
     }
   };
 
@@ -224,12 +212,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     try {
       await updateMarketAdminClientConfig(scope, body);
       await mutateConfig();
-      showMessage("success", "Configuración actualizada correctamente.");
+      showMessage("success", t("feedback.configUpdated"));
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al actualizar la configuración."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.configUpdateError"));
       throw err;
     }
   };
@@ -245,7 +230,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   if (error || !cliente) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-[#999999]">No se pudo cargar el cliente.</p>
+        <p className="text-sm text-[#999999]">{t("loadError")}</p>
       </div>
     );
   }
@@ -263,11 +248,11 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   const inMarketplace = cliente.in_marketplace === 1;
 
   const TABS = [
-    { id: "promociones", label: "Promociones", icon: Tag },
-    { id: "direcciones", label: `Direcciones (${direccionesCount})`, icon: MapPin },
-    { id: "usuarios", label: `Usuarios (${usuariosCount})`, icon: Users },
-    { id: "productos", label: `Productos (${productosCount})`, icon: Package },
-    { id: "configuraciones", label: "Configuraciones", icon: Settings }
+    { id: "promociones", label: t("tabs.promotions"), icon: Tag },
+    { id: "direcciones", label: t("tabs.addresses", { count: direccionesCount }), icon: MapPin },
+    { id: "usuarios", label: t("tabs.users", { count: usuariosCount }), icon: Users },
+    { id: "productos", label: t("tabs.products", { count: productosCount }), icon: Package },
+    { id: "configuraciones", label: t("tabs.settings"), icon: Settings }
   ];
 
   return (
@@ -275,7 +260,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
       {/* Volver, código y estado van en el header compartido (docs/DESIGN.md §4) */}
       <Header
         title={cliente.client_name}
-        back="/market-admin/clientes"
+        back="/market-admin/clients"
         actionsExtra={
           <div className="flex items-center gap-3">
             <ClientCodeSelect nit={cliente.nit} codigo={codigo} codes={codes} />
@@ -285,10 +270,10 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
               }`}
             >
               {cliente.in_marketplace === 0
-                ? "Sin marketplace"
+                ? t("noMarketplace")
                 : isActive === 1
-                  ? "Activo"
-                  : "Inactivo"}
+                  ? tCommon("status.active")
+                  : tCommon("status.inactive")}
             </span>
           </div>
         }
@@ -297,14 +282,14 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
       <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] flex flex-col gap-8">
         {/* Información general */}
         <div>
-          <p className="text-sm font-bold text-[#141414] mb-4">Información general</p>
+          <p className="text-sm font-bold text-[#141414] mb-4">{t("generalInfo")}</p>
           <div className="grid grid-cols-[1fr_1fr_1fr_2fr] gap-6">
-            <Field label="NIT" value={cliente.nit} />
+            <Field label={tCommon("fields.taxId")} value={cliente.nit} />
             {/* TODO: el detalle aún no devuelve la ciudad — pendiente en backend */}
-            <Field label="Ciudad" value={cliente.city || "—"} />
-            <Field label="Canal" value={cliente.bu || "—"} />
+            <Field label={t("fields.city")} value={cliente.city || "—"} />
+            <Field label={t("fields.channel")} value={cliente.bu || "—"} />
             <Field
-              label="Líneas de negocio"
+              label={t("fields.businessLines")}
               value={
                 <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                   {splitLineas(cliente.lineas).map((l) => {

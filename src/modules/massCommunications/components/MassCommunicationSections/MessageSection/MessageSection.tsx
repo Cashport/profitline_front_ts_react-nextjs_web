@@ -1,6 +1,7 @@
 "use client";
 import { Row, Col, Tag, Typography } from "antd";
 import { FileText, Info, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import type { WhatsappTemplate } from "../../../lib/mockData";
 import type { EmailTemplate } from "./EmailTemplateCard";
@@ -46,6 +47,7 @@ export default function MessageSection({
   currentTemplate,
   onCreateTemplate
 }: MessageSectionProps) {
+  const t = useTranslations("massCommunications.message");
   return (
     <section className="cp-card px-[18px] py-[14px]">
       <div className="flex justify-between mb-4">
@@ -54,7 +56,7 @@ export default function MessageSection({
             3
           </div>
           <Text strong className="text-[15px]">
-            Mensaje
+            {t("title")}
           </Text>
           <FileText size={16} className="text-gray-400 ml-1" />
           <Tag className="ml-2">{channel === "email" ? "Email" : "WhatsApp"}</Tag>
@@ -67,7 +69,7 @@ export default function MessageSection({
             className="border-[#CBE71E] text-[#141414] hover:bg-[#CBE71E]/10 gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
-            Crear template
+            {t("createTemplate")}
           </Button>
         )}
       </div>
@@ -76,7 +78,7 @@ export default function MessageSection({
         <Row gutter={16}>
           <Col span={12}>
             <Text strong className="block text-[13px] mb-3">
-              Templates de email
+              {t("emailTemplates")}
             </Text>
             <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded">
               {emailTemplates.map((tpl) => (
@@ -91,7 +93,7 @@ export default function MessageSection({
           </Col>
           <Col span={12}>
             <Text strong className="block text-[13px] mb-3">
-              Vista previa
+              {t("preview")}
             </Text>
             <div className="rounded-lg border border-[#DDDDDD] overflow-hidden">
               <EmailPreview
@@ -107,16 +109,16 @@ export default function MessageSection({
         <Row gutter={16}>
           <Col span={12}>
             <Text strong className="block text-[13px] mb-3">
-              Selecciona una plantilla aprobada
+              {t("selectApprovedTemplate")}
             </Text>
             <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-1">
               {waTemplatesLoading ? (
                 <Text type="secondary" className="text-sm text-center py-4">
-                  Cargando plantillas…
+                  {t("loadingTemplates")}
                 </Text>
               ) : waTemplates.length === 0 ? (
                 <Text type="secondary" className="text-sm text-center py-4">
-                  No hay plantillas disponibles
+                  {t("noTemplates")}
                 </Text>
               ) : (
                 waTemplates.map((tpl) => (
@@ -134,18 +136,21 @@ export default function MessageSection({
           </Col>
           <Col span={12}>
             <Text strong className="block text-[13px] mb-3">
-              Vista previa
+              {t("preview")}
             </Text>
             <WhatsAppPreview template={currentTemplate} />
             {currentTemplate && (
               <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-[#DDDDDD] flex gap-2 items-start">
                 <Info size={16} className="text-gray-400 shrink-0 mt-0.5" />
                 <Text type="secondary" className="text-[13px] leading-relaxed">
-                  Las variables{" "}
-                  <Text code className="text-[13px]">
-                    {currentTemplate.variables.map((v) => `{{${v}}}`).join(", ")}
-                  </Text>{" "}
-                  se completan automaticamente con los datos de cada cliente al momento del envio.
+                  {t.rich("variablesHint", {
+                    variables: currentTemplate.variables.map((v) => `{{${v}}}`).join(", "),
+                    code: (chunks) => (
+                      <Text code className="text-[13px]">
+                        {chunks}
+                      </Text>
+                    )
+                  })}
                 </Text>
               </div>
             )}

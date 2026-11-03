@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Flex, Spin } from "antd";
 import { FileArrowUp, Pencil } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import "./documentButtonAction.scss";
 import { FileDownloadModal } from "@/components/molecules/modals/FileDownloadModal/FileDownloadModal";
 import { editClientDocument } from "@/services/clients/clients";
@@ -21,6 +22,7 @@ export const DocumentButtonAction = ({
   editable,
   setDocumentReplaced
 }: Props) => {
+  const t = useTranslations("components.documentButton");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { ID: documentId, URL: documentUrl } = renderedDocument;
   const [loadingReplaceDocument, setLoadingReplaceDocument] = useState(false);
@@ -66,7 +68,7 @@ export const DocumentButtonAction = ({
           <div className="nameIconContainer">
             <FileArrowUp size={"25px"} style={{ minWidth: "18px" }} />
             <p className="nameFile">
-              {documentUrl ? documentUrl.split("/").pop() : "Seleccionar archivo"}
+              {documentUrl ? documentUrl.split("/").pop() : t("selectFile")}
             </p>
           </div>
 

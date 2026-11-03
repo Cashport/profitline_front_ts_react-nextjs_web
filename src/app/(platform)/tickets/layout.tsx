@@ -1,10 +1,7 @@
-import { Metadata } from "next";
 import TicketsLayout from "@/modules/ticketsModule/containers/tickets-layout/tickets-layout";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Task manager",
-  description: "Gestor de tareas por proceso"
-};
+export const generateMetadata = () => pageMetadata("tasks");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return <TicketsLayout>{children}</TicketsLayout>;

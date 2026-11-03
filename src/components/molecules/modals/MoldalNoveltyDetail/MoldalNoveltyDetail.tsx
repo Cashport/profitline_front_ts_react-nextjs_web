@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { CaretDoubleRight, Check, X } from "phosphor-react";
 import { Button, message, Tag, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { approveIncident, rejectIncident } from "@/services/resolveNovelty/resolveNovelty";
 import { useInvoices } from "@/hooks/useInvoices";
@@ -32,6 +33,8 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
   onResolved
 }) => {
   const { data, isLoading, mutate: mutateIncident } = useIncidentDetail({ incidentId: noveltyId }); // TODO CAMBIAR ESTO
+  const t = useTranslations("modals.noveltyDetail");
+  const tCommon = useTranslations("common");
   const projectId = useAppStore((state) => state.selectedProject.ID);
   const { mutate: mutateWallet } = useInvoices({});
   const { mutate: mutateGeneralDashboardData } = useGeneralPortfolio();
@@ -62,10 +65,10 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
     try {
       if (isResolving) {
         await approveIncident(noveltyId, actionData);
-        messageShow.success("Incidente aprobado exitosamente");
+        messageShow.success(t("approved"));
       } else {
         await rejectIncident(noveltyId, actionData);
-        messageShow.success("Incidente rechazado exitosamente");
+        messageShow.success(t("rejected"));
       }
       setOpenResolveModal(false);
       mutateWallet();
@@ -76,12 +79,12 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
       onClose(); // Cierra el modal principal después de resolver/rechazar
     } catch (error) {
       console.error("Error al procesar el incidente:", error);
-      messageShow.error("Hubo un error al procesar el incidente. Por favor, inténtalo de nuevo.");
+      messageShow.error(t("processError"));
     }
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{tCommon("status.loading")}</div>;
   }
 
   if (!incidentData) {
@@ -105,7 +108,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
             {incidentData.incident_name}
             {incidentData.is_closed && (
               <Tag color="default" style={{ marginLeft: 8 }}>
-                Cerrada
+                {t("closed")}
               </Tag>
             )}
           </Title>
@@ -113,11 +116,11 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
             <div className="header-buttons">
               <Button onClick={() => handleOpenResolveModal(false)}>
                 <X />
-                Rechazar
+                {tCommon("actions.reject")}
               </Button>
               <Button type="primary" onClick={() => handleOpenResolveModal(true)}>
                 <Check />
-                Aprobar
+                {tCommon("actions.approve")}
               </Button>
             </div>
           )}
@@ -126,7 +129,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
       <InfoSection
         responsable={incidentData.responsible_user}
         fecha={incidentData.date}
-        cliente={incidentData.client ?? "Sin nombre"}
+        cliente={incidentData.client ?? t("noName")}
         clienteId={incidentData.client_uuid ?? undefined}
         projectId={projectId}
         aprobadores={[{ nombre: incidentData.approvers_users, estado: "pendiente" }]}

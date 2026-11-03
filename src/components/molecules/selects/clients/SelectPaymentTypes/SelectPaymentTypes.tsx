@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import {
   ControllerRenderProps,
@@ -21,6 +22,7 @@ interface Props<T extends FieldValues> {
 }
 
 export const SelectPaymentTypes = <T extends FieldValues>({ errors, field }: Props<T>) => {
+  const t = useTranslations("shared.selects");
   const options = PAYMENT_TYPES.map((option) => ({
     value: option.id,
     label: option.label,
@@ -30,7 +32,7 @@ export const SelectPaymentTypes = <T extends FieldValues>({ errors, field }: Pro
   return (
     <>
       <Select
-        placeholder="Seleccione el tipo de pago"
+        placeholder={t("selectPaymentType")}
         className={errors ? "selectInputError" : "selectInputCustom"}
         variant="borderless"
         optionLabelProp="label"
@@ -40,7 +42,7 @@ export const SelectPaymentTypes = <T extends FieldValues>({ errors, field }: Pro
         labelInValue
       />
       {errors && (
-        <Typography.Text className="textError">El tipo de pago es obligatorio *</Typography.Text>
+        <Typography.Text className="textError">{t("paymentTypeRequired")}</Typography.Text>
       )}
     </>
   );

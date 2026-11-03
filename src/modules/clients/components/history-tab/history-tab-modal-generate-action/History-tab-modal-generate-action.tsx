@@ -1,6 +1,7 @@
 "use client";
 import { Flex, Modal } from "antd";
 import { X } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const ModalActionsHistoryTab = ({ isOpen, onClose, setSelectOpen }: Props) => {
+  const t = useTranslations("clients.history.generateAction");
   const handleOpenModal = (type: number) => {
     setSelectOpen({
       selected: type
@@ -28,14 +30,14 @@ const ModalActionsHistoryTab = ({ isOpen, onClose, setSelectOpen }: Props) => {
       footer={null}
       onCancel={onClose}
     >
-      <p className="modalActionsHistoryTab__description">Selecciona la acción que vas a realizar</p>
+      <p className="modalActionsHistoryTab__description">{t("description")}</p>
       <Flex vertical gap="0.75rem">
         <ButtonGenerateAction
           onClick={() => {
             handleOpenModal(2);
           }}
           icon={<X size={16} />}
-          title="Anular pago"
+          title={t("voidPayment")}
         />
       </Flex>
     </Modal>

@@ -1,0 +1,598 @@
+{
+  "layout": {
+    "myOrders": "Mis pedidos",
+    "orderConfirmed": "Pedido confirmado",
+    "createOrder": "Crear orden"
+  },
+  "createOrder": {
+    "title": "Crear orden",
+    "noClientSelected": "No hay cliente seleccionado"
+  },
+  "ordersView": {
+    "generateAction": "Generar acción",
+    "createOrder": "Crear orden",
+    "removeName": "pedidos",
+    "noOrdersSelected": "No hay órdenes seleccionadas"
+  },
+  "confirmedOrder": {
+    "orderNumber": "Pedido #{number}",
+    "created": "Tu pedido ha sido creado",
+    "shippingData": "Datos de envío",
+    "generateAction": "Generar acción",
+    "appliedDiscount": "Descuento aplicado",
+    "exit": "Salir"
+  },
+  "summary": {
+    "title": "Resumen",
+    "skus": "SKUs: {count}",
+    "totalProducts": "Total Productos: {count}",
+    "subtotal": "Subtotal",
+    "discounts": "Descuentos",
+    "productDiscounts": "Descuentos de productos",
+    "orderDiscounts": "Descuentos de la orden (Cross selling)",
+    "totalDiscount": "Descuento Total",
+    "totalWithoutVat": "Total sin IVA",
+    "vat19": "IVA 19%",
+    "vat": "IVA",
+    "total": "Total",
+    "totalWithEarlyPayment": "Total con pronto pago"
+  },
+  "shippingFields": {
+    "dispatchAddress": "Dirección de despacho",
+    "city": "Ciudad",
+    "businessUnit": "Unidad de negocio",
+    "warehouse": "Bodega",
+    "dispatchWarehouse": "Bodega de despacho",
+    "email": "Email",
+    "contact": "Contacto",
+    "seller": "Vendedor",
+    "comments": "Observaciones"
+  },
+  "blockedOrderModal": {
+    "title": "Pedido bloqueado por falta de cupo",
+    "description": "El cliente no tiene cupo disponible para realizar el pedido",
+    "sendToApproval": "Enviar a aprobación",
+    "cashOrder": "Es un pedido de contado",
+    "sentToApproval": "Pedido enviado para aprobación",
+    "uploadRemittance": "Cargar soporte de pago",
+    "attachEvidence": "Adjunta la evidencia del pago",
+    "sendRemittance": "Enviar soporte",
+    "attachRemittance": "Por favor, adjunta el soporte de pago.",
+    "remittanceAdded": "Soporte de pago agregado exitosamente",
+    "remittanceError": "Error al agregar soporte de pago."
+  },
+  "orderActions": {
+    "title": "Generar acción",
+    "description": "Selecciona la acción que vas a realizar",
+    "moveToBilled": "Enviar pedido a facturado"
+  },
+  "sendInvite": {
+    "title": "Enviar invitación",
+    "description": "Ingresa un email para enviar una invitación de acceso al marketplace",
+    "email": "Email",
+    "emailPlaceholder": "correo@mail.com",
+    "emailRequired": "El email es requerido",
+    "emailInvalid": "El email no es válido",
+    "submit": "Enviar Código",
+    "success": "Invitación enviada correctamente",
+    "error": "Error al enviar la invitación"
+  },
+  "searchClient": {
+    "newOrder": "Nueva orden",
+    "newOrderDescription": "Completa los datos para comenzar",
+    "newClient": "Nuevo cliente",
+    "channel": "Canal",
+    "selectChannel": "Seleccionar canal",
+    "noChannels": "Este cliente no tiene canales disponibles",
+    "selectClient": "Seleccione un cliente",
+    "searchClient": "Buscar cliente...",
+    "noResults": "Sin resultados",
+    "selectAddress": "Seleccione una dirección",
+    "noSavedAddresses": "Sin direcciones guardadas",
+    "newAddress": "Nueva dirección",
+    "maxChars": "Máximo {count} caracteres",
+    "warehouseValue": "Bodega {warehouse}",
+    "createOrder": "Crear orden",
+    "selectClientHint": "Selecciona un cliente para ver su información",
+    "selectedClient": "Cliente seleccionado",
+    "taxIdValue": "NIT: {nit}",
+    "invalidDocumentType": "Tipo de documento inválido",
+    "clientRegistered": "Cliente registrado exitosamente",
+    "clientRegisterError": "Error al registrar el cliente. Por favor intente nuevamente.",
+    "registerDialog": {
+      "title": "Registrar Nuevo Cliente",
+      "description": "Complete los datos del cliente para crear la orden",
+      "submit": "Guardar Cliente"
+    },
+    "receivables": {
+      "title": "Cartera",
+      "total": "Cartera total",
+      "pastDue": "Cartera vencida",
+      "availableCredit": "Cupo disponible",
+      "creditLimit": "Cupo total",
+      "availablePct": "Disponible: {pct}%",
+      "usedPct": "Saldo: {pct}%"
+    }
+  },
+  "selects": {
+    "selectWarehouse": "Seleccione una bodega",
+    "selectCity": "Seleccione o escriba una ciudad",
+    "addCity": "Agregar \"{city}\""
+  },
+  "discountsModal": {
+    "title": "Descuentos",
+    "notCumulative": "Recuerda que algunos descuentos no son acumulables"
+  },
+  "product": {
+    "pack": "Pack",
+    "productsCount": "{count, plural, one {# producto} other {# productos}}",
+    "ean": "EAN: {ean}",
+    "insufficientStock": "Stock insuficiente",
+    "units": "{count} und",
+    "autoQuantity": "Cantidad calculada automáticamente",
+    "auto": "Auto"
+  },
+  "cart": {
+    "title": "Resumen de la orden",
+    "skusAndProducts": "SKUs: {skus} - Productos: {products}",
+    "closeCart": "Cerrar carrito",
+    "empty": "Aún no has agregado productos",
+    "viewAllDiscounts": "Ver todos los descuentos",
+    "freeGoods": "Bonificados",
+    "available": "{count} disp.",
+    "continuePurchase": "Continuar compra",
+    "cannotContinue": "No puedes continuar con la compra",
+    "minimumOrder": "El pedido debe ser mínimo de {amount} (IVA incluido)",
+    "addMoreProducts": "Agrega más productos al carrito para continuar.",
+    "addOtherProducts": "Agrega otros productos al carrito para continuar.",
+    "understood": "Entendido",
+    "confirmContinue": "¿Está seguro que desea continuar?",
+    "noCannulasOrWater": "No has seleccionado Cánulas y/o Agua estéril",
+    "reviewOrder": "Te recomendamos revisar la orden",
+    "onlyCannulasOrWater": "No se pueden facturar solo cánulas ni aguas",
+    "oddSkinboosters": "Se va a cobrar la unidad impar de Skinboosters a precio full",
+    "oddRestylane": "La suma total de unidades entre las referencias Restylane (VOLYME, REFYNE, LYFT LIDO, LIDOCAINA, KYSSE, DEFYNE) es impar. Se va a cobrar la unidad impar a precio full",
+    "complementMismatch": "Las cantidades de cánulas y agua estéril no coinciden con lo requerido por los productos principales.",
+    "requiredCannulas": "Cánulas requeridas: <strong>{expected}</strong> — En carrito: <strong>{actual}</strong>",
+    "requiredWater": "Agua estéril requerida: <strong>{expected}</strong> — En carrito: <strong>{actual}</strong>",
+    "reloadOrContactSupport": "Vuelve a cargar el carrito o contacta a soporte.",
+    "modify": "Modificar",
+    "complementUnavailable": "Producto complemento no disponible",
+    "complementNotFound": "El producto “{product}” no se encontró en el catálogo y no se pudo agregar automáticamente.",
+    "contactCatalogAdmin": "Contacta al administrador del catálogo."
+  },
+  "productsTable": {
+    "columns": {
+      "product": "Producto",
+      "sku": "SKU",
+      "originalPrice": "P. Original",
+      "discount": "Descuento",
+      "finalPrice": "P. Final",
+      "quantity": "Cant.",
+      "total": "Total",
+      "remaining": "Rest."
+    },
+    "noDiscount": "Sin desc.",
+    "pack": "Pack",
+    "packs": "Packs",
+    "removePack": "Eliminar pack",
+    "packProducts": "Productos del pack",
+    "removeProduct": "Eliminar producto",
+    "freeGoods": "Productos bonificados",
+    "autoPromo": "Promo auto",
+    "manual": "Manual",
+    "fullDiscount": "100% desc.",
+    "removeFreeGood": "Quitar bonificado",
+    "totals": "Totales"
+  },
+  "bonusModal": {
+    "title": "Bonificados",
+    "choosePromotion": "Elige la promoción a aplicar",
+    "noFreeGoods": "No hay bonificados disponibles",
+    "promotionFreeGoods": "Bonificados promoción",
+    "option": "Opción {number}",
+    "included": "Incluido",
+    "chooseUnits": "Elige {count} und.",
+    "otherFreeGoods": "Otros bonificados",
+    "availableQty": "Disp. {available}/{assigned}",
+    "backToPromotions": "Volver a la lista de promociones",
+    "flex": "Flex",
+    "monthPromos": "Promos {month}",
+    "others": "Otros",
+    "total": "Total: <strong>{total}</strong>"
+  },
+  "checkout": {
+    "clientNotFound": "Cliente no encontrado",
+    "createdOrderNotFound": "No se pudo obtener la orden creada",
+    "createOrderError": "Error al crear la orden",
+    "invalidTotal": "El total no es válido",
+    "missingShippingData": "Faltan datos de envío",
+    "paymentNotCompleted": "Pago no completado, orden no generada",
+    "attachRemittance": "Por favor, adjunta el soporte de pago",
+    "createDraftError": "Error al crear el borrador",
+    "confirmCrossSelling": "¿Confirmas continuar el pedido con crosselling?",
+    "yesContinue": "Sí, continuar",
+    "electronicBilling": "¿Necesita facturación electrónica?",
+    "yesINeedIt": "Sí, necesito",
+    "cashClientRemittance": "Cliente de contado, adjunta la evidencia del pago",
+    "productDetails": "Detalle de productos",
+    "otherDiscounts": "Otros descuentos",
+    "newAddressOption": "+ Nueva dirección",
+    "phoneDigits": "Teléfono debe tener 10 dígitos",
+    "phoneDigitsRange": "Teléfono debe tener entre 10 y 12 dígitos",
+    "newDestination": "Nuevo destino",
+    "editDestination": "Editar destino",
+    "addDestination": "Agregar destino",
+    "removeDestination": "Eliminar destino",
+    "availableShort": "Disp.",
+    "totalUnits": "Total <muted>({count} und.)</muted>",
+    "deliveryAddress": "Dirección de entrega",
+    "emailPlaceholder": "correo@ejemplo.com",
+    "invalidEmail": "Correo electrónico no válido",
+    "contactPhone": "Teléfono de contacto",
+    "commentsPlaceholder": "Instrucciones especiales para esta entrega",
+    "cannotSaveDelivery": "No puedes guardar esta entrega",
+    "deliveryMinimum": "Cada entrega debe ser mínimo de {amount}",
+    "reassignQuantities": "Reasigna cantidades a esta entrega para continuar.",
+    "addOtherProductsToDelivery": "Agrega otros productos a esta entrega para continuar.",
+    "noCannulasOrWaterInDelivery": "No has seleccionado Cánulas y/o Agua estéril en esta entrega",
+    "completeMissingData": "Completa los datos faltantes para finalizar el pedido",
+    "multipleDeliveries": "Múltiples entregas",
+    "shippingData": "Datos de envío",
+    "splitDeliveries": "Dividir entregas",
+    "singleShipment": "Un solo envío",
+    "selectDeliveryAddress": "Selecciona una dirección de entrega",
+    "addressWithoutWarehouse": "La dirección seleccionada no tiene bodega asociada",
+    "enterCity": "Ingresa la ciudad",
+    "enterDispatchAddress": "Ingresa la dirección de despacho",
+    "selectDispatchWarehouse": "Selecciona una bodega de despacho",
+    "enterEmail": "Ingresa un correo electrónico",
+    "enterPhone": "Ingresa un teléfono de contacto",
+    "enterComment": "Ingresar un comentario",
+    "noAddress": "Sin dirección",
+    "editPurchaseOrder": "Editar orden de compra",
+    "removePurchaseOrder": "Quitar orden de compra",
+    "attachPurchaseOrder": "Adjuntar orden de compra",
+    "requiredForChannel": "Obligatorio para el canal {channel}",
+    "discountsWithName": "Descuentos ({name})",
+    "orderDiscount": "Descuento de orden",
+    "appliedDiscounts": "Descuentos aplicados",
+    "saveDraft": "Guardar borrador",
+    "finishOrder": "Finalizar pedido"
+  },
+  "purchaseOrderModal": {
+    "title": "Orden de compra",
+    "numberLabel": "# de orden de compra",
+    "numberPlaceholder": "Ingresa el # de orden de compra",
+    "pdf": "PDF orden de compra",
+    "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de {size} MB."
+  },
+  "ordersTable": {
+    "columns": {
+      "id": "ID",
+      "elapsedTime": "Tiempo transcurrido"
+    },
+    "earlyPayment": "Pronto pago",
+    "viewDispute": "Ver novedad",
+    "viewWarehouse": "Ver bodega",
+    "continueOrder": "Continuar pedido",
+    "history": "Historial",
+    "resendToBilling": "Reenviar a facturación",
+    "resendingToBilling": "Reenviando a facturación...",
+    "resentToBilling": "Orden reenviada a facturación correctamente",
+    "resendToBillingError": "Error al reenviar a facturación",
+    "orderLabel": "Pedido #{number}"
+  },
+  "billingExcelModal": {
+    "title": "Descargar informe de facturación detallado",
+    "description": "Selecciona el rango de fechas del informe",
+    "presets": {
+      "today": "Hoy",
+      "last7": "Últimos 7 días",
+      "thisMonth": "Este mes",
+      "lastMonth": "Mes anterior"
+    },
+    "rangeSummary": "{start} – {end} · {days, plural, one {# día} other {# días}}"
+  },
+  "generateAction": {
+    "title": "Generar acción",
+    "description": "Selecciona la acción que vas a realizar",
+    "selectedCount": "{count, plural, one {# seleccionada:} other {# seleccionadas:}}",
+    "selectedDrafts": "draft seleccionados:",
+    "actions": {
+      "moveToBilled": "Enviar pedido a facturado",
+      "downloadCsv": "Descargar CSV",
+      "downloadBillingReport": "Descargar informe de facturación",
+      "downloadBillingDetail": "Descargar informe de facturación detallado",
+      "downloadSalesReport": "Descargar informe de ventas",
+      "partialCsv": "Descarga parcial CSV",
+      "downloadPoFormatCsv": "Descargar csv Formato OC",
+      "sendInvite": "Enviar invitación",
+      "returnToSeller": "Retornar al vendedor",
+      "uploadPurchaseOrder": "Subir orden de compra"
+    },
+    "noOrdersSelected": "No hay órdenes seleccionadas",
+    "csvDownloadError": "Error al descargar CSV",
+    "downloadSuccess": "Descarga exitosa",
+    "downloadAllClientSuccess": "Descarga de todas las órdenes del cliente en el mismo estado exitosa",
+    "downloadingBillingReport": "Descargando informe de facturación...",
+    "downloadingBillingDetail": "Descargando informe de facturación detallado...",
+    "downloadingSalesReport": "Descargando informe de ventas...",
+    "fileDownloadError": "Error al descargar el archivo",
+    "partialCsvError": "Error al descargar el CSV parcial",
+    "backordersCreated": "{count, plural, one {Se ha creado # orden de backorder: {ids}} other {Se han creado # órdenes de backorder: {ids}}}",
+    "failedOrders": "Órdenes con error: {ids}",
+    "statusChanged": "Estado cambiado correctamente",
+    "statusChangeError": "Error al cambiar el estado de la orden",
+    "onlyXlsx": "Solo se permiten archivos Excel (.xlsx)",
+    "purchaseOrdersError": "Error al procesar las órdenes de compra",
+    "billingFileTitle": "Descarga de plano de facturación",
+    "ordersWithoutStock": "Órdenes sin stock",
+    "splitOrderConfirm": "¿Está seguro de querer dividir el pedido?",
+    "splitOrderContent": "Productos sin unidades se enviarán a backorder",
+    "poFormat": {
+      "title": "Descargar CSV Formato OC",
+      "question": "¿Qué órdenes deseas descargar?",
+      "client": "Cliente: <strong>{name}</strong>",
+      "status": "Estado: <strong>{status}</strong>",
+      "onlySelectedHelp": "<b>Solo seleccionadas</b>: descarga únicamente {count, plural, one {la # orden marcada} other {las # órdenes marcadas}}.",
+      "allClientHelp": "<b>Todas del cliente en este estado</b>: descarga todas las órdenes del mismo cliente que estén en el mismo estado.",
+      "onlySelected": "Solo seleccionadas",
+      "allClient": "Todas del cliente"
+    }
+  },
+  "uploadPurchaseOrders": {
+    "processingTitle": "Procesando orden de compra",
+    "defaultFileName": "archivo.xlsx",
+    "waitingServer": "Esperando respuesta del servidor, por favor espere...",
+    "summaryTitle": "Órdenes de compra procesadas",
+    "successBanner": "OC procesadas correctamente",
+    "columns": {
+      "order": "# Orden",
+      "iscalaCode": "Código Iscala",
+      "address": "Dirección",
+      "city": "Ciudad"
+    },
+    "tiles": {
+      "package": "Paquete",
+      "draft": "Borrador",
+      "ordersCreated": "Órdenes creadas",
+      "skusProcessed": "SKUs procesados",
+      "totalAmount": "Monto total"
+    },
+    "ordersDetail": "Detalle de órdenes ({count})",
+    "showing": "Mostrando {shown} de {total}"
+  },
+  "dashboard": {
+    "loadError": "No se pudo cargar el dashboard",
+    "vatToggle": {
+      "ariaWithVat": "Mostrando valores con IVA",
+      "ariaWithoutVat": "Mostrando valores sin IVA",
+      "titleWithVat": "Los valores incluyen IVA. Click para ver ventas netas.",
+      "titleWithoutVat": "Los valores son netos (sin IVA). Click para incluir IVA.",
+      "withVat": "Con IVA",
+      "withoutVat": "Sin IVA"
+    },
+    "kpis": {
+      "totalBilled": "Total facturado",
+      "ordersInProcess": "Pedidos en proceso",
+      "ordersCount": "{count, plural, one {# pedido} other {# pedidos}}",
+      "expectedBilling": "Facturación esperada",
+      "orderCount": "Cantidad de pedidos",
+      "avgOrderValue": "Valor promedio por pedido"
+    },
+    "tabs": {
+      "clientDetails": "Detalles cliente",
+      "regionSeller": "Regional/Vendedor",
+      "promotions": "Promociones",
+      "backorder": "Backorder",
+      "negotiations": "Negociaciones",
+      "grossToNetTitle": "Análisis Gross to Net",
+      "grossToNetDescription": "Puente financiero de ventas brutas a ingresos netos."
+    },
+    "filters": {
+      "date": "Fecha",
+      "dateLabel": "Fecha:",
+      "selectPeriod": "Selecciona un periodo",
+      "frequencyLabel": "Frecuencia",
+      "selectedCount": "{count} seleccionados",
+      "presetPeriods": "Periodos Predefinidos",
+      "customRange": "Rango Personalizado",
+      "from": "Desde",
+      "to": "Hasta",
+      "datePresets": {
+        "hoy": "Hoy",
+        "esta_semana": "Esta semana",
+        "mes_actual": "Mes actual",
+        "ultimo_mes": "Último mes",
+        "ultimo_trimestre": "Último trimestre",
+        "ytd": "YTD",
+        "ultimos_12_meses": "Últimos 12 meses"
+      },
+      "frequency": {
+        "diaria": "Diaria",
+        "semanal": "Semanal",
+        "mensual": "Mensual",
+        "trimestral": "Trimestral",
+        "anual": "Anual"
+      },
+      "categories": {
+        "channelIds": "Unidad de negocio",
+        "productIds": "Producto",
+        "productTypes": "Tipo de producto",
+        "sellerIds": "Vendedor",
+        "clientIds": "Cliente",
+        "cityIds": "Ciudad",
+        "lineIds": "Categoría"
+      }
+    },
+    "topSales": {
+      "title": "Top de ventas",
+      "summary": "{name} {total} - <highlight>Pareto {pareto}</highlight>",
+      "sales": "Ventas",
+      "units": {
+        "units": "Unid.",
+        "orders": "Órdenes"
+      },
+      "categories": {
+        "producto": {
+          "singular": "Producto",
+          "plural": "Productos"
+        },
+        "cliente": {
+          "singular": "Cliente",
+          "plural": "Clientes"
+        },
+        "ciudad": {
+          "singular": "Ciudad",
+          "plural": "Ciudades"
+        },
+        "vendedor": {
+          "singular": "Vendedor",
+          "plural": "Vendedores"
+        }
+      }
+    },
+    "revenueChart": {
+      "title": "Evolución de ingresos",
+      "cumulative": "Acumulado",
+      "periodSales": "Venta periodo",
+      "targetLine": "META: ${value}M",
+      "weekShort": "S{week}",
+      "frequencyShort": {
+        "diaria": "D",
+        "semanal": "S",
+        "mensual": "M"
+      },
+      "subtext": {
+        "diaria": "Ventas diarias y avance acumulado",
+        "semanal": "Ventas semanales acumuladas",
+        "mensual": "Evolución mensual acumulada",
+        "trimestral": "Evolución trimestral acumulada",
+        "anual": "Evolución anual acumulada"
+      },
+      "fullscreenDescription": "{subtext} en <b>{range}</b> ({frequency}).",
+      "monthsShort": {
+        "jan": "Ene",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Abr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Ago",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dic"
+      }
+    },
+    "treemap": {
+      "title": "Análisis cruzado (Treemap 2D)",
+      "description": "Explora dos dimensiones combinadas en simultáneo",
+      "fullscreen": "Pantalla completa",
+      "detailTitle": "Análisis cruzado detallado",
+      "detailDescription": "Agrupado por <b>{dim1}</b> cruzado con <b>{dim2}</b>. Pasa el cursor sobre los recuadros para revisar la estadística.",
+      "percentOfTotal": "{pct}% del total",
+      "dimensions": {
+        "linea": "Línea de Negocio",
+        "producto": "Producto",
+        "vendedor": "Vendedor",
+        "ciudad": "Ciudad",
+        "cliente": "Cliente",
+        "canal": "Canal de Venta"
+      }
+    },
+    "tables": {
+      "loading": "Cargando datos...",
+      "noData": "No hay datos disponibles",
+      "export": "Export",
+      "searchClientOrTaxId": "Buscar cliente o NIT...",
+      "showingResults": "Mostrando {from} a {to} de {total} resultados",
+      "downloadSuccess": "Descarga exitosa",
+      "fileDownloadError": "Error al descargar el archivo"
+    },
+    "salesTable": {
+      "loading": "Cargando datos...",
+      "noData": "No hay datos disponibles",
+      "title": "Resumen de ventas por regional y vendedor",
+      "description": "Ventas agrupadas por región con detalle de vendedores",
+      "columns": {
+        "regionSeller": "Regional / Vendedor",
+        "draft": "Borrador",
+        "creditHold": "Cartera",
+        "inProcess": "En proceso",
+        "billed": "Facturado",
+        "target": "Meta",
+        "remaining": "Monto faltante"
+      }
+    },
+    "negotiations": {
+      "title": "Informe de Negociaciones",
+      "descriptionMonths": "Clientes con descuento negociado (Plan Anual). Promedio de venta facturada de los últimos {months} meses cerrados; solo clientes con promedio mayor a cero.",
+      "descriptionNoMonths": "Clientes con descuento negociado (Plan Anual). Promedio de venta facturada de los meses cerrados; solo clientes con promedio mayor a cero.",
+      "includeExpired": "Incluir vencidas",
+      "generating": "Generando informe de negociaciones...",
+      "loadError": "Error al cargar las negociaciones",
+      "columns": {
+        "start": "Inicio",
+        "end": "Fin",
+        "negotiation": "Negociación",
+        "monthlyAverage": "Promedio mes",
+        "lastMonth": "Último mes",
+        "lastPurchase": "Última compra"
+      }
+    },
+    "promotions": {
+      "title": "Informe de Promociones",
+      "description": "Un pedido con dos promociones cuenta en ambas, así que el total puede superar las ventas del período.",
+      "searchPlaceholder": "Buscar promoción o vendedor...",
+      "showClientDetail": "Ver el detalle por cliente de {promotion}",
+      "hideClientDetail": "Ocultar el detalle por cliente de {promotion}",
+      "columns": {
+        "promotion": "Promoción",
+        "seller": "Vendedor",
+        "orders": "Pedidos",
+        "units": "Unidades",
+        "amount": "Monto"
+      }
+    },
+    "backorder": {
+      "title": "Informe de Backorder",
+      "description": "Venta pendiente por falta de stock. Solo pedidos en estado backorder, fechados por su fecha de creación.",
+      "searchPlaceholder": "Buscar producto o SKU...",
+      "showClientDetail": "Ver el detalle por cliente de {product}",
+      "hideClientDetail": "Ocultar el detalle por cliente de {product}",
+      "columns": {
+        "product": "Producto",
+        "sku": "SKU"
+      }
+    },
+    "clientDetails": {
+      "title": "Detalle por Cliente",
+      "searchPlaceholder": "Buscar...",
+      "columns": {
+        "monthSales": "Ventas mes",
+        "target": "Meta",
+        "monthlyAvg": "Prom. mens.",
+        "prevMonth": "Mes ant.",
+        "prevYtd": "YTD ant.",
+        "ytd": "YTD",
+        "ytdPct": "% YTD"
+      },
+      "csv": {
+        "client": "Cliente",
+        "monthSales": "Ventas mes",
+        "target": "Meta",
+        "targetPct": "Meta %",
+        "monthlyAvg": "Prom. mensual",
+        "monthlyAvgPct": "Prom. mensual %",
+        "prevMonth": "Mes anterior",
+        "prevMonthPct": "Mes anterior %",
+        "prevYtd": "YTD anterior",
+        "currentYtd": "YTD actual",
+        "roiYtdPct": "ROI YTD %"
+      }
+    }
+  }
+}

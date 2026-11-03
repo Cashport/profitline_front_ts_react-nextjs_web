@@ -1,6 +1,7 @@
 "use client";
 import { Flex, Modal, Typography } from "antd";
 import { ArrowsClockwise, Pencil, FileLock } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
@@ -24,6 +25,7 @@ export const ModalGenerateActionProjectForm = ({
   handleEditProject,
   statusForm
 }: Props) => {
+  const t = useTranslations("modals.generateActionProjectForm");
   return (
     <Modal
       className="modalGenerateAction"
@@ -32,17 +34,17 @@ export const ModalGenerateActionProjectForm = ({
       centered
       title={
         <Title className="modalGenerateAction__title" level={4}>
-          Generar acción
+          {t("title")}
         </Title>
       }
       footer={null}
       onCancel={onClose}
     >
-      <p className="modalGenerateAction__description">Selecciona la acción que vas a realizar</p>
+      <p className="modalGenerateAction__description">{t("description")}</p>
       <Flex vertical gap="0.75rem">
         <ButtonGenerateAction
           icon={<ArrowsClockwise size={16} />}
-          title="Cambio de estado"
+          title={t("changeStatus")}
           onClick={() => {
             handleOpenModal(2);
           }}
@@ -50,11 +52,11 @@ export const ModalGenerateActionProjectForm = ({
         <ButtonGenerateAction
           onClick={handleEditProject}
           icon={<Pencil size={16} />}
-          title={statusForm === "edit" ? "Cancelar edición" : "Editar proyecto"}
+          title={statusForm === "edit" ? t("cancelEdit") : t("editProject")}
         />
         <ButtonGenerateAction
           icon={<FileLock size={16} />}
-          title="Cerrar periodo contable"
+          title={t("closePeriod")}
           onClick={() => {
             handleOpenModal(3);
           }}

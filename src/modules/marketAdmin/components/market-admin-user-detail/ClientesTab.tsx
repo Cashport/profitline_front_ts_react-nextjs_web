@@ -5,6 +5,7 @@ import { Dropdown, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { DotsThreeVertical } from "@phosphor-icons/react";
 import { Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import ModalAgregarClientes from "@/modules/marketAdmin/components/market-admin-user-detail/ModalAgregarClientes";
 import { IMarketAdminUserClient } from "@/types/marketAdmin/IMarketAdmin";
@@ -20,6 +21,8 @@ type Props = {
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, disabled }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.customersTab");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
 
@@ -36,14 +39,14 @@ export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, 
 
   const columns: ColumnsType<IMarketAdminUserClient> = [
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "client_name",
       key: "client_name",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "NIT",
+      title: tCommon("fields.taxId"),
       dataIndex: "nit",
       key: "nit",
       width: 160,
@@ -64,7 +67,7 @@ export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, 
             items: [
               {
                 key: "eliminar",
-                label: "Eliminar",
+                label: tCommon("actions.delete"),
                 icon: <Trash2 size={14} />,
                 onClick: () => onQuitar(c.nit)
               }
@@ -72,7 +75,8 @@ export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, 
           }}
         >
           <button
-            title="Acciones"
+            title={tCommon("fields.actions")}
+            aria-label={tCommon("fields.actions")}
             disabled={disabled}
             className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-transparent"
           >
@@ -86,12 +90,15 @@ export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, 
   return (
     <div className="cp-fill">
       <div className="flex items-center justify-between gap-4 mb-4">
-        <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
+        <UiSearchInput
+          placeholder={tCommon("placeholders.search")}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors flex-shrink-0"
         >
-          <Plus size={18} /> Agregar clientes
+          <Plus size={18} /> {t("add")}
         </button>
       </div>
 
@@ -103,9 +110,7 @@ export default function ClientesTab({ clientes, onAgregar, onQuitar, isLoading, 
         loading={isLoading}
         pagination={false}
         locale={{
-          emptyText: search.trim()
-            ? "No se encontraron clientes con ese nombre o NIT."
-            : "Este usuario aún no tiene clientes asignados."
+          emptyText: search.trim() ? t("noSearchResults") : t("empty")
         }}
       />
 

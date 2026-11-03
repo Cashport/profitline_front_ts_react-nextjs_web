@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "use-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -27,6 +28,9 @@ export function DispatchModal({
   purchaseOrderId,
   mutateOrderDetail
 }: DispatchModalProps) {
+  const t = useTranslations("purchaseOrders.dispatchModal");
+  const tCommon = useTranslations("common");
+  const tStages = useTranslations("purchaseOrders.stages");
   const [dispatchNotes, setDispatchNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,11 +57,11 @@ export function DispatchModal({
 
       await purchaseOrderActions(purchaseOrderId, payload);
 
-      message.success("Orden despachada correctamente");
+      message.success(t("success"));
       mutateOrderDetail();
       onOpenChange(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error al despachar la orden";
+      const errorMessage = error instanceof Error ? error.message : t("error");
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
@@ -73,19 +77,17 @@ export function DispatchModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Confirmar despacho</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{t("title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-gray-600">
-            Confirma que el pedido ha sido despachado por logística
-          </p>
+          <p className="text-sm text-gray-600">{t("description")}</p>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Observaciones</label>
+            <label className="text-sm font-medium text-gray-700">{t("notesLabel")}</label>
             <Textarea
               value={dispatchNotes}
               onChange={(e) => setDispatchNotes(e.target.value)}
-              placeholder="Agrega notas sobre el despacho (opcional)"
+              placeholder={t("notesPlaceholder")}
               className="min-h-[100px] resize-none"
             />
           </div>
@@ -103,9 +105,11 @@ export function DispatchModal({
             <div className="flex gap-2">
               <AlertTriangle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-blue-900">Orden de compra: {orderNumber}</p>
+                <p className="text-sm font-medium text-blue-900">
+                  {t("orderNumber", { number: orderNumber })}
+                </p>
                 <p className="text-[13px] text-blue-700 mt-1">
-                  El estado cambiará a &quot;En despacho&quot; una vez confirmado
+                  {t("statusWillChange", { status: tStages("inDispatch") })}
                 </p>
               </div>
             </div>
@@ -118,7 +122,7 @@ export function DispatchModal({
             disabled={isLoading}
             className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             onClick={handleConfirm}
@@ -129,10 +133,10 @@ export function DispatchModal({
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Despachando...
+                {t("dispatching")}
               </>
             ) : (
-              "Confirmar despacho"
+              t("title")
             )}
           </Button>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import StatCards, { type StatCardItem } from "@/components/ui/stat-cards/stat-cards";
 
@@ -15,6 +16,7 @@ import { useSurveysListStore } from "../../stores/surveys-list-store";
  * seguir ahí al volver.
  */
 export default function SurveysView() {
+  const t = useTranslations("surveys.stats");
   const router = useRouter();
   const store = useSurveysListStore();
   const { forms, visibleForms, totals, isLoading, error } = useVisitForms();
@@ -23,21 +25,21 @@ export default function SurveysView() {
   const cards: StatCardItem[] = [
     {
       id: "active",
-      label: "Encuestas activas",
+      label: t("active"),
       value: fmt(totals.active),
-      foot: `de ${forms?.length ?? 0} encuestas`
+      foot: t("activeFoot", { total: forms?.length ?? 0 })
     },
     {
       id: "month",
-      label: "Respuestas este mes",
+      label: t("month"),
       value: fmt(totals.monthResponses),
-      foot: `${fmt(totals.responses)} en total`
+      foot: t("monthFoot", { total: fmt(totals.responses) })
     },
     {
       id: "inactive",
-      label: "Inactivas",
+      label: t("inactive"),
       value: fmt(totals.inactive),
-      foot: "No le aparecen al asesor en la app"
+      foot: t("inactiveFoot")
     }
   ];
 

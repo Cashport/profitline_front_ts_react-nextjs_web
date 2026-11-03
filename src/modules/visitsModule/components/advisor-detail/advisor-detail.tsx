@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import type { IAdvisorVisitDetail, IAdvisorVisitDetailRegister } from "@/types/visits/IVisits";
 import { cn } from "@/utils/utils";
@@ -28,24 +29,33 @@ interface AdvisorDetailProps {
   onJumpTo: (minute: number) => void;
 }
 
+type DetailT = ReturnType<typeof useTranslations<"visits.detail">>;
+
 /** Qué está haciendo, en una línea junto al estado: la visita en curso o la próxima. */
-function nowText({ state, visits }: IAdvisorVisitDetail) {
+function nowText({ state, visits }: IAdvisorVisitDetail, tv: DetailT) {
   if (state === "IN_VISIT") {
     const current = visits.route.find((v) => v.status_code === "IN_PROGRESS");
     if (current?.started_at) {
-      return `en ${current.client_name} · desde ${fmtClock(minutesOfDay(current.started_at))}`;
+      return tv("nowInVisit", {
+        client: current.client_name,
+        time: fmtClock(minutesOfDay(current.started_at))
+      });
     }
   }
   if (state === "EN_ROUTE") {
     const next = visits.route.find((v) => v.status_code === "SCHEDULED");
     if (next)
-      return `hacia ${next.client_name} · ${fmtClock(minutesOfDay(next.scheduled_start_at))}`;
+      return tv("nowEnRoute", {
+        client: next.client_name,
+        time: fmtClock(minutesOfDay(next.scheduled_start_at))
+      });
   }
   return "";
 }
 
 /** Antigüedad de la última señal: "ahora" dentro del primer minuto. */
-const signalAge = (minutes: number) => (minutes < 1 ? "ahora" : `hace ${fmtDuration(minutes)}`);
+const signalAge = (minutes: number, tv: DetailT) =>
+  minutes < 1 ? tv("signalNow") : tv("signalAgo", { duration: fmtDuration(minutes) });
 
 const STOP_ROW =
   "grid cursor-pointer grid-cols-[44px_16px_minmax(0,1fr)] gap-2 rounded-[7px] pr-1.5 transition-colors hover:bg-secondary";
@@ -101,6 +111,7 @@ function RegisterRows({
   rows: IAdvisorVisitDetailRegister[];
   onJumpTo: (minute: number) => void;
 }) {
+  const tv = useTranslations("visits.detail");
   return (
     <ol className="ml-1 mt-1 flex flex-col border-l-2 border-border pl-2.5">
       {rows.map((r) => (
@@ -127,7 +138,7 @@ function RegisterRows({
               r.effective ? "font-medium text-foreground/75" : "text-muted-foreground"
             )}
           >
-            {r.effective ? "Efectiva" : "No efectiva"}
+            {r.effective ? tv("effective") : tv("notEffective")}
           </span>
         </li>
       ))}
@@ -145,6 +156,7 @@ export default function AdvisorDetail({
   onOpenDay,
   onJumpTo
 }: AdvisorDetailProps) {
+  const tv = useTranslations("visits.detail");
   const { activities, visits, tracking } = d;
   const color = palette.status[d.state];
   const dayStart = tracking.started_at ? minutesOfDay(tracking.started_at) : null;
@@ -155,29 +167,29 @@ export default function AdvisorDetail({
 
   const tiles: { label: string; value: string | number; suffix?: string; detail: string }[] = [
     {
-      label: "Visitas",
+      label: tv("tiles.visits"),
       value: visits.completed + visits.failed,
       suffix: `/ ${visits.total}`,
-      detail: `${visits.pending} por hacer`
+      detail: tv("tiles.toDo", { count: visits.pending })
     },
     {
-      label: "Efectividad",
+      label: tv("tiles.effectiveness"),
       value: visits.effectivity_pct != null ? fmtNumber(visits.effectivity_pct) : "—",
       suffix: visits.effectivity_pct != null ? "%" : undefined,
-      detail: `${visits.completed} efectivas`
+      detail: tv("tiles.effectiveCount", { count: visits.completed })
     },
     {
-      label: "Recorrido",
+      label: tv("tiles.distance"),
       value: fmtNumber(tracking.distance_km || 0, 1),
       suffix: "km",
-      detail: `desde ${startText}`
+      detail: tv("since", { time: startText })
     },
     {
-      label: "En visita",
+      label: tv("tiles.inVisit"),
       value: visits.total_visit_minutes != null ? fmtDuration(visits.total_visit_minutes) : "—",
       detail:
         visits.average_duration_minutes != null
-          ? `${Math.round(visits.average_duration_minutes)} min prom.`
+          ? tv("tiles.avgMinutes", { minutes: Math.round(visits.average_duration_minutes) })
           : "—"
     }
   ];
@@ -190,7 +202,7 @@ export default function AdvisorDetail({
         className="flex items-center gap-1.5 py-1 text-[13px] tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronLeft className="h-3 w-3" />
-        Equipo
+        {tv("team")}
       </button>
 
       <div className="mt-2.5 flex items-center gap-3">
@@ -205,7 +217,9 @@ export default function AdvisorDetail({
             {d.user.userName}
           </h2>
           {d.zones.length > 0 && (
-            <div className="text-[13px] text-muted-foreground">Zona {d.zones.join(", ")}</div>
+            <div className="text-[13px] text-muted-foreground">
+              {tv("zone", { zones: d.zones.join(", ") })}
+            </div>
           )}
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
             <StatusPill label={d.state_name} color={color} />
@@ -214,29 +228,37 @@ export default function AdvisorDetail({
               onClick={onOpenDay}
               className="flex h-6 items-center gap-0.5 rounded-lg bg-[#cbe71e] pl-2 pr-1.5 text-[13px] font-bold text-[#141414] transition-colors hover:bg-[#b9d417]"
             >
-              Ver día
+              {tv("viewDay")}
               <ChevronRight className="h-3 w-3" />
             </button>
-            <span className="text-[13px] text-muted-foreground">{nowText(d)}</span>
+            <span className="text-[13px] text-muted-foreground">{nowText(d, tv)}</span>
           </div>
         </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-3.5 gap-y-1 text-[13px] text-muted-foreground">
         <span className="whitespace-nowrap">
-          Últ. señal{" "}
-          <b className="font-medium text-foreground/80">
-            {lastSignal == null ? "—" : isLive ? signalAge(t - lastSignal) : fmtClock(lastSignal)}
-          </b>
+          {tv.rich("lastSignal", {
+            value:
+              lastSignal == null
+                ? "—"
+                : isLive
+                  ? signalAge(t - lastSignal, tv)
+                  : fmtClock(lastSignal),
+            b: (chunks) => <b className="font-medium text-foreground/80">{chunks}</b>
+          })}
         </span>
         <span className="whitespace-nowrap">
-          Inicio <b className="font-medium text-foreground/80">{startText}</b>
+          {tv.rich("start", {
+            value: startText,
+            b: (chunks) => <b className="font-medium text-foreground/80">{chunks}</b>
+          })}
         </span>
       </div>
 
       <div className="mt-3 rounded-xl border border-border px-3 py-2.5">
         <div className="flex items-baseline justify-between gap-2 text-[13px] font-semibold text-foreground">
-          <span>Actividades</span>
+          <span>{tv("activities")}</span>
           <b className="whitespace-nowrap text-xl font-semibold">{activities.registered}</b>
         </div>
         <div className="mt-1.5 h-1.5 overflow-hidden rounded-[3px] bg-secondary">
@@ -246,7 +268,7 @@ export default function AdvisorDetail({
           />
         </div>
         <div className="mt-1.5 text-[13px] text-muted-foreground">
-          {activities.registered} registradas
+          {tv("registered", { count: activities.registered })}
         </div>
         <div className="mt-2.5 flex h-[38px] items-end gap-[3px]">
           {ACTIVITY_HOURS.map((hour) => {
@@ -303,8 +325,10 @@ export default function AdvisorDetail({
       </div>
 
       <div className="mb-1.5 mt-[18px] flex items-baseline justify-between whitespace-nowrap">
-        <span className="text-[13px] font-medium text-muted-foreground">Ruta del día</span>
-        <span className="text-[13px] text-muted-foreground">{visits.pending} pendientes</span>
+        <span className="text-[13px] font-medium text-muted-foreground">{tv("dayRoute")}</span>
+        <span className="text-[13px] text-muted-foreground">
+          {tv("pendingCount", { count: visits.pending })}
+        </span>
       </div>
 
       <ol className="relative">
@@ -318,9 +342,9 @@ export default function AdvisorDetail({
             </Rail>
             <div className="min-w-0 pb-2.5 pt-1.5">
               <div className="text-[13px] font-semibold leading-[1.3] text-foreground">
-                Inicio de jornada
+                {tv("dayStart")}
               </div>
-              <div className="mt-0.5 text-[13px] text-muted-foreground">Check-in app</div>
+              <div className="mt-0.5 text-[13px] text-muted-foreground">{tv("checkIn")}</div>
             </div>
           </li>
         )}
@@ -388,7 +412,9 @@ export default function AdvisorDetail({
                         {v.status_name}
                       </span>
                       {started != null && (
-                        <span className="whitespace-nowrap">desde {fmtClock(started)}</span>
+                        <span className="whitespace-nowrap">
+                          {tv("since", { time: fmtClock(started) })}
+                        </span>
                       )}
                     </>
                   ) : (
@@ -422,7 +448,7 @@ export default function AdvisorDetail({
             </Rail>
             <div className="min-w-0 pb-2.5 pt-1.5">
               <div className="text-[13px] font-semibold leading-[1.3] text-foreground">
-                Actividades sin visita
+                {tv("orphans")}
               </div>
               <RegisterRows rows={orphans} onJumpTo={onJumpTo} />
             </div>

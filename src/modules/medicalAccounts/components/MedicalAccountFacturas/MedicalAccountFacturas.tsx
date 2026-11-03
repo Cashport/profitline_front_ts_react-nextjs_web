@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, FileText } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { IMedicalAccountFacturaApi } from "@/types/medicalAccounts/IMedicalAccounts";
 import { formatDate } from "../../utils/format";
@@ -14,12 +15,13 @@ const handleDownload = (url: string | null) => {
 };
 
 export function MedicalAccountFacturas({ facturas }: MedicalAccountFacturasProps) {
+  const t = useTranslations("medicalAccounts.invoices");
   if (facturas.length === 0) return null;
 
   return (
     <div className="border-b border-gray-100">
       <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/40 px-6 py-3">
-        <span className="text-[13px] font-semibold text-gray-600">Facturas</span>
+        <span className="text-[13px] font-semibold text-gray-600">{t("title")}</span>
         <span className="text-[13px] font-medium text-gray-400">{facturas.length}</span>
       </div>
 
@@ -28,16 +30,16 @@ export function MedicalAccountFacturas({ facturas }: MedicalAccountFacturasProps
           <thead>
             <tr className="border-b border-cp-line bg-cp-surface">
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                No. factura
+                {t("columns.invoiceNumber")}
               </th>
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                Fecha factura
+                {t("columns.invoiceDate")}
               </th>
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                Fecha de carga
+                {t("columns.uploadDate")}
               </th>
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                Archivos
+                {t("columns.files")}
               </th>
             </tr>
           </thead>

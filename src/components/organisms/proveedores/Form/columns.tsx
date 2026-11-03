@@ -1,26 +1,34 @@
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import { formatDate } from "@/utils/utils";
 import type { ColumnType } from "antd/es/table";
+import type { useTranslations } from "use-intl";
 import { Eye } from "phosphor-react";
 import { Document } from "./types";
 import BadgeDocumentStatus from "../components/BadgeDocumentStatus/BadgeDocumentStatus";
 
+type DocumentsT = ReturnType<typeof useTranslations<"suppliers.documentsTable">>;
+type CommonT = ReturnType<typeof useTranslations<"common">>;
+
 export const columns = ({
   handleOpenDrawer,
-  setSelectedDocument
+  setSelectedDocument,
+  t,
+  tCommon
 }: {
   handleOpenDrawer: () => void;
   setSelectedDocument: React.Dispatch<React.SetStateAction<Document | null>>;
+  t: DocumentsT;
+  tCommon: CommonT;
 }) => [
-  { title: "Nombre", dataIndex: "name", key: "name", width: "20%" },
+  { title: tCommon("fields.name"), dataIndex: "name", key: "name", width: "20%" },
   {
-    title: "Descripción",
+    title: tCommon("fields.description"),
     dataIndex: "description",
     key: "description",
     width: "35%"
   },
   {
-    title: "Fecha cargue",
+    title: t("uploadDate"),
     dataIndex: "createdAt",
     key: "createdAt",
     render: (_: string, record: any) => {
@@ -32,7 +40,7 @@ export const columns = ({
     width: "15%"
   },
   {
-    title: "Vencimiento",
+    title: t("expiration"),
     dataIndex: "expiryDate",
     key: "expiryDate",
     render: (_: string, record: any) => {
@@ -44,14 +52,16 @@ export const columns = ({
     width: "15%"
   },
   {
-    title: "Obligatorio",
+    title: t("mandatory"),
     dataIndex: "isMandatory",
     key: "isMandatory",
-    render: (isMandatory: boolean) => <p>{isMandatory ? "Sí" : "No"}</p>,
+    render: (isMandatory: boolean) => (
+      <p>{isMandatory ? tCommon("status.yes") : tCommon("status.no")}</p>
+    ),
     width: "10%"
   },
   {
-    title: "Estado",
+    title: tCommon("fields.status"),
     dataIndex: "statusId",
     key: "statusId",
     render: (statusId: string) => {
@@ -69,6 +79,7 @@ export const columns = ({
           handleOpenDrawer();
         }}
         icon={<Eye size={"1.3rem"} />}
+        aria-label={t("viewDetail")}
         style={{ backgroundColor: "#F4F4F4" }}
       />
     ),

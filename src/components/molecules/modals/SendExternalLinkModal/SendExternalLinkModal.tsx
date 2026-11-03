@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Flex, Modal } from "antd";
 import { useForm, Controller } from "react-hook-form";
+import { useFormatter, useTranslations } from "use-intl";
 import { CaretLeft } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -37,6 +38,9 @@ const SendExternalLinkModal = ({
   clientUUID,
   onCloseAllModals
 }: SendExternalLinkModalProps) => {
+  const t = useTranslations("modals.sendExternalLink");
+  const tCommon = useTranslations("common");
+  const format = useFormatter();
   const { showMessage } = useMessageApi();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [recipients, setRecipients] = useState<
@@ -58,15 +62,11 @@ const SendExternalLinkModal = ({
 
   const watchForwardTo = watch("forward_to");
 
-  const formatRecipientsList = (recipients: ISelect[]): string => {
-    const labels = recipients.map((r) => r.label);
-    if (labels.length === 1) return labels[0];
-    if (labels.length === 2) return `${labels[0]} y ${labels[1]}`;
-
-    const allButLast = labels.slice(0, -1).join(", ");
-    const last = labels[labels.length - 1];
-    return `${allButLast} y ${last}`;
-  };
+  const formatRecipientsList = (recipients: ISelect[]): string =>
+    format.list(
+      recipients.map((r) => r.label),
+      { type: "conjunction" }
+    );
 
   useEffect(() => {
     const fetchFormInfo = async () => {
@@ -104,15 +104,15 @@ const SendExternalLinkModal = ({
       const hasSuccess = results.some((result) => result.status === "fulfilled");
 
       if (hasSuccess) {
-        showMessage("success", "Link enviado correctamente");
+        showMessage("success", t("sent"));
         setView("success");
       } else {
-        showMessage("error", "Error al enviar Link");
+        showMessage("error", t("sendError"));
       }
       setView("success");
     } catch (error) {
       console.error("Unexpected error", error);
-      showMessage("error", "Error inesperado al enviar Link");
+      showMessage("error", t("unexpectedError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -131,7 +131,7 @@ const SendExternalLinkModal = ({
         <>
           <button className="sendExternalLinkModal__goBackBtn" onClick={onClose}>
             <CaretLeft size="1.25rem" />
-            Enviar link externo
+            {t("title")}
           </button>
 
           <Flex vertical gap="0.5rem">
@@ -143,7 +143,7 @@ const SendExternalLinkModal = ({
                 <GeneralSearchSelect
                   errors={errors.forward_to}
                   field={field}
-                  title="Para"
+                  title={t("to")}
                   placeholder=""
                   options={recipients}
                   suffixIcon={null}
@@ -154,14 +154,14 @@ const SendExternalLinkModal = ({
           </Flex>
 
           <div className="sendExternalLinkModal__footer">
-            <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+            <SecondaryButton onClick={onClose}>{tCommon("actions.cancel")}</SecondaryButton>
 
             <PrincipalButton
               onClick={handleSubmit(onSubmit)}
               disabled={!isValid}
               loading={isSubmitting}
             >
-              Enviar correo
+              {t("sendEmail")}
             </PrincipalButton>
           </div>
         </>
@@ -169,11 +169,9 @@ const SendExternalLinkModal = ({
 
       {view === "success" && (
         <div className="sendExternalLinkModal__successView">
-          <h2>Link enviado exitosamente</h2>
+          <h2>{t("successTitle")}</h2>
           <span>
-            <p className="sendExternalLinkModal__successMessage">
-              Se ha enviado el link de ingreso a:
-            </p>
+            <p className="sendExternalLinkModal__successMessage">{t("successMessage")}</p>
             <p className="sendExternalLinkModal__recipients">
               {formatRecipientsList(watchForwardTo)}
             </p>
@@ -184,7 +182,7 @@ const SendExternalLinkModal = ({
             }}
             onClick={onCloseAllModals}
           >
-            Entendido
+            {t("gotIt")}
           </PrincipalButton>
         </div>
       )}

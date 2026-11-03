@@ -5,6 +5,7 @@ import style from "./formtocomplete.module.scss";
 import { useFieldArray, useForm } from "react-hook-form";
 import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 import { mockForm } from "./mock-form";
 import { defaultFormLoaded, FormLoaded, FormValues } from "./schema";
 import AnswerCard from "./components/AnswerCard";
@@ -12,6 +13,8 @@ import AnswerCard from "./components/AnswerCard";
 const { Text, Title } = Typography;
 
 const CompleteForm: React.FC = () => {
+  const t = useTranslations("projects.forms");
+  const tCommon = useTranslations("common");
   const {
     control,
     handleSubmit,
@@ -76,6 +79,7 @@ const CompleteForm: React.FC = () => {
             icon={<CloseOutlined />}
             style={{ position: "absolute", right: "1rem", top: "1rem" }}
             onClick={handleGoBack}
+            aria-label={t("close")}
           />
           {loadedForm?.questions?.map((question, index) => {
             return (
@@ -90,8 +94,8 @@ const CompleteForm: React.FC = () => {
             );
           })}
           <FooterButtons
-            backTitle={"Cancelar"}
-            nextTitle={"Finalizar"}
+            backTitle={tCommon("actions.cancel")}
+            nextTitle={tCommon("actions.finish")}
             handleBack={handleGoBack}
             handleNext={() => handleSubmit(onSubmit)()}
             nextDisabled={false}

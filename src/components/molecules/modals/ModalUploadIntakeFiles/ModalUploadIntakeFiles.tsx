@@ -2,6 +2,7 @@ import { useState } from "react";
 import { message, Modal, Typography } from "antd";
 import type { UploadFile } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
@@ -19,6 +20,9 @@ interface Props {
 }
 
 export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }: Props) => {
+  const t = useTranslations("modals.uploadIntakeFiles");
+  const tCommon = useTranslations("common");
+  const tShared = useTranslations("modals.shared");
   const [ingestaFile, setIngestaFile] = useState<File | undefined>();
   const [pruebaFile, setPruebaFile] = useState<File | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,9 +49,7 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
       if (!file) return;
       const fileSizeInMB = file.size / (1024 * 1024);
       if (fileSizeInMB > 100) {
-        message.error(
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 100 MB."
-        );
+        message.error(t("fileTooLarge"));
         return;
       }
       setter(file);
@@ -64,21 +66,17 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
     setIsLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Subiendo archivo de ingesta...",
+      content: t("uploading"),
       duration: 0
     });
     try {
       await uploadIntakeFile(archiveId, ingestaFile, pruebaFile);
-      message.success("Archivo de ingesta subido exitosamente.");
+      message.success(t("success"));
       onSuccess?.();
       resetState();
       onClose();
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo."
-      );
+      message.error(error instanceof Error ? error.message : t("error"));
     } finally {
       hide();
       setIsLoading(false);
@@ -89,13 +87,13 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
     <Modal
       open={isOpen}
       onCancel={handleClose}
-      title={<Title level={4}>Subir archivos</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       className="modalUploadIntakeFiles"
       width={600}
       footer={
         <FooterButtons
-          titleConfirm="Enviar"
-          titleCancel="Cancelar"
+          titleConfirm={tCommon("actions.send")}
+          titleCancel={tCommon("actions.cancel")}
           onClose={handleClose}
           handleOk={handleSubmit}
           isConfirmDisabled={!ingestaFile}
@@ -105,10 +103,10 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
       destroyOnClose
     >
       <div className="fileRow">
-        <Text className="label">Ingesta</Text>
+        <Text className="label">{t("intake")}</Text>
         <div className="documentButtonWrapper">
           <DocumentButton
-            title="Ingesta"
+            title={t("intake")}
             fileName={ingestaFile?.name}
             fileSize={ingestaFile?.size}
             handleOnChange={handleChange(setIngestaFile)}
@@ -118,12 +116,12 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
       </div>
       <div className="fileRow">
         <div className="label">
-          <Text>Prueba</Text>
-          <em className="opt">*Opcional</em>
+          <Text>{t("test")}</Text>
+          <em className="opt">{tShared("optional")}</em>
         </div>
         <div className="documentButtonWrapper">
           <DocumentButton
-            title="Prueba"
+            title={t("test")}
             fileName={pruebaFile?.name}
             fileSize={pruebaFile?.size}
             handleOnChange={handleChange(setPruebaFile)}

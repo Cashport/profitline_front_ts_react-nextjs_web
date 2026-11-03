@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "use-intl";
+
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { KpiCard, KpiValue } from "@/components/ui/kpi-card/kpi-card";
 import { useAppStore } from "@/lib/store/store";
@@ -29,6 +31,7 @@ export default function PortfolioCard({
   extras,
   className
 }: PortfolioCardProps) {
+  useLocale(); // re-renderiza al cambiar de idioma: los rótulos salen de AGING_SEGMENTS
   const formatMoney = useAppStore((s) => s.formatMoney);
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
 

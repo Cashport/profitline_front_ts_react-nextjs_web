@@ -1,4 +1,5 @@
 import { Flex, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import { InputForm } from "../InputForm/InputForm";
 import { Control, FieldErrors } from "react-hook-form";
 import { AddressType } from "@/components/molecules/modals/ModalShipTo/ModalAddress/ModalAddress";
@@ -10,16 +11,17 @@ interface Props {
 }
 
 export const InputAddress = ({ control, errors, disabled }: Props) => {
+  const t = useTranslations("components.inputAddress");
   return (
     <Flex vertical>
       <Flex align="flex-end">
         <InputForm
-          titleInput="Ingresar dirección"
+          titleInput={t("address")}
           control={control}
           nameInput="location.address.street_type"
           error={errors.location?.address?.street_type}
           customStyle={{ width: "75%", paddingRight: "1rem" }}
-          placeholder="Carrera"
+          placeholder={t("streetTypePlaceholder")}
           disabled={disabled}
         />
         <Flex align="center" gap={"0.5rem"}>
@@ -59,8 +61,8 @@ export const InputAddress = ({ control, errors, disabled }: Props) => {
         </Flex>
       </Flex>
       <InputForm
-        titleInput="Complemento"
-        placeholder="Local 1A"
+        titleInput={t("complement")}
+        placeholder={t("complementPlaceholder")}
         control={control}
         nameInput="location.complement"
         error={errors.location?.complement}

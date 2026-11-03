@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Dispatch, SetStateAction } from "react";
 import { Checkbox, Flex, Spin, Typography } from "antd";
 import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
@@ -11,11 +12,12 @@ interface Props {
 }
 
 export const SelectClientsGroup = ({ disabled, assignedGroups, setAssignedGroups }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, loading: isLoading } = useClientsGroupsSimplified();
 
   return (
     <div className="selectClientsGroup">
-      <Typography.Text className="title">Grupos de clientes</Typography.Text>
+      <Typography.Text className="title">{t("customerGroups")}</Typography.Text>
       <Flex vertical className="cardGroups">
         {isLoading ? (
           <Spin />

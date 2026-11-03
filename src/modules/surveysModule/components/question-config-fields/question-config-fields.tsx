@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { DatePicker, Input, InputNumber, Select, Switch, Tooltip } from "antd";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import type { IVisitFormQuestion, IVisitFormQuestionValidation } from "@/types/surveys/ISurveys";
 import { cn } from "@/utils/utils";
@@ -28,13 +29,14 @@ type NumericLimit =
 
 /** Campo con su etiqueta. `soon`: el backend todavía no lo recibe, va deshabilitado y no se envía. */
 function Field({ label, soon, children }: { label: string; soon?: boolean; children: ReactNode }) {
+  const t = useTranslations("surveys.config");
   const field = (
     <div className="flex min-w-0 flex-col gap-1">
       <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
       {children}
     </div>
   );
-  return soon ? <Tooltip title="Próximamente">{field}</Tooltip> : field;
+  return soon ? <Tooltip title={t("soon")}>{field}</Tooltip> : field;
 }
 
 const Grid = ({ children }: { children: ReactNode }) => (
@@ -43,6 +45,7 @@ const Grid = ({ children }: { children: ReactNode }) => (
 
 /** Configuración propia de cada tipo de pregunta (límites, formatos, fechas). */
 export default function QuestionConfigFields({ question, editor }: QuestionConfigFieldsProps) {
+  const t = useTranslations("surveys.config");
   const v = question.validation ?? {};
   const setValidation = (patch: IVisitFormQuestionValidation) =>
     editor.updateValidation(question.id, patch);
@@ -67,7 +70,7 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
   );
 
   const placeholderField = (
-    <Field label="Texto de ejemplo">
+    <Field label={t("placeholder")}>
       <Input
         value={question.placeholder ?? ""}
         onChange={(e) =>
@@ -89,7 +92,7 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
       return (
         <Grid>
           {placeholderField}
-          {limit("max_length", "Máx. caracteres", {
+          {limit("max_length", t("maxChars"), {
             min: 1,
             max: question.type === "text" ? 255 : 5000
           })}
@@ -100,27 +103,27 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
       return (
         <Grid>
           {placeholderField}
-          {limit("min_length", "Mín. dígitos", { min: 0 })}
-          {limit("max_length", "Máx. dígitos", { min: 1 })}
+          {limit("min_length", t("minDigits"), { min: 0 })}
+          {limit("max_length", t("maxDigits"), { min: 1 })}
         </Grid>
       );
     case "number":
       return (
         <Grid>
           {placeholderField}
-          {limit("min_value", "Mínimo")}
-          {limit("max_value", "Máximo")}
-          {limit("decimals", "Decimales", { min: 0, max: MAX_DECIMALS })}
-          <Field label="Valor inicial" soon>
+          {limit("min_value", t("min"))}
+          {limit("max_value", t("max"))}
+          {limit("decimals", t("decimals"), { min: 0, max: MAX_DECIMALS })}
+          <Field label={t("initialValue")} soon>
             <InputNumber className="!w-full" disabled placeholder="0" />
           </Field>
-          <Field label="Moneda" soon>
+          <Field label={t("currency")} soon>
             <Select
               disabled
-              placeholder="COP · Peso colombiano"
+              placeholder={t("currencyCop")}
               options={[
-                { value: "COP", label: "COP · Peso colombiano" },
-                { value: "USD", label: "USD · Dólar" }
+                { value: "COP", label: t("currencyCop") },
+                { value: "USD", label: t("currencyUsd") }
               ]}
             />
           </Field>
@@ -129,16 +132,16 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
     case "multi_select":
       return (
         <Grid>
-          {limit("min_selections", "Mín. selecciones", { min: 0 })}
-          {limit("max_selections", "Máx. selecciones", { min: 1, placeholder: "Sin límite" })}
+          {limit("min_selections", t("minSelections"), { min: 0 })}
+          {limit("max_selections", t("maxSelections"), { min: 1, placeholder: t("noLimit") })}
         </Grid>
       );
     case "photo":
       return (
         <Grid>
-          {limit("max_files", "Máx. fotos", { min: 1, max: MAX_FILES_LIMIT })}
-          {limit("max_file_size_mb", "Tamaño máx. (MB)", { min: 1 })}
-          <Field label="Solo cámara" soon>
+          {limit("max_files", t("maxPhotos"), { min: 1, max: MAX_FILES_LIMIT })}
+          {limit("max_file_size_mb", t("maxSizeMb"), { min: 1 })}
+          <Field label={t("cameraOnly")} soon>
             <Switch disabled className="w-fit" />
           </Field>
         </Grid>
@@ -147,10 +150,10 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
       return (
         <div className="flex flex-col gap-3">
           <Grid>
-            {limit("max_files", "Máx. archivos", { min: 1, max: MAX_FILES_LIMIT })}
-            {limit("max_file_size_mb", "Tamaño máx. (MB)", { min: 1 })}
+            {limit("max_files", t("maxFiles"), { min: 1, max: MAX_FILES_LIMIT })}
+            {limit("max_file_size_mb", t("maxSizeMb"), { min: 1 })}
           </Grid>
-          <Field label="Formatos permitidos">
+          <Field label={t("allowedFormats")}>
             <div className="flex flex-wrap gap-1.5">
               {Array.from(new Set([...FILE_TYPE_OPTIONS, ...(v.allowed_file_types ?? [])])).map(
                 (ext) => {
@@ -179,7 +182,7 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
     case "date":
       return (
         <Grid>
-          <Field label="Fecha mínima">
+          <Field label={t("minDate")}>
             <DatePicker
               className="!w-full"
               format="DD/MM/YYYY"
@@ -187,7 +190,7 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
               onChange={(d) => setValidation({ min_date: d ? d.format("YYYY-MM-DD") : undefined })}
             />
           </Field>
-          <Field label="Fecha máxima">
+          <Field label={t("maxDate")}>
             <DatePicker
               className="!w-full"
               format="DD/MM/YYYY"
@@ -200,7 +203,7 @@ export default function QuestionConfigFields({ question, editor }: QuestionConfi
     case "location":
       return (
         <Grid>
-          <Field label="Precisión mínima (m)" soon>
+          <Field label={t("minAccuracy")} soon>
             <InputNumber className="!w-full" disabled placeholder="50" />
           </Field>
         </Grid>

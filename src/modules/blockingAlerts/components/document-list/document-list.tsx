@@ -1,7 +1,8 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { useAppStore } from "@/lib/store/store";
-import { plural } from "../../utils/blocking-alerts";
 
 interface DocumentListProps<T> {
   items: T[];
@@ -11,8 +12,8 @@ interface DocumentListProps<T> {
   describe: (item: T) => { title: string; subtitle: string; dot: string };
   selected: string[];
   onSelectedChange: (ids: string[]) => void;
-  /** Sustantivo de la lista ("factura", "facturas"). */
-  noun: [string, string];
+  /** Conteo de la lista ya con su sustantivo ("3 facturas"). */
+  countLabel: (count: number) => string;
   empty: string;
   /** Aviso sobre la lista (p. ej. que las pagadas no suman). */
   notice?: React.ReactNode;
@@ -31,10 +32,11 @@ export default function DocumentList<T>({
   describe,
   selected,
   onSelectedChange,
-  noun,
+  countLabel,
   empty,
   notice
 }: DocumentListProps<T>) {
+  const t = useTranslations("blockingAlerts.documents");
   const formatMoney = useAppStore((s) => s.formatMoney);
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
 
@@ -66,9 +68,9 @@ export default function DocumentList<T>({
               }}
               onChange={() => onSelectedChange(allOn ? others : [...others, ...ids])}
             />
-            <span className="flex-1 text-[13px] font-semibold text-cp-ink">Seleccionar todas</span>
+            <span className="flex-1 text-[13px] font-semibold text-cp-ink">{t("selectAll")}</span>
             <span className="text-[13px] text-cp-ink-3">
-              {plural(items.length, ...noun)} · {money(total(items))}
+              {countLabel(items.length)} · {money(total(items))}
             </span>
           </label>
           {items.map((item) => {

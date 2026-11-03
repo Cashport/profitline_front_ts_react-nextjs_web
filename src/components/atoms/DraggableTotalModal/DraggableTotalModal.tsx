@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import Draggable, { ControlPosition, DraggableData, DraggableEvent } from "react-draggable";
 import { getAppZoom } from "@/utils/utils";
 import { NewspaperClipping } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 
@@ -22,6 +23,7 @@ export const DraggableTotalModal = ({
   icon,
   initialPosition
 }: Props) => {
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const draggleRef = useRef<HTMLDivElement>(null);
@@ -65,7 +67,7 @@ export const DraggableTotalModal = ({
       defaultPosition={defaultPosition}
     >
       <div ref={draggleRef}>
-        <p className={styles.modal__title}>Total</p>
+        <p className={styles.modal__title}>{tCommon("fields.total")}</p>
         <p className={styles.modal__total}>{formatMoney(totalAmount.toString())}</p>
         <div className={styles.modal__count}>
           {icon ?? <NewspaperClipping size={16} />}

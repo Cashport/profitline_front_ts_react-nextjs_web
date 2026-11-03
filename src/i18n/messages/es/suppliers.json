@@ -1,0 +1,109 @@
+{
+  "title": "Proveedores",
+  "selfServiceTitle": "Auto gestión",
+  "list": {
+    "tabs": {
+      "customers": "Clientes",
+      "suppliers": "Proveedores"
+    },
+    "searchCustomers": "Buscar clientes",
+    "searchSuppliers": "Buscar proveedores",
+    "columns": {
+      "createdAt": "Fecha creación"
+    },
+    "moreActions": "Más acciones",
+    "viewDetail": "Ver detalle"
+  },
+  "form": {
+    "supplier": "Proveedor",
+    "newSupplier": "Nuevo proveedor",
+    "generalInfo": "Información General",
+    "documents": "Documentos",
+    "enterField": "Ingresar {field}",
+    "selectField": "Seleccionar {field}",
+    "select": "Seleccionar",
+    "deleteSuccess": "Documentos eliminados correctamente",
+    "deleteError": "Error al eliminar documentos",
+    "confirmDelete": "{count, plural, one {¿Está seguro de eliminar # documento?} other {¿Está seguro de eliminar # documentos?}}"
+  },
+  "documentsTable": {
+    "uploadDate": "Fecha cargue",
+    "expiration": "Vencimiento",
+    "mandatory": "Obligatorio",
+    "viewDetail": "Ver detalle"
+  },
+  "documentStatus": {
+    "unclassified": "No clasificado",
+    "inReview": "En revisión",
+    "rejected": "Rechazado",
+    "aiApproved": "Aprobado IA",
+    "aiRejected": "Rechazado IA",
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "unknown": "Estado desconocido"
+  },
+  "generateAction": {
+    "title": "Generar acción",
+    "addRequirement": "Agregar requerimiento",
+    "auditRequirements": "Auditar requerimientos",
+    "createCustomer": "Crear cliente",
+    "sendReminder": "Enviar recordatorio",
+    "sendInvitation": "Enviar invitación",
+    "noDocumentsToAudit": "No hay documentos seleccionados para auditar.",
+    "noDocumentsToDelete": "No hay documentos seleccionados para eliminar."
+  },
+  "invitation": {
+    "title": "Enviar invitación",
+    "emailPlaceholder": "Ingresar correo electrónico",
+    "cc": "CC",
+    "subject": "Asunto",
+    "subjectPlaceholder": "Ingresar asunto",
+    "message": "Mensaje",
+    "messagePlaceholder": "Ingresa tu mensaje",
+    "submit": "Enviar invitación"
+  },
+  "audit": {
+    "title": "Auditar Requerimientos",
+    "requirementType": "Tipo de requerimiento",
+    "audit": "Auditar",
+    "commentRequired": "Este campo es obligatorio al rechazar",
+    "commentPlaceholder": "Agrega un comentario",
+    "success": "Requerimientos auditados correctamente",
+    "error": "Error al auditar requerimientos",
+    "downloadDocument": "Descargar documento"
+  },
+  "ai": {
+    "analyzeWith": "Analizar con <ai>Cashport IA</ai>"
+  },
+  "drawer": {
+    "approvers": "Aprobadores",
+    "uploadedBy": "Cargado por",
+    "uploadDate": "Fecha cargue",
+    "form": "Formulario",
+    "questionCount": "{count, plural, one {# pregunta} other {# preguntas}}",
+    "expiration": "Vencimiento",
+    "expirationPlaceholder": "Seleccionar fecha de expiración",
+    "document": "Documento",
+    "selectFile": "Seleccionar archivo",
+    "fileHint": "PDF, Word, PNG. (Tamaño máx. 30 MB)",
+    "addDocument": "Agregar documento",
+    "downloadTemplate": "Descargar plantilla",
+    "deleteDocument": "Eliminar documento",
+    "uploadSuccess": "Documento subido exitosamente",
+    "uploadError": "Error al subir el documento",
+    "deleteSuccess": "Documento eliminado exitosamente",
+    "deleteError": "Error al eliminar el documento",
+    "confirmDelete": "¿Está seguro de eliminar el documento?",
+    "close": "Cerrar"
+  },
+  "events": {
+    "title": "Eventos",
+    "commentPlaceholder": "Agrega un comentario",
+    "timeAgo": "Hace {time}",
+    "unknownUser": "Usuario desconocido",
+    "commentRequired": "Por favor, ingrese un comentario",
+    "commentNoIncident": "No se ha podido agregar el comentario, no está asociado a un incidente",
+    "commentSuccess": "Comentario agregado exitosamente",
+    "commentError": "Error al agregar el comentario"
+  }
+}

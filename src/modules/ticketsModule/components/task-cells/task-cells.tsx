@@ -1,6 +1,7 @@
 "use client";
 
 import { Bot, Headset, Mail, MailCheck, Users } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { fmtM } from "@/modules/walletModule/utils/format";
 import { cn } from "@/utils/utils";
@@ -85,9 +86,10 @@ export function IntakeLabel({ ticket }: { ticket: ITicket }) {
 }
 
 export function AssigneeAvatar({ name }: { name: string | null }) {
+  const t = useTranslations("tickets");
   return (
     <span
-      title={name ?? "Sin responsable"}
+      title={name ?? t("noAssignee")}
       className="inline-grid h-6 w-6 shrink-0 place-items-center rounded-full border border-cp-line-2 bg-cp-muted text-[10px] font-semibold text-cp-ink-3"
     >
       {initialsOf(name)}
@@ -121,6 +123,7 @@ export function TaskCell({
   ticket: ITicket;
   config?: ITaskConfig;
 }) {
+  const tt = useTranslations("tickets");
   switch (field.key) {
     case "title":
       return (
@@ -130,7 +133,7 @@ export function TaskCell({
           </span>
           {t.incident_id && (
             <span className="shrink-0 rounded-[5px] bg-cp-muted px-1.5 text-[13px] text-cp-ink-3">
-              Novedad #{t.incident_id}
+              {tt("cells.dispute", { id: t.incident_id })}
             </span>
           )}
         </span>

@@ -1,5 +1,6 @@
 import { Select as AntSelect } from "antd";
 import type { ReactNode } from "react";
+import { useTranslations } from "use-intl";
 
 interface SelectOption {
   value: string;
@@ -21,7 +22,7 @@ interface Props {
 export default function Select({
   value,
   onChange,
-  placeholder = "Seleccionar",
+  placeholder,
   options,
   showSearch = false,
   hasError = false,
@@ -29,17 +30,19 @@ export default function Select({
   loading = false,
   notFoundContent
 }: Props) {
+  const tCommon = useTranslations("common");
   return (
     <AntSelect
       showSearch={showSearch}
       value={value || undefined}
       onChange={onChange}
-      placeholder={<span style={{ color: "#666666" }}>{placeholder}</span>}
+      placeholder={
+        <span style={{ color: "#666666" }}>{placeholder ?? tCommon("actions.select")}</span>
+      }
       optionFilterProp="label"
       filterOption={
         showSearch
-          ? (input, option) =>
-              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+          ? (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
           : undefined
       }
       options={options}

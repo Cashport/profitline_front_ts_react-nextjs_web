@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { Dropdown } from "antd";
 import { Filter, ChevronDown, Building, User } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
@@ -50,6 +51,8 @@ export function GeneralFilter({
   onClearDateRange,
   iconOnly = false
 }: GeneralFilterProps) {
+  const t = useTranslations("purchaseOrders.filters");
+  const tCommon = useTranslations("common");
   const [isOpen, setIsOpen] = useState(false);
 
   const dropdownContent = (
@@ -60,7 +63,7 @@ export function GeneralFilter({
           <div>
             <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
               <Filter className="h-3 w-3 inline mr-1" />
-              Estados
+              {t("statuses")}
             </label>
             <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
               <button
@@ -71,7 +74,7 @@ export function GeneralFilter({
                 }`}
                 onClick={() => onStatusChange(null)}
               >
-                Todos los estados
+                {t("allStatuses")}
               </button>
 
               {statuses.map((status) => (
@@ -104,7 +107,7 @@ export function GeneralFilter({
           <div>
             <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
               <Building className="h-3 w-3 inline mr-1" />
-              {clienteFilterLabel || "Cliente"}
+              {clienteFilterLabel || tCommon("fields.customer")}
             </label>
             <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
               <button
@@ -115,7 +118,7 @@ export function GeneralFilter({
                 }`}
                 onClick={() => onCompradorChange(null)}
               >
-                Todos los {clienteFilterLabel || "clientes"}
+                {clienteFilterLabel ? t("allOf", { label: clienteFilterLabel }) : t("allCustomers")}
               </button>
 
               {clients.map((client) => (
@@ -142,7 +145,7 @@ export function GeneralFilter({
           <div>
             <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
               <User className="h-3 w-3 inline mr-1" />
-              Vendedor
+              {t("seller")}
             </label>
             <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
               <button
@@ -153,7 +156,7 @@ export function GeneralFilter({
                 }`}
                 onClick={() => onVendedorChange(null)}
               >
-                Todos los vendedores
+                {t("allSellers")}
               </button>
 
               {sellers.map((seller) => (
@@ -190,7 +193,7 @@ export function GeneralFilter({
             onClick={() => setIsOpen(false)}
             className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter"
           >
-            Cerrar
+            {tCommon("actions.close")}
           </Button>
         </div>
       </div>
@@ -213,7 +216,7 @@ export function GeneralFilter({
         <Filter className={iconOnly ? "h-4 w-4" : "h-4 w-4 mr-2"} />
         {!iconOnly && (
           <>
-            Filtros
+            {t("filters")}
             <ChevronDown className="h-4 w-4 ml-2" />
           </>
         )}

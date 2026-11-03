@@ -1,5 +1,6 @@
 import React, { ReactNode, useState } from "react";
 import { Button, Dropdown, Table, TableProps, Tooltip } from "antd";
+import { useTranslations } from "use-intl";
 import { ArrowDownLeft, DotsThreeVertical, Eye, Trash } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -33,6 +34,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   markPaymentAsUnidentified
 }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const t = useTranslations("clients.applyTab.tables");
+  const tCommon = useTranslations("common");
   const [activeRow, setActiveRow] = useState<IApplyTabRecord | null>(null);
 
   const [removeModal, setRemoveModal] = useState(false);
@@ -40,7 +43,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const columns: TableProps<IApplyTabRecord>["columns"] = [
     {
-      title: "Pago",
+      title: t("columns.payment"),
       dataIndex: "payment_id",
       key: "payment_id",
       render: (id) => <p className="sectionContainerTable__id">{id}</p>,
@@ -48,7 +51,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       showSorterTooltip: false
     },
     {
-      title: "Fecha",
+      title: tCommon("fields.date"),
       dataIndex: "created_at",
       key: "created_at",
       render: (date) => <p>{date ? formatDate(date) : "-"}</p>,
@@ -56,7 +59,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       showSorterTooltip: false
     },
     {
-      title: "Comentario",
+      title: tCommon("fields.comment"),
       dataIndex: "entity_description",
       key: "entity_description",
       render: (entity_description) => (
@@ -66,7 +69,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       )
     },
     {
-      title: "Monto",
+      title: tCommon("fields.amount"),
       dataIndex: "amount",
       key: "amount",
       render: (amount) => <p className="fontMonoSpace">{formatMoney(amount)}</p>,
@@ -75,7 +78,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       align: "right"
     },
     {
-      title: "Monto aplicado",
+      title: t("columns.appliedAmount"),
       dataIndex: "applied_amount",
       key: "applied_amount",
       render: (applied_amount) => <p className="fontMonoSpace">{formatMoney(applied_amount)}</p>,
@@ -84,7 +87,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       align: "right"
     },
     {
-      title: "Saldo",
+      title: t("columns.remaining"),
       dataIndex: "current_value",
       key: "current_value",
       render: (current_value) => <p className="fontMonoSpace">{formatMoney(current_value)}</p>,
@@ -93,7 +96,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       align: "right"
     },
     {
-      title: "Detalle",
+      title: tCommon("fields.detail"),
       width: 76,
       render: (_, row) => {
         const items = [
@@ -108,7 +111,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   handleEditRow(row, "payment");
                 }}
               >
-                Editar
+                {tCommon("actions.edit")}
               </Button>
             )
           },
@@ -123,7 +126,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   setRemoveModal(true);
                 }}
               >
-                Eliminar
+                {tCommon("actions.delete")}
               </Button>
             )
           },
@@ -138,7 +141,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   setConfirmModal(true);
                 }}
               >
-                Pago no es del cliente
+                {t("paymentNotFromCustomer")}
               </Button>
             )
           }
@@ -178,7 +181,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       />
 
       <ModalRemove
-        name="elemento"
+        name={t("removeItemName")}
         isOpen={removeModal}
         onClose={() => {
           setActiveRow(null);
@@ -192,7 +195,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       />
 
       <ModalConfirmAction
-        title="Se marcará el pago como no identificado"
+        title={t("markUnidentifiedConfirm")}
         isOpen={confirmModal}
         onClose={() => setConfirmModal(false)}
         onOk={() => {

@@ -1,4 +1,5 @@
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import "./modalPeriodicity.scss";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -31,6 +32,8 @@ export const ModalPeriodicity = ({
   showCommunicationDetails,
   resetOnParentClose = false
 }: Props) => {
+  const t = useTranslations("modals.periodicity");
+  const tCommon = useTranslations("common");
   const {
     control,
     handleSubmit,
@@ -67,6 +70,13 @@ export const ModalPeriodicity = ({
   const watchDays = watch("days");
   const watchFrequencyNumber = watch("frequency_number");
 
+  // "Semanal"/"Mensual" y los días (SelectDay) son los valores que guarda el backend: solo se
+  // traduce lo que se muestra.
+  const frequencyLabel = (value?: string) =>
+    value === "Semanal" || value === "Mensual" ? t(`frequenciesInline.${value}`) : value ?? "";
+  const dayLabel = (value: string) =>
+    WEEKDAY_KEYS[value] ? t(`weekdays.${WEEKDAY_KEYS[value]}`) : value;
+
   const handleOnSave = (data: IPeriodicityModalForm) => {
     setSelectedPeriodicity(data);
     onClose();
@@ -80,21 +90,21 @@ export const ModalPeriodicity = ({
       footer={null}
       destroyOnClose
     >
-      <h2 className="modalPeriodicity__title"> Establecer periodicidad</h2>
+      <h2 className="modalPeriodicity__title"> {t("title")}</h2>
       <div className="modalPeriodicity__inputs">
-        <p className="modalPeriodicity__inputs__name">Inicio</p>
+        <p className="modalPeriodicity__inputs__name">{t("start")}</p>
         <InputDateForm
           titleInput=""
           hiddenIcon
           nameInput="init_date"
-          placeholder="Seleccionar fecha"
+          placeholder={tCommon("placeholders.selectDate")}
           control={control}
           error={errors.init_date}
           minDate={dayjs(new Date().toUTCString())}
           validationRules={{ required: true }}
           disabled={!isEditAvailable && !!showCommunicationDetails.communicationId}
         />
-        <p className="modalPeriodicity__inputs__name">Repetir cada</p>
+        <p className="modalPeriodicity__inputs__name">{t("repeatEvery")}</p>
         <div className="modalPeriodicity__inputs__repeat">
           <Controller
             name="frequency_number"
@@ -102,7 +112,7 @@ export const ModalPeriodicity = ({
             rules={{
               required: true,
               pattern: {
-                message: "valor invalido",
+                message: t("invalidValue"),
                 value: /^(3[0-1]|[12][0-9]|[1-9]|0[1-9])$/
               }
             }}
@@ -132,8 +142,11 @@ export const ModalPeriodicity = ({
               <GeneralSelect
                 errors={errors.frequency}
                 field={field}
-                placeholder="Semanal"
-                options={repeatOptions}
+                placeholder={t("frequencies.Semanal")}
+                options={repeatOptions.map((value) => ({
+                  value,
+                  label: t(`frequencies.${value}`)
+                }))}
                 errorSmall
                 customStyleContainer={{ width: "100%" }}
                 readOnly={!isEditAvailable && !!showCommunicationDetails.communicationId}
@@ -157,7 +170,7 @@ export const ModalPeriodicity = ({
             )}
           />
         </div>
-        <p className="modalPeriodicity__inputs__name">Fin</p>
+        <p className="modalPeriodicity__inputs__name">{t("end")}</p>
         <InputDateForm
           disabled={
             (!isEditAvailable && !!showCommunicationDetails.communicationId) || !watchInitDate
@@ -166,7 +179,7 @@ export const ModalPeriodicity = ({
           hiddenTitle
           hiddenIcon
           nameInput="end_date"
-          placeholder="Seleccionar fecha"
+          placeholder={tCommon("placeholders.selectDate")}
           control={control}
           error={errors.end_date}
           minDate={dayjs(watchInitDate, "YYYY-MM-DD", true).add(1, "day")}
@@ -175,7 +188,7 @@ export const ModalPeriodicity = ({
               const initDate = dayjs(watchInitDate, "YYYY-MM-DD", true);
               const inputDate = dayjs(value, "YYYY-MM-DD", true);
               if (inputDate.diff(initDate, "days") <= 0) {
-                return "La fecha debe ser mínimo un día más que la fecha inicial";
+                return t("endAfterStart");
               }
               return true;
             }
@@ -183,18 +196,18 @@ export const ModalPeriodicity = ({
         />
       </div>
       <p className="modalPeriodicity__inputs__name">
-        Se produce {watchFrequency?.value}{" "}
-        {watchDays.length > 0
-          ? `cada ${watchDays?.map((day) => day.value).join(", ")} `
-          : `${watchFrequencyNumber ? watchFrequencyNumber : "n"} veces `}
-        iniciando el
-        {watchInitDate ? ` ${dayjs(watchInitDate, "YYYY-MM-DD").format("DD/MM/YYYY")}` : "..."}
+        {t(watchDays.length > 0 ? "summaryDays" : "summaryTimes", {
+          frequency: frequencyLabel(watchFrequency?.value),
+          days: watchDays?.map((day) => dayLabel(day.value)).join(", ") ?? "",
+          count: String(watchFrequencyNumber ? watchFrequencyNumber : "n"),
+          date: watchInitDate ? dayjs(watchInitDate, "YYYY-MM-DD").format("DD/MM/YYYY") : "..."
+        })}
       </p>
       {!isEditAvailable && !!showCommunicationDetails.communicationId ? null : (
         <div className="modalPeriodicity__footer">
-          <SecondaryButton onClick={() => onClose()}>Cancelar</SecondaryButton>
+          <SecondaryButton onClick={() => onClose()}>{tCommon("actions.cancel")}</SecondaryButton>
           <PrincipalButton disabled={!isValid} onClick={handleSubmit(handleOnSave)}>
-            Guardar
+            {tCommon("actions.save")}
           </PrincipalButton>
         </div>
       )}
@@ -202,7 +215,17 @@ export const ModalPeriodicity = ({
   );
 };
 
-const repeatOptions = [
-  { value: "Semanal", label: "Semanal" },
-  { value: "Mensual", label: "Mensual" }
-];
+const repeatOptions = ["Semanal", "Mensual"] as const;
+
+const WEEKDAY_KEYS: Record<
+  string,
+  "sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"
+> = {
+  Domingo: "sunday",
+  Lunes: "monday",
+  Martes: "tuesday",
+  Miércoles: "wednesday",
+  Jueves: "thursday",
+  Viernes: "friday",
+  Sábado: "saturday"
+};

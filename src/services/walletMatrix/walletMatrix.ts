@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import axios from "axios";
 
 import { API, default as instance } from "@/utils/api/api";
@@ -165,7 +166,7 @@ export const downloadWalletMatrixExcel = async (filters?: IWalletMatrixFilters):
         // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
       }
     }
-    throw new Error(message || "No se pudo descargar el Excel de la cartera.");
+    throw new Error(message || getTranslator("shared")("services.downloadReceivablesExcelError"));
   }
 };
 
@@ -176,9 +177,7 @@ export const downloadWalletMatrixExcel = async (filters?: IWalletMatrixFilters):
  *
  * Devuelve el nombre del archivo para mostrarlo en el aviso de éxito.
  */
-export const downloadNoveltiesExcel = async (
-  filters?: IWalletMatrixFilters
-): Promise<string> => {
+export const downloadNoveltiesExcel = async (filters?: IWalletMatrixFilters): Promise<string> => {
   try {
     const response = await instance.get(
       `/portfolio/matrix/novelties-export?${buildMatrixQuery(filters)}`,
@@ -212,6 +211,6 @@ export const downloadNoveltiesExcel = async (
         // Cuerpo que no es JSON (p. ej. un 502 del gateway).
       }
     }
-    throw new Error(message || "No se pudo descargar el Excel de novedades.");
+    throw new Error(message || getTranslator("shared")("services.downloadDisputesExcelError"));
   }
 };

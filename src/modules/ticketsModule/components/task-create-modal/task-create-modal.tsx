@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Modal } from "antd";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { useWalletTheme } from "@/modules/walletModule/contexts/wallet-theme-context";
@@ -46,6 +47,8 @@ export function toBody(fields: ITaskFieldConfig[], values: TaskFormValues): Task
  * vuelve a validar todo contra la config.
  */
 export default function TaskCreateModal({ config }: { config: ITaskConfig }) {
+  const t = useTranslations("tickets.create");
+  const tCommon = useTranslations("common");
   const { draft, closeCreate, refresh, openDetail } = useTicketsView(
     useShallow((s) => ({
       draft: s.createDraft,
@@ -79,18 +82,18 @@ export default function TaskCreateModal({ config }: { config: ITaskConfig }) {
   const submit = async () => {
     const missing = fields.filter((f) => f.required && !values[f.key]?.trim());
     if (missing.length) {
-      showMessage("warning", `Falta: ${missing.map((f) => f.label).join(", ")}`);
+      showMessage("warning", t("missing", { fields: missing.map((f) => f.label).join(", ") }));
       return;
     }
     setSaving(true);
     try {
       const created = await createTask(toBody(fields, values));
-      showMessage("success", `Tarea ${created.ticket_code} creada`);
+      showMessage("success", t("created", { code: created.ticket_code }));
       refresh();
       closeCreate();
       openDetail(created.id);
     } catch (error) {
-      showMessage("error", (error as Error).message || "No se pudo crear la tarea");
+      showMessage("error", (error as Error).message || t("error"));
     } finally {
       setSaving(false);
     }
@@ -99,11 +102,11 @@ export default function TaskCreateModal({ config }: { config: ITaskConfig }) {
   return (
     <Modal
       open={draft !== null}
-      title="Nueva tarea"
+      title={t("title")}
       onCancel={closeCreate}
       onOk={submit}
-      okText="Crear tarea"
-      cancelText="Cancelar"
+      okText={t("submit")}
+      cancelText={tCommon("actions.cancel")}
       confirmLoading={saving}
       destroyOnClose
       centered

@@ -1,4 +1,5 @@
 import { SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { IApprovalStatusItem } from "@/types/approvals/IApprovals";
 import { Button } from "@/modules/chat/ui/button";
@@ -20,6 +21,7 @@ export default function ApprovalsStateDropdown({
   selectedStatuses,
   onStatusChange
 }: ApprovalsStateDropdownProps) {
+  const t = useTranslations("approvals.filters");
   const handleToggleStatus = (code: string) => {
     const newStatuses = selectedStatuses.includes(code)
       ? selectedStatuses.filter((s) => s !== code)
@@ -36,7 +38,7 @@ export default function ApprovalsStateDropdown({
           style={{ height: "var(--control-h)" }}
         >
           <SlidersHorizontal className="h-4 w-4" />
-          Estados
+          {t("statuses")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

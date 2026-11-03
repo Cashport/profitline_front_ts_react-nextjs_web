@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { Flex, Input, Modal, Typography } from "antd";
 import { FileText, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { uploadMedicalAccount } from "@/services/medicalAccounts/medicalAccounts";
-import { SERVICE_TYPES } from "../../constants";
+import { SERVICE_TYPE_CODES } from "../../constants";
 
 const { Title } = Typography;
 
@@ -26,6 +27,7 @@ export function ModalAddMedicalAccount({
   onClose,
   onSuccess
 }: ModalAddMedicalAccountProps) {
+  const t = useTranslations("medicalAccounts");
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -48,7 +50,7 @@ export function ModalAddMedicalAccount({
   const handleFileUpload = (file: File) => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      setError("Solo se permiten archivos PDF.");
+      setError(t("upload.onlyPdf"));
       return;
     }
     setError(null);
@@ -58,7 +60,7 @@ export function ModalAddMedicalAccount({
   const handleOk = async () => {
     if (!selectedFile || !orderNumber.trim()) return;
     if (!projectId) {
-      showMessage("error", "Selecciona un proyecto antes de cargar la cuenta.");
+      showMessage("error", t("addModal.selectProject"));
       return;
     }
 
@@ -70,14 +72,11 @@ export function ModalAddMedicalAccount({
         orderNumber.trim(),
         selectedServiceType ?? undefined
       );
-      showMessage("success", "Cuenta médica cargada y procesada correctamente.");
+      showMessage("success", t("addModal.success"));
       onSuccess?.();
       onClose();
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al cargar la cuenta médica."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("addModal.error"));
     } finally {
       setIsLoading(false);
     }
@@ -89,10 +88,10 @@ export function ModalAddMedicalAccount({
       open={isOpen}
       width={600}
       onCancel={isLoading ? undefined : onClose}
-      title={<Title level={4}>Nueva Cuenta Médica</Title>}
+      title={<Title level={4}>{t("addModal.title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Cargar cuenta médica"
+          titleConfirm={t("addModal.confirm")}
           showLeftButton={false}
           isConfirmDisabled={!selectedFile || !selectedServiceType || !orderNumber.trim()}
           isConfirmLoading={isLoading}
@@ -103,17 +102,15 @@ export function ModalAddMedicalAccount({
       destroyOnClose
     >
       <Flex vertical gap="1.25rem" style={{ marginBottom: "1rem" }}>
-        <p className="-mt-2 text-sm text-gray-500">
-          Selecciona el tipo de servicio y adjunta el PDF de la cuenta.
-        </p>
+        <p className="-mt-2 text-sm text-gray-500">{t("addModal.description")}</p>
 
         {/* Número de pedido */}
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            Número de pedido <span className="text-red-500">*</span>
+            {t("addModal.orderNumber")} <span className="text-red-500">*</span>
           </p>
           <Input
-            placeholder="Ej: PED-001"
+            placeholder={t("addModal.orderNumberPlaceholder")}
             value={orderNumber}
             onChange={(e) => setOrderNumber(e.target.value)}
           />
@@ -122,16 +119,16 @@ export function ModalAddMedicalAccount({
         {/* Tipo de servicio */}
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            Tipo de servicio <span className="text-red-500">*</span>
+            {t("addModal.serviceType")} <span className="text-red-500">*</span>
           </p>
           <div className="grid grid-cols-5 gap-2">
-            {SERVICE_TYPES.map((serviceType) => {
-              const isSelected = selectedServiceType === serviceType.code;
+            {SERVICE_TYPE_CODES.map((code) => {
+              const isSelected = selectedServiceType === code;
               return (
                 <button
-                  key={serviceType.code}
+                  key={code}
                   type="button"
-                  onClick={() => setSelectedServiceType(serviceType.code)}
+                  onClick={() => setSelectedServiceType(code)}
                   className={`relative flex flex-col items-center justify-center rounded-lg border-2 px-2 py-3 text-center transition ${
                     isSelected
                       ? "border-cashport-black bg-cashport-black text-white shadow-md"
@@ -141,13 +138,13 @@ export function ModalAddMedicalAccount({
                   {isSelected && (
                     <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-cashport-green" />
                   )}
-                  <span className="text-sm font-bold">{serviceType.code}</span>
+                  <span className="text-sm font-bold">{code}</span>
                   <span
                     className={`mt-0.5 text-[13px] leading-tight ${
                       isSelected ? "text-gray-200" : "text-gray-500"
                     }`}
                   >
-                    {serviceType.label}
+                    {t(`serviceTypes.${code}`)}
                   </span>
                 </button>
               );
@@ -158,7 +155,7 @@ export function ModalAddMedicalAccount({
         {/* Archivo PDF */}
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            Archivo PDF <span className="text-red-500">*</span>
+            {t("addModal.pdfFile")} <span className="text-red-500">*</span>
           </p>
 
           {selectedFile ? (
@@ -174,7 +171,7 @@ export function ModalAddMedicalAccount({
                 type="button"
                 onClick={() => setSelectedFile(null)}
                 className="shrink-0 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                aria-label="Quitar archivo"
+                aria-label={t("upload.removeFile")}
               >
                 <X size={18} />
               </button>
@@ -184,12 +181,10 @@ export function ModalAddMedicalAccount({
               <UploadDropZone
                 onFileUpload={handleFileUpload}
                 allowedExtensions={[".pdf"]}
-                title="Arrastra el PDF aquí"
-                subtitle="o haz clic para seleccionarlo desde tu equipo"
+                title={t("upload.dropTitle")}
+                subtitle={t("upload.dropSubtitleFromDevice")}
               />
-              <p className="mt-2 text-center text-[13px] text-gray-400">
-                Solo PDF · Máx. 500 páginas
-              </p>
+              <p className="mt-2 text-center text-[13px] text-gray-400">{t("addModal.pdfHint")}</p>
             </>
           )}
 
@@ -197,9 +192,7 @@ export function ModalAddMedicalAccount({
         </div>
 
         {isLoading && (
-          <p className="text-center text-[13px] text-gray-500">
-            Procesando la cuenta médica, esto puede tardar hasta 90 segundos…
-          </p>
+          <p className="text-center text-[13px] text-gray-500">{t("addModal.processing")}</p>
         )}
       </Flex>
     </Modal>

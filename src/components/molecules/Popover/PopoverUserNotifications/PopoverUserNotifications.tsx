@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Badge, List, Popover, Spin, Flex } from "antd";
 import React, { useState, useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "react-query";
@@ -36,8 +37,8 @@ export const PopoverUserNotifications: React.FC<PopoverUserNotificationsProps> =
   isPopoverVisible,
   projectId
 }) => {
-  const { notificationCount, updateNotificationCount, startPolling } =
-    useNotificationStore();
+  const t = useTranslations("shared.notificationsPopover");
+  const { notificationCount, updateNotificationCount, startPolling } = useNotificationStore();
   const { openModal } = useModalDetail();
 
   useEffect(() => {
@@ -147,12 +148,12 @@ export const PopoverUserNotifications: React.FC<PopoverUserNotificationsProps> =
   const items = [
     {
       key: "1",
-      label: `Abiertos ${openNotifications && openNotifications.length > 0 ? `(${openNotifications.length})` : ""}`,
+      label: t("openTab", { count: openNotifications?.length ?? 0 }),
       children: renderList(openNotifications, isLoadingOpen)
     },
     {
       key: "2",
-      label: `Cerradas ${rejectedNotifications && rejectedNotifications.length > 0 ? `(${rejectedNotifications.length})` : ""}`,
+      label: t("closedTab", { count: rejectedNotifications?.length ?? 0 }),
       children: renderList(rejectedNotifications, isLoadingRejected)
     }
   ];
@@ -161,11 +162,11 @@ export const PopoverUserNotifications: React.FC<PopoverUserNotificationsProps> =
     <div className="notificationsPopoverContent">
       <div className="modalTitle">
         <div className="title__text">
-          <p>Notificaciones</p>
+          <p>{t("title")}</p>
         </div>
         <div>
-          <Link href="/notificaciones" passHref>
-            Ver todo
+          <Link href="/notifications" passHref>
+            {t("viewAll")}
           </Link>
         </div>
       </div>

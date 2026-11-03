@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { message } from "antd";
+import { useTranslations } from "use-intl";
 import { BellSimpleRinging } from "@phosphor-icons/react";
 import { DotsThree } from "phosphor-react";
 
@@ -31,6 +32,10 @@ import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQual
 import { ModalDataEmailRules } from "../../components/ModalDataRegisteredEmails/ModalDataEmailRules";
 
 export default function DataQualityClientDetails() {
+  const t = useTranslations("dataQuality.clientDetail");
+  // Mensajes de carga/descarga compartidos con la vista de país.
+  const tUploads = useTranslations("dataQuality.countryView");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const selectedProject = useAppStore((projects) => projects.selectedProject);
@@ -60,7 +65,7 @@ export default function DataQualityClientDetails() {
 
     const hide = message.open({
       type: "loading",
-      content: "Descargando catálogo...",
+      content: tUploads("downloadingCatalog"),
       duration: 0
     });
 
@@ -69,11 +74,11 @@ export default function DataQualityClientDetails() {
 
       window.open(res.url, "_blank");
 
-      message.success("Catálogo descargado exitosamente.");
+      message.success(tUploads("catalogDownloaded"));
       setWhichModalIsOpen(0);
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message || error?.message || "Error al descargar el catálogo.";
+        error?.response?.data?.message || error?.message || tUploads("catalogDownloadError");
 
       message.error(errorMessage);
     } finally {
@@ -100,13 +105,11 @@ export default function DataQualityClientDetails() {
     setIsUploadLoading(true);
     try {
       await uploadPointsOfSaleFile(file);
-      message.success("Archivo de puntos de venta cargado exitosamente.");
+      message.success(tUploads("posUploaded"));
       setWhichModalIsOpen(0);
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
-      );
+      message.error(error instanceof Error ? error.message : tUploads("posUploadError"));
     } finally {
       setIsUploadLoading(false);
     }
@@ -120,9 +123,14 @@ export default function DataQualityClientDetails() {
     setIsUploadPacksLoading(true);
     try {
       const res = await uploadPacksFile(file);
-      const summary = `Packs procesados: ${res.total} (creados: ${res.created}, actualizados: ${res.updated}, errores: ${res.errors})`;
+      const summary = tUploads("packsSummary", {
+        total: res.total,
+        created: res.created,
+        updated: res.updated,
+        errors: res.errors
+      });
       if (res.error_log?.url) {
-        message.warning(`${summary}. Se generó un log de errores.`);
+        message.warning(tUploads("packsSummaryWithLog", { summary }));
         window.open(res.error_log.url, "_blank");
       } else {
         message.success(summary);
@@ -130,9 +138,7 @@ export default function DataQualityClientDetails() {
       setWhichModalIsOpen(0);
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al cargar el archivo de packs."
-      );
+      message.error(error instanceof Error ? error.message : tUploads("packsUploadError"));
     } finally {
       setIsUploadPacksLoading(false);
     }
@@ -148,11 +154,11 @@ export default function DataQualityClientDetails() {
     };
     try {
       await uploadMassiveOrHistoricalFile({ file, requestObject });
-      message.success("Archivo cargado exitosamente.");
+      message.success(t("fileUploaded"));
       setWhichModalIsOpen(0);
       mutate();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
+      message.error(error instanceof Error ? error.message : t("fileUploadError"));
     } finally {
       setIsUploadLoading(false);
     }
@@ -163,15 +169,11 @@ export default function DataQualityClientDetails() {
     try {
       // Implement the upload logic here, similar to handleUploadMassive
       await uploadCatalogMaterial(file);
-      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      message.success(tUploads("materialsAuxUploaded"));
       setWhichModalIsOpen(0);
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al cargar el archivo de auxiliar de materiales."
-      );
+      message.error(error instanceof Error ? error.message : tUploads("materialsAuxUploadError"));
     } finally {
       setIsUploadLoading(false);
     }
@@ -185,7 +187,7 @@ export default function DataQualityClientDetails() {
         <div className="min-h-[400px] flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-            <p className="text-gray-600">Cargando información del cliente...</p>
+            <p className="text-gray-600">{t("loading")}</p>
           </div>
         </div>
       </div>
@@ -200,10 +202,10 @@ export default function DataQualityClientDetails() {
         <div className="min-h-[400px] flex items-center justify-center">
           <div className="text-center">
             <div className="text-red-600 mb-4">
-              <h2 className="text-xl font-semibold">Error al cargar los datos</h2>
+              <h2 className="text-xl font-semibold">{t("loadError")}</h2>
             </div>
             <p className="text-gray-600 mb-4">{error.message}</p>
-            <Button onClick={() => window.location.reload()}>Reintentar</Button>
+            <Button onClick={() => window.location.reload()}>{tCommon("actions.retry")}</Button>
           </div>
         </div>
       </div>
@@ -216,7 +218,7 @@ export default function DataQualityClientDetails() {
       <div className="cp-page">
         <Header title="" back="/data-quality" />
         <div className="min-h-[400px] flex items-center justify-center">
-          <p className="text-gray-600">No se encontraron datos para este cliente.</p>
+          <p className="text-gray-600">{t("notFound")}</p>
         </div>
       </div>
     );
@@ -236,7 +238,7 @@ export default function DataQualityClientDetails() {
             {(canManage || canDownloadCatalog) && (
               <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
                 <DotsThree size={"1.5rem"} />
-                Generar acción
+                {t("generateAction")}
               </Button>
             )}
             {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
@@ -246,7 +248,7 @@ export default function DataQualityClientDetails() {
               >
                 <Button variant="outline" className="">
                   <BellSimpleRinging size={18} />
-                  Alertas
+                  {tUploads("alerts")}
                 </Button>
               </Link>
             )}
@@ -257,7 +259,7 @@ export default function DataQualityClientDetails() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <Button variant="outline" className="">
-                  Referencias
+                  {tUploads("references")}
                 </Button>
               </Link>
             )}
@@ -275,7 +277,7 @@ export default function DataQualityClientDetails() {
                     border: "none"
                   }}
                 >
-                  Catálogos
+                  {t("catalogs")}
                 </Button>
               </Link>
             )}
@@ -302,7 +304,7 @@ export default function DataQualityClientDetails() {
         </div>
 
         <div className="mt-4 text-sm" style={{ color: "#141414" }}>
-          Mostrando {archiveCounts.shown} de {archiveCounts.total} archivos
+          {t("showingFiles", { count: archiveCounts.shown, total: archiveCounts.total })}
         </div>
       </main>
 

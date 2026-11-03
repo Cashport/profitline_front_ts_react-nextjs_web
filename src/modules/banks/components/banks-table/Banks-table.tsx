@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Flex, Table, TableProps, Typography } from "antd";
 import { Eye, Receipt } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
@@ -32,6 +33,8 @@ export const BanksTable = ({
   bankStatusId,
   clearSelected
 }: PropsBanksTable) => {
+  const t = useTranslations("banks.table");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -127,7 +130,7 @@ export const BanksTable = ({
       width: 100
     },
     {
-      title: "Id ERP",
+      title: t("erpId"),
       dataIndex: "ID_ERP",
       key: "ID_ERP",
       render: (ID_ERP, record) => (
@@ -141,7 +144,7 @@ export const BanksTable = ({
       width: 110
     },
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "CLIENT_NAME",
       key: "CLIENT_NAME",
       render: (text) => <Text>{text}</Text>,
@@ -150,7 +153,7 @@ export const BanksTable = ({
       width: 190
     },
     {
-      title: "Fecha",
+      title: tCommon("fields.date"),
       dataIndex: "payment_date",
       key: "payment_date",
       render: (text) => <Text>{formatDate(text)}</Text>,
@@ -159,7 +162,7 @@ export const BanksTable = ({
       width: 115
     },
     {
-      title: "Monto",
+      title: tCommon("fields.amount"),
       key: "current_value",
       dataIndex: "current_value",
       align: "right",
@@ -171,7 +174,7 @@ export const BanksTable = ({
       width: 130
     },
     {
-      title: "Descripción",
+      title: tCommon("fields.description"),
       key: "description",
       dataIndex: "description",
       render: (text) => <p className="description">{text}</p>,
@@ -179,7 +182,7 @@ export const BanksTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Cuenta",
+      title: t("account"),
       key: "bank_description",
       dataIndex: "bank_description",
       render: (text, record) => (
@@ -240,7 +243,7 @@ export const BanksTable = ({
       <InvoiceDownloadModal
         isModalOpen={isModalFileDetailOpen}
         handleCloseModal={setIsModalFileDetailOpen}
-        title="Imagen"
+        title={t("image")}
         url={fileURL}
       />
     </>

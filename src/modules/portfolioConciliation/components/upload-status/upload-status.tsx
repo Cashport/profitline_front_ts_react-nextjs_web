@@ -2,25 +2,26 @@
 
 import { Button, Spin } from "antd";
 import { WarningCircle } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { formatNumber } from "@/utils/utils";
 import { IConciliationUpload } from "@/types/portfolioConciliation/IPortfolioConciliation";
 
 /** La carga sigue en el servidor: lectura del Excel, cruce y reemplazo. */
-export const UploadProcessingBanner = ({ fileName }: { fileName?: string }) => (
-  <div className="flex items-center gap-4 rounded-lg border border-[#ececec] bg-[#fafafa] px-4 py-3.5">
-    <Spin />
-    <div className="flex min-w-0 flex-col">
-      <span className="truncate text-[13px] font-semibold">
-        Procesando {fileName ?? "la cartera"}…
-      </span>
-      <span className="text-[13px] text-[#8a8a8a]">
-        Leyendo el archivo y cruzando cada documento contra Cashport. Puedes salir de esta pantalla:
-        la carga sigue en el servidor.
-      </span>
+export const UploadProcessingBanner = ({ fileName }: { fileName?: string }) => {
+  const t = useTranslations("reconciliation.uploadStatus");
+  return (
+    <div className="flex items-center gap-4 rounded-lg border border-[#ececec] bg-[#fafafa] px-4 py-3.5">
+      <Spin />
+      <div className="flex min-w-0 flex-col">
+        <span className="truncate text-[13px] font-semibold">
+          {fileName ? t("processingFile", { fileName }) : t("processingPortfolio")}
+        </span>
+        <span className="text-[13px] text-[#8a8a8a]">{t("processingHint")}</span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface FailedPanelProps {
   upload: IConciliationUpload;
@@ -30,6 +31,8 @@ interface FailedPanelProps {
 
 /** La última carga no se aplicó: errores de validación por fila o falla del proceso. */
 export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelProps) => {
+  const t = useTranslations("reconciliation.uploadStatus");
+  const tCommon = useTranslations("common");
   const hiddenErrors = upload.error_count - upload.errors.length;
 
   return (
@@ -38,18 +41,17 @@ export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelPro
         <WarningCircle size={22} weight="fill" className="mt-0.5 flex-none text-[#e5484d]" />
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="text-[13px] font-semibold">
-            La carga de {upload.file_name} no se aplicó
+            {t("failedTitle", { fileName: upload.file_name })}
           </span>
           <span className="text-[13px] text-[#444]">
-            {upload.error_message ?? "No se pudo procesar el archivo."} La cartera vigente no
-            cambió.
+            {upload.error_message ?? t("processError")} {t("unchanged")}
           </span>
         </div>
         <div className="flex gap-2">
           <Button type="text" onClick={onDismiss}>
-            Ocultar
+            {tCommon("actions.hide")}
           </Button>
-          <Button onClick={onRetry}>Cargar archivo corregido</Button>
+          <Button onClick={onRetry}>{t("retry")}</Button>
         </div>
       </div>
 
@@ -58,9 +60,15 @@ export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelPro
           <table className="w-full border-collapse text-[13px]">
             <thead className="sticky top-0 bg-cp-surface">
               <tr className="text-left text-[13.5px] text-cp-ink">
-                <th className="w-[70px] border-b border-cp-line px-3 py-3 font-semibold">Fila</th>
-                <th className="w-[130px] border-b border-cp-line px-3 py-3 font-semibold">Columna</th>
-                <th className="border-b border-cp-line px-3 py-3 font-semibold">Qué corregir</th>
+                <th className="w-[70px] border-b border-cp-line px-3 py-3 font-semibold">
+                  {t("columns.row")}
+                </th>
+                <th className="w-[130px] border-b border-cp-line px-3 py-3 font-semibold">
+                  {t("columns.column")}
+                </th>
+                <th className="border-b border-cp-line px-3 py-3 font-semibold">
+                  {t("columns.fix")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -70,7 +78,7 @@ export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelPro
                   className="border-t border-[#f0f0f0]"
                 >
                   <td className="px-3 py-1.5 tabular-nums">
-                    {error.row === null ? "Archivo" : formatNumber(error.row)}
+                    {error.row === null ? t("file") : formatNumber(error.row)}
                   </td>
                   <td className="px-3 py-1.5 text-[#444]">{error.column ?? "—"}</td>
                   <td className="px-3 py-1.5">{error.message}</td>
@@ -82,8 +90,10 @@ export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelPro
       )}
       {hiddenErrors > 0 && (
         <span className="text-[13px] text-[#8a8a8a]">
-          Se muestran los primeros {formatNumber(upload.errors.length)} de{" "}
-          {formatNumber(upload.error_count)} errores.
+          {t("hiddenErrors", {
+            shown: formatNumber(upload.errors.length),
+            total: formatNumber(upload.error_count)
+          })}
         </span>
       )}
     </div>

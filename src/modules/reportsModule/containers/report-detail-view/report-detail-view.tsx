@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import ReportDetailHeader from "../../components/report-detail-header/report-detail-header";
 import ReportViewer from "../../components/report-viewer/report-viewer";
@@ -18,6 +19,7 @@ interface ReportDetailViewProps {
  * filtros y orden del store); con un link directo, todos del más reciente.
  */
 export default function ReportDetailView({ reportId }: ReportDetailViewProps) {
+  const t = useTranslations("reports.detail");
   const router = useRouter();
   const { report, isLoading, error } = useReportDetail(reportId);
   const { visibleReports } = useVisibleReports();
@@ -35,7 +37,7 @@ export default function ReportDetailView({ reportId }: ReportDetailViewProps) {
         onNext={() => index >= 0 && index < visibleReports.length - 1 && goTo(index + 1)}
       />
       <ReportViewer
-        title={report?.name ?? "Informe"}
+        title={report?.name ?? t("fallbackTitle")}
         html={report?.html}
         isLoading={isLoading}
         error={error}

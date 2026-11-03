@@ -44,8 +44,10 @@ import { useMessageApi } from "@/context/MessageContext";
 import { sendMailLink } from "@/services/externalAuth/externalAuth";
 import axios from "axios";
 import { useLoginCetaphil } from "@/hooks/useLoginCetaphil";
+import { useTranslations } from "use-intl";
 
 export default function CetaphilLanding() {
+  const t = useTranslations("publicPortals.cetaphil.landing");
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const { isLoading: isLoadingLogin, registerMode } = useLoginCetaphil(token);
@@ -97,10 +99,7 @@ export default function CetaphilLanding() {
     try {
       setIsLoading(true);
       await sendMailLink(loginEmail);
-      showMessage(
-        "success",
-        "Enlace de correo enviado exitosamente. Revisa tu bandeja de entrada."
-      );
+      showMessage("success", t("mailLinkSent"));
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message;
@@ -109,10 +108,7 @@ export default function CetaphilLanding() {
           const errorMessages = data.map((item: any) => item.msg).join(", ");
           showMessage("error", errorMessages);
         } else {
-          showMessage(
-            "error",
-            (typeof message === "string" && message) || "Error al enviar el enlace de correo"
-          );
+          showMessage("error", (typeof message === "string" && message) || t("mailLinkError"));
         }
       }
     }
@@ -125,7 +121,7 @@ export default function CetaphilLanding() {
       e.preventDefault();
       handleSendMailLinkWithMail(loginEmail);
     },
-    [loginEmail]
+    [loginEmail, t]
   );
 
   const onSubmitRegister = useCallback(
@@ -135,7 +131,7 @@ export default function CetaphilLanding() {
         const documentTypeId = getDocumentTypeId(data.documentType);
 
         if (!documentTypeId) {
-          showMessage("error", "Tipo de documento inválido");
+          showMessage("error", t("invalidDocumentType"));
           return;
         }
 
@@ -161,30 +157,30 @@ export default function CetaphilLanding() {
         setShowLogin(true);
       } catch (error: any) {
         console.error("Error:", error);
-        showMessage("error", error.message || "Error al aceptar la invitación");
+        showMessage("error", error.message || t("acceptInvitationError"));
       } finally {
         setIsSubmitting(false);
       }
     },
-    [token, showMessage, decodedToken]
+    [token, showMessage, decodedToken, t]
   );
 
   const onSubmitRegisterAutoinvite = useCallback(
     async (data: RegistrationFormData) => {
       try {
         if (data.referralEmail === data.email) {
-          showMessage("error", "El email de referencia no puede ser igual al email de registro");
+          showMessage("error", t("referralSameAsEmail"));
           return;
         }
         if (!data.referralEmail) {
-          showMessage("error", "El email de referencia es obligatorio");
+          showMessage("error", t("referralRequired"));
           return;
         }
         setIsSubmitting(true);
         const documentTypeId = getDocumentTypeId(data.documentType);
 
         if (!documentTypeId) {
-          showMessage("error", "Tipo de documento inválido");
+          showMessage("error", t("invalidDocumentType"));
           return;
         }
 
@@ -209,12 +205,12 @@ export default function CetaphilLanding() {
         setShowLogin(true);
       } catch (error: any) {
         console.error("Error:", error);
-        showMessage("error", error.message || "Error al aceptar la invitación");
+        showMessage("error", error.message || t("acceptInvitationError"));
       } finally {
         setIsSubmitting(false);
       }
     },
-    [token, showMessage, decodedToken]
+    [token, showMessage, decodedToken, t]
   );
 
   return (
@@ -251,16 +247,16 @@ export default function CetaphilLanding() {
                   className="text-foreground hover:text-primary"
                   disabled={isLoadingLogin}
                 >
-                  Iniciar Sesión
+                  {t("signIn")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md bg-card">
                 <DialogHeader className="space-y-2">
                   <DialogTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-                    Iniciar Sesión
+                    {t("signIn")}
                   </DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
-                    Ingresa tu email para recibir un código de acceso
+                    {t("signInDescription")}
                   </DialogDescription>
                 </DialogHeader>
 
@@ -272,7 +268,7 @@ export default function CetaphilLanding() {
                     <Input
                       id="login-email"
                       type="email"
-                      placeholder="tu@email.com"
+                      placeholder={t("emailPlaceholder")}
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
@@ -285,7 +281,7 @@ export default function CetaphilLanding() {
                     className="w-full bg-[#CBE71E] hover:bg-[#CBE71E]/90 text-[#141414] font-medium"
                     disabled={isLoading}
                   >
-                    Enviar Código
+                    {t("sendCode")}
                   </Button>
                 </form>
               </DialogContent>
@@ -294,12 +290,10 @@ export default function CetaphilLanding() {
               <DialogContent className="sm:max-w-md bg-card">
                 <DialogHeader className="space-y-2">
                   <DialogTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-                    Revisa tu correo
+                    {t("checkEmailTitle")}
                   </DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
-                    {registerMode === "autoinvite"
-                      ? "Muchas gracias por enviar tu solicitud. Pronto nos pondremos en contacto contigo."
-                      : `Hemos enviado a tu correo un link para acceder al marketplace`}
+                    {registerMode === "autoinvite" ? t("requestReceived") : t("accessLinkSent")}
                   </DialogDescription>
                 </DialogHeader>
 
@@ -317,7 +311,7 @@ export default function CetaphilLanding() {
                       <Input
                         id="login-email"
                         type="email"
-                        placeholder="tu@email.com"
+                        placeholder={t("emailPlaceholder")}
                         value={loginEmail}
                         required
                         disabled={true}
@@ -333,7 +327,7 @@ export default function CetaphilLanding() {
               className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium"
               disabled={isLoadingLogin}
             >
-              Solicitar Acceso
+              {t("requestAccess")}
             </Button>
             <RegistrationDialog
               open={showRegister}
@@ -341,9 +335,9 @@ export default function CetaphilLanding() {
               onSubmit={
                 registerMode === "autoinvite" ? onSubmitRegisterAutoinvite : onSubmitRegister
               }
-              title="Solicitud de Registro"
-              description="Complete el formulario para acceder al marketplace de distribuidores"
-              submitButtonText="Crear mi cuenta"
+              title={t("registration.title")}
+              description={t("registration.description")}
+              submitButtonText={t("registration.submit")}
               showReferralEmail={!decodedToken?.claims?.userInvitingEmail ? true : false}
               showEmail={!decodedToken?.claims?.guestEmail ? true : false}
               defaultValues={{
@@ -372,7 +366,7 @@ export default function CetaphilLanding() {
             >
               <Image
                 src={banner}
-                alt={`Cetaphil Banner ${index + 1}`}
+                alt={t("bannerAlt", { number: index + 1 })}
                 fill
                 className="object-cover object-center"
                 priority={index === 0}
@@ -389,7 +383,7 @@ export default function CetaphilLanding() {
                 className={`w-2 h-2 rounded-full transition-all ${
                   index === currentBanner ? "bg-white w-8" : "bg-white/50"
                 }`}
-                aria-label={`Go to banner ${index + 1}`}
+                aria-label={t("goToBanner", { number: index + 1 })}
               />
             ))}
           </div>
@@ -400,9 +394,7 @@ export default function CetaphilLanding() {
       <section className="py-8 bg-background flex justify-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-center">
           <ShieldCheck className="w-4 h-4 text-blue-600" />
-          <span className="text-sm font-medium text-blue-600">
-            Marketplace Exclusivo para trabajadores de Galderma
-          </span>
+          <span className="text-sm font-medium text-blue-600">{t("exclusiveBadge")}</span>
         </div>
       </section>
 
@@ -411,10 +403,12 @@ export default function CetaphilLanding() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Productos <span className="text-primary">Cetaphil</span>
+              {t.rich("productsTitle", {
+                brand: (chunks) => <span className="text-primary">{chunks}</span>
+              })}
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Línea completa de cuidado dermatológico para piel sensible
+              {t("productsSubtitle")}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -422,7 +416,7 @@ export default function CetaphilLanding() {
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
                 <Image
                   src={cetaphilCleanser}
-                  alt="Limpiador Cetaphil"
+                  alt={t("products.cleanserAlt")}
                   width={300}
                   height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
@@ -431,8 +425,8 @@ export default function CetaphilLanding() {
                 />
               </div>
               <CardHeader>
-                <CardTitle className="text-lg">Limpiadores</CardTitle>
-                <CardDescription>Limpieza suave para piel sensible</CardDescription>
+                <CardTitle className="text-lg">{t("products.cleansers")}</CardTitle>
+                <CardDescription>{t("products.cleansersDescription")}</CardDescription>
               </CardHeader>
             </Card>
 
@@ -440,7 +434,7 @@ export default function CetaphilLanding() {
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
                 <Image
                   src={cetaphilMoisturizer}
-                  alt="Humectante Cetaphil"
+                  alt={t("products.moisturizerAlt")}
                   width={300}
                   height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
@@ -449,8 +443,8 @@ export default function CetaphilLanding() {
                 />
               </div>
               <CardHeader>
-                <CardTitle className="text-lg">Humectantes</CardTitle>
-                <CardDescription>Hidratación profunda y duradera</CardDescription>
+                <CardTitle className="text-lg">{t("products.moisturizers")}</CardTitle>
+                <CardDescription>{t("products.moisturizersDescription")}</CardDescription>
               </CardHeader>
             </Card>
 
@@ -458,7 +452,7 @@ export default function CetaphilLanding() {
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
                 <Image
                   src={cetaphilSunscreen}
-                  alt="Protector Solar Cetaphil"
+                  alt={t("products.sunscreenAlt")}
                   width={300}
                   height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
@@ -467,8 +461,8 @@ export default function CetaphilLanding() {
                 />
               </div>
               <CardHeader>
-                <CardTitle className="text-lg">Protección Solar</CardTitle>
-                <CardDescription>Protección UV para piel sensible</CardDescription>
+                <CardTitle className="text-lg">{t("products.sunscreen")}</CardTitle>
+                <CardDescription>{t("products.sunscreenDescription")}</CardDescription>
               </CardHeader>
             </Card>
           </div>
@@ -484,9 +478,7 @@ export default function CetaphilLanding() {
               <span className="text-muted-foreground">×</span>
               <span className="font-semibold text-primary">Cetaphil</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 Marketplace Exclusivo para Distribuidores Autorizados
-            </p>
+            <p className="text-sm text-muted-foreground">{t("footer")}</p>
           </div>
         </div>
       </footer>

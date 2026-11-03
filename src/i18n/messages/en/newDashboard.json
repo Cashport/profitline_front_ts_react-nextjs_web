@@ -1,0 +1,129 @@
+{
+  "tabs": {
+    "collection": {
+      "title": "Payments Summary",
+      "subtitle": "Targets and daily progress"
+    },
+    "portfolio": {
+      "title": "Receivables Status",
+      "subtitle": "Analysis by aging and zone"
+    },
+    "management": {
+      "title": "Collections Management",
+      "subtitle": "Strategies and risk"
+    },
+    "map": {
+      "title": "Risk Map",
+      "subtitle": "Customer geolocation"
+    }
+  },
+  "sidebar": {
+    "collection": "Payments",
+    "portfolio": "Collections",
+    "management": "Management",
+    "map": "Map",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "card": {
+    "minimize": "Minimize",
+    "expand": "Expand view"
+  },
+  "settings": {
+    "title": "View settings",
+    "currency": "Currency",
+    "globalFilters": "Global filters",
+    "city": "City",
+    "allCities": "All cities",
+    "businessType": "Business type",
+    "allTypes": "All types",
+    "commercial": "Commercial",
+    "logistics": "Logistics",
+    "organization": "Organization",
+    "apply": "Apply changes",
+    "headerTitle": "Collections",
+    "filtersAndCurrency": "Filters and currency"
+  },
+  "risk": {
+    "high": "High",
+    "mediumHigh": "Medium-high",
+    "medium": "Medium",
+    "mediumLow": "Medium-low",
+    "low": "Low"
+  },
+  "ages": {
+    "current": "Current",
+    "d0_30": "0–30",
+    "d30_60": "30–60",
+    "d60_90": "60–90",
+    "gt90": "> 90"
+  },
+  "overview": {
+    "collectionTitle": "Collected",
+    "monthlyTarget": "Monthly target",
+    "collectedToDate": "Collected to date",
+    "collected": "Collected",
+    "target": "Target",
+    "forecast": "Forecast",
+    "forecastShort": "Fcst",
+    "attainment": "Current attainment:",
+    "closingForecast": "Month-end forecast:",
+    "dailyProgress": "Daily cash collected",
+    "toApply": "Payments to apply",
+    "pendingPayments": "{count, plural, one {# pending payment} other {# pending payments}}",
+    "unidentified": "Unidentified payments",
+    "noReference": "{count, plural, one {# payment without reference} other {# payments without reference}}",
+    "avgDaysToApply": "Avg. days to apply",
+    "days": "{value} days",
+    "vsLastMonth": "{delta} vs last month"
+  },
+  "portfolio": {
+    "status": "Receivables status",
+    "total": "Total receivables",
+    "pastDue": "Past due",
+    "aging": "AR aging",
+    "breakdown": "Receivables breakdown",
+    "totalShort": "Total",
+    "byCity": "Receivables by city",
+    "columns": {
+      "city": "City",
+      "receivables": "Receivables",
+      "share": "% of receivables",
+      "d90_180": "90–180"
+    }
+  },
+  "management": {
+    "customerRisk": "Customer risk",
+    "customersTotal": "Total",
+    "customersActive": "Active",
+    "customersInactive": "Inactive",
+    "strategies": "Collection strategies",
+    "disputes": "Disputes",
+    "totalDisputes": "Total disputes",
+    "thisMonth": "This month",
+    "avgDays": "Avg. days",
+    "byCustomer": "Detail by customer",
+    "analyzeWith": "<wide>Analyze with</wide> CashportAI",
+    "columns": {
+      "customerType": "Customer type",
+      "receivables": "Receivables",
+      "visits": "Visits",
+      "pastDue": "Past due",
+      "pastDuePct": "% past due",
+      "risk": "Risk"
+    },
+    "total": "Total",
+    "totalReceivables": "Receivables: {amount}",
+    "totalPastDue": "Past due: {amount}"
+  },
+  "map": {
+    "loadError": "We couldn't load the map resources.",
+    "initError": "We couldn't start the map.",
+    "errorTitle": "Error",
+    "receivables": "Receivables",
+    "risk": "Risk",
+    "fullScreen": "Full screen",
+    "exitFullScreen": "Exit full screen",
+    "riskLevel": "Risk level"
+  }
+}

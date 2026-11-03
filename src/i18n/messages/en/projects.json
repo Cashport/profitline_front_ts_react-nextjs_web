@@ -1,0 +1,143 @@
+{
+  "title": "Projects",
+  "tabs": {
+    "detail": "Project",
+    "createProject": "Create project",
+    "businessRules": "Business rules",
+    "clients": "Customers",
+    "users": "Users",
+    "accounts": "Accounts",
+    "clientGroups": "Customer groups",
+    "approvals": "Approvals",
+    "communications": "Communications",
+    "requirements": "Requirements"
+  },
+  "create": {
+    "headerTitle": "Create project",
+    "success": "Project created.",
+    "error": "Something went wrong. Please try again later."
+  },
+  "detail": {
+    "updateSuccess": "Project updated.",
+    "activateSuccess": "Project activated.",
+    "deactivateSuccess": "Project deactivated.",
+    "error": "Something went wrong. Please try again later."
+  },
+  "accounts": {
+    "placeholder": "accounts"
+  },
+  "businessRules": {
+    "title": "Set up business rules",
+    "editRules": "Edit rules",
+    "viewRules": "View rules"
+  },
+  "clientGroup": {
+    "changeStatus": "Change status",
+    "editGroup": "Edit group",
+    "removeEntity": "group"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "opened": "Open ({count})",
+    "closed": "Closed ({count})",
+    "loadError": "We couldn't load the notifications",
+    "viewDetail": "View details"
+  },
+  "requirements": {
+    "requiresPayment": "Requires payment",
+    "documents": "Documents",
+    "generateAction": "Take action",
+    "viewDetail": "View details",
+    "clientType": {
+      "validity": "Validity period",
+      "template": "Template",
+      "templateLink": "Document",
+      "mandatory": "Required",
+      "approvals": "Approvals",
+      "inactivate": "Deactivate",
+      "addRequirement": "Add requirement",
+      "moreActions": "More actions"
+    },
+    "addRequirement": {
+      "title": "Requirement",
+      "documentsTitle": "Documents",
+      "formsTitle": "Forms",
+      "document": "Document",
+      "form": "Form"
+    },
+    "documentList": {
+      "document": "Document",
+      "form": "Form",
+      "validity": "Validity period",
+      "template": "Template",
+      "templateLink": "Document",
+      "questions": "Questions",
+      "newDocument": "New document",
+      "newForm": "New form",
+      "addDocuments": "Add documents",
+      "addForms": "Add forms",
+      "addSuccess": "Documents added",
+      "createError": "We couldn't create the document with ID {id}"
+    },
+    "createDocument": {
+      "newTitle": "New document",
+      "editTitle": "Edit document",
+      "addDocuments": "Add documents",
+      "name": "Document name",
+      "namePlaceholder": "Enter name",
+      "validity": "Validity period",
+      "validityPlaceholder": "Select validity period",
+      "descriptionPlaceholder": "Enter description",
+      "mandatory": "Required"
+    },
+    "uploadButton": {
+      "uploadTemplate": "Upload template",
+      "changeFile": "Change file",
+      "removeFile": "Remove file"
+    }
+  },
+  "forms": {
+    "createTitle": "Create form",
+    "editTitle": "Edit form",
+    "modes": {
+      "create": "Create mode",
+      "edit": "Edit mode",
+      "preview": "Preview",
+      "answer": "Answer"
+    },
+    "goToComplete": "Go to fill out form",
+    "formName": "Form name",
+    "namePlaceholder": "Enter name",
+    "validity": "Validity period",
+    "validityYears": "{count, plural, one {# year} other {# years}}",
+    "validityPlaceholder": "Select validity period",
+    "descriptionPlaceholder": "Enter description",
+    "selectQuestionType": "Select question type",
+    "addQuestion": "Add new question",
+    "close": "Close",
+    "questionTypes": {
+      "multipleChoice": "Multiple choice",
+      "singleChoice": "Single choice",
+      "text": "Text",
+      "file": "Attachment",
+      "number": "Number",
+      "date": "Date"
+    },
+    "question": {
+      "placeholder": "Question",
+      "descriptionPlaceholder": "Question description",
+      "mandatory": "Required",
+      "selectDate": "Select date",
+      "enterNumber": "Enter a number",
+      "enterText": "Enter text",
+      "option": "Option {number}",
+      "addOption": "Add option",
+      "deleteQuestion": "Delete question",
+      "deleteOption": "Delete option"
+    },
+    "answer": {
+      "chooseOption": "Select at least one option"
+    },
+    "fieldRequired": "{field} is required *"
+  }
+}

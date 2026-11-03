@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "use-intl";
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
   FilterCategoryConfig,
@@ -34,18 +35,13 @@ type ResponsableKey = "asigned_user" | "coordinator" | "kam" | "kam_lider";
 // Mismas claves y etiquetas que los selects de responsables de ConfiguracionesTab.
 // La clave de la categoría es el campo del filtro, así el mapeo es directo.
 // Cada categoría solo ofrece los usuarios con su rol en el proyecto (rol_id).
-const RESPONSABLE_CATEGORIES: { key: ResponsableKey; label: string; rolId: number }[] = [
-  { key: "asigned_user", label: "Ejecutivo", rolId: 4 },
-  { key: "coordinator", label: "Coordinador", rolId: 3 },
-  { key: "kam", label: "KAM", rolId: 14 },
-  { key: "kam_lider", label: "KAM líder", rolId: 31 }
+// La etiqueta sale de marketAdmin.shared.responsibles.<key>.
+const RESPONSABLE_CATEGORIES: { key: ResponsableKey; rolId: number }[] = [
+  { key: "asigned_user", rolId: 4 },
+  { key: "coordinator", rolId: 3 },
+  { key: "kam", rolId: 14 },
+  { key: "kam_lider", rolId: 31 }
 ];
-
-const ESTADO_OPTIONS: FilterOptionItem[] = [
-  { id: "1", name: "Activo" },
-  { id: "0", name: "Inactivo" }
-];
-
 
 interface FilterClientsModalProps {
   value: IMarketAdminClientsFilter;
@@ -53,7 +49,15 @@ interface FilterClientsModalProps {
 }
 
 export default function FilterClientsModal({ value, onChange }: FilterClientsModalProps) {
+  const t = useTranslations("marketAdmin.clients.filters");
+  const tShared = useTranslations("marketAdmin.shared");
+  const tCommon = useTranslations("common");
   const { data: lines, isLoading: isLoadingLines } = useMarketAdminLines();
+
+  const estadoOptions: FilterOptionItem[] = [
+    { id: "1", name: tCommon("status.active") },
+    { id: "0", name: tCommon("status.inactive") }
+  ];
   const { users, isLoading: isLoadingUsers } = useProjectUsersByRole();
 
   // El id de la opción es el propio nombre: es el valor que espera el endpoint,
@@ -80,7 +84,12 @@ export default function FilterClientsModal({ value, onChange }: FilterClientsMod
     linea: value.linea ? [{ id: value.linea, name: value.linea }] : [],
     estado:
       value.status !== null
-        ? [{ id: String(value.status), name: value.status === 1 ? "Activo" : "Inactivo" }]
+        ? [
+            {
+              id: String(value.status),
+              name: value.status === 1 ? tCommon("status.active") : tCommon("status.inactive")
+            }
+          ]
         : [],
     asigned_user: toUserItems(value.asigned_user),
     coordinator: toUserItems(value.coordinator),
@@ -104,22 +113,22 @@ export default function FilterClientsModal({ value, onChange }: FilterClientsMod
   const categories: FilterCategoryConfig[] = [
     {
       key: "linea",
-      label: "Línea",
+      label: t("line"),
       selectMode: "single",
       options: lineaOptions,
       status: isLoadingLines ? "loading" : undefined
     },
     {
       key: "estado",
-      label: "Estado",
+      label: tCommon("fields.status"),
       selectMode: "single",
-      options: ESTADO_OPTIONS
+      options: estadoOptions
     },
     // Sin selectMode (multi): se pueden elegir varios usuarios por responsable
     ...RESPONSABLE_CATEGORIES.map(
-      ({ key, label, rolId }): FilterCategoryConfig => ({
+      ({ key, rolId }): FilterCategoryConfig => ({
         key,
-        label,
+        label: tShared(`responsibles.${key}`),
         options: usersWithEmail.filter((u) => u.rol_id === rolId).map(toUserOption),
         status: isLoadingUsers ? "loading" : undefined
       })

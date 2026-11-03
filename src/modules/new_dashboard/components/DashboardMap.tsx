@@ -2,11 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Maximize2, Minimize2 } from "lucide-react";
+import { useTranslations } from "use-intl";
+
+import { getTranslator } from "@/i18n/translator";
 
 import { formatCompactCurrency } from "./Formatters";
-import { CUSTOMERS_RISK, COLORS } from "../lib/constants";
+import { CUSTOMERS_RISK, COLORS, RISK_KEYS } from "../lib/constants";
 
 const DashboardMap: React.FC = () => {
+  const t = useTranslations("newDashboard.map");
+  const tRisk = useTranslations("newDashboard.risk");
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +71,7 @@ const DashboardMap: React.FC = () => {
       map.current.on("error", (e) => {
         console.error("MapLibre error:", e);
         if (e.error && e.error.message && !e.error.message.includes("404")) {
-          setError("Error loading map resources.");
+          setError(getTranslator("newDashboard")("map.loadError"));
         }
       });
 
@@ -166,17 +171,20 @@ const DashboardMap: React.FC = () => {
           if (e.features && e.features[0]) {
             const coordinates = (e.features[0].geometry as any).coordinates.slice();
             const { name, risk, formattedPortfolio } = e.features[0].properties as any;
+            const tMap = getTranslator("newDashboard");
+            const riskKey = RISK_KEYS[risk as keyof typeof RISK_KEYS];
+            const riskLabel = riskKey ? tMap(`risk.${riskKey}`) : risk;
 
             const description = `
                     <div class="p-3 min-w-[140px]">
                         <h3 class="font-bold text-[#141414] text-sm mb-2 border-b border-gray-100 pb-1">${name}</h3>
                         <div class="space-y-1.5">
                              <div class="text-[13px] flex justify-between items-center">
-                                <span class="text-gray-500 font-medium">Cartera</span>
+                                <span class="text-gray-500 font-medium">${tMap("map.receivables")}</span>
                                 <span class="font-bold text-[#141414]">${formattedPortfolio}</span>
                             </div>
                             <div class="text-[13px] flex justify-between items-center">
-                                <span class="text-gray-500 font-medium">Riesgo</span>
+                                <span class="text-gray-500 font-medium">${tMap("map.risk")}</span>
                                 <span class="font-bold px-1.5 py-0.5 rounded text-[13px] text-white" style="background-color: ${
                                   risk === "Alto"
                                     ? COLORS.riskHigh
@@ -187,7 +195,7 @@ const DashboardMap: React.FC = () => {
                                         : risk === "Medio bajo"
                                           ? COLORS.riskMediumLow
                                           : COLORS.riskLow
-                                }">${risk}</span>
+                                }">${riskLabel}</span>
                             </div>
                         </div>
                     </div>
@@ -205,7 +213,7 @@ const DashboardMap: React.FC = () => {
       });
     } catch (err) {
       console.error("Failed to initialize map:", err);
-      setError("Error initializing map.");
+      setError(getTranslator("newDashboard")("map.initError"));
     }
 
     return () => {
@@ -227,7 +235,7 @@ const DashboardMap: React.FC = () => {
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-50">
           <div className="text-center p-6 max-w-md">
-            <p className="text-red-500 font-bold mb-2">Error</p>
+            <p className="text-red-500 font-bold mb-2">{t("errorTitle")}</p>
             <p className="text-gray-600 text-sm">{error}</p>
           </div>
         </div>
@@ -239,7 +247,7 @@ const DashboardMap: React.FC = () => {
       <button
         onClick={() => setIsFullScreen(!isFullScreen)}
         className="absolute top-4 right-4 z-20 bg-white p-2 rounded-lg shadow-md text-gray-600 hover:text-black hover:bg-gray-50 transition-colors"
-        title={isFullScreen ? "Salir de pantalla completa" : "Pantalla completa"}
+        title={isFullScreen ? t("exitFullScreen") : t("fullScreen")}
       >
         {isFullScreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
       </button>
@@ -250,16 +258,14 @@ const DashboardMap: React.FC = () => {
           isFullScreen ? "bottom-8 left-8" : "bottom-4 md:bottom-6 md:left-6"
         }`}
       >
-        <h4 className="text-[13px] font-bold text-[#141414] mb-2 md:mb-3">
-          Nivel de riesgo
-        </h4>
+        <h4 className="text-[13px] font-bold text-[#141414] mb-2 md:mb-3">{t("riskLevel")}</h4>
         <div className="space-y-2">
           {[
-            { label: "Alto", color: COLORS.riskHigh },
-            { label: "Medio alto", color: COLORS.riskMediumHigh },
-            { label: "Medio", color: COLORS.riskMedium },
-            { label: "Medio bajo", color: COLORS.riskMediumLow },
-            { label: "Bajo", color: COLORS.riskLow }
+            { label: tRisk("high"), color: COLORS.riskHigh },
+            { label: tRisk("mediumHigh"), color: COLORS.riskMediumHigh },
+            { label: tRisk("medium"), color: COLORS.riskMedium },
+            { label: tRisk("mediumLow"), color: COLORS.riskMediumLow },
+            { label: tRisk("low"), color: COLORS.riskLow }
           ].map((item, idx) => (
             <div key={idx} className="flex items-center justify-between">
               <span className="text-[13px] font-medium text-gray-600">{item.label}</span>

@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { useState, useEffect } from "react";
 import { getProjectDetails } from "@/services/projects/projects"; // Import your API call
 import { IProject } from "@/types/projects/IProject";
@@ -28,11 +29,11 @@ export const useProject = ({ id }: Props) => {
           setProjectDetails(response);
         } else {
           console.warn("No data received for project:", id);
-          setError("No project found.");
+          setError(getTranslator("shared")("project.notFound"));
         }
       } catch (error) {
         console.error("Error fetching project:", error);
-        setError("Failed to load project.");
+        setError(getTranslator("shared")("project.loadError"));
       } finally {
         setLoading(false);
       }

@@ -4,6 +4,7 @@ import axios from "axios";
 import { Badge, Spin } from "antd";
 import { BellSimpleRinging } from "phosphor-react";
 import { Users, UserX, Bell, FileText, FileX, Tag, Bot } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
@@ -24,6 +25,8 @@ import Header from "@/components/organisms/header";
 import { ISummaryCountries } from "@/types/dataQuality/IDataQuality";
 
 export default function DataQualityView() {
+  const t = useTranslations("dataQuality.home");
+  const tCommon = useTranslations("common");
   const selectedProject = useAppStore((projects) => projects.selectedProject);
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
@@ -58,7 +61,7 @@ export default function DataQualityView() {
           return;
         }
         console.error("Error fetching countries:", err);
-        setError("No se pudieron cargar los países. Por favor, intenta de nuevo.");
+        setError(t("loadError"));
       } finally {
         setIsLoading(false);
       }
@@ -72,6 +75,7 @@ export default function DataQualityView() {
       setNoCountryAccess(false);
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ID, canReadData]);
 
   // Rol sin acceso a la vista general (p.ej. Admin Global Aux): no invocar countries-summary
@@ -85,16 +89,14 @@ export default function DataQualityView() {
             canManageAux && (
               <Link href="/data-quality/auxiliary-catalogs">
                 <Button variant="outline" className="text-[#141414]">
-                  Auxiliares
+                  {t("auxiliaries")}
                 </Button>
               </Link>
             )
           }
         />
         <div className="cp-card p-12 text-center">
-          <p className="text-gray-500 text-lg">
-            No tienes acceso a la vista general de Data Quality.
-          </p>
+          <p className="text-gray-500 text-lg">{t("noOverviewAccess")}</p>
         </div>
       </div>
     );
@@ -121,7 +123,7 @@ export default function DataQualityView() {
             onClick={() => window.location.reload()}
             className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119]"
           >
-            Reintentar
+            {tCommon("actions.retry")}
           </Button>
         </div>
       </div>
@@ -131,9 +133,9 @@ export default function DataQualityView() {
   if (noCountryAccess) {
     return (
       <div className="cp-page">
-        <Header title="Data Quality" titleExtra="Países y Distribuidores" />
+        <Header title="Data Quality" titleExtra={t("subtitle")} />
         <div className="cp-card p-12 text-center">
-          <p className="text-gray-500 text-lg">No tienes países asignados</p>
+          <p className="text-gray-500 text-lg">{t("noCountriesAssigned")}</p>
         </div>
       </div>
     );
@@ -142,11 +144,9 @@ export default function DataQualityView() {
   if (countries.length === 0) {
     return (
       <div className="cp-page">
-        <Header title="Data Quality" titleExtra="Países y Distribuidores" />
+        <Header title="Data Quality" titleExtra={t("subtitle")} />
         <div className="cp-card p-12 text-center">
-          <p className="text-gray-500 text-lg">
-            No hay información disponible para los países asignados.
-          </p>
+          <p className="text-gray-500 text-lg">{t("noDataForCountries")}</p>
         </div>
       </div>
     );
@@ -158,9 +158,9 @@ export default function DataQualityView() {
         title="Data Quality"
         titleExtra={
           <span className="flex items-center gap-3">
-            Países y Distribuidores
+            {t("subtitle")}
             <BadgeUI variant="secondary" className="text-sm">
-              {totalCountries} países activos
+              {t("activeCountries", { count: totalCountries })}
             </BadgeUI>
           </span>
         }
@@ -169,7 +169,7 @@ export default function DataQualityView() {
             {(hasDataQualityManagementPermission(selectedProject) || canManageAux) && (
               <Link href="/data-quality/auxiliary-catalogs">
                 <Button variant="outline" className="text-[#141414]">
-                  Auxiliares
+                  {t("auxiliaries")}
                 </Button>
               </Link>
             )}
@@ -178,7 +178,7 @@ export default function DataQualityView() {
                 <Badge count={totalAlerts} color="#E53935">
                   <Button variant="outline">
                     <BellSimpleRinging size={18} />
-                    Alertas
+                    {t("alerts")}
                   </Button>
                 </Badge>
               </Link>
@@ -230,21 +230,21 @@ export default function DataQualityView() {
                 </div>
                 <div className="flex items-center gap-1">
                   <span
-                    title="Archivos pendientes"
+                    title={t("pendingFiles")}
                     className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[13px] font-medium text-[#6B7280]"
                   >
                     <FileText className="w-3 h-3" />
                     {missing}
                   </span>
                   <span
-                    title="Alertas de catálogo"
+                    title={t("catalogAlerts")}
                     className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[13px] font-medium text-[#6B7280]"
                   >
                     <Tag className="w-3 h-3" />
                     {catalog}
                   </span>
                   <span
-                    title="Otras novedades"
+                    title={t("otherIssues")}
                     className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[13px] font-medium text-[#6B7280]"
                   >
                     <Bell className="w-3 h-3" />
@@ -267,7 +267,7 @@ export default function DataQualityView() {
                         arrowClassName={DARK_TOOLTIP_ARROW}
                       >
                         <p className="text-[13px] font-semibold opacity-70">
-                          Automatizaciones fallidas
+                          {t("failedAutomations")}
                         </p>
                         <ul className="space-y-1">
                           {visibleAutomationFailures.map((failure, i) => (
@@ -280,7 +280,7 @@ export default function DataQualityView() {
                         </ul>
                         {remainingAutomationFailures > 0 && (
                           <p className="text-[13px] opacity-70 pt-0.5">
-                            +{remainingAutomationFailures} más
+                            {t("more", { count: remainingAutomationFailures })}
                           </p>
                         )}
                       </TooltipContent>
@@ -292,7 +292,7 @@ export default function DataQualityView() {
               {/* Ingesta del mes */}
               <div className="rounded-xl bg-[#F5F5F4] p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-[#6B7280]">Ingesta del mes</span>
+                  <span className="text-[13px] text-[#6B7280]">{t("monthlyIngestion")}</span>
                   <span className="text-lg font-bold text-[#4D7C0F]">
                     {country.monthly_ingestion_percentage}%
                   </span>
@@ -313,7 +313,7 @@ export default function DataQualityView() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <Users className="w-3 h-3" />
-                          Clientes
+                          {t("customers")}
                         </div>
                         <span className="text-lg font-bold text-[#141414]">
                           {country.total_clients}
@@ -322,7 +322,7 @@ export default function DataQualityView() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <UserX className="w-3 h-3" />
-                          Pendientes
+                          {t("pending")}
                         </div>
                         <span
                           className={`text-lg font-bold ${pendingClients > 0 ? "text-[#DC2626]" : "text-[#141414]"}`}
@@ -339,15 +339,13 @@ export default function DataQualityView() {
                       arrowClassName={DARK_TOOLTIP_ARROW}
                     >
                       <p className="text-[13px] font-semibold opacity-70">
-                        Clientes con archivos pendientes
+                        {t("customersWithPendingFiles")}
                       </p>
                       <ul className="space-y-0.5">
                         {visiblePendingClients.map((c, i) => (
                           <li key={i} className="text-[13px]">
                             {c.client}{" "}
-                            <span className="opacity-70">
-                              ({c.count} archivo{c.count > 1 ? "s" : ""})
-                            </span>
+                            <span className="opacity-70">{t("fileCount", { count: c.count })}</span>
                           </li>
                         ))}
                       </ul>
@@ -361,7 +359,7 @@ export default function DataQualityView() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <FileText className="w-3 h-3" />
-                          Archivos
+                          {t("files")}
                         </div>
                         <span className="text-lg font-bold text-[#141414]">
                           {country.total_files_expected}
@@ -370,7 +368,7 @@ export default function DataQualityView() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <FileX className="w-3 h-3" />
-                          Pendientes
+                          {t("pending")}
                         </div>
                         <span
                           className={`text-lg font-bold ${missing > 0 ? "text-[#DC2626]" : "text-[#141414]"}`}
@@ -387,7 +385,7 @@ export default function DataQualityView() {
                       arrowClassName={DARK_TOOLTIP_ARROW}
                     >
                       <p className="text-[13px] font-semibold opacity-70">
-                        Archivos pendientes por cliente
+                        {t("pendingFilesByCustomer")}
                       </p>
                       <ul className="space-y-0.5">
                         {visiblePendingClients.map((entry, i) => (
@@ -399,7 +397,7 @@ export default function DataQualityView() {
                       </ul>
                       {remainingFileCount > 0 && (
                         <p className="text-[13px] opacity-70 pt-0.5">
-                          +{remainingFileCount} archivos más
+                          {t("moreFiles", { count: remainingFileCount })}
                         </p>
                       )}
                     </TooltipContent>
@@ -409,7 +407,7 @@ export default function DataQualityView() {
 
               <Link href={`/data-quality/country/${country.id_country}`} className="block">
                 <Button className="w-full text-[13px] font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none rounded-full h-8">
-                  Ver Clientes
+                  {t("viewCustomers")}
                 </Button>
               </Link>
             </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import {
   ICreateMarketAdminClientAddressBody,
@@ -24,6 +25,8 @@ const BLANK_DIR: ICreateMarketAdminClientAddressBody = {
 };
 
 export default function ModalDireccion({ mode, initial, onClose, onSave }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.addresses");
+  const tCommon = useTranslations("common");
   const [form, setForm] = useState<ICreateMarketAdminClientAddressBody>(
     initial
       ? {
@@ -65,7 +68,7 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
       width={448}
       title={
         <span className="text-base font-bold text-[#141414]">
-          {mode === "new" ? "Nueva dirección" : "Editar dirección"}
+          {mode === "new" ? t("new") : t("edit")}
         </span>
       }
       footer={
@@ -74,40 +77,50 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
             onClick={onClose}
             className="text-sm text-[#666666] px-4 py-2 rounded-lg hover:bg-[#F5F5F5] transition-colors"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </button>
           <button
             onClick={save}
             disabled={!isValid || isSaving}
             className="text-sm font-semibold bg-[#141414] text-white px-5 py-2 rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {isSaving ? "Guardando..." : mode === "new" ? "Guardar dirección" : "Guardar cambios"}
+            {isSaving
+              ? tCommon("status.saving")
+              : mode === "new"
+                ? t("save")
+                : tCommon("actions.saveChanges")}
           </button>
         </div>
       }
     >
       <div className="space-y-4">
         <div>
-          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Dirección</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
+            {t("columns.address")}
+          </label>
           <input
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-            placeholder="Ej. Calle 100 # 15-20"
+            placeholder={t("form.addressPlaceholder")}
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             autoFocus
           />
         </div>
         <div>
-          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Ciudad</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
+            {t("columns.city")}
+          </label>
           <input
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-            placeholder="Ej. Bogotá"
+            placeholder={t("form.cityPlaceholder")}
             value={form.city}
             onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
           />
         </div>
         <div>
-          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Bodega</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
+            {t("columns.warehouse")}
+          </label>
           <WarehouseSelect
             value={form.warehouse_id ?? undefined}
             onChange={(warehouseId) => setForm((f) => ({ ...f, warehouse_id: warehouseId }))}
@@ -116,22 +129,22 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
         </div>
         <div>
           <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-            Código de dirección
+            {t("form.addressCode")}
           </label>
           <input
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-            placeholder='Ej. 01 — usa "00" para la dirección principal'
+            placeholder={t("form.addressCodePlaceholder")}
             value={form.code_address ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, code_address: e.target.value }))}
           />
         </div>
         <div>
           <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-            Centro de costo
+            {t("form.costCenter")}
           </label>
           <input
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-            placeholder="Opcional"
+            placeholder={t("form.optional")}
             value={form.profit_center ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, profit_center: e.target.value }))}
           />

@@ -2,6 +2,7 @@ import axios from "axios";
 import config from "@/config";
 import { auth } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { getActiveLocale, getTranslator } from "@/i18n/translator";
 
 export async function getIdToken(forceRefresh?: boolean) {
   const user = auth.currentUser;
@@ -28,7 +29,6 @@ const instance = axios.create({
   }
 });
 
-
 interface IError {
   error: boolean;
   message: string;
@@ -46,7 +46,7 @@ export const fetcher = async (url: string, overrideTimeout?: number) => {
     })
     .catch((error) => {
       if (error.code === "ECONNABORTED") {
-        throw new Error("La solicitud ha sido cancelada debido a un timeout");
+        throw new Error(getTranslator("common")("feedback.timeoutError"));
       } else {
         if (error.response?.data) {
           const errorData = error.response.data as IError;
@@ -71,10 +71,12 @@ export const setProjectInApi = (projectId: number) => {
 };
 API.interceptors.request.use((request) => {
   request.headers.set("projectId", `${idProject}`);
+  request.headers.set("Accept-Language", getActiveLocale());
   return request;
 });
 instance.interceptors.request.use((request) => {
   request.headers.set("projectId", `${idProject}`);
+  request.headers.set("Accept-Language", getActiveLocale());
   return request;
 });
 
@@ -85,10 +87,7 @@ instance.interceptors.request.use(async (request) => {
   return request;
 });
 
-const UNAUTHENTICATED_ENDPOINTS = [
-  "/user/accept-invitation",
-  "/auth/reset-password/confirm"
-];
+const UNAUTHENTICATED_ENDPOINTS = ["/user/accept-invitation", "/auth/reset-password/confirm"];
 
 API.interceptors.request.use(async (request) => {
   request.headers.set("Accept", "application/json, text/plain, */*");
@@ -109,7 +108,11 @@ API.interceptors.response.use(
     if (response?.data?.message) {
       error.message = response.data.message;
     }
-    throw new ApiError(response?.status, error.message, response?.data?.data || response?.data?.error);
+    throw new ApiError(
+      response?.status,
+      error.message,
+      response?.data?.data || response?.data?.error
+    );
   }
 );
 

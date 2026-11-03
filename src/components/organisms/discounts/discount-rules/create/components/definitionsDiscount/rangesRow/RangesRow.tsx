@@ -3,6 +3,7 @@ import { Button, Col, Flex, Row } from "antd";
 import { Trash } from "phosphor-react";
 import { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { DiscountSchema } from "../../../resolvers/generalResolver";
+import { useTranslations } from "use-intl";
 
 type RangesRowProps = {
   id: number;
@@ -13,6 +14,7 @@ type RangesRowProps = {
 };
 
 export default function RangesRow({ id, register, control, errors, remove }: RangesRowProps) {
+  const t = useTranslations("discounts.byOrder");
   const { name: nameDiscount, ...rest } = register(
     ("ranges." + id + ".discount") as "ranges.0.discount"
   );
@@ -25,9 +27,9 @@ export default function RangesRow({ id, register, control, errors, remove }: Ran
   return (
     <>
       <Flex justify="space-between" align="center">
-        Rango {id}
+        {t("range", { number: id })}
         {remove && (
-          <Button type="text" onClick={remove}>
+          <Button type="text" onClick={remove} aria-label={t("removeRange")}>
             <Trash size={20} />
           </Button>
         )}

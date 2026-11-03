@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Select, SelectProps, Tag, Tooltip, Typography } from "antd";
 import { Flex } from "antd";
+import { useTranslations } from "use-intl";
 import styles from "./MultiSelect.module.scss"; // Archivo de estilos opcional
 import { EmailOption } from "@/types/sendEmail";
 
@@ -20,9 +21,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   value,
   onChange,
   options,
-  label = "Seleccionar",
+  label,
   selectProps = {}
 }) => {
+  const t = useTranslations("modals.sendEmail");
+  const tCommon = useTranslations("common");
   const [customOptions, setCustomOptions] = useState<EmailOption[]>(options);
 
   const tagRender: TagRender = (props) => {
@@ -64,7 +67,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           id: Date.now(), // Generar un ID único
           email,
           name: email, // Se usa el email como nombre predeterminado
-          companyPosition: "No especificado"
+          companyPosition: t("notSpecified")
         };
         setCustomOptions((prev) => [...prev, newOption]); // Agregar nueva opción a la lista
         return newOption;
@@ -75,7 +78,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
   return (
     <Flex gap={16} className={styles.multiSelect}>
-      <span className={styles.label}>{label}</span>
+      <span className={styles.label}>{label ?? tCommon("actions.select")}</span>
       <Select
         mode="tags"
         variant="borderless"
@@ -100,7 +103,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                 {selectedOption ? selectedOption.name : option.data.value}
               </Text>
               <Text style={{ fontSize: 13, color: "#14141452" }}>
-                {selectedOption ? selectedOption.companyPosition : "Correo personalizado"}
+                {selectedOption ? selectedOption.companyPosition : t("customEmail")}
               </Text>
             </Flex>
           );

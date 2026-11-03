@@ -7,6 +7,7 @@ import { useSocket } from "@/context/ChatContext";
 import { cn } from "@/utils/utils";
 
 import { useSWRConfig } from "swr";
+import { useTranslations } from "use-intl";
 import config from "@/config";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 
@@ -19,6 +20,7 @@ import { auth } from "../../../../../firebase";
 import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 
 export default function ChatInbox() {
+  const t = useTranslations("chat.view");
   const { mutate } = useSWRConfig();
 
   const revalidateTickets = useCallback(() => {
@@ -80,7 +82,7 @@ export default function ChatInbox() {
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Selecciona un chat para ver la conversacion
+              {t("selectChat")}
             </div>
           )}
         </section>

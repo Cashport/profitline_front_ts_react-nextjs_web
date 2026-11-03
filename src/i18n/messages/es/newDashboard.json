@@ -1,0 +1,117 @@
+{
+  "tabs": {
+    "collection": { "title": "Resumen de Recaudo", "subtitle": "Metas y avance diario" },
+    "portfolio": { "title": "Estado de Cartera", "subtitle": "Análisis por vencimiento y zona" },
+    "management": { "title": "Gestión de Cobranza", "subtitle": "Estrategias y riesgo" },
+    "map": { "title": "Mapa de Riesgo", "subtitle": "Geolocalización de clientes" }
+  },
+  "sidebar": {
+    "collection": "Recaudo",
+    "portfolio": "Cartera",
+    "management": "Gestión",
+    "map": "Mapa",
+    "reports": "Reportes",
+    "settings": "Config"
+  },
+  "card": {
+    "minimize": "Minimizar",
+    "expand": "Ampliar vista"
+  },
+  "settings": {
+    "title": "Configuración de vista",
+    "currency": "Moneda",
+    "globalFilters": "Filtros globales",
+    "city": "Ciudad",
+    "allCities": "Todas las ciudades",
+    "businessType": "Tipo de negocio",
+    "allTypes": "Todos los tipos",
+    "commercial": "Comercial",
+    "logistics": "Logística",
+    "organization": "Organización",
+    "apply": "Aplicar cambios",
+    "headerTitle": "Cartera",
+    "filtersAndCurrency": "Filtros y moneda"
+  },
+  "risk": {
+    "high": "Alto",
+    "mediumHigh": "Medio alto",
+    "medium": "Medio",
+    "mediumLow": "Medio bajo",
+    "low": "Bajo"
+  },
+  "ages": {
+    "current": "Corriente",
+    "d0_30": "0 a 30",
+    "d30_60": "30 a 60",
+    "d60_90": "60 a 90",
+    "gt90": "> 90"
+  },
+  "overview": {
+    "collectionTitle": "Recaudo",
+    "monthlyTarget": "Meta del mes",
+    "collectedToDate": "Recaudo actual",
+    "collected": "Recaudo",
+    "target": "Meta",
+    "forecast": "Forecast",
+    "forecastShort": "Fcst",
+    "attainment": "Cumplimiento actual:",
+    "closingForecast": "Forecast cierre:",
+    "dailyProgress": "Avance diario de recaudo",
+    "toApply": "Pagos por aplicar",
+    "pendingPayments": "{count, plural, one {# pago pendiente} other {# pagos pendientes}}",
+    "unidentified": "Pagos no identificados",
+    "noReference": "{count, plural, one {# pago sin referencia} other {# pagos sin referencia}}",
+    "avgDaysToApply": "Días prom. aplicación",
+    "days": "{value} días",
+    "vsLastMonth": "{delta} vs mes anterior"
+  },
+  "portfolio": {
+    "status": "Estado de cartera",
+    "total": "Total cartera",
+    "pastDue": "Vencido",
+    "aging": "Edades de cartera",
+    "breakdown": "División de cartera",
+    "totalShort": "Total",
+    "byCity": "Cartera por ciudad",
+    "columns": {
+      "city": "Ciudad",
+      "receivables": "Cartera",
+      "share": "% Cartera",
+      "d90_180": "90 a 180"
+    }
+  },
+  "management": {
+    "customerRisk": "Riesgo por clientes",
+    "customersTotal": "Total",
+    "customersActive": "Activos",
+    "customersInactive": "Inactivos",
+    "strategies": "Estrategias de cobro",
+    "disputes": "Novedades",
+    "totalDisputes": "Total novedades",
+    "thisMonth": "Mes actual",
+    "avgDays": "Días prom.",
+    "byCustomer": "Detallado por cliente",
+    "analyzeWith": "<wide>Análisis con</wide> CashportAI",
+    "columns": {
+      "customerType": "Tipo de cliente",
+      "receivables": "Cartera",
+      "visits": "Visitas",
+      "pastDue": "Vencido",
+      "pastDuePct": "% Venc",
+      "risk": "Riesgo"
+    },
+    "total": "Total",
+    "totalReceivables": "Cartera: {amount}",
+    "totalPastDue": "Vencido: {amount}"
+  },
+  "map": {
+    "loadError": "No se pudieron cargar los recursos del mapa.",
+    "initError": "No se pudo iniciar el mapa.",
+    "errorTitle": "Error",
+    "receivables": "Cartera",
+    "risk": "Riesgo",
+    "fullScreen": "Pantalla completa",
+    "exitFullScreen": "Salir de pantalla completa",
+    "riskLevel": "Nivel de riesgo"
+  }
+}

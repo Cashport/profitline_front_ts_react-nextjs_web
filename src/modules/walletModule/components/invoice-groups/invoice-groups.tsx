@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pagination, Spin } from "antd";
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { columnMeta } from "../../constants";
@@ -38,10 +39,11 @@ const TH_PLAIN =
 
 /** Días sin gestión: verde ≤3, ámbar ≤7, rojo por encima. */
 const GestionChip = ({ dias }: { dias: number | null }) => {
+  const t = useTranslations("wallet.sla");
   if (dias === null) return <span className="text-muted-foreground">—</span>;
   return (
     <StatusChip sev={dias <= 3 ? "ok" : dias <= 7 ? "warn" : "crit"}>
-      {dias === 0 ? "Hoy" : `${dias}d`}
+      {dias === 0 ? t("today") : t("days", { days: dias })}
     </StatusChip>
   );
 };
@@ -56,6 +58,8 @@ export default function InvoiceGroups({
   onClearDrilldown,
   loading
 }: InvoiceGroupsProps) {
+  const t = useTranslations("wallet.groups");
+  const tCommon = useTranslations("common");
   const [sort, setSort] = useState<SortState>({ col: "monto", dir: "desc" });
   const zona = useRef<HTMLElement>(null);
 
@@ -108,22 +112,23 @@ export default function InvoiceGroups({
   const suma = visibleRows.reduce((a, g) => a + g.monto, 0);
   const titulo =
     drilldown && clienteNombre
-      ? `${clienteNombre} · ${enTramo ? columnMeta(ti).label : "todos los tramos"}`
-      : "Grupos de facturas";
+      ? t("titleFor", {
+          customer: clienteNombre,
+          bucket: enTramo ? columnMeta(ti).label : t("allBuckets")
+        })
+      : t("title");
 
   return (
     <section ref={zona} className="cp-card text-card-foreground">
       <div className="flex flex-wrap items-center gap-2.5 border-b border-border p-4">
         <h3 className="text-[13.5px] font-semibold text-foreground">{titulo}</h3>
         <span className="ml-auto text-[13px] text-muted-foreground">
-          {loading ? (
-            "Actualizando…"
-          ) : (
-            <>
-              {grp(visibleRows.length)} · {fmtM(suma)}
-              {enTramo && " en el tramo"} · doble clic para abrir la gestión
-            </>
-          )}
+          {loading
+            ? t("refreshing")
+            : t(enTramo ? "summaryInBucket" : "summary", {
+                groups: grp(visibleRows.length),
+                amount: fmtM(suma)
+              })}
         </span>
         {drilldown && (
           <button
@@ -131,7 +136,7 @@ export default function InvoiceGroups({
             onClick={onClearDrilldown}
             className="rounded-md border border-border bg-card px-2.5 py-1 text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary"
           >
-            Ver todos
+            {t("viewAll")}
           </button>
         )}
       </div>
@@ -140,30 +145,46 @@ export default function InvoiceGroups({
         <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
-              <SortableTh col="grupo" label="Grupo" sort={sort} onSort={onSort} />
-              <SortableTh col="cliente" label="Cliente" sort={sort} onSort={onSort} />
-              <SortableTh col="fact" label="Fact." align="right" sort={sort} onSort={onSort} />
+              <SortableTh col="grupo" label={t("columns.group")} sort={sort} onSort={onSort} />
+              <SortableTh col="cliente" label={t("columns.customer")} sort={sort} onSort={onSort} />
+              <SortableTh
+                col="fact"
+                label={t("columns.invoices")}
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
               <SortableTh
                 col="monto"
-                label={enTramo ? `Total ${columnMeta(ti).short}` : "Total"}
+                label={
+                  enTramo
+                    ? t("columns.totalIn", { bucket: columnMeta(ti).short })
+                    : tCommon("fields.total")
+                }
                 align="right"
                 sort={sort}
                 onSort={onSort}
               />
               <th scope="col" className={TH_PLAIN}>
-                Reparto
+                {t("columns.split")}
               </th>
               <th scope="col" className={TH_PLAIN}>
-                Responsable
+                {t("columns.owner")}
               </th>
-              <SortableTh col="gestion" label="Gest." align="right" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="gestion"
+                label={t("columns.activity")}
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
               <th scope="col" className={TH_PLAIN}>
-                Ticket
+                {t("columns.ticket")}
               </th>
               <th scope="col" className={TH_PLAIN}>
-                Límite
+                {t("columns.limit")}
               </th>
-              <SortableTh col="estado" label="Estado" sort={sort} onSort={onSort} />
+              <SortableTh col="estado" label={t("columns.status")} sort={sort} onSort={onSort} />
               <th className="border-b border-cp-line bg-cp-surface" />
             </tr>
           </thead>
@@ -180,7 +201,7 @@ export default function InvoiceGroups({
             ) : visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={11} className="p-9 text-center text-muted-foreground">
-                  No hay grupos con los filtros actuales.
+                  {t("empty")}
                 </td>
               </tr>
             ) : (
@@ -216,7 +237,7 @@ export default function InvoiceGroups({
                     {fmtM(g.monto)}
                   </td>
                   <DetailTooltip
-                    title="Reparto por tramo"
+                    title={t("splitByBucket")}
                     rows={tramoRows(g.tramos)}
                     // El pie sale de la suma del reparto y no de `monto`: con un
                     // tramo pedido el API recorta el total, y el tooltip tiene
@@ -232,7 +253,7 @@ export default function InvoiceGroups({
                       <span className="text-foreground">{g.responsable}</span>
                     ) : (
                       <span className="font-semibold text-rose-600 dark:text-rose-400">
-                        Sin dueño
+                        {t("noOwner")}
                       </span>
                     )}
                   </td>
@@ -251,8 +272,8 @@ export default function InvoiceGroups({
                   <td className="px-3 py-2.5 text-right">
                     <button
                       type="button"
-                      aria-label="Abrir gestión"
-                      title="Abrir gestión"
+                      aria-label={t("openActivity")}
+                      title={t("openActivity")}
                       onClick={() => onOpenDetail(g.clave)}
                       className="inline-flex rounded-md border border-border bg-card p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
@@ -269,7 +290,7 @@ export default function InvoiceGroups({
       {!loading && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
           <span className="text-[13px] text-muted-foreground">
-            Mostrando {pageRows.length} de {grp(visibleRows.length)}
+            {t("showing", { shown: pageRows.length, groups: grp(visibleRows.length) })}
           </span>
           <Pagination
             current={page}
@@ -288,24 +309,19 @@ export default function InvoiceGroups({
           // aquí no se ve el total del grupo sino su parte. Decirlo evita que
           // el monto se lea como "todo lo que se resuelve con una gestión".
           ti === "vencido" ? (
-            <>
-              Sólo los grupos de {clienteNombre} con facturas vencidas, y los montos son su parte
-              vencida. Un mismo grupo puede tener más cartera en corriente.
-            </>
+            t("noteOverdue", { customer: clienteNombre ?? "" })
           ) : (
-            <>
-              Sólo los grupos de {clienteNombre} con facturas en{" "}
-              {columnMeta(ti).label.toLowerCase()}, y los montos son la parte que cae en ese tramo.
-              Un mismo grupo puede tener más cartera en otros tramos.
-            </>
+            t("noteBucket", {
+              customer: clienteNombre ?? "",
+              bucket: columnMeta(ti).label.toLowerCase()
+            })
           )
         ) : (
           <>
-            {drilldown
-              ? `Todos los grupos de ${clienteNombre}, sin importar el tramo. `
-              : "Estos son los grupos de toda la foto. "}
-            <b className="font-semibold text-foreground">Total</b> es todo lo que se resuelve con
-            una sola gestión.
+            {drilldown ? t("noteAllBuckets", { customer: clienteNombre ?? "" }) : t("noteSnapshot")}{" "}
+            {t.rich("noteTotal", {
+              b: (chunks) => <b className="font-semibold text-foreground">{chunks}</b>
+            })}
           </>
         )}
       </div>

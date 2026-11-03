@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Flex, Select, Typography } from "antd";
 import {
   ControllerRenderProps,
@@ -22,6 +23,7 @@ interface Props<T extends FieldValues> {
 }
 
 export const SelectLocations = <T extends FieldValues>({ errors, field, disabled }: Props<T>) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useLocations();
   if (axios.isAxiosError(data)) {
     return null;
@@ -39,10 +41,10 @@ export const SelectLocations = <T extends FieldValues>({ errors, field, disabled
 
   return (
     <Flex vertical>
-      <h4 className="inputTitle">Ciudad</h4>
+      <h4 className="inputTitle">{t("city")}</h4>
       <Select
         showSearch
-        placeholder="Seleccione la ciudad"
+        placeholder={t("selectCity")}
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={isLoading}
         variant="borderless"
@@ -54,9 +56,7 @@ export const SelectLocations = <T extends FieldValues>({ errors, field, disabled
         filterOption={filterOption}
         disabled={disabled}
       />
-      {errors && (
-        <Typography.Text className="textError">La ciudad es obligatoria *</Typography.Text>
-      )}
+      {errors && <Typography.Text className="textError">{t("cityRequired")}</Typography.Text>}
     </Flex>
   );
 };

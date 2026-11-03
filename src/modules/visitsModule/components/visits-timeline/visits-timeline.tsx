@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { getAppZoom } from "@/utils/utils";
 
@@ -10,7 +11,6 @@ import {
   DAY_START_MIN,
   MISSING,
   SEGMENT_KINDS,
-  STATUS_LABELS,
   TIMELINE_BUCKET_MIN
 } from "../../constants";
 import type { DayMode, ILiveAdvisor, IVisitsPalette, SegmentKind } from "../../types";
@@ -69,6 +69,7 @@ export default function VisitsTimeline({
   onSeek,
   onGoLive
 }: VisitsTimelineProps) {
+  const tv = useTranslations("visits");
   const trackRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -107,10 +108,14 @@ export default function VisitsTimeline({
       if (!bucket) return null;
       const on = SEGMENT_KINDS.reduce((sum, s) => sum + (bucket.counts[s] ?? 0), 0);
       return {
-        title: `${fmtClock(start)}–${fmtClock(start + TIMELINE_BUCKET_MIN)} · ${on} de ${bucket.total} conectados`,
+        title: tv("timeline.bucketTitle", {
+          range: `${fmtClock(start)}–${fmtClock(start + TIMELINE_BUCKET_MIN)}`,
+          on,
+          total: bucket.total
+        }),
         rows: SEGMENT_KINDS.filter((s) => bucket.counts[s]).map((s) => ({
           color: palette.status[s],
-          label: STATUS_LABELS[s],
+          label: tv(`status.${s}`),
           value: String(bucket.counts[s])
         }))
       };
@@ -122,15 +127,18 @@ export default function VisitsTimeline({
       else if (s.start < m) totals[s.kind] = (totals[s.kind] ?? 0) + (m - s.start);
     });
     return {
-      title: `${fmtClock(m)} · ${current ? STATUS_LABELS[current.kind] : "Sin puntos"}`,
+      title: tv("timeline.pointTitle", {
+        time: fmtClock(m),
+        status: current ? tv(`status.${current.kind}`) : tv("timeline.noPoints")
+      }),
       rows: [
         ...SEGMENT_KINDS.filter((k) => totals[k]).map((k) => ({
           color: palette.status[k],
-          label: `${STATUS_LABELS[k]} acumulado`,
+          label: tv("timeline.accumulated", { status: tv(`status.${k}`) }),
           value: fmtDuration(totals[k] ?? 0)
         })),
         // Las actividades aún no llegan del backend.
-        { color: palette.ink, label: "Actividades", value: MISSING }
+        { color: palette.ink, label: tv("timeline.activities"), value: MISSING }
       ]
     };
   };
@@ -159,7 +167,7 @@ export default function VisitsTimeline({
       <div className="flex items-center gap-1.5">
         <button
           type="button"
-          aria-label={playing ? "Pausar" : "Reproducir"}
+          aria-label={playing ? tv("timeline.pause") : tv("timeline.play")}
           onClick={onTogglePlay}
           className="grid h-8 w-8 place-items-center rounded-full border border-border bg-secondary text-foreground transition-colors hover:border-[#cbe71e]"
         >
@@ -171,7 +179,7 @@ export default function VisitsTimeline({
         </button>
         <button
           type="button"
-          aria-label="Velocidad de reproducción"
+          aria-label={tv("timeline.speed")}
           onClick={onToggleSpeed}
           className="rounded-[5px] border border-border px-1.5 py-[3px] text-[13px] text-muted-foreground transition-colors hover:text-foreground"
         >
@@ -303,7 +311,7 @@ export default function VisitsTimeline({
                 className="h-[7px] w-[7px] rounded-[2px]"
                 style={{ background: palette.status[s] }}
               />
-              {STATUS_LABELS[s]}
+              {tv(`status.${s}`)}
             </span>
           ))}
         </div>
@@ -335,7 +343,7 @@ export default function VisitsTimeline({
         <svg width="8" height="8" aria-hidden>
           <circle cx="4" cy="4" r="4" fill="currentColor" />
         </svg>
-        {dayMode === "today" ? "En vivo" : "Ir a hoy"}
+        {dayMode === "today" ? tv("timeline.live") : tv("timeline.goToday")}
       </button>
     </div>
   );

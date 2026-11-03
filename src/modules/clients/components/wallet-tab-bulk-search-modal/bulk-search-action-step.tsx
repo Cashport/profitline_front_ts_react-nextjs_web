@@ -12,13 +12,17 @@ import {
 } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
 import { CaretLeft, Paperclip, UploadSimple, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { cn, formatNumber } from "@/utils/utils";
 import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 import { DigitalRecordResponse, IUser } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
-import { invoiceStates } from "@/modules/clients/components/wallet-tab-change-status-modal/wallet-tab-change-status-modal";
+import {
+  getInvoiceStateLabelKey,
+  invoiceStates
+} from "@/modules/clients/components/wallet-tab-change-status-modal/wallet-tab-change-status-modal";
 import { BULK_ACTIONS } from "./bulk-search-constants";
 import { formatMillions } from "./bulk-search-utils";
 import { BulkStatementMethod, IBulkActionConfig, IBulkSearchRow } from "./types";
@@ -38,17 +42,15 @@ interface Props {
   onRun: () => void;
 }
 
-const STATEMENT_METHODS: { label: string; value: BulkStatementMethod }[] = [
-  { label: "Correo", value: "correo" },
-  { label: "WhatsApp", value: "whatsapp" },
-  { label: "Descargar", value: "descargar" }
+// Etiquetas en clients.bulkSearch.action.methods
+const STATEMENT_METHODS: {
+  labelKey: "email" | "whatsapp" | "download";
+  value: BulkStatementMethod;
+}[] = [
+  { labelKey: "email", value: "correo" },
+  { labelKey: "whatsapp", value: "whatsapp" },
+  { labelKey: "download", value: "descargar" }
 ];
-
-// El servicio recibe el estado en minúsculas, igual que desde el modal de cambio de estado
-const STATUS_OPTIONS = invoiceStates.map((state) => ({
-  label: state,
-  value: state.toLocaleLowerCase()
-}));
 
 // "Aplicar pago" sólo lista las primeras facturas
 const VISIBLE_INVOICES = 100;
@@ -87,7 +89,26 @@ const BulkSearchActionStep = ({
   onBack,
   onRun
 }: Props) => {
+  const t = useTranslations("clients.bulkSearch.action");
+  const tActions = useTranslations("clients.bulkSearch.actions");
+  const tStates = useTranslations("clients.changeStatus.states");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
+
+  // El servicio recibe el estado en minúsculas, igual que desde el modal de cambio de estado
+  const statusOptions = useMemo(
+    () =>
+      invoiceStates.map((state) => {
+        const labelKey = getInvoiceStateLabelKey(state);
+        return { label: labelKey ? tStates(labelKey) : state, value: state.toLocaleLowerCase() };
+      }),
+    [tStates]
+  );
+
+  const statementMethods = STATEMENT_METHODS.map(({ labelKey, value }) => ({
+    label: t(`methods.${labelKey}`),
+    value
+  }));
   const motives = useInvoiceIncidentMotives();
 
   // Estados de las encontradas en el orden en que aparecen, con su color y cuántas hay
@@ -115,13 +136,13 @@ const BulkSearchActionStep = ({
       const destination = isWhatsapp ? user.full_phone : user.value;
       return {
         value: String(user.contact_id),
-        label: `${user.label} · ${isDisabled ? "sin WhatsApp activo" : destination}`,
+        label: `${user.label} · ${isDisabled ? t("noActiveWhatsapp") : destination}`,
         // Lo que muestra la etiqueta una vez elegido
         destination,
         disabled: isDisabled
       };
     });
-  }, [statementInfo, config.statementMethod]);
+  }, [statementInfo, config.statementMethod, t]);
 
   const action = BULK_ACTIONS.find((item) => item.key === config.action) ?? BULK_ACTIONS[0];
   // El estado de cuenta es del cliente: no depende de las facturas elegidas
@@ -140,10 +161,10 @@ const BulkSearchActionStep = ({
   const isInvalid = (!isStatement && !scopedRows.length) || isIncomplete;
 
   const runLabel = !isStatement
-    ? `${action.verb} ${formatNumber(scopedRows.length)} facturas`
+    ? tActions(`${action.i18nKey}.run`, { count: scopedRows.length })
     : config.statementMethod === "descargar"
-      ? "Descargar estado de cuenta"
-      : "Enviar estado de cuenta";
+      ? t("downloadStatement")
+      : t("sendStatement");
 
   // Dragger lo llama una vez por archivo: el lote entero se agrega con el primero para no
   // perder archivos entre una actualización del estado y otra
@@ -155,7 +176,7 @@ const BulkSearchActionStep = ({
           !config.evidence.some((evidence) => evidence.name === item.name)
       );
       if (accepted.length < fileList.length) {
-        messageApi.warning(`Se omitieron archivos repetidos o de más de ${MAX_EVIDENCE_MB} MB.`);
+        messageApi.warning(t("skippedFiles", { maxMb: MAX_EVIDENCE_MB }));
       }
       onConfigChange({ evidence: [...config.evidence, ...accepted] });
     }
@@ -184,9 +205,12 @@ const BulkSearchActionStep = ({
         {!isStatement && (
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
-              <span className="text-[13px] font-semibold">Aplicar a</span>
+              <span className="text-[13px] font-semibold">{t("applyTo")}</span>
               <span className="text-[13px] text-muted-foreground">
-                {formatNumber(scopedRows.length)} facturas · {formatMillions(scopedAmount)}
+                {t("scopeSummary", {
+                  count: scopedRows.length,
+                  amount: formatMillions(scopedAmount)
+                })}
               </span>
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -215,7 +239,7 @@ const BulkSearchActionStep = ({
 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] items-start gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="text-[13px] font-semibold">Acción</span>
+            <span className="text-[13px] font-semibold">{t("actionTitle")}</span>
             <Radio.Group
               value={config.action}
               onChange={(event) => onConfigChange({ action: event.target.value })}
@@ -233,9 +257,11 @@ const BulkSearchActionStep = ({
                   )}
                 >
                   <span className="block text-[13px] font-medium text-foreground">
-                    {item.label}
+                    {tActions(`${item.i18nKey}.label`)}
                   </span>
-                  <span className="block text-[13px] text-[#8a8a8a]">{item.description}</span>
+                  <span className="block text-[13px] text-[#8a8a8a]">
+                    {tActions(`${item.i18nKey}.description`)}
+                  </span>
                 </Radio>
               ))}
             </Radio.Group>
@@ -243,12 +269,12 @@ const BulkSearchActionStep = ({
 
           <div className="flex flex-col gap-3 rounded-lg bg-[#f7f7f7] p-3.5">
             {config.action === "estado" && (
-              <Field label="Nuevo estado">
+              <Field label={t("newStatus")}>
                 <Select
                   value={config.newStatus}
                   onChange={(value) => onConfigChange({ newStatus: value })}
-                  options={STATUS_OPTIONS}
-                  placeholder="Selecciona un estado"
+                  options={statusOptions}
+                  placeholder={t("statusPlaceholder")}
                   style={{ width: "100%" }}
                 />
               </Field>
@@ -256,7 +282,7 @@ const BulkSearchActionStep = ({
 
             {config.action === "pago" &&
               (scopedRows.length ? (
-                <Field label="Se llevan a la tabla de aplicación de pagos">
+                <Field label={t("paymentTableLabel")}>
                   <ul className="flex max-h-[260px] flex-col overflow-auto rounded-md border border-[#e3e3e3] bg-white">
                     {scopedRows.slice(0, VISIBLE_INVOICES).map((row) => (
                       <li
@@ -276,17 +302,17 @@ const BulkSearchActionStep = ({
                   </ul>
                   {scopedRows.length > VISIBLE_INVOICES && (
                     <span className="text-[13px] text-[#8a8a8a]">
-                      y {formatNumber(scopedRows.length - VISIBLE_INVOICES)} más
+                      {t("andMore", { count: scopedRows.length - VISIBLE_INVOICES })}
                     </span>
                   )}
                 </Field>
               ) : (
-                <p className="text-[13px] text-[#444]">Ninguna factura en el alcance.</p>
+                <p className="text-[13px] text-[#444]">{t("noInvoicesInScope")}</p>
               ))}
 
             {config.action === "novedad" && (
               <>
-                <Field label="Motivo">
+                <Field label={tCommon("fields.reason")}>
                   <Select
                     value={config.motiveId}
                     onChange={(value) => onConfigChange({ motiveId: value })}
@@ -297,15 +323,13 @@ const BulkSearchActionStep = ({
                     }))}
                     loading={motives.isLoading}
                     status={motives.isError ? "error" : undefined}
-                    placeholder={
-                      motives.isError ? "No se pudieron cargar los motivos" : "Selecciona un motivo"
-                    }
+                    placeholder={motives.isError ? t("reasonsError") : t("reasonPlaceholder")}
                     showSearch
                     optionFilterProp="label"
                     style={{ width: "100%" }}
                   />
                 </Field>
-                <Field label="Monto novedad (opcional)">
+                <Field label={t("disputeAmount")}>
                   <InputNumber<string>
                     stringMode
                     min="0"
@@ -317,7 +341,7 @@ const BulkSearchActionStep = ({
                       userTyping ? input : formatAmount(value)
                     }
                     parser={parseAmount}
-                    placeholder="Ingresar monto"
+                    placeholder={t("amountPlaceholder")}
                     style={{ width: "100%" }}
                   />
                 </Field>
@@ -326,19 +350,19 @@ const BulkSearchActionStep = ({
 
             {config.action === "radicar" && (
               <>
-                <Field label="Tipo de radicación">
-                  <Input value="Email" disabled />
+                <Field label={t("submissionType")}>
+                  <Input value={t("methods.emailValue")} disabled />
                 </Field>
-                <Field label="Fecha de radicación">
+                <Field label={t("submissionDate")}>
                   <DatePicker
                     value={config.radicationDate}
                     onChange={(date) => onConfigChange({ radicationDate: date })}
                     format="DD/MM/YYYY"
-                    placeholder="Selecciona la fecha"
+                    placeholder={t("datePlaceholder")}
                     style={{ width: "100%" }}
                   />
                 </Field>
-                <Field label="Evidencia">
+                <Field label={t("evidence")}>
                   <Upload.Dragger
                     multiple
                     accept={FILE_EXTENSIONS.join(", ")}
@@ -347,11 +371,9 @@ const BulkSearchActionStep = ({
                   >
                     <div className="flex flex-col items-center gap-1 px-3">
                       <UploadSimple size={18} />
-                      <span className="text-[13px] font-medium">
-                        Arrastra o selecciona archivos
-                      </span>
+                      <span className="text-[13px] font-medium">{t("dragFiles")}</span>
                       <span className="text-[13px] text-[#8a8a8a]">
-                        Hasta {MAX_EVIDENCE_MB} MB por archivo
+                        {t("maxPerFile", { maxMb: MAX_EVIDENCE_MB })}
                       </span>
                     </div>
                   </Upload.Dragger>
@@ -365,7 +387,7 @@ const BulkSearchActionStep = ({
                       <Button
                         type="text"
                         size="small"
-                        aria-label={`Quitar ${file.name}`}
+                        aria-label={t("removeFile", { name: file.name })}
                         icon={<X size={12} />}
                         onClick={() =>
                           onConfigChange({
@@ -383,14 +405,16 @@ const BulkSearchActionStep = ({
               <>
                 <Segmented<BulkStatementMethod>
                   block
-                  options={STATEMENT_METHODS}
+                  options={statementMethods}
                   value={config.statementMethod}
                   onChange={handleStatementMethodChange}
                 />
                 {config.statementMethod === "descargar" ? (
-                  <Field label="Archivos">
+                  <Field label={t("files")}>
                     {isStatementLoading ? (
-                      <span className="text-[13px] text-[#8a8a8a]">Cargando…</span>
+                      <span className="text-[13px] text-[#8a8a8a]">
+                        {tCommon("status.loading")}
+                      </span>
                     ) : statementInfo?.attachments.length ? (
                       <div className="flex flex-wrap gap-1.5">
                         {statementInfo.attachments.map((file) => (
@@ -403,11 +427,11 @@ const BulkSearchActionStep = ({
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[13px] text-[#8a8a8a]">Sin archivos adjuntos</span>
+                      <span className="text-[13px] text-[#8a8a8a]">{t("noAttachments")}</span>
                     )}
                   </Field>
                 ) : (
-                  <Field label="Para">
+                  <Field label={t("to")}>
                     <Select
                       mode="tags"
                       value={config.recipients}
@@ -418,25 +442,27 @@ const BulkSearchActionStep = ({
                       // teléfono
                       optionFilterProp="label"
                       optionLabelProp="destination"
-                      placeholder="Selecciona o escribe destinatarios"
+                      placeholder={t("recipientsPlaceholder")}
                       style={{ width: "100%" }}
                     />
                   </Field>
                 )}
                 {hasStatementError && (
-                  <p className="text-[13px] text-[#c4321c]">
-                    No se pudieron cargar los contactos ni los archivos del cliente.
-                  </p>
+                  <p className="text-[13px] text-[#c4321c]">{t("statementError")}</p>
                 )}
               </>
             )}
 
             {hasComment && (
-              <Field label={config.action === "novedad" ? "Comentario" : "Comentario (opcional)"}>
+              <Field
+                label={
+                  config.action === "novedad" ? tCommon("fields.comment") : t("commentOptional")
+                }
+              >
                 <Input.TextArea
                   value={config.comment}
                   onChange={(event) => onConfigChange({ comment: event.target.value })}
-                  placeholder="Queda en el historial de cada factura"
+                  placeholder={t("commentPlaceholder")}
                   rows={3}
                   className="!text-[13px]"
                   style={{ resize: "none" }}
@@ -449,7 +475,7 @@ const BulkSearchActionStep = ({
 
       <footer className="flex flex-none items-center gap-2.5 border-t border-[#ececec] px-[22px] py-3.5">
         <Button type="text" size="large" icon={<CaretLeft size={12} />} onClick={onBack}>
-          Resultados
+          {t("backToResults")}
         </Button>
         <div className="flex-1" />
         <Button

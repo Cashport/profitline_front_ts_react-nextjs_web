@@ -2,6 +2,7 @@
 
 import React from "react";
 import { ShieldAlert } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 interface DashboardNoticeProps {
   /** Mensaje que devuelve el back (p. ej. el motivo por el que no hay acceso). */
@@ -18,10 +19,12 @@ interface DashboardNoticeProps {
  * "—" las dos cosas se ven igual.
  */
 export default function DashboardNotice({ message, onRetry }: DashboardNoticeProps) {
+  const t = useTranslations("commerce.dashboard");
+  const tCommon = useTranslations("common");
   return (
     <div className="cp-card p-10 flex flex-col items-center text-center gap-3">
       <ShieldAlert className="w-10 h-10 text-[#FF6B00]" strokeWidth={1.5} />
-      <h2 className="text-lg font-semibold text-foreground">No se pudo cargar el dashboard</h2>
+      <h2 className="text-lg font-semibold text-foreground">{t("loadError")}</h2>
       <p className="text-sm text-muted-foreground max-w-md">{message}</p>
       {onRetry && (
         <button
@@ -29,7 +32,7 @@ export default function DashboardNotice({ message, onRetry }: DashboardNoticePro
           onClick={onRetry}
           className="mt-2 text-sm font-semibold text-[#FF6B00] hover:underline"
         >
-          Reintentar
+          {tCommon("actions.retry")}
         </button>
       )}
     </div>

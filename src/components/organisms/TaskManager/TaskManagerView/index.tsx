@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Flex, Spin } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useTasks } from "@/hooks/useTasks";
 import { useDebounce } from "@/hooks/useSearch";
@@ -17,6 +18,7 @@ import FiltersTasks, {
 import { ITask } from "@/types/tasks/ITasks";
 
 const TaskManagerView = () => {
+  const t = useTranslations("taskManager");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 1000);
   const [selectedRows, setSelectedRows] = useState<ITask[] | undefined>(undefined);
@@ -46,7 +48,7 @@ const TaskManagerView = () => {
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="search"
-              placeholder="Buscar tarea"
+              placeholder={t("searchPlaceholder")}
               onChange={(event) => setSearch(event.target.value)}
             />
             <FiltersTasks

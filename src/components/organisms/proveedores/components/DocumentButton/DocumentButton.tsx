@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Typography, Flex } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { FileArrowUp, FileArrowDown } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -21,6 +22,7 @@ interface DocumentCardProps {
 }
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ doc, handleDelete, handleUpload, index }) => {
+  const t = useTranslations("suppliers.drawer");
   const handleClick = () => {
     if (!doc) {
       handleUpload(); // Si no hay documento, permite subir uno
@@ -52,9 +54,9 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ doc, handleDelete, handleUp
         <Flex align="center" gap={8}>
           {doc ? <FileArrowUp size={16} /> : <FileArrowDown size={16} color="#7B7B7B" />}
           <Flex vertical>
-            <Text>{doc?.name || "Seleccionar archivo"}</Text>
+            <Text>{doc?.name || t("selectFile")}</Text>
             <Text type="secondary" style={{ fontSize: 13 }}>
-              {doc?.uploadedAt || "PDF, Word, PNG. (Tamaño max 30MB)"}
+              {doc?.uploadedAt || t("fileHint")}
             </Text>
           </Flex>
         </Flex>
@@ -62,6 +64,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ doc, handleDelete, handleUp
           <Button
             type="text"
             icon={<DeleteOutlined />}
+            aria-label={t("deleteDocument")}
             onClick={(e) => {
               e.stopPropagation(); // Evita que se dispare el click en el botón principal
               handleDelete(index);

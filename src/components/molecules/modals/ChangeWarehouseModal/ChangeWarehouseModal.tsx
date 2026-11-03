@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Typography, Button, Table, Flex, Radio, message } from "antd";
 import { CaretLeft, Eye } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import { ColumnsType } from "antd/es/table";
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -27,6 +28,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
   onClose,
   setFetchMutate
 }) => {
+  const t = useTranslations("modals.changeWarehouse");
   const [view, setView] = useState<"change-warehouse" | "warehouse-detail">("change-warehouse");
   const [warehouseSelected, setWarehouseSelected] = useState<number | null>(currentWarehouseId);
   const [viewWarehouseDetails, setViewWarehouseDetails] = useState<IInventoriesByWarehouse | null>(
@@ -69,10 +71,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
           );
           setWarehouseProductsStock(response);
         } catch (error) {
-          message.error(
-            error instanceof Error ? error.message : "Error fetching warehouse stock details",
-            3
-          );
+          message.error(error instanceof Error ? error.message : t("stockError"), 3);
         }
       }
       setLoading(false);
@@ -82,7 +81,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
 
   const columns: ColumnsType<IInventoriesByWarehouse> = [
     {
-      title: "Bodega",
+      title: t("columns.warehouse"),
       dataIndex: "warehouse",
       key: "warehouse",
       render: (warehouse, record) => (
@@ -104,17 +103,17 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       )
     },
     {
-      title: "Inventario",
+      title: t("columns.inventory"),
       dataIndex: "availability",
       key: "availability",
       render: (availability: boolean) => (
         <Text {...(availability && { type: "success" })}>
-          {availability ? "Stock disponible" : "No hay stock"}
+          {availability ? t("inStock") : t("outOfStock")}
         </Text>
       )
     },
     {
-      title: "Detalle",
+      title: t("columns.detail"),
       key: "buttonSeeDetail",
       dataIndex: "",
       render: (_, row) => (
@@ -130,17 +129,17 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
   ];
   const columnsDetails: ColumnsType<IWarehouseProductsStock> = [
     {
-      title: "Producto",
+      title: t("columns.product"),
       dataIndex: "description",
       key: "description"
     },
     {
-      title: "Pedido",
+      title: t("columns.ordered"),
       dataIndex: "requested",
       key: "requested"
     },
     {
-      title: "Stock",
+      title: t("columns.stock"),
       dataIndex: "inWarehouse",
       key: "inWarehouse",
       render: (inWarehouse: number, record: IWarehouseProductsStock) => (
@@ -155,10 +154,10 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       const orderIds = [selectedOrder];
       await updateWarehouse(orderIds, warehouseSelected as number);
       onClose();
-      message.success("Bodega actualizada", 2);
+      message.success(t("updated"), 2);
       setFetchMutate();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar la bodega", 3);
+      message.error(error instanceof Error ? error.message : t("updateError"), 3);
     } finally {
       setLoadingSubmit(false);
     }
@@ -210,8 +209,8 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
           />
           <Title level={4} style={{ marginBottom: 0 }}>
             {view === "change-warehouse"
-              ? "Cambiar bodega"
-              : `Bodega ${viewWarehouseDetails?.warehouse}`}
+              ? t("title")
+              : t("detailTitle", { warehouse: viewWarehouseDetails?.warehouse ?? "" })}
           </Title>
         </Flex>
       }
@@ -219,7 +218,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       footer={
         view === "change-warehouse" && (
           <FooterButtons
-            titleConfirm="Guardar bodega"
+            titleConfirm={t("save")}
             onClose={onClose}
             handleOk={onSubmit}
             isConfirmDisabled={warehouseSelected === currentWarehouseId}

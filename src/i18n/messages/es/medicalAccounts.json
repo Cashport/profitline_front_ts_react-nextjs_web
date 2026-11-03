@@ -1,0 +1,247 @@
+{
+  "title": "Cuentas Médicas",
+  "serviceTypes": {
+    "ACC": "Accesorios",
+    "PRO": "Monitoreos o Programación",
+    "RH": "Rehabilitación",
+    "SYS": "Cirugía",
+    "UPG": "Actualización"
+  },
+  "documentTypes": {
+    "CC": "Cédula de Ciudadanía",
+    "TI": "Tarjeta de Identidad",
+    "CE": "Cédula de Extranjería",
+    "RC": "Registro Civil",
+    "PA": "Pasaporte",
+    "PEP": "Permiso Especial de Permanencia",
+    "PPT": "Permiso por Protección Temporal",
+    "NIT": "NIT"
+  },
+  "noveltyTypes": {
+    "tipo_documento": "Tipo de documento",
+    "tipo_regimen": "Tipo de régimen",
+    "no_coinciden_fechas": "No coinciden fechas",
+    "nombre_servicio": "Nombre de servicio",
+    "codigo_producto": "Código producto",
+    "documento_diferente": "Documento diferente",
+    "falta_factura": "Falta factura",
+    "falta_autorizacion": "Falta autorización",
+    "falta_preautorizacion": "Falta preautorización"
+  },
+  "regimens": {
+    "contributivo": "Contributivo",
+    "subsidiado": "Subsidiado"
+  },
+  "upload": {
+    "onlyPdf": "Solo se permiten archivos PDF.",
+    "onlyZip": "Solo se permiten archivos ZIP.",
+    "removeFile": "Quitar archivo",
+    "dropTitle": "Arrastra el PDF aquí",
+    "dropZipTitle": "Arrastra el ZIP aquí",
+    "dropSubtitle": "o haz clic para seleccionarlo",
+    "dropSubtitleFromDevice": "o haz clic para seleccionarlo desde tu equipo"
+  },
+  "list": {
+    "bulkSubmit": "{count, plural, =0 {Radicación masiva} other {Radicación masiva (#)}}",
+    "downloadReport": "Descargar reporte",
+    "downloadReportError": "Ocurrió un error al descargar el reporte."
+  },
+  "toolbar": {
+    "searchPlaceholder": "Buscar por ID, paciente o documento",
+    "epsPlaceholder": "EPS",
+    "dateRange": "Rango de fechas",
+    "add": "Agregar cuenta médica"
+  },
+  "table": {
+    "columns": {
+      "orderNumber": "No. Pedido",
+      "authorizationNumber": "No. Autorización",
+      "patient": "Paciente",
+      "uploadDate": "Fecha Cargue",
+      "serviceDate": "Fecha Servicio",
+      "regimen": "Régimen",
+      "eps": "EPS",
+      "serviceType": "Tipo Servicio"
+    },
+    "deleteSuccess": "Cuenta médica eliminada correctamente.",
+    "deleteError": "No se pudo eliminar la cuenta médica.",
+    "deleteConfirm": {
+      "title": "Eliminar cuenta médica",
+      "description": "¿Seguro que deseas eliminar esta cuenta médica?"
+    }
+  },
+  "addModal": {
+    "title": "Nueva Cuenta Médica",
+    "description": "Selecciona el tipo de servicio y adjunta el PDF de la cuenta.",
+    "orderNumber": "Número de pedido",
+    "orderNumberPlaceholder": "Ej: PED-001",
+    "serviceType": "Tipo de servicio",
+    "pdfFile": "Archivo PDF",
+    "pdfHint": "Solo PDF · Máx. 500 páginas",
+    "processing": "Procesando la cuenta médica, esto puede tardar hasta 90 segundos…",
+    "confirm": "Cargar cuenta médica",
+    "selectProject": "Selecciona un proyecto antes de cargar la cuenta.",
+    "success": "Cuenta médica cargada y procesada correctamente.",
+    "error": "Ocurrió un error al cargar la cuenta médica."
+  },
+  "bulkSubmitModal": {
+    "title": "Radicación masiva",
+    "confirm": "Radicar",
+    "description": "Se radicarán <b>{count}</b> {count, plural, one {cuenta seleccionada} other {cuentas seleccionadas}} en estado Facturado. Adjunta el PDF de evidencia.",
+    "evidence": "Evidencia PDF",
+    "success": "{count, plural, one {# cuenta radicada correctamente.} other {# cuentas radicadas correctamente.}}",
+    "error": "Ocurrió un error en la radicación masiva."
+  },
+  "submitModal": {
+    "title": "Radicar",
+    "confirm": "Radicar",
+    "description": "Adjunta el PDF con la evidencia de radicación.",
+    "evidence": "Evidencia PDF",
+    "success": "Cuenta médica radicada correctamente.",
+    "error": "Ocurrió un error al radicar la cuenta."
+  },
+  "invoiceModal": {
+    "title": "Facturar",
+    "confirm": "Facturar",
+    "description": "Ingresa el número de factura y adjunta el PDF. El ZIP es opcional.",
+    "invoiceNumber": "Número de factura",
+    "invoiceNumberPlaceholder": "Ej: FAC-001",
+    "invoicePdf": "PDF de la factura",
+    "invoiceZip": "ZIP de la factura",
+    "optional": "(opcional)",
+    "success": "Factura cargada correctamente.",
+    "error": "Ocurrió un error al cargar la factura."
+  },
+  "uploadSupportModal": {
+    "title": "Cargar soporte",
+    "confirm": "Cargar soporte",
+    "description": "Adjunta el PDF e indica el tipo de documento.",
+    "documentType": "Tipo de documento",
+    "documentTypePlaceholder": "Ej: soporte_medico",
+    "success": "Soporte cargado correctamente.",
+    "error": "Ocurrió un error al cargar el soporte."
+  },
+  "replaceSupportModal": {
+    "title": "Reemplazar soporte",
+    "confirm": "Reemplazar",
+    "description": "Adjunta el nuevo PDF de este documento para reemplazar el soporte actual.",
+    "success": "Soporte reemplazado correctamente.",
+    "error": "Ocurrió un error al reemplazar el soporte."
+  },
+  "detail": {
+    "loading": "Cargando cuenta médica…",
+    "loadError": "No se pudo cargar la cuenta médica.",
+    "notFound": "Cuenta médica no encontrada.",
+    "history": "Historial",
+    "actions": {
+      "sendToAudit": "Enviar a pendiente auditar",
+      "audit": "Auditar",
+      "auditing": "Auditando…",
+      "invoice": "Facturar",
+      "submit": "Radicar",
+      "deleting": "Eliminando…"
+    },
+    "deleteConfirm": {
+      "title": "Eliminar cuenta médica",
+      "description": "¿Seguro que deseas eliminar esta cuenta médica?"
+    },
+    "deleteSuccess": "Cuenta médica eliminada correctamente.",
+    "deleteError": "Ocurrió un error al eliminar la cuenta.",
+    "sendToAuditSuccess": "Cuenta enviada a pendiente por auditar.",
+    "sendToAuditError": "Ocurrió un error al enviar a auditar.",
+    "auditSuccess": "Cuenta médica auditada correctamente.",
+    "auditError": "Ocurrió un error al auditar la cuenta.",
+    "updateSuccess": "Cuenta médica actualizada correctamente.",
+    "updateError": "Ocurrió un error al actualizar la cuenta."
+  },
+  "info": {
+    "patientNamePlaceholder": "Nombre del paciente",
+    "documentType": "Tipo de documento",
+    "documentNumber": "No. Documento",
+    "authorizationNumber": "No. Autorización",
+    "orderNumber": "No. Pedido",
+    "regimen": "Régimen",
+    "serviceDate": "Fecha de servicio",
+    "serviceType": "Tipo de servicio",
+    "eps": "EPS",
+    "uploadDate": "Fecha de cargue"
+  },
+  "novelties": {
+    "title": "Novedades",
+    "confirm": "Confirmar novedad",
+    "confirming": "Confirmando…",
+    "resolveSuccess": "Novedad resuelta correctamente.",
+    "resolveError": "No se pudo resolver la novedad.",
+    "severity": {
+      "CRITICA": "Crítica",
+      "ALTA": "Alta",
+      "MEDIA": "Media",
+      "BAJA": "Baja"
+    }
+  },
+  "invoices": {
+    "title": "Facturas",
+    "columns": {
+      "invoiceNumber": "No. factura",
+      "invoiceDate": "Fecha factura",
+      "uploadDate": "Fecha de carga",
+      "files": "Archivos"
+    }
+  },
+  "submission": {
+    "title": "Radicación",
+    "columns": {
+      "evidence": "Evidencia",
+      "submissionDate": "Fecha de radicación",
+      "submittedBy": "Radicado por",
+      "file": "Archivo"
+    },
+    "evidenceLabel": "Evidencia de radicación",
+    "system": "Sistema"
+  },
+  "timeline": {
+    "by": "Por: {actor}",
+    "system": "Sistema",
+    "current": "Estado actual",
+    "currentWithNovelties": "Con novedades · Estado actual",
+    "pending": "Pendiente"
+  },
+  "documents": {
+    "title": "Documentos clasificados",
+    "fallbackName": "Documento {sequence}",
+    "pages": "pág. {start}–{end}",
+    "columns": {
+      "novelties": "Novedades"
+    },
+    "empty": {
+      "title": "Sin documentos clasificados",
+      "description": "Este archivo aún no ha sido procesado."
+    },
+    "noSelection": {
+      "title": "Ningún documento seleccionado",
+      "description": "Haz clic en el ojo de un documento para verlo aquí."
+    },
+    "preview": {
+      "unavailable": "Vista previa no disponible",
+      "invalidPdf": "El documento es inválido o está corrupto.",
+      "missingPdf": "No se encontró el documento.",
+      "unexpectedResponse": "Respuesta inesperada del servidor.",
+      "loadError": "No se pudo cargar el documento.",
+      "notAvailableTitle": "Documento no disponible",
+      "notAvailableDescription": "El PDF de este documento aún no está disponible."
+    },
+    "menu": {
+      "download": "Descargar",
+      "fixNovelties": "Solucionar novedades",
+      "replaceSupport": "Reemplazar soporte"
+    },
+    "viewDocument": "Ver documento",
+    "uploadSupport": "Cargar soporte",
+    "generating": "Generando…",
+    "downloadPdfs": "{count, plural, one {Descargar PDF} other {Descargar PDFs}}",
+    "mergeError": "No se pudo generar el PDF unificado.",
+    "downloadError": "No se pudieron descargar los documentos.",
+    "noveltiesResolved": "{count, plural, one {# novedad resuelta.} other {# novedades resueltas.}}",
+    "noveltiesResolveError": "No se pudieron resolver las novedades."
+  }
+}

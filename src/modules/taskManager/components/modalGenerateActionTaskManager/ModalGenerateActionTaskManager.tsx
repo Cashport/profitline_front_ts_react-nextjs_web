@@ -1,6 +1,7 @@
 import React from "react";
 import { message, Modal } from "antd";
 import { MailOutlined, PhoneOutlined } from "@ant-design/icons";
+import { useTranslations } from "use-intl";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
@@ -21,11 +22,12 @@ export const ModalGenerateActionTaskManager: React.FC<ModalActionPaymentProps> =
   onClose,
   selectedRows
 }) => {
+  const t = useTranslations("taskManager.generateAction");
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Selecciona la acción que vas a realizar"
+      title={t("title")}
       footer={null}
       onCancel={onClose}
       className="modalGenerateActionTaskManager"
@@ -34,20 +36,20 @@ export const ModalGenerateActionTaskManager: React.FC<ModalActionPaymentProps> =
       <div className="modal-content">
         <ButtonGenerateAction
           icon={<MailOutlined size={20} />}
-          title="Enviar correo"
+          title={t("sendEmail")}
           onClick={() => {
             if (!selectedRows || selectedRows.length === 0) {
-              message.error("Debes seleccionar al menos una tarea");
+              message.error(t("selectTask"));
               return;
             }
           }}
         />
         <ButtonGenerateAction
           icon={<PhoneOutlined size={16} />}
-          title="Llamar"
+          title={t("call")}
           onClick={() => {
             if (!selectedRows || selectedRows.length === 0) {
-              message.error("Debes seleccionar al menos una tarea");
+              message.error(t("selectTask"));
               return;
             }
           }}

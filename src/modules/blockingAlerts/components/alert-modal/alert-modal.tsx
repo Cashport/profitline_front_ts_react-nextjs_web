@@ -2,6 +2,7 @@
 
 import { Button, Modal } from "antd";
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useWalletTheme } from "@/modules/walletModule/contexts/wallet-theme-context";
 import { cn } from "@/utils/utils";
@@ -25,6 +26,7 @@ interface AlertModalProps {
  */
 export default function AlertModal({ onClose, title, subtitle, children }: AlertModalProps) {
   const { resolvedTheme } = useWalletTheme();
+  const tCommon = useTranslations("common");
 
   return (
     <Modal
@@ -62,7 +64,12 @@ export default function AlertModal({ onClose, title, subtitle, children }: Alert
               <p className="m-0 truncate text-[13px] leading-tight text-cp-ink-3">{subtitle}</p>
             )}
           </div>
-          <Button type="text" aria-label="Cerrar" icon={<X size={14} />} onClick={onClose} />
+          <Button
+            type="text"
+            aria-label={tCommon("actions.close")}
+            icon={<X size={14} />}
+            onClick={onClose}
+          />
         </header>
         <div
           className={cn(

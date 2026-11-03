@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import Header from "@/components/organisms/header";
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
-import { FECHA_CORTE_PLACEHOLDER } from "@/modules/walletModule/constants";
 import { fmtActualizado } from "@/modules/walletModule/utils/format";
 import NoveltiesFilterModal from "../novelties-filter-modal/novelties-filter-modal";
 import type { INoveltiesFilters } from "../../types";
@@ -28,13 +29,14 @@ export default function NoveltiesHeader({
   filters,
   onFiltersChange
 }: NoveltiesHeaderProps) {
+  const t = useTranslations("novelties.header");
   return (
     <Header
-      title="Novedades"
+      title={t("title")}
       titleExtra={
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 shrink-0 rounded-full bg-[#9bb514]" />
-          {fmtActualizado(fetchedAt, FECHA_CORTE_PLACEHOLDER)}
+          {fmtActualizado(fetchedAt, t("loadingCutoff"))}
         </span>
       }
       actionsExtra={
@@ -43,7 +45,7 @@ export default function NoveltiesHeader({
           <HeaderSearch
             value={search}
             onChange={onSearchChange}
-            placeholder="Cliente, factura o ejecutivo…"
+            placeholder={t("searchPlaceholder")}
           />
         </>
       }

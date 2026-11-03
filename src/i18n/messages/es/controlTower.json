@@ -1,0 +1,50 @@
+{
+  "header": {
+    "title": "Torre de control",
+    "searchPlaceholder": "Cliente, factura o novedad…"
+  },
+  "kpis": {
+    "total": "Cartera total",
+    "totalFoot": "{invoices} · {customers}",
+    "pastDue": "Vencido",
+    "pastDueFoot": "Meta de operación {pct}%",
+    "covered": "Vencido cubierto",
+    "coveredFoot": "{amount} sin conciliar",
+    "openDisputes": "Novedades abiertas",
+    "overdueTicket": "{count} con ticket vencido",
+    "stale": "{count} sin gestión +7d"
+  },
+  "aging": {
+    "title": "Cartera por tramo de mora",
+    "hintIdle": "clic en un tramo para filtrar el tablero",
+    "hintActive": "{count, plural, one {# tramo filtrando} other {# tramos filtrando}} el tablero",
+    "current": "Corriente <b>{amount}</b>",
+    "pastDue": "Vencido <b>{amount}</b>",
+    "over60": "Más de 60 días <b>{amount}</b>",
+    "unreconciled": "Sin conciliar <b>{amount}</b>"
+  },
+  "executives": {
+    "title": "Composición de la cartera por ejecutivo",
+    "hint": "ancho = cartera · cifra = vencido sin conciliar",
+    "empty": "Ningún ejecutivo tiene cartera con estos filtros.",
+    "tooltipTitle": "{name} · cartera"
+  },
+  "disputeTypes": {
+    "title": "Novedades abiertas por tipo",
+    "onTime": "al día",
+    "overdueTicket": "con ticket vencido",
+    "empty": "No hay novedades abiertas con estos filtros.",
+    "onTimeLabel": "Al día",
+    "overdueCount": "{count} con ticket vencido",
+    "total": "{count, plural, one {# novedad} other {# novedades}}"
+  },
+  "topCustomers": {
+    "title": "Clientes con más saldo sin conciliar",
+    "hint": "vencido sin acuerdo ni novedad",
+    "collector": "Ejecutivo",
+    "pastDue": "Vencido",
+    "unreconciled": "Sin conciliar",
+    "covered": "Cubierto",
+    "empty": "Sin clientes con vencido bajo estos filtros."
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/modules/chat/ui/badge";
 import { IApprovalStep } from "@/types/approvals/IApprovals";
 
@@ -10,8 +11,11 @@ interface ApproversTimelineProps {
 }
 
 export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps) => {
+  const t = useTranslations("approvals.timeline");
+  const tCommon = useTranslations("common");
+
   if (!steps || steps.length === 0) {
-    return <p className="text-sm text-muted-foreground">No hay aprobadores asignados</p>;
+    return <p className="text-sm text-muted-foreground">{t("noApprovers")}</p>;
   }
 
   // Group steps by order
@@ -42,11 +46,11 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
           {/* Step indicator */}
           <div className="mb-3 flex items-center gap-2">
             <Badge variant="secondary" className="text-[13px] font-semibold">
-              Paso {order}
+              {t("step", { order })}
             </Badge>
             {stepsByOrder[order].length > 1 && (
               <span className="text-[13px] text-muted-foreground">
-                ({stepsByOrder[order].length} aprobadores)
+                {t("approversCount", { count: stepsByOrder[order].length })}
               </span>
             )}
           </div>
@@ -116,10 +120,10 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
                     >
                       {step.status.name ||
                         (status === "aprobado"
-                          ? "Aprobado"
+                          ? tCommon("status.approved")
                           : status === "rechazado"
-                            ? "Rechazado"
-                            : "Pendiente")}
+                            ? tCommon("status.rejected")
+                            : tCommon("status.pending"))}
                     </Badge>
                   </div>
                 </div>

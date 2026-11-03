@@ -1,0 +1,398 @@
+{
+  "moduleTitle": "Collections",
+  "updatedAt": "Updated {date}",
+  "buckets": {
+    "current": {
+      "label": "Current",
+      "short": "Current"
+    },
+    "d1_30": {
+      "label": "1 – 30 days",
+      "short": "1–30"
+    },
+    "d31_60": {
+      "label": "31 – 60 days",
+      "short": "31–60"
+    },
+    "d61_90": {
+      "label": "61 – 90 days",
+      "short": "61–90"
+    },
+    "d91_120": {
+      "label": "91 – 120 days",
+      "short": "91–120"
+    },
+    "over120": {
+      "label": "Over 120 days",
+      "short": "120+"
+    },
+    "pastDue": {
+      "label": "Past due",
+      "short": "Past due"
+    }
+  },
+  "estados": {
+    "compensada": {
+      "name": "Offset",
+      "chip": "Pending clearing",
+      "short": "Offset applied; drops off once cleared"
+    },
+    "pagada": {
+      "name": "Paid, not cleared",
+      "chip": "Paid",
+      "short": "Paid, pending clearing in SAP"
+    },
+    "conciliado": {
+      "name": "Reconciled",
+      "chip": "Awaiting payment",
+      "short": "Awaiting customer payment"
+    },
+    "abono": {
+      "name": "Partial payment",
+      "chip": "Partial payment",
+      "short": "Partial payment applied; balance still due"
+    },
+    "novedad": {
+      "name": "In dispute",
+      "chip": "In progress",
+      "short": "Open dispute being worked"
+    },
+    "sin_conciliar": {
+      "name": "Unreconciled",
+      "chip": "No activity",
+      "short": "No payment plan or dispute"
+    },
+    "saldo": {
+      "name": "Deduction",
+      "chip": "Deduction",
+      "short": "Overpayment pending offset"
+    },
+    "saldo_factura": {
+      "name": "Invoice deduction",
+      "chip": "Invoice deduction",
+      "short": "Outstanding deduction on the invoice"
+    },
+    "glosado": {
+      "name": "Medical claim",
+      "chip": "Medical claim",
+      "short": "Invoice with a customer medical claim"
+    },
+    "devolucion": {
+      "name": "Return",
+      "chip": "Return",
+      "short": "Return document"
+    },
+    "nota_debito": {
+      "name": "Debit memo",
+      "chip": "No activity",
+      "short": "Unreconciled debit memo"
+    },
+    "otros": {
+      "name": "Other",
+      "chip": "Other",
+      "short": "Other catalog statuses"
+    },
+    "newStatus": "New catalog status"
+  },
+  "documentType": {
+    "FINANCIAL_RECORD": "Invoice",
+    "BALANCE": "Deduction"
+  },
+  "count": {
+    "invoices": "{count, plural, one {# invoice} other {# invoices}}",
+    "customers": "{count, plural, one {# customer} other {# customers}}",
+    "groups": "{count, plural, one {# group} other {# groups}}",
+    "docs": "{count, plural, one {# doc} other {# docs}}"
+  },
+  "sla": {
+    "closed": "Closed",
+    "overdueBy": "{days}d overdue",
+    "dueToday": "Due today",
+    "dueIn": "In {days}d",
+    "today": "Today",
+    "days": "{days}d"
+  },
+  "ticketStatus": {
+    "resolved": "Resolved",
+    "late": "Late",
+    "open": "Open",
+    "overdueBy": "{days}d overdue"
+  },
+  "fallback": {
+    "noName": "No name",
+    "unassigned": "Unassigned",
+    "attachment": "attachment"
+  },
+  "timeline": {
+    "created": "Dispute created",
+    "approved": "Approved the dispute",
+    "rejected": "Rejected the dispute",
+    "empty": "No activity has been logged for this group yet.",
+    "system": "System",
+    "event": "event"
+  },
+  "attachments": {
+    "open": "Open {name}",
+    "remove": "Remove {name}"
+  },
+  "person": {
+    "noOwner": "No owner",
+    "noAssignee": "Unassigned"
+  },
+  "legend": {
+    "filterByStatus": "Filter by status"
+  },
+  "actionsMenu": {
+    "downloadExcel": "Download to Excel",
+    "moreActions": "More actions"
+  },
+  "header": {
+    "title": "AR Aging by Customer",
+    "loadingCutoff": "Loading cutoff…",
+    "refreshing": "Updating…",
+    "reprocess": "Reprocess"
+  },
+  "skeleton": {
+    "matrix": "Loading aging matrix",
+    "groups": "Loading invoice groups"
+  },
+  "view": {
+    "refreshTimeout": "The update is taking longer than expected. Showing the latest available snapshot.",
+    "refreshStarted": "Matrix update started",
+    "refreshInProgress": "An update is already in progress",
+    "refreshError": "Couldn't start the update",
+    "downloadingExcel": "Downloading Excel…",
+    "downloadWalletError": "Couldn't download the receivables Excel file.",
+    "fileDownloaded": "File downloaded: {filename}",
+    "downloadNoveltiesError": "Couldn't download the disputes Excel file.",
+    "loadError": "Couldn't load receivables.",
+    "empty": "No receivables match the current filters."
+  },
+  "matrix": {
+    "title": "Control matrix",
+    "legendHint": "click a status to filter · shift+click to add more",
+    "filteringStatuses": "{count, plural, one {# status filtering} other {# statuses filtering}} the matrix and groups",
+    "clearFilter": "Clear filter",
+    "searchPlaceholder": "Search customer, tax ID, invoice or collector…",
+    "downloadNovelties": "Download disputes to Excel",
+    "refreshing": "Updating…",
+    "clientsCount": "{count, plural, one {# customer} other {# customers}}",
+    "columns": {
+      "customer": "Customer",
+      "pastDuePct": "% past due"
+    },
+    "empty": "No customers match the filters.",
+    "wholeAccount": "{customer} · all receivables",
+    "clearSelection": "clear selection",
+    "viewGroups": "view groups",
+    "taxIdLine": "Tax ID {taxId} — {collector}",
+    "showing": "Showing {shown} of {count, plural, one {# customer} other {# customers}}"
+  },
+  "groups": {
+    "title": "Invoice groups",
+    "titleFor": "{customer} · {bucket}",
+    "allBuckets": "all aging buckets",
+    "refreshing": "Updating…",
+    "summary": "{groups} · {amount} · double-click to open the activity",
+    "summaryInBucket": "{groups} · {amount} in this bucket · double-click to open the activity",
+    "viewAll": "View all",
+    "columns": {
+      "group": "Group",
+      "customer": "Customer",
+      "invoices": "Inv.",
+      "totalIn": "Total {bucket}",
+      "split": "Breakdown",
+      "owner": "Owner",
+      "activity": "Last act.",
+      "ticket": "Ticket",
+      "limit": "Deadline",
+      "status": "Status"
+    },
+    "empty": "No groups match the current filters.",
+    "splitByBucket": "Breakdown by aging bucket",
+    "noOwner": "No owner",
+    "openActivity": "Open activity",
+    "showing": "Showing {shown} of {groups}",
+    "noteOverdue": "Only {customer}'s groups with past-due invoices; amounts show the past-due portion. The same group may have more receivables in current.",
+    "noteBucket": "Only {customer}'s groups with invoices in {bucket}; amounts show the portion in that bucket. The same group may have more receivables in other buckets.",
+    "noteAllBuckets": "All of {customer}'s groups, across every aging bucket.",
+    "noteSnapshot": "These are the groups for the entire snapshot.",
+    "noteTotal": "<b>Total</b> is everything that can be resolved with a single activity."
+  },
+  "filters": {
+    "coordinator": "Coordinator",
+    "market": "Market",
+    "kam": "KAM",
+    "kamLead": "KAM lead",
+    "collector": "Collector",
+    "status": "Status",
+    "noveltyType": "Dispute type",
+    "selectedCount": "{count} selected"
+  },
+  "statCards": {
+    "total": "Total receivables",
+    "totalFoot": "{invoices} · {customers}",
+    "pastDue": "Past-due receivables",
+    "pastDueFoot": "{invoices} · 60+ days {amount}",
+    "openDispute": "With open dispute",
+    "openDisputeFoot": "{pct} of total AR · in progress",
+    "unreconciled": "Unreconciled",
+    "unreconciledFoot": "{pct} of total AR · untouched",
+    "openDeductions": "Open deductions",
+    "openDeductionsFoot": "{pct} · {docs} unapplied",
+    "pendingClearing": "Pending clearing",
+    "pendingClearingFoot": "{pct} · payments not yet cleared"
+  },
+  "detail": {
+    "comingSoon": "Coming soon",
+    "commentSaved": "Comment added",
+    "commentError": "Couldn't add the comment",
+    "actionCreated": "Action created",
+    "actionCreateError": "Couldn't create the action",
+    "actionResolved": "Action resolved",
+    "actionResolveError": "Couldn't resolve the action",
+    "changingStatus": "Changing status…",
+    "statusUpdated": "Status updated",
+    "statusError": "Couldn't change the status",
+    "customerNotFound": "Couldn't identify the dispute's customer",
+    "noveltyCreated": "Dispute created",
+    "noveltyCreateError": "Couldn't create the dispute",
+    "noveltyUpdated": "Dispute updated",
+    "noveltyUpdateError": "Couldn't update the dispute",
+    "noveltyLoadError": "Couldn't load the dispute.",
+    "actionsLoadError": "Couldn't load the actions.",
+    "tabs": {
+      "followUp": "Follow-up",
+      "invoices": "Invoices"
+    },
+    "searchInvoice": "Search invoice…",
+    "invoicesLoadError": "Couldn't load the invoices.",
+    "followUpUnavailable": "Follow-up is only available for groups with a dispute.",
+    "loadingFollowUp": "Loading follow-up…",
+    "taxId": "Tax ID {taxId}"
+  },
+  "rail": {
+    "inBucket": "{label} in {bucket}",
+    "amount": "Open amount",
+    "invoices": "Invoices",
+    "owner": "Owner",
+    "lastActivity": "Last activity",
+    "commitment": "Commitment",
+    "deadline": "Deadline",
+    "collector": "Collector",
+    "pastDue": "Past due",
+    "avgDpd": "Avg. DPD",
+    "splitByBucket": "Breakdown by aging bucket"
+  },
+  "composer": {
+    "placeholder": "Write a comment…",
+    "attach": "Attach file",
+    "submitting": "Saving…",
+    "submit": "Post"
+  },
+  "groupActions": {
+    "loadingStatuses": "Loading statuses…",
+    "current": "current",
+    "novelty": "Dispute",
+    "edit": "Edit dispute details",
+    "changeStatus": "Change status",
+    "onSelected": "On selected invoices",
+    "create": "Create dispute",
+    "link": "Link to an existing dispute",
+    "resolve": "Resolve the dispute",
+    "resolveSelected": "Resolve selected",
+    "resolveAll": "Resolve entire dispute ({count})",
+    "menu": "Group actions"
+  },
+  "invoicesTable": {
+    "invoice": "Invoice",
+    "docDate": "Doc. date",
+    "type": "Type",
+    "status": "Status",
+    "originalAmount": "Original amount",
+    "openAmount": "Open amount",
+    "empty": "No invoices to show.",
+    "noMatches": "No invoices match your search.",
+    "selectOne": "Select {doc}",
+    "viewDetailSoon": "View invoice details (coming soon)",
+    "viewDetail": "View invoice details",
+    "filteredTotal": "Filtered total",
+    "countOf": "{invoices} of {total}",
+    "collected": "Collected {amount}",
+    "selectedSummary": "<b>{count}</b> {count, plural, one {invoice selected} other {invoices selected}} · <b>{amount}</b>",
+    "noneSelected": "No invoices selected"
+  },
+  "ticketForm": {
+    "title": "New ticket",
+    "owner": "Owner",
+    "ownerPlaceholder": "Whoever creates the action",
+    "deadline": "Deadline",
+    "action": "Action",
+    "actionPlaceholder": "E.g., get the carrier's delivery report",
+    "comment": "Comment",
+    "optional": "optional",
+    "commentPlaceholder": "Context for whoever resolves it",
+    "creating": "Creating…",
+    "create": "Create ticket"
+  },
+  "tickets": {
+    "open": "Open actions",
+    "overdue": "{count} overdue",
+    "new": "New",
+    "loading": "Loading actions…",
+    "empty": "No open actions. Create a ticket to set the next one.",
+    "closed": "Closed actions",
+    "late": "{count} late"
+  },
+  "ticketCard": {
+    "resolution": "Resolution:",
+    "noDate": "No date",
+    "resolve": "Resolve",
+    "resolutionPlaceholder": "Resolution comment (optional)",
+    "resolving": "Resolving…"
+  },
+  "noveltyDocs": {
+    "invoice": "Invoice",
+    "type": "Type",
+    "amount": "Open amount"
+  },
+  "noveltyForm": {
+    "createTitle": "New dispute",
+    "createSubmit": "Create dispute",
+    "creating": "Creating…",
+    "classification": "Classification",
+    "type": "Dispute type",
+    "typePlaceholder": "Select the type",
+    "owner": "Owner",
+    "noOwner": "Unassigned",
+    "firstTicketDate": "First ticket date",
+    "resolutionDeadline": "Resolution deadline",
+    "initialComment": "Initial comment",
+    "initialCommentPlaceholder": "E.g., the customer needs the signed supporting document by Friday",
+    "initialCommentHint": "It becomes the first entry in the dispute's timeline. The next action opens as a ticket on the date you set.",
+    "includedInvoices": "Included invoices",
+    "editTitle": "Edit dispute",
+    "editable": "Editable details",
+    "readOnly": "Not editable here",
+    "customer": "Customer",
+    "groupedAmount": "Grouped amount",
+    "created": "Created",
+    "commitmentDate": "Commitment date",
+    "datesHint": "Dates can't be edited manually: the commitment moves when the current ticket is closed, and the deadline is set when the dispute is created. The change is logged in the group's timeline."
+  },
+  "linkNovelty": {
+    "loadError": "Couldn't load the customer's disputes",
+    "title": "Link to an existing dispute",
+    "submit": "Link invoices",
+    "submitting": "Linking…",
+    "openNovelties": "Open disputes for this customer",
+    "searchPlaceholder": "Search by document or reason…",
+    "loading": "Loading disputes…",
+    "empty": "No open disputes for this customer",
+    "noMatches": "No disputes match your search",
+    "select": "Select {name}",
+    "includedInvoices": "Included invoices",
+    "comment": "Comment",
+    "commentPlaceholder": "E.g., the customer needs the signed supporting document by Friday"
+  }
+}

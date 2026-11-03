@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 
 import type { DayMode, IVisitsPalette } from "../../types";
@@ -15,14 +17,15 @@ interface LiveClockProps {
 
 /** Qué se está viendo (en vivo, repetición, histórico o programación) y a qué hora. */
 export default function LiveClock({ dayMode, isLive, t, palette }: LiveClockProps) {
+  const tv = useTranslations("visits.liveClock");
   const tag =
     dayMode === "future"
-      ? { label: "Programación", color: palette.status.IN_TRANSIT }
+      ? { label: tv("future"), color: palette.status.IN_TRANSIT }
       : dayMode === "past"
-        ? { label: "Histórico", color: palette.ink3 }
+        ? { label: tv("past"), color: palette.ink3 }
         : isLive
-          ? { label: "En vivo", color: palette.status.IN_VISIT }
-          : { label: "Reproducción", color: palette.status.ON_PAUSE };
+          ? { label: tv("live"), color: palette.status.IN_VISIT }
+          : { label: tv("replay"), color: palette.status.ON_PAUSE };
   const pulse = dayMode === "today" && isLive;
 
   return (

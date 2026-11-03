@@ -2,6 +2,7 @@
 
 import { Input, Select } from "antd";
 import { Plus } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -31,19 +32,21 @@ export function MedicalAccountsToolbar({
   onClearDateRange,
   onAdd
 }: MedicalAccountsToolbarProps) {
+  const t = useTranslations("medicalAccounts.toolbar");
+  const tCommon = useTranslations("common");
   const { statuses } = useMedicalAccountStatuses();
 
   return (
     <div className="mb-6 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
         <UiSearchInput
-          placeholder="Buscar por ID, paciente o documento"
+          placeholder={t("searchPlaceholder")}
           onChange={(e) => onSearch(e.target.value)}
         />
 
         <Select
           allowClear
-          placeholder="Estado"
+          placeholder={tCommon("fields.status")}
           style={{ width: 180, height: "var(--control-h)" }}
           options={statuses.map(({ code, name }) => ({ value: code, label: name }))}
           value={statusFilter}
@@ -52,7 +55,7 @@ export function MedicalAccountsToolbar({
 
         <Input
           allowClear
-          placeholder="EPS"
+          placeholder={t("epsPlaceholder")}
           style={{ width: 160, height: "var(--control-h)" }}
           value={epsFilter}
           onChange={(e) => onEpsChange(e.target.value)}
@@ -68,7 +71,7 @@ export function MedicalAccountsToolbar({
       {/* PrincipalButton fija height:100% con !important: el contenedor le da el alto del buscador (--control-h) */}
       <div className="h-[var(--control-h)] flex-shrink-0">
         <PrincipalButton icon={<Plus size={18} />} onClick={onAdd} customStyles={{ fontSize: 14 }}>
-          Agregar cuenta médica
+          {t("add")}
         </PrincipalButton>
       </div>
     </div>

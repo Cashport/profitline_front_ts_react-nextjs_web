@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Product } from "@/types/products/products";
 import { INivel, IProductoCondicion, TipoCondicion } from "@/types/marketAdmin/IMarketAdmin";
 import ProductSelect from "./ProductSelect";
@@ -24,6 +25,7 @@ export default function CondicionObjetivo({
   products: Product[];
   onChange: (n: INivel) => void;
 }) {
+  const t = useTranslations("marketAdmin.promotions.target");
   const firstAvailableId = (used: number[]) => products.find((p) => !used.includes(p.id))?.id ?? 0;
 
   const productosCondicion = nivel.productosCondicion ?? [];
@@ -139,12 +141,12 @@ export default function CondicionObjetivo({
         <span className="w-5 h-5 rounded-full bg-[#F0F0F0] flex items-center justify-center text-[13px] font-bold text-[#666666]">
           1
         </span>
-        <p className="text-[13px] font-semibold text-[#141414]">Objetivo</p>
+        <p className="text-[13px] font-semibold text-[#141414]">{t("title")}</p>
       </div>
 
       {tipo === "monto" ? (
         <div className="flex flex-col gap-2">
-          <p className="text-[13px] text-[#999999]">Rango de compra</p>
+          <p className="text-[13px] text-[#999999]">{t("purchaseRange")}</p>
           <div className="flex items-center gap-2">
             <div className="flex items-center border border-[#DDDDDD] rounded-lg overflow-hidden">
               <span className="px-2.5 py-2 text-[13px] text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
@@ -160,7 +162,7 @@ export default function CondicionObjetivo({
                 placeholder="2.000.000"
               />
             </div>
-            <span className="text-[13px] text-[#999999]">a</span>
+            <span className="text-[13px] text-[#999999]">{t("rangeTo")}</span>
             <div className="flex items-center border border-[#DDDDDD] rounded-lg overflow-hidden">
               <span className="px-2.5 py-2 text-[13px] text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
                 $
@@ -182,7 +184,7 @@ export default function CondicionObjetivo({
           {/* Productos individuales */}
           {productosCondicion.length > 0 && (
             <div className="flex flex-col gap-2">
-              <p className="text-[13px] text-[#999999]">Productos individuales</p>
+              <p className="text-[13px] text-[#999999]">{t("individualProducts")}</p>
               {productosCondicion.map((pc) => (
                 <div key={pc.id} className="flex items-center gap-2">
                   <ProductSelect
@@ -210,6 +212,7 @@ export default function CondicionObjetivo({
                   </div>
                   <button
                     onClick={() => removeProductoCondicion(pc.id)}
+                    aria-label={t("removeProduct")}
                     className="w-7 h-7 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
                   >
                     <Trash2 size={12} />
@@ -225,10 +228,11 @@ export default function CondicionObjetivo({
               {/* Header del paquete */}
               <div className="flex items-center justify-between px-3 py-2 bg-[#F7F7F7] border-b border-[#EEEEEE]">
                 <span className="text-[13px] font-semibold text-[#141414]">
-                  Paquete de productos
+                  {t("productBundle")}
                 </span>
                 <button
                   onClick={() => removePaqueteCondicion(pak.id)}
+                  aria-label={t("removeBundle")}
                   className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors"
                 >
                   <Trash2 size={11} />
@@ -239,7 +243,7 @@ export default function CondicionObjetivo({
                 {/* Unidades + min productos */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] text-[#999999]">Pide</span>
+                    <span className="text-[13px] text-[#999999]">{t("orders")}</span>
                     <input
                       type="number"
                       min={1}
@@ -249,9 +253,9 @@ export default function CondicionObjetivo({
                       }
                       className="w-14 px-2 py-1.5 text-sm text-center font-semibold text-[#141414] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] bg-white"
                     />
-                    <span className="text-[13px] text-[#999999]">unidades</span>
+                    <span className="text-[13px] text-[#999999]">{t("units")}</span>
                   </div>
-                  <span className="text-[13px] text-[#CCCCCC]">entre</span>
+                  <span className="text-[13px] text-[#CCCCCC]">{t("across")}</span>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="number"
@@ -266,7 +270,7 @@ export default function CondicionObjetivo({
                       }
                       className="w-14 px-2 py-1.5 text-sm text-center font-semibold text-[#141414] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] bg-white"
                     />
-                    <span className="text-[13px] text-[#999999]">productos diferentes</span>
+                    <span className="text-[13px] text-[#999999]">{t("differentProducts")}</span>
                   </div>
                 </div>
 
@@ -274,7 +278,7 @@ export default function CondicionObjetivo({
                 {pak.productos.length > 0 && (
                   <div className="flex flex-col gap-1.5">
                     <p className="text-[13px] text-[#AAAAAA] font-semibold">
-                      Productos elegibles
+                      {t("eligibleProducts")}
                     </p>
                     {pak.productos.map((pp) => (
                       <div key={pp.id} className="flex items-center gap-2">
@@ -292,6 +296,7 @@ export default function CondicionObjetivo({
                         />
                         <button
                           onClick={() => removeProductoFromPaquete(pak.id, pp.id)}
+                          aria-label={t("removeProduct")}
                           className="w-6 h-6 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
                         >
                           <Trash2 size={10} />
@@ -306,7 +311,7 @@ export default function CondicionObjetivo({
                   disabled={pak.productos.length >= products.length}
                   className="flex items-center gap-1 text-[13px] text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                 >
-                  <Plus size={10} /> Agregar producto elegible
+                  <Plus size={10} /> {t("addEligibleProduct")}
                 </button>
               </div>
             </div>
@@ -319,14 +324,14 @@ export default function CondicionObjetivo({
               disabled={sinProductosDisponibles}
               className="flex items-center gap-1.5 text-[13px] text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
             >
-              <Plus size={11} /> Agregar producto
+              <Plus size={11} /> {t("addProduct")}
             </button>
             <span className="text-[#DDDDDD] text-[13px]">|</span>
             <button
               onClick={addPaqueteCondicion}
               className="flex items-center gap-1.5 text-[13px] text-[#0067B1] hover:underline w-fit"
             >
-              <Plus size={11} /> Agregar paquete de productos
+              <Plus size={11} /> {t("addBundle")}
             </button>
           </div>
         </div>

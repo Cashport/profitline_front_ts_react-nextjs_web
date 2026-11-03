@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import Image from "next/image";
 import { Flex } from "antd";
 import { Minus, Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 
@@ -22,6 +23,8 @@ export interface CreateOrderProductProps {
 }
 
 const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName }) => {
+  const t = useTranslations("commerce.product");
+  const tCommon = useTranslations("common");
   const { formatMoney, config } = useAppStore((state) => ({
     formatMoney: state.formatMoney,
     config: state.config
@@ -50,7 +53,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
         />
         {product.is_pack && (
           <span className={styles.packBadge}>
-            <SimpleTag text="Pack" colorTag="#141414" colorText="#ffffff" fontSize="13px" />
+            <SimpleTag text={t("pack")} colorTag="#141414" colorText="#ffffff" fontSize="13px" />
           </span>
         )}
       </div>
@@ -59,16 +62,15 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
         {product.name}
         {product.is_pack && product.pack_products && (
           <span className={styles.sku}>
-            {product.pack_products.length} producto
-            {product.pack_products.length === 1 ? "" : "s"}
+            {t("productsCount", { count: product.pack_products.length })}
           </span>
         )}
         {product.EAN?.trim() && !product.is_pack && (
-          <span className={styles.sku}>EAN: {product.EAN}</span>
+          <span className={styles.sku}>{t("ean", { ean: product.EAN })}</span>
         )}
         {!product.stock && (
           <SimpleTag
-            text="Stock insuficiente"
+            text={t("insufficientStock")}
             colorTag="#ff350d"
             colorText="#ffffff"
             fontSize="13px"
@@ -89,7 +91,9 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
             <h5 className={styles.price__amount}>{formatMoney(price)}</h5>
             {product.shipment_unit > 1 && (alreadySelectedProduct?.quantity ?? 0) > 0 && (
               <span className={styles.units}>
-                {product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)} und
+                {t("units", {
+                  count: product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)
+                })}
               </span>
             )}
           </Flex>
@@ -129,7 +133,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
             bordered
             onClick={() => handleAddToCart(product)}
           >
-            Agregar <Plus size={20} />
+            {tCommon("actions.add")} <Plus size={20} />
           </SecondaryButton>
         </div>
       )}

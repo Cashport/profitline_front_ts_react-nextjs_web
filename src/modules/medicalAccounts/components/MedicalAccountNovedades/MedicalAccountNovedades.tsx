@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { AlertCircle, CheckCircle } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import {
   IMedicalAccountNoveltyApi,
   MedicalAccountSeverity
 } from "@/types/medicalAccounts/IMedicalAccounts";
-import { NOVEDAD_TYPE_LABELS } from "../../constants";
+import { isNoveltyTypeCode } from "../../constants";
 import { cn } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
@@ -24,18 +25,15 @@ const SEVERITY_STYLES: Record<MedicalAccountSeverity, string> = {
   BAJA: "border-gray-200 bg-gray-50 text-gray-500"
 };
 
-const SEVERITY_LABELS: Record<MedicalAccountSeverity, string> = {
-  CRITICA: "Crítica",
-  ALTA: "Alta",
-  MEDIA: "Media",
-  BAJA: "Baja"
-};
+const SEVERITY_CODES: MedicalAccountSeverity[] = ["CRITICA", "ALTA", "MEDIA", "BAJA"];
 
 export function MedicalAccountNovedades({
   novedades,
   accountId,
   onResolved
 }: MedicalAccountNovedadesProps) {
+  const t = useTranslations("medicalAccounts.novelties");
+  const tRoot = useTranslations("medicalAccounts");
   const [resolvingId, setResolvingId] = useState<number | null>(null);
   const { showMessage } = useMessageApi();
 
@@ -46,10 +44,10 @@ export function MedicalAccountNovedades({
         "@/services/medicalAccounts/medicalAccounts"
       );
       await resolveMedicalAccountNovelty(accountId, noveltyId);
-      showMessage("success", "Novedad resuelta correctamente.");
+      showMessage("success", t("resolveSuccess"));
       onResolved();
     } catch {
-      showMessage("error", "No se pudo resolver la novedad.");
+      showMessage("error", t("resolveError"));
     } finally {
       setResolvingId(null);
     }
@@ -58,7 +56,7 @@ export function MedicalAccountNovedades({
   return (
     <div className="border-b border-gray-100">
       <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/40 px-6 py-3">
-        <span className="text-[13px] font-semibold text-gray-600">Novedades</span>
+        <span className="text-[13px] font-semibold text-gray-600">{t("title")}</span>
         {novedades.length > 0 && (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[13px] font-semibold leading-none text-amber-600">
             {novedades.length}
@@ -72,7 +70,7 @@ export function MedicalAccountNovedades({
           const menuItems: ItemType[] = [
             {
               key: "confirm",
-              label: isResolving ? "Confirmando…" : "Confirmar novedad",
+              label: isResolving ? t("confirming") : t("confirm"),
               icon: <CheckCircle className="h-3.5 w-3.5" />,
               disabled: isResolving,
               onClick: () => handleResolve(novedad.id)
@@ -86,7 +84,9 @@ export function MedicalAccountNovedades({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-amber-700">
-                  {NOVEDAD_TYPE_LABELS[novedad.novelty_type] ?? novedad.novelty_type}
+                  {isNoveltyTypeCode(novedad.novelty_type)
+                    ? tRoot(`noveltyTypes.${novedad.novelty_type}`)
+                    : novedad.novelty_type}
                 </p>
                 <p className="mt-0.5 text-[13px] text-gray-500">{novedad.description}</p>
               </div>
@@ -96,7 +96,9 @@ export function MedicalAccountNovedades({
                   SEVERITY_STYLES[novedad.severity] ?? SEVERITY_STYLES.BAJA
                 )}
               >
-                {SEVERITY_LABELS[novedad.severity] ?? novedad.severity}
+                {SEVERITY_CODES.includes(novedad.severity)
+                  ? t(`severity.${novedad.severity}`)
+                  : novedad.severity}
               </span>
               <DotsDropdown
                 items={menuItems}

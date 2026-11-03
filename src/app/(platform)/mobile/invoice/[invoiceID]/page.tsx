@@ -1,8 +1,6 @@
 import PendingInvoiceDetail from "@/modules/cashportMobile/containers/PendingInvoiceDetail/PendingInvoiceDetail";
-import { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "CashportMobile"
-};
+import { pageMetadata } from "@/i18n/metadata";
+export const generateMetadata = () => pageMetadata("cashportMobile");
 
 export default function Mobile() {
   return <PendingInvoiceDetail />;

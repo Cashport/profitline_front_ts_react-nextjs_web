@@ -3,6 +3,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import { cn } from "@/utils/utils";
@@ -27,6 +28,7 @@ interface AlertsHeaderProps {
  * Móvil: título (o migas), sin avatar, como el prototipo. El tema va en el menú del avatar.
  */
 export default function AlertsHeader({ crumbs, info, flush }: AlertsHeaderProps) {
+  const t = useTranslations("blockingAlerts.header");
   const current = crumbs[crumbs.length - 1];
 
   return (
@@ -36,7 +38,10 @@ export default function AlertsHeader({ crumbs, info, flush }: AlertsHeaderProps)
         title={current.label}
         titleNode={
           crumbs.length > 1 ? (
-            <nav aria-label="Ruta" className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+            <nav
+              aria-label={t("breadcrumb")}
+              className="flex min-w-0 items-center gap-1.5 whitespace-nowrap"
+            >
               {crumbs.map((crumb, i) => (
                 <Fragment key={crumb.label + i}>
                   {i > 0 && <ChevronRight className="h-4 w-4 shrink-0 text-cp-ink-4" />}
@@ -66,7 +71,7 @@ export default function AlertsHeader({ crumbs, info, flush }: AlertsHeaderProps)
         <div className="min-w-0 flex-1">
           {crumbs.length > 1 ? (
             <nav
-              aria-label="Ruta"
+              aria-label={t("breadcrumb")}
               className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[13px]"
             >
               {crumbs.map((crumb, i) => (

@@ -2,6 +2,7 @@ import { FC, Key, useState, useEffect } from "react";
 import Link from "next/link";
 import { Button, Flex, message, Spin } from "antd";
 import { DotsThree, Plus, PresentationChart } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { deleteOrders } from "@/services/commerce/commerce";
 import { useMessageApi } from "@/context/MessageContext";
@@ -32,6 +33,8 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import styles from "./orders-view.module.scss";
 
 export const OrdersView: FC = () => {
+  const t = useTranslations("commerce.ordersView");
+  const tCommon = useTranslations("common");
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [isOpenModalRemove, setIsOpenModalRemove] = useState<boolean>(false);
@@ -134,7 +137,7 @@ export const OrdersView: FC = () => {
       <Flex className={styles.FlexContainer} vertical>
         <Flex className={styles.header}>
           <UiSearchInput
-            placeholder="Buscar"
+            placeholder={tCommon("placeholders.search")}
             className={styles.searchInput}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
@@ -145,16 +148,16 @@ export const OrdersView: FC = () => {
             disabled={false}
             onClick={handleIsGenerateActionOpen}
           >
-            {isMobile || isTablet ? null : "Generar acción"}
+            {isMobile || isTablet ? null : t("generateAction")}
           </Button>
           <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} isMobile={isMobile} />
-          <Link href="/comercio/dashboard">
+          <Link href="/commerce/dashboard">
             <Button className={styles.generateActionButton} size="large">
               {isMobile || isTablet ? <PresentationChart size={24} /> : "Dashboard"}
             </Button>
           </Link>
           <Link
-            href="/comercio/pedido"
+            href="/commerce/order"
             className={styles.ctaButton}
             // Empezar una orden nueva: limpiar el borrador previo (persistido) para
             // que CreateOrderView no cargue el último draft abierto.
@@ -164,7 +167,7 @@ export const OrdersView: FC = () => {
               className={styles.ctaButton}
               customStyles={{ padding: isMobile ? "7px 12px" : undefined }}
             >
-              {isMobile ? <Plus size={24} /> : "Crear orden"}
+              {isMobile ? <Plus size={24} /> : t("createOrder")}
             </PrincipalButton>
           </Link>
         </Flex>
@@ -206,7 +209,7 @@ export const OrdersView: FC = () => {
       </Flex>
       <ModalRemove
         isMassiveAction={true}
-        name="pedidos"
+        name={t("removeName")}
         isOpen={isOpenModalRemove}
         onClose={() => setIsOpenModalRemove(false)}
         onRemove={handleDeleteOrders}
@@ -221,7 +224,7 @@ export const OrdersView: FC = () => {
         setSelectedRowKeys={setSelectedRowKeys}
         handleDeleteRows={() => {
           if ((selectedRows?.length ?? 0) === 0 && (selectedDrafts?.length ?? 0) === 0)
-            return message.error("No hay órdenes seleccionadas");
+            return message.error(t("noOrdersSelected"));
           setIsGenerateActionModalOpen(false);
           setIsOpenModalRemove(true);
         }}

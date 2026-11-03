@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { Modal, message } from "antd";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { Button } from "@/modules/chat/ui/button";
 import { IReferenceFile } from "@/types/dataQuality/IDataQuality";
-import { formatBytesToMB, scopeLabel } from "../../references/references.utils";
+import { formatBytesToMB } from "../../references/references.utils";
+import { useReferenceScopeLabels } from "../../hooks/useReferenceScopeLabels";
 
 interface ModalReferenceDetailProps {
   isOpen: boolean;
@@ -24,23 +26,26 @@ export function ModalReferenceDetail({
   reference,
   ownerLabel
 }: ModalReferenceDetailProps) {
+  const t = useTranslations("dataQuality.references.detail");
+  const tCommon = useTranslations("common");
+  const scopeLabels = useReferenceScopeLabels();
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
     if (!reference?.file_url) {
-      message.error("No hay archivo disponible para descargar.");
+      message.error(t("noFile"));
       return;
     }
     setDownloading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando archivo...",
+      content: t("downloading"),
       duration: 0
     });
     try {
       // Mismo mecanismo de descarga que los auxiliares existentes.
       const response = await fetch(reference.file_url);
-      if (!response.ok) throw new Error("No se pudo descargar el archivo.");
+      if (!response.ok) throw new Error(t("downloadFailed"));
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -51,7 +56,7 @@ export function ModalReferenceDetail({
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al descargar el archivo.");
+      message.error(error instanceof Error ? error.message : t("downloadError"));
     } finally {
       hide();
       setDownloading(false);
@@ -60,28 +65,32 @@ export function ModalReferenceDetail({
 
   const rows: { label: string; value: string }[] = reference
     ? [
-        { label: "Tipo", value: reference.reference_type },
-        { label: "Ámbito", value: scopeLabel(reference.scope_level) },
-        { label: "Propietario", value: ownerLabel },
-        { label: "Versión", value: String(reference.version) },
-        { label: "Estado", value: reference.is_active === 1 ? "Activo" : "Inactivo" },
-        { label: "Archivo", value: reference.original_filename },
-        { label: "Tamaño", value: formatBytesToMB(reference.size_bytes) },
-        { label: "Hoja", value: reference.sheet_name ?? "-" },
+        { label: t("type"), value: reference.reference_type },
+        { label: t("scope"), value: scopeLabels.label(reference.scope_level) },
+        { label: t("owner"), value: ownerLabel },
+        { label: t("version"), value: String(reference.version) },
         {
-          label: "Fila de encabezado",
-          value: reference.header_row === null || reference.header_row === undefined
-            ? "-"
-            : String(reference.header_row)
+          label: t("status"),
+          value: reference.is_active === 1 ? tCommon("status.active") : tCommon("status.inactive")
         },
-        { label: "Descripción", value: reference.description ?? "-" },
-        { label: "Creado", value: formatDate(reference.created_at) },
-        { label: "Actualizado", value: formatDate(reference.updated_at) }
+        { label: t("file"), value: reference.original_filename },
+        { label: t("size"), value: formatBytesToMB(reference.size_bytes) },
+        { label: t("sheet"), value: reference.sheet_name ?? "-" },
+        {
+          label: t("headerRow"),
+          value:
+            reference.header_row === null || reference.header_row === undefined
+              ? "-"
+              : String(reference.header_row)
+        },
+        { label: t("description"), value: reference.description ?? "-" },
+        { label: t("created"), value: formatDate(reference.created_at) },
+        { label: t("updated"), value: formatDate(reference.updated_at) }
       ]
     : [];
 
   return (
-    <Modal open={isOpen} onCancel={onClose} title="Detalle de la referencia" footer={null} destroyOnClose>
+    <Modal open={isOpen} onCancel={onClose} title={t("title")} footer={null} destroyOnClose>
       {reference && (
         <div className="space-y-4">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
@@ -94,7 +103,7 @@ export function ModalReferenceDetail({
           </dl>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cerrar
+              {tCommon("actions.close")}
             </Button>
             <Button
               type="button"
@@ -102,7 +111,7 @@ export function ModalReferenceDetail({
               onClick={handleDownload}
               disabled={downloading || !reference.file_url}
             >
-              {downloading ? "Descargando..." : "Descargar"}
+              {downloading ? t("downloadingShort") : tCommon("actions.download")}
             </Button>
           </div>
         </div>

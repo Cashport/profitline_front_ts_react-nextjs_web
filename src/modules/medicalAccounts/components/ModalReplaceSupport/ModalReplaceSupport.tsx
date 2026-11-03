@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Flex, Modal, Typography } from "antd";
 import { FileText, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -29,13 +30,14 @@ export function ModalReplaceSupport({
   onSuccess
 }: ModalReplaceSupportProps) {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const t = useTranslations("medicalAccounts");
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
 
   const handleFileUpload = (file: File) => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      showMessage("error", "Solo se permiten archivos PDF.");
+      showMessage("error", t("upload.onlyPdf"));
       return;
     }
     setPdfFile(file);
@@ -47,14 +49,11 @@ export function ModalReplaceSupport({
     setIsLoading(true);
     try {
       await replaceMedicalAccountSupport(accountId, documentId, pdfFile);
-      showMessage("success", "Soporte reemplazado correctamente.");
+      showMessage("success", t("replaceSupportModal.success"));
       onSuccess();
       onClose();
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al reemplazar el soporte."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("replaceSupportModal.error"));
     } finally {
       setIsLoading(false);
     }
@@ -73,10 +72,10 @@ export function ModalReplaceSupport({
       open={isOpen}
       width={520}
       onCancel={handleClose}
-      title={<Title level={4}>Reemplazar soporte</Title>}
+      title={<Title level={4}>{t("replaceSupportModal.title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Reemplazar"
+          titleConfirm={t("replaceSupportModal.confirm")}
           showLeftButton={false}
           isConfirmDisabled={!pdfFile || documentId == null}
           isConfirmLoading={isLoading}
@@ -87,9 +86,7 @@ export function ModalReplaceSupport({
       destroyOnClose
     >
       <Flex vertical gap="1.25rem">
-        <p className="-mt-2 text-sm text-gray-500">
-          Adjunta el nuevo PDF de este documento para reemplazar el soporte actual.
-        </p>
+        <p className="-mt-2 text-sm text-gray-500">{t("replaceSupportModal.description")}</p>
 
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
@@ -107,7 +104,7 @@ export function ModalReplaceSupport({
                 type="button"
                 onClick={() => setPdfFile(null)}
                 className="shrink-0 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                aria-label="Quitar archivo"
+                aria-label={t("upload.removeFile")}
               >
                 <X size={18} />
               </button>
@@ -116,8 +113,8 @@ export function ModalReplaceSupport({
             <UploadDropZone
               onFileUpload={handleFileUpload}
               allowedExtensions={[".pdf"]}
-              title="Arrastra el PDF aquí"
-              subtitle="o haz clic para seleccionarlo"
+              title={t("upload.dropTitle")}
+              subtitle={t("upload.dropSubtitle")}
             />
           )}
         </div>

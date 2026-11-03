@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 import { API } from "@/utils/api/api";
 import {
@@ -43,14 +44,14 @@ export const addAddressToLocation = async (
     );
 
     if (response.success !== false) {
-      showMessage("success", "Direccion creada exitosamente.");
+      showMessage("success", getTranslator("shared")("services.addressCreated"));
     } else {
       throw new Error("error");
     }
     return response;
   } catch (error) {
     console.warn("error creating new location: ", error);
-    showMessage("error", "Oops ocurrio un error creando la dirección.");
+    showMessage("error", getTranslator("shared")("services.createAddressError"));
     return error as any;
   }
 };

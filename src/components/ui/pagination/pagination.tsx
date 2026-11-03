@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import { CaretLeft, CaretRight } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import styles from "./pagination.module.scss";
 
 export interface PaginationProps {
@@ -31,6 +32,8 @@ const Pagination: FC<PaginationProps> = ({
   showResultsText = true,
   isLoading = false
 }) => {
+  const t = useTranslations("components.pagination");
+  const tCommon = useTranslations("common");
   const totalPages = Math.ceil(totalItems / pageSize);
 
   if (totalPages <= 1) {
@@ -76,7 +79,7 @@ const Pagination: FC<PaginationProps> = ({
     <div className={`${styles.paginationContainer} ${className || ""}`}>
       {showResultsText && (
         <div className={styles.resultsText}>
-          Mostrando {startItem} a {endItem} de {totalItems} resultados
+          {t("showing", { start: startItem, end: endItem, total: totalItems })}
         </div>
       )}
 
@@ -88,7 +91,7 @@ const Pagination: FC<PaginationProps> = ({
           disabled={currentPage === 1 || isLoading}
         >
           <CaretLeft weight="bold" />
-          Anterior
+          {tCommon("actions.previous")}
         </button>
 
         <div className={styles.pageNumbers}>
@@ -111,7 +114,7 @@ const Pagination: FC<PaginationProps> = ({
           onClick={handleNext}
           disabled={currentPage === totalPages || isLoading}
         >
-          Siguiente
+          {tCommon("actions.next")}
           <CaretRight weight="bold" />
         </button>
       </div>

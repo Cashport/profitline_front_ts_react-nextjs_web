@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 
 import {
   IColumnProfile,
@@ -10,27 +11,19 @@ import {
 } from "@/types/dataQuality/IIntakeStructure";
 import { PlModalShell } from "./PlModalShell";
 
-const TYPE_OPTIONS: { value: ValidationColumnType; label: string }[] = [
-  { value: "text", label: "Texto" },
-  { value: "number", label: "Número" },
-  { value: "integer", label: "Entero" },
-  { value: "date", label: "Fecha" },
-  { value: "boolean", label: "Sí / No" },
-  { value: "any", label: "Cualquiera" }
+// Etiquetas en modals.intakeStructure.loaderValidations.{types,calcs,severities}.
+const TYPE_OPTIONS: ValidationColumnType[] = [
+  "text",
+  "number",
+  "integer",
+  "date",
+  "boolean",
+  "any"
 ];
 
-const CALC_OPTIONS: { value: ValidationCalc; label: string }[] = [
-  { value: "none", label: "Ninguno" },
-  { value: "sum", label: "Sumar" },
-  { value: "count", label: "Contar" },
-  { value: "count_distinct", label: "Contar distintos" },
-  { value: "avg", label: "Promedio" }
-];
+const CALC_OPTIONS: ValidationCalc[] = ["none", "sum", "count", "count_distinct", "avg"];
 
-const SEVERITY_OPTIONS: { value: ValidationSeverity; label: string }[] = [
-  { value: "warning", label: "Advertir" },
-  { value: "block", label: "Bloquear" }
-];
+const SEVERITY_OPTIONS: ValidationSeverity[] = ["warning", "block"];
 
 const WINDOW_OPTIONS = [3, 6, 12];
 
@@ -65,6 +58,9 @@ export const ModalLoaderValidations = ({
   onSave,
   onCancel
 }: Props) => {
+  const t = useTranslations("modals.intakeStructure.loaderValidations");
+  const tShared = useTranslations("modals.intakeStructure");
+  const tCommon = useTranslations("common");
   const [config, setConfig] = useState<ILoaderValidationConfig | null>(initial);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +98,7 @@ export const ModalLoaderValidations = ({
 
   const handleSave = async () => {
     if (totalRules < 2) {
-      setError("Activa al menos una regla además del total de filas.");
+      setError(t("atLeastOneRule"));
       return;
     }
     setSaving(true);
@@ -110,7 +106,7 @@ export const ModalLoaderValidations = ({
     try {
       await onSave(config);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudieron guardar las validaciones.");
+      setError(e instanceof Error ? e.message : t("saveError"));
     } finally {
       setSaving(false);
     }
@@ -122,36 +118,28 @@ export const ModalLoaderValidations = ({
       onClose={onCancel}
       title={
         mode === "upload"
-          ? `Define las validaciones${loaderName ? ` · ${loaderName}` : ""}`
-          : `Validaciones${loaderName ? ` · ${loaderName}` : ""}`
+          ? `${t("titleUpload")}${loaderName ? ` · ${loaderName}` : ""}`
+          : `${t("titleEdit")}${loaderName ? ` · ${loaderName}` : ""}`
       }
       fileName={fileName}
-      meta={mode === "upload" ? "el template ya está guardado" : null}
+      meta={mode === "upload" ? t("templateSaved") : null}
       steps={
         mode === "upload"
           ? [
-              { label: "1 · Estructura", state: "done" },
-              { label: "2 · Validaciones", state: "active" },
-              { label: "3 · Cargue", state: "pending" }
+              { label: t("stepStructure"), state: "done" },
+              { label: t("stepValidations"), state: "active" },
+              { label: t("stepUpload"), state: "pending" }
             ]
           : undefined
       }
-      heading={
-        mode === "upload"
-          ? "Este ETL todavía no tiene validaciones"
-          : "Qué se revisa en cada cargue"
-      }
-      subheading={
-        mode === "upload"
-          ? "Elige qué revisar en cada columna antes de cargar. Las sugerencias salen del archivo."
-          : "Los cambios aplican desde el próximo cargue."
-      }
+      heading={mode === "upload" ? t("headingUpload") : t("headingEdit")}
+      subheading={mode === "upload" ? t("subheadingUpload") : t("subheadingEdit")}
       footer={
         <>
-          <span className="plNote">Se crearán {totalRules} reglas</span>
+          <span className="plNote">{t("rulesToCreate", { count: totalRules })}</span>
           <span className="plSpacer" />
           <button type="button" className="plBtn" onClick={onCancel} disabled={saving}>
-            {mode === "upload" ? "Cancelar cargue" : "Cancelar"}
+            {mode === "upload" ? tShared("cancelUpload") : tCommon("actions.cancel")}
           </button>
           <button
             type="button"
@@ -159,19 +147,23 @@ export const ModalLoaderValidations = ({
             onClick={handleSave}
             disabled={saving}
           >
-            {saving ? "Guardando…" : mode === "upload" ? "Guardar y cargar" : "Guardar"}
+            {saving
+              ? tCommon("status.saving")
+              : mode === "upload"
+                ? t("saveAndUpload")
+                : tCommon("actions.save")}
           </button>
         </>
       }
     >
       <div className="plCard">
         <div className="plRuleGrid plRuleGrid--head">
-          <span>Columna</span>
-          <span>Tipo</span>
-          <span>Oblig.</span>
-          <span>Calcular</span>
-          <span>Desv. %</span>
-          <span>Si se sale</span>
+          <span>{t("columns.column")}</span>
+          <span>{t("columns.type")}</span>
+          <span>{t("columns.required")}</span>
+          <span>{t("columns.calc")}</span>
+          <span>{t("columns.deviation")}</span>
+          <span>{t("columns.ifOut")}</span>
         </div>
 
         {config.columns.map((c, i) => {
@@ -184,44 +176,44 @@ export const ModalLoaderValidations = ({
                 </span>
                 {p && (
                   <span className="plHint">
-                    {p.cell} · {p.filled} con valor
-                    {p.empty ? ` · ${p.empty} vacías` : ""}
+                    {p.cell} · {t("filled", { count: p.filled })}
+                    {p.empty ? ` · ${t("empty", { count: p.empty })}` : ""}
                   </span>
                 )}
               </span>
               <select
-                aria-label={`Tipo de ${c.name}`}
+                aria-label={t("aria.type", { name: c.name })}
                 value={c.type}
                 onChange={(e) => updateColumn(i, { type: e.target.value as ValidationColumnType })}
               >
                 {TYPE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+                  <option key={o} value={o}>
+                    {t(`types.${o}`)}
                   </option>
                 ))}
               </select>
               <input
                 type="checkbox"
-                aria-label={`${c.name} obligatoria`}
+                aria-label={t("aria.required", { name: c.name })}
                 checked={c.required}
                 onChange={(e) => updateColumn(i, { required: e.target.checked })}
               />
               <select
-                aria-label={`Cálculo de ${c.name}`}
+                aria-label={t("aria.calc", { name: c.name })}
                 value={c.calc}
                 onChange={(e) => updateColumn(i, { calc: e.target.value as ValidationCalc })}
               >
-                {CALC_OPTIONS.filter(
-                  (o) => isNumeric(c.type) || (o.value !== "sum" && o.value !== "avg")
-                ).map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
+                {CALC_OPTIONS.filter((o) => isNumeric(c.type) || (o !== "sum" && o !== "avg")).map(
+                  (o) => (
+                    <option key={o} value={o}>
+                      {t(`calcs.${o}`)}
+                    </option>
+                  )
+                )}
               </select>
               <input
                 type="number"
-                aria-label={`Desviación permitida de ${c.name}`}
+                aria-label={t("aria.deviation", { name: c.name })}
                 min={1}
                 max={100}
                 step={1}
@@ -230,7 +222,7 @@ export const ModalLoaderValidations = ({
                 onChange={(e) => updateColumn(i, { tolerance_pct: Number(e.target.value) })}
               />
               <select
-                aria-label={`Qué pasa si ${c.name} se sale`}
+                aria-label={t("aria.ifOut", { name: c.name })}
                 value={c.severity}
                 disabled={rulesOf(c) === 0}
                 onChange={(e) =>
@@ -238,8 +230,8 @@ export const ModalLoaderValidations = ({
                 }
               >
                 {SEVERITY_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+                  <option key={o} value={o}>
+                    {t(`severities.${o}`)}
                   </option>
                 ))}
               </select>
@@ -249,15 +241,15 @@ export const ModalLoaderValidations = ({
 
         <div className="plRuleGrid">
           <span className="plColName">
-            <span style={{ fontWeight: 700 }}>Total de filas</span>
-            <span className="plHint">siempre se revisa</span>
+            <span style={{ fontWeight: 700 }}>{t("rowCount")}</span>
+            <span className="plHint">{t("alwaysChecked")}</span>
           </span>
           <span className="plHint">—</span>
           <span className="plHint">—</span>
-          <span className="plHint">Contar filas</span>
+          <span className="plHint">{t("countRows")}</span>
           <input
             type="number"
-            aria-label="Desviación permitida del total de filas"
+            aria-label={t("aria.rowCountDeviation")}
             min={1}
             max={100}
             step={1}
@@ -270,7 +262,7 @@ export const ModalLoaderValidations = ({
             }
           />
           <select
-            aria-label="Qué pasa si el total de filas se sale"
+            aria-label={t("aria.rowCountIfOut")}
             value={config.row_count.severity}
             onChange={(e) =>
               setConfig({
@@ -283,8 +275,8 @@ export const ModalLoaderValidations = ({
             }
           >
             {SEVERITY_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
+              <option key={o} value={o}>
+                {t(`severities.${o}`)}
               </option>
             ))}
           </select>
@@ -292,9 +284,9 @@ export const ModalLoaderValidations = ({
       </div>
 
       <div className="plWindowRow">
-        Comparar contra el promedio de las últimas
+        {t("windowBefore")}
         <select
-          aria-label="Cargas que forman el promedio"
+          aria-label={t("aria.window")}
           value={config.window}
           onChange={(e) => setConfig({ ...config, window: Number(e.target.value) })}
         >
@@ -306,13 +298,9 @@ export const ModalLoaderValidations = ({
               </option>
             ))}
         </select>
-        cargas
+        {t("windowAfter", { count: config.window })}
       </div>
-      <span className="plNote">
-        Mientras no haya cargas anteriores solo se revisan tipos y obligatorias; las desviaciones
-        empiezan a contar desde la segunda carga. &quot;Bloquear&quot; detiene el cargue;
-        &quot;Advertir&quot; lo deja pasar y queda en el historial.
-      </span>
+      <span className="plNote">{t("footnote")}</span>
       {error && <span className="plError">{error}</span>}
     </PlModalShell>
   );

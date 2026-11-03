@@ -3,6 +3,7 @@
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
 import { ExternalLink, PanelRightOpen } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import { useModalDetail } from "@/context/ModalContext";
@@ -19,7 +20,7 @@ import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { useProgressiveRows } from "../../hooks/use-progressive-rows";
 import type { PnaAge } from "../../types";
 import { CatalogIndex, indexCatalogs } from "../../utils/filters";
-import { fmt, fmtPaidAt, full, money, plural } from "../../utils/format";
+import { fmt, fmtPaidAt, full, money } from "../../utils/format";
 import {
   clientName,
   clientSub,
@@ -45,34 +46,34 @@ import {
 } from "../shared/styles";
 import TowerTooltip from "../shared/tower-tooltip";
 
+/** Nombre de cada columna: `collections.unappliedTable.columns.<col>`. */
 const COLUMNS: {
-  col: string;
-  label: string;
+  col: "id" | "client" | "paidAt" | "days" | "amount";
   align?: "right";
   width: string;
   hideSm?: boolean;
   dir: SortState["dir"];
 }[] = [
-  { col: "id", label: "ID pago", width: "w-[14%]", dir: "asc" },
-  { col: "client", label: "Cliente", width: "w-[34%]", dir: "asc" },
-  { col: "paidAt", label: "Fecha de pago", width: "w-[18%]", hideSm: true, dir: "asc" },
-  { col: "days", label: "Tiempo pendiente", align: "right", width: "w-[16%]", dir: "desc" },
-  { col: "amount", label: "Monto pendiente", align: "right", width: "w-[18%]", dir: "desc" }
+  { col: "id", width: "w-[14%]", dir: "asc" },
+  { col: "client", width: "w-[34%]", dir: "asc" },
+  { col: "paidAt", width: "w-[18%]", hideSm: true, dir: "asc" },
+  { col: "days", align: "right", width: "w-[16%]", dir: "desc" },
+  { col: "amount", align: "right", width: "w-[18%]", dir: "desc" }
 ];
+
+type UnappliedT = ReturnType<typeof useTranslations<"collections.unappliedTable">>;
 
 /** Tiempo pendiente: neutro hasta 3 días, alerta de 4 a 7, crítico con más de 7. */
 const ageTone = (days: number) =>
   days > PNA_DAYS_CRIT ? "crit" : days > PNA_DAYS_WARN ? "warn" : "idle";
 
-const payments = (n: number) => plural(n, "pago", "pagos");
-
 /**
  * Tiempo pendiente del chip. El banco sólo trae la fecha del pago: sin hora,
  * las horas serían siempre las del corte ("8 h" en todos), así que va en días.
  */
-const pendingLabel = (p: ITowerUnappliedPayment, hasTime: boolean) => {
+const pendingLabel = (p: ITowerUnappliedPayment, hasTime: boolean, tc: UnappliedT) => {
   const days = pendingDays(p);
-  if (!hasTime) return days ? `${days} d` : "Hoy";
+  if (!hasTime) return days ? `${days} d` : tc("today");
   return `${days ? `${days} d ` : ""}${p.pendingHours % 24} h`;
 };
 
@@ -94,6 +95,7 @@ const UnappliedRow = memo(function UnappliedRow({
   onToggle,
   onOpenPayment
 }: UnappliedRowProps) {
+  const tc = useTranslations("collections.unappliedTable");
   const paid = fmtPaidAt(p.paidAt);
   return (
     <tr
@@ -109,7 +111,7 @@ const UnappliedRow = memo(function UnappliedRow({
             href={p.url}
             target="_blank"
             rel="noopener noreferrer"
-            title="Abrir el pago en Cashport"
+            title={tc("openInCashport")}
             className="inline-flex items-center gap-[5px] text-[13px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
           >
             {p.id}
@@ -120,7 +122,7 @@ const UnappliedRow = memo(function UnappliedRow({
           <button
             type="button"
             onClick={() => onOpenPayment(p.id)}
-            title="Ver el detalle del pago"
+            title={tc("viewDetail")}
             className="inline-flex cursor-pointer items-center gap-[5px] border-0 bg-transparent p-0 text-[13px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
           >
             {p.id}
@@ -138,13 +140,13 @@ const UnappliedRow = memo(function UnappliedRow({
       </td>
       <td className={cn(TD, "text-right")}>
         <StatusChip sev={ageTone(pendingDays(p))} className="rounded tabular-nums">
-          {pendingLabel(p, Boolean(paid.time))}
+          {pendingLabel(p, Boolean(paid.time), tc)}
         </StatusChip>
       </td>
       <td className={cn(TD, "text-right")}>
         <TowerTooltip
-          title="Pago sin aplicar"
-          rows={[{ key: "v", color, label: "Monto", value: full(p.amount) }]}
+          title={tc("unappliedTitle")}
+          rows={[{ key: "v", color, label: tc("amount"), value: full(p.amount) }]}
         >
           <span className={AMOUNT}>{money(p.amount)}</span>
         </TowerTooltip>
@@ -158,6 +160,8 @@ const UnappliedRow = memo(function UnappliedRow({
  * filtros rápidos por coordinador (selección múltiple) y por antigüedad.
  */
 export default function UnappliedTable({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections");
+  const tCommon = useTranslations("common");
   const { filters, toggleClient } = useTowerFilters();
   const { openModal } = useModalDetail();
   const [age, setAge] = useState<PnaAge>("all");
@@ -196,32 +200,32 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
 
   const hint = `${
     active.length
-      ? `${plural(active.length, "coordinador filtrando", "coordinadores filtrando")} · `
+      ? `${tc("unappliedTable.coordinatorsFiltering", { count: active.length })} · `
       : ""
-  }${payments(rows.length)} · ${money(total)}${
-    previous ? ` (${money(previous)} de meses anteriores)` : ""
+  }${tc("unappliedTable.payments", { count: rows.length })} · ${money(total)}${
+    previous ? ` ${tc("unappliedTable.previousMonths", { amount: money(previous) })}` : ""
   }`;
 
   return (
     <PanelCard
-      title="Pagos identificados sin aplicar (PNA)"
+      title={tc("unappliedTable.title")}
       hint={hint}
       flush
       actions={
         <>
           <Select
             size="small"
-            aria-label="Filtrar PNA"
+            aria-label={tc("unappliedTable.filterAria")}
             className="w-[136px]"
             popupMatchSelectWidth={false}
             value={age}
-            options={PNA_AGES.map((a) => ({ value: a.id, label: a.label }))}
+            options={PNA_AGES.map((a) => ({ value: a.id, label: tc(`pnaAges.${a.id}`) }))}
             onChange={setAge}
           />
           <ExcelButton
             table="unapplied"
             state={{ pnaAge: age, coordinators: active, sortBy: sort.col, sortDir: sort.dir }}
-            name="PNA sin aplicar"
+            name={tc("unappliedTable.excelName")}
             periodLabel={data.period.label}
           />
         </>
@@ -229,7 +233,7 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
     >
       <div
         role="group"
-        aria-label="Filtrar PNA por coordinador"
+        aria-label={tc("unappliedTable.byCoordinatorAria")}
         className="flex flex-wrap gap-0.5 px-4 py-2.5"
       >
         {data.catalogs.coordinators
@@ -242,8 +246,18 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
                 key={c.id}
                 title={c.name}
                 rows={[
-                  { key: "n", color, label: "Pagos sin aplicar", value: String(own.length) },
-                  { key: "v", color, label: "Monto", value: money(sumBy(own, (p) => p.amount)) }
+                  {
+                    key: "n",
+                    color,
+                    label: tc("unappliedTable.unappliedPayments"),
+                    value: String(own.length)
+                  },
+                  {
+                    key: "v",
+                    color,
+                    label: tc("unappliedTable.amount"),
+                    value: money(sumBy(own, (p) => p.amount))
+                  }
                 ]}
               >
                 <button
@@ -273,7 +287,11 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
                 <SortableTh
                   key={c.col}
                   col={c.col}
-                  label={c.label}
+                  label={
+                    c.col === "client"
+                      ? tCommon("fields.customer")
+                      : tc(`unappliedTable.columns.${c.col}`)
+                  }
                   align={c.align}
                   sort={sort}
                   onSort={(col) => setSort((s) => nextSort(s, col, c.dir))}
@@ -298,19 +316,21 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
             ) : (
               <tr>
                 <td colSpan={COLUMNS.length} className={EMPTY}>
-                  No hay pagos pendientes de aplicar en esta vista
+                  {tc("unappliedTable.empty")}
                 </td>
               </tr>
             )}
             {hasMore && <SentinelRow ref={sentinelRef} colSpan={COLUMNS.length} />}
             {rows.length > 0 && (
               <tr>
-                <td className={TD_TOTAL}>Total</td>
-                <td className={TD_TOTAL}>{payments(rows.length)}</td>
+                <td className={TD_TOTAL}>{tc("rows.total")}</td>
+                <td className={TD_TOTAL}>
+                  {tc("unappliedTable.payments", { count: rows.length })}
+                </td>
                 <td className={cn(TD_TOTAL, HIDE_SM)} />
                 <td className={cn(TD_TOTAL, "text-right")}>
                   <span className="text-[13px] font-normal text-muted-foreground">
-                    {fmt(avgDays, 1)} días prom.
+                    {tc("unappliedTable.avgDays", { value: fmt(avgDays, 1) })}
                   </span>
                 </td>
                 <td className={cn(TD_TOTAL, "text-right tabular-nums")}>{money(total)}</td>

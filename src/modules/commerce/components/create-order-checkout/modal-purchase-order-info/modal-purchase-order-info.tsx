@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Input, Modal, Typography } from "antd";
 import type { UploadFile } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
@@ -30,6 +31,8 @@ export default function ModalPurchaseOrderInfo({
   isNumberRequired
 }: ModalPurchaseOrderInfoProps) {
   const { showMessage } = useMessageApi();
+  const t = useTranslations("commerce.purchaseOrderModal");
+  const tCommon = useTranslations("common");
   const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
   const [poFile, setPoFile] = useState<File | undefined>();
   const [numberError, setNumberError] = useState(false);
@@ -49,10 +52,7 @@ export default function ModalPurchaseOrderInfo({
     if (!file) return;
     const fileSizeInMB = file.size / (1024 * 1024);
     if (fileSizeInMB > 30) {
-      showMessage(
-        "error",
-        "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-      );
+      showMessage("error", t("fileTooLarge", { size: 30 }));
       return;
     }
     setPoFile(file);
@@ -79,12 +79,12 @@ export default function ModalPurchaseOrderInfo({
     <Modal
       open={isOpen}
       onCancel={onCancel}
-      title={<Title level={4}>Orden de compra</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       width={520}
       footer={
         <FooterButtons
-          titleConfirm="Guardar"
-          titleCancel="Cancelar"
+          titleConfirm={tCommon("actions.save")}
+          titleCancel={tCommon("actions.cancel")}
           onClose={onCancel}
           handleOk={handleOk}
         />
@@ -94,7 +94,7 @@ export default function ModalPurchaseOrderInfo({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Text className="font-medium text-[#141414]">
-            # de orden de compra
+            {t("numberLabel")}
             {isNumberRequired && <span className="text-red-500"> *</span>}
           </Text>
           <Input
@@ -103,23 +103,23 @@ export default function ModalPurchaseOrderInfo({
               setPurchaseOrderNumber(e.target.value);
               setNumberError(false);
             }}
-            placeholder="Ingresa el # de orden de compra"
+            placeholder={t("numberPlaceholder")}
             maxLength={50}
             className="h-10"
             status={numberError ? "error" : undefined}
           />
           {numberError && (
             <Text type="danger" className="text-[13px]">
-              Ingresa el # de orden de compra
+              {t("numberPlaceholder")}
             </Text>
           )}
         </div>
 
         <div className="flex flex-col gap-2">
-          <Text className="font-medium text-[#141414]">PDF orden de compra</Text>
+          <Text className="font-medium text-[#141414]">{t("pdf")}</Text>
           <div className="h-[100px]">
             <DocumentButton
-              title="PDF orden de compra"
+              title={t("pdf")}
               fileName={poFile?.name}
               fileSize={poFile?.size}
               handleOnChange={handleChange}

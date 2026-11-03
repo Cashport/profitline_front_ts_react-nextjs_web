@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import dayjs from "dayjs";
 import useSWR from "swr";
 import { Table } from "antd";
+import { useLocale, useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import {
@@ -18,7 +19,7 @@ import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsB
 import { FilterDevolucionesTab } from "../FilterDevolucionesTab/FilterDevolucionesTab";
 import { useDevolucionesTabState } from "../../contexts/ReverseLogisticsFiltersContext";
 import { parseCausales } from "../../utils/causales";
-import { returnsColumns } from "./columns";
+import { getReturnsColumns } from "./columns";
 import { highestFaseLabel } from "../../constants";
 
 // Backend page size — the visits endpoint paginates with its own `page`/`limit`,
@@ -151,6 +152,12 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit, visitIndex: number): Retu
 };
 
 export function DevolucionesTab() {
+  const t = useTranslations("reverseLogistics");
+  const tReturns = useTranslations("reverseLogistics.returns");
+  const tCommon = useTranslations("common");
+  // The fase label baked into each row is translated when the rows are built.
+  const locale = useLocale();
+  const columns = useMemo(() => getReturnsColumns(tReturns), [tReturns]);
   // Filter / search / page / selection state live in ReverseLogisticsFiltersProvider
   // so they survive tab switches between Devoluciones and Aprobaciones.
   const {
@@ -213,7 +220,7 @@ export function DevolucionesTab() {
             devs.length > 0 ? devs.map((d, i) => mapDevolucionToRow(visit, d, i)) : undefined
         };
       }),
-    [visits]
+    [visits, locale]
   );
 
   // Client-side search across the current page only — cliente, date range and
@@ -236,7 +243,10 @@ export function DevolucionesTab() {
     <>
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
-        <UiSearchInput placeholder="Buscar" onChange={(e) => setSearchTerm(e.target.value)} />
+        <UiSearchInput
+          placeholder={tCommon("actions.search")}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
         <GenerateActionButton onClick={() => {}} />
 
@@ -255,7 +265,7 @@ export function DevolucionesTab() {
       <div className="w-full overflow-x-auto">
         <Table<ReturnRow>
           rowKey="key"
-          columns={returnsColumns}
+          columns={columns}
           dataSource={filtered}
           loading={isLoading}
           // `indent > 0` = fila hija desplegada de una visita con 2+ devoluciones:
@@ -277,7 +287,8 @@ export function DevolucionesTab() {
             showSizeChanger: false,
             position: ["none", "bottomRight"],
             onChange: setPage,
-            showTotal: (t, range) => `Mostrando ${range[0]} a ${range[1]} de ${t} resultados`
+            showTotal: (total, range) =>
+              t("table.showingTotal", { from: range[0], to: range[1], total })
           }}
           scroll={{ x: 1000 }}
         />

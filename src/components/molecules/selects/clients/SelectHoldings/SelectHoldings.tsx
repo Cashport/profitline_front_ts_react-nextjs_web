@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import {
   ControllerRenderProps,
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const SelectHoldings = ({ errors, field }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useHolding();
   const options = data?.data?.map((option) => {
     return {
@@ -31,14 +33,14 @@ export const SelectHoldings = ({ errors, field }: Props) => {
 
   options?.unshift({
     value: 0,
-    label: "- Sin Asignar -",
+    label: t("unassignedOption"),
     className: "selectOptions  -noHolding"
   });
 
   return (
     <>
       <Select
-        placeholder="Seleccione un Holding"
+        placeholder={t("selectHolding")}
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={isLoading}
         variant="borderless"
@@ -48,9 +50,7 @@ export const SelectHoldings = ({ errors, field }: Props) => {
         options={options}
         labelInValue
       />
-      {errors && (
-        <Typography.Text className="textError">El holding es obligatorio *</Typography.Text>
-      )}
+      {errors && <Typography.Text className="textError">{t("holdingRequired")}</Typography.Text>}
     </>
   );
 };

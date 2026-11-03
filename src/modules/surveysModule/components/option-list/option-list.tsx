@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Input, type InputRef } from "antd";
 import { Plus, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import type { IVisitFormQuestion } from "@/types/surveys/ISurveys";
 import { cn } from "@/utils/utils";
@@ -16,6 +17,7 @@ interface OptionListProps {
 
 /** Opciones de una pregunta de selección. Enter agrega otra debajo y sigue escribiendo en ella. */
 export default function OptionList({ question, editor }: OptionListProps) {
+  const t = useTranslations("surveys.optionList");
   const inputs = useRef(new Map<string, InputRef>());
   const [focusId, setFocusId] = useState<string | null>(null);
   const options = question.options ?? [];
@@ -48,14 +50,14 @@ export default function OptionList({ question, editor }: OptionListProps) {
               else inputs.current.delete(option.id);
             }}
             value={option.label}
-            placeholder={`Opción ${i + 1}`}
+            placeholder={t("placeholder", { number: i + 1 })}
             onChange={(e) => editor.updateOption(question.id, option.id, e.target.value)}
             onPressEnter={() => setFocusId(editor.addOption(question.id, i))}
           />
           <button
             type="button"
-            title="Quitar opción"
-            aria-label="Quitar opción"
+            title={t("remove")}
+            aria-label={t("remove")}
             disabled={options.length <= 1}
             onClick={() => editor.removeOption(question.id, option.id)}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[#efefef] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
@@ -70,7 +72,7 @@ export default function OptionList({ question, editor }: OptionListProps) {
         className="flex h-8 w-fit items-center gap-1.5 rounded-md px-2 text-[13px] font-medium text-foreground transition-colors hover:bg-[#efefef]"
       >
         <Plus className="h-4 w-4" />
-        Agregar opción
+        {t("add")}
       </button>
     </div>
   );

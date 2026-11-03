@@ -14,6 +14,7 @@ import { Input } from "@cetaphilUI/input";
 import { Label } from "@cetaphilUI/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@cetaphilUI/select";
 import { DOCUMENT_TYPES } from "@/constants/documentTypes";
+import { useTranslations } from "use-intl";
 
 export interface RegistrationFormData {
   fullName: string;
@@ -56,15 +57,17 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
   open,
   onOpenChange,
   onSubmit,
-  title = "Solicitud de Registro",
-  description = "Complete el formulario para acceder al marketplace de distribuidores",
-  submitButtonText = "Crear mi cuenta",
+  title,
+  description,
+  submitButtonText,
   showReferralEmail = false,
   showEmail = true,
   defaultValues,
   disabledFields,
   isSubmitting = false
 }) => {
+  const t = useTranslations("publicPortals.cetaphil.registration");
+  const tCommon = useTranslations("common");
   const {
     control,
     handleSubmit,
@@ -111,32 +114,34 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md bg-card">
         <DialogHeader className="space-y-2">
-          <DialogTitle className="text-xl font-semibold text-foreground">{title}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-foreground">
+            {title ?? t("title")}
+          </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {description}
+            {description ?? t("description")}
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4 py-4" onSubmit={handleSubmit(handleFormSubmit)}>
           {/* Nombre y Apellido */}
           <div className="space-y-2">
             <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
-              Nombre y Apellido
+              {t("fullName")}
             </Label>
             <Controller
               name="fullName"
               control={control}
               rules={{
-                required: "Este campo es requerido",
+                required: tCommon("validation.required"),
                 minLength: {
                   value: 2,
-                  message: "El nombre debe tener al menos 2 caracteres"
+                  message: t("fullNameMinLength")
                 }
               }}
               render={({ field }) => (
                 <Input
                   {...field}
                   id="fullName"
-                  placeholder="Ingresa tu nombre"
+                  placeholder={t("fullNamePlaceholder")}
                   className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
                 />
               )}
@@ -147,19 +152,19 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
           {/* Tipo de documento */}
           <div className="space-y-2">
             <Label htmlFor="documentType" className="text-sm font-medium text-foreground">
-              Tipo de documento
+              {t("documentType")}
             </Label>
             <Controller
               name="documentType"
               control={control}
-              rules={{ required: "Este campo es requerido" }}
+              rules={{ required: tCommon("validation.required") }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger
                     id="documentType"
                     className="bg-white border-[#DDDDDD] focus:border-[#141414] focus:ring-0 focus:ring-offset-0 transition-colors w-full"
                   >
-                    <SelectValue placeholder="Seleccione su tipo de identificación" />
+                    <SelectValue placeholder={t("documentTypePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
                     {DOCUMENT_TYPES.map((docType) => (
@@ -179,23 +184,23 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
           {/* N° de identificación */}
           <div className="space-y-2">
             <Label htmlFor="documentNumber" className="text-sm font-medium text-foreground">
-              N° de identificación
+              {t("documentNumber")}
             </Label>
             <Controller
               name="documentNumber"
               control={control}
               rules={{
-                required: "Este campo es requerido",
+                required: tCommon("validation.required"),
                 pattern: {
                   value: /^[0-9]+$/,
-                  message: "Solo se permiten números"
+                  message: t("onlyNumbers")
                 }
               }}
               render={({ field }) => (
                 <Input
                   {...field}
                   id="documentNumber"
-                  placeholder="Número de identificación"
+                  placeholder={t("documentNumberPlaceholder")}
                   className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
                 />
               )}
@@ -209,16 +214,16 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
           {showEmail && (
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                Correo electrónico
+                {tCommon("fields.email")}
               </Label>
               <Controller
                 name="email"
                 control={control}
                 rules={{
-                  required: "Este campo es requerido",
+                  required: tCommon("validation.required"),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Correo electrónico inválido"
+                    message: tCommon("validation.invalidEmail")
                   }
                 }}
                 render={({ field }) => (
@@ -226,7 +231,7 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
                     {...field}
                     id="email"
                     type="email"
-                    placeholder="Ingresa tu correo"
+                    placeholder={t("emailPlaceholder")}
                     disabled={disabledFields?.email}
                     className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   />
@@ -240,16 +245,16 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
           {showReferralEmail && (
             <div className="space-y-2">
               <Label htmlFor="referralEmail" className="text-sm font-medium text-foreground">
-                Correo electrónico de referido
+                {t("referralEmail")}
               </Label>
               <Controller
                 name="referralEmail"
                 control={control}
                 rules={{
-                  required: "Este campo es requerido",
+                  required: tCommon("validation.required"),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Correo electrónico inválido"
+                    message: tCommon("validation.invalidEmail")
                   }
                 }}
                 render={({ field }) => (
@@ -257,7 +262,7 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
                     {...field}
                     id="referralEmail"
                     type="email"
-                    placeholder="Ingresa el correo de referido"
+                    placeholder={t("referralEmailPlaceholder")}
                     disabled={disabledFields?.referralEmail}
                     className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   />
@@ -272,7 +277,7 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
           {/* Celular */}
           <div className="space-y-2">
             <Label htmlFor="phone" className="text-sm font-medium text-foreground">
-              Celular
+              {t("phone")}
             </Label>
             <div className="flex gap-2">
               <div className="w-16 flex items-center justify-center border border-[#DDDDDD] rounded-md bg-[#F7F7F7] text-sm font-medium text-foreground">
@@ -282,10 +287,10 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
                 name="phone"
                 control={control}
                 rules={{
-                  required: "Este campo es requerido",
+                  required: tCommon("validation.required"),
                   pattern: {
                     value: /^[0-9]{10}$/,
-                    message: "Debe contener 10 dígitos"
+                    message: t("phoneDigits", { count: 10 })
                   }
                 }}
                 render={({ field }) => (
@@ -293,7 +298,7 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
                     {...field}
                     id="phone"
                     type="tel"
-                    placeholder="Ingresa tu celular"
+                    placeholder={t("phonePlaceholder")}
                     className="flex-1 bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
                   />
                 )}
@@ -309,7 +314,7 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
               disabled={isSubmitting}
               className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-medium border-2 border-accent disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Enviando..." : submitButtonText}
+              {isSubmitting ? tCommon("status.sending") : submitButtonText ?? t("submit")}
             </Button>
           </div>
         </form>

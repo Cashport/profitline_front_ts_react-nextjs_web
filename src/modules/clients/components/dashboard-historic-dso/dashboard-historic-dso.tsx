@@ -1,4 +1,5 @@
 import { FC, useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import dayjs from "dayjs";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
@@ -27,6 +28,7 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
   className,
   yAxisLabelFormatter
 }) => {
+  const t = useTranslations("clients.dashboard.historicDso");
   const [data, setData] = useState([] as history_chart[]);
   const width = useScreenWidth();
 
@@ -43,18 +45,18 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
   };
 
   const monthNames = [
-    "Ene",
-    "Feb",
-    "Mar",
-    "Abr",
-    "May",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dic"
+    t("months.jan"),
+    t("months.feb"),
+    t("months.mar"),
+    t("months.apr"),
+    t("months.may"),
+    t("months.jun"),
+    t("months.jul"),
+    t("months.aug"),
+    t("months.sep"),
+    t("months.oct"),
+    t("months.nov"),
+    t("months.dec")
   ];
 
   useEffect(() => {
@@ -72,14 +74,14 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
       };
     });
     setData(chartData);
-  }, [history_dso]);
+  }, [history_dso, t]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className={styles.customTooltip}>
           <p>{label}</p>
-          <p className={styles.dsoValue}>DSO: {payload[0].value}</p>
+          <p className={styles.dsoValue}>{t("tooltip", { value: payload[0].value })}</p>
         </div>
       );
     }
@@ -89,11 +91,11 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
   return (
     <div className={`${styles.wrapper} ${className}`}>
       <div className={styles.name}>
-        DSO histórico
+        {t("title")}
         <div className={styles.legends}>
           <div className={styles.legend}>
             <div className={styles.circle} style={{ backgroundColor: "#CBE71E" }}></div>
-            Días
+            {t("days")}
           </div>
         </div>
       </div>

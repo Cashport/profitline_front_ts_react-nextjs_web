@@ -7,6 +7,7 @@ import {
   FileText,
   Map as MapIcon
 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Tab } from "../lib/types";
 
 interface SidebarProps {
@@ -16,13 +17,14 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpenSettings }) => {
+  const t = useTranslations("newDashboard.sidebar");
   const menuItems = [
-    { id: Tab.COLLECTION, icon: CircleDollarSign, label: "Recaudo" },
-    { id: Tab.PORTFOLIO, icon: PieChart, label: "Cartera" },
-    { id: Tab.MANAGEMENT, icon: Wallet, label: "Gestión" },
-    { id: Tab.MAP, icon: MapIcon, label: "Mapa" },
-    { id: "reports", icon: FileText, label: "Reportes" },
-    { id: "settings", icon: Settings, label: "Config" }
+    { id: Tab.COLLECTION, icon: CircleDollarSign, label: t("collection") },
+    { id: Tab.PORTFOLIO, icon: PieChart, label: t("portfolio") },
+    { id: Tab.MANAGEMENT, icon: Wallet, label: t("management") },
+    { id: Tab.MAP, icon: MapIcon, label: t("map") },
+    { id: "reports", icon: FileText, label: t("reports") },
+    { id: "settings", icon: Settings, label: t("settings") }
   ];
 
   const handleTabClick = (id: string) => {

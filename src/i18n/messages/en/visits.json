@@ -1,0 +1,184 @@
+{
+  "header": {
+    "title": "Visits",
+    "searchPlaceholder": "Search sales rep or customer"
+  },
+  "dateNav": {
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "pickDay": "Pick a day"
+  },
+  "dayLabel": {
+    "date": "{weekday}, {month} {day}",
+    "today": "Today · {date}",
+    "yesterday": "Yesterday · {date}",
+    "tomorrow": "Tomorrow · {date}"
+  },
+  "status": {
+    "IN_VISIT": "On visit",
+    "AT_POINT": "At location",
+    "EN_ROUTE": "En route",
+    "NO_VISITS": "No visits",
+    "IN_TRANSIT": "In transit",
+    "ON_PAUSE": "On break"
+  },
+  "result": {
+    "efectiva": "Successful",
+    "reprogramada": "Rescheduled",
+    "sincontacto": "No contact"
+  },
+  "projects": {
+    "ventas": {
+      "name": "Sales",
+      "definition": "Sales form with a closed order"
+    },
+    "cartera": {
+      "name": "Collections",
+      "definition": "Payment plan or payment recorded in receivables"
+    },
+    "encuestas": {
+      "name": "Surveys",
+      "definition": "Survey completed and submitted"
+    }
+  },
+  "operation": {
+    "ruta": "Visit route",
+    "fijo": "Fixed location"
+  },
+  "statusChips": {
+    "ariaLabel": "Filter by status"
+  },
+  "liveClock": {
+    "future": "Schedule",
+    "past": "History",
+    "live": "Live",
+    "replay": "Replay"
+  },
+  "filters": {
+    "project": "Project",
+    "operation": "Operation type",
+    "zone": "Zone",
+    "city": "City",
+    "salesRep": "Sales rep",
+    "result": "Result",
+    "selectedCount": "{count} selected"
+  },
+  "ranking": {
+    "title": "Ranking · Activities",
+    "counter": "{total} in the field",
+    "counterToday": "{total} in the field today",
+    "counterFiltered": "{shown} of {total}",
+    "tiles": {
+      "active": "Active",
+      "visits": "Visits",
+      "effectiveness": "Success",
+      "activities": "Activities"
+    }
+  },
+  "rankingRow": {
+    "eta": "ETA {time}",
+    "toward": "To {client}",
+    "zone": "Zone {zone}",
+    "noPending": "No pending visits",
+    "noneScheduled": "No visits scheduled",
+    "activitiesTitle": "Activities · {definition}",
+    "visitsShort": "{done}/{total} visits"
+  },
+  "layers": {
+    "track": "Route",
+    "trackFull": "Route traveled",
+    "plan": "Plan",
+    "planFull": "Pending plan",
+    "clients": "Customers"
+  },
+  "legend": {
+    "actualRoute": "Actual route",
+    "toVisit": "To visit",
+    "inVisit": "On visit",
+    "pending": "Pending"
+  },
+  "map": {
+    "inProgressSince": "In progress since {time}",
+    "since": "From {time}",
+    "eta": "ETA {time}",
+    "startPoint": "Starting point",
+    "noToken": "Map unavailable: the Mapbox token is missing"
+  },
+  "timeline": {
+    "pause": "Pause",
+    "play": "Play",
+    "speed": "Playback speed",
+    "bucketTitle": "{range} · {on} of {total} online",
+    "pointTitle": "{time} · {status}",
+    "noPoints": "No location data",
+    "accumulated": "{status} total",
+    "activities": "Activities",
+    "live": "Live",
+    "goToday": "Go to today"
+  },
+  "view": {
+    "loadErrorToday": "We couldn't load today's visits.",
+    "loadErrorDay": "We couldn't load the visits for that day.",
+    "loading": "Loading sales reps…",
+    "noMatch": "No sales reps match the filter.",
+    "noneToday": "No sales reps in the field today.",
+    "noneDay": "No sales reps in the field that day."
+  },
+  "detail": {
+    "team": "Team",
+    "loadError": "We couldn't load the sales rep's details.",
+    "loading": "Loading sales rep details…",
+    "zone": "Zone {zones}",
+    "viewDay": "View day",
+    "nowInVisit": "at {client} · since {time}",
+    "nowEnRoute": "to {client} · {time}",
+    "signalNow": "now",
+    "signalAgo": "{duration} ago",
+    "lastSignal": "Last signal <b>{value}</b>",
+    "start": "Start <b>{value}</b>",
+    "activities": "Activities",
+    "registered": "{count, plural, one {# logged} other {# logged}}",
+    "tiles": {
+      "visits": "Visits",
+      "toDo": "{count} to go",
+      "effectiveness": "Success rate",
+      "effectiveCount": "{count, plural, one {# successful} other {# successful}}",
+      "distance": "Distance",
+      "inVisit": "On visits",
+      "avgMinutes": "{minutes} min avg."
+    },
+    "since": "since {time}",
+    "dayRoute": "Route for the day",
+    "pendingCount": "{count, plural, one {# pending} other {# pending}}",
+    "dayStart": "Start of day",
+    "checkIn": "App check-in",
+    "orphans": "Activities without a visit",
+    "effective": "Successful",
+    "notEffective": "Unsuccessful"
+  },
+  "dayModal": {
+    "zone": "Zone {zones}",
+    "noActivities": "No activities this day.",
+    "showOnMap": "View on map",
+    "cutoff": "{day} · as of {time}",
+    "effectiveActivities": "Successful activities",
+    "rankOf": "of {total} in the ranking",
+    "ofGoal": "<b>{pct}%</b> of target",
+    "projection": "End-of-day projection <b>{value}</b>",
+    "pace": "Pace <b>{value}</b>/hour",
+    "kpis": {
+      "visits": "Visits",
+      "successRate": "Success rate",
+      "visitEffectiveness": "Visit effectiveness",
+      "distance": "Distance"
+    },
+    "byHour": "Activities by hour",
+    "bestHour": "Best hour {hour}:00 · {count}",
+    "noActivitiesYet": "No activities yet",
+    "dayLog": "Day log",
+    "logSummary": "{registered} logged · {effective} successful",
+    "noLogged": "No activities logged yet.",
+    "effective": "Successful",
+    "notEffective": "Unsuccessful"
+  }
+}

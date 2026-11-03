@@ -2,6 +2,7 @@ import { Discount } from "@/types/discount/DiscountPackage";
 import { UseFormReturn } from "react-hook-form";
 import * as yup from "yup";
 import { ObjectSchema } from "yup";
+import type { useTranslations } from "use-intl";
 
 const yesterday: any = (date: string) =>
   new Date(new Date(date).setDate(new Date(date).getDate() - 1));
@@ -31,55 +32,53 @@ const discountBasicsSchema = yup.object({
   is_deleted: yup.number().required()
 });
 
-export const generalResolver: ObjectSchema<DiscountPackageSchema> = yup.object({
-  name: yup
-    .string()
-    .min(3, "El nombre debe tener al menos 3 caracteres")
-    .required("El nombre es requerido"),
-  description: yup
-    .string()
-    .min(3, "La descripción debe tener al menos 3 caracteres")
-    .required("La descripción es requerida"),
-  startDate: yup
-    .date()
-    .required("La fecha de inicio es requerida")
-    .min(yesterday(new Date() as any), "La fecha de inicio debe ser mayor o igual a hoy"),
-  endDate: yup
-    .date()
-    .optional()
-    .when("is_active", {
-      is: (checkbox: boolean) => {
-        return checkbox === false || checkbox === undefined;
-      },
-      then: () =>
-        yup
-          .date()
-          .test({
-            name: "min",
-            message: "La fecha de fin debe ser mayor a la fecha de inicio",
-            test: (endDate, context) =>
-              new Date(endDate || "") >= tomorrow(context.parent.startDate)
-          })
-          .required("La fecha de fin es requerida"),
-      otherwise: (a) => {
-        return a.nullable().optional();
-      }
-    }),
-  is_active: yup.boolean().optional(),
-  primaryDiscounts: yup
-    .array()
-    .of(discountBasicsSchema)
-    .min(1, "Debe haber al menos un descuento primario")
-    .optional()
-    .default([]),
-  secondaryDiscounts: yup.array().of(discountBasicsSchema).optional().default([]),
-  client_groups: yup
-    .array()
-    .min(1, "Debe haber al menos un grupo de clientes")
-    .of(yup.number().required())
-    .required()
-    .default([])
-});
+// Los mensajes se traducen al construir el esquema (useMemo en el hook del formulario).
+type ValidationT = ReturnType<typeof useTranslations<"discounts.validation">>;
+
+export const generalResolver = (t: ValidationT): ObjectSchema<DiscountPackageSchema> =>
+  yup.object({
+    name: yup.string().min(3, t("nameMin")).required(t("nameRequired")),
+    description: yup.string().min(3, t("descriptionMin")).required(t("descriptionRequired")),
+    startDate: yup
+      .date()
+      .required(t("startDateRequired"))
+      .min(yesterday(new Date() as any), t("startDateMin")),
+    endDate: yup
+      .date()
+      .optional()
+      .when("is_active", {
+        is: (checkbox: boolean) => {
+          return checkbox === false || checkbox === undefined;
+        },
+        then: () =>
+          yup
+            .date()
+            .test({
+              name: "min",
+              message: t("endDateMin"),
+              test: (endDate, context) =>
+                new Date(endDate || "") >= tomorrow(context.parent.startDate)
+            })
+            .required(t("endDateRequired")),
+        otherwise: (a) => {
+          return a.nullable().optional();
+        }
+      }),
+    is_active: yup.boolean().optional(),
+    primaryDiscounts: yup
+      .array()
+      .of(discountBasicsSchema)
+      .min(1, t("primaryMin"))
+      .optional()
+      .default([]),
+    secondaryDiscounts: yup.array().of(discountBasicsSchema).optional().default([]),
+    client_groups: yup
+      .array()
+      .min(1, t("customerGroupsMin"))
+      .of(yup.number().required())
+      .required()
+      .default([])
+  });
 
 export interface DiscountPackageSchema {
   name: string;

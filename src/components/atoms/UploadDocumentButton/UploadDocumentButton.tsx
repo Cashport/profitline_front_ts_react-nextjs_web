@@ -3,6 +3,7 @@ import { DocumentButton } from "../DocumentButton/DocumentButton";
 const { Text } = Typography;
 import "./uploaddocumentbutton.scss";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 
 export interface FileObject {
   docReference: string;
@@ -31,6 +32,7 @@ export const UploadDocumentButton = ({
   disabled,
   children
 }: DocumentProps) => {
+  const t = useTranslations("components.uploadDocumentButton");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export const UploadDocumentButton = ({
       const fileSizeInMB = rawFile.size / (1024 * 1024);
 
       if (fileSizeInMB > 30) {
-        alert("El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.");
+        alert(t("fileTooLarge"));
         return;
       }
 
@@ -62,7 +64,7 @@ export const UploadDocumentButton = ({
       const fileSizeInMB = rawFile.size / (1024 * 1024);
 
       if (fileSizeInMB > 30) {
-        alert("El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.");
+        alert(t("fileTooLarge"));
         return;
       }
       setUploadedFile(rawFile);
@@ -114,7 +116,7 @@ export const UploadDocumentButton = ({
     <div className={`uploaddocumentbutton ${containerClassName}`}>
       <Flex vertical justify="center">
         <Text className="titleDocument">{title}</Text>
-        <Text className="descriptionDocument">*{isMandatory ? "Obligatorio" : "Opcional"}</Text>
+        <Text className="descriptionDocument">*{isMandatory ? t("required") : t("optional")}</Text>
       </Flex>
       <DocumentButton
         title={title}

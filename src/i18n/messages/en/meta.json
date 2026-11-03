@@ -1,0 +1,158 @@
+{
+  "acceptInvitation": {
+    "title": "Accept Invitation"
+  },
+  "aging": {
+    "title": "AR Aging",
+    "description": "Receivables by customer and aging bucket"
+  },
+  "approvals": {
+    "title": "Approvals"
+  },
+  "balances": {
+    "title": "Deductions"
+  },
+  "banks": {
+    "title": "Banks"
+  },
+  "blockingAlerts": {
+    "title": "Credit Hold Alerts",
+    "description": "Customers and points of sale on hold, or about to be, because of past-due receivables"
+  },
+  "botHealth": {
+    "title": "Automation Health"
+  },
+  "bulkReconciliation": {
+    "title": "Bulk Reconciliation",
+    "description": "Bulk reconciliation of the customer's receivables"
+  },
+  "cashApplication": {
+    "title": "Cash Application"
+  },
+  "cashportMobile": {
+    "title": "Cashport Mobile"
+  },
+  "cetaphil": {
+    "title": "Cetaphil - Exclusive Marketplace",
+    "description": "Exclusive marketplace for Galderma employees"
+  },
+  "changePassword": {
+    "title": "Change Password"
+  },
+  "chat": {
+    "title": "Chat"
+  },
+  "collectionsTower": {
+    "title": "Collections Control Tower",
+    "description": "This month's target, forecast, payment plans and unapplied payments"
+  },
+  "completeForm": {
+    "title": "Complete Form"
+  },
+  "controlTower": {
+    "title": "Control Tower",
+    "description": "Receivables KPIs with cross-filters"
+  },
+  "createForm": {
+    "title": "Create Form"
+  },
+  "createOrder": {
+    "title": "Create Order"
+  },
+  "createProject": {
+    "title": "Create Project"
+  },
+  "customerDetail": {
+    "title": "Customer Details"
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  },
+  "dataQuality": {
+    "title": "Data Quality"
+  },
+  "discounts": {
+    "title": "Discounts"
+  },
+  "home": {
+    "title": "Cashport"
+  },
+  "legacyTaskManager": {
+    "title": "Task Manager"
+  },
+  "mail": {
+    "title": "Mail",
+    "description": "Task manager"
+  },
+  "marketplace": {
+    "title": "Marketplace"
+  },
+  "massCommunications": {
+    "title": "Campaigns",
+    "description": "Campaign manager"
+  },
+  "medicalAccounts": {
+    "title": "Medical Billing"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Notifications by user"
+  },
+  "novelties": {
+    "title": "Disputes",
+    "description": "Receivables disputes inbox"
+  },
+  "orderConfirmed": {
+    "title": "Order Confirmed"
+  },
+  "payment": {
+    "title": "Payment",
+    "description": "Payment page powered by Wompi"
+  },
+  "projects": {
+    "title": "Projects"
+  },
+  "purchaseOrders": {
+    "title": "Purchase Orders"
+  },
+  "receivables": {
+    "title": "Collections"
+  },
+  "reconciliation": {
+    "title": "Reconciliation"
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Reports published for the team"
+  },
+  "reverseLogistics": {
+    "title": "Reverse Logistics"
+  },
+  "seals": {
+    "title": "Seals"
+  },
+  "selfService": {
+    "title": "Self-Service"
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "signIn": {
+    "title": "Sign In"
+  },
+  "suppliers": {
+    "title": "Suppliers"
+  },
+  "surveys": {
+    "title": "Surveys",
+    "description": "Surveys that sales reps fill out during their visits"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "description": "Task manager by process"
+  },
+  "visits": {
+    "title": "Visits",
+    "description": "Live tracking of sales reps' field visits"
+  }
+}

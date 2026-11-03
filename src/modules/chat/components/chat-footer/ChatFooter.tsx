@@ -16,6 +16,7 @@ import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { IMessage } from "@/types/chat/IChat";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import { message as messageApi } from "antd";
+import { useTranslations } from "use-intl";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -44,6 +45,7 @@ export default function ChatFooter({
   scrollToBottom,
   setTemplateOpen
 }: ChatFooterProps) {
+  const t = useTranslations("chat.footer");
   const { toast } = useToast();
   const { mutate } = useTicketMessages({ ticketId: conversation.id });
 
@@ -88,8 +90,8 @@ export default function ChatFooter({
     const to = normalizePhoneForWA(conversation.phone || "");
     if (!to) {
       toast({
-        title: "No hay número",
-        description: "Este contacto no tiene teléfono válido.",
+        title: t("noNumberTitle"),
+        description: t("noNumberDescription"),
         variant: "destructive"
       });
       return;
@@ -116,14 +118,14 @@ export default function ChatFooter({
         return { ...currentData, messages: [tempMessage, ...currentData.messages] };
       }, false);
 
-      toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
+      toast({ title: t("messageSentTitle"), description: t("messageSentDescription") });
       mutate();
       setTimeout(() => mutate(), 2000);
       scrollToBottom();
     } catch (err: any) {
       toast({
-        title: "Error al enviar",
-        description: err?.message || "No se pudo enviar por WhatsApp Cloud.",
+        title: t("sendErrorTitle"),
+        description: err?.message || t("sendErrorDescription"),
         variant: "destructive"
       });
     } finally {
@@ -141,11 +143,11 @@ export default function ChatFooter({
         caption: file.name,
         file
       });
-      messageApi.success("Archivo enviado correctamente");
+      messageApi.success(t("fileSent"));
       mutate();
       setTimeout(() => scrollToBottom(), 2000);
     } catch {
-      messageApi.error("Error al enviar el archivo");
+      messageApi.error(t("fileSendError"));
     }
   }
 
@@ -224,7 +226,7 @@ export default function ChatFooter({
           variant="ghost"
           size="icon"
           className="h-9 w-9 shrink-0 text-muted-foreground"
-          aria-label="Plantillas"
+          aria-label={t("templates")}
           onClick={() => setTemplateOpen(true)}
         >
           <File className="h-5 w-5" />
@@ -234,7 +236,7 @@ export default function ChatFooter({
           variant="ghost"
           size="icon"
           className="h-9 w-9 shrink-0 text-muted-foreground"
-          aria-label="Adjuntar archivo"
+          aria-label={t("attachFile")}
           onClick={() => waFileInputRef.current?.click()}
         >
           <Paperclip className="h-5 w-5" />
@@ -244,7 +246,7 @@ export default function ChatFooter({
           ref={messageTextareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Escribe un mensaje..."
+          placeholder={t("messagePlaceholder")}
           rows={1}
           className="flex-1 resize-none rounded-[20px] border border-[#DDDDDD] bg-white px-4 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-0"
           style={{ overflowY: "hidden" }}
@@ -260,7 +262,7 @@ export default function ChatFooter({
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#909090] text-white disabled:opacity-50"
           onClick={sendWhatsapp}
           disabled={isSendingWA || !message.trim()}
-          aria-label="Enviar mensaje"
+          aria-label={t("sendMessage")}
         >
           <PaperPlaneTilt className="h-4 w-4" />
         </button>
@@ -293,14 +295,14 @@ export default function ChatFooter({
         <Input
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          placeholder="Asunto del correo"
+          placeholder={t("emailSubjectPlaceholder")}
           className="bg-[#F7F7F7]"
           style={{ borderColor: "#DDDDDD" }}
         />
         <Textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Escribe el cuerpo del correo..."
+          placeholder={t("emailBodyPlaceholder")}
           className="min-h-[140px] bg-[#F7F7F7]"
           style={{ borderColor: "#DDDDDD" }}
         />
@@ -317,7 +319,7 @@ export default function ChatFooter({
                   >
                     <Image
                       src={img.url || "/placeholder.svg"}
-                      alt={"Adjunto " + img.name}
+                      alt={t("attachmentAlt", { name: img.name })}
                       fill
                       unoptimized
                       className="object-cover"
@@ -325,7 +327,7 @@ export default function ChatFooter({
                     <button
                       onClick={() => removeEmailImage(idx)}
                       className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white z-10"
-                      aria-label={"Quitar imagen " + img.name}
+                      aria-label={t("removeImage", { name: img.name })}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -346,7 +348,7 @@ export default function ChatFooter({
                       variant="ghost"
                       size="icon"
                       className="ml-auto h-7 w-7 text-muted-foreground"
-                      aria-label={"Quitar adjunto " + f.name}
+                      aria-label={t("removeAttachment", { name: f.name })}
                       onClick={() => removeEmailFile(idx)}
                     >
                       <X className="h-4 w-4" />
@@ -371,7 +373,7 @@ export default function ChatFooter({
               variant="ghost"
               size="icon"
               className="h-9 w-9 text-muted-foreground"
-              aria-label="Plantillas"
+              aria-label={t("templates")}
               onClick={() => setTemplateOpen(true)}
             >
               <File className="h-5 w-5" />
@@ -380,7 +382,7 @@ export default function ChatFooter({
               variant="ghost"
               size="icon"
               className="h-9 w-9 text-muted-foreground"
-              aria-label="Adjuntar archivos"
+              aria-label={t("attachFiles")}
               onClick={() => fileInputRef.current?.click()}
             >
               <Paperclip className="h-5 w-5" />
@@ -390,7 +392,7 @@ export default function ChatFooter({
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#909090] text-white disabled:opacity-50"
             onClick={sendEmail}
             disabled={!subject.trim() || !body.trim()}
-            aria-label="Enviar correo"
+            aria-label={t("sendEmail")}
           >
             <PaperPlaneTilt className="h-4 w-4" />
           </button>
@@ -398,7 +400,7 @@ export default function ChatFooter({
 
         {isDragging && (
           <div className="pointer-events-none -mt-2 rounded-md border border-dashed border-[#CBE71E] p-3 text-center text-[13px] text-muted-foreground">
-            Suelta archivos o imágenes para adjuntar
+            {t("dropHint")}
           </div>
         )}
       </div>

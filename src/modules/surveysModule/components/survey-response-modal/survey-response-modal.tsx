@@ -2,6 +2,7 @@
 
 import { Modal } from "antd";
 import { FileText } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import StatusPill from "@/modules/visitsModule/components/shared/status-pill";
@@ -18,6 +19,8 @@ interface SurveyResponseModalProps {
 
 /** Una respuesta: cada pregunta visible con lo que contestó el asesor, y sus fotos o archivos. */
 export default function SurveyResponseModal({ responseId, onClose }: SurveyResponseModalProps) {
+  const t = useTranslations("surveys.responseModal");
+  const tStatus = useTranslations("surveys.responseStatus");
   const { response, isLoading, error } = useVisitFormResponseDisplay(responseId);
 
   const renderBody = () => {
@@ -25,7 +28,7 @@ export default function SurveyResponseModal({ responseId, onClose }: SurveyRespo
     if (error || !response) {
       return (
         <p className="py-6 text-center text-sm text-destructive">
-          {error?.message || "No se pudo cargar la respuesta."}
+          {error?.message || t("loadError")}
         </p>
       );
     }
@@ -80,7 +83,7 @@ export default function SurveyResponseModal({ responseId, onClose }: SurveyRespo
                     : "text-[13px] text-muted-foreground"
                 }
               >
-                {answer.display ?? "Sin respuesta"}
+                {answer.display ?? t("noAnswer")}
               </span>
             )}
           </li>
@@ -101,19 +104,19 @@ export default function SurveyResponseModal({ responseId, onClose }: SurveyRespo
         response ? (
           <div className="flex flex-col gap-1 pr-6">
             <span className="text-[17px] font-semibold">
-              {response.client.name ?? "Cliente sin nombre"}
+              {response.client.name ?? t("unnamedCustomer")}
             </span>
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-normal text-muted-foreground">
               {formatDateAndTime(response.completedAt ?? response.startedAt)} ·{" "}
               {response.user.name ?? "—"}
               <StatusPill
-                label={RESPONSE_STATUS[response.status].label}
+                label={tStatus(response.status)}
                 color={RESPONSE_STATUS[response.status].color}
               />
             </span>
           </div>
         ) : (
-          "Respuesta"
+          t("title")
         )
       }
     >

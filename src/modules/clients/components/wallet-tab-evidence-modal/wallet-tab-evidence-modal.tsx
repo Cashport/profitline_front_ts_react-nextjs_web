@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from "react";
 import { Button, Flex, UploadFile } from "antd";
+import { useTranslations } from "use-intl";
 import { CaretLeft, Plus } from "@phosphor-icons/react";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
 import styles from "./wallet-tab-evidence-modal.module.scss";
@@ -31,6 +32,8 @@ const EvidenceModal = ({
   isSubmitting,
   noComment = false
 }: EvidenceModalProps) => {
+  const t = useTranslations("clients.evidence");
+  const tCommon = useTranslations("common");
   const isAttachButtonDisabled = !noComment
     ? !(commentary && selectedEvidence.length > 0)
     : selectedEvidence.length === 0;
@@ -39,13 +42,13 @@ const EvidenceModal = ({
     <div className={styles.content}>
       <button className={styles.content__header} onClick={() => setIsSecondView(false)}>
         <CaretLeft size={"1.25rem"} />
-        <h4>Evidencia</h4>
+        <h4>{t("title")}</h4>
       </button>
-      <p className={styles.content__description}>Adjunta la evidencia e ingresa un comentario</p>
+      <p className={styles.content__description}>{t("description")}</p>
       <div className={styles.content__evidence}>
         <Flex vertical>
-          <p>Evidencia</p>
-          <em className="descriptionDocument">*Obligatorio</em>
+          <p>{t("title")}</p>
+          <em className="descriptionDocument">{t("required")}</em>
         </Flex>
         <DocumentButton
           title={selectedEvidence[0]?.name}
@@ -80,7 +83,7 @@ const EvidenceModal = ({
               className={styles.addDocument}
               icon={<Plus size={"1rem"} />}
             >
-              <p>Cargar otro documento</p>
+              <p>{t("uploadAnother")}</p>
             </Button>
             <input
               type="file"
@@ -92,19 +95,19 @@ const EvidenceModal = ({
           </>
         )}
 
-        <p>Comentarios</p>
-        <textarea onChange={handleOnChangeTextArea} placeholder="Ingresar un comentario" />
+        <p>{tCommon("fields.comments")}</p>
+        <textarea onChange={handleOnChangeTextArea} placeholder={t("commentPlaceholder")} />
       </div>
       <div className={styles.footer}>
         <Button className={styles.cancelButton} onClick={() => setIsSecondView(false)}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </Button>
         <Button
           onClick={handleAttachEvidence}
           disabled={isAttachButtonDisabled || isSubmitting}
           className={styles.acceptButton}
         >
-          {isSubmitting ? "Enviando..." : "Adjuntar evidencia"}
+          {isSubmitting ? tCommon("status.sending") : t("attach")}
         </Button>
       </div>
     </div>

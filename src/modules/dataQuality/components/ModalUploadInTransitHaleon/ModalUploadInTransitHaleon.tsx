@@ -6,6 +6,7 @@ import { Modal, message } from "antd";
 import { CaretLeft } from "@phosphor-icons/react";
 import { FileArrowUp } from "phosphor-react";
 import type { Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -42,6 +43,8 @@ const ModalUploadInTransitHaleon = ({
   clientId,
   onSuccess
 }: ModalUploadInTransitHaleonProps) => {
+  const t = useTranslations("dataQuality.inTransitModal");
+  const tCommon = useTranslations("common");
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [archiveDraft, setArchiveDraft] = useState<IArchiveDraft | null>(null);
@@ -58,14 +61,14 @@ const ModalUploadInTransitHaleon = ({
 
   const handleUpload = async (data: IFormUploadInTransitHaleon) => {
     if (!file || !data.date) {
-      message.error("La fecha y el archivo son obligatorios *");
+      message.error(t("required"));
       return;
     }
 
     setIsSubmitting(true);
     const hide = message.open({
       type: "loading",
-      content: "Cargando archivo In-Transit Haleon...",
+      content: t("uploading"),
       duration: 0
     });
 
@@ -85,10 +88,7 @@ const ModalUploadInTransitHaleon = ({
         );
 
         if (!inTransitType) {
-          message.error(
-            `No existe el tipo de archivo "${IN_TRANSIT_HALEON_TYPE_DESCRIPTION}". ` +
-              "Contacte al administrador."
-          );
+          message.error(t("typeNotFound", { type: IN_TRANSIT_HALEON_TYPE_DESCRIPTION }));
           return;
         }
 
@@ -101,7 +101,7 @@ const ModalUploadInTransitHaleon = ({
 
         idArchivesClientData = createdArchive?.id;
         if (!idArchivesClientData) {
-          throw new Error("No se pudo crear el registro de fecha del archivo.");
+          throw new Error(t("dateRecordError"));
         }
 
         setArchiveDraft({ id: idArchivesClientData, date: dateStr });
@@ -110,16 +110,14 @@ const ModalUploadInTransitHaleon = ({
       // Paso 3: subir el archivo por el flujo Universal (/transform/generic).
       await uploadGenericIntakeFile(idArchivesClientData, file);
 
-      message.success("Archivo cargado correctamente.");
+      message.success(t("uploaded"));
       reset();
       setFile(null);
       setArchiveDraft(null);
       onSuccess?.();
       onClose();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al cargar el archivo."
-      );
+      message.error(error instanceof Error ? error.message : t("uploadError"));
     } finally {
       hide();
       setIsSubmitting(false);
@@ -144,20 +142,20 @@ const ModalUploadInTransitHaleon = ({
     >
       <button className="modalCreateNewFile__header" onClick={handleClose} type="button">
         <CaretLeft size="1.25rem" />
-        <h4>Cargar &quot;In-Transit Haleon&quot;</h4>
+        <h4>{t("title")}</h4>
       </button>
 
       <form className="modalCreateNewFile__form">
         <InputDateForm
-          titleInput="Fecha"
+          titleInput={t("date")}
           nameInput="date"
           control={control}
           error={errors.date}
-          placeholder="Seleccionar fecha"
+          placeholder={t("datePlaceholder")}
         />
 
         <div className="modalUploadInTransitHaleon__file">
-          <p className="modalUploadInTransitHaleon__file-title">Archivo</p>
+          <p className="modalUploadInTransitHaleon__file-title">{t("file")}</p>
           <label className="modalUploadInTransitHaleon__file-dropzone">
             <input
               type="file"
@@ -167,11 +165,11 @@ const ModalUploadInTransitHaleon = ({
               style={{ display: "none" }}
             />
             <FileArrowUp size="1.5rem" />
-            <span>Seleccionar archivo</span>
+            <span>{t("selectFile")}</span>
           </label>
           {file && (
             <p className="modalUploadInTransitHaleon__file-name">
-              Archivo seleccionado: <strong>{file.name}</strong>
+              {t("selectedFile")} <strong>{file.name}</strong>
             </p>
           )}
         </div>
@@ -180,8 +178,8 @@ const ModalUploadInTransitHaleon = ({
       <FooterButtons
         handleOk={() => handleSubmit(handleUpload)()}
         onClose={handleClose}
-        titleConfirm="Cargar"
-        titleCancel="Cancelar"
+        titleConfirm={tCommon("actions.upload")}
+        titleCancel={tCommon("actions.cancel")}
         isConfirmLoading={isSubmitting}
         isConfirmDisabled={!isValid || !file}
       />

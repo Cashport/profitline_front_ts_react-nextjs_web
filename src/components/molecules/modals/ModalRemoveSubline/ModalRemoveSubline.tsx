@@ -1,4 +1,5 @@
 import { Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import "./modalremovesubline.scss";
 
 const { Text } = Typography;
@@ -17,22 +18,23 @@ export const ModalRemoveSubline = ({
   onClose,
   onRemove
 }: Props) => {
+  const t = useTranslations("modals.removeSubline");
   return (
     <Modal
       open={isOpen}
       onCancel={onClose}
       okButtonProps={{ className: "acceptButton", loading: isLoading }}
-      okText="Eliminar Sublinea"
+      okText={t("ok")}
       cancelButtonProps={{
         className: "buttonCancel"
       }}
       className="modalChangeStatusChanel"
-      title={`¿Estás seguro que deseas eliminar esta sublinea?`}
+      title={t("title")}
       onOk={onRemove}
     >
-      <Text className="title">Sublinea: {sublineDescription}</Text>
+      <Text className="title">{t("subline", { name: sublineDescription })}</Text>
       <br />
-      <Text className="title">Esta acción es definitiva </Text>
+      <Text className="title">{t("irreversible")} </Text>
     </Modal>
   );
 };

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { usePacksDataQuality } from "../../hooks/usePacksDataQuality";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -31,6 +32,8 @@ import { IMaterialPackMaterial, IPackMaterialRequest } from "@/types/dataQuality
 import { message } from "antd";
 
 export function CatalogPacksTable() {
+  const t = useTranslations("dataQuality.packsTable");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
@@ -93,11 +96,11 @@ export function CatalogPacksTable() {
     setIsLoadingDelete(true);
     try {
       await deleteMaterialPackRow(selectedMaterial.materialPackId);
-      message.success("Material eliminado correctamente");
+      message.success(t("deleted"));
       mutate();
       setIsDeleteModalOpen(false);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al eliminar el material");
+      message.error(error instanceof Error ? error.message : t("deleteError"));
     } finally {
       setIsLoadingDelete(false);
     }
@@ -115,19 +118,19 @@ export function CatalogPacksTable() {
       if (modalMode === "create") {
         if (!selectedPackId) return;
         await createMaterialPack(selectedPackId, payload);
-        message.success("Material agregado al pack correctamente");
+        message.success(t("added"));
       } else {
         if (!selectedMaterial) return;
         await editMaterialPackRow(selectedMaterial?.materialPackId, payload);
-        message.success("Material editado correctamente");
+        message.success(t("edited"));
       }
       mutate();
       setModalOpen(false);
     } catch (error) {
       if (modalMode === "create") {
-        message.error(error instanceof Error ? error.message : "Error al crear material");
+        message.error(error instanceof Error ? error.message : t("createError"));
       } else {
-        message.error(error instanceof Error ? error.message : "Error al editar material");
+        message.error(error instanceof Error ? error.message : t("editError"));
       }
     } finally {
       setIsLoadingSave(false);
@@ -140,7 +143,7 @@ export function CatalogPacksTable() {
       <div className="flex items-center justify-between pb-4 gap-2">
         <div className="flex items-center gap-3">
           <UiSearchInput
-            placeholder="Buscar"
+            placeholder={tCommon("placeholders.search")}
             onChange={(e) => {
               setPackSearch(e.target.value);
             }}
@@ -151,161 +154,178 @@ export function CatalogPacksTable() {
       {/* Table */}
       {error ? (
         <div className="bg-white rounded-lg p-6 text-center">
-          <p className="text-red-600">
-            {error instanceof Error ? error.message : "No se pudo cargar los packs de materiales."}
-          </p>
+          <p className="text-red-600">{error instanceof Error ? error.message : t("loadError")}</p>
         </div>
       ) : (
-      <>
-      <Table>
-        <TableHeader>
-          <TableRow style={{ borderColor: "#DDDDDD" }}>
-            <TableHead className="w-10" />
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Id Cliente</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Pack</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>SKU</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Producto</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Factor</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }} className="text-right">
-              Acciones
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {packsData.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center text-gray-500 py-8">
-                No hay packs configurados.
-              </TableCell>
-            </TableRow>
-          )}
-          {packsData.map((pack) => {
-            const isExpanded = expandedPacks.has(pack.idCatalogMaterialAux);
-            const firstMaterial = pack.materials[0];
-            const remainingMaterials = pack.materials.slice(1);
-
-            return (
-              <>
-                {/* Pack main row (shows first material inline) */}
-                <TableRow
-                  key={pack.idCatalogMaterialAux}
-                  className="hover:bg-gray-50"
-                  style={{ borderColor: "#DDDDDD" }}
-                >
-                  <TableCell className="w-10">
-                    {pack.materials.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-0 h-6 w-6"
-                        onClick={() => togglePackExpand(pack.idCatalogMaterialAux)}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4" />
-                        )}
-                      </Button>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium" style={{ color: "#141414" }}>
-                    {pack.customerProductCod}
-                  </TableCell>
-                  <TableCell style={{ color: "#141414" }}>{pack.clientName}</TableCell>
-                  <TableCell className="text-sm" style={{ color: "#141414" }}>
-                    {firstMaterial?.materialCode || "-"}
-                  </TableCell>
-                  <TableCell style={{ color: "#141414" }}>
-                    {firstMaterial?.materialName || "-"}
-                  </TableCell>
-                  <TableCell style={{ color: "#141414" }}>{firstMaterial?.factor ?? "-"}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddMaterialToPack(pack.idCatalogMaterialAux)}
-                        title="Agregar"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                      {firstMaterial && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            handleMaterialEdit(pack.idCatalogMaterialAux, firstMaterial)
-                          }
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {firstMaterial && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleMaterialDelete(firstMaterial)}
-                          title="Eliminar"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow style={{ borderColor: "#DDDDDD" }}>
+                <TableHead className="w-10" />
+                <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                  {t("columns.customerId")}
+                </TableHead>
+                <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                  {t("columns.packName")}
+                </TableHead>
+                <TableHead style={{ color: "#141414", fontWeight: 600 }}>SKU</TableHead>
+                <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                  {t("columns.productName")}
+                </TableHead>
+                <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                  {t("columns.factor")}
+                </TableHead>
+                <TableHead style={{ color: "#141414", fontWeight: 600 }} className="text-right">
+                  {t("columns.actions")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {packsData.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-gray-500 py-8">
+                    {t("empty")}
                   </TableCell>
                 </TableRow>
+              )}
+              {packsData.map((pack) => {
+                const isExpanded = expandedPacks.has(pack.idCatalogMaterialAux);
+                const firstMaterial = pack.materials[0];
+                const remainingMaterials = pack.materials.slice(1);
 
-                {/* Expanded material rows */}
-                {isExpanded &&
-                  remainingMaterials.map((material) => (
+                return (
+                  <>
+                    {/* Pack main row (shows first material inline) */}
                     <TableRow
-                      key={material.idCatalogMaterial}
-                      className="bg-gray-50/60"
-                      style={{ borderColor: "#EEEEEE" }}
+                      key={pack.idCatalogMaterialAux}
+                      className="hover:bg-gray-50"
+                      style={{ borderColor: "#DDDDDD" }}
                     >
-                      <TableCell />
-                      <TableCell />
-                      <TableCell />
-                      <TableCell className="text-sm" style={{ color: "#141414" }}>
-                        {material.materialCode}
+                      <TableCell className="w-10">
+                        {pack.materials.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-0 h-6 w-6"
+                            onClick={() => togglePackExpand(pack.idCatalogMaterialAux)}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            )}
+                          </Button>
+                        )}
                       </TableCell>
-                      <TableCell style={{ color: "#141414" }}>{material.materialName}</TableCell>
-                      <TableCell style={{ color: "#141414" }}>{material.factor}</TableCell>
+                      <TableCell className="font-medium" style={{ color: "#141414" }}>
+                        {pack.customerProductCod}
+                      </TableCell>
+                      <TableCell style={{ color: "#141414" }}>{pack.clientName}</TableCell>
+                      <TableCell className="text-sm" style={{ color: "#141414" }}>
+                        {firstMaterial?.materialCode || "-"}
+                      </TableCell>
+                      <TableCell style={{ color: "#141414" }}>
+                        {firstMaterial?.materialName || "-"}
+                      </TableCell>
+                      <TableCell style={{ color: "#141414" }}>
+                        {firstMaterial?.factor ?? "-"}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 justify-end">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleMaterialEdit(pack.idCatalogMaterialAux, material)}
-                            title="Editar"
+                            onClick={() => handleAddMaterialToPack(pack.idCatalogMaterialAux)}
+                            title={tCommon("actions.add")}
                           >
-                            <Edit className="w-4 h-4" />
+                            <Plus className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleMaterialDelete(material)}
-                            title="Eliminar"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          {firstMaterial && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleMaterialEdit(pack.idCatalogMaterialAux, firstMaterial)
+                              }
+                              title={tCommon("actions.edit")}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {firstMaterial && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMaterialDelete(firstMaterial)}
+                              title={tCommon("actions.delete")}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
-              </>
-            );
-          })}
-        </TableBody>
-      </Table>
 
-      <div className="mt-4 pt-4 border-t text-sm text-gray-600" style={{ borderColor: "#DDDDDD" }}>
-        Mostrando {packsData.length} packs con{" "}
-        {packsData.reduce((acc, p) => acc + p.materials.length, 0)} productos
-      </div>
-      </>
+                    {/* Expanded material rows */}
+                    {isExpanded &&
+                      remainingMaterials.map((material) => (
+                        <TableRow
+                          key={material.idCatalogMaterial}
+                          className="bg-gray-50/60"
+                          style={{ borderColor: "#EEEEEE" }}
+                        >
+                          <TableCell />
+                          <TableCell />
+                          <TableCell />
+                          <TableCell className="text-sm" style={{ color: "#141414" }}>
+                            {material.materialCode}
+                          </TableCell>
+                          <TableCell style={{ color: "#141414" }}>
+                            {material.materialName}
+                          </TableCell>
+                          <TableCell style={{ color: "#141414" }}>{material.factor}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 justify-end">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleMaterialEdit(pack.idCatalogMaterialAux, material)
+                                }
+                                title={tCommon("actions.edit")}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleMaterialDelete(material)}
+                                title={tCommon("actions.delete")}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          <div
+            className="mt-4 pt-4 border-t text-sm text-gray-600"
+            style={{ borderColor: "#DDDDDD" }}
+          >
+            {t("showing", {
+              packs: packsData.length,
+              products: packsData.reduce((acc, p) => acc + p.materials.length, 0)
+            })}
+          </div>
+        </>
       )}
 
       <ModalAddEditPackMaterial
@@ -321,8 +341,8 @@ export function CatalogPacksTable() {
       <ModalConfirmAction
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        title="¿Está seguro de eliminar este producto?"
-        okText="Eliminar"
+        title={t("confirmDelete")}
+        okText={tCommon("actions.delete")}
         onOk={deleteRow}
         okLoading={isLoadingDelete}
       />

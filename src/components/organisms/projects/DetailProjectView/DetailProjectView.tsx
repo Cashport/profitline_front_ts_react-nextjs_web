@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Flex, Spin } from "antd";
 import { useParams } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 // Hooks & Services
 import { useProject } from "@/hooks/useProject";
@@ -19,6 +20,7 @@ import { useMessageApi } from "@/context/MessageContext";
 import "./detailproject.scss";
 
 export const DetailsProjectView = () => {
+  const t = useTranslations("projects.detail");
   const params = useParams();
   const projectId = extractSingleParam(params.id) || "";
   const { showMessage } = useMessageApi();
@@ -30,33 +32,33 @@ export const DetailsProjectView = () => {
     try {
       const response = await updateProject(finalData, projectId, data?.UUID || "");
       if (response.status === SUCCESS) {
-        showMessage("success", "El proyecto fue editado exitosamente.");
+        showMessage("success", t("updateSuccess"));
         window.location.reload();
       }
       setIsEditProject(false);
     } catch (error) {
       console.warn("Error updating project: ", error);
-      showMessage("error", "Oops, hubo un error. Por favor, intenta más tarde.");
+      showMessage("error", t("error"));
     }
   };
 
   const onActiveProject = async () => {
     try {
       await activateProject(projectId);
-      showMessage("success", "El proyecto fue activado exitosamente.");
+      showMessage("success", t("activateSuccess"));
     } catch (error) {
       console.warn("Error activating project: ", error);
-      showMessage("error", "Oops, hubo un error. Por favor, intenta más tarde.");
+      showMessage("error", t("error"));
     }
   };
 
   const onDesactivateProject = async () => {
     try {
       await desactiveProject(projectId);
-      showMessage("success", "El proyecto fue desactivado exitosamente.");
+      showMessage("success", t("deactivateSuccess"));
     } catch (error) {
       console.warn("Error deactivating project: ", error);
-      showMessage("error", "Oops, hubo un error. Por favor, intenta más tarde.");
+      showMessage("error", t("error"));
     }
   };
 

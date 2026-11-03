@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Flex } from "antd";
 import { PencilSimpleLine } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { signInWithCustomToken } from "@firebase/auth";
 import { auth } from "../../../../../firebase";
@@ -22,6 +23,7 @@ import { formatCurrencyMoney } from "@/utils/utils";
 const MobileConfirmPayment: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("publicPortals.mobile.confirmPayment");
 
   const token = searchParams.get("token");
   const paymentLink = searchParams.get("payment_link");
@@ -32,7 +34,7 @@ const MobileConfirmPayment: React.FC = () => {
 
   useEffect(() => {
     if (!token || !paymentLink) {
-      setError("Información de pago incompleta o inválida.");
+      setError(t("incompleteInfo"));
       setLoading(false);
       return;
     }
@@ -57,7 +59,7 @@ const MobileConfirmPayment: React.FC = () => {
       setData(walletData);
     } catch (err) {
       console.error(err);
-      setError("No se pudo cargar la información del pago.");
+      setError(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -68,18 +70,14 @@ const MobileConfirmPayment: React.FC = () => {
   };
 
   const handleModifyPayment = () => {
-    router.push(
-      `/mobile/confirmPayment/modify?token=${encodeURIComponent(
-        token || ""
-      )}`
-    );
+    router.push(`/mobile/confirm-payment/modify?token=${encodeURIComponent(token || "")}`);
   };
 
   if (loading) return <MobileLoader />;
   if (error) return <ErrorMobile message={error} />;
 
   return (
-    <MobileNavBar title="Detalles del pago" onBack={handleGoBack}>
+    <MobileNavBar title={t("title")} onBack={handleGoBack}>
       <Flex vertical gap="2rem" className="mobileConfirmPayment">
         <PaymentSummaryCard
           billed={data?.total_debt || 0}
@@ -89,7 +87,7 @@ const MobileConfirmPayment: React.FC = () => {
         />
 
         <Flex vertical gap="1rem">
-          <h4 className="mobileConfirmPayment__title">Facturas incluidas</h4>
+          <h4 className="mobileConfirmPayment__title">{t("includedInvoices")}</h4>
 
           <Flex vertical gap="0.5rem">
             {(data?.invoices_list || []).map((invoice, index) => (
@@ -101,18 +99,15 @@ const MobileConfirmPayment: React.FC = () => {
                   date: invoice.expiration_date,
                   status: invoice.status as any,
                   isPastDue: invoice.status === "Vencida",
-                  formattedAmount: formatCurrencyMoney(invoice.value),
+                  formattedAmount: formatCurrencyMoney(invoice.value)
                 }}
                 isInteractive={false}
               />
             ))}
           </Flex>
 
-          <button
-            className="mobileConfirmPayment__modifyButton"
-            onClick={handleModifyPayment}
-          >
-            Modificar pago
+          <button className="mobileConfirmPayment__modifyButton" onClick={handleModifyPayment}>
+            {t("modifyPayment")}
             <PencilSimpleLine size={14} />
           </button>
         </Flex>

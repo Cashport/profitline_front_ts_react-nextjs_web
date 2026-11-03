@@ -1,0 +1,30 @@
+{
+  "filters": {
+    "statuses": "Estados",
+    "types": "Tipos"
+  },
+  "table": {
+    "columns": {
+      "approvalType": "Tipo de aprobación",
+      "daysPending": "Días pendientes"
+    },
+    "days": "{count, plural, one {# día} other {# días}}",
+    "unknownStatus": "Desconocido"
+  },
+  "timeline": {
+    "noApprovers": "No hay aprobadores asignados",
+    "step": "Paso {order}",
+    "approversCount": "({count, plural, one {# aprobador} other {# aprobadores}})"
+  },
+  "detail": {
+    "requestedBy": "Solicitado por",
+    "requestDate": "Fecha de solicitud",
+    "daysElapsed": "({count, plural, one {# día} other {# días}})",
+    "attachments": "Adjuntos ({count})",
+    "approvalDetail": "Detalle de aprobación",
+    "rejectReason": "Motivo del rechazo *",
+    "rejectPlaceholder": "Explica brevemente por qué rechazas esta solicitud...",
+    "confirmReject": "Confirmar rechazo",
+    "approvers": "Aprobadores"
+  }
+}

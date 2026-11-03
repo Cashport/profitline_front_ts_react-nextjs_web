@@ -75,13 +75,13 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
   const uniqueItemsMap = new Map();
 
   portfolioData?.payments_vs_invoices?.forEach((item) => {
-    const name = capitalize(dayjs(item.month).utc().locale("es").format("MMM YY"));
+    const name = capitalize(dayjs(item.month).utc().format("MMM YY"));
     uniqueItemsMap.set(name, item);
   });
 
   const sellsVsPaymentsData = Array.from(uniqueItemsMap?.values())?.map((item) => {
     return {
-      name: capitalize(dayjs(item.month).utc().locale("es").format("MMM YY")),
+      name: capitalize(dayjs(item.month).utc().format("MMM YY")),
       ventas: item.sales,
       bancos: item.banks,
       recaudo: item.collections
@@ -138,7 +138,6 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
   const countInvoices = portfolioData?.count_invoices ?? 0;
   const countBalancesNew = portfolioData?.count_balances_new ?? 0;
   const countCreditNotes = portfolioData?.count_credit_notes ?? 0;
-
 
   return {
     totalWallet,

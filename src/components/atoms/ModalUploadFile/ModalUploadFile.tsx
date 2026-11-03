@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 
 import ProfitLoader from "@/components/ui/profit-loader/profit-loader";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -20,14 +21,15 @@ export const ModalUploadFile: React.FC<ModalUploadFileProps> = ({
   onClose,
   onFileUpload,
   loading = false,
-  title = "Cargar archivo",
+  title,
   allowedExtensions
 }) => {
+  const tCommon = useTranslations("common");
   return (
     <Modal
       open={isOpen}
       onCancel={onClose}
-      title={title}
+      title={title ?? tCommon("actions.uploadFile")}
       footer={null}
       centered
       closable={!loading}

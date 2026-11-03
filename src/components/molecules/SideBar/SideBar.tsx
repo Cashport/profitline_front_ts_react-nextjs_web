@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Avatar, Button, Flex } from "antd";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "use-intl";
 import { Clipboard, List } from "phosphor-react";
 
 import { useLogoutConfirm } from "@/components/organisms/header/user-menu/logout-confirm";
@@ -20,6 +21,8 @@ import {
   SettingsRailItem
 } from "@/components/atoms/NavigationBar/ModulesButtons/ModulesButtons";
 import { usePermissionRedirect } from "@/hooks/usePermissionRedirect";
+import { useAppLocale } from "@/i18n/I18nProvider";
+import { readLocaleCookie } from "@/i18n/config";
 
 import "./sidebar.scss";
 
@@ -34,6 +37,9 @@ export const SideBar = () => {
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
   const { askLogout, logoutModal } = useLogoutConfirm();
+  const t = useTranslations("shell");
+  // setLocale/locale del store son el formato numérico (es-CO); estos son el idioma de la interfaz.
+  const { locale: uiLocale, setLocale: setUiLocale } = useAppLocale();
 
   const path = usePathname();
   const height = useScreenHeight();
@@ -81,6 +87,13 @@ export const SideBar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isMobile, isModuleMenuOpen]);
+
+  // Al entrar tras el login (sin recargar la página) se toma el idioma del usuario que
+  // /api/auth dejó en la cookie.
+  useEffect(() => {
+    const saved = readLocaleCookie();
+    if (saved && saved !== uiLocale) setUiLocale(saved);
+  }, []);
 
   useEffect(() => {
     setIsComponentLoading(false);
@@ -178,14 +191,14 @@ export const SideBar = () => {
           <button
             type="button"
             className="logoContainer"
-            title="Cambiar proyecto"
+            title={t("nav.switchProject")}
             onClick={() => setModalProjectSelectorOpen(true)}
           >
             <span className="logoContainer__tile">
               {LOGO ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  alt={projectName || "Logo del proyecto"}
+                  alt={projectName || t("nav.projectLogo")}
                   src={`${LOGO.trim()}?v=${new Date().getTime()}`}
                   className="logoContainer__image"
                 />
@@ -208,12 +221,12 @@ export const SideBar = () => {
           <div className="exit">
             <SettingsRailItem path={path} project={project} />
             <RailItem
-              label={pinned ? "Desfijar menú" : "Fijar menú"}
+              label={pinned ? t("nav.unpinMenu") : t("nav.pinMenu")}
               icon={<RailIcon name={pinned ? "desfijar" : "fijar"} />}
               onClick={togglePinned}
             />
             <RailItem
-              label="Cerrar sesión"
+              label={t("userMenu.logout")}
               icon={<RailIcon name="cerrarSesion" />}
               onClick={askLogout}
             />

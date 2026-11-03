@@ -2,6 +2,7 @@ import UiSearchInput from "@/components/ui/search-input";
 import { Button, Flex, Table, Typography } from "antd";
 import { DotsThree, Eye } from "phosphor-react";
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import "./RequirementsView.scss";
 import { TableProps } from "antd/lib/table";
 import { ClientTypeView } from "./components/ClientTypeView";
@@ -67,6 +68,8 @@ const mockedData: IClientType[] = [
 ];
 const { Text } = Typography;
 export const RequirementsView = () => {
+  const t = useTranslations("projects.requirements");
+  const tCommon = useTranslations("common");
   const [isGenerateActionOpen, setIsGenerateActionOpen] = useState<boolean>(false);
   const [selectedClientType, setSelectedClientType] = useState<number | null>(null);
 
@@ -75,34 +78,36 @@ export const RequirementsView = () => {
   };
   const columns: TableProps<IClientType>["columns"] = [
     {
-      title: "Tipo",
+      title: tCommon("fields.type"),
       dataIndex: "type",
       key: "type"
     },
     {
-      title: "Descripción",
+      title: tCommon("fields.description"),
       dataIndex: "description",
       key: "description"
     },
     {
-      title: "Requiere pago",
+      title: t("requiresPayment"),
       dataIndex: "require_payment",
       key: "require_payment",
-      render: (require_payment: boolean) => <Text>{require_payment ? "Si" : "No"}</Text>
+      render: (require_payment: boolean) => (
+        <Text>{require_payment ? tCommon("status.yes") : tCommon("status.no")}</Text>
+      )
     },
     {
-      title: "Documentos",
+      title: t("documents"),
       dataIndex: "document_quantity",
       key: "document_quantity"
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       key: "isActive",
       dataIndex: "isActive",
       render: (isActive: boolean) => (
         <Flex align="center" className={isActive ? "statusContainer" : "statusContainerPending"}>
           <div className={isActive ? "statusActive" : "statusPending"} />
-          <Text>{isActive ? "Activo" : "Inactivo"}</Text>
+          <Text>{isActive ? tCommon("status.active") : tCommon("status.inactive")}</Text>
         </Flex>
       )
     },
@@ -117,6 +122,7 @@ export const RequirementsView = () => {
             setSelectedClientType(row.id);
           }}
           icon={<Eye size={"1.3rem"} />}
+          aria-label={t("viewDetail")}
         />
       )
     }
@@ -131,14 +137,14 @@ export const RequirementsView = () => {
   return (
     <Flex vertical className="requirementsView" gap={"2rem"}>
       <Flex gap={"0.5rem"} align="center">
-        <UiSearchInput className="search" placeholder="Buscar" />
+        <UiSearchInput className="search" placeholder={tCommon("placeholders.search")} />
         <Button
           className="button__actions"
           size="large"
           icon={<DotsThree size={18} />}
           onClick={handleisGenerateActionOpen}
         >
-          Generar acción
+          {t("generateAction")}
         </Button>
       </Flex>
       <Table dataSource={mockedData} columns={columns} rowKey="id" pagination={false} />

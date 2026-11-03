@@ -2,6 +2,7 @@
 
 import { Modal } from "antd";
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import type { IAdvisorVisitDetail } from "@/types/visits/IVisits";
 import { cn } from "@/utils/utils";
@@ -84,6 +85,8 @@ function NoActivities({
   onClose,
   onShowOnMap
 }: Omit<AdvisorDayModalProps, "detail" | "isDark"> & { detail: IAdvisorVisitDetail }) {
+  const tv = useTranslations("visits.dayModal");
+  const tCommon = useTranslations("common");
   const color = palette.status[d.state];
 
   return (
@@ -99,7 +102,7 @@ function NoActivities({
           <h3 className="truncate text-[17px] font-semibold">{d.user.userName}</h3>
           <p className="mt-px flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground">
             {d.zones.length > 0 && (
-              <span className="whitespace-nowrap">Zona {d.zones.join(", ")}</span>
+              <span className="whitespace-nowrap">{tv("zone", { zones: d.zones.join(", ") })}</span>
             )}
             <StatusPill label={d.state_name} color={color} />
             <span className="whitespace-nowrap">{dayLabel}</span>
@@ -107,7 +110,7 @@ function NoActivities({
         </div>
         <button
           type="button"
-          aria-label="Cerrar"
+          aria-label={tCommon("actions.close")}
           onClick={onClose}
           className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
@@ -116,7 +119,7 @@ function NoActivities({
       </div>
 
       <div className="grid flex-1 place-items-center px-5 py-12 text-center">
-        <p className="text-sm text-muted-foreground">No tiene actividades en el día.</p>
+        <p className="text-sm text-muted-foreground">{tv("noActivities")}</p>
       </div>
 
       <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
@@ -125,14 +128,14 @@ function NoActivities({
           onClick={onClose}
           className="h-10 rounded-[10px] px-3.5 text-[13.5px] font-semibold text-foreground transition-colors hover:bg-secondary"
         >
-          Cerrar
+          {tCommon("actions.close")}
         </button>
         <button
           type="button"
           onClick={onShowOnMap}
           className="h-10 rounded-[10px] bg-[#cbe71e] px-[30px] text-[13.5px] font-semibold text-[#141414] transition-colors hover:bg-[#bfd916]"
         >
-          Ver en mapa
+          {tv("showOnMap")}
         </button>
       </div>
     </div>
@@ -146,6 +149,8 @@ function DayContent({
   onClose,
   onShowOnMap
 }: Omit<AdvisorDayModalProps, "detail" | "isDark"> & { detail: IAdvisorVisitDetail }) {
+  const tv = useTranslations("visits.dayModal");
+  const tCommon = useTranslations("common");
   const { activities, visits, tracking, ranking } = d;
   const color = palette.status[d.state];
   // Minuto en que se armó el detalle: las horas que vienen después van punteadas.
@@ -153,19 +158,23 @@ function DayContent({
   const maxHour = Math.max(1, ...activities.by_hour.map((h) => h.count));
 
   const miniKpis: { label: string; value: string | number; suffix?: string }[] = [
-    { label: "Visitas", value: visits.completed + visits.failed, suffix: `/ ${visits.total}` },
     {
-      label: "Tasa de éxito",
+      label: tv("kpis.visits"),
+      value: visits.completed + visits.failed,
+      suffix: `/ ${visits.total}`
+    },
+    {
+      label: tv("kpis.successRate"),
       value: visits.success_rate_pct != null ? fmtNumber(visits.success_rate_pct) : "—",
       suffix: visits.success_rate_pct != null ? "%" : undefined
     },
     {
-      label: "Efectividad visita",
+      label: tv("kpis.visitEffectiveness"),
       value: visits.effectivity_pct != null ? fmtNumber(visits.effectivity_pct) : "—",
       suffix: visits.effectivity_pct != null ? "%" : undefined
     },
     {
-      label: "Recorrido",
+      label: tv("kpis.distance"),
       value: tracking.distance_km ? fmtNumber(tracking.distance_km, 1) : MISSING,
       suffix: "km"
     }
@@ -184,17 +193,17 @@ function DayContent({
           <h3 className="truncate text-[17px] font-semibold">{d.user.userName}</h3>
           <p className="mt-px flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground">
             {d.zones.length > 0 && (
-              <span className="whitespace-nowrap">Zona {d.zones.join(", ")}</span>
+              <span className="whitespace-nowrap">{tv("zone", { zones: d.zones.join(", ") })}</span>
             )}
             <StatusPill label={d.state_name} color={color} />
             <span className="whitespace-nowrap">
-              {dayLabel} · corte {fmtClock(cutoff)}
+              {tv("cutoff", { day: dayLabel, time: fmtClock(cutoff) })}
             </span>
           </p>
         </div>
         <button
           type="button"
-          aria-label="Cerrar"
+          aria-label={tCommon("actions.close")}
           onClick={onClose}
           className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
@@ -206,7 +215,7 @@ function DayContent({
         {/* Mismo negro con verde de marca en ambos temas. */}
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-4 gap-y-1.5 rounded-[14px] bg-[#141414] px-[18px] py-4 text-white">
           <div>
-            <div className="text-[13px] text-[#bdbdbd]">Actividades efectivas</div>
+            <div className="text-[13px] text-[#bdbdbd]">{tv("effectiveActivities")}</div>
             <div className="text-[52px] font-bold leading-[0.95] tracking-[-0.04em] text-[#cbe71e] max-[520px]:text-[42px]">
               {activities.effective}
               <small className="ml-1 text-lg font-medium tracking-normal text-[#bdbdbd]">
@@ -218,7 +227,9 @@ function DayContent({
             <b className="block text-[28px] font-bold leading-none">
               {ranking.position != null ? `#${ranking.position}` : "—"}
             </b>
-            <span className="text-[13px] text-[#bdbdbd]">de {ranking.total} en el ranking</span>
+            <span className="text-[13px] text-[#bdbdbd]">
+              {tv("rankOf", { total: ranking.total })}
+            </span>
           </div>
           <div className="relative col-span-2 mt-2.5 h-2.5 rounded-[5px] bg-[#333]">
             {activities.projection_pct != null && (
@@ -235,18 +246,23 @@ function DayContent({
           </div>
           <div className="col-span-2 flex flex-wrap justify-between gap-2 text-[13px] text-[#bdbdbd]">
             <span className="whitespace-nowrap">
-              <b className="font-semibold text-white">{fmtNumber(activities.goal_pct)}%</b> de la
-              meta
+              {tv.rich("ofGoal", {
+                pct: fmtNumber(activities.goal_pct),
+                b: (chunks) => <b className="font-semibold text-white">{chunks}</b>
+              })}
             </span>
             <span className="whitespace-nowrap">
-              Proyección al cierre{" "}
-              <b className="font-semibold text-white">{activities.projection ?? "—"}</b>
+              {tv.rich("projection", {
+                value: activities.projection ?? "—",
+                b: (chunks) => <b className="font-semibold text-white">{chunks}</b>
+              })}
               {activities.projection_pct != null && ` (${fmtNumber(activities.projection_pct)}%)`}
             </span>
             <span className="whitespace-nowrap">
-              Ritmo{" "}
-              <b className="font-semibold text-white">{fmtNumber(activities.pace_per_hour, 1)}</b>
-              /hora
+              {tv.rich("pace", {
+                value: fmtNumber(activities.pace_per_hour, 1),
+                b: (chunks) => <b className="font-semibold text-white">{chunks}</b>
+              })}
             </span>
           </div>
         </div>
@@ -269,11 +285,14 @@ function DayContent({
 
         <div className="rounded-xl border border-border px-3.5 py-3">
           <h4 className="mb-2 flex justify-between gap-2 text-[13px] font-semibold">
-            Actividades por hora
+            {tv("byHour")}
             <span className="text-[13px] font-normal text-muted-foreground">
               {activities.best_hour
-                ? `Mejor hora ${activities.best_hour.hour}:00 · ${activities.best_hour.count}`
-                : "Sin actividades aún"}
+                ? tv("bestHour", {
+                    hour: activities.best_hour.hour,
+                    count: activities.best_hour.count
+                  })
+                : tv("noActivitiesYet")}
             </span>
           </h4>
           <div className="flex h-[84px] items-end gap-1">
@@ -307,9 +326,12 @@ function DayContent({
 
         <div>
           <h4 className="mb-2 flex justify-between gap-2 text-[13px] font-semibold">
-            Registro del día
+            {tv("dayLog")}
             <span className="text-[13px] font-normal text-muted-foreground">
-              {activities.registered} registradas · {activities.effective} efectivas
+              {tv("logSummary", {
+                registered: activities.registered,
+                effective: activities.effective
+              })}
             </span>
           </h4>
           <ol className="flex flex-col">
@@ -330,14 +352,12 @@ function DayContent({
                   />
                   <span className="truncate">{r.client_name}</span>
                   <span className="whitespace-nowrap text-[13px] text-muted-foreground max-[520px]:hidden">
-                    {r.effective ? "Efectiva" : "No efectiva"}
+                    {r.effective ? tv("effective") : tv("notEffective")}
                   </span>
                 </li>
               ))
             ) : (
-              <li className="py-[7px] text-[13px] text-muted-foreground">
-                Aún no hay actividades registradas.
-              </li>
+              <li className="py-[7px] text-[13px] text-muted-foreground">{tv("noLogged")}</li>
             )}
           </ol>
         </div>
@@ -349,14 +369,14 @@ function DayContent({
           onClick={onClose}
           className="h-10 rounded-[10px] px-3.5 text-[13.5px] font-semibold text-foreground transition-colors hover:bg-secondary"
         >
-          Cerrar
+          {tCommon("actions.close")}
         </button>
         <button
           type="button"
           onClick={onShowOnMap}
           className="h-10 rounded-[10px] bg-[#cbe71e] px-[30px] text-[13.5px] font-semibold text-[#141414] transition-colors hover:bg-[#bfd916]"
         >
-          Ver en mapa
+          {tv("showOnMap")}
         </button>
       </div>
     </div>

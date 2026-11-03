@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, Drawer } from "antd";
+import { useTranslations } from "use-intl";
 
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -30,6 +31,7 @@ interface SurveyEditorViewProps {
  * nada se guarda hasta "Publicar", que crea la encuesta o publica una versión.
  */
 export default function SurveyEditorView({ formId, startInEdit = false }: SurveyEditorViewProps) {
+  const t = useTranslations("surveys.editor");
   const router = useRouter();
   const isNew = formId === undefined;
   const editor = useSurveyEditor(formId);
@@ -62,15 +64,13 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
     if (!isReady) {
       return (
         <div className="flex flex-col items-center gap-2 rounded-xl bg-card p-9 text-center shadow-sm">
-          <p className="text-sm text-destructive">
-            {editor.error?.message || "No se encontró la encuesta."}
-          </p>
+          <p className="text-sm text-destructive">{editor.error?.message || t("notFound")}</p>
           <button
             type="button"
             onClick={() => router.push("/surveys")}
             className="text-[13px] font-medium text-[#1677ff] hover:underline"
           >
-            Volver a Encuestas
+            {t("backToSurveys")}
           </button>
         </div>
       );
@@ -93,7 +93,7 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
               showIcon
               closable
               onClose={editor.clearErrors}
-              message="La encuesta no se publicó"
+              message={t("publishFailed")}
               description={
                 <ul className="list-disc pl-4">
                   {editor.errors.map((e) => (
@@ -162,7 +162,7 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
       {renderBody()}
 
       <Drawer
-        title="Vista previa"
+        title={t("preview")}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         width={400}
@@ -178,10 +178,10 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
           if (await editor.publish()) unsaved.confirmNavigation();
         }}
         onCancel={unsaved.confirmNavigation}
-        title="Cambios sin publicar"
-        content="Tienes cambios sin publicar. ¿Quieres publicarlos antes de salir?"
-        okText="Publicar"
-        cancelText="Descartar"
+        title={t("unsaved.title")}
+        content={t("unsaved.content")}
+        okText={t("unsaved.publish")}
+        cancelText={t("unsaved.discard")}
         okLoading={editor.isSaving}
       />
 
@@ -193,10 +193,10 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
           setConfirmExit(false);
           setMode("view");
         }}
-        title="¿Salir sin publicar?"
-        content="Los cambios que no publicaste se pierden."
-        okText="Salir"
-        cancelText="Seguir editando"
+        title={t("exit.title")}
+        content={t("exit.content")}
+        okText={t("exit.ok")}
+        cancelText={t("exit.keepEditing")}
       />
     </div>
   );

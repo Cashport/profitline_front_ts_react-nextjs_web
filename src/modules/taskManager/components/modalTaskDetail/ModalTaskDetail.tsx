@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { X, Mail, AlertCircle } from "lucide-react";
 import { message, Modal } from "antd";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import "./modalTaskDetail.scss";
 
 import { Button } from "@/modules/chat/ui/button";
@@ -15,6 +16,7 @@ import { getTaskDetails, patchTask } from "@/services/tasks/tasks";
 import { getUsersByProject } from "@/services/users/users";
 import { IUser } from "@/types/users/IUser";
 import { useAppStore } from "@/lib/store/store";
+import { getActiveLocale } from "@/i18n/translator";
 
 import { ModalContent, TaskFormValues } from "./ModalContent";
 
@@ -35,6 +37,8 @@ export function ModalTaskDetail({
   taskTypes,
   onTaskUpdated
 }: IModalTaskDetail) {
+  const t = useTranslations("taskManager.detail");
+  const tCommon = useTranslations("common");
   const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -74,7 +78,7 @@ export function ModalTaskDetail({
         }
       } catch (error) {
         console.error("Error fetching task details:", error);
-        setDetailError("Failed to load task details");
+        setDetailError(t("loadError"));
       } finally {
         setIsLoadingDetail(false);
       }
@@ -166,14 +170,15 @@ export function ModalTaskDetail({
         task_type: data.task_type ?? undefined,
         assigned_to: data.assigned_to ?? undefined
       });
-      message.success("Tarea actualizada exitosamente");
+      message.success(t("updated"));
       await fetchTaskDetail();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar la tarea");
+      message.error(error instanceof Error ? error.message : t("updateError"));
     }
     setIsSaving(false);
   };
 
+  // Nombres de estado del backend: se comparan, no se traducen.
   const canEdistStates = ["Sin empezar", "Spam"];
   const canEdit = taskDetail ? canEdistStates.includes(taskDetail.status.name) : false;
 
@@ -204,11 +209,14 @@ export function ModalTaskDetail({
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
                   <Mail className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-600">
-                    {new Date(taskDetail.created_at).toLocaleDateString("es-CO", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric"
-                    })}
+                    {new Date(taskDetail.created_at).toLocaleDateString(
+                      getActiveLocale() === "en" ? "en-GB" : "es-CO",
+                      {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric"
+                      }
+                    )}
                   </span>
                 </div>
               )}
@@ -239,7 +247,7 @@ export function ModalTaskDetail({
               <div className="h-full flex items-center justify-center">
                 <div className="text-center py-12">
                   <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-3" />
-                  <p className="text-gray-500">Cargando detalles...</p>
+                  <p className="text-gray-500">{t("loadingDetails")}</p>
                 </div>
               </div>
             ) : detailError ? (
@@ -270,14 +278,14 @@ export function ModalTaskDetail({
                 onClick={onClose}
                 className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-cashport-black bg-transparent px-6 py-2.5"
               >
-                Cancelar
+                {tCommon("actions.cancel")}
               </Button>
               <Button
                 onClick={handleSubmit(onSubmit)}
                 className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6 py-2.5"
                 disabled={isSaving}
               >
-                Guardar cambios
+                {tCommon("actions.saveChanges")}
               </Button>
             </div>
           )}

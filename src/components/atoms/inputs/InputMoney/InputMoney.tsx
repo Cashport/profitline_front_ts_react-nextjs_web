@@ -1,4 +1,5 @@
 import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import { NumericFormat } from "react-number-format";
 import { Flex, Input, Typography } from "antd";
 
@@ -33,6 +34,7 @@ const InputMoney = ({
   fixedDecimalScale = false,
   allowNegative = false
 }: InputMoneyProps) => {
+  const tInputs = useTranslations("components.inputs");
   return (
     <Flex vertical className={`inputMoney ${customClassName}`}>
       {!hiddenTitle && (
@@ -67,7 +69,7 @@ const InputMoney = ({
       />
 
       <Typography.Text className="textError">
-        {error?.message || (error ? `${titleInput} es obligatorio *` : "")}
+        {error?.message || (error ? tInputs("requiredField", { field: titleInput }) : "")}
       </Typography.Text>
     </Flex>
   );

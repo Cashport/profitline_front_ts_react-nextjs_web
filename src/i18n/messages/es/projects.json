@@ -1,0 +1,143 @@
+{
+  "title": "Proyectos",
+  "tabs": {
+    "detail": "Proyecto",
+    "createProject": "Crear Proyecto",
+    "businessRules": "Reglas de Negocio",
+    "clients": "Clientes",
+    "users": "Usuarios",
+    "accounts": "Cuentas",
+    "clientGroups": "Grupos de Clientes",
+    "approvals": "Aprobaciones",
+    "communications": "Comunicaciones",
+    "requirements": "Requerimientos"
+  },
+  "create": {
+    "headerTitle": "Crear proyecto",
+    "success": "El proyecto fue creado exitosamente.",
+    "error": "Oops, hubo un error. Por favor, intenta más tarde."
+  },
+  "detail": {
+    "updateSuccess": "El proyecto fue editado exitosamente.",
+    "activateSuccess": "El proyecto fue activado exitosamente.",
+    "deactivateSuccess": "El proyecto fue desactivado exitosamente.",
+    "error": "Oops, hubo un error. Por favor, intenta más tarde."
+  },
+  "accounts": {
+    "placeholder": "cuentas"
+  },
+  "businessRules": {
+    "title": "Configurar reglas de negocio",
+    "editRules": "Editar Reglas",
+    "viewRules": "Ver Reglas"
+  },
+  "clientGroup": {
+    "changeStatus": "Cambiar Estado",
+    "editGroup": "Editar Grupo",
+    "removeEntity": "grupo"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "opened": "Abiertas ({count})",
+    "closed": "Cerradas ({count})",
+    "loadError": "Error al cargar las notificaciones",
+    "viewDetail": "Ver detalle"
+  },
+  "requirements": {
+    "requiresPayment": "Requiere pago",
+    "documents": "Documentos",
+    "generateAction": "Generar acción",
+    "viewDetail": "Ver detalle",
+    "clientType": {
+      "validity": "Vigencia",
+      "template": "Plantilla",
+      "templateLink": "Documento",
+      "mandatory": "Obligatorio",
+      "approvals": "Aprobaciones",
+      "inactivate": "Inactivar",
+      "addRequirement": "Agregar requerimiento",
+      "moreActions": "Más acciones"
+    },
+    "addRequirement": {
+      "title": "Requerimiento",
+      "documentsTitle": "Documentos",
+      "formsTitle": "Formularios",
+      "document": "Documento",
+      "form": "Formulario"
+    },
+    "documentList": {
+      "document": "Documento",
+      "form": "Formulario",
+      "validity": "Vigencia",
+      "template": "Plantilla",
+      "templateLink": "Documento",
+      "questions": "Preguntas",
+      "newDocument": "Nuevo documento",
+      "newForm": "Nuevo formulario",
+      "addDocuments": "Agregar documentos",
+      "addForms": "Agregar formularios",
+      "addSuccess": "Documentos agregados correctamente",
+      "createError": "Error al crear documento con ID {id}"
+    },
+    "createDocument": {
+      "newTitle": "Nuevo documento",
+      "editTitle": "Editar documento",
+      "addDocuments": "Agregar documentos",
+      "name": "Nombre del documento",
+      "namePlaceholder": "Ingresar nombre",
+      "validity": "Vigencia",
+      "validityPlaceholder": "Seleccionar vigencia",
+      "descriptionPlaceholder": "Ingresar descripción",
+      "mandatory": "Obligatorio"
+    },
+    "uploadButton": {
+      "uploadTemplate": "Cargar plantilla",
+      "changeFile": "Cambiar archivo",
+      "removeFile": "Quitar archivo"
+    }
+  },
+  "forms": {
+    "createTitle": "Crear formulario",
+    "editTitle": "Editar formulario",
+    "modes": {
+      "create": "Modo creación",
+      "edit": "Modo edición",
+      "preview": "Vista previa",
+      "answer": "Responder"
+    },
+    "goToComplete": "Ir a completar formulario",
+    "formName": "Nombre del formulario",
+    "namePlaceholder": "Ingresar nombre",
+    "validity": "Vigencia",
+    "validityYears": "{count, plural, one {# año} other {# años}}",
+    "validityPlaceholder": "Seleccionar vigencia",
+    "descriptionPlaceholder": "Ingresar descripción",
+    "selectQuestionType": "Seleccionar tipo de pregunta",
+    "addQuestion": "Agregar nueva pregunta",
+    "close": "Cerrar",
+    "questionTypes": {
+      "multipleChoice": "Opción múltiple",
+      "singleChoice": "Única opción",
+      "text": "Texto",
+      "file": "Adjunto",
+      "number": "Numérico",
+      "date": "Fecha"
+    },
+    "question": {
+      "placeholder": "Pregunta",
+      "descriptionPlaceholder": "Descripción de la pregunta",
+      "mandatory": "Obligatorio",
+      "selectDate": "Seleccionar fecha",
+      "enterNumber": "Ingresar número",
+      "enterText": "Ingresar texto",
+      "option": "Opción {number}",
+      "addOption": "Agregar opción",
+      "deleteQuestion": "Eliminar pregunta",
+      "deleteOption": "Eliminar opción"
+    },
+    "answer": {
+      "chooseOption": "Debes elegir por lo menos una opción"
+    },
+    "fieldRequired": "{field} es obligatorio *"
+  }
+}

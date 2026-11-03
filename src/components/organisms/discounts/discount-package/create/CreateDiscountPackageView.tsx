@@ -11,6 +11,7 @@ import { discountsFormColumns } from "../../constants/column";
 import { DividerCustom } from "@/components/atoms/DividerCustom/DividerCustom";
 import AddDiscountModal from "@/components/molecules/modals/AddDiscountModal/AddDiscountModal";
 import { useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import { Discount } from "@/types/discount/DiscountPackage";
 import GroupClientsPackage from "./components/GroupClientsPackage";
 
@@ -21,6 +22,9 @@ export type TypeDiscount = "principal" | "additional";
 const { Title, Text } = Typography;
 
 export function CreateDiscountPackageView({ params }: Readonly<Props>) {
+  const t = useTranslations("discounts");
+  const tColumns = useTranslations("discounts.columns");
+  const tCommon = useTranslations("common");
   const {
     handleExecCallback,
     loading,
@@ -114,24 +118,24 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
               </Button>
             )}
           </Flex> */}
-          <Title level={4}>Descripción</Title>
+          <Title level={4}>{t("form.description")}</Title>
           <Flex gap={20}>
             <InputForm
               control={control}
               error={errors.name}
               nameInput="name"
-              titleInput="Nombre"
+              titleInput={tCommon("fields.name")}
               className={styles.input}
             />
             <InputForm
               control={control}
               error={errors.description}
               nameInput="description"
-              titleInput="Descripción"
+              titleInput={tCommon("fields.description")}
               className={styles.inputDesc}
             />
           </Flex>
-          <Title level={4}>Fechas</Title>
+          <Title level={4}>{t("form.dates")}</Title>
           <Controller
             name="is_active"
             control={control}
@@ -143,7 +147,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
                     size="small"
                     {...field}
                   />
-                  <Text type="secondary">No tiene fin</Text>
+                  <Text type="secondary">{t("form.noEndDate")}</Text>
                 </Flex>
               );
             }}
@@ -156,10 +160,10 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
                 render={({ field: { value, ...field } }) => {
                   return (
                     <>
-                      <Text type="secondary">Inicio</Text>
+                      <Text type="secondary">{t("form.start")}</Text>
                       <DatePicker
                         className={styles.inputDatePicker}
-                        placeholder="Inicio"
+                        placeholder={t("form.start")}
                         type="secondary"
                         format="YYYY-MM-DD"
                         value={value}
@@ -180,11 +184,11 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
                 render={({ field: { onChange, ...field } }) => {
                   return (
                     <>
-                      <Text type="secondary">Fin</Text>
+                      <Text type="secondary">{t("form.end")}</Text>
                       <DatePicker
                         disabled={watch("is_active")}
                         className={styles.inputDatePicker}
-                        placeholder="Fin"
+                        placeholder={t("form.end")}
                         type="secondary"
                         onChange={(e) => {
                           onChange(e);
@@ -204,8 +208,8 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
           <DividerCustom />
           <Flex gap={20} vertical>
             <Flex vertical gap={24}>
-              <Title level={4}>Descuento</Title>
-              <Title level={5}>Selecciona un grupo de clientes</Title>
+              <Title level={4}>{t("package.discount")}</Title>
+              <Title level={5}>{t("byClient.selectCustomerGroup")}</Title>
               <GroupClientsPackage
                 error={errors.client_groups}
                 form={form}
@@ -216,7 +220,12 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
               <>
                 <Table
                   dataSource={primaryDiscountsFields}
-                  columns={discountsFormColumns({ remove: removeDiscount, isFormDisabled })}
+                  columns={discountsFormColumns({
+                    remove: removeDiscount,
+                    isFormDisabled,
+                    t: tColumns,
+                    tCommon
+                  })}
                   pagination={false}
                 />
                 <Text type="danger" hidden={!errors.primaryDiscounts}>
@@ -234,16 +243,21 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
                     iconPosition="end"
                     disabled={isFormDisabled}
                   >
-                    Agregar regla de descuento
+                    {t("package.addRule")}
                   </PrincipalButton>
                 </Flex>
               )}
             </Flex>
             <Flex vertical gap={24}>
-              <Title level={4}>Descuento adicional</Title>
+              <Title level={4}>{t("package.additionalDiscount")}</Title>
               <Table
                 dataSource={secondaryDiscountsFields}
-                columns={discountsFormColumns({ remove: removeAdditionalDiscount, isFormDisabled })}
+                columns={discountsFormColumns({
+                  remove: removeAdditionalDiscount,
+                  isFormDisabled,
+                  t: tColumns,
+                  tCommon
+                })}
                 pagination={false}
               />
               {!isFormDisabled && secondaryDiscountsFields.length === 0 && (
@@ -257,7 +271,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
                     iconPosition="end"
                     disabled={isFormDisabled}
                   >
-                    Agregar regla de descuento
+                    {t("package.addRule")}
                   </PrincipalButton>
                 </Flex>
               )}
@@ -270,7 +284,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}
             >
-              Volver a la lista
+              {t("form.backToList")}
             </Button>
           </Link>
           {statusForm !== "review" && (
@@ -279,7 +293,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
               onClick={handleExecCallback}
               loading={loading}
             >
-              Crear paquete de descuentos
+              {t("package.create")}
               {/* {discountId ? "Guardar cambios" : "Crear paquete de descuentos"} */}
             </PrincipalButton>
           )}

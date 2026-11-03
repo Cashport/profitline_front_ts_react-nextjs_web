@@ -1,12 +1,14 @@
 import { FC } from "react";
 import { CaretRight } from "phosphor-react";
 import { Collapse, ConfigProvider } from "antd";
+import { useTranslations } from "use-intl";
 import styles from "./generate-action.module.scss";
 import { useInvoiceActionsModal } from "../../../hooks/invoice-actions/invoice-actions-modal.hook";
 
 interface GenerateActionProps {}
 
 const GenerateAction: FC<GenerateActionProps> = () => {
+  const t = useTranslations("clients.invoiceActions");
   const { options, goToOptionId } = useInvoiceActionsModal();
 
   const collapseItems = options.map((option) => {
@@ -51,8 +53,8 @@ const GenerateAction: FC<GenerateActionProps> = () => {
       }}
     >
       <div className={styles.wrapper}>
-        <div className={styles.mainTitle}>Generar acción</div>
-        <div className={styles.title}>Selecciona la acción que vas a realizar</div>
+        <div className={styles.mainTitle}>{t("title")}</div>
+        <div className={styles.title}>{t("subtitle")}</div>
         <div className={styles.list}>
           <Collapse
             items={collapseItems}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Pagination } from "antd";
+import { useTranslations } from "use-intl";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -21,9 +22,10 @@ import { useIncidentListKpis } from "../../hooks/useIncidentListKpis";
 import { useNoveltyStatuses } from "../../hooks/useNoveltyStatuses";
 import type { INoveltiesFilters, NoveltyView } from "../../types";
 
-const VISTAS: { key: NoveltyView; label: string }[] = [
-  { key: "lista", label: "Lista" },
-  { key: "tablero", label: "Tablero" }
+/** `label` es la clave en `novelties.view.modes`. */
+const VISTAS: { key: NoveltyView; label: "list" | "board" }[] = [
+  { key: "lista", label: "list" },
+  { key: "tablero", label: "board" }
 ];
 
 const PAGE_SIZE = 20;
@@ -42,6 +44,7 @@ const TEXTUAL_COLS: IncidentSortBy[] = [
 ];
 
 export default function NoveltiesView() {
+  const t = useTranslations("novelties.view");
   const [card, setCard] = useState<IncidentCard | null>("abiertas");
   const [filters, setFilters] = useState<INoveltiesFilters>(EMPTY_NOVELTIES_FILTERS);
   // Al listado sólo entra la versión con debounce; el input muestra la cruda.
@@ -123,7 +126,7 @@ export default function NoveltiesView() {
                     : "font-medium text-muted-foreground hover:text-foreground"
                 )}
               >
-                {v.label}
+                {t(`modes.${v.label}`)}
               </button>
             ))}
           </div>
@@ -134,7 +137,7 @@ export default function NoveltiesView() {
         <ProfitLoader size="small" />
       ) : error ? (
         <p className="p-9 text-center text-sm text-destructive">
-          {error.message || "No se pudieron cargar las novedades."}
+          {error.message || t("loadError")}
         </p>
       ) : (
         <>

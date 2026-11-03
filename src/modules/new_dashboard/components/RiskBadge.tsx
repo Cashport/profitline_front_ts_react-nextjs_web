@@ -1,11 +1,15 @@
 import React from "react";
-import { COLORS } from "../lib/constants";
+import { useTranslations } from "use-intl";
+import { COLORS, RISK_KEYS } from "../lib/constants";
+import type { CustomerRisk } from "../lib/types";
 
 interface RiskBadgeProps {
   level: string;
 }
 
 const RiskBadge: React.FC<RiskBadgeProps> = ({ level }) => {
+  const t = useTranslations("newDashboard.risk");
+  const riskKey = RISK_KEYS[level as CustomerRisk["risk"]];
   let bgColor = COLORS.riskMedium;
 
   switch (level) {
@@ -31,7 +35,7 @@ const RiskBadge: React.FC<RiskBadgeProps> = ({ level }) => {
       className="px-3 py-1 text-[13px] font-semibold text-white rounded-md w-full block text-center shadow-sm"
       style={{ backgroundColor: bgColor }}
     >
-      {level}
+      {riskKey ? t(riskKey) : level}
     </span>
   );
 };

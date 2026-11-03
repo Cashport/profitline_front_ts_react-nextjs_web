@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import { PAYMENT_TYPES } from "@/constants/documentTypes";
@@ -58,12 +59,13 @@ const BLANK_CONFIG: ConfigForm = {
 
 const CLIENT_DATA_KEYS = ["asigned_user", "coordinator", "kam", "kam_lider", "market"] as const;
 
-// Cada select guarda el email del usuario seleccionado.
-const USER_SELECTS: { key: (typeof CLIENT_DATA_KEYS)[number]; label: string }[] = [
-  { key: "asigned_user", label: "Ejecutivo" },
-  { key: "coordinator", label: "Coordinador" },
-  { key: "kam", label: "KAM" },
-  { key: "kam_lider", label: "KAM líder" }
+// Cada select guarda el email del usuario seleccionado. La etiqueta sale de
+// marketAdmin.shared.responsibles.<key>.
+const USER_SELECTS: { key: "asigned_user" | "coordinator" | "kam" | "kam_lider" }[] = [
+  { key: "asigned_user" },
+  { key: "coordinator" },
+  { key: "kam" },
+  { key: "kam_lider" }
 ];
 
 const toForm = (config?: IMarketAdminClientConfig): ConfigForm =>
@@ -102,6 +104,9 @@ export default function ConfiguracionesTab({
   inMarketplace = true,
   onSave
 }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.settings");
+  const tShared = useTranslations("marketAdmin.shared");
+  const tCommon = useTranslations("common.actions");
   const [form, setForm] = useState<ConfigForm>(toForm(config));
   const [isSaving, setIsSaving] = useState(false);
   // Todos los usuarios del proyecto, no solo los asociados al cliente.
@@ -115,9 +120,9 @@ export default function ConfiguracionesTab({
 
   useEffect(() => {
     if (marketsError) {
-      showMessage("error", "No fue posible cargar los mercados disponibles");
+      showMessage("error", t("marketsLoadError"));
     }
-  }, [marketsError, showMessage]);
+  }, [marketsError, showMessage, t]);
 
   useEffect(() => {
     setForm(toForm(config));
@@ -144,7 +149,9 @@ export default function ConfiguracionesTab({
     marketOptions.unshift({
       value: form.market,
       label:
-        marketsError || isLoadingMarkets ? form.market : `${form.market} (actual — no disponible)`,
+        marketsError || isLoadingMarkets
+          ? form.market
+          : t("currentUnavailable", { market: form.market }),
       disabled: true
     });
   }
@@ -193,25 +200,27 @@ export default function ConfiguracionesTab({
   return (
     <div className="cp-list-scroll">
       {/* Ajustes datos del cliente */}
-      <p className="text-sm font-bold text-[#141414] mb-4">Ajustes datos del cliente</p>
+      <p className="text-sm font-bold text-[#141414] mb-4">{t("customerData")}</p>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
         {/* Ejecutivo, Coordinador, KAM y KAM líder */}
-        {USER_SELECTS.map(({ key, label }) => (
+        {USER_SELECTS.map(({ key }) => (
           <div key={key}>
-            <label className="text-[13px] font-bold text-[#141414] block mb-1.5">{label}</label>
+            <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
+              {tShared(`responsibles.${key}`)}
+            </label>
             <Select
               showSearch
               allowClear
               size="large"
-              placeholder="Seleccione un usuario"
+              placeholder={t("selectUser")}
               className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
               popupClassName="[&_.ant-select-item]:!text-sm"
               value={form[key] || undefined}
               options={userOptions}
               loading={isLoadingUsers}
               disabled={isLoading}
-              notFoundContent="Sin usuarios disponibles"
+              notFoundContent={t("noUsers")}
               filterOption={(input, option) =>
                 (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
               }
@@ -222,12 +231,12 @@ export default function ConfiguracionesTab({
 
         {/* Mercado */}
         <div>
-          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Mercado</label>
+          <label className="text-[13px] font-bold text-[#141414] block mb-1.5">{t("market")}</label>
           <Select
             showSearch
             allowClear
             size="large"
-            placeholder="Mercado del cliente"
+            placeholder={t("marketPlaceholder")}
             className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
             popupClassName="[&_.ant-select-item]:!text-sm"
             value={form.market || undefined}
@@ -235,7 +244,7 @@ export default function ConfiguracionesTab({
             loading={isLoadingMarkets}
             disabled={isLoading || isLoadingMarkets || !!marketsError}
             status={marketsError ? "error" : undefined}
-            notFoundContent="Sin mercados disponibles"
+            notFoundContent={t("noMarkets")}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
             }
@@ -250,14 +259,14 @@ export default function ConfiguracionesTab({
       {inMarketplace ? (
         <>
           <p className="text-sm font-bold text-[#141414] mt-8 pt-8 border-t border-[#F0F0F0] mb-4">
-            Ajustes financieros y operativos del cliente
+            {t("financialSettings")}
           </p>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
             {/* Cupo de crédito */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Cupo de crédito
+                {t("fields.creditLimit")}
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#999999]">
@@ -278,7 +287,7 @@ export default function ConfiguracionesTab({
             {/* Descuento pronto pago */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Descuento pronto pago
+                {t("fields.earlyPaymentDiscount")}
               </label>
               <div className="relative">
                 <input
@@ -299,11 +308,11 @@ export default function ConfiguracionesTab({
             {/* Condición de pago */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Condición de pago
+                {t("fields.paymentTerms")}
               </label>
               <input
                 type="text"
-                placeholder="Código de condición de pago"
+                placeholder={t("paymentTermsPlaceholder")}
                 disabled={isLoading}
                 value={form.payment_condition_code}
                 onChange={(e) => setForm((f) => ({ ...f, payment_condition_code: e.target.value }))}
@@ -314,7 +323,7 @@ export default function ConfiguracionesTab({
             {/* Tipo de pago */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Tipo de pago
+                {t("fields.paymentType")}
               </label>
               <select
                 disabled={isLoading}
@@ -322,7 +331,7 @@ export default function ConfiguracionesTab({
                 onChange={(e) => setForm((f) => ({ ...f, payment_type: e.target.value }))}
                 className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors bg-white"
               >
-                <option value="">Seleccione un tipo de pago</option>
+                <option value="">{t("selectPaymentType")}</option>
                 {PAYMENT_TYPES.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.label}
@@ -334,7 +343,7 @@ export default function ConfiguracionesTab({
             {/* Bodega por defecto */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Bodega por defecto
+                {t("fields.defaultWarehouse")}
               </label>
               <WarehouseSelect
                 value={form.warehouse_id ?? undefined}
@@ -347,12 +356,12 @@ export default function ConfiguracionesTab({
             {/* Lista de precios */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Lista de precios
+                {t("fields.priceList")}
               </label>
               <input
                 type="number"
                 min={0}
-                placeholder="ID de la lista de precios"
+                placeholder={t("priceListPlaceholder")}
                 disabled={isLoading}
                 value={form.pricelist_id}
                 onChange={(e) => setForm((f) => ({ ...f, pricelist_id: e.target.value }))}
@@ -363,7 +372,7 @@ export default function ConfiguracionesTab({
             {/* Recibe parciales de lotes */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Recibe parciales de lotes
+                {t("fields.partialLots")}
               </label>
               <input
                 type="number"
@@ -378,7 +387,7 @@ export default function ConfiguracionesTab({
             {/* Lotes mayores a */}
             <div>
               <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-                Lotes mayores a
+                {t("fields.lotsGreaterThan")}
               </label>
               <input
                 type="number"
@@ -393,13 +402,8 @@ export default function ConfiguracionesTab({
         </>
       ) : (
         <div className="mt-8 pt-8 border-t border-[#F0F0F0]">
-          <p className="text-sm font-bold text-[#141414] mb-1">
-            Ajustes financieros y operativos del cliente
-          </p>
-          <p className="text-sm text-[#999999]">
-            Este cliente no está en el marketplace, por lo que sus opciones de marketplace no están
-            disponibles.
-          </p>
+          <p className="text-sm font-bold text-[#141414] mb-1">{t("financialSettings")}</p>
+          <p className="text-sm text-[#999999]">{t("notInMarketplace")}</p>
         </div>
       )}
 
@@ -410,7 +414,7 @@ export default function ConfiguracionesTab({
           disabled={!isDirty || isSaving || isLoading}
           loading={isSaving}
         >
-          Guardar cambios
+          {tCommon("saveChanges")}
         </PrincipalButton>
       </div>
     </div>

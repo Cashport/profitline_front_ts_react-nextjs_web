@@ -2,6 +2,7 @@
 
 import { useState, type HTMLAttributes } from "react";
 import { GripVertical, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import type { IVisitFormQuestionType } from "@/types/surveys/ISurveys";
 
@@ -23,6 +24,8 @@ export default function AddQuestionMenu({
   dropZone,
   showDropLine
 }: AddQuestionMenuProps) {
+  const t = useTranslations("surveys.addQuestion");
+  const tTypes = useTranslations("surveys.questionTypes");
   const [open, setOpen] = useState(false);
 
   return (
@@ -37,19 +40,17 @@ export default function AddQuestionMenu({
         className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-sm font-semibold text-foreground transition-colors hover:border-[#9bb514]"
       >
         <Plus className="h-4 w-4" />
-        Agregar pregunta
+        {t("button")}
       </button>
 
       {open && (
         <div className="rounded-xl bg-card p-3 shadow-sm">
           <p className="mb-2 text-[13px] text-muted-foreground">
-            {selectedNumber
-              ? `Se agrega debajo de la pregunta ${selectedNumber}`
-              : "Se agrega al final"}
+            {selectedNumber ? t("addBelow", { number: selectedNumber }) : t("addAtEnd")}
           </p>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
             {QUESTION_TYPE_ORDER.map((type) => {
-              const { label, hint, Icon } = QUESTION_TYPES[type];
+              const { Icon } = QUESTION_TYPES[type];
               return (
                 <button
                   key={type}
@@ -64,8 +65,10 @@ export default function AddQuestionMenu({
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-medium">{label}</span>
-                    <span className="block truncate text-[13px] text-muted-foreground">{hint}</span>
+                    <span className="block font-medium">{tTypes(`${type}.label`)}</span>
+                    <span className="block truncate text-[13px] text-muted-foreground">
+                      {tTypes(`${type}.hint`)}
+                    </span>
                   </span>
                 </button>
               );
@@ -75,8 +78,10 @@ export default function AddQuestionMenu({
       )}
 
       <p className="text-center text-[13px] text-muted-foreground">
-        <span className="text-[#e0007a]">*</span> Obligatoria · arrastra{" "}
-        <GripVertical className="inline h-3.5 w-3.5 align-text-bottom" /> para reordenar
+        {t.rich("hint", {
+          req: (chunks) => <span className="text-[#e0007a]">{chunks}</span>,
+          grip: () => <GripVertical className="inline h-3.5 w-3.5 align-text-bottom" />
+        })}
       </p>
     </div>
   );

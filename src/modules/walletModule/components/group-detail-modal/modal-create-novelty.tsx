@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { DatePicker, Input, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import { useProjectUsers } from "@/hooks/useProjectUsers";
@@ -35,6 +36,7 @@ function CreateNoveltyForm({
   onClose,
   onCreate
 }: Omit<ModalCreateNoveltyProps, "open">) {
+  const t = useTranslations("wallet.noveltyForm");
   const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
   const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
@@ -69,20 +71,20 @@ function CreateNoveltyForm({
 
   return (
     <NoveltyPanel
-      title="Nueva novedad"
+      title={t("createTitle")}
       subtitle={`${fac(documentos.length)} · ${fmtFull(total)} · ${clienteNombre}`}
       onClose={onClose}
-      submitLabel="Crear novedad"
-      sendingLabel="Creando…"
+      submitLabel={t("createSubmit")}
+      sendingLabel={t("creating")}
       onSubmit={handleSubmit}
       isSending={isSending}
       submitDisabled={!canSubmit}
     >
       <div>
-        <SectionTitle>Clasificación</SectionTitle>
+        <SectionTitle>{t("classification")}</SectionTitle>
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <Label>Tipo de novedad</Label>
+            <Label>{t("type")}</Label>
             <Select
               className="w-full"
               value={motiveId}
@@ -96,11 +98,11 @@ function CreateNoveltyForm({
               optionFilterProp="label"
               loading={isLoadingMotives}
               disabled={isSending}
-              placeholder="Selecciona el tipo"
+              placeholder={t("typePlaceholder")}
             />
           </div>
           <div>
-            <Label>Responsable</Label>
+            <Label>{t("owner")}</Label>
             <Select
               className="w-full"
               value={assignedTo}
@@ -111,11 +113,11 @@ function CreateNoveltyForm({
               optionFilterProp="label"
               loading={isLoadingUsers}
               disabled={isSending}
-              placeholder="Sin responsable"
+              placeholder={t("noOwner")}
             />
           </div>
           <div>
-            <Label>Fecha del primer ticket</Label>
+            <Label>{t("firstTicketDate")}</Label>
             <DatePicker
               className="w-full"
               format="DD/MM/YYYY"
@@ -126,7 +128,7 @@ function CreateNoveltyForm({
             />
           </div>
           <div>
-            <Label>Fecha límite de solución</Label>
+            <Label>{t("resolutionDeadline")}</Label>
             <DatePicker
               className="w-full"
               format="DD/MM/YYYY"
@@ -140,22 +142,21 @@ function CreateNoveltyForm({
       </div>
 
       <div>
-        <SectionTitle>Comentario inicial</SectionTitle>
+        <SectionTitle>{t("initialComment")}</SectionTitle>
         <Input.TextArea
           rows={2}
           value={comment}
           disabled={isSending}
-          placeholder="Ej.: el cliente pide el soporte firmado antes del viernes"
+          placeholder={t("initialCommentPlaceholder")}
           onChange={(e) => setComment(e.target.value)}
         />
         <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-          Queda como primera entrada en la línea de tiempo de la novedad. La próxima acción se abre
-          como ticket con la fecha indicada.
+          {t("initialCommentHint")}
         </p>
       </div>
 
       <div>
-        <SectionTitle>Facturas incluidas</SectionTitle>
+        <SectionTitle>{t("includedInvoices")}</SectionTitle>
         <NoveltyDocumentsTable documentos={documentos} />
       </div>
     </NoveltyPanel>

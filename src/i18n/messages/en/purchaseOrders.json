@@ -1,0 +1,373 @@
+{
+  "layout": {
+    "title": "Purchase Orders"
+  },
+  "stages": {
+    "purchaseOrder": "Purchase order",
+    "validations": "Validations",
+    "invoiced": "Invoiced",
+    "inDispatch": "In transit",
+    "delivered": "Delivered"
+  },
+  "process": {
+    "title": "Order progress",
+    "viewStock": "View stock",
+    "viewFullHistory": "View full history"
+  },
+  "approveModal": {
+    "title": "Are you sure?",
+    "description": "Do you want to approve this purchase order?"
+  },
+  "noveltyCard": {
+    "title": "Issues",
+    "needsAttention": "Needs attention"
+  },
+  "validation": {
+    "orderNumberRequired": "Purchase order number is required",
+    "customerNameRequired": "Customer name is required",
+    "createdAtRequired": "Creation date is required",
+    "invalidOrderDate": "Invalid order date",
+    "invalidDeliveryDate": "Invalid delivery date",
+    "addressMaxLength": "Address can't exceed {max} characters",
+    "observationsMaxLength": "Notes can't exceed {max} characters",
+    "productIdRequired": "Product ID is required",
+    "quantityRequired": "Quantity is required",
+    "quantityMin": "Minimum quantity is {min}",
+    "quantityInteger": "Quantity must be a whole number",
+    "minValue": "Minimum value is {min}",
+    "productsRequired": "Products are required",
+    "productsMin": "Add at least one product"
+  },
+  "rejectModal": {
+    "title": "Reject order",
+    "description": "Select a reason and add a note",
+    "reasonLabel": "Rejection reason",
+    "reasonPlaceholder": "Select a reason",
+    "reasons": {
+      "wrongPrice": "Incorrect price",
+      "productUnavailable": "Product unavailable",
+      "incompleteInfo": "Incomplete information",
+      "customerError": "Customer error",
+      "other": "Other"
+    },
+    "observationLabel": "Note",
+    "observationPlaceholder": "Write a note..."
+  },
+  "document": {
+    "title": "Original document",
+    "previewUnavailable": "Preview unavailable",
+    "unavailable": "Document unavailable",
+    "pdfUnavailable": "The original PDF isn't available for preview",
+    "errors": {
+      "invalid": "The document is invalid or corrupted",
+      "missing": "The document is missing",
+      "unexpectedResponse": "Unexpected server response",
+      "cannotLoad": "Couldn't load the document"
+    }
+  },
+  "dispatchModal": {
+    "title": "Confirm dispatch",
+    "description": "Confirm that logistics has dispatched the order",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Add dispatch notes (optional)",
+    "orderNumber": "Purchase order: {number}",
+    "statusWillChange": "Once confirmed, the status will change to \"{status}\"",
+    "dispatching": "Dispatching...",
+    "success": "Order dispatched",
+    "error": "Couldn't dispatch the order"
+  },
+  "downloadPlane": {
+    "title": "Download flat file",
+    "subtitle": "Select the files you want to download:",
+    "selectAll": "Select all",
+    "selectedCount": "{selected} of {total} selected",
+    "fetchError": "Couldn't load the available files",
+    "success": "Files downloaded",
+    "downloadError": "Couldn't download the files"
+  },
+  "rebillingModal": {
+    "title": "Confirm rebilling",
+    "fileTooLarge": "The file is too large. Upload a file smaller than {maxMb} MB.",
+    "success": "Rebilling confirmed.",
+    "error": "Couldn't confirm the rebilling. Please try again.",
+    "invoiceId": "Invoice ID",
+    "invoiceIdPlaceholder": "Enter the invoice ID",
+    "newInvoice": "New invoice",
+    "creditNote": "Credit memo"
+  },
+  "sendToApprovalModal": {
+    "title": "Send for approval",
+    "description": "Select who needs to approve this issue",
+    "approvers": "Approvers",
+    "success": "Order sent for approval",
+    "error": "Couldn't send for approval"
+  },
+  "historyModal": {
+    "title": "Full history",
+    "loading": "Loading history...",
+    "empty": "No events in the history yet",
+    "traceability": "Activity history",
+    "open": "Open",
+    "closed": "Closed",
+    "actionBy": "By:",
+    "comment": "Comment:",
+    "summary": "Summary",
+    "totalEvents": "Total events:"
+  },
+  "aiProcessing": {
+    "title": "AI processing",
+    "analyzingFile": "Analyzing {fileName}",
+    "progress": "Analysis progress",
+    "stepOf": "Step {current} of {total}",
+    "steps": {
+      "analyzingPdf": "Analyzing PDF document",
+      "extractingInvoice": "Extracting document information",
+      "identifyingParties": "Identifying buyer and seller details",
+      "processingProducts": "Processing product lines",
+      "calculatingTotals": "Calculating amounts and totals",
+      "validatingData": "Validating extracted data"
+    }
+  },
+  "backorderModal": {
+    "fetchError": "Couldn't load the warehouse products",
+    "sentSuccess": "Purchase order moved to backorder",
+    "sendError": "Couldn't move the purchase order to backorder",
+    "processedSuccess": "Purchase order processed",
+    "removeError": "Couldn't remove the unavailable products",
+    "noData": "No data for the selected warehouse",
+    "allInStock": "All products are in stock",
+    "confirmSendAll": "Are you sure you want to move it to backorder?",
+    "noneInStock": "None of the products are in stock",
+    "confirmSend": "Are you sure you want to move it to backorder?",
+    "someInStock": "Some products are in stock",
+    "sendAllToBackorder": "Move all to backorder",
+    "processAvailable": "Process available items",
+    "processAvailableQuestion": "Do you want to remove the unavailable products or save them in a new purchase order for later?",
+    "removeUnavailable": "Remove unavailable items",
+    "saveInNewPo": "Save in new PO"
+  },
+  "filters": {
+    "filters": "Filters",
+    "statuses": "Statuses",
+    "allStatuses": "All statuses",
+    "allCustomers": "All customers",
+    "allOf": "All: {label}",
+    "seller": "Sales rep",
+    "allSellers": "All sales reps"
+  },
+  "invoiceModal": {
+    "title": "Invoice purchase order",
+    "description": "You can split this order into multiple invoices. Add the ID and PDF of each invoice issued.",
+    "onlyPdf": "Only PDF files are allowed",
+    "fileTooLarge": "The file is too large (max {maxMb} MB)",
+    "incomplete": "Each invoice needs an ID and a PDF file",
+    "success": "Invoices added",
+    "error": "Couldn't add the invoices",
+    "changePdf": "Change PDF",
+    "uploadPdf": "Upload PDF",
+    "invoiceIdPlaceholder": "Invoice ID (e.g., FV-2024-001)",
+    "addAnother": "+ Add another invoice",
+    "duplicateIds": "There are duplicate invoice IDs",
+    "importantInfo": "Important",
+    "totalsHint": "Make sure the invoices add up to the purchase order total.",
+    "save": "Save invoices"
+  },
+  "create": {
+    "missingOrderNumber": "File \"{fileName}\": the purchase order number is missing",
+    "missingCustomer": "File \"{fileName}\": select a customer",
+    "missingProducts": "File \"{fileName}\": add at least one product",
+    "productsWithoutSelection": "File \"{fileName}\": every line needs a product selected",
+    "sameCustomerRequired": "All files must belong to the same customer. Check the selected customers.",
+    "success": "Purchase orders created",
+    "error": "Couldn't create the purchase orders",
+    "creating": "Creating...",
+    "submit": "Create purchase order"
+  },
+  "list": {
+    "generateAction": "Take action",
+    "uploadPurchaseOrder": "Upload purchase order",
+    "emptyState": "Upload your first purchase order to start the analysis"
+  },
+  "uploadInvoicesModal": {
+    "title": "Upload invoices",
+    "submit": "Upload invoices",
+    "incomplete": "Each invoice needs a number and an attached file",
+    "success": "Invoices uploaded",
+    "error": "Couldn't upload the invoices",
+    "selectAtLeastOne": "Select at least one PO from the list to upload invoices.",
+    "columns": {
+      "po": "PO",
+      "invoiceNumber": "Invoice no."
+    },
+    "invoiceNumberPlaceholder": "e.g., FAC-2024-001",
+    "attachPdf": "Attach PDF",
+    "addInvoice": "Add invoice",
+    "removeInvoice": "Remove invoice"
+  },
+  "uploadModal": {
+    "title": "Upload purchase order",
+    "onlyPdf": "Only PDF files are allowed",
+    "fileTooLarge": "The file is too large (max {maxMb} MB)",
+    "sentToProcessing": "The order was sent for processing",
+    "uploadSuccess": "Order uploaded",
+    "uploadError": "Couldn't upload the purchase order",
+    "scanUnavailable": "Scanning isn't available in this browser",
+    "scanError": "Couldn't access the camera to scan",
+    "tabs": {
+      "ai": "Process with AI",
+      "manual": "Process manually"
+    },
+    "dropPdf": "Drag your PDF file here",
+    "orSelectFile": "Or select a file from your device",
+    "selectFile": "Select file",
+    "scanning": "Scanning...",
+    "scanDocument": "Scan document",
+    "uploadedFiles": "Uploaded files",
+    "continueManual": "Continue to manual entry"
+  },
+  "detail": {
+    "loading": "Loading purchase order...",
+    "notFound": "Purchase order not found",
+    "backToList": "Back to list",
+    "updateSuccess": "Information updated",
+    "updateError": "Couldn't update the information",
+    "downloadFlatFileError": "Couldn't download the purchase order flat file",
+    "poLabel": "PO {number}",
+    "unsavedTitle": "Unsaved changes",
+    "unsavedContent": "You have unsaved changes. Do you want to save them before leaving?",
+    "dontSave": "Don't save"
+  },
+  "actionsModal": {
+    "title": "Select the action you want to take",
+    "selectAtLeastOneOrder": "Select at least one order to take this action",
+    "selectOnlyOneOrder": "You can only select one order for this action",
+    "sameStatusRequired": "All selected orders must have the same status",
+    "selectAtLeastOnePo": "Select at least one purchase order to take this action",
+    "sendingToDispatch": "Sending order to dispatch...",
+    "sentToDispatch": "Order sent to dispatch",
+    "sendToDispatchError": "Couldn't send the order to dispatch",
+    "sameOrderRequired": "All selected purchase orders must belong to the same order",
+    "splitSuccess": "Purchase orders split from the order",
+    "splitError": "Couldn't split the purchase orders from the order",
+    "sendingToBilling": "Sending order to billing...",
+    "sentToBilling": "Order sent to billing",
+    "sendToBillingError": "Couldn't send the order to billing",
+    "deleteError": "Couldn't delete the purchase orders",
+    "downloadingSalesFile": "Downloading sales flat file...",
+    "salesFileError": "Couldn't download the sales flat file",
+    "downloadingInventory": "Downloading inventory...",
+    "inventoryError": "Couldn't download the inventory",
+    "generatingTxt": "Generating TXT...",
+    "txtGenerated": "TXT generated",
+    "txtError": "Couldn't generate the TXT",
+    "generatingTxtEan": "Generating EAN TXT...",
+    "txtEanGenerated": "EAN TXT generated",
+    "txtEanError": "Couldn't generate the EAN TXT",
+    "downloadTxtErp": "Download ERP TXT",
+    "downloadTxtEan": "Download EAN TXT",
+    "deleteSelected": "Delete selected purchase orders",
+    "splitPo": "Split PO from order",
+    "sendToBilling": "Send to billing",
+    "uploadInvoices": "Upload invoices",
+    "downloadFlatFile": "Download flat file",
+    "sendToDispatch": "Send to dispatch",
+    "exportSalesFile": "Export sales flat file",
+    "exportInventory": "Export inventory",
+    "confirmSplit": "{count, plural, one {Are you sure you want to split this PO from the order?} other {Are you sure you want to split these POs from the order?}}",
+    "confirmSendToApproval": "Do you want to send it for approval?",
+    "insufficientCredit": "The customer doesn't have enough available credit for this order",
+    "sendForApproval": "Send for approval",
+    "confirmDelete": "{count, plural, one {Are you sure you want to delete this purchase order?} other {Are you sure you want to delete these purchase orders?}}"
+  },
+  "detailHeader": {
+    "generatingTxtErp": "Generating ERP TXT...",
+    "txtErpGenerated": "ERP TXT generated",
+    "txtErpError": "Couldn't generate the ERP TXT",
+    "filesCount": "{count, plural, one {# file} other {# files}}",
+    "noFile": "No file",
+    "sendingToRebilling": "Sending order to rebilling...",
+    "sentToRebilling": "Order sent to rebilling",
+    "sendToRebillingError": "Couldn't send the order to rebilling",
+    "uploadInvoice": "Upload invoice",
+    "confirmDispatchDelivery": "Confirm dispatch/delivery",
+    "markAsBackorder": "Mark as backorder",
+    "rebill": "Rebill",
+    "confirmRebilling": "Confirm rebilling",
+    "generateAction": "Take action",
+    "region": "Region: {region}",
+    "destination": "Destination: {code}",
+    "viewApproval": "View approval",
+    "ordersCount": "{count, plural, one {# order} other {# orders}}",
+    "unknownStatus": "Unknown",
+    "confirmRebillTitle": "Are you sure you want to rebill?",
+    "confirmRebillContent": "This action can't be undone"
+  },
+  "info": {
+    "addressesError": "Couldn't load the addresses",
+    "generalInfo": "General information",
+    "internalPoId": "Internal PO ID",
+    "purchaseOrder": "Purchase order",
+    "channel": "Channel",
+    "loadingChannels": "Loading channels...",
+    "selectChannel": "Select channel",
+    "loadingCustomers": "Loading customers...",
+    "selectCustomer": "Select customer",
+    "noCustomers": "No customers available",
+    "poDate": "Purchase order date",
+    "selectDate": "Select date",
+    "invoices": "Invoices",
+    "deliveryInfo": "Delivery information",
+    "deliveryDateTime": "Delivery date/time",
+    "fullAddress": "Full address",
+    "loadingAddresses": "Loading addresses...",
+    "noAddresses": "No addresses available",
+    "selectAddress": "Select address",
+    "observation": "Notes"
+  },
+  "table": {
+    "columns": {
+      "orderId": "Order ID",
+      "purchaseOrder": "Purchase order",
+      "delivery": "Delivery",
+      "products": "Products"
+    },
+    "empty": "No purchase orders.",
+    "ordersCount": "{count, plural, one {# order} other {# orders}}",
+    "noveltyType": "Issue type:",
+    "changeWarehouse": "Change warehouse",
+    "showing": "Showing {from} to {to} of {total} results"
+  },
+  "products": {
+    "title": "Product details",
+    "warehouse": "Warehouse: {name}",
+    "editProducts": "Edit products",
+    "noDecimals": "Boxes and units can't include decimals",
+    "updateSuccess": "Products updated",
+    "updateError": "Couldn't update the products",
+    "columns": {
+      "product": "Product",
+      "batch": "Lot",
+      "batchExpiration": "Lot expiration",
+      "units": "Units",
+      "boxes": "Boxes",
+      "stock": "Stock",
+      "unitPrice": "Unit price",
+      "vat": "VAT",
+      "totalPrice": "Total price"
+    },
+    "selectProduct": "Select product",
+    "selectBatch": "Select lot",
+    "sku": "SKU: {sku}",
+    "batchLabel": "{batch} - {date} - {months, plural, one {# month} other {# months}}",
+    "batchExpiresStock": "Expires: {date}  |  {stock} units",
+    "monthsCount": "{count, plural, one {# month} other {# months}}",
+    "original": {
+      "title": "Original customer data",
+      "totalValue": "Total value",
+      "observation": "Note",
+      "viewTooltip": "View original PDF data"
+    },
+    "removeProduct": "Remove product",
+    "addProduct": "Add product"
+  }
+}

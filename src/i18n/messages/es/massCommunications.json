@@ -1,0 +1,123 @@
+{
+  "title": "Comunicaciones masivas",
+  "clientPreview": {
+    "loadError": "No se pudo cargar la vista previa del mensaje.",
+    "backToList": "Volver a la lista",
+    "personalizedEmail": "Correo personalizado para {name}",
+    "to": "Para: {recipients}",
+    "noSubject": "Sin asunto",
+    "noContent": "Sin contenido",
+    "attachments": "Adjuntos:",
+    "attachmentsTitle": "Adjuntos",
+    "subject": "Asunto",
+    "recipientCount": "{count, plural, one {# destinatario} other {# destinatarios}}"
+  },
+  "actionsBar": {
+    "recipientsVia": "<b>{count}</b> destinatarios vía <b>{channel}</b>",
+    "selectRecipients": "Selecciona destinatarios para continuar",
+    "previewAndSend": "Vista previa y enviar"
+  },
+  "channel": {
+    "title": "Canal de comunicación",
+    "descriptions": {
+      "email": "Correo electrónico con adjuntos",
+      "whatsapp": "Plantillas aprobadas con URL de descarga"
+    }
+  },
+  "message": {
+    "title": "Mensaje",
+    "createTemplate": "Crear template",
+    "emailTemplates": "Templates de email",
+    "preview": "Vista previa",
+    "selectApprovedTemplate": "Selecciona una plantilla aprobada",
+    "loadingTemplates": "Cargando plantillas…",
+    "noTemplates": "No hay plantillas disponibles",
+    "variablesHint": "Las variables <code>{variables}</code> se completan automáticamente con los datos de cada cliente al momento del envío.",
+    "emailPreview": "Vista previa del correo",
+    "sampleRecipient": "Para: destinatario@ejemplo.com",
+    "noSubject": "Sin asunto",
+    "bodyPlaceholder": "El contenido del mensaje aparecerá aquí...",
+    "attachments": "Adjuntos",
+    "selected": "Seleccionado",
+    "templateTag": "Template",
+    "subjectLabel": "Asunto:",
+    "approved": "Aprobada"
+  },
+  "recipients": {
+    "title": "Destinatarios",
+    "validationDone": "Validación completada: {valid} válidos, {invalid} no encontrados",
+    "validateError": "Error al validar los clientes",
+    "downloadError": "Error al descargar el reporte",
+    "placeholder": "COL-001, COL-002, MEX-001\no uno por línea:\nCOL-001\nCOL-002\nMEX-001",
+    "validate": "Validar",
+    "found": "{count, plural, one {# cliente encontrado} other {# clientes encontrados}}",
+    "notFound": "{count, plural, one {# no encontrado} other {# no encontrados}}",
+    "ofTotal": "{total, plural, one {de # cliente total} other {de # clientes totales}}",
+    "downloadReport": "Descargar reporte"
+  },
+  "addClient": {
+    "title": "Agregar cliente",
+    "success": "Cliente agregado a la circularización",
+    "error": "Error al agregar el cliente",
+    "placeholder": "Buscar y seleccionar cliente"
+  },
+  "createTemplate": {
+    "title": "Crear template de email",
+    "subtitle": "Escribe el contenido del correo usando tags dinámicos. La vista previa se actualiza en tiempo real.",
+    "name": "Nombre del template",
+    "namePlaceholder": "Ej: Recordatorio mensual de cartera",
+    "subject": "Asunto",
+    "subjectPlaceholder": "Ej: Reporte de {receivables} - {clientName}",
+    "body": "Cuerpo del mensaje",
+    "bodyPlaceholder": "Estimado {clientName},\n\nLe informamos que su cartera actual es de {receivables}...\n\nQuedamos atentos,\n{signature}",
+    "contentPlaceholder": "El contenido aparecerá aquí...",
+    "selectTag": "Seleccionar tag",
+    "insertInto": "{field, select, subject {Se insertará en el asunto} other {Se insertará en el cuerpo}}",
+    "recipientRoles": "Roles destinatarios",
+    "templateAttachments": "Adjuntos del template",
+    "save": "Guardar template",
+    "clientRole": "Cliente - {name}",
+    "success": "Template creado exitosamente",
+    "error": "Ocurrió un error al crear el template",
+    "validation": {
+      "roleRequired": "Debe seleccionar al menos un rol",
+      "nameRequired": "El nombre es obligatorio",
+      "subjectRequired": "El asunto es obligatorio",
+      "bodyRequired": "El cuerpo es obligatorio"
+    }
+  },
+  "testCommunication": {
+    "title": "Probar comunicación",
+    "description": "Envía una comunicación de prueba a tu correo para verificar que todo se vea correctamente.",
+    "testEmail": "Email de prueba",
+    "emailPlaceholder": "tu@email.com",
+    "sent": "Enviado",
+    "send": "Enviar prueba"
+  },
+  "whatsappPreview": {
+    "title": "Vista previa de WhatsApp",
+    "empty": "Selecciona una plantilla para ver la vista previa",
+    "sampleTime": "10:30 a. m."
+  },
+  "table": {
+    "activated": "Comunicación activada correctamente",
+    "activateError": "Error al activar la comunicación",
+    "clientRemoved": "Cliente eliminado del envío",
+    "removeError": "Error al eliminar cliente",
+    "columns": {
+      "contacts": "Contactos",
+      "receivables": "Cartera",
+      "pastDue": "Vencida",
+      "paymentPlans": "Acuerdos de pago"
+    },
+    "removeFromSend": "Eliminar del envío",
+    "viewEmailOf": "Ver correo de {name}",
+    "confirm": "Confirmo que he revisado el contenido y los destinatarios. Esta acción no se puede deshacer.",
+    "send": "Enviar comunicación"
+  },
+  "tableView": {
+    "title": "Envío masivo de comunicación",
+    "searchPlaceholder": "Buscar cliente...",
+    "addClient": "+Añadir cliente"
+  }
+}

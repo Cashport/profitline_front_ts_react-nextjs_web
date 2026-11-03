@@ -1,6 +1,7 @@
 "use client";
 
 import { Paperclip, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import type { IWalletAttachment } from "../../types";
@@ -16,6 +17,7 @@ const CHIP =
   "inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-[7px] py-0.5 text-[13px] font-semibold text-foreground";
 
 export default function AttachmentList({ items, onRemove, className }: AttachmentListProps) {
+  const t = useTranslations("wallet.attachments");
   if (!items.length) return null;
 
   return (
@@ -36,7 +38,7 @@ export default function AttachmentList({ items, onRemove, className }: Attachmen
             href={a.url}
             target="_blank"
             rel="noopener noreferrer"
-            title={`Abrir ${a.nombre}`}
+            title={t("open", { name: a.nombre })}
             className={cn(CHIP, "transition-colors hover:bg-secondary hover:underline")}
           >
             {contenido}
@@ -47,7 +49,7 @@ export default function AttachmentList({ items, onRemove, className }: Attachmen
             {onRemove && (
               <button
                 type="button"
-                aria-label={`Quitar ${a.nombre}`}
+                aria-label={t("remove", { name: a.nombre })}
                 className="text-muted-foreground transition-colors hover:text-rose-600 dark:hover:text-rose-400"
                 onClick={() => onRemove(i)}
               >

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { Input, Modal, Select, Table, TableProps, Typography } from "antd";
 import { Trash } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -46,6 +47,8 @@ interface Props {
 }
 
 const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }: Props) => {
+  const t = useTranslations("clients.adjustments.editModal");
+  const tCommon = useTranslations("common");
   const height = useScreenHeight();
   const { showMessage } = useMessageApi();
   const { data: motives } = useFinancialDiscountMotives();
@@ -95,10 +98,10 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
 
     try {
       await editAccountingAdjustments(rows);
-      showMessage("success", "Ajustes editados correctamente");
+      showMessage("success", t("success"));
       onClose();
     } catch (error) {
-      showMessage("error", "Error al editar ajustes");
+      showMessage("error", t("error"));
     }
     setIsSubmitting(false);
   };
@@ -116,13 +119,13 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
 
   const columns: TableProps<IFinancialDiscountForm>["columns"] = [
     {
-      title: "Ajuste contable",
+      title: t("columns.adjustment"),
       dataIndex: "adjustmentId",
       key: "adjustmentId",
       width: 150
     },
     {
-      title: "Motivo",
+      title: tCommon("fields.reason"),
       dataIndex: "requirementType",
       key: "requirementType",
       render: (_: any, record: any, index: number) => (
@@ -144,7 +147,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
       width: 250
     },
     {
-      title: "Comentario",
+      title: tCommon("fields.comment"),
       dataIndex: "commentary",
       key: "commentary",
       render: (_: any, record: any, index: number) => {
@@ -155,7 +158,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
             render={({ field, fieldState }) => (
               <Input
                 {...field}
-                placeholder="Agrega un comentario"
+                placeholder={t("commentPlaceholder")}
                 className={
                   fieldState.invalid
                     ? "inputEditAdjustments inputEditAdjustments__error"
@@ -168,7 +171,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
       }
     },
     {
-      title: "Monto",
+      title: tCommon("fields.amount"),
       dataIndex: "amount",
       key: "amount",
       render: (_: any, record: any, index: number) => (
@@ -176,13 +179,13 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
           hiddenTitle
           name={`rows.${index}.amount`}
           control={control}
-          titleInput="Valor"
-          placeholder="Valor"
+          titleInput={tCommon("fields.value")}
+          placeholder={tCommon("fields.value")}
           validationRules={{
-            required: "Valor es obligatorio",
+            required: t("amountRequired"),
             validate: (value) =>
               parseFloat(value?.replaceAll(".", "").replaceAll(",", ".") || "0") != 0 ||
-              "El valor debe ser distinto a 0"
+              t("amountNonZero")
           }}
           allowNegative={true}
           fixedDecimalScale={true}
@@ -219,7 +222,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
         closable={false}
         destroyOnClose
       >
-        <Title level={4}>Edición de saldos</Title>
+        <Title level={4}>{t("title")}</Title>
 
         <Table
           className="modalEditAdjustments__adjustmentsTable"
@@ -235,17 +238,17 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
         <div className="modalEditAdjustments__footer">
           <FooterButtons
             className="modalEditAdjustments__footerButtons"
-            titleCancel="Volver"
+            titleCancel={tCommon("actions.back")}
             onClose={() => onClose(true)}
             handleOk={handleSubmit(onSubmit)}
-            titleConfirm="Guardar"
+            titleConfirm={tCommon("actions.save")}
             isConfirmLoading={isSubmitting}
           />
         </div>
       </Modal>
 
       <ModalRemove
-        name="ajuste"
+        name={t("removeItemName")}
         isOpen={isRemoveModalOpen}
         onClose={() => {
           setActiveRow(undefined);

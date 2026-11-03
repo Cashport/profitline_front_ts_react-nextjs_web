@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import axios from "axios";
 
 import { API, default as instance } from "@/utils/api/api";
@@ -48,10 +49,7 @@ export const buildTowerQuery = (query: ICollectionTowerQuery): string => {
   if (search) params.set("search", search);
   if (query.aging) params.set("aging", query.aging);
   if (query.segments.length) {
-    params.set(
-      "segments",
-      query.segments.map((s) => `${s.date}:${s.status ?? "*"}`).join(",")
-    );
+    params.set("segments", query.segments.map((s) => `${s.date}:${s.status ?? "*"}`).join(","));
   }
   return params.toString();
 };
@@ -112,6 +110,6 @@ export const downloadCollectionTowerExcel = async (
         // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
       }
     }
-    throw new Error(message || "No se pudo descargar el Excel.");
+    throw new Error(message || getTranslator("shared")("services.downloadExcelError"));
   }
 };

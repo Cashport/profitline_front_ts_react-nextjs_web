@@ -1,0 +1,70 @@
+{
+  "nav": {
+    "groups": {
+      "receivables": "Cartera",
+      "collections": "Recaudo",
+      "commercial": "Comercial",
+      "automation": "Automatización",
+      "management": "Gestión"
+    },
+    "modules": {
+      "receivables": "Cartera",
+      "aging": "Cartera por edad",
+      "novelties": "Novedades",
+      "balances": "Saldos",
+      "blockingAlerts": "Alertas de bloqueo",
+      "medicalAccounts": "Cuentas médicas",
+      "collectionsTower": "Torre de recaudo",
+      "banks": "Bancos",
+      "cashApplication": "Aplicación de pagos",
+      "marketplace": "Marketplace",
+      "purchaseOrders": "Órdenes de compra",
+      "visits": "Visitas",
+      "surveys": "Encuestas",
+      "reverseLogistics": "Logística inversa",
+      "bots": "Bots",
+      "mail": "Mail",
+      "whatsapp": "WhatsApp",
+      "dataQuality": "Data Quality",
+      "approvals": "Aprobaciones",
+      "tasks": "Tareas",
+      "reports": "Informes",
+      "settings": "Configuración"
+    },
+    "switchProject": "Cambiar proyecto",
+    "projectLogo": "Logo del proyecto",
+    "pinMenu": "Fijar menú",
+    "unpinMenu": "Desfijar menú",
+    "openMenu": "Abrir menú"
+  },
+  "header": {
+    "back": "Volver"
+  },
+  "userMenu": {
+    "trigger": "Menú de usuario",
+    "theme": "Tema",
+    "themes": {
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
+    "language": "Idioma",
+    "languageSaveError": "Cambiamos el idioma en este equipo, pero no pudimos guardarlo en tu usuario. Intenta de nuevo más tarde.",
+    "changePassword": "Cambiar contraseña",
+    "sendingEmail": "Enviando correo…",
+    "passwordEmailSent": "Te enviamos un correo a {email} para cambiar tu contraseña",
+    "passwordEmailError": "No pudimos enviar el correo. Intenta de nuevo.",
+    "contactSupport": "Contactar soporte",
+    "logout": "Cerrar sesión"
+  },
+  "logout": {
+    "title": "¿Cerrar sesión?",
+    "description": "Saldrás de Cashport en este equipo. Tus filtros y preferencias quedan guardados.",
+    "confirm": "Cerrar sesión"
+  },
+  "projectSelector": {
+    "title": "Elegir proyecto",
+    "projectImage": "Imagen del proyecto",
+    "showMore": "Ver más proyectos"
+  }
+}

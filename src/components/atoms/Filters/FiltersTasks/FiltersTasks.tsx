@@ -1,10 +1,12 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState, ReactNode } from "react";
 import dayjs from "dayjs";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 import { getTasksStatus, getTaskTypes } from "@/services/tasks/tasks";
 
 import { ITaskStatus, ITaskTypes } from "@/types/tasks/ITasks";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 
 interface FilterOption {
@@ -34,6 +36,8 @@ export default function FiltersTasks({
   customDate,
   setCustomDate
 }: Props) {
+  const t = useTranslations("components.filters");
+  const tCommon = useTranslations("common");
   const [optionsList, setOptionsList] = useState<FilterOption[]>(initialOptions);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [openOption, setOpenOption] = useState<string | null>(null);
@@ -41,19 +45,23 @@ export default function FiltersTasks({
   const dates = useMemo(
     () => [
       {
-        label: "Últimos 7 días",
+        key: "last7Days",
+        label: filterLabel("last7Days"),
         value: `${dayjs().subtract(7, "day").format("YYYY-MM-DD")}|${dayjs().format("YYYY-MM-DD")}`
       },
       {
-        label: "Últimos 30 días",
+        key: "last30Days",
+        label: filterLabel("last30Days"),
         value: `${dayjs().subtract(30, "day").format("YYYY-MM-DD")}|${dayjs().format("YYYY-MM-DD")}`
       },
       {
-        label: "Este mes",
+        key: "thisMonth",
+        label: filterLabel("thisMonth"),
         value: `${dayjs().startOf("month").format("YYYY-MM-DD")}|${dayjs().endOf("month").format("YYYY-MM-DD")}`
       },
       {
-        label: "Este trimestre",
+        key: "thisQuarter",
+        label: filterLabel("thisQuarter"),
         value: `${dayjs()
           .utc()
           .startOf("month")
@@ -67,11 +75,13 @@ export default function FiltersTasks({
           .format("YYYY-MM-DD")}`
       },
       {
-        label: "Este año",
+        key: "thisYear",
+        label: filterLabel("thisYear"),
         value: `${dayjs().utc().startOf("year").format("YYYY-MM-DD")}|${dayjs().utc().endOf("year").format("YYYY-MM-DD")}`
       },
       {
-        label: "Trimestre pasado",
+        key: "lastQuarter",
+        label: filterLabel("lastQuarter"),
         value: (() => {
           const currentMonth = dayjs().utc().month();
           const startMonth = currentMonth - (currentMonth % 3) - 3;
@@ -238,7 +248,7 @@ export default function FiltersTasks({
                   style={{ textDecoration: "underline", cursor: "pointer" }}
                   onClick={handleOpenCustomDate}
                 >
-                  Fecha personalizada
+                  {t("customDate")}
                 </p>
               </div>
             )}
@@ -250,7 +260,7 @@ export default function FiltersTasks({
       style={{ width: "180px" }}
       multiple
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomLeft"
       showCheckedStrategy={Cascader.SHOW_CHILD}
       loadData={loadData}
@@ -272,18 +282,18 @@ export default function FiltersTasks({
 const initialOptions: FilterOption[] = [
   {
     value: "Fechas",
-    label: "Fechas",
+    label: filterLabel("dates"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "statuses",
-    label: "Estado",
+    label: filterLabel("status"),
     isLeaf: false
   },
   {
     value: "taskTypes",
-    label: "Tipo de tarea",
+    label: filterLabel("taskType"),
     isLeaf: false
   }
 ];

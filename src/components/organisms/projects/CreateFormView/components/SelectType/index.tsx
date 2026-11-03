@@ -3,19 +3,21 @@ import { SelectTypeButton } from "../SelectTypeButton";
 import { Calendar, CheckSquare, Files, NumberSquareNine, RadioButton } from "phosphor-react";
 import { TextAUnderline } from "@phosphor-icons/react";
 import { QuestionType } from "../../controllers/formSchema";
+import { useTranslations } from "use-intl";
 
 interface Props {
   typeSelected: QuestionType | null;
   handleTypeClick: (type: QuestionType) => void;
 }
 export const SelectType = ({ typeSelected, handleTypeClick }: Props) => {
+  const t = useTranslations("projects.forms.questionTypes");
   return (
     <Row gutter={[8, 8]}>
       <Col span={8}>
         <SelectTypeButton
           icon={<CheckSquare />}
           onClick={() => handleTypeClick(QuestionType.MULTIPLE_CHOICE)}
-          title="Opción múltiple"
+          title={t("multipleChoice")}
           selected={typeSelected === QuestionType.MULTIPLE_CHOICE}
         />
       </Col>
@@ -23,7 +25,7 @@ export const SelectType = ({ typeSelected, handleTypeClick }: Props) => {
         <SelectTypeButton
           icon={<RadioButton weight="fill" />}
           onClick={() => handleTypeClick(QuestionType.SINGLE_CHOICE)}
-          title="Única opción"
+          title={t("singleChoice")}
           selected={typeSelected === QuestionType.SINGLE_CHOICE}
         />
       </Col>
@@ -32,14 +34,14 @@ export const SelectType = ({ typeSelected, handleTypeClick }: Props) => {
           icon={<TextAUnderline />}
           onClick={() => handleTypeClick(QuestionType.TEXT)}
           selected={typeSelected === QuestionType.TEXT}
-          title="Texto"
+          title={t("text")}
         />
       </Col>
       <Col span={8}>
         <SelectTypeButton
           icon={<Files />}
           onClick={() => handleTypeClick(QuestionType.FILE)}
-          title="Adjunto"
+          title={t("file")}
           selected={typeSelected === QuestionType.FILE}
         />
       </Col>
@@ -47,7 +49,7 @@ export const SelectType = ({ typeSelected, handleTypeClick }: Props) => {
         <SelectTypeButton
           icon={<NumberSquareNine />}
           onClick={() => handleTypeClick(QuestionType.NUMBER)}
-          title="Numérico"
+          title={t("number")}
           selected={typeSelected === QuestionType.NUMBER}
         />
       </Col>
@@ -55,7 +57,7 @@ export const SelectType = ({ typeSelected, handleTypeClick }: Props) => {
         <SelectTypeButton
           icon={<Calendar />}
           onClick={() => handleTypeClick(QuestionType.DATE)}
-          title="Fecha"
+          title={t("date")}
           selected={typeSelected === QuestionType.DATE}
         />
       </Col>

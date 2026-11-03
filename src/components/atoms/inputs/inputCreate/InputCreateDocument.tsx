@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { Button, Checkbox, message, Upload, UploadProps } from "antd";
 import { Controller, useForm } from "react-hook-form";
 
@@ -9,9 +10,11 @@ import { ICreateDocumentForm } from "@/types/clientTypes/clientTypes";
 import { useDocumentByClient } from "@/hooks/useDocumentByClient";
 
 export const InputCreateDocument = ({ clientTypeId }: { clientTypeId: number }) => {
+  const t = useTranslations("components.inputCreate");
+  const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
-  const initialValueLabel = "Cargar plantilla";
-  const [uploadLabel, setUploadLabel] = useState(initialValueLabel);
+  // null = sin plantilla seleccionada (se muestra "Cargar plantilla").
+  const [uploadLabel, setUploadLabel] = useState<string | null>(null);
 
   const { addDocument } = useDocumentByClient(clientTypeId);
   const [messageApi, contextHolder] = message.useMessage();
@@ -37,7 +40,7 @@ export const InputCreateDocument = ({ clientTypeId }: { clientTypeId: number }) 
     await addDocument(formData, messageApi);
 
     reset();
-    setUploadLabel(initialValueLabel);
+    setUploadLabel(null);
     setIsLoading(false);
   };
 
@@ -59,13 +62,13 @@ export const InputCreateDocument = ({ clientTypeId }: { clientTypeId: number }) 
   return (
     <>
       <form className="inputCreateDocument" onSubmit={handleSubmit(onSubmit)}>
-      {contextHolder}
+        {contextHolder}
         <InputForm
           titleInput=""
           control={control}
           nameInput="document_name"
           error={errors.document_name}
-          placeholder="Ingresar nombre del documento"
+          placeholder={t("documentPlaceholder")}
         />
         <Controller
           name="required"
@@ -73,7 +76,7 @@ export const InputCreateDocument = ({ clientTypeId }: { clientTypeId: number }) 
           defaultValue={false}
           render={({ field }) => (
             <Checkbox className="inputCreateDocument__check" checked={field.value} {...field}>
-              Obligatorio
+              {t("required")}
             </Checkbox>
           )}
         />
@@ -92,14 +95,14 @@ export const InputCreateDocument = ({ clientTypeId }: { clientTypeId: number }) 
             >
               <Button htmlType="button" loading={isLoading} className="">
                 <FileArrowUp size={16} />
-                {uploadLabel}
+                {uploadLabel ?? t("uploadTemplate")}
               </Button>{" "}
             </Upload>
           )}
         />
 
         <Button htmlType="submit" loading={isLoading} className="createButton">
-          Crear
+          {tCommon("actions.create")}
         </Button>
       </form>
     </>

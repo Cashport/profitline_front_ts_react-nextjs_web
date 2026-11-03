@@ -1,4 +1,5 @@
 import { Calendar } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 
@@ -17,24 +18,27 @@ export function DateRangeFilter({
   dateRange,
   onDateRangeChange,
   onClear,
-  label = "Rango de fechas",
-  startLabel = "Fecha inicio",
-  endLabel = "Fecha fin",
-  clearLabel = "Limpiar fechas",
+  label,
+  startLabel,
+  endLabel,
+  clearLabel,
   showLabel = true
 }: DateRangeFilterProps) {
+  const t = useTranslations("components.dateRangeFilter");
   return (
     <div>
       {showLabel && (
         <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
           <Calendar className="h-3 w-3 inline mr-1" />
-          {label}
+          {label ?? t("label")}
         </label>
       )}
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[13px] text-gray-600 mb-1 block">{startLabel}</label>
+            <label className="text-[13px] text-gray-600 mb-1 block">
+              {startLabel ?? t("start")}
+            </label>
             <Input
               type="date"
               value={dateRange.start || ""}
@@ -43,7 +47,7 @@ export function DateRangeFilter({
             />
           </div>
           <div>
-            <label className="text-[13px] text-gray-600 mb-1 block">{endLabel}</label>
+            <label className="text-[13px] text-gray-600 mb-1 block">{endLabel ?? t("end")}</label>
             <Input
               type="date"
               value={dateRange.end || ""}
@@ -58,7 +62,7 @@ export function DateRangeFilter({
           onClick={onClear}
           className="w-full border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter"
         >
-          {clearLabel}
+          {clearLabel ?? t("clear")}
         </Button>
       </div>
     </div>

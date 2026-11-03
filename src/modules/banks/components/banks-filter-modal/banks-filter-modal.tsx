@@ -1,6 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -30,11 +31,6 @@ interface BanksFilterModalProps<T extends IBanksFilters> {
   defaultLast30?: boolean;
 }
 
-const ACTIVE_OPTIONS: FilterOptionItem[] = [
-  { id: "1", name: "Sí" },
-  { id: "0", name: "No" }
-];
-
 const EMPTY_DATE: DateDraft = { from: null, to: null };
 
 /**
@@ -47,6 +43,12 @@ export default function BanksFilterModal<T extends IBanksFilters>({
   withActive,
   defaultLast30
 }: BanksFilterModalProps<T>) {
+  const t = useTranslations("banks.filters");
+  const tCommon = useTranslations("common");
+  const activeOptions: FilterOptionItem[] = [
+    { id: "1", name: tCommon("status.yes") },
+    { id: "0", name: tCommon("status.no") }
+  ];
   const [date, setDate] = useState<DateDraft>(() =>
     defaultLast30 ? resolveDatePreset("ultimos_30") : EMPTY_DATE
   );
@@ -68,21 +70,28 @@ export default function BanksFilterModal<T extends IBanksFilters>({
   const categories: FilterCategoryConfig[] = [
     {
       key: "fechas",
-      label: "Fechas",
+      label: t("dates"),
       kind: "custom",
       metaLabel: hasDraftDate
-        ? `Periodo: ${formatDateTagValue(dateDraft)}`
-        : "Selecciona un periodo",
+        ? t("periodValue", { period: formatDateTagValue(dateDraft) })
+        : t("selectPeriod"),
       draftCount: hasDraftDate ? 1 : 0,
       renderPanel: () => <FilterDateTab value={dateDraft} onChange={setDateDraft} />,
       // null (no un elemento vacío) para que el contador de filtros activos no lo cuente.
       renderTag: () =>
         hasDate ? (
-          <DateFilterTag value={date} label="Fechas" onClear={() => setDate(EMPTY_DATE)} />
+          <DateFilterTag value={date} label={t("dates")} onClear={() => setDate(EMPTY_DATE)} />
         ) : null
     },
     ...(withActive
-      ? [{ key: "activo", label: "Activo", selectMode: "single" as const, options: ACTIVE_OPTIONS }]
+      ? [
+          {
+            key: "activo",
+            label: t("active"),
+            selectMode: "single" as const,
+            options: activeOptions
+          }
+        ]
       : [])
   ];
 

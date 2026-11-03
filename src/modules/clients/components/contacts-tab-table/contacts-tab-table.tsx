@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { Button, Flex, Table, TableProps, Typography } from "antd";
 import { Eye, Triangle } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import { IContact } from "@/types/contacts/IContacts";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
@@ -23,6 +24,8 @@ const ContactsTable = ({
   setSelectedRows,
   setShowContactModal
 }: PropsContactsTable) => {
+  const t = useTranslations("clients.contacts.columns");
+  const tCommon = useTranslations("common");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [page, setPage] = useState(1);
   const height = useScreenHeight();
@@ -48,7 +51,7 @@ const ContactsTable = ({
 
   const columns: TableProps<IContact>["columns"] = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "contact_name",
       key: "contact_name",
       render: (contact_name) => <Text className="cell">{contact_name}</Text>,
@@ -56,7 +59,7 @@ const ContactsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Apellido",
+      title: t("lastName"),
       dataIndex: "contact_lastname",
       key: "contact_lastname",
       render: (text) => <Text className="cell">{text}</Text>,
@@ -64,7 +67,7 @@ const ContactsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Cargo",
+      title: t("position"),
       key: "name_position",
       dataIndex: "name_position",
       render: (text) => <Text className="cell">{text}</Text>,
@@ -73,7 +76,7 @@ const ContactsTable = ({
       width: 140
     },
     {
-      title: "Rol",
+      title: t("role"),
       key: "contact_position",
       dataIndex: "contact_position",
       render: (text) => <Text className="cell">{text}</Text>,
@@ -82,7 +85,7 @@ const ContactsTable = ({
       width: 140
     },
     {
-      title: "Teléfono",
+      title: tCommon("fields.phone"),
       key: "contact_phone",
       dataIndex: "contact_phone",
       render: (phone, row) => (
@@ -92,7 +95,7 @@ const ContactsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Email",
+      title: t("email"),
       key: "contact_email",
       dataIndex: "contact_email",
       render: (amount) => <Text className="cell">{amount}</Text>,

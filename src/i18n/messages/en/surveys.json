@@ -1,0 +1,260 @@
+{
+  "header": {
+    "title": "Surveys",
+    "newSurvey": "New survey",
+    "searchPlaceholder": "Search surveys"
+  },
+  "stats": {
+    "active": "Active surveys",
+    "activeFoot": "of {total, plural, one {# survey} other {# surveys}}",
+    "month": "Responses this month",
+    "monthFoot": "{total} total",
+    "inactive": "Inactive",
+    "inactiveFoot": "Hidden from sales reps in the app"
+  },
+  "list": {
+    "title": "Surveys",
+    "loadError": "We couldn't load the surveys.",
+    "empty": "No surveys yet.",
+    "noMatch": "No surveys match these criteria.",
+    "clearCriteria": "Clear search and filters",
+    "count": "{total, plural, one {# survey} other {# surveys}}",
+    "countFiltered": "{shown} of {total, plural, one {# survey} other {# surveys}}"
+  },
+  "table": {
+    "name": "Survey",
+    "questions": "Questions",
+    "responses": "Responses",
+    "lastResponse": "Last response",
+    "createdBy": "Created by",
+    "updatedAt": "Updated",
+    "viewSurvey": "View survey",
+    "viewResponses": "View responses"
+  },
+  "card": {
+    "responses": "{count, plural, one {<b>{formatted}</b> response} other {<b>{formatted}</b> responses}}",
+    "questions": "{count, plural, one {# question} other {# questions}}",
+    "lastResponse": "Last {date}",
+    "noResponses": "No responses",
+    "view": "View",
+    "viewResponses": "View responses"
+  },
+  "filters": {
+    "createdBy": "Created by",
+    "updatedAt": "Updated date",
+    "period": "Period: {value}",
+    "selectPeriod": "Select a period",
+    "updatedTag": "Updated"
+  },
+  "pageHeader": {
+    "backTo": "Back to {label}"
+  },
+  "meta": {
+    "namePlaceholder": "Survey name",
+    "descriptionPlaceholder": "Description the sales rep sees when opening the survey",
+    "questions": "{count, plural, one {<b>#</b> question} other {<b>#</b> questions}}",
+    "required": "{count, plural, one {<b>#</b> required} other {<b>#</b> required}}",
+    "version": "Version {version}",
+    "createdBy": "Created by {name}",
+    "updatedAt": "Updated {date}",
+    "active": "Active"
+  },
+  "editorHeader": {
+    "newSurvey": "New survey",
+    "untitled": "Untitled survey",
+    "preview": "Preview",
+    "hidePreview": "Hide preview",
+    "exitEditor": "Exit editor",
+    "publish": "Publish",
+    "publishChanges": "Publish changes",
+    "published": "Published",
+    "viewResponses": "View responses",
+    "backLabel": "Surveys"
+  },
+  "editor": {
+    "notFound": "We couldn't find this survey.",
+    "backToSurveys": "Back to Surveys",
+    "publishFailed": "The survey wasn't published",
+    "preview": "Preview",
+    "published": "Survey published",
+    "publishError": "We couldn't publish the survey",
+    "problems": {
+      "name": "Give the survey a name",
+      "noQuestions": "Add at least one question",
+      "untitled": "{count, plural, one {# untitled question} other {# untitled questions}}",
+      "emptyOptions": "Question {number} has blank options"
+    },
+    "unsaved": {
+      "title": "Unpublished changes",
+      "content": "You have unpublished changes. Do you want to publish them before leaving?",
+      "publish": "Publish",
+      "discard": "Discard"
+    },
+    "exit": {
+      "title": "Leave without publishing?",
+      "content": "Any changes you haven't published will be lost.",
+      "ok": "Leave",
+      "keepEditing": "Keep editing"
+    }
+  },
+  "questionTypes": {
+    "text": { "label": "Short text", "hint": "One-line answer" },
+    "textarea": { "label": "Long text", "hint": "Paragraph with a limit" },
+    "number": { "label": "Number", "hint": "Value with min and max" },
+    "document": { "label": "ID number", "hint": "Digits only (ID, code)" },
+    "dropdown": { "label": "Dropdown", "hint": "One option from a list" },
+    "single_select": { "label": "Single choice", "hint": "e.g. Yes / No" },
+    "multi_select": { "label": "Multiple choice", "hint": "Can select several" },
+    "date": { "label": "Date", "hint": "Day, month, and year" },
+    "email": { "label": "Email", "hint": "Email address" },
+    "phone": { "label": "Phone", "hint": "Contact number" },
+    "location": { "label": "Location", "hint": "GPS of the location" },
+    "photo": { "label": "Photo", "hint": "Device camera" },
+    "file": { "label": "File", "hint": "PDF, images, or other" }
+  },
+  "questionDefaults": {
+    "placeholders": {
+      "text": "Type your answer...",
+      "textarea": "Type your notes...",
+      "number": "Enter a value",
+      "document": "Enter the number",
+      "phone": "Enter the phone number",
+      "email": "email@example.com"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "option": "Option {number}"
+  },
+  "addQuestion": {
+    "button": "Add question",
+    "addBelow": "Will be added below question {number}",
+    "addAtEnd": "Will be added at the end",
+    "hint": "<req>*</req> Required · drag <grip></grip> to reorder"
+  },
+  "optionList": {
+    "placeholder": "Option {number}",
+    "remove": "Remove option",
+    "add": "Add option"
+  },
+  "questionCard": {
+    "rules": {
+      "photos": "{count, plural, one {Up to # photo} other {Up to # photos}}",
+      "anyFormat": "Any format",
+      "files": "{formats} · {count, plural, one {up to # file} other {up to # files}}",
+      "filesWithSize": "{formats} · {count, plural, one {up to # file} other {up to # files}} of {size} MB",
+      "maxSelections": "Up to {count, plural, one {# option} other {# options}}"
+    },
+    "summary": {
+      "maxChars": "Max {count} characters",
+      "digitsRange": "{min}–{max} digits",
+      "digitsMax": "Up to {max} digits",
+      "digitsMin": "At least {min} digits",
+      "numberRange": "{min} to {max}",
+      "numberMax": "Up to {max}",
+      "numberMin": "From {min}",
+      "options": "{count, plural, one {# option} other {# options}}",
+      "files": "{count, plural, one {# file} other {# files}}"
+    },
+    "dragToReorder": "Drag to reorder",
+    "questionPlaceholder": "Type the question",
+    "helpPlaceholder": "Help text (optional)",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "duplicate": "Duplicate",
+    "required": "Required",
+    "untitled": "Untitled question",
+    "conditional": "Conditional",
+    "conditionalHint": "Shown based on the answer to another question"
+  },
+  "config": {
+    "soon": "Coming soon",
+    "placeholder": "Placeholder text",
+    "maxChars": "Max characters",
+    "minDigits": "Min digits",
+    "maxDigits": "Max digits",
+    "min": "Minimum",
+    "max": "Maximum",
+    "decimals": "Decimals",
+    "initialValue": "Initial value",
+    "currency": "Currency",
+    "currencyCop": "COP · Colombian peso",
+    "currencyUsd": "USD · US dollar",
+    "minSelections": "Min selections",
+    "maxSelections": "Max selections",
+    "noLimit": "No limit",
+    "maxPhotos": "Max photos",
+    "maxSizeMb": "Max size (MB)",
+    "cameraOnly": "Camera only",
+    "maxFiles": "Max files",
+    "allowedFormats": "Allowed formats",
+    "minDate": "Earliest date",
+    "maxDate": "Latest date",
+    "minAccuracy": "Minimum accuracy (m)"
+  },
+  "preview": {
+    "caption": "Preview · sales rep app",
+    "selectOption": "Select an option",
+    "option": "Option",
+    "datePlaceholder": "DD/MM/YYYY",
+    "captureLocation": "Capture location",
+    "takePhoto": "Take photo",
+    "attachFile": "Attach file",
+    "filesProgress": "· 0 of {max}",
+    "untitledSurvey": "Untitled survey",
+    "sampleCustomer": "Sample customer",
+    "requiredLeft": "{count, plural, one {# required question left} other {# required questions left}}",
+    "untitledQuestion": "Untitled question",
+    "finish": "Submit form"
+  },
+  "answers": {
+    "stats": {
+      "total": "Total responses",
+      "totalFoot": "Complete and partial",
+      "month": "This month",
+      "monthFoot": "Since the 1st",
+      "users": "Sales reps",
+      "usersFoot": "Have answered the survey"
+    },
+    "loadError": "We couldn't load the responses.",
+    "empty": "This survey has no responses yet.",
+    "backFallback": "Survey",
+    "title": "Responses",
+    "recent": "Recent responses",
+    "showing": "Showing {shown} of {total}"
+  },
+  "download": {
+    "title": "Download responses",
+    "subtitle": "One row per response, one column per question",
+    "format": "Format",
+    "period": "Period",
+    "includeLinks": "Include links to photos and files",
+    "download": "Download {format}",
+    "success": "Responses downloaded",
+    "error": "We couldn't download the responses."
+  },
+  "exportPeriods": {
+    "hoy": "Today",
+    "semana": "This week",
+    "mes": "This month",
+    "mes_anterior": "Last month",
+    "trimestre": "Last quarter",
+    "ytd": "YTD",
+    "doce_meses": "Last 12 months"
+  },
+  "responsesTable": {
+    "salesRep": "Sales rep",
+    "city": "City",
+    "taxId": "Tax ID {taxId}",
+    "viewResponse": "View response"
+  },
+  "responseStatus": {
+    "COMPLETED": "Complete",
+    "DRAFT": "Partial"
+  },
+  "responseModal": {
+    "title": "Response",
+    "loadError": "We couldn't load the response.",
+    "noAnswer": "No answer",
+    "unnamedCustomer": "Unnamed customer"
+  }
+}

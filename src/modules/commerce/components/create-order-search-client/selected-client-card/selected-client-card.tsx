@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { MapPin } from "lucide-react";
 
 import { ISelectedAddress } from "../types";
@@ -11,12 +12,13 @@ interface ISelectedClientCardProps {
 
 // Card: Cliente seleccionado
 function SelectedClientCard({ client, address, nit }: ISelectedClientCardProps) {
+  const t = useTranslations("commerce.searchClient");
   return (
     <div className="bg-white rounded-xl border border-[#DDDDDD] p-5 flex flex-col gap-3">
-      <p className="text-[13px] font-medium text-[#999999]">Cliente seleccionado</p>
+      <p className="text-[13px] font-medium text-[#999999]">{t("selectedClient")}</p>
       <div>
         <p className="text-base font-bold text-[#141414] leading-tight">{client.client_name}</p>
-        <p className="text-[13px] text-[#999999] mt-0.5">NIT: {nit}</p>
+        <p className="text-[13px] text-[#999999] mt-0.5">{t("taxIdValue", { nit })}</p>
       </div>
       {address && (
         <div className="flex items-start gap-2">

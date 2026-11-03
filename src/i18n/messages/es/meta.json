@@ -1,0 +1,158 @@
+{
+  "acceptInvitation": {
+    "title": "Aceptar invitación"
+  },
+  "aging": {
+    "title": "Cartera por edad",
+    "description": "Cartera por cliente y tramo"
+  },
+  "approvals": {
+    "title": "Aprobaciones"
+  },
+  "balances": {
+    "title": "Saldos"
+  },
+  "banks": {
+    "title": "Bancos"
+  },
+  "blockingAlerts": {
+    "title": "Alertas de bloqueo",
+    "description": "Clientes y puntos de venta bloqueados o por bloquear por cartera vencida"
+  },
+  "botHealth": {
+    "title": "Salud de automatizaciones"
+  },
+  "bulkReconciliation": {
+    "title": "Conciliación masiva",
+    "description": "Conciliación masiva de la cartera del cliente"
+  },
+  "cashApplication": {
+    "title": "Aplicación de pagos"
+  },
+  "cashportMobile": {
+    "title": "Cashport Mobile"
+  },
+  "cetaphil": {
+    "title": "Cetaphil - Marketplace exclusivo",
+    "description": "Marketplace exclusivo para trabajadores de Galderma"
+  },
+  "changePassword": {
+    "title": "Cambiar contraseña"
+  },
+  "chat": {
+    "title": "Chat"
+  },
+  "collectionsTower": {
+    "title": "Torre de recaudo",
+    "description": "Meta, forecast, acuerdos de pago y PNA del mes"
+  },
+  "completeForm": {
+    "title": "Completar formulario"
+  },
+  "controlTower": {
+    "title": "Torre de control",
+    "description": "Indicadores y filtros cruzados de la cartera"
+  },
+  "createForm": {
+    "title": "Crear formulario"
+  },
+  "createOrder": {
+    "title": "Crear pedido"
+  },
+  "createProject": {
+    "title": "Crear proyecto"
+  },
+  "customerDetail": {
+    "title": "Detalle del cliente"
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  },
+  "dataQuality": {
+    "title": "Data Quality"
+  },
+  "discounts": {
+    "title": "Descuentos"
+  },
+  "home": {
+    "title": "Cashport"
+  },
+  "legacyTaskManager": {
+    "title": "Gestor de tareas"
+  },
+  "mail": {
+    "title": "Mail",
+    "description": "Gestor de tareas"
+  },
+  "marketplace": {
+    "title": "Marketplace"
+  },
+  "massCommunications": {
+    "title": "Comunicaciones masivas",
+    "description": "Gestor de comunicaciones masivas"
+  },
+  "medicalAccounts": {
+    "title": "Cuentas médicas"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "description": "Notificaciones por usuario"
+  },
+  "novelties": {
+    "title": "Novedades",
+    "description": "Bandeja de novedades de cartera"
+  },
+  "orderConfirmed": {
+    "title": "Pedido confirmado"
+  },
+  "payment": {
+    "title": "Pago",
+    "description": "Pantalla de pago con Wompi"
+  },
+  "projects": {
+    "title": "Proyectos"
+  },
+  "purchaseOrders": {
+    "title": "Órdenes de compra"
+  },
+  "receivables": {
+    "title": "Cartera"
+  },
+  "reconciliation": {
+    "title": "Conciliación"
+  },
+  "reports": {
+    "title": "Informes",
+    "description": "Informes publicados para el equipo"
+  },
+  "reverseLogistics": {
+    "title": "Logística inversa"
+  },
+  "seals": {
+    "title": "Precintos"
+  },
+  "selfService": {
+    "title": "Autogestión"
+  },
+  "settings": {
+    "title": "Configuración"
+  },
+  "signIn": {
+    "title": "Inicio de sesión"
+  },
+  "suppliers": {
+    "title": "Proveedores"
+  },
+  "surveys": {
+    "title": "Encuestas",
+    "description": "Encuestas que los asesores diligencian en sus visitas"
+  },
+  "tasks": {
+    "title": "Tareas",
+    "description": "Gestor de tareas por proceso"
+  },
+  "visits": {
+    "title": "Visitas",
+    "description": "Seguimiento en vivo de las visitas de los asesores en campo"
+  }
+}

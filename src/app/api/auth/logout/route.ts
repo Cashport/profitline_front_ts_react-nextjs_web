@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     // Determinar la URL de redirección basada en la ruta actual
     let redirectUrl = "/";
 
-    if (currentPath === "/comercio/cetaphil") {
+    if (currentPath === "/commerce/cetaphil") {
       redirectUrl = "/cetaphil";
     }
 

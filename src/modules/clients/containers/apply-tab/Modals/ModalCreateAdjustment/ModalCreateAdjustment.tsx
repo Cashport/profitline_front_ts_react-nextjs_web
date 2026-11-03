@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import { Modal } from "antd";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { CaretLeft, Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { createGlobalAdjustment } from "@/services/applyTabClients/applyTabClients";
@@ -40,6 +41,8 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
   const { showMessage } = useMessageApi();
+  const t = useTranslations("clients.applyModals");
+  const tCommon = useTranslations("common");
   const { mutate } = useAcountingAdjustment(clientId.toString(), projectId.toString(), 2);
   const { data: motives } = useFinancialDiscountMotives();
 
@@ -76,12 +79,12 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
     }));
     try {
       await createGlobalAdjustment(projectId, clientId, adjustments);
-      showMessage("success", "Ajuste(s) creado correctamente");
+      showMessage("success", t("shared.created", { count: adjustments.length }));
       mutate();
       onCancel(true);
       console.log("Ajustes creados:", adjustments);
     } catch (error) {
-      showMessage("error", "Error al crear el ajuste(s)");
+      showMessage("error", t("shared.createError"));
     }
     setLoadingCreate(false);
   };
@@ -98,7 +101,7 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
       >
         <div onClick={() => onCancel()} className="header">
           <CaretLeft size={24} />
-          <h2>Crear ajuste</h2>
+          <h2>{t("shared.createAdjustment")}</h2>
         </div>
 
         <div className="modalCreateAdjustment__allAdjustments">
@@ -107,13 +110,13 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
               <Controller
                 name={`adjustments.${index}.motive`}
                 control={control}
-                rules={{ required: "Motivo es obligatorio" }}
+                rules={{ required: t("createAdjustment.reasonRequired") }}
                 render={({ field }) => (
                   <GeneralSelect
                     errors={errors?.adjustments?.[index]?.motive}
                     field={field}
-                    title="Motivo"
-                    placeholder="Ingresar Motivo"
+                    title={tCommon("fields.reason")}
+                    placeholder={t("createAdjustment.reasonPlaceholder")}
                     options={
                       motives?.map((motive) => ({ value: motive.id, label: motive.name })) || []
                     }
@@ -125,7 +128,7 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
               />
 
               <InputForm
-                titleInput="Detalle"
+                titleInput={tCommon("fields.detail")}
                 control={control}
                 nameInput={`adjustments.${index}.detail`}
                 error={errors?.adjustments?.[index]?.detail}
@@ -133,13 +136,13 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
               <InputMoney
                 name={`adjustments.${index}.amount`}
                 control={control}
-                titleInput="Valor"
-                placeholder="Valor"
+                titleInput={tCommon("fields.value")}
+                placeholder={tCommon("fields.value")}
                 validationRules={{
-                  required: "Valor es obligatorio",
+                  required: t("createAdjustment.amountRequired"),
                   validate: (value) =>
                     parseFloat(value?.replaceAll(".", "").replaceAll(",", ".") || "0") != 0 ||
-                    "El valor debe ser distinto a 0"
+                    t("createAdjustment.amountNonZero")
                 }}
                 allowNegative={true}
                 error={errors?.adjustments?.[index]?.amount}
@@ -154,12 +157,12 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
           onClick={() => append({ motive: undefined, detail: undefined, amount: undefined })}
         >
           <Plus />
-          Agregar ajuste
+          {t("shared.addAdjustment")}
         </button>
 
         <div className="modal-footer">
           <SecondaryButton fullWidth onClick={() => onCancel()}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </SecondaryButton>
 
           <PrincipalButton
@@ -168,7 +171,7 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
             fullWidth
             loading={loadingCreate}
           >
-            Crear ajuste
+            {t("shared.createAdjustment")}
           </PrincipalButton>
         </div>
       </Modal>

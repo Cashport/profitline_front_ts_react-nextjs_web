@@ -13,76 +13,73 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Chats } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import Header from "@/components/organisms/header";
+import type { Messages } from "@/i18n/types";
 
 type Section = {
   href: string;
   icon: ComponentType<{ size?: string | number; className?: string }>;
-  label: string;
-  description: string;
+  /** Clave en marketAdmin.home.sections */
+  key: keyof Messages["marketAdmin"]["home"]["sections"];
   disabled?: boolean;
 };
 
 const sections: Section[] = [
   {
-    href: "/market-admin/clientes",
+    href: "/market-admin/clients",
     icon: Users,
-    label: "Clientes",
-    description: "Gestiona clientes, sus productos, descuentos y usuarios asignados."
+    key: "clients"
   },
   {
-    href: "/market-admin/usuarios",
+    href: "/market-admin/users",
     icon: User,
-    label: "Usuarios",
-    description: "Administra los usuarios del Marketplace, roles y clientes asociados."
+    key: "users"
   },
   {
-    href: "/market-admin/productos",
+    href: "/market-admin/products",
     icon: Package,
-    label: "Productos",
-    description: "Revisa el catálogo: líneas, canales, SKUs, lotes, precios e imágenes."
+    key: "products"
   },
   {
     href: "/market-admin/packs",
     icon: Boxes,
-    label: "Packs de productos",
-    description: "Arma packs con productos del catálogo: SKU propio, imagen y cantidades."
+    key: "packs"
   },
   {
-    href: "/market-admin/bonusAndDiscounts",
+    href: "/market-admin/bonuses-and-discounts",
     icon: Tag,
-    label: "Descuentos y bonificados",
-    description: "Gestiona descuentos y bonificados: reglas, fechas, estado y categoría."
+    key: "discounts"
   },
   {
     href: "/market-admin/load",
     icon: UploadCloud,
-    label: "Cargue de información",
-    description: "Alimenta el app con ETLs manuales: inventario, precios, clientes y más."
+    key: "load"
   },
   {
     href: "/mass-communications",
     icon: Chats,
-    label: "Comunicaciones Masivas",
-    description: "Envía comunicaciones masivas a los clientes en minutos."
+    key: "massCommunications"
   },
   {
     href: "/settings",
     icon: Settings,
-    label: "Configuraciones",
-    description: "Gestión administrativa del proyecto."
+    key: "settings"
   }
 ];
 
 export default function MarketAdmin() {
+  const t = useTranslations("marketAdmin.home");
   return (
     <div className="cp-page min-h-full">
-      <Header title="Administración" />
+      <Header title={t("title")} />
 
       {/* Single white card — full width, sized to its content */}
       <div className="cp-card overflow-hidden">
         <div className="grid grid-cols-2">
-          {sections.map(({ href, icon: Icon, label, description, disabled }) => {
+          {sections.map(({ href, icon: Icon, key, disabled }) => {
+            const label = t(`sections.${key}.label`);
+            const description = t(`sections.${key}.description`);
             const inner = (
               <div
                 className={`group flex items-center gap-5 px-7 py-7 border-b border-r border-[#F0F0F0] transition-all h-full ${
@@ -122,9 +119,9 @@ export default function MarketAdmin() {
             );
 
             return disabled ? (
-              <div key={label}>{inner}</div>
+              <div key={key}>{inner}</div>
             ) : (
-              <Link key={label} href={href} className="block">
+              <Link key={key} href={href} className="block">
                 {inner}
               </Link>
             );

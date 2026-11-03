@@ -4,10 +4,12 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { cn } from "@/utils/utils";
 
 import { BOT_STATUS_META } from "../../constants";
+import { useBotLabels } from "../../hooks/useBotLabels";
 import { BotStatus } from "../../types/automations";
 
 export function BotStatusBadge({ status }: { status: BotStatus }) {
   const meta = BOT_STATUS_META[status];
+  const botLabels = useBotLabels();
   const Icon = meta.icon;
 
   return (
@@ -17,7 +19,7 @@ export function BotStatusBadge({ status }: { status: BotStatus }) {
       style={{ backgroundColor: meta.bg, color: meta.color }}
     >
       <Icon className={cn("h-3 w-3", status === "EN_EJECUCION" && "animate-spin")} />
-      {meta.label}
+      {botLabels.status(status)}
     </Badge>
   );
 }

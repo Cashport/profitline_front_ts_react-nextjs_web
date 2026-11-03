@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -9,11 +10,7 @@ import type {
   FilterSelection
 } from "@/components/ui/filter-modal";
 import { TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
-import {
-  ESTADO_PENDIENTE_APROBACION_ID,
-  ESTADO_PENDIENTE_APROBACION_NOMBRE,
-  TIPO_APROBACION_OPTIONS
-} from "../../constants";
+import { ESTADO_PENDIENTE_APROBACION_ID, TIPO_APROBACION_OPTIONS } from "../../constants";
 import { useProfit360Filters } from "../../contexts/Profit360FiltersContext";
 import { IAprobacionesFilter } from "../../types";
 import { FilterDateTab, DateDraft, formatDateTagValue } from "../FilterDateTab/FilterDateTab";
@@ -27,16 +24,13 @@ interface FilterAprobacionesTabProps {
   ciudadOptions: string[];
 }
 
-const TAG_PLURALS: Record<string, string> = {
-  tipo: "Tipos",
-  ciudad: "Ciudades"
-};
-
 export function FilterAprobacionesTab({
   value,
   onChange,
   ciudadOptions
 }: FilterAprobacionesTabProps) {
+  const t = useTranslations("reverseLogistics.filters");
+  const tTypes = useTranslations("reverseLogistics.approvalTypes");
   const { clientes, estados, isLoading } = useProfit360Filters();
 
   // FilterModal's internal draft only holds option categories, so the date
@@ -51,9 +45,9 @@ export function FilterAprobacionesTab({
     name: c.nombre
   }));
 
-  const tipoOptions: FilterOptionItem[] = TIPO_APROBACION_OPTIONS.map((t) => ({
-    id: t.value,
-    name: t.label
+  const tipoOptions: FilterOptionItem[] = TIPO_APROBACION_OPTIONS.map((opt) => ({
+    id: opt.value,
+    name: tTypes(opt.labelKey)
   }));
 
   const estadoOptions: FilterOptionItem[] = estados.map((e) => ({ id: e.codigo, name: e.nombre }));
@@ -66,10 +60,7 @@ export function FilterAprobacionesTab({
   const estadoItem = (id: string): FilterOptionItem =>
     estadoOptions.find((o) => o.id.toUpperCase() === id.toUpperCase()) ?? {
       id,
-      name:
-        id.toUpperCase() === ESTADO_PENDIENTE_APROBACION_ID
-          ? ESTADO_PENDIENTE_APROBACION_NOMBRE
-          : id
+      name: id.toUpperCase() === ESTADO_PENDIENTE_APROBACION_ID ? t("pendingApproval") : id
     };
 
   const selection: FilterSelection = {
@@ -82,9 +73,9 @@ export function FilterAprobacionesTab({
         ]
       : [],
     estado: value.status ? [estadoItem(value.status)] : [],
-    tipo: value.tipos.map((t) => ({
-      id: t,
-      name: tipoOptions.find((o) => o.id === t)?.name ?? t
+    tipo: value.tipos.map((tipo) => ({
+      id: tipo,
+      name: tipoOptions.find((o) => o.id === tipo)?.name ?? tipo
     })),
     ciudad: value.ciudades.map((c) => ({ id: c, name: c }))
   };
@@ -101,21 +92,21 @@ export function FilterAprobacionesTab({
   const hasDraftDate = Boolean(dateDraft.from || dateDraft.to);
 
   const categories: FilterCategoryConfig[] = [
-    { key: "cliente", label: "Cliente", selectMode: "single", options: clienteOptions },
-    { key: "estado", label: "Estado", selectMode: "single", options: estadoOptions },
-    { key: "tipo", label: "Tipo de Aprobación", options: tipoOptions },
+    { key: "cliente", label: t("customer"), selectMode: "single", options: clienteOptions },
+    { key: "estado", label: t("status"), selectMode: "single", options: estadoOptions },
+    { key: "tipo", label: t("approvalType"), options: tipoOptions },
     {
       key: "ciudad",
-      label: "Ciudad",
+      label: t("city"),
       options: ciudadOptions.map((c) => ({ id: c, name: c }))
     },
     {
       key: "fecha",
-      label: "Fecha de registro",
+      label: t("registrationDate"),
       kind: "custom",
       metaLabel: hasDraftDate
-        ? `Periodo: ${formatDateTagValue(dateDraft)}`
-        : "Selecciona un periodo",
+        ? t("period", { value: formatDateTagValue(dateDraft) })
+        : t("selectPeriod"),
       draftCount: hasDraftDate ? 1 : 0,
       renderPanel: () => <FilterDateTab value={dateDraft} onChange={setDateDraft} />,
       // Must be null (not an element that renders nothing) so FilterModal's
@@ -136,7 +127,13 @@ export function FilterAprobacionesTab({
       value={selection}
       isLoading={isLoading}
       formatTagValue={(cat, items) =>
-        items.length === 1 ? items[0].name : `${items.length} ${TAG_PLURALS[cat.key] ?? ""}`.trim()
+        items.length === 1
+          ? items[0].name
+          : cat.key === "tipo"
+            ? t("typesCount", { count: items.length })
+            : cat.key === "ciudad"
+              ? t("citiesCount", { count: items.length })
+              : String(items.length)
       }
       onApply={(sel) =>
         onChange({

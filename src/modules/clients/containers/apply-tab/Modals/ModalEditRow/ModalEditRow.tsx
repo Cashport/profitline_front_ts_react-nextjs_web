@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import { Button, Flex, Modal, Spin, Table, TableProps } from "antd";
 import { PencilLine, Plus, Trash } from "phosphor-react";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -50,6 +51,9 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
   const { showMessage } = useMessageApi();
+  const t = useTranslations("clients.applyModals.editRow");
+  const tShared = useTranslations("clients.applyModals.shared");
+  const tCommon = useTranslations("common");
 
   const [isEditing, setIsEditing] = useState(false);
   const {
@@ -70,14 +74,14 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
   const isLoading = false;
   const columns: TableProps<IApplicationTabRow>["columns"] = [
     {
-      title: "Ajuste",
+      title: t("adjustment"),
       dataIndex: "adjustment",
       key: "adjustment",
       render: (adjustment) => <p>{adjustment}</p>,
       width: "50%"
     },
     {
-      title: "Monto",
+      title: tCommon("fields.amount"),
       dataIndex: "amount",
       key: "amount",
       align: "center" as const,
@@ -95,7 +99,7 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
                 validationRules={{
                   pattern: {
                     value: /^-?\d+(\.\d+)?$/,
-                    message: "Solo se permiten números"
+                    message: t("onlyNumbers")
                   },
                   validate: (value) => {
                     const maxAmount = row?.current_value ?? row?.current_amount ?? amount;
@@ -103,9 +107,10 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
                       row?.entity_type_name === "FINANCIAL_RECORD" && maxAmount < 0;
                     if (isNegativeFinancialRecord) return true;
                     return (
-                      parseFloat(value) <=
-                        maxAmount ||
-                      `El valor no puede superar ${formatMoney(maxAmount, { hideCurrencySymbol: true })}`
+                      parseFloat(value) <= maxAmount ||
+                      t("maxAmount", {
+                        max: formatMoney(maxAmount, { hideCurrencySymbol: true })
+                      })
                     );
                   }
                 }}
@@ -136,28 +141,23 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
     rowData?: IApplyTabRecord,
     onlyTitle?: Boolean
   ) => {
-    let title = "";
-    let id = "";
+    const notAvailable = tCommon("status.notAvailable");
+    let id = notAvailable;
 
     switch (type) {
       case "invoice":
-        title = "Factura";
-        id = rowData?.id_erp?.toString() || "N/A";
+        id = rowData?.id_erp?.toString() || notAvailable;
         break;
       case "payment":
-        title = "Pago";
-        id = rowData?.payment_id?.toString() || "N/A";
+        id = rowData?.payment_id?.toString() || notAvailable;
         break;
       case "discount":
-        title = "Ajuste";
-        id = rowData?.financial_discount_id?.toString() || "N/A";
+        id = rowData?.financial_discount_id?.toString() || notAvailable;
         break;
-      default:
-        title = "Factura";
-        id = "N/A";
     }
-    if (onlyTitle) return title;
-    return `${title} ${id}`;
+    const rowType = type ?? "invoice";
+    if (onlyTitle) return t("rowType", { type: rowType });
+    return t("title", { type: rowType, id });
   };
 
   const handleSaveChanges = async (adjustmentsData: IFormValues) => {
@@ -170,10 +170,10 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
         row?.id ?? 0,
         adjustmentsData.adjustments[0].amount
       );
-      showMessage("success", "Cambios guardados correctamente");
+      showMessage("success", tCommon("feedback.savedSuccessfully"));
       onCancel(true);
     } catch (error) {
-      showMessage("error", "Error al guardar los cambios");
+      showMessage("error", t("saveError"));
     }
 
     setLoading(false);
@@ -209,7 +209,7 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
           onClick={handleEdit}
           icon={<PencilLine size={20} weight="light" />}
         >
-          {isEditing ? "Cancelar" : "Editar"}
+          {isEditing ? tCommon("actions.cancel") : tCommon("actions.edit")}
         </Button>
       </div>
 
@@ -236,14 +236,14 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
             onClick={() => row && handleCreateAdjustment && handleCreateAdjustment(row)}
           >
             <Plus size={20} />
-            Agregar ajuste
+            {tShared("addAdjustment")}
           </button>
         </div>
       )}
 
       <div className="modal-footer">
         <SecondaryButton fullWidth onClick={() => onCancel()}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </SecondaryButton>
         <PrincipalButton
           disabled={!isEditing}
@@ -251,7 +251,7 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
           loading={loading}
           onClick={handleSubmit(handleSaveChanges)}
         >
-          Guardar cambios
+          {tCommon("actions.saveChanges")}
         </PrincipalButton>
       </div>
     </Modal>

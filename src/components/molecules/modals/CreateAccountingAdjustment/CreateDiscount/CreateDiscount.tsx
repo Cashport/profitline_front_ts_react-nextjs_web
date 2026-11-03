@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import "./createDiscount.scss";
 import { FieldError, useForm } from "react-hook-form";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -29,18 +30,20 @@ interface Props {
   clientIdParam?: string;
 }
 
-const schema = yup.object().shape({
-  motive: yup.string().required("Campo obligatorio"),
-  percentage: yup
-    .number()
-    .max(100, "El porcentaje no puede ser mayor al 100%")
-    .required("Campo obligatorio"),
-  amount: yup.number().min(0, "El valor no puede ser negativo").required("Campo obligatorio"),
-  validity_range: yup.array().of(yup.date()).optional(),
-  expedition_date: yup.date().required("Campo obligatorio")
-});
+type CreateAdjustmentT = ReturnType<typeof useTranslations<"modals.createAdjustment">>;
+
+const buildSchema = (t: CreateAdjustmentT) =>
+  yup.object().shape({
+    motive: yup.string().required(t("required")),
+    percentage: yup.number().max(100, t("percentageMax")).required(t("required")),
+    amount: yup.number().min(0, t("negative")).required(t("required")),
+    validity_range: yup.array().of(yup.date()).optional(),
+    expedition_date: yup.date().required(t("required"))
+  });
 
 export const CreateDiscount = ({ onClose, messageApi, projectIdParam, clientIdParam }: Props) => {
+  const t = useTranslations("modals.createAdjustment");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const {
     control,
     handleSubmit,
@@ -78,13 +81,13 @@ export const CreateDiscount = ({ onClose, messageApi, projectIdParam, clientIdPa
       });
       messageApi.open({
         type: "success",
-        content: "Descuento creado con éxito"
+        content: t("discount.success")
       });
       onClose();
     } catch (error) {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error creando Descuento. Por favor, intente nuevamente."
+        content: t("discount.error")
       });
     } finally {
       setIsSubmitting(false);
@@ -93,47 +96,47 @@ export const CreateDiscount = ({ onClose, messageApi, projectIdParam, clientIdPa
 
   return (
     <div className="createDiscountCustom">
-      <p className="subTitleModalAction">Ingresa la información para crear el nuevo descuento</p>
+      <p className="subTitleModalAction">{t("discount.subtitle")}</p>
       <form className="modalContent" onSubmit={handleSubmit(handleSubmitForm)}>
         <div className="containterForm">
           <InputSelect
-            titleInput="Motivo"
+            titleInput={t("reason")}
             nameInput="motive"
             control={control}
             error={errors.motive}
             options={motives?.map((motive) => ({ value: motive.name, label: motive.name })) || []}
             loading={isLoading}
             isError={isError}
-            placeholder="Seleccionar motivo"
+            placeholder={t("reasonPlaceholder")}
           />
           <div />
           <InputFormMoney
-            titleInput="Cupo total"
+            titleInput={t("totalAmount")}
             nameInput="amount"
             control={control}
             error={errors.amount}
-            placeholder="Ingresar valor"
+            placeholder={t("amountPlaceholder")}
             typeInput="number"
             customStyle={{ width: "100%" }}
           />
           <InputForm
-            titleInput="Porcentaje a aplicar"
+            titleInput={t("percentage")}
             nameInput="percentage"
             control={control}
             error={errors.percentage}
-            placeholder="Ingresar valor"
+            placeholder={t("amountPlaceholder")}
             typeInput="number"
             customStyle={{ width: "100%" }}
           />
           <InputDateForm
-            titleInput="Fecha de expedición"
+            titleInput={t("issueDate")}
             nameInput="expedition_date"
-            placeholder="Seleccionar fecha de expedición"
+            placeholder={t("issueDatePlaceholder")}
             control={control}
             error={errors.expedition_date}
           />
           <InputDateRange
-            titleInput="Rango de vigencia"
+            titleInput={t("validityRange")}
             nameInput="validity_range"
             control={control}
             error={errors.validity_range as FieldError}
@@ -144,7 +147,7 @@ export const CreateDiscount = ({ onClose, messageApi, projectIdParam, clientIdPa
           handleOk={handleSubmit(handleSubmitForm)}
           onClose={onClose}
           isConfirmDisabled={!isValid || isSubmitting}
-          titleConfirm="Crear Descuento"
+          titleConfirm={t("discount.submit")}
           className="createDiscountCustom__footer"
         />
       </form>

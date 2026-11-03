@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { DownloadSimple } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -16,6 +17,7 @@ import { useMedicalAccounts } from "../../hooks/useMedicalAccounts";
 import { IMedicalAccountListItem } from "../../types/IMedicalAccount";
 
 export function MedicalAccountsView() {
+  const t = useTranslations("medicalAccounts.list");
   const router = useRouter();
   const { showMessage } = useMessageApi();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -51,7 +53,7 @@ export function MedicalAccountsView() {
   });
 
   const handleOpenDetail = (record: IMedicalAccountListItem) => {
-    router.push(`/cuentas-medicas/${record.id}`);
+    router.push(`/medical-accounts/${record.id}`);
   };
 
   const handleDownloadReport = async () => {
@@ -66,10 +68,7 @@ export function MedicalAccountsView() {
         date_to: dateRange.end
       });
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al descargar el reporte."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("downloadReportError"));
     } finally {
       setIsDownloadingReport(false);
     }
@@ -110,14 +109,14 @@ export function MedicalAccountsView() {
                 onClick={() => setShowBulkRadiate(true)}
                 disabled={selectedIds.length === 0}
               >
-                Radicación masiva{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
+                {t("bulkSubmit", { count: selectedIds.length })}
               </Button>
               <Button
                 icon={<DownloadSimple size={16} />}
                 onClick={handleDownloadReport}
                 loading={isDownloadingReport}
               >
-                Descargar reporte
+                {t("downloadReport")}
               </Button>
             </div>
           </div>

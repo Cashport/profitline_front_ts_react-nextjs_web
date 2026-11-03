@@ -1,5 +1,6 @@
 import { Button } from "@/modules/chat/ui/button";
 import { Edit } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 interface ClientDetailInfoProps {
   stakeholder?: string | null | undefined;
@@ -14,11 +15,13 @@ export function ClientDetailInfo({
   setIsEditClientOpen,
   showEditButton = true
 }: ClientDetailInfoProps) {
+  const t = useTranslations("dataQuality.clientInfo");
+  const tCommon = useTranslations("common");
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
-          Información general
+          {t("title")}
         </h2>
 
         {showEditButton && (
@@ -29,14 +32,14 @@ export function ClientDetailInfo({
             style={{ borderColor: "#DDDDDD", color: "#141414" }}
           >
             <Edit className="w-4 h-4 mr-2" />
-            Editar
+            {tCommon("actions.edit")}
           </Button>
         )}
       </div>
       <div className="grid grid-cols-2 gap-x-8 gap-y-6 mb-8">
         <div>
           <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-            Cliente
+            {t("customer")}
           </p>
           <p className="text-sm" style={{ color: "#141414" }}>
             {clientName || ""}
@@ -44,7 +47,7 @@ export function ClientDetailInfo({
         </div>
         <div>
           <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-            Stakeholder
+            {t("stakeholder")}
           </p>
           <p className="text-sm" style={{ color: "#141414" }}>
             {stakeholder || ""}

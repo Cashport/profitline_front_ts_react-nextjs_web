@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Drawer, Spin } from "antd";
 import useSWR from "swr";
+import { useLocale, useTranslations } from "use-intl";
 import { AlertTriangle, Image as ImageIcon, Loader2, Play, RotateCcw } from "lucide-react";
 
 import { Badge } from "@/modules/chat/ui/badge";
@@ -18,8 +19,9 @@ import {
   IClientDetailDataArchive
 } from "@/types/dataQuality/IDataQuality";
 
-import { BOT_FREQUENCY_LABELS, BOT_MUTED_TEXT_COLOR, BOT_STATUS_META } from "../../constants";
+import { BOT_MUTED_TEXT_COLOR, BOT_STATUS_META } from "../../constants";
 import { useBotHistory } from "../../hooks/useBotHistory";
+import { useBotLabels } from "../../hooks/useBotLabels";
 import { BotStatusBadge } from "../bots-table/bot-status-badge";
 import { ModalDataIntake } from "../modal-data-intake";
 
@@ -66,16 +68,6 @@ function formatDuration(seconds: number | null): string {
   return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
 }
 
-// Texto sintetizado en frontend a partir de campos reales (tipo_archivo + periodicidad):
-// el contrato de backend no tiene todavía un campo de descripción por bot.
-function getBotDescription(bot: IBotStatusItem): string {
-  const periodicidadLabel = bot.periodicidad
-    .map((p) => (BOT_FREQUENCY_LABELS[p] ?? p).toLowerCase())
-    .join(" y ");
-  const tipo = bot.tipo_archivo || "archivo";
-  return `Descarga el ${tipo}${periodicidadLabel ? ` ${periodicidadLabel}` : ""} del portal del cliente y lo carga en la plataforma.`;
-}
-
 export function BotHistoryDrawer({
   bot,
   isOpen,
@@ -84,6 +76,10 @@ export function BotHistoryDrawer({
   onRun,
   onClientClick
 }: BotHistoryDrawerProps) {
+  const t = useTranslations("dataQuality.botHistory");
+  const tBots = useTranslations("dataQuality.bots");
+  const locale = useLocale();
+  const botLabels = useBotLabels();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false);
   const [evidenceUrl, setEvidenceUrl] = useState("");
@@ -115,6 +111,18 @@ export function BotHistoryDrawer({
   };
 
   if (!bot) return null;
+
+  // Texto sintetizado en frontend a partir de campos reales (tipo_archivo + periodicidad):
+  // el contrato de backend no tiene todavía un campo de descripción por bot.
+  const getBotDescription = (item: IBotStatusItem): string => {
+    const frequency = new Intl.ListFormat(locale, { type: "conjunction" }).format(
+      item.periodicidad.map((p) => botLabels.frequency(p).toLowerCase())
+    );
+    const fileType = item.tipo_archivo || t("fileFallback");
+    return frequency
+      ? t("descriptionWithFrequency", { fileType, frequency })
+      : t("description", { fileType });
+  };
 
   const isRunning = bot.estado === "EN_EJECUCION" || executingScheduleId === bot.schedule_id;
   const canRun = !isRunning;
@@ -148,7 +156,7 @@ export function BotHistoryDrawer({
             >
               {bot.cliente} · {bot.pais} · {bot.tipo_archivo}
               {bot.periodicidad.length > 0
-                ? ` · ${bot.periodicidad.map((p) => BOT_FREQUENCY_LABELS[p] ?? p).join(", ")}`
+                ? ` · ${bot.periodicidad.map(botLabels.frequency).join(", ")}`
                 : ""}
             </button>
             <div className="mt-2">
@@ -158,11 +166,8 @@ export function BotHistoryDrawer({
         }
       >
         <div className="mb-4 rounded-lg p-3" style={{ backgroundColor: "#F7F7F7" }}>
-          <p
-            className="mb-1 text-[13px] font-semibold"
-            style={{ color: BOT_MUTED_TEXT_COLOR }}
-          >
-            ¿Qué hace este bot?
+          <p className="mb-1 text-[13px] font-semibold" style={{ color: BOT_MUTED_TEXT_COLOR }}>
+            {t("whatItDoes")}
           </p>
           <p className="text-sm" style={{ color: "#141414" }}>
             {getBotDescription(bot)}
@@ -171,25 +176,19 @@ export function BotHistoryDrawer({
 
         <div className="mb-4 grid grid-cols-2 gap-2.5">
           <div>
-            <p
-              className="text-[13px] font-semibold"
-              style={{ color: BOT_MUTED_TEXT_COLOR }}
-            >
-              Última ejecución
+            <p className="text-[13px] font-semibold" style={{ color: BOT_MUTED_TEXT_COLOR }}>
+              {t("lastRun")}
             </p>
             <p className="mt-0.5 text-sm" style={{ color: "#141414" }}>
-              {formatTimestamp(bot.ultima_ejecucion, "Sin registro")}
+              {formatTimestamp(bot.ultima_ejecucion, tBots("noRecord"))}
             </p>
           </div>
           <div>
-            <p
-              className="text-[13px] font-semibold"
-              style={{ color: BOT_MUTED_TEXT_COLOR }}
-            >
-              Próxima
+            <p className="text-[13px] font-semibold" style={{ color: BOT_MUTED_TEXT_COLOR }}>
+              {t("nextRun")}
             </p>
             <p className="mt-0.5 text-sm" style={{ color: "#141414" }}>
-              {formatTimestamp(bot.proxima_ejecucion, "Sin programar")}
+              {formatTimestamp(bot.proxima_ejecucion, tBots("notScheduled"))}
             </p>
           </div>
         </div>
@@ -199,14 +198,10 @@ export function BotHistoryDrawer({
             variant="outline"
             className="flex-1"
             disabled={!matchingIntake}
-            title={
-              matchingIntake
-                ? undefined
-                : "No se encontró una ingesta configurada para este tipo de archivo"
-            }
+            title={matchingIntake ? undefined : t("noIntakeConfigured")}
             onClick={() => setIsIntakeModalOpen(true)}
           >
-            Ver ingesta
+            {t("viewIntake")}
           </Button>
           <Button disabled={!canRun} onClick={() => onRun(bot)} className="flex-1">
             {isRunning ? (
@@ -214,7 +209,7 @@ export function BotHistoryDrawer({
             ) : (
               <Play className="h-4 w-4" />
             )}
-            Ejecutar ahora
+            {t("runNow")}
           </Button>
         </div>
 
@@ -223,7 +218,7 @@ export function BotHistoryDrawer({
             className="mb-4 rounded-lg border p-3 text-sm"
             style={{ borderColor: "#FCA5A5", backgroundColor: "#FEF2F2", color: "#991B1B" }}
           >
-            <span className="font-semibold">Error: </span>
+            <span className="font-semibold">{t("errorPrefix")} </span>
             {bot.error_legible || bot.error}
           </div>
         )}
@@ -235,24 +230,26 @@ export function BotHistoryDrawer({
                 className="h-3.5 w-3.5"
                 style={{ color: BOT_STATUS_META.FALLIDO.color }}
               />
-              <span className="text-sm font-medium text-cashport-black">Diagnóstico</span>
+              <span className="text-sm font-medium text-cashport-black">{t("diagnosis")}</span>
             </div>
             <div className="space-y-3">
-              {bot.categoria_error && <DetailRow label="Categoría" value={bot.categoria_error} />}
-              {bot.codigo_error && <DetailRow label="Código de error" value={bot.codigo_error} />}
-              {bot.diagnostico && <DetailRow label="Diagnóstico" value={bot.diagnostico} />}
-              {bot.paso_fallido && <DetailRow label="Paso fallido" value={bot.paso_fallido} />}
+              {bot.categoria_error && (
+                <DetailRow label={t("category")} value={bot.categoria_error} />
+              )}
+              {bot.codigo_error && <DetailRow label={t("errorCode")} value={bot.codigo_error} />}
+              {bot.diagnostico && <DetailRow label={t("diagnosis")} value={bot.diagnostico} />}
+              {bot.paso_fallido && <DetailRow label={t("failedStep")} value={bot.paso_fallido} />}
               {bot.accion_requerida && (
-                <DetailRow label="Acción requerida" value={bot.accion_requerida} />
+                <DetailRow label={t("requiredAction")} value={bot.accion_requerida} />
               )}
               {bot.detalle_tecnico && (
-                <DetailRow label="Detalle técnico" value={bot.detalle_tecnico} />
+                <DetailRow label={t("technicalDetail")} value={bot.detalle_tecnico} />
               )}
             </div>
           </div>
         )}
 
-        <h3 className="mb-4 text-sm font-semibold text-cashport-black">Historial de ejecuciones</h3>
+        <h3 className="mb-4 text-sm font-semibold text-cashport-black">{t("runHistory")}</h3>
 
         {isHistoryLoading && (
           <div className="flex justify-center py-6">
@@ -262,13 +259,13 @@ export function BotHistoryDrawer({
 
         {!isHistoryLoading && historyError && (
           <p className="text-sm" style={{ color: BOT_STATUS_META.FALLIDO.color }}>
-            No se pudo cargar el historial de ejecuciones. Intenta de nuevo más tarde.
+            {t("historyLoadError")}
           </p>
         )}
 
         {!isHistoryLoading && !historyError && history && history.data.length === 0 && (
           <p className="text-sm" style={{ color: BOT_MUTED_TEXT_COLOR }}>
-            Sin ejecuciones registradas para este bot.
+            {t("noRuns")}
           </p>
         )}
 
@@ -279,10 +276,12 @@ export function BotHistoryDrawer({
               const runMeta = BOT_STATUS_META[run.estado];
               const outcomeLabel =
                 run.estado === "FALLIDO"
-                  ? `Falló${run.error_legible ? `: ${run.error_legible}` : ""}`
+                  ? run.error_legible
+                    ? t("failedWithReason", { reason: run.error_legible })
+                    : t("failed")
                   : run.estado === "EXITOSO"
-                    ? `Completada · ${formatDuration(run.duracion_segundos)}`
-                    : runMeta.label;
+                    ? t("completed", { duration: formatDuration(run.duracion_segundos) })
+                    : botLabels.status(run.estado);
 
               return (
                 <li key={run.id} className="relative flex gap-3 pb-5 pl-1 last:pb-0">
@@ -299,7 +298,7 @@ export function BotHistoryDrawer({
                   <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-cashport-black">
-                        {formatTimestamp(run.fecha_inicio, "Sin fecha")}
+                        {formatTimestamp(run.fecha_inicio, t("noDate"))}
                       </p>
                       <p
                         className="mt-0.5 text-[13px]"
@@ -317,7 +316,7 @@ export function BotHistoryDrawer({
                       <button
                         type="button"
                         onClick={() => openEvidence(run.evidencia_url || "")}
-                        title="Ver evidencia"
+                        title={t("viewEvidence")}
                         className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-gray-100"
                       >
                         <ImageIcon
@@ -330,7 +329,7 @@ export function BotHistoryDrawer({
                         className="gap-1 text-[13px]"
                         style={{ backgroundColor: runMeta.bg, color: runMeta.color }}
                       >
-                        {runMeta.label}
+                        {botLabels.status(run.estado)}
                       </Badge>
                     </div>
                   </div>
@@ -345,7 +344,7 @@ export function BotHistoryDrawer({
         isModalOpen={isEvidenceModalOpen}
         url={evidenceUrl}
         onCloseModal={setIsEvidenceModalOpen}
-        title="Imagen"
+        title={t("image")}
       />
 
       {matchingIntake && (

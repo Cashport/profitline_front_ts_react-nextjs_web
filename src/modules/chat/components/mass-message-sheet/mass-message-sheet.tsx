@@ -7,6 +7,10 @@ import { Textarea } from "@/modules/chat/ui/textarea";
 import { Button } from "@/modules/chat/ui/button";
 import { Switch } from "@/modules/chat/ui/switch";
 import { Badge } from "@/modules/chat/ui/badge";
+import { useTranslations } from "use-intl";
+
+// Variables que interpreta el envío: no se traducen.
+const VARS = { name: "{nombre}", days: "{dias_atraso}" };
 
 type Props = {
   open: boolean;
@@ -16,6 +20,8 @@ type Props = {
 };
 
 export default function MassMessageSheet({ open, onOpenChange, selectedCount, onSend }: Props) {
+  const t = useTranslations("chat.massMessage");
+  const tCommon = useTranslations("common");
   const [text, setText] = useState("");
   const [preview, setPreview] = useState(true);
 
@@ -46,14 +52,14 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
           className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100"
         >
           <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{tCommon("actions.close")}</span>
         </button>
 
         {/* Header */}
         <div className="flex flex-col gap-1.5 p-4">
-          <h2 className="text-foreground font-semibold">Envío masivo por WhatsApp</h2>
+          <h2 className="text-foreground font-semibold">{t("title")}</h2>
           <div className="text-sm text-muted-foreground">
-            Seleccionados:{" "}
+            {t("selected")}{" "}
             <Badge className="rounded-full bg-[#141414] text-white">{selectedCount}</Badge>
           </div>
         </div>
@@ -61,26 +67,22 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
         {/* Body */}
         <div className="mt-4 space-y-4">
           <div className="space-y-2">
-            <Label>Mensaje</Label>
+            <Label>{t("message")}</Label>
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Hola {'{nombre}'} tienes {'{dias_atraso}'} días de atraso..."
+              placeholder={t("placeholder", VARS)}
               className="min-h-[140px] bg-[#F7F7F7] border-[#DDDDDD]"
             />
-            <p className="text-[13px] text-muted-foreground">
-              Soporta variables simples como {"{nombre}"} y {"{dias_atraso}"}.
-            </p>
+            <p className="text-[13px] text-muted-foreground">{t("variablesHint", VARS)}</p>
           </div>
           <div
             className="flex items-center justify-between rounded-md border p-3"
             style={{ borderColor: "#DDDDDD" }}
           >
             <div>
-              <p className="text-sm font-medium">Vista previa de enlaces</p>
-              <p className="text-[13px] text-muted-foreground">
-                Enviar con vista previa enriquecida
-              </p>
+              <p className="text-sm font-medium">{t("linkPreview")}</p>
+              <p className="text-[13px] text-muted-foreground">{t("linkPreviewHint")}</p>
             </div>
             <Switch checked={preview} onCheckedChange={setPreview} />
           </div>
@@ -93,14 +95,14 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
             onClick={() => onOpenChange(false)}
             className="border-[#DDDDDD]"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             onClick={() => onSend({ text, schedule: null, preview })}
             className="text-[#141414]"
             style={{ backgroundColor: "#CBE71E" }}
           >
-            Enviar a {selectedCount}
+            {t("sendTo", { count: selectedCount })}
           </Button>
         </div>
       </div>

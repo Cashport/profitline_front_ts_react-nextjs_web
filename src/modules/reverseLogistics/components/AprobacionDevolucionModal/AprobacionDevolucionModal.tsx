@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Modal, Select, Input } from "antd";
+import { useTranslations } from "use-intl";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import { IProfit360FilterItem } from "@/types/reverseLogistics/IReverseLogistics";
@@ -36,6 +37,8 @@ export function AprobacionDevolucionModal({
   onApprove,
   onClose
 }: AprobacionDevolucionModalProps) {
+  const t = useTranslations("reverseLogistics.approveModal");
+  const tCommon = useTranslations("common");
   const [causal, setCausal] = useState<string | undefined>(undefined);
   const [observacion, setObservacion] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -73,7 +76,7 @@ export function AprobacionDevolucionModal({
 
   return (
     <Modal
-      title="¿Confirma aprobación?"
+      title={t("title")}
       open={open}
       onCancel={onClose}
       footer={null}
@@ -83,34 +86,34 @@ export function AprobacionDevolucionModal({
     >
       <div className="flex flex-col gap-4 py-2">
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Causal Aprobación</label>
+          <label className="text-sm font-medium text-gray-700">{t("reason")}</label>
           <Select
             value={causal}
             onChange={setCausal}
             options={causales.map((c) => ({ value: c.codigo, label: c.nombre }))}
-            placeholder="Selecciona una causal"
+            placeholder={t("selectReason")}
             className="w-full"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Observación</label>
+          <label className="text-sm font-medium text-gray-700">{t("observation")}</label>
           <Input.TextArea
             value={observacion}
             onChange={(e) => setObservacion(e.target.value)}
-            placeholder="Digite la observación aquí..."
+            placeholder={t("observationPlaceholder")}
             rows={4}
             maxLength={500}
             showCount
           />
         </div>
         <div className="flex items-center justify-end gap-2 pt-2">
-          <SecondaryButton onClick={onClose}>No Aprobar</SecondaryButton>
+          <SecondaryButton onClick={onClose}>{t("reject")}</SecondaryButton>
           <PrincipalButton
             onClick={handleAprobar}
             loading={submitting}
             disabled={!causal || !aprobadoEstadoCodigo}
           >
-            Aprobar
+            {tCommon("actions.approve")}
           </PrincipalButton>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
@@ -70,7 +71,7 @@ export const getAdresses = async (clientId: string) => {
     return response.data;
   } catch (error) {
     console.error("Error al obtener las direcciones del cliente:", error);
-    throw Error("Error al obtener las direcciones del cliente");
+    throw Error(getTranslator("shared")("services.customerAddressesError"));
   }
 };
 
@@ -147,7 +148,7 @@ export const createOrder = async (
   if (response.status !== 200) {
     throw response;
   }
-  showMessage("success", "Orden creada correctamente");
+  showMessage("success", getTranslator("shared")("services.orderCreated"));
   return response;
 };
 
@@ -166,10 +167,10 @@ export const createDraft = async (
     if (response.status !== 200) {
       throw response;
     }
-    showMessage("success", "Borrador guardado correctamente");
+    showMessage("success", getTranslator("shared")("services.draftSaved"));
     return response;
   } catch (error) {
-    showMessage("error", "Error al guardar el borrador");
+    showMessage("error", getTranslator("shared")("services.draftSaveError"));
     return error;
   }
 };
@@ -191,10 +192,10 @@ export const deleteOrders = async (
     if (response.status !== 200) {
       throw response;
     }
-    showMessage("success", "Orden eliminada correctamente");
+    showMessage("success", getTranslator("shared")("services.orderDeleted"));
     return response;
   } catch (error) {
-    showMessage("error", "Error al eliminar ordenes");
+    showMessage("error", getTranslator("shared")("services.ordersDeleteError"));
     return error;
   }
 };
@@ -233,10 +234,10 @@ export const createOrderFromDraft = async (
     if (response.status !== 200) {
       throw response;
     }
-    showMessage("success", "Orden creada correctamente");
+    showMessage("success", getTranslator("shared")("services.orderCreated"));
     return response;
   } catch (error) {
-    showMessage("error", "Error al crear orden");
+    showMessage("error", getTranslator("shared")("services.orderCreateError"));
     return error;
   }
 };
@@ -257,11 +258,11 @@ export const changeOrderState = async (
     if (response.status !== 200) {
       throw response;
     }
-    showMessage("success", "Estado cambiado correctamente");
+    showMessage("success", getTranslator("shared")("services.statusChanged"));
     return response;
   } catch (error) {
     const messageError =
-      error instanceof Error ? error.message : "Error al cambiar el estado de la orden";
+      error instanceof Error ? error.message : getTranslator("shared")("services.orderStatusError");
     showMessage("error", messageError);
     throw error;
   }
@@ -330,9 +331,9 @@ export const downloadPartialOrderCSV = async (orderIds: number[], sendToBackorde
     return response;
   } catch (error) {
     if (error instanceof ApiError) {
-      throw new Error(error.message || "Error al descargar el CSV parcial");
+      throw new Error(error.message || getTranslator("shared")("services.partialCsvError"));
     }
-    throw new Error("Error desconocido al descargar el CSV parcial");
+    throw new Error(getTranslator("shared")("services.partialCsvUnknownError"));
   }
 };
 
@@ -398,10 +399,12 @@ export const getInventoriesWarehouse = async (projectId: number, orderIds: numbe
       return response.data;
     }
 
-    throw new Error(response.message || "Error al obtener las bodegas");
+    throw new Error(response.message || getTranslator("shared")("services.warehousesError"));
   } catch (error) {
     throw new Error(
-      error instanceof Error ? error.message : "Error desconocido al al obtener las bodegas"
+      error instanceof Error
+        ? error.message
+        : getTranslator("shared")("services.warehousesUnknownError")
     );
   }
 };
@@ -425,12 +428,14 @@ export const getWarehouseProducts = async (
       return response.data;
     }
 
-    throw new Error(response.message || `Error al obtener stock de la bodega ${warehouseId}`);
+    throw new Error(
+      response.message || getTranslator("shared")("services.warehouseStockError", { warehouseId })
+    );
   } catch (error) {
     throw new Error(
       error instanceof Error
         ? error.message
-        : `Error desconocido al obtener stock de la bodega ${warehouseId}`
+        : getTranslator("shared")("services.warehouseStockUnknownError", { warehouseId })
     );
   }
 };
@@ -441,7 +446,7 @@ export const updateWarehouse = async (orderIds: number[], warehouseId: number) =
   if (response.success) {
     return response.success;
   } else {
-    throw new Error(response.message || `Error al actualizar bodega`);
+    throw new Error(response.message || getTranslator("shared")("services.warehouseUpdateError"));
   }
 };
 
@@ -451,7 +456,7 @@ export const getOrdersFilter = async () => {
       await API.get(`/marketplace/filter`);
     return response.data;
   } catch (error) {
-    throw new Error("Error al obtener los filtros de órdenes");
+    throw new Error(getTranslator("shared")("services.orderFiltersError"));
   }
 };
 
@@ -478,7 +483,7 @@ export const registerNewClient = async (guestData: {
     return response.data;
   } catch (error) {
     console.error("Error al registrar nuevo cliente:", error);
-    throw new Error("Error al registrar nuevo cliente");
+    throw new Error(getTranslator("shared")("services.registerCustomerError"));
   }
 };
 
@@ -491,7 +496,7 @@ export const sendInvitationMarketplace = async (email: string) => {
     return response.data;
   } catch (error) {
     console.error("Error al enviar invitación:", error);
-    throw new Error("Error al enviar invitación");
+    throw new Error(getTranslator("shared")("services.sendInvitationError"));
   }
 };
 
@@ -503,7 +508,7 @@ export const getMarketplaceConfig = async () => {
     return response.data;
   } catch (error) {
     console.error("Error al obtener la configuración del marketplace:", error);
-    throw new Error("Error al obtener la configuración del marketplace");
+    throw new Error(getTranslator("shared")("services.marketplaceConfigError"));
   }
 };
 
@@ -529,7 +534,7 @@ export const changeStatusOrder = async (orderId: number) => {
   } catch (error) {
     console.error("Error al cambiar el estado de la orden:", error);
     throw new Error(
-      error instanceof Error ? error.message : "Error al cambiar el estado de la orden"
+      error instanceof Error ? error.message : getTranslator("shared")("services.orderStatusError")
     );
   }
 };

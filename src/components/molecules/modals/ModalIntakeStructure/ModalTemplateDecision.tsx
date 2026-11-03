@@ -1,4 +1,6 @@
 import { ITemplatePreview } from "@/types/dataQuality/IIntakeStructure";
+import { useTranslations } from "use-intl";
+
 import { PlCol, PlModalShell } from "./PlModalShell";
 
 interface Props {
@@ -14,12 +16,14 @@ interface Props {
  * (409 TEMPLATE_DECISION_REQUIRED).
  */
 export const ModalTemplateDecision = ({ open, preview, onAnswer }: Props) => {
+  const t = useTranslations("modals.intakeStructure.templateDecision");
+  const tShared = useTranslations("modals.intakeStructure");
   const detected = preview?.detected;
   const canUse = !!preview?.can_use_as_template;
   const headers = preview?.template?.fields.map((f) => f.name) ?? detected?.headers ?? [];
   const meta = detected?.headerCell
-    ? `${detected.sheet ? `Hoja ${detected.sheet} · ` : ""}encabezados desde ${detected.headerCell}${
-        detected.delimiter ? ` · separador ${detected.delimiter}` : ""
+    ? `${detected.sheet ? `${t("sheet", { sheet: detected.sheet })} · ` : ""}${tShared("headersFrom", { cell: detected.headerCell })}${
+        detected.delimiter ? ` · ${t("delimiter", { delimiter: detected.delimiter })}` : ""
       }`
     : null;
 
@@ -27,23 +31,19 @@ export const ModalTemplateDecision = ({ open, preview, onAnswer }: Props) => {
     <PlModalShell
       open={open}
       onClose={() => onAnswer(null)}
-      title="Este archivo aún no tiene template"
+      title={t("title")}
       fileName={null}
       meta={meta}
-      heading={canUse ? `${headers.length} columnas detectadas` : "No se puede usar como template"}
-      subheading={
-        canUse
-          ? "Si lo usas como template, los próximos archivos deberán traer estas mismas columnas, en el mismo orden y en la misma ubicación."
-          : "Corrige el archivo o cárgalo sin template."
-      }
+      heading={canUse ? t("columnsDetected", { count: headers.length }) : t("cannotUse")}
+      subheading={canUse ? t("useHint") : t("fixHint")}
       footer={
         <>
           <button type="button" className="plBtn" onClick={() => onAnswer(null)}>
-            Cancelar cargue
+            {tShared("cancelUpload")}
           </button>
           <span className="plSpacer" />
           <button type="button" className="plBtn" onClick={() => onAnswer(false)}>
-            Cargar sin template
+            {t("uploadWithout")}
           </button>
           <button
             type="button"
@@ -51,7 +51,7 @@ export const ModalTemplateDecision = ({ open, preview, onAnswer }: Props) => {
             disabled={!canUse}
             onClick={() => onAnswer(true)}
           >
-            Usar como template
+            {t("useAsTemplate")}
           </button>
         </>
       }
@@ -60,7 +60,7 @@ export const ModalTemplateDecision = ({ open, preview, onAnswer }: Props) => {
         <div className="plCard" style={{ padding: "14px 18px" }}>
           <div className="plTags">
             {headers.map((h, i) => (
-              <PlCol key={`${h}-${i}`}>{h || "(sin nombre)"}</PlCol>
+              <PlCol key={`${h}-${i}`}>{h || tShared("unnamed")}</PlCol>
             ))}
           </div>
         </div>
@@ -79,7 +79,7 @@ export const ModalTemplateDecision = ({ open, preview, onAnswer }: Props) => {
 
       {canUse && !!preview?.warnings.length && (
         <div className="plAlert">
-          <strong>Revisa antes de confirmar</strong>
+          <strong>{t("reviewBeforeConfirm")}</strong>
           <ul>
             {preview.warnings.map((w, i) => (
               <li key={i}>{w.message}</li>

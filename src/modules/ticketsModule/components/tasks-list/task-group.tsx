@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import type {
   ITaskConfig,
@@ -54,6 +55,8 @@ export default function TaskGroup({
   onOpen,
   onCreate
 }: TaskGroupProps) {
+  const t = useTranslations("tickets");
+  const tCommon = useTranslations("common");
   const preloaded = group.items !== null;
   const more = useMoreTasks(config, field, group.value, preloaded ? 2 : 1);
   const rows = [...(group.items ?? []), ...more.items];
@@ -95,15 +98,15 @@ export default function TaskGroup({
           <span className="shrink-0 text-cp-ink-3">{group.count}</span>
           {group.critical_count > 0 && (
             <span className="shrink-0 text-[13px] font-semibold text-cp-magenta">
-              · {group.critical_count} {group.critical_count === 1 ? "crítica" : "críticas"}
+              · {t("criticalCount", { count: group.critical_count })}
             </span>
           )}
         </button>
         {onCreate && (
           <button
             type="button"
-            title={`Nueva tarea en ${group.label}`}
-            aria-label={`Nueva tarea en ${group.label}`}
+            title={t("newTaskIn", { group: group.label })}
+            aria-label={t("newTaskIn", { group: group.label })}
             onClick={onCreate}
             className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-cp-ink-3 hover:bg-cp-muted hover:text-cp-ink"
           >
@@ -132,8 +135,8 @@ export default function TaskGroup({
               className="flex h-9 w-full cursor-pointer items-center border-0 border-b border-solid border-cp-line bg-transparent px-4 text-left text-[13px] font-semibold text-cp-ink-3 hover:text-cp-ink disabled:cursor-default disabled:opacity-60"
             >
               {more.isLoading
-                ? "Cargando…"
-                : `Ver ${Math.min(remaining, TASKS_PER_GROUP)} más de ${remaining}`}
+                ? tCommon("status.loading")
+                : t("showMoreOf", { count: Math.min(remaining, TASKS_PER_GROUP), remaining })}
             </button>
           )}
         </>

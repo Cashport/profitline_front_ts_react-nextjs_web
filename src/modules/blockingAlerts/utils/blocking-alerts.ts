@@ -1,21 +1,18 @@
 import dayjs from "dayjs";
-import "dayjs/locale/es";
 
+import { getTranslator } from "@/i18n/translator";
 import type { IBlockingAlertRow } from "@/types/blockingAlerts/IBlockingAlerts";
-
-/** "1 día", "3 días". */
-export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 /** "Bloqueado hace 3 días", "Se bloquea mañana", "Al día · saldo a favor". */
 export const statusLabel = (row: IBlockingAlertRow): string => {
-  if (row.status === "blocked")
-    return `Bloqueado hace ${plural(row.blocked_days ?? 0, "día", "días")}`;
+  const t = getTranslator("blockingAlerts");
+  if (row.status === "blocked") return t("statusLabel.blockedFor", { days: row.blocked_days ?? 0 });
   if (row.status === "warning") {
-    if (row.days_to_block === 0) return "Se bloquea hoy";
-    if (row.days_to_block === 1) return "Se bloquea mañana";
-    return `Se bloquea en ${row.days_to_block} días`;
+    if (row.days_to_block === 0) return t("statusLabel.blocksToday");
+    if (row.days_to_block === 1) return t("statusLabel.blocksTomorrow");
+    return t("statusLabel.blocksIn", { days: row.days_to_block ?? 0 });
   }
-  return row.past_due < 0 ? "Al día · saldo a favor" : "Al día";
+  return row.past_due < 0 ? t("statusLabel.okCredit") : t("statusLabel.ok");
 };
 
 const STATUS_RANK = { blocked: 0, warning: 1, ok: 2 };
@@ -29,10 +26,9 @@ export const byUrgency = (a: IBlockingAlertRow, b: IBlockingAlertRow) =>
 /** "24/09/2026 · 08:00" */
 export const fmtCutoff = (iso: string) => dayjs(iso).format("DD/MM/YYYY · HH:mm");
 
-/** "18 sep" o, con año, "18 sep 2026". */
+/** "18 sep" o, con año, "18 sep 2026" (meses en el idioma activo). */
 export const fmtDay = (iso: string, withYear = false) =>
   dayjs(iso)
-    .locale("es")
     .format(withYear ? "D MMM YYYY" : "D MMM")
     .replace(".", "");
 

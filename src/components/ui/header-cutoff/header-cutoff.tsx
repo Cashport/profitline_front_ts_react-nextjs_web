@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 
@@ -56,14 +57,16 @@ interface HeaderCutoffProps {
 
 export default function HeaderCutoff({
   cutoffAt,
-  placeholder = "Corte —",
+  placeholder,
   busy = false,
   busyLabel,
   onRefresh,
-  refreshLabel = "Reprocesar",
+  refreshLabel: refreshLabelProp,
   cadenceMinutes = 30,
   projection
 }: HeaderCutoffProps) {
+  const t = useTranslations("components.headerCutoff");
+  const refreshLabel = refreshLabelProp ?? t("reprocess");
   // Cada clic da una vuelta completa al ícono (aunque la respuesta sea inmediata).
   const [turns, setTurns] = useState(0);
 
@@ -73,8 +76,8 @@ export default function HeaderCutoff({
     busy && busyLabel
       ? busyLabel
       : cutoff
-        ? `${today ? "Hoy" : ddmm(cutoff)} ${hhmm(cutoff)}`
-        : placeholder;
+        ? t("cutoffLabel", { day: today ? t("today") : ddmm(cutoff), time: hhmm(cutoff) })
+        : placeholder ?? t("placeholder");
   const next = cutoff ? hhmm(new Date(cutoff.getTime() + cadenceMinutes * 60_000)) : null;
   const projTo = projection?.toLabel ?? monthEndLabel();
 
@@ -131,10 +134,12 @@ export default function HeaderCutoff({
         </div>
         {cutoff && !busy && (
           <HoverCard
-            title={`${today ? "Hoy" : cutoff.toLocaleDateString("es-CO")} a las ${hhmm(cutoff)}`}
+            title={t("cutoffTitle", {
+              day: today ? t("today") : cutoff.toLocaleDateString("es-CO"),
+              time: hhmm(cutoff)
+            })}
           >
-            Los datos se toman cada {cadenceMinutes} minutos para que todos vean lo mismo. Próximo:{" "}
-            {next}.
+            {t("cadence", { minutes: cadenceMinutes, next: next ?? "" })}
           </HoverCard>
         )}
       </div>
@@ -156,19 +161,17 @@ export default function HeaderCutoff({
           >
             {projection.checked ? (
               <>
-                Proyectado a {projTo}
+                {t("projectedTo", { date: projTo })}
                 <span className="ml-2 font-normal" aria-hidden>
                   ×
                 </span>
               </>
             ) : (
-              "Proyectar a cierre"
+              t("project")
             )}
           </button>
-          <HoverCard title={projection.checked ? `Proyectado a ${projTo}` : "Proyectar a cierre"}>
-            {projection.checked
-              ? "Estás viendo cifras estimadas al cierre. Clic para volver a hoy."
-              : `Estima cómo cerrará el mes (${projTo}).`}
+          <HoverCard title={projection.checked ? t("projectedTo", { date: projTo }) : t("project")}>
+            {projection.checked ? t("projectedHint") : t("projectHint", { date: projTo })}
           </HoverCard>
         </div>
       )}

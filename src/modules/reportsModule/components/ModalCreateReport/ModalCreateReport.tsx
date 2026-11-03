@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Flex, Input, Modal, Select, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -37,6 +38,8 @@ export function ModalCreateReport({
   createdType,
   onSuccess
 }: ModalCreateReportProps) {
+  const t = useTranslations("reports.createModal");
+  const tCommon = useTranslations("common");
   const [typeId, setTypeId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -64,11 +67,11 @@ export function ModalCreateReport({
 
   const handleFileUpload = (selected: File) => {
     if (!/\.html?$/i.test(selected.name)) {
-      setFileError("El archivo debe ser .html");
+      setFileError(t("errors.notHtml"));
       return;
     }
     if (selected.size > REPORT_FILE_MAX_MB * 1024 * 1024) {
-      setFileError(`El archivo supera ${REPORT_FILE_MAX_MB} MB`);
+      setFileError(t("errors.tooLarge", { maxMb: REPORT_FILE_MAX_MB }));
       return;
     }
     setFileError(null);
@@ -83,11 +86,11 @@ export function ModalCreateReport({
     setIsLoading(true);
     try {
       const report = await publishReport({ report_type_id: typeId, name: name.trim(), file });
-      showMessage("success", "Informe publicado");
+      showMessage("success", t("published"));
       onSuccess?.(report);
       handleClose();
     } catch (err) {
-      showMessage("error", err instanceof Error ? err.message : "No se pudo publicar el informe.");
+      showMessage("error", err instanceof Error ? err.message : t("errors.publish"));
     } finally {
       setIsLoading(false);
     }
@@ -99,10 +102,11 @@ export function ModalCreateReport({
       open={isOpen}
       width={600}
       onCancel={isLoading ? undefined : handleClose}
-      title={<Title level={4}>Publicar informe</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Publicar informe"
+          titleConfirm={t("title")}
+          titleCancel={tCommon("actions.cancel")}
           isConfirmDisabled={!isReady}
           isConfirmLoading={isLoading}
           onClose={handleClose}
@@ -112,28 +116,26 @@ export function ModalCreateReport({
       destroyOnClose
     >
       <Flex vertical gap="1.25rem" style={{ marginBottom: "1rem" }}>
-        <p className="-mt-2 text-sm text-gray-500">
-          Quedará disponible para el equipo en el listado de informes.
-        </p>
+        <p className="-mt-2 text-sm text-gray-500">{t("subtitle")}</p>
 
         {/* Tipo de informe */}
         <div>
           <div className="mb-2 flex items-center justify-between gap-2">
             <p className={LABEL_CLASS}>
-              Tipo de informe <span className="text-red-500">*</span>
+              {t("typeLabel")} <span className="text-red-500">*</span>
             </p>
             <button
               type="button"
               onClick={onCreateType}
               className="text-[13px] font-medium text-[#1677ff] hover:underline"
             >
-              + Crear tipo
+              {t("createType")}
             </button>
           </div>
           <Select
             size="large"
             className="w-full"
-            placeholder="Selecciona un tipo"
+            placeholder={t("typePlaceholder")}
             value={typeId ?? undefined}
             onChange={setTypeId}
             options={types}
@@ -144,11 +146,11 @@ export function ModalCreateReport({
         {/* Nombre del informe */}
         <div>
           <p className={`mb-2 ${LABEL_CLASS}`}>
-            Nombre del informe <span className="text-red-500">*</span>
+            {t("nameLabel")} <span className="text-red-500">*</span>
           </p>
           <Input
             size="large"
-            placeholder="Ej. Informe cierre julio"
+            placeholder={t("namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -157,7 +159,7 @@ export function ModalCreateReport({
         {/* Archivo HTML */}
         <div>
           <p className={`mb-2 ${LABEL_CLASS}`}>
-            Archivo HTML <span className="text-red-500">*</span>
+            {t("fileLabel")} <span className="text-red-500">*</span>
           </p>
           {file ? (
             <HtmlFileChip file={file} onRemove={() => setFile(null)} disabled={isLoading} />
@@ -165,8 +167,8 @@ export function ModalCreateReport({
             <UploadDropZone
               onFileUpload={handleFileUpload}
               allowedExtensions={REPORT_FILE_EXTENSIONS}
-              title="Arrastra el archivo HTML aquí"
-              subtitle={`Archivo .html generado en Claude · máx. ${REPORT_FILE_MAX_MB} MB`}
+              title={t("dropTitle")}
+              subtitle={t("dropSubtitle", { maxMb: REPORT_FILE_MAX_MB })}
             />
           )}
           {fileError && <p className="mt-2 text-[13px] text-red-500">{fileError}</p>}

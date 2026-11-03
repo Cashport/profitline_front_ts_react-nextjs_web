@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { message, Tabs } from "antd";
 import type { TabsProps } from "antd";
+import { useTranslations } from "use-intl";
 
 import { signInWithCustomToken } from "@firebase/auth";
 import { auth } from "../../../../../firebase";
@@ -14,7 +15,12 @@ import PendingInvoicesTab from "../tabs/PendingInvoicesTab/PendingInvoicesTab";
 import CreditBalancesTab from "../tabs/CreditBalancesTab/CreditBalancesTab";
 import MyPaymentsTab from "../tabs/MyPaymentsTab/MyPaymentsTab";
 
-import { CreditBalance, CreditBalanceFormated, IClientWalletData, InvoiceFormated } from "@/types/clients/IClients";
+import {
+  CreditBalance,
+  CreditBalanceFormated,
+  IClientWalletData,
+  InvoiceFormated
+} from "@/types/clients/IClients";
 
 import "./cashportMobileView.scss";
 import MobileLoader from "../../components/Loader/MobileLoader";
@@ -30,7 +36,9 @@ export const formatDate = (dateString?: string): string => {
 };
 
 // Helper function to map API invoice data to component format
-const mapPendingInvoices = (listadoFacturas?: IClientWalletData["invoices_list"]): InvoiceFormated[] => {
+const mapPendingInvoices = (
+  listadoFacturas?: IClientWalletData["invoices_list"]
+): InvoiceFormated[] => {
   if (!listadoFacturas) return [];
   return listadoFacturas?.map((factura, index) => ({
     id: (index + 1).toString(),
@@ -39,16 +47,19 @@ const mapPendingInvoices = (listadoFacturas?: IClientWalletData["invoices_list"]
     amount: factura.value,
     status: factura.status as any,
     formattedAmount: formatCurrencyMoney(factura.value),
-    isPastDue: factura.status === "Vencida",
+    isPastDue: factura.status === "Vencida"
   }));
 };
 
 // Helper function to map API credit balance data to component format
-const mapCreditBalances = (saldosAFavor?: CreditBalance[]): CreditBalanceFormated[] => {
+const mapCreditBalances = (
+  fallbackDescription: string,
+  saldosAFavor?: CreditBalance[]
+): CreditBalanceFormated[] => {
   if (!saldosAFavor) return [];
   return saldosAFavor.map((saldo, index) => ({
     id: (index + 1).toString(),
-    description: saldo.reason || "Saldo a favor",
+    description: saldo.reason || fallbackDescription,
     date: saldo.creation_date ? formatDate(saldo.creation_date) : "",
     formattedAmount: formatCurrencyMoney(saldo.value || 0)
   }));
@@ -56,6 +67,7 @@ const mapCreditBalances = (saldosAFavor?: CreditBalance[]): CreditBalanceFormate
 
 const CashportMobileView: React.FC = () => {
   const searchParams = useSearchParams();
+  const t = useTranslations("publicPortals.mobile.home");
   const paramsToken = searchParams.get("token");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,8 +77,8 @@ const CashportMobileView: React.FC = () => {
     if (paramsToken) {
       signInAndGetWallet(paramsToken);
     } else {
-      message.error("Token no proporcionado");
-      setError("Token no proporcionado");
+      message.error(t("missingToken"));
+      setError(t("missingToken"));
       setLoading(false);
     }
   }, [paramsToken]);
@@ -82,9 +94,9 @@ const CashportMobileView: React.FC = () => {
     } catch (error: any) {
       console.error("Error in signInAndGetWallet:", error);
       if (error?.code === "auth/invalid-custom-token") {
-        setError("El enlace de acceso ha caducado o es inválido. Por favor, solicite uno nuevo.");
+        setError(t("expiredLink"));
       } else {
-        setError("Ocurrió un error al cargar la información. Por favor intente nuevamente.");
+        setError(t("loadError"));
       }
     } finally {
       setLoading(false);
@@ -100,32 +112,30 @@ const CashportMobileView: React.FC = () => {
   const tabItems: TabsProps["items"] = [
     {
       key: "pending",
-      label: "Facturas pendientes",
+      label: t("tabs.pendingInvoices"),
       children: (
-        <PendingInvoicesTab
-          pendingInvoices={data ? mapPendingInvoices(data.invoices_list) : []}
-        />
+        <PendingInvoicesTab pendingInvoices={data ? mapPendingInvoices(data.invoices_list) : []} />
       )
     },
     {
       key: "credit-balances",
-      label: "Saldos a favor",
+      label: t("tabs.creditBalances"),
       children: (
         <CreditBalancesTab
-          creditBalances={data ? mapCreditBalances(data.credit_balances) : []}
+          creditBalances={data ? mapCreditBalances(t("creditBalance"), data.credit_balances) : []}
         />
       )
     },
     {
       key: "my-payments",
-      label: "Mis pagos",
+      label: t("tabs.myPayments"),
       children: <MyPaymentsTab availablePayments={data?.payments.length ? data.payments : []} />
     }
   ];
 
   const handlePay = () => {
     if (!data?.payment_link) {
-      message.error("No se pudo iniciar el pago.");
+      message.error(t("payError"));
       return;
     }
 

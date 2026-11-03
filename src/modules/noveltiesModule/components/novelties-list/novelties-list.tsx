@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import PersonBadge from "@/modules/walletModule/components/shared/person-badge";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
@@ -27,8 +29,13 @@ interface NoveltiesListProps {
 
 /** Días sin gestión: verde ≤3, ámbar ≤7, rojo por encima. */
 const GestionChip = ({ dias }: { dias: number | null }) => {
+  const t = useTranslations("wallet.sla");
   if (dias === null) return <span className="text-muted-foreground">—</span>;
-  return <StatusChip sev={sevGestion(dias)}>{dias === 0 ? "Hoy" : `${dias}d`}</StatusChip>;
+  return (
+    <StatusChip sev={sevGestion(dias)}>
+      {dias === 0 ? t("today") : t("days", { days: dias })}
+    </StatusChip>
+  );
 };
 
 /** Vista "Lista": la bandeja como tabla ordenable. */
@@ -39,33 +46,45 @@ export default function NoveltiesList({
   loading,
   onOpenDetail
 }: NoveltiesListProps) {
+  const t = useTranslations("novelties.list");
   return (
     <section className="cp-card">
       <div className={cn("overflow-x-auto", loading && "pointer-events-none opacity-60")}>
         <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
-              <SortableTh col="id" label="Novedad" sort={sort} onSort={onSort} />
-              <SortableTh col="client_name" label="Cliente" sort={sort} onSort={onSort} />
+              <SortableTh col="id" label={t("novelty")} sort={sort} onSort={onSort} />
+              <SortableTh col="client_name" label={t("customer")} sort={sort} onSort={onSort} />
               {/* El API no ordena por número de facturas. */}
               <th
                 scope="col"
                 className="whitespace-nowrap border-b border-cp-line bg-cp-surface px-3 py-3 text-right text-[13.5px] font-semibold text-cp-ink"
               >
-                Fact.
+                {t("invoices")}
               </th>
-              <SortableTh col="amount" label="Monto" align="right" sort={sort} onSort={onSort} />
-              <SortableTh col="assigned_to_name" label="Responsable" sort={sort} onSort={onSort} />
               <SortableTh
-                col="last_management_at"
-                label="Últ. gestión"
+                col="amount"
+                label={t("amount")}
                 align="right"
                 sort={sort}
                 onSort={onSort}
               />
-              <SortableTh col="next_ticket_date" label="Próx. ticket" sort={sort} onSort={onSort} />
-              <SortableTh col="limit_date" label="Límite" sort={sort} onSort={onSort} />
-              <SortableTh col="novelty_status" label="Estado" sort={sort} onSort={onSort} />
+              <SortableTh col="assigned_to_name" label={t("owner")} sort={sort} onSort={onSort} />
+              <SortableTh
+                col="last_management_at"
+                label={t("lastActivity")}
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
+              <SortableTh
+                col="next_ticket_date"
+                label={t("nextTicket")}
+                sort={sort}
+                onSort={onSort}
+              />
+              <SortableTh col="limit_date" label={t("deadline")} sort={sort} onSort={onSort} />
+              <SortableTh col="novelty_status" label={t("status")} sort={sort} onSort={onSort} />
             </tr>
           </thead>
 
@@ -73,7 +92,7 @@ export default function NoveltiesList({
             {items.length === 0 ? (
               <tr>
                 <td colSpan={9} className="p-9 text-center text-muted-foreground">
-                  No hay novedades con estos filtros.
+                  {t("empty")}
                 </td>
               </tr>
             ) : (

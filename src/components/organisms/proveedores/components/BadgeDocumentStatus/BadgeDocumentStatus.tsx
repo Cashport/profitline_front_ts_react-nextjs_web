@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { getStatusDetails } from "../../utils/documentStatusMap";
 
 import "./badgeDocumentStatus.scss";
@@ -8,7 +9,9 @@ interface BadgeDocumentStatusProps {
 }
 
 const BadgeDocumentStatus: React.FC<BadgeDocumentStatusProps> = ({ statusId }) => {
-  const { text, color, icon, backgroundColor } = getStatusDetails(statusId);
+  const t = useTranslations("suppliers.documentStatus");
+  const { labelKey, text, color, icon, backgroundColor, textWrapper } = getStatusDetails(statusId);
+  const label = labelKey ? t(labelKey) : text ?? t("unknown");
 
   return (
     <>
@@ -16,7 +19,7 @@ const BadgeDocumentStatus: React.FC<BadgeDocumentStatusProps> = ({ statusId }) =
         style={{ "--color": color, "--bg-color": backgroundColor } as React.CSSProperties}
         className="badge-document-status"
       >
-        {icon} {text}
+        {icon} {textWrapper ? textWrapper(label) : label}
       </div>
     </>
   );

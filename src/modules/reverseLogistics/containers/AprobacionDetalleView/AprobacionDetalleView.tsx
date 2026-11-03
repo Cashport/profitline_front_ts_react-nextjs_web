@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import useSWR, { useSWRConfig } from "swr";
 import dayjs from "dayjs";
 import { message, Modal, Table } from "antd";
+import { useTranslations } from "use-intl";
 import { AlertTriangle, TrendingUp } from "lucide-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiSearchInput from "@/components/ui/search-input/search-input";
@@ -22,7 +23,7 @@ import { useProfit360Filters } from "../../contexts/Profit360FiltersContext";
 import { AprobacionDevolucionModal } from "../../components/AprobacionDevolucionModal/AprobacionDevolucionModal";
 import { parseCausales } from "../../utils/causales";
 import { fmtCop, fmtPct } from "../../utils/format";
-import { productsColumns } from "./columns";
+import { getProductsColumns } from "./columns";
 
 interface AprobacionDetalleViewProps {
   id: string;
@@ -76,6 +77,10 @@ function shortCausal(causal: string): string {
 
 export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
   const router = useRouter();
+  const t = useTranslations("reverseLogistics.detail");
+  const tColumns = useTranslations("reverseLogistics.detail.columns");
+  const tCommon = useTranslations("common");
+  const productsColumns = useMemo(() => getProductsColumns(tColumns), [tColumns]);
   const { mutate: mutateGlobal } = useSWRConfig();
 
   const { data, isLoading } = useSWR(
@@ -151,7 +156,7 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
   const handleAprobarClick = () => {
     if (!resumen) return;
     if (!resumen.isLogisticAdmin && Boolean(resumen.superaLimitePermitido)) {
-      message.error("No puede aprobar, supera el límite permitido");
+      message.error(t("cannotApprove"));
       return;
     }
     setApproveModalOpen(true);
@@ -180,13 +185,13 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
         causal: causalCodigo,
         causalOriginal: defaultCausalCodigo
       });
-      message.success("Devolución aprobada correctamente");
+      message.success(t("approvedSuccess"));
       // The list is keyed as ["reverse-logistics/profit360-approvals", ...filters];
       // drop every cached variant so the approved row doesn't reappear on landing.
       mutateGlobal(
         (key) => Array.isArray(key) && key[0] === "reverse-logistics/profit360-approvals"
       );
-      router.push("/logistica-inversa/aprobaciones");
+      router.push("/reverse-logistics/approvals");
     } finally {
       setApproving(false);
     }
@@ -197,19 +202,19 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
       {/* Client info grid — same labels as the original */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm text-gray-700">
         <div>
-          <span className="font-semibold">Cliente:</span> {resumen?.cliente ?? "—"}
+          <span className="font-semibold">{t("customer")}</span> {resumen?.cliente ?? "—"}
         </div>
         <div>
-          <span className="font-semibold">Código Cliente:</span> {resumen?.codigoCliente ?? "—"}
+          <span className="font-semibold">{t("customerCode")}</span> {resumen?.codigoCliente ?? "—"}
         </div>
         <div>
-          <span className="font-semibold">Línea de Negocio:</span> {resumen?.lineaNegocio ?? "—"}
+          <span className="font-semibold">{t("businessLine")}</span> {resumen?.lineaNegocio ?? "—"}
         </div>
         <div>
-          <span className="font-semibold">Valor del Documento:</span> {fmtCop(totalValor)}
+          <span className="font-semibold">{t("documentValue")}</span> {fmtCop(totalValor)}
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-semibold">Causal Devolución:</span>
+          <span className="font-semibold">{t("returnReason")}</span>
           <span
             className="inline-block px-2 py-0.5 rounded text-[13px] font-semibold text-white"
             style={{ backgroundColor: "#9333ea" }}
@@ -218,10 +223,10 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
           </span>
         </div>
         <div>
-          <span className="font-semibold">Unidades Documentos:</span> {totalUnidades}
+          <span className="font-semibold">{t("documentUnits")}</span> {totalUnidades}
         </div>
         <div>
-          <span className="font-semibold">Unidades Registradas:</span> {totalUnidades}
+          <span className="font-semibold">{t("registeredUnits")}</span> {totalUnidades}
         </div>
       </div>
 
@@ -229,39 +234,41 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
           <span className="text-[13px] font-medium text-gray-500">
-            {regla?.reglaDescripcion ?? "Regla devoluciones / venta mensual — límite 5,00%"}
+            {regla?.reglaDescripcion ?? t("ruleFallback")}
           </span>
           {excede && (
             <span className="flex items-center gap-1 text-[13px] font-medium text-red-600 bg-red-50 rounded-full px-2 py-0.5">
               <AlertTriangle className="h-3 w-3" />
-              Supera el límite permitido
+              {t("exceedsLimit")}
             </span>
           )}
         </div>
 
         <div className="grid grid-cols-3 divide-x divide-gray-100">
           <div className="flex flex-col gap-0.5 px-5 py-3.5">
-            <span className="text-[13px] text-gray-500 font-medium">Máximo permitido</span>
+            <span className="text-[13px] text-gray-500 font-medium">{t("maxAllowed")}</span>
             <span className="text-lg font-semibold tabular-nums text-gray-800">
               {fmtCop(Math.round(ventaMensual * limitePct))}
             </span>
             <span className="text-[13px] text-gray-400">
-              {fmtPct(limitePct)} de {fmtCop(ventaMensual)} en ventas
+              {t("pctOfSales", { pct: fmtPct(limitePct), sales: fmtCop(ventaMensual) })}
             </span>
           </div>
 
           <div className="flex flex-col gap-0.5 px-5 py-3.5">
-            <span className="text-[13px] text-gray-500 font-medium">Devoluciones este mes</span>
+            <span className="text-[13px] text-gray-500 font-medium">{t("returnsThisMonth")}</span>
             <span className="text-lg font-semibold tabular-nums text-amber-500">
               {fmtPct(devolucionesMes / ventaMensual)}
             </span>
-            <span className="text-[13px] text-gray-400">{fmtCop(devolucionesMes)} acumulado</span>
+            <span className="text-[13px] text-gray-400">
+              {t("accumulated", { amount: fmtCop(devolucionesMes) })}
+            </span>
           </div>
 
           <div className="flex flex-col gap-0.5 px-5 py-3.5">
             <span className="text-[13px] text-gray-500 font-medium flex items-center gap-1">
               <TrendingUp className="h-3.5 w-3.5" />
-              Con esta aprobación
+              {t("withThisApproval")}
             </span>
             <span
               className={`text-lg font-semibold tabular-nums ${
@@ -272,8 +279,8 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
             </span>
             <span className="text-[13px] text-gray-400">
               {excede
-                ? `Supera en ${fmtPct(pctTotal - limitePct)}`
-                : `Quedan ${fmtPct(limitePct - pctTotal)} disponibles`}
+                ? t("exceedsBy", { pct: fmtPct(pctTotal - limitePct) })
+                : t("remaining", { pct: fmtPct(limitePct - pctTotal) })}
             </span>
           </div>
         </div>
@@ -289,9 +296,9 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
       {/* Observations banner — keeps the legacy purple styling */}
       <div className="flex items-center justify-between gap-4 rounded-lg bg-[#e8e8f8] border border-[#c7c7ef] px-4 py-3">
         <div>
-          <p className="text-sm font-semibold text-[#3a3a8c] mb-0.5">Observaciones:</p>
+          <p className="text-sm font-semibold text-[#3a3a8c] mb-0.5">{t("observations")}</p>
           <p className="text-sm text-[#5a5aaa]">
-            {resumen?.observacionAprobacion || "autorizado por el lab via correo"}
+            {resumen?.observacionAprobacion || t("observationFallback")}
           </p>
         </div>
         <PrincipalButton
@@ -299,16 +306,17 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
           onClick={() => setSoportesOpen(true)}
           disabled={!resumen?.fotosAprobacion}
         >
-          Ver soportes
+          {t("viewSupportingDocs")}
         </PrincipalButton>
       </div>
 
       {/* Table toolbar */}
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm text-gray-500">
-          {filtered.length} registro{filtered.length !== 1 ? "s" : ""}
-        </span>
-        <UiSearchInput placeholder="Buscar" onChange={(e) => setSearchTerm(e.target.value)} />
+        <span className="text-sm text-gray-500">{t("records", { count: filtered.length })}</span>
+        <UiSearchInput
+          placeholder={tCommon("actions.search")}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {/* Products table */}
@@ -330,19 +338,19 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
       {/* Footer: Aprobar — opens the modal which does the real POST */}
       <div className="flex items-center justify-between pt-1">
         <span className="text-sm text-gray-500">
-          Mostrando 1 a {filtered.length} de {filtered.length} registros
+          {t("showingRecords", { count: filtered.length })}
         </span>
         <PrincipalButton
           onClick={handleAprobarClick}
           disabled={!resumen || approving || !aprobadoEstadoCodigo}
         >
-          Aprobar
+          {tCommon("actions.approve")}
         </PrincipalButton>
       </div>
 
       {/* Soportes preview — opens the approval photo from `fotosAprobacion`. */}
       <Modal
-        title="Soportes de la aprobación"
+        title={t("supportingDocsTitle")}
         open={soportesOpen}
         onCancel={() => setSoportesOpen(false)}
         footer={null}
@@ -355,12 +363,12 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
             href={resumen.fotosAprobacion}
             target="_blank"
             rel="noopener noreferrer"
-            title="Abrir en pestaña nueva"
+            title={t("openInNewTab")}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={resumen.fotosAprobacion}
-              alt="Soporte de aprobación"
+              alt={t("supportingDocAlt")}
               style={{
                 maxWidth: "calc(80 * var(--vw))",
                 maxHeight: "calc(80 * var(--vh))",
@@ -370,7 +378,7 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
             />
           </a>
         ) : (
-          <p className="text-sm text-gray-500 m-0">No hay soportes adjuntos.</p>
+          <p className="text-sm text-gray-500 m-0">{t("noSupportingDocs")}</p>
         )}
       </Modal>
 

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowUpRight } from "lucide-react";
+import { useLocale, useTranslations } from "use-intl";
 
 import { Card } from "@/modules/chat/ui/card";
 import {
@@ -35,11 +36,14 @@ type UnitType = "units_haleon" | "vol_reported";
 type DayCell = IDataExplorationTotals & { novedades_percent: number };
 
 export function DataExplorationCard() {
+  const t = useTranslations("dataQuality.dashboard.exploration");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { selectedRegion, selectedPeriod, setSelectedPeriod, selectedFileType } =
     useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
   const [unitType, setUnitType] = useState<UnitType>("units_haleon");
-  const months = useMemo(buildLastSixMonths, []);
+  const months = useMemo(() => buildLastSixMonths(locale), [locale]);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, error, isLoading } = useDataExploration({
@@ -112,12 +116,10 @@ export function DataExplorationCard() {
         <div className="flex items-center gap-4">
           <div>
             <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>
-              Exploración de Datos
+              {t("title")}
             </h3>
             <p className="text-[13px] mt-0.5" style={{ color: "#6B7280" }}>
-              {unitType === "units_haleon"
-                ? "Unidades recibidas por día del mes"
-                : "Volumen reportado por día del mes"}
+              {unitType === "units_haleon" ? t("unitsSubtitle") : t("volumeSubtitle")}
             </p>
           </div>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -138,10 +140,10 @@ export function DataExplorationCard() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="units_haleon" className="text-[13px]">
-                Unidades (Haleon)
+                {t("unitsOption")}
               </SelectItem>
               <SelectItem value="vol_reported" className="text-[13px]">
-                Volumen reportado
+                {t("volumeOption")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -150,35 +152,35 @@ export function DataExplorationCard() {
           <div className="flex items-center gap-4 text-[13px]" style={{ color: "#6B7280" }}>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "#D1FAE5" }} />
-              <span>Recibido</span>
+              <span>{t("legend.received")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "#FEF3C7" }} />
-              <span>Con novedades</span>
+              <span>{t("legend.withIssues")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "#FEE2E2" }} />
-              <span>Faltante</span>
+              <span>{t("legend.missing")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div
                 className="w-3 h-3 rounded border"
                 style={{ backgroundColor: "#F9FAFB", borderColor: "#E5E7EB" }}
               />
-              <span>Esperado</span>
+              <span>{t("legend.expected")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div
                 className="w-3 h-3 rounded border"
                 style={{ backgroundColor: "#ffffff", borderColor: "#E5E7EB" }}
               />
-              <span>No esperado</span>
+              <span>{t("legend.notExpected")}</span>
             </div>
           </div>
           <SearchField
             value={search}
             onChange={setSearch}
-            placeholder="Buscar cliente..."
+            placeholder={t("searchPlaceholder")}
             className="w-48"
           />
         </div>
@@ -192,7 +194,7 @@ export function DataExplorationCard() {
                 className="text-left px-2 py-3 text-[13.5px] font-semibold text-cp-ink sticky left-0 bg-cp-surface z-10"
                 style={{ minWidth: "90px" }}
               >
-                Cliente
+                {t("columns.customer")}
               </th>
               {/* TODO: re-enable Periodicidad column once API exposes per-client periodicity */}
               {/*
@@ -216,19 +218,19 @@ export function DataExplorationCard() {
                 className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
                 style={{ minWidth: "50px" }}
               >
-                Total
+                {t("columns.total")}
               </th>
               <th
                 className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
                 style={{ minWidth: "55px" }}
               >
-                Novedades
+                {t("columns.issues")}
               </th>
               <th
                 className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
                 style={{ minWidth: "70px" }}
               >
-                Total mes ant.
+                {t("columns.lastMonthTotal")}
               </th>
             </tr>
           </thead>
@@ -240,7 +242,7 @@ export function DataExplorationCard() {
                   className="text-center py-8 text-[13px]"
                   style={{ color: "#6B7280" }}
                 >
-                  Cargando…
+                  {tCommon("status.loading")}
                 </td>
               </tr>
             ) : error ? (
@@ -250,7 +252,7 @@ export function DataExplorationCard() {
                   className="text-center py-8 text-[13px]"
                   style={{ color: "#991B1B" }}
                 >
-                  Error al cargar los datos.
+                  {t("loadError")}
                 </td>
               </tr>
             ) : rows.length === 0 ? (
@@ -260,7 +262,7 @@ export function DataExplorationCard() {
                   className="text-center py-8 text-[13px]"
                   style={{ color: "#6B7280" }}
                 >
-                  No se encontraron datos con los filtros actuales.
+                  {t("empty")}
                 </td>
               </tr>
             ) : (
@@ -362,15 +364,17 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {formatNumber(dayTotals.novedades)} novedades (
-                                    {dayTotals.novedades_percent}%)
+                                    {t("issuesTooltip", {
+                                      count: formatNumber(dayTotals.novedades),
+                                      percent: dayTotals.novedades_percent
+                                    })}
                                   </span>
                                   {catalogHref && (
                                     <Link
                                       href={catalogHref}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      title="Ir al catálogo del cliente"
+                                      title={t("goToCatalog")}
                                       className="ml-1 inline-flex hover:opacity-80"
                                     >
                                       <ArrowUpRight
@@ -500,8 +504,10 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {formatNumber(lastMonth.novedades)} novedades (
-                                    {lastMonth.novedades_percent}%)
+                                    {t("issuesTooltip", {
+                                      count: formatNumber(lastMonth.novedades),
+                                      percent: lastMonth.novedades_percent
+                                    })}
                                   </span>
                                 </div>
                               </TooltipContent>

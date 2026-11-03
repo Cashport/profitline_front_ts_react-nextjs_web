@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Radio } from "antd";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { changeTaskStatus } from "@/services/tasks/tasks";
 import { useMessageApi } from "@/context/MessageContext";
@@ -16,12 +17,13 @@ interface Props {
 }
 
 const TASK_STATUS_OPTIONS = [
-  { id: "6d5ee261-8e77-11f0-b08c-0635ef5156a1", label: "Completado" },
-  { id: "b2bbe2c2-d542-11f0-80fa-06e6795ff363", label: "Spam" },
-  { id: "c3a7f8d4-8e77-11f0-b08c-0635ef5156a1", label: "Novedad" }
-];
+  { id: "6d5ee261-8e77-11f0-b08c-0635ef5156a1", labelKey: "completed" },
+  { id: "b2bbe2c2-d542-11f0-80fa-06e6795ff363", labelKey: "spam" },
+  { id: "c3a7f8d4-8e77-11f0-b08c-0635ef5156a1", labelKey: "dispute" }
+] as const;
 
 export const ModalChangeTaskStatus: React.FC<Props> = ({ isOpen, onClose, taskId, onSuccess }) => {
+  const t = useTranslations("taskManager.changeStatus");
   const { showMessage } = useMessageApi();
 
   const [selectedStatusId, setSelectedStatusId] = useState<string | undefined>();
@@ -38,12 +40,11 @@ export const ModalChangeTaskStatus: React.FC<Props> = ({ isOpen, onClose, taskId
     setLoading(true);
     try {
       await changeTaskStatus(taskId, selectedStatusId);
-      showMessage("success", "El estado de la tarea se actualizó correctamente.");
+      showMessage("success", t("success"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Ha ocurrido un error al cambiar el estado.";
+      const errorMessage = error instanceof Error ? error.message : t("error");
       showMessage("error", errorMessage);
     }
     setLoading(false);
@@ -53,10 +54,10 @@ export const ModalChangeTaskStatus: React.FC<Props> = ({ isOpen, onClose, taskId
     <Modal className={styles.wrapper} width="50%" open={isOpen} footer={null} closable={false}>
       <Button onClick={onClose} className={styles.content__header}>
         <CaretLeft size="1.25rem" />
-        <span>Cambio de estado</span>
+        <span>{t("title")}</span>
       </Button>
       <div className={styles.content}>
-        <p className={styles.content__description}>Selecciona el nuevo estado de la tarea</p>
+        <p className={styles.content__description}>{t("description")}</p>
 
         <div className={styles.content__status}>
           <Radio.Group
@@ -65,7 +66,7 @@ export const ModalChangeTaskStatus: React.FC<Props> = ({ isOpen, onClose, taskId
           >
             {TASK_STATUS_OPTIONS.map((status) => (
               <Radio className={styles.content__status__item} value={status.id} key={status.id}>
-                {status.label}
+                {t(`options.${status.labelKey}`)}
               </Radio>
             ))}
           </Radio.Group>
@@ -74,7 +75,7 @@ export const ModalChangeTaskStatus: React.FC<Props> = ({ isOpen, onClose, taskId
         <FooterButtons
           handleOk={handleConfirm}
           onClose={onClose}
-          titleConfirm="Cambiar de estado"
+          titleConfirm={t("confirm")}
           isConfirmDisabled={!selectedStatusId}
           isConfirmLoading={loading}
         />

@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import useSWR from "swr";
 
 import { IProjects } from "@/types/projects/IProjects";
@@ -22,7 +23,7 @@ export const useProjects = ({ page, countryId, currencyId, searchQuery }: Props)
     revalidateOnReconnect: false
   });
   if (error?.message && error.message === "Request failed with status code 401") {
-    alert("Usuario no autorizado.");
+    alert(getTranslator("shared")("session.unauthorized"));
     logOut(router);
     mutate(undefined, false);
   }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal, Select as AntSelect, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { getAllCountries } from "@/services/countries/countries";
@@ -16,6 +17,8 @@ interface IModalProcessIntakeProps {
 }
 
 export const ModalProcessIntake = ({ isOpen, onClose }: IModalProcessIntakeProps) => {
+  const t = useTranslations("taskManager.intake");
+  const tCommon = useTranslations("common");
   const [view, setView] = useState<"client" | "files">("client");
   const [selectedCountryId, setSelectedCountryId] = useState<number | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -60,14 +63,14 @@ export const ModalProcessIntake = ({ isOpen, onClose }: IModalProcessIntakeProps
     <Modal
       open={isOpen}
       onCancel={handleClose}
-      title={<Title level={4}>Procesar ingesta</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       width={480}
       centered
       footer={
         view === "client" ? (
           <FooterButtons
-            titleConfirm="Confirmar cliente"
-            titleCancel="Cancelar"
+            titleConfirm={t("confirmClient")}
+            titleCancel={tCommon("actions.cancel")}
             onClose={handleClose}
             handleOk={() => setView("files")}
             isConfirmDisabled={!selectedClientId}
@@ -79,21 +82,23 @@ export const ModalProcessIntake = ({ isOpen, onClose }: IModalProcessIntakeProps
       {view === "client" ? (
         <div className="flex flex-col gap-4 py-2">
           <div>
-            <label className="text-sm font-medium text-gray-700">País</label>
+            <label className="text-sm font-medium text-gray-700">{t("country")}</label>
             <AntSelect
               showSearch
               value={selectedCountryId ?? undefined}
               onChange={handleCountryChange}
               options={countries.map((c) => ({ value: c.id, label: c.country_name }))}
               loading={countriesLoading}
-              placeholder={countriesLoading ? "Cargando países..." : "Seleccionar país"}
-              notFoundContent="No hay países disponibles"
+              placeholder={countriesLoading ? t("loadingCountries") : t("selectCountry")}
+              notFoundContent={t("noCountries")}
               filterOption={filterByLabel}
               className="mt-1 w-full [&_.ant-select-selector]:!h-[38px]"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700">Cliente</label>
+            <label className="text-sm font-medium text-gray-700">
+              {tCommon("fields.customer")}
+            </label>
             <AntSelect
               showSearch
               disabled={selectedCountryId === null}
@@ -101,8 +106,8 @@ export const ModalProcessIntake = ({ isOpen, onClose }: IModalProcessIntakeProps
               onChange={(value) => setSelectedClientId(value)}
               options={(clients ?? []).map((c) => ({ value: c.id, label: c.client_name }))}
               loading={clientsLoading}
-              placeholder={clientsLoading ? "Cargando clientes..." : "Seleccionar cliente"}
-              notFoundContent="No hay clientes disponibles"
+              placeholder={clientsLoading ? t("loadingClients") : t("selectClient")}
+              notFoundContent={t("noClients")}
               filterOption={filterByLabel}
               className="mt-1 w-full [&_.ant-select-selector]:!h-[38px]"
             />

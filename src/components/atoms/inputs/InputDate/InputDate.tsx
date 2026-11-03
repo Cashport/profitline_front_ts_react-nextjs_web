@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { DatePicker, Flex } from "antd";
 import dayjs from "dayjs";
 import { Calendar } from "phosphor-react";
@@ -36,6 +37,7 @@ export const InputDate = ({
   format,
   allowClear
 }: InputDateProps) => {
+  const tInputs = useTranslations("components.inputs");
   return (
     <Flex vertical className={`datePickerContainer ${className}`} style={customStyleContainer}>
       {!hiddenTitle && <p className="input-date-custom-title">{titleInput}</p>}
@@ -44,7 +46,9 @@ export const InputDate = ({
         onChange={onChange}
         size="large"
         disabled={disabled}
-        placeholder={placeholder || `Select ${titleInput.toLowerCase()}`}
+        placeholder={
+          placeholder || tInputs("selectPlaceholder", { field: titleInput.toLowerCase() })
+        }
         suffixIcon={
           !hiddenIcon ? <Calendar weight="light" className="dateInputForm__icon" /> : false
         }

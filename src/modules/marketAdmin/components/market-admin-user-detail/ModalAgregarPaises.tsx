@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Modal, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { ICountry } from "@/types/countries/ICountries";
@@ -24,6 +25,8 @@ export default function ModalAgregarPaises({
   onClose,
   disabled
 }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.addCountriesModal");
+  const tCommon = useTranslations("common.actions");
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
@@ -56,7 +59,7 @@ export default function ModalAgregarPaises({
 
   const columns: ColumnsType<ICountry> = [
     {
-      title: "País",
+      title: t("country"),
       dataIndex: "country_name",
       key: "country_name",
       onHeaderCell: headerCell,
@@ -70,13 +73,13 @@ export default function ModalAgregarPaises({
       onCancel={onClose}
       centered
       width={704}
-      title={<span className="text-base font-bold text-[#141414]">Agregar países</span>}
+      title={<span className="text-base font-bold text-[#141414]">{t("title")}</span>}
       footer={null}
     >
       <div className="mb-4">
         <UiSearchInput
           id="modal-agregar-paises-search"
-          placeholder="Buscar país..."
+          placeholder={t("searchPlaceholder")}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
@@ -88,7 +91,7 @@ export default function ModalAgregarPaises({
         loading={disabled}
         pagination={false}
         scroll={{ y: 320 }}
-        locale={{ emptyText: "Todos los países ya están asignados." }}
+        locale={{ emptyText: t("empty") }}
         rowSelection={{
           columnWidth: 40,
           selectedRowKeys: visibleSelectedIds,
@@ -98,16 +101,14 @@ export default function ModalAgregarPaises({
 
       {selectedIds.length > 0 && (
         <p className="mt-3 text-sm text-[#666666]">
-          {selectedIds.length === 1
-            ? "1 país seleccionado"
-            : `${selectedIds.length} países seleccionados`}
+          {t("selected", { count: selectedIds.length })}
         </p>
       )}
 
       <div className="mt-6">
         <FooterButtons
-          titleCancel="Cancelar"
-          titleConfirm="Agregar seleccionados"
+          titleCancel={tCommon("cancel")}
+          titleConfirm={t("confirm")}
           onClose={onClose}
           handleOk={handleAgregar}
           isConfirmDisabled={disabled || selectedIds.length === 0}

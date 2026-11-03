@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Modal, Select, Upload, Flex, message } from "antd";
 import { Paperclip, TextItalic, TextUnderline } from "phosphor-react";
 import { TextB, LineVertical } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import Editor from "draft-js-plugins-editor";
 import { EditorState } from "draft-js";
@@ -50,6 +51,7 @@ const ModalEnterProcess: React.FC<Props> = ({
   extraFields,
   onSuccess
 }) => {
+  const t = useTranslations("modals.enterProcess");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   /* -------------------- Header State -------------------- */
@@ -121,7 +123,7 @@ const ModalEnterProcess: React.FC<Props> = ({
           setContactId(initialValues?.contactId ?? nextContacts[0]?.ID ?? null);
         }
       } catch (error) {
-        message.error("Error cargando datos de gestión");
+        message.error(t("loadError"));
       }
     };
 
@@ -167,15 +169,15 @@ const ModalEnterProcess: React.FC<Props> = ({
 
       const isSuccess = response.success ?? response.data === true;
       if (isSuccess) {
-        message.success("Gestión registrada correctamente");
+        message.success(t("success"));
         onSuccess?.(response);
         onClose();
         return;
       }
 
-      message.error("Error al registrar la gestión");
+      message.error(t("error"));
     } catch (error) {
-      message.error("Error al registrar la gestión");
+      message.error(t("error"));
     } finally {
       setLoading(false);
     }
@@ -204,7 +206,7 @@ const ModalEnterProcess: React.FC<Props> = ({
     >
       <Flex vertical gap={20}>
         <Header
-          title="Ingresar gestión"
+          title={t("title")}
           onClose={onClose}
           showMinimize={false}
           showMaximize={false}
@@ -218,19 +220,19 @@ const ModalEnterProcess: React.FC<Props> = ({
           {/* ----------- Selects ----------- */}
           <Flex gap={12}>
             <Select
-              placeholder="Tipo de gestión"
+              placeholder={t("typePlaceholder")}
               value={managementType}
               onChange={setManagementType}
               disabled={lockSelects}
               style={{ width: "100%" }}
-              options={managementTypes.map((t) => ({
-                value: t.id, // <- usar id en minúscula
-                label: t.name // <- usar name en minúscula
+              options={managementTypes.map((type) => ({
+                value: type.id, // <- usar id en minúscula
+                label: type.name // <- usar name en minúscula
               }))}
             />
 
             <Select
-              placeholder="Estado de gestión"
+              placeholder={t("statusPlaceholder")}
               value={managementStatus}
               onChange={setManagementStatus}
               style={{ width: "100%" }}
@@ -241,7 +243,7 @@ const ModalEnterProcess: React.FC<Props> = ({
             />
 
             <Select
-              placeholder="Contacto (opcional)"
+              placeholder={t("contactPlaceholder")}
               value={contactId}
               onChange={setContactId}
               allowClear
@@ -271,7 +273,7 @@ const ModalEnterProcess: React.FC<Props> = ({
               onChange={setEditorState}
               plugins={plugins}
               ref={editorRef}
-              placeholder="Escribe la gestión..."
+              placeholder={t("bodyPlaceholder")}
             />
           </div>
 
@@ -320,7 +322,7 @@ const ModalEnterProcess: React.FC<Props> = ({
           <FooterButtons
             handleOk={handleSubmit}
             onClose={onClose}
-            titleConfirm="Ingresar gestión"
+            titleConfirm={t("submit")}
             isConfirmLoading={loading}
             isConfirmDisabled={!managementType || !managementStatus || !hasContent()}
           />

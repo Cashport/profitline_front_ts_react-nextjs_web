@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
+import { useTranslations } from "use-intl";
 import { DownloadSimple, Invoice, SubtractSquare, Trash } from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 
@@ -40,6 +41,8 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   mutate,
   onUploadInvoices
 }) => {
+  const t = useTranslations("purchaseOrders.actionsModal");
+  const tCommon = useTranslations("common");
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
   const [isBillingLoading, setIsBillingLoading] = useState(false);
 
@@ -100,11 +103,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   const validatePackageSelection = (): boolean => {
     if (selectedPackageRows.length === 0) {
-      message.warning("Selecciona al menos un pedido para realizar esta acción");
+      message.warning(t("selectAtLeastOneOrder"));
       return false;
     }
     if (selectedPackageRows.length > 1) {
-      message.warning("Solo puedes seleccionar un pedido para realizar esta acción");
+      message.warning(t("selectOnlyOneOrder"));
       return false;
     }
     return true;
@@ -112,12 +115,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   const validatePackagesSelection = (): boolean => {
     if (selectedPackageRows.length === 0) {
-      message.warning("Selecciona al menos un pedido para realizar esta acción");
+      message.warning(t("selectAtLeastOneOrder"));
       return false;
     }
     const firstStatus = selectedPackageRows[0].status;
     if (selectedPackageRows.some((p) => p.status !== firstStatus)) {
-      message.warning("Todos los pedidos seleccionados deben tener el mismo estado");
+      message.warning(t("sameStatusRequired"));
       return false;
     }
     return true;
@@ -125,7 +128,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   const validateOrderSelection = (): boolean => {
     if (selectedOrders.length === 0) {
-      message.warning("Selecciona al menos una orden para realizar esta acción");
+      message.warning(t("selectAtLeastOnePo"));
       return false;
     }
     return true;
@@ -135,18 +138,18 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     if (!validatePackageSelection()) return;
 
     setIsDispatchLoading(true);
-    const hideLoading = message.loading("Enviando pedido a despacho...", 0);
+    const hideLoading = message.loading(t("sendingToDispatch"), 0);
 
     try {
       await sendPackageToDispatch(String(selectedPackageRows[0].packageId));
-      message.success("Pedido enviado a despacho exitosamente");
+      message.success(t("sentToDispatch"));
       mutate && mutate();
       onClose();
     } catch (error) {
       if (error instanceof ApiError) {
-        message.error(error.message || "Error enviando pedido a despacho");
+        message.error(error.message || t("sendToDispatchError"));
       } else {
-        message.error("Error enviando pedido a despacho");
+        message.error(t("sendToDispatchError"));
       }
     } finally {
       hideLoading();
@@ -164,7 +167,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     if (!validateOrderSelection()) return;
     const packageId = selectedOrders[0].packageId;
     if (selectedOrders.some((order) => order.packageId !== packageId)) {
-      message.error("Todas las órdenes seleccionadas deben pertenecer al mismo pedido");
+      message.error(t("sameOrderRequired"));
       return;
     }
     onClose();
@@ -179,13 +182,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     };
     try {
       await removePurchaseOrdersFromPackage(modelData);
-      message.success("Órdenes separadas del pedido exitosamente");
+      message.success(t("splitSuccess"));
       mutate && mutate();
       setIsSeparateOrderModalOpen(false);
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error separando las órdenes del pedido"
-      );
+      message.error(error instanceof Error ? error.message : t("splitError"));
     }
     setIsActionLoading(false);
   };
@@ -194,14 +195,14 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     if (!validatePackageSelection()) return;
 
     setIsBillingLoading(true);
-    const hideLoading = message.loading("Enviando pedido a facturación...", 0);
+    const hideLoading = message.loading(t("sendingToBilling"), 0);
 
     try {
       await sendPackageToBilling(
         String(selectedPackageRows[0].packageId),
         send_approval && send_approval ? 1 : 0
       );
-      message.success("Pedido enviado a facturación exitosamente");
+      message.success(t("sentToBilling"));
       mutate && mutate();
       onClose();
     } catch (error) {
@@ -210,10 +211,10 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
           onClose();
           setIsBillingConfirmOpen(true);
         } else {
-          message.error(error.message || "Error enviando pedido a facturación");
+          message.error(error.message || t("sendToBillingError"));
         }
       } else {
-        message.error("Error enviando pedido a facturación");
+        message.error(t("sendToBillingError"));
       }
     } finally {
       hideLoading();
@@ -234,7 +235,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
       mutate && mutate();
       setIsDeleteOrderModalOpen(false);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al eliminar las órdenes");
+      message.error(error instanceof Error ? error.message : t("deleteError"));
     }
     setIsActionLoading(false);
   };
@@ -246,14 +247,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   };
 
   const handleDownloadSalesPlane = async () => {
-    const hideLoading = message.loading("Descargando plano de ventas...", 0);
+    const hideLoading = message.loading(t("downloadingSalesFile"), 0);
     try {
       const res = await getSalesPlane();
       window.open(res.url, "_blank");
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar el plano de ventas"
-      );
+      message.error(error instanceof Error ? error.message : t("salesFileError"));
     } finally {
       hideLoading();
     }
@@ -261,14 +260,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   const handleDownloadInventory = async () => {
     setIsInventoryExportLoading(true);
-    const hideLoading = message.loading("Descargando inventario...", 0);
+    const hideLoading = message.loading(t("downloadingInventory"), 0);
     try {
       const res = await getInventoryExport();
       window.open(res.url, "_blank");
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar el inventario"
-      );
+      message.error(error instanceof Error ? error.message : t("inventoryError"));
     } finally {
       setIsInventoryExportLoading(false);
       hideLoading();
@@ -279,17 +276,15 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     if (!validateOrderSelection()) return;
 
     setIsMvpTxtLoading(true);
-    const hideLoading = message.loading("Generando TXT...", 0);
+    const hideLoading = message.loading(t("generatingTxt"), 0);
     try {
       await downloadMvpTxt({
         orderIds: selectedOrders.map((order) => order.id),
         variant: "sku"
       });
-      message.success("TXT generado correctamente");
+      message.success(t("txtGenerated"));
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al generar el TXT"
-      );
+      message.error(error instanceof Error ? error.message : t("txtError"));
     } finally {
       hideLoading();
       setIsMvpTxtLoading(false);
@@ -300,17 +295,15 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     if (!validateOrderSelection()) return;
 
     setIsMvpTxtV2Loading(true);
-    const hideLoading = message.loading("Generando TXT EAN...", 0);
+    const hideLoading = message.loading(t("generatingTxtEan"), 0);
     try {
       await downloadMvpTxtV2({
         orderIds: selectedOrders.map((order) => order.id),
         variant: "sku"
       });
-      message.success("TXT EAN generado correctamente");
+      message.success(t("txtEanGenerated"));
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al generar el TXT EAN"
-      );
+      message.error(error instanceof Error ? error.message : t("txtEanError"));
     } finally {
       hideLoading();
       setIsMvpTxtV2Loading(false);
@@ -322,7 +315,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
       <Modal
         open={isOpen}
         onClose={onClose}
-        title="Selecciona la acción que vas a realizar"
+        title={t("title")}
         footer={null}
         onCancel={onClose}
         className="actionsModalPurchaseOrder"
@@ -335,21 +328,21 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               {isTxtErpEnabled && (
                 <ButtonGenerateAction
                   icon={<DownloadSimple className="h-4 w-4" />}
-                  title="Descargar TXT ERP"
+                  title={t("downloadTxtErp")}
                   onClick={handleDownloadMvpTxt}
                   disabled={isMvpTxtLoading || selectedOrders.length === 0}
                 />
               )}
               <ButtonGenerateAction
                 icon={<DownloadSimple className="h-4 w-4" />}
-                title="Descargar TXT EAN"
+                title={t("downloadTxtEan")}
                 onClick={handleDownloadMvpTxtV2}
                 disabled={isMvpTxtV2Loading || selectedOrders.length === 0}
               />
               {canDelete && (
                 <ButtonGenerateAction
                   icon={<Trash className="h-4 w-4" />}
-                  title="Eliminar Ordenes seleccionadas"
+                  title={t("deleteSelected")}
                   onClick={handleDeleteOrders}
                   disabled={isDispatchLoading}
                 />
@@ -360,7 +353,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               {canDelete && (
                 <ButtonGenerateAction
                   icon={<Trash className="h-4 w-4" />}
-                  title="Eliminar Ordenes seleccionadas"
+                  title={t("deleteSelected")}
                   onClick={handleDeleteOrders}
                   disabled={isDispatchLoading}
                 />
@@ -368,7 +361,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               {canSeparateOrder && (
                 <ButtonGenerateAction
                   icon={<SubtractSquare className="h-4 w-4" />}
-                  title="Separar OC del pedido"
+                  title={t("splitPo")}
                   onClick={handleSeparateOrder}
                   disabled={isDispatchLoading}
                 />
@@ -376,7 +369,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               {canSendToBilling && (
                 <ButtonGenerateAction
                   icon={<Invoice size={16} />}
-                  title="Enviar a facturación"
+                  title={t("sendToBilling")}
                   onClick={() => handleSendToBilling()}
                   disabled={isBillingLoading}
                 />
@@ -384,7 +377,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               {canUploadInvoices && (
                 <ButtonGenerateAction
                   icon={<Invoice size={16} />}
-                  title="Cargar facturas"
+                  title={t("uploadInvoices")}
                   onClick={handleUploadInvoices}
                   disabled={false}
                 />
@@ -392,7 +385,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               {canDownload && (
                 <ButtonGenerateAction
                   icon={<DownloadSimple className="h-4 w-4" />}
-                  title="Descargar plano"
+                  title={t("downloadFlatFile")}
                   onClick={handleOpenDownloadPlaneModal}
                   disabled={isDispatchLoading}
                 />
@@ -400,20 +393,20 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               {canSendToDispatch && (
                 <ButtonGenerateAction
                   icon={<PackageCheck className="h-4 w-4" />}
-                  title="Enviar a despacho"
+                  title={t("sendToDispatch")}
                   onClick={handleSendToDispatch}
                   disabled={isDispatchLoading}
                 />
               )}
               <ButtonGenerateAction
                 icon={<PackageCheck className="h-4 w-4" />}
-                title="Exportar plano de ventas"
+                title={t("exportSalesFile")}
                 onClick={handleDownloadSalesPlane}
                 disabled={isDispatchLoading}
               />
               <ButtonGenerateAction
                 icon={<DownloadSimple className="h-4 w-4" />}
-                title="Exportar inventario"
+                title={t("exportInventory")}
                 onClick={handleDownloadInventory}
                 disabled={isInventoryExportLoading}
               />
@@ -428,7 +421,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         onOk={() => {
           separateOrderRequest(selectedOrders);
         }}
-        title="¿Está seguro de separar la(s) OC del pedido?"
+        title={t("confirmSplit", { count: selectedOrders.length })}
         okLoading={isActionLoading}
       />
 
@@ -439,10 +432,10 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
           setIsBillingConfirmOpen(false);
           handleSendToBilling(true);
         }}
-        title="¿Desea enviar a aprobación? "
-        content="El cliente no tiene cupo suficiente para gestionar el pedido"
-        okText="Enviar aprobación"
-        cancelText="Cancelar"
+        title={t("confirmSendToApproval")}
+        content={t("insufficientCredit")}
+        okText={t("sendForApproval")}
+        cancelText={tCommon("actions.cancel")}
       />
 
       <ModalConfirmAction
@@ -451,7 +444,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         onOk={() => {
           deleteOrderRequest(selectedOrders);
         }}
-        title="¿Estás seguro de eliminar la(s) orden(es) de compra?"
+        title={t("confirmDelete", { count: selectedOrders.length })}
         okLoading={isActionLoading}
       />
 

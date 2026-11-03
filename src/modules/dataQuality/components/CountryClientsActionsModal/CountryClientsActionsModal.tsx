@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import { DownloadSimple, UploadSimple, EnvelopeSimple } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -56,10 +57,11 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   downloadCatalogOnly = false,
   onlyGmnOficiales = false
 }) => {
+  const t = useTranslations("dataQuality.actionsModal");
   const gmnOficialesButton = onUploadGmnOficiales ? (
     <ButtonGenerateAction
       icon={<UploadSimple size={20} />}
-      title="Cargar Maestra Productos"
+      title={t("uploadProductMaster")}
       onClick={onUploadGmnOficiales}
     />
   ) : null;
@@ -68,9 +70,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
     <Modal
       open={isOpen}
       onClose={onClose}
-      title={
-        onlyGmnOficiales ? "Cargar Maestra Productos" : "Selecciona la acción que vas a realizar"
-      }
+      title={onlyGmnOficiales ? t("uploadProductMaster") : t("title")}
       footer={null}
       onCancel={onClose}
       className="countryClientsActionsModal"
@@ -80,28 +80,28 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
         {onlyGmnOficiales && gmnOficialesButton}
         {!onlyGmnOficiales && (
           <>
-        <ButtonGenerateAction
-          icon={<DownloadSimple size={20} />}
-          title="Descargar catálogo"
-          onClick={onDownloadCatalog}
-          disabled={isDownloadCatalogLoading}
-        />
-        {onDownloadIqviaCatalog && (
-          <ButtonGenerateAction
-            icon={<DownloadSimple size={20} />}
-            title="Descargar catálogo IQVIA Clientes"
-            onClick={onDownloadIqviaCatalog}
-            disabled={isDownloadIqviaCatalogLoading}
-          />
-        )}
-        {onDownloadIqviaProductCatalog && (
-          <ButtonGenerateAction
-            icon={<DownloadSimple size={20} />}
-            title="Descargar catálogo IQVIA Productos"
-            onClick={onDownloadIqviaProductCatalog}
-            disabled={isDownloadIqviaProductCatalogLoading}
-          />
-        )}
+            <ButtonGenerateAction
+              icon={<DownloadSimple size={20} />}
+              title={t("downloadCatalog")}
+              onClick={onDownloadCatalog}
+              disabled={isDownloadCatalogLoading}
+            />
+            {onDownloadIqviaCatalog && (
+              <ButtonGenerateAction
+                icon={<DownloadSimple size={20} />}
+                title={t("downloadIqviaCustomers")}
+                onClick={onDownloadIqviaCatalog}
+                disabled={isDownloadIqviaCatalogLoading}
+              />
+            )}
+            {onDownloadIqviaProductCatalog && (
+              <ButtonGenerateAction
+                icon={<DownloadSimple size={20} />}
+                title={t("downloadIqviaProducts")}
+                onClick={onDownloadIqviaProductCatalog}
+                disabled={isDownloadIqviaProductCatalogLoading}
+              />
+            )}
           </>
         )}
         {!downloadCatalogOnly && !onlyGmnOficiales && (
@@ -109,65 +109,65 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
             {onUploadIqviaCatalog && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}
-                title="Cargar catálogo IQVIA Clientes"
+                title={t("uploadIqviaCustomers")}
                 onClick={onUploadIqviaCatalog}
               />
             )}
             {onUploadIqviaProductCatalog && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}
-                title="Cargar catálogo IQVIA Productos"
+                title={t("uploadIqviaProducts")}
                 onClick={onUploadIqviaProductCatalog}
               />
             )}
             {onDownloadMaterials && (
               <ButtonGenerateAction
                 icon={<DownloadSimple size={20} />}
-                title="Descargar Auxiliar Materiales"
+                title={t("downloadMaterialsAux")}
                 onClick={onDownloadMaterials}
               />
             )}
             <ButtonGenerateAction
               icon={<UploadSimple size={20} />}
-              title="Cargar Auxiliar Materiales"
+              title={t("uploadMaterialsAux")}
               onClick={onUploadMaterialsAuxiliary}
             />
             {isInDetailView && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}
-                title="Cargar Histórico"
+                title={t("uploadHistory")}
                 onClick={onUploadFile}
               />
             )}
             {onDownloadPointsOfSale && (
               <ButtonGenerateAction
                 icon={<DownloadSimple size={20} />}
-                title="Descargar Puntos de venta"
+                title={t("downloadPos")}
                 onClick={onDownloadPointsOfSale}
               />
             )}
             <ButtonGenerateAction
               icon={<UploadSimple size={20} />}
-              title="Cargar Puntos de venta"
+              title={t("uploadPos")}
               onClick={onUploadPointsOfSale}
             />
             <ButtonGenerateAction
               icon={<UploadSimple size={20} />}
-              title="Cargar Packs"
+              title={t("uploadPacks")}
               onClick={onUploadPacks}
             />
             {gmnOficialesButton}
             {isInDetailView && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}
-                title='Cargar "In-Transit Haleon"'
+                title={t("uploadInTransitHaleon")}
                 onClick={onUploadInTransitHaleon}
               />
             )}
             {onAddEmails && (
               <ButtonGenerateAction
                 icon={<EnvelopeSimple size={20} />}
-                title="Editar reglas de correo"
+                title={t("editEmailRules")}
                 onClick={onAddEmails}
               />
             )}

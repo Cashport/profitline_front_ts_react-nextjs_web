@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Select } from "antd";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import { useAppStore } from "@/lib/store/store";
 import { getClientsByProject } from "@/services/banksPayments/banksPayments";
 import { IMarketAdminClientCode } from "@/types/marketAdmin/IMarketAdmin";
@@ -23,6 +24,7 @@ const selectClass =
   "min-w-[240px] [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm";
 
 export default function ClientCodeSelect({ nit, codigo, codes }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.codeSelect");
   const router = useRouter();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
@@ -44,11 +46,11 @@ export default function ClientCodeSelect({ nit, codigo, codes }: Props) {
 
   const goToClient = (nextNit: string) => {
     // Al cambiar de cliente se descarta el código: no pertenece al nuevo.
-    router.push(`/market-admin/clientes/${nextNit}`);
+    router.push(`/market-admin/clients/${nextNit}`);
   };
 
   const goToCode = (nextCode: string) => {
-    router.replace(`/market-admin/clientes/${nit}?codigo=${encodeURIComponent(nextCode)}`, {
+    router.replace(`/market-admin/clients/${nit}?codigo=${encodeURIComponent(nextCode)}`, {
       scroll: false
     });
   };
@@ -62,13 +64,13 @@ export default function ClientCodeSelect({ nit, codigo, codes }: Props) {
         loading={isLoading}
         value={nit}
         options={clientOptions}
-        notFoundContent="Sin clientes disponibles"
+        notFoundContent={t("noCustomers")}
         onChange={goToClient}
         // Los options traen "NOMBRE - NIT": filtrar por cualquiera de las dos.
         filterOption={(input, option) =>
           (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
         }
-        placeholder="Buscar cliente"
+        placeholder={t("searchCustomer")}
       />
 
       {showCodeSelect && (
@@ -78,7 +80,7 @@ export default function ClientCodeSelect({ nit, codigo, codes }: Props) {
           value={codigo}
           options={codeOptions}
           onChange={goToCode}
-          placeholder="Código"
+          placeholder={t("code")}
         />
       )}
     </div>

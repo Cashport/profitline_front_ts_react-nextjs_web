@@ -11,7 +11,7 @@ import {
 
 const LANDING_ROUTES = ["/", "/en"];
 const PUBLIC_FILES = ["/robots.txt", "/sitemap.xml", "/llms.txt", "/assets"];
-const APP_HOME = "/clientes/all";
+const APP_HOME = "/clients/all";
 
 export async function middleware(request: NextRequest) {
   // content-security-policy
@@ -145,12 +145,12 @@ export async function middleware(request: NextRequest) {
     return noIndex(NextResponse.redirect(new URL("/", request.url), 308));
   }
 
-  const noAuthRoutes = ["/auth", "/mobile", "/cetaphil", "/portal-archivos"];
+  const noAuthRoutes = ["/auth", "/mobile", "/cetaphil", "/file-portal"];
   if (noAuthRoutes.some((route) => pathname.startsWith(route))) {
     return noIndex(next());
   }
 
-  if (!session && pathname === "/comercio/cetaphil") {
+  if (!session && pathname === "/commerce/cetaphil") {
     return noIndex(NextResponse.redirect(new URL("/cetaphil", request.url)));
   }
   //Return to the landing login if there is no valid session

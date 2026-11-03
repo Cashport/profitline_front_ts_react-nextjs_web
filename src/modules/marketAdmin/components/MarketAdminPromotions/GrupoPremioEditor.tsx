@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Product } from "@/types/products/products";
 import { IGrupoPremio } from "@/types/marketAdmin/IMarketAdmin";
 import ProductSelect from "./ProductSelect";
@@ -20,6 +21,7 @@ export default function GrupoPremioEditor({
   onChange: (grupo: IGrupoPremio) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations("marketAdmin.promotions.rewardGroup");
   const esPool = grupo.modo === "pool";
 
   const firstAvailableId = (used: number[]) => products.find((p) => !used.includes(p.id))?.id ?? 0;
@@ -70,7 +72,7 @@ export default function GrupoPremioEditor({
         <div className="flex items-center gap-2">
           {esPool ? (
             <div className="flex items-center gap-1.5">
-              <span className="text-[13px] text-[#92400E]">El cliente elige</span>
+              <span className="text-[13px] text-[#92400E]">{t("customerPicks")}</span>
               <input
                 type="number"
                 min={1}
@@ -78,15 +80,16 @@ export default function GrupoPremioEditor({
                 onChange={(e) => updatePool(parseInt(e.target.value) || 1)}
                 className="w-10 px-1.5 py-0.5 text-[13px] font-semibold text-[#92400E] bg-white border border-[#FDE68A] rounded text-center outline-none"
               />
-              <span className="text-[13px] text-[#92400E]">und. entre:</span>
+              <span className="text-[13px] text-[#92400E]">{t("unitsFrom")}</span>
             </div>
           ) : (
-            <span className="text-[13px] text-[#666666] font-medium">Fijo</span>
+            <span className="text-[13px] text-[#666666] font-medium">{t("fixed")}</span>
           )}
         </div>
         {canRemove && (
           <button
             onClick={onRemove}
+            aria-label={t("removeGroup")}
             className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors"
           >
             <Trash2 size={10} />
@@ -108,7 +111,7 @@ export default function GrupoPremioEditor({
             {!esPool && (
               <div className="flex items-center border border-[#EEEEEE] rounded overflow-hidden w-[76px] flex-shrink-0">
                 <span className="px-1.5 py-1 text-[13px] text-[#999999] bg-[#F7F7F7] border-r border-[#EEEEEE]">
-                  und.
+                  {t("unitsShort")}
                 </span>
                 <input
                   type="number"
@@ -122,6 +125,7 @@ export default function GrupoPremioEditor({
             {grupo.productos.length > 1 && (
               <button
                 onClick={() => removeProducto(pp.id)}
+                aria-label={t("removeProduct")}
                 className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
               >
                 <Trash2 size={10} />
@@ -134,7 +138,7 @@ export default function GrupoPremioEditor({
           disabled={grupo.productos.length >= products.length}
           className="flex items-center gap-1 text-[13px] text-[#6AB000] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
         >
-          <Plus size={9} /> Agregar producto
+          <Plus size={9} /> {t("addProduct")}
         </button>
       </div>
     </div>

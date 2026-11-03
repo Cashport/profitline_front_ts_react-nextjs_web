@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useEffect, useState } from "react";
 import { Button, ColorPicker, Flex, Input, Select, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
@@ -42,6 +43,8 @@ export const ProjectFormTab = ({
   onActiveProject = () => {},
   onDesactivateProject = () => {}
 }: ProjectFormTabProps) => {
+  const t = useTranslations("shared.projectForm");
+  const tCommon = useTranslations("common");
   const [isOpenModal, setIsOpenModal] = useState({
     selected: 0
   });
@@ -113,7 +116,7 @@ export const ProjectFormTab = ({
               className="buttonGoBack"
               icon={<CaretLeft size={"1.45rem"} />}
             >
-              Ver Proyectos
+              {t("viewProjects")}
             </Button>
           </Link>
           <Flex gap={"1rem"}>
@@ -133,27 +136,27 @@ export const ProjectFormTab = ({
             imgDefault={`${data.LOGO?.trim()}?v=${new Date().getTime()}`}
             setImgFile={setImageFile}
           />
-          {imageError && <Text className="textError">{"Logo del proyecto es obligatorio *"}</Text>}
+          {imageError && <Text className="textError">{t("logoRequired")}</Text>}
           {/* -----------------------------------General--------------------------------------- */}
           <Title className="title" level={4}>
-            Informacion General
+            {t("generalInfo")}
           </Title>
           <Flex component={"section"} className="generalProject" justify="flex-start">
             <InputForm
-              titleInput="Nombre del Proyecto"
+              titleInput={t("projectName")}
               nameInput="general.name"
               control={control}
               error={errors.general?.name}
             />
             <InputForm
-              titleInput="NIT"
+              titleInput={tCommon("fields.taxId")}
               nameInput="general.nit"
               control={control}
               error={errors.general?.nit}
             />
             <Flex vertical className="containerInput">
               <Title className="title" level={5}>
-                Divisas
+                {t("currencies")}
               </Title>
               <Controller
                 name="general.currencies"
@@ -162,12 +165,12 @@ export const ProjectFormTab = ({
                 render={({ field }) => <SelectCurrencies errors={errors} field={field} />}
               />
               <Text className="textError">
-                {errors?.general?.currencies && "Divisa es obligatorio *"}
+                {errors?.general?.currencies && t("currencyRequired")}
               </Text>
             </Flex>
             <Flex vertical className="containerInput">
               <Title className="title" level={5}>
-                País
+                {t("country")}
               </Title>
               <Controller
                 name="general.country"
@@ -175,19 +178,17 @@ export const ProjectFormTab = ({
                 rules={{ required: true }}
                 render={({ field }) => <SelectCountries errors={errors} field={field} />}
               />
-              <Text className="textError">
-                {errors?.general?.country && "Pais es obligatorio *"}
-              </Text>
+              <Text className="textError">{errors?.general?.country && t("countryRequired")}</Text>
             </Flex>
             <InputForm
-              titleInput="Direccion"
+              titleInput={t("address")}
               nameInput="general.address"
               control={control}
               error={errors.general?.address}
             />
             <Flex className="containerInput" vertical style={{ width: "24.5%" }} justify="center">
               <Title className="title" level={5}>
-                Período de facturación
+                {t("billingPeriod")}
               </Title>
               <Controller
                 name="general.billing_period"
@@ -201,14 +202,17 @@ export const ProjectFormTab = ({
                       disabled={statusForm === "review"}
                       variant="borderless"
                       className={error ? "inputError" : "input"}
-                      placeholder="Segundo miércoles del mes"
+                      placeholder={t("billingPeriodPlaceholder")}
                       onClick={() => setIsBillingPeriodOpen(true)}
                       {...field}
                       value={
                         billingPeriod
                           ? billingPeriod.day_flag === "true"
-                            ? `El dia ${billingPeriod.day} del mes`
-                            : `El ${billingPeriod.order} ${billingPeriod.day_of_week} del mes`
+                            ? t("billingDayOfMonth", { day: billingPeriod.day ?? "" })
+                            : t("billingWeekdayOfMonth", {
+                                order: billingPeriod.order ?? "",
+                                dayOfWeek: billingPeriod.day_of_week ?? ""
+                              })
                           : data.BILLING_PERIOD
                             ? data.BILLING_PERIOD
                             : undefined
@@ -216,7 +220,7 @@ export const ProjectFormTab = ({
                     />
                     {error && (
                       <Typography.Text className="textError">
-                        El Periodo de facturacion es obligatorio *
+                        {t("billingPeriodRequired")}
                       </Typography.Text>
                     )}
                   </>
@@ -226,7 +230,7 @@ export const ProjectFormTab = ({
 
             <Flex vertical className="containerInput">
               <Title className="title" level={5}>
-                Fecha de vigencia de factura
+                {t("invoiceValidityDate")}
               </Title>
               <Controller
                 name="general.accept_date"
@@ -235,30 +239,30 @@ export const ProjectFormTab = ({
                 render={({ field }) => {
                   return (
                     <Select
-                      placeholder="Fecha de aceptación"
+                      placeholder={t("acceptanceDate")}
                       className={errors?.general?.accept_date ? "selectInputError" : "selectInput"}
                       loading={false}
                       variant="borderless"
                       optionLabelProp="label"
                       {...field}
                     >
-                      <Option value={`Fecha de aceptación`} key={1}>
-                        Fecha de aceptación
+                      <Option value={`Fecha de aceptación`} key={1} label={t("acceptanceDate")}>
+                        {t("acceptanceDate")}
                       </Option>
-                      <Option value={`Fecha de emisión`} key={2}>
-                        Fecha de emisión
+                      <Option value={`Fecha de emisión`} key={2} label={t("issueDate")}>
+                        {t("issueDate")}
                       </Option>
                     </Select>
                   );
                 }}
               />
               <Text className="textError">
-                {errors?.general?.accept_date && "Campo obligatorio *"}
+                {errors?.general?.accept_date && t("requiredField")}
               </Text>
             </Flex>
             <Flex vertical className="containerInput">
               <Title className="title" level={5}>
-                DSO - Calculo solo del año actual
+                {t("dsoCurrentYearOnly")}
               </Title>
               <Controller
                 name="general.DSO_currenly_year"
@@ -267,7 +271,7 @@ export const ProjectFormTab = ({
                 render={({ field }) => {
                   return (
                     <Select
-                      placeholder="Si | No"
+                      placeholder={t("yesNoPlaceholder")}
                       className={
                         errors?.general?.DSO_currenly_year ? "selectInputError" : "selectInput"
                       }
@@ -276,30 +280,30 @@ export const ProjectFormTab = ({
                       optionLabelProp="label"
                       {...field}
                     >
-                      <Option value={`Sí`} key={1}>
-                        {`Sí`}
+                      <Option value={`Sí`} key={1} label={tCommon("status.yes")}>
+                        {tCommon("status.yes")}
                       </Option>
-                      <Option value={`No`} key={2}>
-                        {`No`}
+                      <Option value={`No`} key={2} label={tCommon("status.no")}>
+                        {tCommon("status.no")}
                       </Option>
                     </Select>
                   );
                 }}
               />
               <Text className="textError">
-                {errors?.general?.DSO_currenly_year && "Campo obligatorio *"}
+                {errors?.general?.DSO_currenly_year && t("requiredField")}
               </Text>
             </Flex>
             <InputForm
               disabled={generalDSOCurrentlyYear === "Sí"}
-              titleInput="DSO - Días de ventas para el cálculo"
+              titleInput={t("dsoSalesDays")}
               nameInput="general.DSO_days"
               typeInput="number"
               validationRules={{
-                required: generalDSOCurrentlyYear === "Sí" ? false : "Campo obligatorio *",
+                required: generalDSOCurrentlyYear === "Sí" ? false : t("requiredField"),
                 min: {
                   value: 1,
-                  message: "El valor debe ser mayor que 1"
+                  message: t("minValue")
                 }
               }}
               control={control}
@@ -309,12 +313,12 @@ export const ProjectFormTab = ({
 
           {/* -----------------------------------Seguridad----------------------------------- */}
           <Title className="title" level={4}>
-            Seguridad
+            {t("security")}
           </Title>
           <Flex component={"section"} className="generalProject" justify="flex-start">
             <Flex vertical className="containerInput">
               <Title className="title" level={5}>
-                Solicitar OTP periódicamente
+                {t("otpRequired")}
               </Title>
               <Controller
                 name="general.otp_required"
@@ -323,51 +327,51 @@ export const ProjectFormTab = ({
                 render={({ field }) => {
                   return (
                     <Select
-                      placeholder="Si | No"
+                      placeholder={t("yesNoPlaceholder")}
                       className={errors?.general?.otp_required ? "selectInputError" : "selectInput"}
                       loading={false}
                       variant="borderless"
                       optionLabelProp="label"
                       {...field}
                     >
-                      <Option value={`Sí`} key={1}>
-                        {`Sí`}
+                      <Option value={`Sí`} key={1} label={tCommon("status.yes")}>
+                        {tCommon("status.yes")}
                       </Option>
-                      <Option value={`No`} key={2}>
-                        {`No`}
+                      <Option value={`No`} key={2} label={tCommon("status.no")}>
+                        {tCommon("status.no")}
                       </Option>
                     </Select>
                   );
                 }}
               />
               <Text className="textError">
-                {errors?.general?.otp_required && "Campo obligatorio *"}
+                {errors?.general?.otp_required && t("requiredField")}
               </Text>
             </Flex>
             <InputForm
               disabled={otpRequired !== "Sí"}
-              titleInput="Días para volver a solicitar OTP"
+              titleInput={t("otpRevalidationDays")}
               nameInput="general.otp_revalidation_days"
               typeInput="number"
               validationRules={{
-                required: otpRequired === "Sí" ? "Campo obligatorio *" : false,
+                required: otpRequired === "Sí" ? t("requiredField") : false,
                 min: {
                   value: 1,
-                  message: "El valor debe ser mayor que 1"
+                  message: t("minValue")
                 }
               }}
               control={control}
               error={errors.general?.otp_revalidation_days}
             />
             <InputForm
-              titleInput="Días de expiración de contraseña"
+              titleInput={t("passwordExpirationDays")}
               nameInput="general.password_expiration_days"
               typeInput="number"
               validationRules={{
-                required: "Campo obligatorio *",
+                required: t("requiredField"),
                 min: {
                   value: 1,
-                  message: "El valor debe ser mayor que 1"
+                  message: t("minValue")
                 }
               }}
               control={control}
@@ -377,7 +381,7 @@ export const ProjectFormTab = ({
           <Flex component={"section"} className="generalProject" justify="flex-start">
             <Flex vertical className="containerInput">
               <Title className="title" level={5}>
-                Permitir dispositivos de confianza
+                {t("trustedDevicesEnabled")}
               </Title>
               <Controller
                 name="general.trusted_devices_enabled"
@@ -386,7 +390,7 @@ export const ProjectFormTab = ({
                 render={({ field }) => {
                   return (
                     <Select
-                      placeholder="Si | No"
+                      placeholder={t("yesNoPlaceholder")}
                       className={
                         errors?.general?.trusted_devices_enabled
                           ? "selectInputError"
@@ -398,33 +402,33 @@ export const ProjectFormTab = ({
                       disabled={otpRequired !== "Sí"}
                       {...field}
                     >
-                      <Option value={`Sí`} key={1}>
-                        {`Sí`}
+                      <Option value={`Sí`} key={1} label={tCommon("status.yes")}>
+                        {tCommon("status.yes")}
                       </Option>
-                      <Option value={`No`} key={2}>
-                        {`No`}
+                      <Option value={`No`} key={2} label={tCommon("status.no")}>
+                        {tCommon("status.no")}
                       </Option>
                     </Select>
                   );
                 }}
               />
               <Text className="textError">
-                {errors?.general?.trusted_devices_enabled && "Campo obligatorio *"}
+                {errors?.general?.trusted_devices_enabled && t("requiredField")}
               </Text>
             </Flex>
             <InputForm
               disabled={otpRequired !== "Sí" || trustedDevicesEnabled !== "Sí"}
-              titleInput="Días de vigencia del dispositivo"
+              titleInput={t("trustedDeviceDays")}
               nameInput="general.trusted_device_days"
               typeInput="number"
               validationRules={{
                 required:
                   otpRequired === "Sí" && trustedDevicesEnabled === "Sí"
-                    ? "Campo obligatorio *"
+                    ? t("requiredField")
                     : false,
                 min: {
                   value: 1,
-                  message: "El valor debe ser mayor que 1"
+                  message: t("minValue")
                 }
               }}
               control={control}
@@ -434,51 +438,51 @@ export const ProjectFormTab = ({
 
           {/* -----------------------------------Contact----------------------------------- */}
           <Title className="title" level={4}>
-            Informacion de Contacto
+            {t("contactInfo")}
           </Title>
           <Flex component={"section"} className="generalProject" justify="flex-start">
             <InputForm
-              titleInput="Nombre"
+              titleInput={tCommon("fields.name")}
               nameInput="contact.name"
               control={control}
               error={errors.contact?.name}
             />
             <InputForm
               typeInput="cargo"
-              titleInput="Cargo"
+              titleInput={t("position")}
               nameInput="contact.position_contact"
               control={control}
               error={errors.contact?.position_contact}
             />
             <InputForm
               typeInput="email"
-              titleInput="Correo"
+              titleInput={t("email")}
               nameInput="contact.email"
               control={control}
               error={errors.contact?.email}
             />
             <InputForm
               typeInput="tel"
-              titleInput="Telefono"
+              titleInput={tCommon("fields.phone")}
               nameInput="contact.phone"
               control={control}
               error={errors.contact?.phone}
               validationRules={{
                 pattern: {
                   value: /^\+?\d+$/,
-                  message: "Solo se permiten números y un signo '+' al comienzo"
+                  message: t("phonePattern")
                 }
               }}
             />
           </Flex>
           {/* -----------------------------------Project Config----------------------------------- */}
           <Title className="title" level={4}>
-            Personalizar Proyecto
+            {t("customizeProject")}
           </Title>
           <Flex component={"section"} className="generalProject" justify="flex-start">
             <Flex vertical className="containerInput">
               <Title className="title" level={5}>
-                Color Personalizado
+                {t("customColor")}
               </Title>
               <Controller
                 name="personalization.color"
@@ -487,12 +491,12 @@ export const ProjectFormTab = ({
                 render={({ field }) => <ColorPicker format="rgb" showText {...field} />}
               />
               <Text className="textError">
-                {errors?.personalization?.color && "Color Personalizado es obligatorio *"}
+                {errors?.personalization?.color && t("customColorRequired")}
               </Text>
             </Flex>
             <InputForm
               typeInput="personalization.description"
-              titleInput="Descripción"
+              titleInput={tCommon("fields.description")}
               nameInput="personalization.description"
               className="description"
               control={control}
@@ -502,7 +506,7 @@ export const ProjectFormTab = ({
           <Flex className="buttonNewProject">
             {["edit", "create"].includes(statusForm) && (
               <PrincipalButton disabled={loading} onClick={handleSubmit(onSubmit)}>
-                {validationButtonText(statusForm)}
+                {t(`submit.${validationButtonText(statusForm)}`)}
               </PrincipalButton>
             )}
           </Flex>

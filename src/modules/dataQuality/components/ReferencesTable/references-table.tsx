@@ -3,6 +3,7 @@
 import dayjs from "dayjs";
 import { MoreHorizontal } from "lucide-react";
 import { Dropdown, Spin } from "antd";
+import { useTranslations } from "use-intl";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -18,9 +19,9 @@ import { IReferenceFile } from "@/types/dataQuality/IDataQuality";
 import {
   ReferenceCatalogs,
   formatBytesToMB,
-  resolveReferenceOwnerLabel,
-  scopeLabel
+  resolveReferenceOwnerLabel
 } from "../../references/references.utils";
+import { useReferenceScopeLabels } from "../../hooks/useReferenceScopeLabels";
 
 interface ReferencesTableProps {
   references: IReferenceFile[];
@@ -52,25 +53,28 @@ export function ReferencesTable({
   onReplace,
   onToggle
 }: ReferencesTableProps) {
+  const t = useTranslations("dataQuality.references.table");
+  const tCommon = useTranslations("common");
+  const scopeLabels = useReferenceScopeLabels();
   return (
     <Spin spinning={isLoading || !!isValidating}>
       <Table className="table-fixed">
         <TableHeader>
           <TableRow style={{ borderColor: "#DDDDDD" }}>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Ámbito</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Propietario</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>{t("type")}</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>{t("scope")}</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>{t("owner")}</TableHead>
             <TableHead className="w-[90px]" style={{ color: "#141414", fontWeight: 600 }}>
-              Versión
+              {t("version")}
             </TableHead>
             <TableHead className="w-[100px]" style={{ color: "#141414", fontWeight: 600 }}>
-              Estado
+              {t("status")}
             </TableHead>
             <TableHead className="w-[150px]" style={{ color: "#141414", fontWeight: 600 }}>
-              Actualizado
+              {t("updated")}
             </TableHead>
             <TableHead className="w-[70px]" style={{ color: "#141414", fontWeight: 600 }}>
-              Acciones
+              {t("actions")}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -78,13 +82,17 @@ export function ReferencesTable({
           {!isLoading && references.length === 0 ? (
             <TableRow style={{ borderColor: "#DDDDDD" }}>
               <TableCell colSpan={7} className="py-10 text-center text-gray-500">
-                No hay referencias para los filtros seleccionados
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : (
             references.map((reference) => {
               const busy = busyId === reference.id;
-              const ownerLabel = resolveReferenceOwnerLabel(reference, catalogs);
+              const ownerLabel = resolveReferenceOwnerLabel(
+                reference,
+                catalogs,
+                scopeLabels.labels
+              );
               return (
                 <TableRow
                   key={reference.id}
@@ -102,13 +110,13 @@ export function ReferencesTable({
                           className="text-[13px]"
                           style={{ backgroundColor: "#DBEAFE", color: "#1D4ED8" }}
                         >
-                          Efectiva
+                          {t("effective")}
                         </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell style={{ color: "#141414" }}>
-                    {scopeLabel(reference.scope_level)}
+                    {scopeLabels.label(reference.scope_level)}
                   </TableCell>
                   <TableCell className="overflow-hidden text-ellipsis" title={ownerLabel}>
                     <span style={{ color: "#141414" }}>{ownerLabel}</span>
@@ -123,7 +131,9 @@ export function ReferencesTable({
                         color: reference.is_active === 1 ? "#166534" : "#6B7280"
                       }}
                     >
-                      {reference.is_active === 1 ? "Activo" : "Inactivo"}
+                      {reference.is_active === 1
+                        ? tCommon("status.active")
+                        : tCommon("status.inactive")}
                     </Badge>
                   </TableCell>
                   <TableCell style={{ color: "#141414" }}>
@@ -141,18 +151,18 @@ export function ReferencesTable({
                           items: [
                             {
                               key: "detail",
-                              label: "Ver detalle",
+                              label: tCommon("actions.viewDetail"),
                               onClick: () => onDetail(reference)
                             },
                             {
                               key: "replace",
-                              label: "Reemplazar archivo",
+                              label: t("replaceFile"),
                               onClick: () => onReplace(reference),
                               disabled: busy
                             },
                             {
                               key: "toggle",
-                              label: reference.is_active === 1 ? "Desactivar" : "Activar",
+                              label: reference.is_active === 1 ? t("deactivate") : t("activate"),
                               onClick: () => onToggle(reference),
                               disabled: busy
                             }

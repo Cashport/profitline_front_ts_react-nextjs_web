@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { message, Modal, Spin } from "antd";
+import { useTranslations } from "use-intl";
 
 import { getWarehouseProducts } from "@/services/commerce/commerce";
 import { sendToBackorder, sendToBackorderStock } from "@/services/purchaseOrders/purchaseOrders";
@@ -26,6 +27,8 @@ export function SendToBackorderModal({
   orderId,
   mutate
 }: SendToBackorderModalProps) {
+  const t = useTranslations("purchaseOrders.backorderModal");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [phase, setPhase] = useState<IPhase>("loading");
 
@@ -58,27 +61,23 @@ export function SendToBackorderModal({
           setPhase("partial");
         }
       } catch (error) {
-        message.error(
-          error instanceof Error ? error.message : "Error al obtener productos de la bodega"
-        );
+        message.error(error instanceof Error ? error.message : t("fetchError"));
         setPhase("noData");
       }
     };
 
     fetchProducts();
-  }, [isOpen, projectId, warehouseId, orderId]);
+  }, [isOpen, projectId, warehouseId, orderId, t]);
 
   const handleSendAllToBackOrder = async () => {
     setIsActionLoading(true);
     try {
       await sendToBackorder(orderId);
-      message.success("Orden de compra enviada a Back Order exitosamente");
+      message.success(t("sentSuccess"));
       onClose();
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al enviar la orden de compra a Back Order"
-      );
+      message.error(error instanceof Error ? error.message : t("sendError"));
     }
     setIsActionLoading(false);
   };
@@ -87,13 +86,11 @@ export function SendToBackorderModal({
     setIsActionLoading(true);
     try {
       await sendToBackorderStock(orderId, saveRest);
-      message.success("Orden de compra procesada exitosamente");
+      message.success(t("processedSuccess"));
       onClose();
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al eliminar productos no disponibles"
-      );
+      message.error(error instanceof Error ? error.message : t("removeError"));
     }
     setIsActionLoading(false);
   };
@@ -109,9 +106,7 @@ export function SendToBackorderModal({
 
     if (phase === "noData") {
       return (
-        <p style={{ textAlign: "center", fontSize: "1rem", margin: "1.5rem 0" }}>
-          No hay data de la bodega seleccionada
-        </p>
+        <p style={{ textAlign: "center", fontSize: "1rem", margin: "1.5rem 0" }}>{t("noData")}</p>
       );
     }
 
@@ -119,14 +114,14 @@ export function SendToBackorderModal({
       return (
         <>
           <h3 style={{ textAlign: "center", fontSize: "1.125rem", fontWeight: 600 }}>
-            Todos los productos tienen stock
+            {t("allInStock")}
           </h3>
           <p style={{ textAlign: "center", fontSize: "1rem", margin: "1.5rem 0" }}>
-            ¿Está seguro que quiere enviar a Back Order?
+            {t("confirmSendAll")}
           </p>
           <FooterButtons
-            titleCancel="Rechazar"
-            titleConfirm="Aceptar"
+            titleCancel={tCommon("actions.reject")}
+            titleConfirm={tCommon("actions.accept")}
             onClose={onClose}
             handleOk={handleSendAllToBackOrder}
             isConfirmLoading={isActionLoading}
@@ -139,14 +134,14 @@ export function SendToBackorderModal({
       return (
         <>
           <h3 style={{ textAlign: "center", fontSize: "1.125rem", fontWeight: 600 }}>
-            Ninguno de los productos tiene stock
+            {t("noneInStock")}
           </h3>
           <p style={{ textAlign: "center", fontSize: "1rem", margin: "1.5rem 0" }}>
-            ¿Está seguro de enviar a Back Order?
+            {t("confirmSend")}
           </p>
           <FooterButtons
-            titleCancel="Rechazar"
-            titleConfirm="Aceptar"
+            titleCancel={tCommon("actions.reject")}
+            titleConfirm={tCommon("actions.accept")}
             onClose={onClose}
             handleOk={handleSendAllToBackOrder}
             isConfirmLoading={isActionLoading}
@@ -166,11 +161,11 @@ export function SendToBackorderModal({
               marginBottom: "1.5rem"
             }}
           >
-            Algunos productos tienen Stock
+            {t("someInStock")}
           </h3>
           <FooterButtons
-            titleCancel="Enviar todo a Back order"
-            titleConfirm="Procesar disponibles"
+            titleCancel={t("sendAllToBackorder")}
+            titleConfirm={t("processAvailable")}
             onClose={handleSendAllToBackOrder}
             handleOk={() => setPhase("processAvailable")}
           />
@@ -189,12 +184,11 @@ export function SendToBackorderModal({
               marginBottom: "1.5rem"
             }}
           >
-            ¿Desea eliminar los productos no disponibles o guardarlos en una orden de compra para
-            después?
+            {t("processAvailableQuestion")}
           </h3>
           <FooterButtons
-            titleCancel="Eliminar no disponibles"
-            titleConfirm="Guardar en nueva OC"
+            titleCancel={t("removeUnavailable")}
+            titleConfirm={t("saveInNewPo")}
             onClose={() => handleSendPartialToBackOrder(false)}
             handleOk={() => handleSendPartialToBackOrder(true)}
             isConfirmLoading={isActionLoading}

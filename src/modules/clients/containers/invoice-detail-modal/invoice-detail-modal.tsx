@@ -9,6 +9,7 @@ import {
   Receipt
 } from "phosphor-react";
 import { Button } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useModalDetail } from "@/context/ModalContext";
@@ -49,6 +50,8 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
   handleActionInDetail,
   deselectInvoices
 }) => {
+  const t = useTranslations("clients.invoiceDetail");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const {
@@ -93,20 +96,39 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
         return "";
     }
   };
+  // event_type_name llega del backend en español: se muestra con su etiqueta traducida
   const getEventTitle = (item: string) => {
     switch (item) {
       case "Generar nota de credito":
-        return "Nota de crédito aplicada";
+        return t("events.creditNoteApplied");
       case "Generar nota de debito":
-        return "Nota de débito aplicada";
+        return t("events.debitNoteApplied");
       case "Generar descuento":
-        return "Descuento aplicado";
+        return t("events.discountApplied");
       case "Radicar factura":
-        return "Radicación";
+        return t("events.submission");
       case "Registrar novedad":
-        return "Nueva novedad";
+        return t("events.newDispute");
       case "Emision de factura":
-        return "Emisión de factura";
+        return t("events.invoiceIssued");
+      case "Cierre de novedad":
+        return t("events.disputeClosed");
+      case "Acuerdo de pago":
+        return t("events.paymentAgreement");
+      case "Vencimiento acuerdo de pago":
+        return t("events.paymentAgreementExpired");
+      case "Aviso de vencimiento":
+        return t("events.dueNotice");
+      case "Cambiar estado":
+        return t("events.statusChanged");
+      case "Factura conciliada":
+        return t("events.invoiceReconciled");
+      case "Pago aplicado":
+        return t("events.paymentApplied");
+      case "Pago parcial":
+        return t("events.partialPayment");
+      case "Saldo Confirmado":
+        return t("events.balanceConfirmed");
       default:
         return item;
     }
@@ -138,7 +160,7 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
       <InvoiceDownloadModal
         isModalOpen={isModalOpen}
         handleCloseModal={setIsModalOpen}
-        title="Imagen"
+        title={t("image")}
         url={urlStep}
       />
       <div>
@@ -148,10 +170,10 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
           </button>
         </div>
         <div className={styles.header}>
-          <h4 className={styles.numberInvoice}>Factura {showId}</h4>
+          <h4 className={styles.numberInvoice}>{t("title", { id: showId })}</h4>
           <div className={styles.viewInvoice}>
             <Receipt size={20} />
-            Ver factura
+            {t("viewInvoice")}
           </div>
           {hiddenActions ? null : (
             <Button
@@ -163,14 +185,14 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                 handleActionInDetail?.(selectInvoice!);
               }}
             >
-              Generar acción
+              {t("generateAction")}
             </Button>
           )}
         </div>
 
         <div className={styles.body}>
           <div className={styles.headerBody}>
-            <div className={styles.title}>Trazabilidad</div>
+            <div className={styles.title}>{t("traceability")}</div>
             <div
               className={`${styles.status} ${statusClass(invoiceData ? invoiceData?.results[0]?.status_name : "")}`}
             >
@@ -208,7 +230,9 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   <span
                                     className={`${styles.tagLabel} ${item.is_legalized === 1 ? styles.tagLabelGreen : styles.tagLabelRed}`}
                                   >
-                                    {item.is_legalized === 1 ? "Legalizada" : "Por legalizar"}
+                                    {item.is_legalized === 1
+                                      ? t("tags.settled")
+                                      : t("tags.pendingSettlement")}
                                   </span>
                                 )}
                                 {item.event_type_name === "Registrar novedad" && (
@@ -219,10 +243,13 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                         : styles.tagLabelGray
                                     }`}
                                   >
-                                    {(item.is_rejected || item.is_rejected === 0
-                                      ? "Cerrada"
-                                      : "Abierta") +
-                                      (item.is_reconciled === 1 ? " - Desvinculada" : "")}
+                                    {item.is_rejected || item.is_rejected === 0
+                                      ? item.is_reconciled === 1
+                                        ? t("tags.closedUnlinked")
+                                        : t("tags.closed")
+                                      : item.is_reconciled === 1
+                                        ? t("tags.openUnlinked")
+                                        : t("tags.open")}
                                   </span>
                                 )}
                                 {item.event_type_name === "Cierre de novedad" && (
@@ -236,16 +263,16 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                     }`}
                                   >
                                     {item.is_rejected === 1
-                                      ? "Aprobada"
+                                      ? t("tags.approved")
                                       : item.is_rejected === 0
-                                        ? "Rechazada"
-                                        : "Pendiente"}
+                                        ? t("tags.rejected")
+                                        : t("tags.pending")}
                                   </span>
                                 )}
                                 {item.event_type_name === "Acuerdo de pago" &&
                                   item.status_name_payment_agreement == "Anulada" && (
                                     <span className={`${styles.tagLabel} ${styles.tagLabelBlack}`}>
-                                      Anulado
+                                      {t("tags.voided")}
                                     </span>
                                   )}
                               </h5>
@@ -291,12 +318,14 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                       }}
                                     />
                                   </div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Valor: ${formatMoney(item.ammount ?? "0")}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("value", { value: formatMoney(item.ammount ?? "0") })}
+                                  </div>
                                   <div className={styles.adjustment}>
-                                    ID del ajuste:
+                                    {t("adjustmentId")}
                                     <div
                                       className={styles.idAdjustment}
                                       onClick={() =>
@@ -341,12 +370,14 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   >
                                     <ArrowLineDown size={14} onClick={() => {}} />
                                   </div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Valor: ${formatMoney(item.ammount ?? "0")}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("value", { value: formatMoney(item.ammount ?? "0") })}
+                                  </div>
                                   <div className={styles.adjustment}>
-                                    ID del ajuste:
+                                    {t("adjustmentId")}
                                     <div className={styles.idAdjustment}>{item.id}</div>
                                   </div>
                                 </div>
@@ -366,15 +397,19 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                     </div>
                                   )}
 
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Valor: ${formatMoney(item.ammount)}`}</div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Fecha de pago acordada: ${formatDatePlane(item.event_date?.toString())}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("value", { value: formatMoney(item.ammount) })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("agreedPaymentDate", {
+                                      date: formatDatePlane(item.event_date?.toString())
+                                    })}
+                                  </div>
                                   <div className={styles.adjustment}>
-                                    ID del acuerdo:
+                                    {t("agreementId")}
                                     <div
                                       className={styles.idAdjustment}
                                       onClick={() => {
@@ -397,9 +432,15 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   <div className={styles.icons}>
                                     <Envelope size={14} onClick={() => {}} />
                                   </div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
-                                  <div className={styles.name}>{`Valor acordado: ${""}`}</div>
-                                  <div className={styles.name}>{`ID del acuerdo: ${item.id}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("agreedValue", { value: "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("agreementIdValue", { id: item.id })}
+                                  </div>
                                 </div>
                               ) : (
                                 ""
@@ -414,7 +455,9 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   >
                                     <ArrowLineDown size={14} onClick={() => {}} />
                                   </div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
                                 </div>
                               ) : (
                                 ""
@@ -432,13 +475,15 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                     </div>
                                   )}
 
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Estado inicial: ${item.previous_status ?? "N/A"}`}</div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Estado final: ${item.status_name}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("initialStatus", { status: item.previous_status ?? "N/A" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("finalStatus", { status: item.status_name })}
+                                  </div>
                                 </div>
                               ) : (
                                 ""
@@ -453,12 +498,14 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   >
                                     <ArrowLineDown size={14} onClick={() => {}} />
                                   </div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Tipo novedad: ${item.type_incident}`}</div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
+                                  <div className={styles.name}>
+                                    {t("disputeType", { type: item.type_incident ?? "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
                                   <div className={styles.adjustment}>
-                                    ID novedad:
+                                    {t("disputeId")}
                                     <div
                                       className={styles.idAdjustment}
                                       onClick={() =>
@@ -483,9 +530,11 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   >
                                     <ArrowLineDown size={14} onClick={() => {}} />
                                   </div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
                                   <div className={styles.adjustment}>
-                                    ID novedad:
+                                    {t("disputeId")}
                                     <div
                                       className={styles.idAdjustment}
                                       onClick={() =>
@@ -515,7 +564,9 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                       }}
                                     />
                                   </div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
                                 </div>
                               ) : null}
 
@@ -525,13 +576,15 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   <div className={styles.icons}>
                                     <Envelope size={14} onClick={() => {}} />
                                   </div>
-                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
-                                  <div
-                                    className={styles.name}
-                                  >{`Valor: ${formatMoney(item.ammount)}`}</div>
+                                  <div className={styles.name}>
+                                    {t("actionBy", { user: item.user_name ?? "" })}
+                                  </div>
+                                  <div className={styles.name}>
+                                    {t("value", { value: formatMoney(item.ammount) })}
+                                  </div>
                                   {item.payment_id && (
                                     <div className={styles.adjustment}>
-                                      ID del pago:
+                                      {t("paymentId")}
                                       <div
                                         className={styles.idAdjustment}
                                         onClick={() =>
@@ -549,14 +602,16 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                               )}
 
                               {item.event_type_name === "Saldo Confirmado" ? (
-                                <div
-                                  className={styles.name}
-                                >{`Valor: ${formatMoney(item.ammount)}`}</div>
+                                <div className={styles.name}>
+                                  {t("value", { value: formatMoney(item.ammount) })}
+                                </div>
                               ) : null}
 
                               {item.comments && (
                                 <div className={styles.commentsContainer}>
-                                  <div className={styles.name}>Comentario: {item.comments}</div>
+                                  <div className={styles.name}>
+                                    {t("comment", { comment: item.comments })}
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -572,10 +627,10 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
         </div>
       </div>
       <div className={styles.footer}>
-        <h4 className={styles.resume}>Resumen</h4>
+        <h4 className={styles.resume}>{t("summary.title")}</h4>
         <div className={styles.bodyContent}>
           <div className={styles.initialValue}>
-            <p className={styles.value}>Valor inicial</p>
+            <p className={styles.value}>{t("summary.initialValue")}</p>
             <p className={styles.result}>
               {formatMoney(invoiceData?.totals.total_initial.toString() ?? "")}
             </p>
@@ -583,7 +638,7 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
           {invoiceData?.totals?.total_creditNotes !== undefined &&
             invoiceData?.totals?.total_creditNotes > 0 && (
               <div className={styles.initialValue}>
-                <p className={styles.value}>Nota credito</p>
+                <p className={styles.value}>{t("summary.creditNote")}</p>
                 <p className={styles.result}>
                   {formatMoney(invoiceData?.totals.total_creditNotes.toString() ?? "")}
                 </p>
@@ -592,7 +647,7 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
           {invoiceData?.totals?.total_debitNotes !== undefined &&
             invoiceData?.totals?.total_debitNotes > 0 && (
               <div className={styles.initialValue}>
-                <p className={styles.value}>Nota debito</p>
+                <p className={styles.value}>{t("summary.debitNote")}</p>
                 <p className={styles.result}>
                   {formatMoney(invoiceData?.totals.total_debitNotes.toString() ?? "")}
                 </p>
@@ -601,7 +656,7 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
           {invoiceData?.totals?.total_discount !== undefined &&
             invoiceData?.totals?.total_discount > 0 && (
               <div className={styles.initialValue}>
-                <p className={styles.value}>Descuento</p>
+                <p className={styles.value}>{t("summary.discount")}</p>
                 <p className={styles.result}>
                   {formatMoney(invoiceData?.totals.total_discount.toString() ?? "")}
                 </p>
@@ -610,7 +665,7 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
 
           <hr />
           <div className={styles.total}>
-            <p className={styles.value}>Total</p>
+            <p className={styles.value}>{tCommon("fields.total")}</p>
             <p className={styles.result}>
               {formatMoney(invoiceData?.totals.total_general.toString() ?? "")}
             </p>

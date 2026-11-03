@@ -3,6 +3,7 @@
 import { Dispatch, SetStateAction, useContext, useEffect, useMemo, useState } from "react";
 import { Flex } from "antd";
 import { Gift, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { DiscountItem, ICommerceAdresses } from "@/types/commerce/ICommerce";
 
@@ -18,7 +19,7 @@ import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import CitiesSelect from "@/modules/commerce/components/cities-select";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
-import { useCityWarehouse } from "@/app/(platform)/comercio/pedido/hooks/useCityWarehouses";
+import { useCityWarehouse } from "@/app/(platform)/commerce/order/hooks/useCityWarehouses";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
@@ -65,6 +66,12 @@ export default function ModalShippingInfo({
     formatMoney: s.formatMoney
   }));
   const { businessUnit } = useContext(OrderViewContext);
+  const t = useTranslations("commerce.checkout");
+  const tShipping = useTranslations("commerce.shippingFields");
+  const tSearch = useTranslations("commerce.searchClient");
+  const tTable = useTranslations("commerce.productsTable");
+  const tCart = useTranslations("commerce.cart");
+  const tCommon = useTranslations("common");
   const { warehouseCities, isCityLoading, warehouseBu } = useCityWarehouse();
   // bloqueada en el WarehouseSelect. Se libera cuando businessUnit no matchea.
   const [warehouseForced, setWarehouseForced] = useState<number | undefined>();
@@ -137,10 +144,10 @@ export default function ModalShippingInfo({
 
   const addressOptions = useMemo(
     () => [
-      NEW_ADDRESS_OPTION,
+      { value: NEW_ADDRESS_OPTION.value, label: t("newAddressOption") },
       ...addresses.map((a) => ({ value: String(a.id), label: a.address }))
     ],
-    [addresses]
+    [addresses, t]
   );
 
   useEffect(() => {
@@ -235,7 +242,7 @@ export default function ModalShippingInfo({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EEEEEE]">
           <h3 className="text-sm font-bold text-[#141414]">
-            {mode === "new" ? "Nuevo destino" : "Editar destino"}
+            {mode === "new" ? t("newDestination") : t("editDestination")}
           </h3>
           <button
             onClick={onClose}
@@ -249,9 +256,15 @@ export default function ModalShippingInfo({
           {/* Left: productos */}
           <div className="flex-1 flex flex-col min-h-0 border-r border-[#EEEEEE]">
             <div className="grid grid-cols-[1fr_48px_64px] px-4 py-2.5 bg-[#FAFAFA] border-b border-[#EEEEEE] flex-shrink-0">
-              <span className="text-[13px] text-[#999999] font-semibold">Producto</span>
-              <span className="text-[13px] text-[#999999] font-semibold text-center">Disp.</span>
-              <span className="text-[13px] text-[#999999] font-semibold text-center">Cant.</span>
+              <span className="text-[13px] text-[#999999] font-semibold">
+                {tTable("columns.product")}
+              </span>
+              <span className="text-[13px] text-[#999999] font-semibold text-center">
+                {t("availableShort")}
+              </span>
+              <span className="text-[13px] text-[#999999] font-semibold text-center">
+                {tTable("columns.quantity")}
+              </span>
             </div>
             <div className="overflow-y-auto flex-1">
               {discountItems.map((item, iIdx) => {
@@ -302,7 +315,7 @@ export default function ModalShippingInfo({
                   <div className="grid grid-cols-[1fr_48px_64px] px-4 py-2 bg-[#F7FDE8] border-y border-[#F0F9D8] items-center">
                     <span className="text-[13px] text-[#6AB000] font-semibold flex items-center gap-1.5">
                       <Gift size={10} />
-                      Bonificados
+                      {tCart("freeGoods")}
                     </span>
                     <span />
                     <span />
@@ -402,10 +415,10 @@ export default function ModalShippingInfo({
             {splitTotal > 0 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-[#EEEEEE] bg-[#FAFAFA] flex-shrink-0">
                 <span className="text-[13px] text-[#666666]">
-                  Total{" "}
-                  <span className="text-[#999999]">
-                    ({Object.values(draft.cantidades).reduce((s, v) => s + v, 0)} und.)
-                  </span>
+                  {t.rich("totalUnits", {
+                    count: Object.values(draft.cantidades).reduce((s, v) => s + v, 0),
+                    muted: (chunks) => <span className="text-[#999999]">{chunks}</span>
+                  })}
                 </span>
                 <span className="text-sm font-bold text-[#141414]">{formatMoney(splitTotal)}</span>
               </div>
@@ -416,7 +429,7 @@ export default function ModalShippingInfo({
           <div className="w-[40%] flex-shrink-0 overflow-y-auto px-4 py-4 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-[13px] font-semibold text-[#666666]">
-                Dirección de entrega
+                {t("deliveryAddress")}
               </label>
               <select
                 value={draft.addressSelectValue}
@@ -424,7 +437,7 @@ export default function ModalShippingInfo({
                 className="w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
               >
                 <option value="" disabled>
-                  Seleccione una dirección
+                  {tSearch("selectAddress")}
                 </option>
                 {addressOptions.map((o) => (
                   <option key={String(o.value)} value={String(o.value)}>
@@ -435,7 +448,9 @@ export default function ModalShippingInfo({
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] font-semibold text-[#666666]">Ciudad</label>
+              <label className="text-[13px] font-semibold text-[#666666]">
+                {tShipping("city")}
+              </label>
               <CitiesSelect
                 cities={warehouseCities}
                 isLoading={isCityLoading}
@@ -450,7 +465,7 @@ export default function ModalShippingInfo({
 
             <div className="flex flex-col gap-1">
               <label className="text-[13px] font-semibold text-[#666666]">
-                Dirección de despacho
+                {tShipping("dispatchAddress")}
               </label>
               <input
                 type="text"
@@ -461,13 +476,15 @@ export default function ModalShippingInfo({
                 onChange={(e) => setDraft((d) => ({ ...d, dispatch_address: e.target.value }))}
                 className="w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
               />
-              {isNewAddress && <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>}
+              {isNewAddress && (
+                <p className="text-[13px] text-[#999999]">{tSearch("maxChars", { count: 35 })}</p>
+              )}
             </div>
 
             {isNewAddress && (
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-semibold text-[#666666]">
-                  Bodega de despacho
+                  {tShipping("dispatchWarehouse")}
                 </label>
                 <WarehouseSelect
                   warehouseForced={warehouseForced}
@@ -479,10 +496,12 @@ export default function ModalShippingInfo({
             )}
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] font-semibold text-[#666666]">Correo electrónico</label>
+              <label className="text-[13px] font-semibold text-[#666666]">
+                {tCommon("fields.email")}
+              </label>
               <input
                 type="email"
-                placeholder="correo@ejemplo.com"
+                placeholder={t("emailPlaceholder")}
                 value={draft.email}
                 onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
                 className={`w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
@@ -491,14 +510,12 @@ export default function ModalShippingInfo({
                     : "border-[#DDDDDD] focus:border-[#141414]"
                 }`}
               />
-              {isEmailInvalid && (
-                <p className="text-[13px] text-red-500">Correo electrónico no válido</p>
-              )}
+              {isEmailInvalid && <p className="text-[13px] text-red-500">{t("invalidEmail")}</p>}
             </div>
 
             <div className="flex flex-col gap-1">
               <label className="text-[13px] font-semibold text-[#666666]">
-                Teléfono de contacto
+                {t("contactPhone")}
               </label>
               <div className="flex gap-1.5">
                 <select
@@ -537,9 +554,11 @@ export default function ModalShippingInfo({
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] font-semibold text-[#666666]">Observaciones</label>
+              <label className="text-[13px] font-semibold text-[#666666]">
+                {tShipping("comments")}
+              </label>
               <textarea
-                placeholder="Instrucciones especiales para esta entrega"
+                placeholder={t("commentsPlaceholder")}
                 maxLength={35}
                 value={draft.observaciones}
                 onChange={(e) =>
@@ -548,7 +567,7 @@ export default function ModalShippingInfo({
                 rows={1}
                 className="w-full px-2.5 py-2 text-[13px] bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
               />
-              <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
+              <p className="text-[13px] text-[#999999]">{tSearch("maxChars", { count: 35 })}</p>
             </div>
           </div>
         </div>
@@ -558,7 +577,7 @@ export default function ModalShippingInfo({
             onClick={onClose}
             className="flex-1 py-2.5 text-sm font-semibold text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -569,7 +588,7 @@ export default function ModalShippingInfo({
                 : "text-[#141414] bg-[#CBE71E] hover:bg-[#b8d11a]"
             }`}
           >
-            {mode === "new" ? "Agregar destino" : "Guardar cambios"}
+            {mode === "new" ? t("addDestination") : tCommon("actions.saveChanges")}
           </button>
         </div>
       </div>
@@ -577,28 +596,28 @@ export default function ModalShippingInfo({
       <ModalConfirmAction
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        title="No puedes guardar esta entrega"
+        title={t("cannotSaveDelivery")}
         content={
           <Flex vertical gap="0.5rem">
-            <p>Cada entrega debe ser mínimo de {formatMoney(MINIMUM_ORDER_AMOUNT)}</p>
-            <p>Reasigna cantidades a esta entrega para continuar.</p>
+            <p>{t("deliveryMinimum", { amount: formatMoney(MINIMUM_ORDER_AMOUNT) })}</p>
+            <p>{t("reassignQuantities")}</p>
           </Flex>
         }
-        cancelText="Entendido"
+        cancelText={tCart("understood")}
         hideOkButton
       />
 
       <ModalConfirmAction
         isOpen={showOnlyCanulasOrAguaModal}
         onClose={() => setShowOnlyCanulasOrAguaModal(false)}
-        title="No puedes guardar esta entrega"
+        title={t("cannotSaveDelivery")}
         content={
           <Flex vertical gap="0.5rem">
-            <p>No se pueden facturar solo cánulas ni aguas</p>
-            <p>Agrega otros productos a esta entrega para continuar.</p>
+            <p>{tCart("onlyCannulasOrWater")}</p>
+            <p>{t("addOtherProductsToDelivery")}</p>
           </Flex>
         }
-        cancelText="Entendido"
+        cancelText={tCart("understood")}
         hideOkButton
       />
 
@@ -606,15 +625,15 @@ export default function ModalShippingInfo({
         isOpen={showCanulasModal}
         onClose={() => setShowCanulasModal(false)}
         onOk={handleConfirmCanulas}
-        title="¿Está seguro que desea continuar?"
+        title={tCart("confirmContinue")}
         content={
           <Flex vertical gap="0.5rem">
-            <p>No has seleccionado Cánulas y/o Agua estéril en esta entrega</p>
-            <p>Te recomendamos revisar la orden</p>
+            <p>{t("noCannulasOrWaterInDelivery")}</p>
+            <p>{tCart("reviewOrder")}</p>
           </Flex>
         }
-        okText="Confirmar"
-        cancelText="Cancelar"
+        okText={tCommon("actions.confirm")}
+        cancelText={tCommon("actions.cancel")}
       />
     </div>
   );

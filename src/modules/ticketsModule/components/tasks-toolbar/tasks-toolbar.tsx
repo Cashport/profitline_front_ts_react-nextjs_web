@@ -12,6 +12,7 @@ import {
   SquareKanban
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { useWalletTheme } from "@/modules/walletModule/contexts/wallet-theme-context";
@@ -22,9 +23,9 @@ import type { TaskLayout } from "../../types";
 
 const NO_GROUP = "__none__";
 
-const LAYOUTS: { key: TaskLayout; label: string; icon: typeof List }[] = [
-  { key: "list", label: "Lista", icon: List },
-  { key: "board", label: "Tablero", icon: SquareKanban }
+const LAYOUTS: { key: TaskLayout; icon: typeof List }[] = [
+  { key: "list", icon: List },
+  { key: "board", icon: SquareKanban }
 ];
 
 const checkLabel = (label: string, on: boolean) => (
@@ -39,6 +40,7 @@ const checkLabel = (label: string, on: boolean) => (
  * "Ordenar por". Solo ofrece los campos que el proyecto tiene activos.
  */
 export default function TasksToolbar({ config }: { config: ITaskConfig }) {
+  const t = useTranslations("tickets.toolbar");
   const { resolvedTheme } = useWalletTheme();
   const { view, patchView } = useTicketsView(
     useShallow((s) => ({ view: s.view, patchView: s.patchView }))
@@ -48,7 +50,7 @@ export default function TasksToolbar({ config }: { config: ITaskConfig }) {
   const sortField = fieldOf(config, view.sortBy);
 
   const groupItems: MenuProps["items"] = [
-    { key: NO_GROUP, label: checkLabel("Sin agrupar", !groupField) },
+    { key: NO_GROUP, label: checkLabel(t("noGrouping"), !groupField) },
     ...config.fields
       .filter((f) => f.groupable)
       .map((f) => ({ key: f.key, label: checkLabel(f.label, f.key === groupField?.key) }))
@@ -76,7 +78,7 @@ export default function TasksToolbar({ config }: { config: ITaskConfig }) {
       <button
         type="button"
         aria-pressed={view.showClosed}
-        title={view.showClosed ? "Ocultar cerradas" : "Mostrar cerradas"}
+        title={view.showClosed ? t("hideClosed") : t("showClosed")}
         onClick={() => patchView({ showClosed: !view.showClosed })}
         className={cn(
           "flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 transition-colors",
@@ -89,7 +91,7 @@ export default function TasksToolbar({ config }: { config: ITaskConfig }) {
       </button>
 
       <div className="flex overflow-hidden rounded-lg border border-cp-line-2 bg-cp-surface">
-        {LAYOUTS.map(({ key, label, icon: Icon }) => (
+        {LAYOUTS.map(({ key, icon: Icon }) => (
           <button
             key={key}
             type="button"
@@ -103,7 +105,7 @@ export default function TasksToolbar({ config }: { config: ITaskConfig }) {
             )}
           >
             <Icon className="h-4 w-4" />
-            {label}
+            {t(`layouts.${key}`)}
           </button>
         ))}
       </div>
@@ -115,8 +117,8 @@ export default function TasksToolbar({ config }: { config: ITaskConfig }) {
           menu={{ items: groupItems, onClick: onGroup }}
         >
           <button type="button" aria-haspopup="menu" className={control}>
-            Agrupar:{" "}
-            <b className="font-semibold text-cp-ink">{groupField?.label ?? "Sin agrupar"}</b>
+            {t("groupBy")}{" "}
+            <b className="font-semibold text-cp-ink">{groupField?.label ?? t("noGrouping")}</b>
             <ChevronDown className="h-3.5 w-3.5" />
           </button>
         </Dropdown>
@@ -128,7 +130,7 @@ export default function TasksToolbar({ config }: { config: ITaskConfig }) {
         menu={{ items: sortItems, onClick: onSort }}
       >
         <button type="button" aria-haspopup="menu" className={control}>
-          Ordenar: <b className="font-semibold text-cp-ink">{sortField?.label ?? "—"}</b>
+          {t("sortBy")} <b className="font-semibold text-cp-ink">{sortField?.label ?? "—"}</b>
           <SortIcon className="h-3.5 w-3.5" />
         </button>
       </Dropdown>

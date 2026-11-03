@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
 import { Button as AntButton, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import {
   downloadUnifiedCatalogFile,
@@ -38,6 +39,7 @@ import { IClientData, IIqviaAuxUploadResult } from "@/types/dataQuality/IDataQua
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 export default function CountriesClientsView() {
+  const t = useTranslations("dataQuality.countryView");
   const params = useParams();
   const countryId = params.countryId as string;
 
@@ -110,7 +112,7 @@ export default function CountriesClientsView() {
 
     const hide = message.open({
       type: "loading",
-      content: "Descargando catálogo...",
+      content: t("downloadingCatalog"),
       duration: 0
     });
 
@@ -120,10 +122,10 @@ export default function CountriesClientsView() {
       });
       window.open(res.url, "_blank");
 
-      message.success("Catálogo descargado exitosamente.");
+      message.success(t("catalogDownloaded"));
       closeAllModals();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al descargar el catálogo");
+      message.error(error instanceof Error ? error.message : t("catalogDownloadError"));
     } finally {
       hide();
       setIsDownloadCatalogLoading(false);
@@ -135,7 +137,7 @@ export default function CountriesClientsView() {
 
     const hide = message.open({
       type: "loading",
-      content: "Descargando catálogo IQVIA...",
+      content: t("downloadingIqviaCatalog"),
       duration: 0
     });
 
@@ -143,12 +145,10 @@ export default function CountriesClientsView() {
       const res = await downloadIqviaAuxCatalog({ countryId });
       window.open(res.url, "_blank");
 
-      message.success("Catálogo IQVIA descargado exitosamente.");
+      message.success(t("iqviaCatalogDownloaded"));
       closeAllModals();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar el catálogo IQVIA"
-      );
+      message.error(error instanceof Error ? error.message : t("iqviaCatalogDownloadError"));
     } finally {
       hide();
       setIsDownloadIqviaLoading(false);
@@ -168,18 +168,24 @@ export default function CountriesClientsView() {
 
       if (res.errores.length > 0) {
         message.warning(
-          `Carga procesada con ${res.errores.length} error(es). ` +
-            `Insertados: ${res.insertados}, actualizados: ${res.actualizados}, ` +
-            `sin cambios: ${res.sin_cambios}.`
+          t("iqviaUploadWithErrors", {
+            errors: res.errores.length,
+            inserted: res.insertados,
+            updated: res.actualizados,
+            unchanged: res.sin_cambios
+          })
         );
       } else {
         message.success(
-          `Carga completa. Insertados: ${res.insertados}, actualizados: ${res.actualizados}, ` +
-            `sin cambios: ${res.sin_cambios}.`
+          t("iqviaUploadComplete", {
+            inserted: res.insertados,
+            updated: res.actualizados,
+            unchanged: res.sin_cambios
+          })
         );
       }
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al cargar el catálogo IQVIA");
+      message.error(error instanceof Error ? error.message : t("iqviaCatalogUploadError"));
     } finally {
       setIsUploadIqviaLoading(false);
     }
@@ -190,7 +196,7 @@ export default function CountriesClientsView() {
 
     const hide = message.open({
       type: "loading",
-      content: "Descargando catálogo IQVIA Productos...",
+      content: t("downloadingIqviaProductCatalog"),
       duration: 0
     });
 
@@ -198,12 +204,10 @@ export default function CountriesClientsView() {
       const res = await downloadIqviaAuxProductCatalog({ countryId });
       window.open(res.url, "_blank");
 
-      message.success("Catálogo IQVIA Productos descargado exitosamente.");
+      message.success(t("iqviaProductCatalogDownloaded"));
       closeAllModals();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar el catálogo IQVIA Productos"
-      );
+      message.error(error instanceof Error ? error.message : t("iqviaProductCatalogDownloadError"));
     } finally {
       hide();
       setIsDownloadIqviaProductLoading(false);
@@ -223,20 +227,24 @@ export default function CountriesClientsView() {
 
       if (res.errores.length > 0) {
         message.warning(
-          `Carga procesada con ${res.errores.length} error(es). ` +
-            `Insertados: ${res.insertados}, actualizados: ${res.actualizados}, ` +
-            `sin cambios: ${res.sin_cambios}.`
+          t("iqviaUploadWithErrors", {
+            errors: res.errores.length,
+            inserted: res.insertados,
+            updated: res.actualizados,
+            unchanged: res.sin_cambios
+          })
         );
       } else {
         message.success(
-          `Carga completa. Insertados: ${res.insertados}, actualizados: ${res.actualizados}, ` +
-            `sin cambios: ${res.sin_cambios}.`
+          t("iqviaUploadComplete", {
+            inserted: res.insertados,
+            updated: res.actualizados,
+            unchanged: res.sin_cambios
+          })
         );
       }
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al cargar el catálogo IQVIA Productos"
-      );
+      message.error(error instanceof Error ? error.message : t("iqviaProductCatalogUploadError"));
     } finally {
       setIsUploadIqviaProductLoading(false);
     }
@@ -250,15 +258,11 @@ export default function CountriesClientsView() {
     setIsUploadLoading(true);
     try {
       await uploadCatalogMaterial(file);
-      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      message.success(t("materialsAuxUploaded"));
       closeAllModals();
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al cargar el archivo de auxiliar de materiales."
-      );
+      message.error(error instanceof Error ? error.message : t("materialsAuxUploadError"));
     } finally {
       setIsUploadLoading(false);
     }
@@ -272,13 +276,11 @@ export default function CountriesClientsView() {
     setIsUploadLoading(true);
     try {
       await uploadPointsOfSaleFile(file);
-      message.success("Archivo de puntos de venta cargado exitosamente.");
+      message.success(t("posUploaded"));
       closeAllModals();
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
-      );
+      message.error(error instanceof Error ? error.message : t("posUploadError"));
     } finally {
       setIsUploadLoading(false);
     }
@@ -292,9 +294,14 @@ export default function CountriesClientsView() {
     setIsUploadPacksLoading(true);
     try {
       const res = await uploadPacksFile(file);
-      const summary = `Packs procesados: ${res.total} (creados: ${res.created}, actualizados: ${res.updated}, errores: ${res.errors})`;
+      const summary = t("packsSummary", {
+        total: res.total,
+        created: res.created,
+        updated: res.updated,
+        errors: res.errors
+      });
       if (res.error_log?.url) {
-        message.warning(`${summary}. Se generó un log de errores.`);
+        message.warning(t("packsSummaryWithLog", { summary }));
         window.open(res.error_log.url, "_blank");
       } else {
         message.success(summary);
@@ -302,9 +309,7 @@ export default function CountriesClientsView() {
       closeAllModals();
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al cargar el archivo de packs."
-      );
+      message.error(error instanceof Error ? error.message : t("packsUploadError"));
     } finally {
       setIsUploadPacksLoading(false);
     }
@@ -324,7 +329,7 @@ export default function CountriesClientsView() {
             {/* Search Input */}
             <div className="flex-1 max-w-sm">
               <UiSearchInput
-                placeholder="Buscar cliente..."
+                placeholder={t("searchPlaceholder")}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
@@ -335,7 +340,9 @@ export default function CountriesClientsView() {
               style={{ display: canManage || canDownloadCatalog ? undefined : "none" }}
               onClick={() => setWhichModalIsOpen(1)}
             >
-              {width > 1100 && <span className="hidden min-[1100px]:inline">Generar acción</span>}
+              {width > 1100 && (
+                <span className="hidden min-[1100px]:inline">{t("generateAction")}</span>
+              )}
             </AntButton>
 
             <DataQualityGeneralFilter
@@ -355,7 +362,7 @@ export default function CountriesClientsView() {
               >
                 <Button variant="outline" className="h-[var(--control-h)]">
                   <BellSimpleRinging size={18} />
-                  <span className="hidden min-[1100px]:inline">Alertas</span>
+                  <span className="hidden min-[1100px]:inline">{t("alerts")}</span>
                 </Button>
               </Link>
             )}
@@ -365,7 +372,7 @@ export default function CountriesClientsView() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <Button variant="outline" className="h-[var(--control-h)]">
-                  Referencias
+                  {t("references")}
                 </Button>
               </Link>
             )}
@@ -375,7 +382,7 @@ export default function CountriesClientsView() {
                 onClick={() => setWhichModalIsOpen(3)}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Crear cliente
+                {t("createCustomer")}
               </Button>
             )}
           </div>
@@ -385,9 +392,7 @@ export default function CountriesClientsView() {
         {error ? (
           <div className="bg-white rounded-lg p-6 text-center">
             <p className="text-red-600">
-              {error instanceof Error
-                ? error.message
-                : "No se pudo cargar la información de este país."}
+              {error instanceof Error ? error.message : t("loadError")}
             </p>
           </div>
         ) : (
@@ -469,7 +474,7 @@ export default function CountriesClientsView() {
         onFileUpload={handleUploadIqviaCatalog}
         loading={isUploadIqviaLoading}
         allowedExtensions={[".xlsx"]}
-        title="Cargar catálogo IQVIA Clientes"
+        title={t("uploadIqviaCustomers")}
       />
       <ModalUploadFile
         isOpen={whichModalIsOpen === 7}
@@ -477,16 +482,16 @@ export default function CountriesClientsView() {
         onFileUpload={handleUploadIqviaProductCatalog}
         loading={isUploadIqviaProductLoading}
         allowedExtensions={[".xlsx"]}
-        title="Cargar catálogo IQVIA Productos"
+        title={t("uploadIqviaProducts")}
       />
 
       <IqviaUploadResultModal
-        title="Resultado de carga IQVIA Clientes"
+        title={t("iqviaCustomersResult")}
         result={iqviaUploadResult}
         onClose={() => setIqviaUploadResult(null)}
       />
       <IqviaUploadResultModal
-        title="Resultado de carga IQVIA Productos"
+        title={t("iqviaProductsResult")}
         result={iqviaProductUploadResult}
         onClose={() => setIqviaProductUploadResult(null)}
       />

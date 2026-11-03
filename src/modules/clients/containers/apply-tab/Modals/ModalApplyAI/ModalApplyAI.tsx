@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { Button, Flex, message, Modal, Spin, UploadProps } from "antd";
 import Dragger from "antd/es/upload/Dragger";
 import { File, Sparkle, Trash, Upload, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
@@ -36,6 +37,8 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || CLIENTUUID_DEMO;
+  const t = useTranslations("clients.applyModals.applyAI");
+  const tCommon = useTranslations("common");
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string>();
@@ -55,9 +58,9 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
     try {
       await uploadPaymentAttachment(projectId, clientId, uploadedFiles, commentary);
       await applyWithCashportAI(projectId, clientId, uploadedFiles, commentary);
-      message.success("Archivos analizados con CashportAI");
+      message.success(t("success"));
     } catch (error) {
-      message.error("Error al aplicar con CashportAI");
+      message.error(t("error"));
     }
     closeModal();
     mutate();
@@ -72,7 +75,7 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
     beforeUpload: (file) => {
       const isUnder5MB = file.size / 1024 / 1024 < 5;
       if (!isUnder5MB) {
-        message.error("El archivo debe ser menor a 5MB");
+        message.error(t("fileTooLarge"));
         return false;
       }
       return isUnder5MB;
@@ -91,7 +94,7 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
           setUploadedFiles((prev) => [...prev, newFile]);
         }
       } else if (status === "error") {
-        message.error(`${info.file.name} file upload failed.`);
+        message.error(t("uploadFailed", { fileName: info.file.name }));
       }
     },
     itemRender: (_, file, _fileList, functions) => {
@@ -146,40 +149,33 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
       destroyOnClose
     >
       <span className="modalApplyAI__title">
-        Aplicar pagos con
-        <span>
-          <span
-            className="cashportIATextGradient"
-            style={{
-              fontWeight: 600
-            }}
-          >
-            {" "}
-            CashportAI
-          </span>
-        </span>
+        {t.rich("title", {
+          ai: (chunks) => (
+            <span className="cashportIATextGradient" style={{ fontWeight: 600 }}>
+              {chunks}
+            </span>
+          )
+        })}
       </span>
       <span className="modalApplyAI__description">
-        Sube los documentos y
-        <span>
-          <span className="cashportIATextGradient"> CashportAI </span>
-        </span>
-        los analizará y clasificará según su tipo.
+        {t.rich("description", {
+          ai: (chunks) => <span className="cashportIATextGradient">{chunks}</span>
+        })}
       </span>
       <Dragger {...props}>
         <Upload size={30} className="draggerIcon" />
-        <p className="draggerText">Arrastra y suelta tu archivo aquí o haz clic para subirlo</p>
-        <p className="draggerText -small">Tamaño máximo 5MB</p>
+        <p className="draggerText">{t("dropHint")}</p>
+        <p className="draggerText -small">{t("maxSize")}</p>
       </Dragger>
 
       <div className="modalApplyAI__commentary">
-        <p>Comentario</p>
-        <textarea onChange={handleOnChangeTextArea} placeholder="Ingresar un comentario" />
+        <p>{tCommon("fields.comment")}</p>
+        <textarea onChange={handleOnChangeTextArea} placeholder={t("commentPlaceholder")} />
       </div>
 
       <div className="modalApplyAI__footer">
         <Button className="cancelButton" onClick={() => onClose(true)}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </Button>
         <Button
           className="iaButton"
@@ -189,15 +185,13 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
         >
           <Sparkle size={14} color="#5b21b6" weight="fill" />
           <span className="textNormal">
-            Analizar con{" "}
-            <span
-              className="cashportIATextGradient"
-              style={{
-                fontWeight: 500
-              }}
-            >
-              CashportAI
-            </span>
+            {t.rich("analyze", {
+              ai: (chunks) => (
+                <span className="cashportIATextGradient" style={{ fontWeight: 500 }}>
+                  {chunks}
+                </span>
+              )
+            })}
           </span>
         </Button>
       </div>

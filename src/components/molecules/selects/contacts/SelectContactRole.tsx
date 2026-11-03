@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import {
   FieldError as OriginalFieldError,
@@ -32,10 +33,11 @@ export const SelectContactRole = <T extends FieldValues>({
   options,
   isLoading
 }: Props<T>) => {
+  const t = useTranslations("shared.selects");
   return (
     <>
       <Select
-        placeholder="Seleccione el tipo de radicado"
+        placeholder={t("selectContactRole")}
         className={errors ? "selectInputError" : `selectInputCustom ${readOnly && "--readOnly"}`}
         loading={isLoading}
         variant="borderless"
@@ -46,7 +48,7 @@ export const SelectContactRole = <T extends FieldValues>({
         labelInValue
         open={readOnly ? false : undefined}
       />
-      {errors && <Typography.Text className="textError">El rol es obligatorio *</Typography.Text>}
+      {errors && <Typography.Text className="textError">{t("roleRequired")}</Typography.Text>}
     </>
   );
 };

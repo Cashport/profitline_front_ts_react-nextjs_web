@@ -1,5 +1,7 @@
 import dayjs, { type Dayjs } from "dayjs";
 
+import { getTranslator } from "@/i18n/translator";
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Fecha ISO (o Dayjs) → minutos desde medianoche en hora local, la unidad de la jornada. */
@@ -30,15 +32,22 @@ export const fmtDuration = (minutes: number) => {
   return m < 60 ? `${m} min` : `${Math.floor(m / 60)}h ${pad(m % 60)}m`;
 };
 
-const WEEKDAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
-const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-
-/** "Hoy · mié 7 oct"; ayer y mañana llevan su prefijo, los demás días sólo la fecha. */
+/**
+ * "Hoy · mié 7 oct"; ayer y mañana llevan su prefijo, los demás días sólo la fecha. Día y
+ * mes salen del idioma activo de dayjs (sin el punto de la abreviatura).
+ */
 export const fmtDayLabel = (day: Dayjs, today: Dayjs) => {
+  const t = getTranslator("visits");
   const offset = day.startOf("day").diff(today.startOf("day"), "day");
-  const prefix =
-    offset === 0 ? "Hoy · " : offset === -1 ? "Ayer · " : offset === 1 ? "Mañana · " : "";
-  return `${prefix}${WEEKDAYS[day.day()]} ${day.date()} ${MONTHS[day.month()]}`;
+  const date = t("dayLabel.date", {
+    weekday: day.format("ddd").replace(/\.$/, ""),
+    day: day.date(),
+    month: day.format("MMM").replace(/\.$/, "")
+  });
+  if (offset === 0) return t("dayLabel.today", { date });
+  if (offset === -1) return t("dayLabel.yesterday", { date });
+  if (offset === 1) return t("dayLabel.tomorrow", { date });
+  return date;
 };
 
 /** Query param de /visits que lleva el día que se mira. */

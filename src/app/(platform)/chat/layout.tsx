@@ -1,12 +1,9 @@
-import { Metadata } from "next";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { SocketProvider } from "@/context/ChatContext";
 import { Toaster } from "@/modules/chat/ui/toaster";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Chat",
-  description: "Chat"
-};
+export const generateMetadata = () => pageMetadata("chat");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

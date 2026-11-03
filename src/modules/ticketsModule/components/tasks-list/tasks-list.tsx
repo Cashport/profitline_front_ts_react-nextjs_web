@@ -2,6 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import { cn } from "@/utils/utils";
@@ -93,9 +94,10 @@ function GroupedBody({
   onToggle: (value: string) => void;
   onCreate: (value: string) => void;
 }) {
+  const tr = useTranslations("tickets");
   const { groups, error, isLoading } = useTaskGroups(config, field.key);
   if (!groups) return error ? <Empty>{error.message}</Empty> : <ProfitLoader size="small" />;
-  if (!groups.groups.length) return <Empty>No hay tareas con estos filtros.</Empty>;
+  if (!groups.groups.length) return <Empty>{tr("noTasksForFilters")}</Empty>;
 
   return (
     <div className={cn(isLoading && "opacity-60")}>
@@ -123,13 +125,15 @@ function GroupedBody({
 }
 
 function FlatBody({ config, columns, grid, onOpen }: BodyProps) {
+  const tr = useTranslations("tickets");
+  const tCommon = useTranslations("common");
   const { items, total, error, isLoading, isLoadingMore, hasMore, loadMore } = useTaskList(
     config,
     true
   );
   if (isLoading && !items.length) return <ProfitLoader size="small" />;
   if (error) return <Empty>{error.message}</Empty>;
-  if (!items.length) return <Empty>No hay tareas con estos filtros.</Empty>;
+  if (!items.length) return <Empty>{tr("noTasksForFilters")}</Empty>;
 
   return (
     <div>
@@ -144,9 +148,7 @@ function FlatBody({ config, columns, grid, onOpen }: BodyProps) {
         />
       ))}
       <div className="flex h-[var(--table-total-h)] items-center gap-3 bg-cp-subtle px-4 text-[13px] text-cp-ink-3">
-        <span>
-          {items.length} de {total} tareas
-        </span>
+        <span>{tr("countOfTotal", { count: items.length, total })}</span>
         {hasMore && (
           <button
             type="button"
@@ -154,7 +156,7 @@ function FlatBody({ config, columns, grid, onOpen }: BodyProps) {
             disabled={isLoadingMore}
             className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cp-ink hover:underline disabled:cursor-default disabled:opacity-60"
           >
-            {isLoadingMore ? "Cargando…" : "Cargar más"}
+            {isLoadingMore ? tCommon("status.loading") : tr("loadMore")}
           </button>
         )}
       </div>

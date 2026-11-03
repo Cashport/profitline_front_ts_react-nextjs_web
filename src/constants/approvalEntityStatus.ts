@@ -1,3 +1,5 @@
+import { getTranslator } from "@/i18n/translator";
+
 export type ApprovalEntityStatus =
   | "BORRADOR"
   | "EN_APROBACION"
@@ -16,14 +18,31 @@ export const APPROVAL_ENTITY_STATUS_BY_ID: Record<number, ApprovalEntityStatus> 
   6: "NO_APLICA"
 };
 
-export const APPROVAL_ENTITY_STATUS_LABELS: Record<ApprovalEntityStatus, string> = {
-  BORRADOR: "Borrador",
-  EN_APROBACION: "En aprobación",
-  APROBADA: "Aprobada",
-  RECHAZADA: "Rechazada",
-  CANCELADA: "Cancelada",
-  NO_APLICA: "No aplica"
+const APPROVAL_ENTITY_STATUS_KEYS: Record<ApprovalEntityStatus, string> = {
+  BORRADOR: "draft",
+  EN_APROBACION: "inApproval",
+  APROBADA: "approved",
+  RECHAZADA: "rejected",
+  CANCELADA: "canceled",
+  NO_APLICA: "notApplicable"
 };
+
+// Etiquetas visibles: cada propiedad es un getter que traduce al leerla (idioma activo).
+export const APPROVAL_ENTITY_STATUS_LABELS = Object.defineProperties(
+  {} as Record<ApprovalEntityStatus, string>,
+  Object.fromEntries(
+    Object.entries(APPROVAL_ENTITY_STATUS_KEYS).map(([status, key]) => [
+      status,
+      {
+        enumerable: true,
+        get: () =>
+          (getTranslator("shared") as unknown as (k: string) => string)(
+            `constants.approvalEntityStatus.${key}`
+          )
+      }
+    ])
+  )
+);
 
 export const APPROVAL_ENTITY_STATUS_STYLES: Record<ApprovalEntityStatus, string> = {
   BORRADOR: "bg-[#F0F0F0] text-[#666666]",

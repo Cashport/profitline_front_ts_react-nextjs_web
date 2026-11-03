@@ -12,6 +12,7 @@ import {
 import { Plus, Trash } from "phosphor-react";
 import { DiscountSchema } from "../../../resolvers/generalResolver";
 import useAnnualFeatures from "./hooks/useAnnualFeatures";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -30,6 +31,7 @@ export default function AnnualFeatures({
   remove,
   statusForm
 }: Readonly<AnnualFeaturesProps>) {
+  const t = useTranslations("discounts.annual");
   const {
     control,
     register,
@@ -48,7 +50,7 @@ export default function AnnualFeatures({
   const watchIdLines = watch("annual_ranges");
 
   if (clientWithoutProducts) {
-    return <div>No hay productos para esta cliente</div>;
+    return <div>{t("noProducts")}</div>;
   }
   return (
     <Flex className={style.container} vertical gap={12}>
@@ -60,7 +62,7 @@ export default function AnnualFeatures({
           <Flex key={`row-${index}`} vertical gap={12}>
             <Flex gap={12} align="center">
               <Flex vertical gap={4}>
-                <span className={style.columnHeader}>Línea</span>
+                <span className={style.columnHeader}>{t("line")}</span>
                 <Controller
                   control={control}
                   {...register(`annual_ranges.${index}.idLine`)}
@@ -72,7 +74,7 @@ export default function AnnualFeatures({
                         className={`${style.selectInput}`}
                         loading={isLoadingOption}
                         options={options}
-                        placeholder="Selecciona una línea"
+                        placeholder={t("selectLine")}
                         onChange={(value) => {
                           field.onChange(value);
                           setValue(`annual_ranges.${index}.idProduct`, undefined);
@@ -86,14 +88,14 @@ export default function AnnualFeatures({
                 </Text>
               </Flex>
               <Flex vertical gap={4}>
-                <span className={style.columnHeader}>Producto</span>
+                <span className={style.columnHeader}>{t("product")}</span>
                 <Controller
                   control={control}
                   {...register(`annual_ranges.${index}.idProduct`)}
                   render={({ field }) => (
                     <Select
                       {...field}
-                      placeholder="Selecciona producto"
+                      placeholder={t("selectProduct")}
                       variant="borderless"
                       className={`${style.selectInput}`}
                       value={field.value}
@@ -112,7 +114,7 @@ export default function AnnualFeatures({
                 </Text>
               </Flex>
               <Flex vertical gap={4}>
-                <span className={style.columnHeader}>Unidades</span>
+                <span className={style.columnHeader}>{t("units")}</span>
                 <InputForm
                   hiddenTitle={true}
                   control={control}
@@ -125,7 +127,7 @@ export default function AnnualFeatures({
                 </Text>
               </Flex>
               <Flex vertical gap={4}>
-                <span className={style.columnHeader}>Descuento</span>
+                <span className={style.columnHeader}>{t("discount")}</span>
                 <InputForm
                   hiddenTitle={true}
                   control={control}
@@ -138,7 +140,7 @@ export default function AnnualFeatures({
                 </Text>
               </Flex>
               {statusForm !== "review" && (
-                <Button type="text" onClick={() => remove(index)}>
+                <Button type="text" onClick={() => remove(index)} aria-label={t("removeRow")}>
                   <Trash size={20} />
                 </Button>
               )}
@@ -157,7 +159,7 @@ export default function AnnualFeatures({
             icon={<Plus />}
             iconPosition="end"
           >
-            Agregar descuento
+            {t("addDiscount")}
           </PrincipalButton>
         </Flex>
       )}

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flex } from "antd";
 import { CaretDown, CaretUp } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import PendingInvoiceCard from "@/modules/cashportMobile/components/PendingInvoiceCard/PendingInvoiceCard";
 
@@ -12,10 +13,9 @@ import { InvoiceFormated } from "@/types/clients/IClients";
 export interface PendingInvoicesTabProps {
   pendingInvoices: InvoiceFormated[];
 }
-const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
-  pendingInvoices
-}) => {
+const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({ pendingInvoices }) => {
   const router = useRouter();
+  const tCommon = useTranslations("common");
   const [showAll, setShowAll] = useState(false);
   const INITIAL_COUNT = 5;
 
@@ -47,11 +47,8 @@ const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
       </Flex>
 
       {hasMore && (
-        <button
-          className="pendingInvoicesTab__seeMoreButton"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? "Ver menos" : "Ver más"}
+        <button className="pendingInvoicesTab__seeMoreButton" onClick={() => setShowAll(!showAll)}>
+          {showAll ? tCommon("actions.showLess") : tCommon("actions.showMore")}
           {showAll ? <CaretUp size={14} /> : <CaretDown size={14} />}
         </button>
       )}

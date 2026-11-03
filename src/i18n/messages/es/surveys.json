@@ -1,0 +1,260 @@
+{
+  "header": {
+    "title": "Encuestas",
+    "newSurvey": "Nueva encuesta",
+    "searchPlaceholder": "Buscar encuesta"
+  },
+  "stats": {
+    "active": "Encuestas activas",
+    "activeFoot": "de {total, plural, one {# encuesta} other {# encuestas}}",
+    "month": "Respuestas este mes",
+    "monthFoot": "{total} en total",
+    "inactive": "Inactivas",
+    "inactiveFoot": "No le aparecen al asesor en la app"
+  },
+  "list": {
+    "title": "Encuestas",
+    "loadError": "No se pudieron cargar las encuestas.",
+    "empty": "Aún no hay encuestas.",
+    "noMatch": "No hay encuestas con esos criterios.",
+    "clearCriteria": "Limpiar búsqueda y filtros",
+    "count": "{total, plural, one {# encuesta} other {# encuestas}}",
+    "countFiltered": "{shown} de {total, plural, one {# encuesta} other {# encuestas}}"
+  },
+  "table": {
+    "name": "Encuesta",
+    "questions": "Preguntas",
+    "responses": "Respuestas",
+    "lastResponse": "Última respuesta",
+    "createdBy": "Creada por",
+    "updatedAt": "Actualizada",
+    "viewSurvey": "Ver encuesta",
+    "viewResponses": "Ver respuestas"
+  },
+  "card": {
+    "responses": "{count, plural, one {<b>{formatted}</b> respuesta} other {<b>{formatted}</b> respuestas}}",
+    "questions": "{count, plural, one {# pregunta} other {# preguntas}}",
+    "lastResponse": "Última {date}",
+    "noResponses": "Sin respuestas",
+    "view": "Visualizar",
+    "viewResponses": "Ver respuestas"
+  },
+  "filters": {
+    "createdBy": "Creada por",
+    "updatedAt": "Fecha de actualización",
+    "period": "Periodo: {value}",
+    "selectPeriod": "Selecciona un periodo",
+    "updatedTag": "Actualizada"
+  },
+  "pageHeader": {
+    "backTo": "Volver a {label}"
+  },
+  "meta": {
+    "namePlaceholder": "Nombre de la encuesta",
+    "descriptionPlaceholder": "Descripción que verá el asesor al abrir la encuesta",
+    "questions": "{count, plural, one {<b>#</b> pregunta} other {<b>#</b> preguntas}}",
+    "required": "{count, plural, one {<b>#</b> obligatoria} other {<b>#</b> obligatorias}}",
+    "version": "Versión {version}",
+    "createdBy": "Creada por {name}",
+    "updatedAt": "Actualizada {date}",
+    "active": "Activa"
+  },
+  "editorHeader": {
+    "newSurvey": "Nueva encuesta",
+    "untitled": "Encuesta sin título",
+    "preview": "Vista previa",
+    "hidePreview": "Ocultar vista previa",
+    "exitEditor": "Salir del editor",
+    "publish": "Publicar",
+    "publishChanges": "Publicar cambios",
+    "published": "Publicada",
+    "viewResponses": "Ver respuestas",
+    "backLabel": "Encuestas"
+  },
+  "editor": {
+    "notFound": "No se encontró la encuesta.",
+    "backToSurveys": "Volver a Encuestas",
+    "publishFailed": "La encuesta no se publicó",
+    "preview": "Vista previa",
+    "published": "Encuesta publicada",
+    "publishError": "No se pudo publicar la encuesta",
+    "problems": {
+      "name": "Ponle un nombre a la encuesta",
+      "noQuestions": "Agrega al menos una pregunta",
+      "untitled": "{count, plural, one {# pregunta sin título} other {# preguntas sin título}}",
+      "emptyOptions": "La pregunta {number} tiene opciones sin texto"
+    },
+    "unsaved": {
+      "title": "Cambios sin publicar",
+      "content": "Tienes cambios sin publicar. ¿Quieres publicarlos antes de salir?",
+      "publish": "Publicar",
+      "discard": "Descartar"
+    },
+    "exit": {
+      "title": "¿Salir sin publicar?",
+      "content": "Los cambios que no publicaste se pierden.",
+      "ok": "Salir",
+      "keepEditing": "Seguir editando"
+    }
+  },
+  "questionTypes": {
+    "text": { "label": "Texto corto", "hint": "Respuesta en una línea" },
+    "textarea": { "label": "Texto largo", "hint": "Párrafo con límite" },
+    "number": { "label": "Número", "hint": "Valor con mínimo y máximo" },
+    "document": { "label": "Documento", "hint": "Solo dígitos (cédula, código)" },
+    "dropdown": { "label": "Lista desplegable", "hint": "Una opción de una lista" },
+    "single_select": { "label": "Opción única", "hint": "Ej. Sí / No" },
+    "multi_select": { "label": "Selección múltiple", "hint": "Puede marcar varias" },
+    "date": { "label": "Fecha", "hint": "Día, mes y año" },
+    "email": { "label": "Correo", "hint": "Correo electrónico" },
+    "phone": { "label": "Teléfono", "hint": "Número de contacto" },
+    "location": { "label": "Ubicación", "hint": "GPS del punto" },
+    "photo": { "label": "Fotografía", "hint": "Cámara del dispositivo" },
+    "file": { "label": "Archivo", "hint": "PDF, imágenes u otros" }
+  },
+  "questionDefaults": {
+    "placeholders": {
+      "text": "Escribe tu respuesta...",
+      "textarea": "Escribe tus observaciones...",
+      "number": "Ingresa un valor",
+      "document": "Ingresa el número",
+      "phone": "Ingresa el teléfono",
+      "email": "correo@ejemplo.com"
+    },
+    "yes": "Sí",
+    "no": "No",
+    "option": "Opción {number}"
+  },
+  "addQuestion": {
+    "button": "Agregar pregunta",
+    "addBelow": "Se agrega debajo de la pregunta {number}",
+    "addAtEnd": "Se agrega al final",
+    "hint": "<req>*</req> Obligatoria · arrastra <grip></grip> para reordenar"
+  },
+  "optionList": {
+    "placeholder": "Opción {number}",
+    "remove": "Quitar opción",
+    "add": "Agregar opción"
+  },
+  "questionCard": {
+    "rules": {
+      "photos": "{count, plural, one {Hasta # foto} other {Hasta # fotos}}",
+      "anyFormat": "Cualquier formato",
+      "files": "{formats} · {count, plural, one {hasta # archivo} other {hasta # archivos}}",
+      "filesWithSize": "{formats} · {count, plural, one {hasta # archivo} other {hasta # archivos}} de {size} MB",
+      "maxSelections": "Máximo {count, plural, one {# opción} other {# opciones}}"
+    },
+    "summary": {
+      "maxChars": "Máx. {count} caracteres",
+      "digitsRange": "{min}–{max} dígitos",
+      "digitsMax": "Hasta {max} dígitos",
+      "digitsMin": "Desde {min} dígitos",
+      "numberRange": "{min} a {max}",
+      "numberMax": "Hasta {max}",
+      "numberMin": "Desde {min}",
+      "options": "{count, plural, one {# opción} other {# opciones}}",
+      "files": "{count, plural, one {# archivo} other {# archivos}}"
+    },
+    "dragToReorder": "Arrastrar para reordenar",
+    "questionPlaceholder": "Escribe la pregunta",
+    "helpPlaceholder": "Texto de ayuda (opcional)",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "duplicate": "Duplicar",
+    "required": "Obligatoria",
+    "untitled": "Pregunta sin título",
+    "conditional": "Condicional",
+    "conditionalHint": "Se muestra según la respuesta de otra pregunta"
+  },
+  "config": {
+    "soon": "Próximamente",
+    "placeholder": "Texto de ejemplo",
+    "maxChars": "Máx. caracteres",
+    "minDigits": "Mín. dígitos",
+    "maxDigits": "Máx. dígitos",
+    "min": "Mínimo",
+    "max": "Máximo",
+    "decimals": "Decimales",
+    "initialValue": "Valor inicial",
+    "currency": "Moneda",
+    "currencyCop": "COP · Peso colombiano",
+    "currencyUsd": "USD · Dólar",
+    "minSelections": "Mín. selecciones",
+    "maxSelections": "Máx. selecciones",
+    "noLimit": "Sin límite",
+    "maxPhotos": "Máx. fotos",
+    "maxSizeMb": "Tamaño máx. (MB)",
+    "cameraOnly": "Solo cámara",
+    "maxFiles": "Máx. archivos",
+    "allowedFormats": "Formatos permitidos",
+    "minDate": "Fecha mínima",
+    "maxDate": "Fecha máxima",
+    "minAccuracy": "Precisión mínima (m)"
+  },
+  "preview": {
+    "caption": "Vista previa · app del asesor",
+    "selectOption": "Selecciona una opción",
+    "option": "Opción",
+    "datePlaceholder": "DD/MM/AAAA",
+    "captureLocation": "Capturar ubicación",
+    "takePhoto": "Tomar foto",
+    "attachFile": "Adjuntar archivo",
+    "filesProgress": "· 0 de {max}",
+    "untitledSurvey": "Encuesta sin título",
+    "sampleCustomer": "Cliente de ejemplo",
+    "requiredLeft": "{count, plural, one {Falta # obligatoria} other {Faltan # obligatorias}}",
+    "untitledQuestion": "Pregunta sin título",
+    "finish": "Finalizar form"
+  },
+  "answers": {
+    "stats": {
+      "total": "Total respuestas",
+      "totalFoot": "Completas y parciales",
+      "month": "Este mes",
+      "monthFoot": "Desde el día 1",
+      "users": "Asesores",
+      "usersFoot": "Han respondido la encuesta"
+    },
+    "loadError": "No se pudieron cargar las respuestas.",
+    "empty": "Esta encuesta aún no tiene respuestas.",
+    "backFallback": "Encuesta",
+    "title": "Respuestas",
+    "recent": "Respuestas recientes",
+    "showing": "Mostrando {shown} de {total}"
+  },
+  "download": {
+    "title": "Descargar respuestas",
+    "subtitle": "Una fila por respuesta, una columna por pregunta",
+    "format": "Formato",
+    "period": "Periodo",
+    "includeLinks": "Incluir enlaces a fotos y archivos",
+    "download": "Descargar {format}",
+    "success": "Respuestas descargadas",
+    "error": "No se pudieron descargar las respuestas."
+  },
+  "exportPeriods": {
+    "hoy": "Hoy",
+    "semana": "Esta semana",
+    "mes": "Mes actual",
+    "mes_anterior": "Último mes",
+    "trimestre": "Último trimestre",
+    "ytd": "YTD",
+    "doce_meses": "Últimos 12 meses"
+  },
+  "responsesTable": {
+    "salesRep": "Asesor",
+    "city": "Ciudad",
+    "taxId": "NIT {taxId}",
+    "viewResponse": "Ver respuesta"
+  },
+  "responseStatus": {
+    "COMPLETED": "Completa",
+    "DRAFT": "Parcial"
+  },
+  "responseModal": {
+    "title": "Respuesta",
+    "loadError": "No se pudo cargar la respuesta.",
+    "noAnswer": "Sin respuesta",
+    "unnamedCustomer": "Cliente sin nombre"
+  }
+}

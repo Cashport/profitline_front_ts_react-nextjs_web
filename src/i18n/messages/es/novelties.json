@@ -1,0 +1,78 @@
+{
+  "types": {
+    "nc_comercial": "Nota crédito comercial",
+    "nc_precio": "NC diferencia de precio",
+    "refact": "Refacturación",
+    "rechazo": "Factura rechazada / sin radicar",
+    "cruce": "Cruce de saldos / legalización",
+    "acuerdo": "Acuerdo de pago",
+    "pago_ni": "Pago no identificado",
+    "faltante": "Faltante / avería en entrega"
+  },
+  "kpis": {
+    "abiertas": {
+      "label": "Abiertas",
+      "foot": "saldo agrupado en gestión"
+    },
+    "vencidas": {
+      "label": "Con ticket vencido",
+      "foot": "la acción en curso ya se pasó de fecha"
+    },
+    "frias": {
+      "label": "Sin gestión +7 días",
+      "foot": "nadie ha registrado nada hace más de una semana"
+    },
+    "limite": {
+      "label": "Fuera de fecha límite",
+      "foot": "el caso debió estar cerrado"
+    },
+    "sinresp": {
+      "label": "Sin responsable",
+      "foot": "no tienen dueño asignado"
+    },
+    "nounOne": "novedad",
+    "nounOther": "novedades"
+  },
+  "filters": {
+    "status": "Estado",
+    "type": "Tipo de novedad",
+    "coordinator": "Coordinador",
+    "kam": "KAM",
+    "market": "Mercado",
+    "collector": "Ejecutivo",
+    "dates": "Fechas",
+    "period": "Periodo: {range}",
+    "selectPeriod": "Selecciona un periodo"
+  },
+  "header": {
+    "title": "Novedades",
+    "loadingCutoff": "Cargando corte…",
+    "searchPlaceholder": "Cliente, factura o ejecutivo…"
+  },
+  "list": {
+    "novelty": "Novedad",
+    "customer": "Cliente",
+    "invoices": "Fact.",
+    "amount": "Monto",
+    "owner": "Responsable",
+    "lastActivity": "Últ. gestión",
+    "nextTicket": "Próx. ticket",
+    "deadline": "Límite",
+    "status": "Estado",
+    "empty": "No hay novedades con estos filtros."
+  },
+  "toolbar": {
+    "summary": "{count, plural, one {# novedad} other {# novedades}} · {amount} · {invoices} vinculadas"
+  },
+  "card": {
+    "lastActivity": "Últ. gestión",
+    "deadline": "Límite {date}"
+  },
+  "view": {
+    "modes": {
+      "list": "Lista",
+      "board": "Tablero"
+    },
+    "loadError": "No se pudieron cargar las novedades."
+  }
+}

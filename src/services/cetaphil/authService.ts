@@ -13,7 +13,7 @@ export const loginCetaphil = async (token: string) => {
                   const data = await response.json();
                   if (response.status === 200) {
                     localStorage.setItem(STORAGE_TOKEN, data.data.token);
-                    router.push("/clientes/all");
+                    router.push("/clients/all");
                   }
                 }); */
     const idToken = await getIdTokenWithToken(token);

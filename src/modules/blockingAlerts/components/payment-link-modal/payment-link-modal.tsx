@@ -4,13 +4,14 @@ import { useState } from "react";
 import { Button, Segmented } from "antd";
 import dayjs from "dayjs";
 import { CircleCheck, Link2, Mail, MessageCircle, QrCode } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 
-import { paymentLinkOf, plural } from "../../utils/blocking-alerts";
+import { paymentLinkOf } from "../../utils/blocking-alerts";
 import AlertModal from "../alert-modal/alert-modal";
 
 type PaymentMode = "past_due" | "selected";
@@ -33,6 +34,9 @@ export default function PaymentLinkModal({
   selected,
   onClose
 }: PaymentLinkModalProps) {
+  const t = useTranslations("blockingAlerts.paymentLink");
+  const tCount = useTranslations("blockingAlerts.count");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((s) => s.formatMoney);
   const { showMessage } = useMessageApi();
   const [mode, setMode] = useState<PaymentMode>("past_due");
@@ -41,50 +45,55 @@ export default function PaymentLinkModal({
   const charge = mode === "past_due" ? pastDue : selected;
   const amount = formatMoney(charge.total, { hideDecimals: true });
   const link = paymentLinkOf(detail);
-  const expires = dayjs().add(48, "hour").locale("es").format("D MMM · HH:mm").replace(".", "");
+  const expires = dayjs().add(48, "hour").format("D MMM · HH:mm").replace(".", "");
 
   const share = (channel: string) => {
-    showMessage("success", `Link enviado por ${channel} a ${detail.contact_name}`);
+    showMessage("success", t("sent", { channel, contact: detail.contact_name }));
     onClose();
   };
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(`https://${link}`);
-      showMessage("success", "Link copiado");
+      showMessage("success", t("copied"));
     } catch {
-      showMessage("error", "No se pudo copiar el link");
+      showMessage("error", t("copyError"));
     }
   };
 
   if (generated) {
     return (
-      <AlertModal onClose={onClose} title="Link de pago" subtitle={detail.name}>
+      <AlertModal onClose={onClose} title={t("title")} subtitle={detail.name}>
         <div className="flex flex-col items-center text-center">
           <CircleCheck className="h-11 w-11 text-cp-lime-dark" strokeWidth={1.8} />
-          <span className="mt-2 text-[16px] font-semibold">Link listo para enviar</span>
+          <span className="mt-2 text-[16px] font-semibold">{t("ready")}</span>
           <span className="text-[22px] font-semibold tabular-nums">{amount}</span>
-          <span className="text-[13px] text-cp-ink-3">Vence el {expires}</span>
+          <span className="text-[13px] text-cp-ink-3">{t("expiresOn", { date: expires })}</span>
         </div>
         <div className="flex items-center gap-2.5 rounded-[10px] border border-cp-line-2 py-1.5 pl-3 pr-1.5">
           <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{link}</span>
           <Button size="small" onClick={copy}>
-            Copiar
+            {tCommon("actions.copy")}
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: "WhatsApp", Icon: MessageCircle, onClick: () => share("WhatsApp") },
-            { label: "Correo", Icon: Mail, onClick: () => share("correo") },
             {
-              label: "QR en tienda",
+              key: "whatsapp",
+              label: "WhatsApp",
+              Icon: MessageCircle,
+              onClick: () => share("WhatsApp")
+            },
+            { key: "email", label: t("emailTab"), Icon: Mail, onClick: () => share(t("email")) },
+            {
+              key: "qr",
+              label: t("qr"),
               Icon: QrCode,
-              onClick: () =>
-                showMessage("info", "El QR estará disponible al conectar el servicio de pagos")
+              onClick: () => showMessage("info", t("qrSoon"))
             }
-          ].map(({ label, Icon, onClick }) => (
+          ].map(({ key, label, Icon, onClick }) => (
             <button
-              key={label}
+              key={key}
               type="button"
               onClick={onClick}
               className="flex h-[62px] cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] border border-cp-line-2 bg-cp-surface text-[13px] font-semibold text-cp-ink hover:border-cp-ink"
@@ -95,7 +104,7 @@ export default function PaymentLinkModal({
           ))}
         </div>
         <Button block size="large" onClick={onClose}>
-          Listo
+          {t("done")}
         </Button>
       </AlertModal>
     );
@@ -104,32 +113,30 @@ export default function PaymentLinkModal({
   return (
     <AlertModal
       onClose={onClose}
-      title="Link de pago"
-      subtitle={`${detail.name} · vigente 48 horas`}
+      title={t("title")}
+      subtitle={t("validFor", { name: detail.name })}
     >
       <Segmented<PaymentMode>
         block
         value={mode}
         onChange={setMode}
         options={[
-          { label: "Pago vencido", value: "past_due" },
-          { label: "Facturas seleccionadas", value: "selected" }
+          { label: t("modePastDue"), value: "past_due" },
+          { label: t("modeSelected"), value: "selected" }
         ]}
       />
       <div className="flex flex-col items-center gap-1 rounded-[12px] border border-cp-line bg-cp-subtle px-4 py-4 text-center">
-        <span className="text-[13px] font-semibold text-cp-ink-4">
-          Vas a cobrar
-        </span>
+        <span className="text-[13px] font-semibold text-cp-ink-4">{t("youWillCharge")}</span>
         <span className="text-[28px] font-semibold leading-tight tabular-nums">{amount}</span>
         <span className="rounded-md bg-cp-muted px-2 py-0.5 text-[13px] font-semibold text-cp-ink-2">
-          {plural(charge.count, "factura", "facturas")}
+          {tCount("invoices", { count: charge.count })}
         </span>
       </div>
       <dl className="m-0 flex flex-col text-[13px]">
         {[
-          ["Cliente", detail.name],
-          ["Contacto", detail.contact_name],
-          ["Vence el link", `${expires} (48 h)`]
+          [t("customer"), detail.name],
+          [t("contact"), detail.contact_name],
+          [t("linkExpires"), t("expiresValue", { date: expires })]
         ].map(([label, value]) => (
           <div
             key={label}
@@ -146,7 +153,7 @@ export default function PaymentLinkModal({
         icon={<Link2 className="h-4 w-4" />}
         onClick={() => setGenerated(true)}
       >
-        Generar link de pago
+        {t("generate")}
       </PrincipalButton>
     </AlertModal>
   );

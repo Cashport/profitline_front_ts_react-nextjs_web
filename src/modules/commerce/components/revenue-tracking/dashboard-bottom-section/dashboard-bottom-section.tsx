@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, Layers } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useIsMobile } from "@/modules/chat/hooks/use-mobile";
 import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
@@ -18,16 +19,19 @@ type TabType =
   | "backorder"
   | "negociaciones";
 
-const tabs = [
-  { id: "detalles-cliente", label: "Detalles cliente" },
-  { id: "regional-vendedor", label: "Regional/Vendedor" },
-  { id: "promociones", label: "Promociones" },
-  { id: "backorder", label: "Backorder" },
-  { id: "negociaciones", label: "Negociaciones" }
-];
+// `id` es la clave de pestaña (lógica); el texto sale de commerce.dashboard.tabs.<labelKey>.
+const TABS = [
+  { id: "detalles-cliente", labelKey: "clientDetails" },
+  { id: "regional-vendedor", labelKey: "regionSeller" },
+  { id: "promociones", labelKey: "promotions" },
+  { id: "backorder", labelKey: "backorder" },
+  { id: "negociaciones", labelKey: "negotiations" }
+] as const;
 
 export function DashboardBottomSection() {
   const isMobile = useIsMobile();
+  const tDashboard = useTranslations("commerce.dashboard.tabs");
+  const tabs = TABS.map((tab) => ({ id: tab.id, label: tDashboard(tab.labelKey) }));
   const [activeTab, setActiveTab] = useState<TabType>("detalles-cliente");
   const [isMenuMobileOpen, setIsMenuMobileOpen] = useState(false);
 
@@ -101,10 +105,8 @@ export function DashboardBottomSection() {
         {activeTab === "gross-to-net" && (
           <div className="cp-card px-[18px] py-[14px] min-h-[400px] flex items-center justify-center text-muted-foreground">
             <div className="text-center">
-              <p className="text-xl font-medium mb-2">Gross to Net Analysis</p>
-              <p className="text-sm">
-                Financial bridge from gross sales to net revenue visualization.
-              </p>
+              <p className="text-xl font-medium mb-2">{tDashboard("grossToNetTitle")}</p>
+              <p className="text-sm">{tDashboard("grossToNetDescription")}</p>
             </div>
           </div>
         )}

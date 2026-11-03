@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { Button, message } from "antd";
 import { useForm } from "react-hook-form";
 
@@ -14,6 +15,8 @@ interface Props {
   isEditAvailable: boolean;
 }
 export const InputCreateHolding = ({ isEditAvailable = false }: Props) => {
+  const t = useTranslations("components.inputCreate");
+  const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const { createHolding } = useHolding();
@@ -33,7 +36,7 @@ export const InputCreateHolding = ({ isEditAvailable = false }: Props) => {
   return (
     <>
       <form className="inputcreateholding" onSubmit={handleSubmit(onSubmit)}>
-      {contextHolder}
+        {contextHolder}
         <InputForm
           titleInput=""
           control={control}
@@ -45,10 +48,10 @@ export const InputCreateHolding = ({ isEditAvailable = false }: Props) => {
             border: "1px solid white",
             borderRadius: ".8rem"
           }}
-          placeholder="Ingresar nombre de holding"
+          placeholder={t("holdingPlaceholder")}
         />
         <Button htmlType="submit" loading={isLoading} className="createButtonHolding">
-          Crear{" "}
+          {tCommon("actions.create")}{" "}
         </Button>
       </form>
     </>

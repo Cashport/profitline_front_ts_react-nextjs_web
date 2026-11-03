@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Flex, Modal, Typography } from "antd";
 import { Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { renameFile } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
@@ -44,6 +45,9 @@ export interface PaymentForm {
 }
 
 const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
+  const t = useTranslations("banks.splitPayment");
+  const tShared = useTranslations("banks.shared");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { ID } = useAppStore((state) => state.selectedProject);
   const userId = useAppStore((state) => state.userId);
@@ -137,10 +141,7 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        showMessage(
-          "error",
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
+        showMessage("error", tShared("fileTooLarge", { maxMb: 30 }));
         return;
       }
       setValue(`payments.${index}.evidence`, rawFile);
@@ -177,11 +178,11 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
         files: renamedFiles.filter((file) => file !== undefined) as File[]
       });
 
-      showMessage("success", "Pago fraccionado correctamente");
+      showMessage("success", t("success"));
 
       onClose();
     } catch (error) {
-      showMessage("error", "Error al fraccionar pagos");
+      showMessage("error", t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -196,11 +197,13 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
       closable={false}
       destroyOnClose
     >
-      <Title level={4}>Fraccionar pago</Title>
+      <Title level={4}>{t("title")}</Title>
 
       <Flex justify="space-between">
         <Title style={{ fontWeight: 500 }} level={5}>
-          Pago {selectedRows && selectedRows.length > 0 ? selectedRows[0].id : ""}
+          {t("payment", {
+            id: selectedRows && selectedRows.length > 0 ? String(selectedRows[0].id) : ""
+          })}
         </Title>
         <Flex vertical align="flex-end">
           <strong className="modalActionsSplitPayment__availAmount">
@@ -216,19 +219,22 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
         {fields.map((field, index) => (
           <Flex style={{ paddingBottom: "10px" }} key={field.id} vertical gap={"1rem"}>
             <Title style={{ fontWeight: 500 }} level={5}>
-              Pago {selectedRows && selectedRows[0]?.id} - {index + 1}
+              {t("paymentPart", {
+                id: String((selectedRows && selectedRows[0]?.id) ?? ""),
+                index: index + 1
+              })}
             </Title>
             <Flex gap={"1rem"}>
               <Controller
                 name={`payments.${index}.client`}
                 control={control}
-                rules={{ required: "Cliente es obligatorio" }}
+                rules={{ required: t("customerRequired") }}
                 render={({ field }) => (
                   <GeneralSelect
                     errors={errors?.payments?.[index]?.client}
                     field={field}
-                    title="Cliente"
-                    placeholder="Ingresar cliente"
+                    title={tCommon("fields.customer")}
+                    placeholder={t("customerPlaceholder")}
                     options={clients}
                     showSearch
                     customStyleContainer={{ width: "100%" }}
@@ -238,15 +244,15 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
               />
 
               <InputFormMoney
-                titleInput="Valor"
+                titleInput={tCommon("fields.value")}
                 nameInput={`payments.${index}.value`}
                 control={control}
                 error={errors?.payments?.[index]?.value}
-                placeholder="Valor"
+                placeholder={tCommon("fields.value")}
                 customStyle={{ width: "100%" }}
                 validationRules={{
-                  required: "Valor es obligatorio",
-                  min: { value: 1, message: "El valor debe ser mayor a 0" }
+                  required: t("valueRequired"),
+                  min: { value: 1, message: t("valueMin") }
                 }}
                 changeInterceptor={(numericValue) => handleValueChange(index, numericValue)}
               />
@@ -254,14 +260,14 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
 
             <div className="modalActionsSplitPayment__file">
               <Flex vertical>
-                <p>Evidencia</p>
-                <em>*Obligatorio</em>
+                <p>{tShared("evidence")}</p>
+                <em>{tShared("required")}</em>
               </Flex>
 
               <Controller
                 name={`payments.${index}.evidence`}
                 control={control}
-                rules={{ required: "Evidencia es obligatoria" }}
+                rules={{ required: t("evidenceRequired") }}
                 render={() => (
                   <>
                     <DocumentButton
@@ -290,12 +296,12 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
         } // Disable the button if there's no more money left
       >
         <Plus />
-        Agregar pago
+        {t("addPayment")}
       </button>
 
       <div className="modalActionsSplitPayment__footer">
         <SecondaryButton onClick={() => onClose(true)} bordered={false}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </SecondaryButton>
 
         <PrincipalButton
@@ -303,7 +309,7 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
           disabled={!isValid || isSubmitting}
           loading={isSubmitting}
         >
-          Fraccionar pago
+          {t("title")}
         </PrincipalButton>
       </div>
     </Modal>

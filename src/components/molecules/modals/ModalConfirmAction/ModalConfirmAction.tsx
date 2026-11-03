@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import "./modalConfirmAction.scss";
 
 interface Props {
@@ -23,12 +24,13 @@ export const ModalConfirmAction = ({
   onCancel,
   title,
   content,
-  okText = "Aceptar",
-  cancelText = "Cancelar",
+  okText,
+  cancelText,
   okLoading,
   cancelLoading,
   hideOkButton
 }: Props) => {
+  const tCommon = useTranslations("common");
   return (
     <Modal
       className="ModalConfirmAction"
@@ -39,14 +41,14 @@ export const ModalConfirmAction = ({
         loading: okLoading,
         style: hideOkButton ? { display: "none" } : undefined
       }}
-      okText={okText}
+      okText={okText ?? tCommon("actions.accept")}
       cancelButtonProps={{
         className: !hideOkButton ? "cancelButton" : "acceptButton",
         onClick: onCancel ? onCancel : onClose,
         loading: cancelLoading,
         style: hideOkButton ? { gridColumn: "1 / span 2" } : undefined
       }}
-      cancelText={cancelText}
+      cancelText={cancelText ?? tCommon("actions.cancel")}
       title={title}
       onOk={onOk}
     >

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 
@@ -20,9 +21,10 @@ interface VisitsHeaderProps {
  * izquierda; filtros, buscador, tema y avatar (cerrar sesión) a la derecha.
  */
 export default function VisitsHeader({ day, today, onDayChange, tools }: VisitsHeaderProps) {
+  const tv = useTranslations("visits.header");
   return (
     <Header
-      title="Visitas"
+      title={tv("title")}
       titleExtra={<VisitsDateNav day={day} today={today} onChange={onDayChange} />}
       actionsExtra={<>{tools}</>}
     />

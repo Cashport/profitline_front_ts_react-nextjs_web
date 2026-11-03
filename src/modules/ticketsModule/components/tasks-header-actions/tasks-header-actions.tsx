@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import {
   FilterChips,
@@ -32,6 +33,7 @@ export default function TasksHeaderActions() {
 }
 
 function HeaderActions({ config }: { config: ITaskConfig }) {
+  const t = useTranslations("tickets");
   const { view, viewKey, setFilter, patchView, setSearch, openCreate } = useTicketsView(
     useShallow((s) => ({
       view: s.view,
@@ -80,7 +82,7 @@ function HeaderActions({ config }: { config: ITaskConfig }) {
   if (view.created.from || view.created.to) {
     chips.push({
       key: "created",
-      label: "Fecha",
+      label: t("filters.date"),
       value: `${formatTaskDate(view.created.from)} – ${formatTaskDate(view.created.to)}`,
       onRemove: () => patchView({ created: { from: null, to: null } })
     });
@@ -94,11 +96,11 @@ function HeaderActions({ config }: { config: ITaskConfig }) {
         className="box-border flex h-[var(--control-h)] shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[11px] border-0 bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-[#d8f032]"
       >
         <Plus className="h-4 w-4" strokeWidth={2.4} />
-        Nueva tarea
+        {t("create.title")}
       </button>
       <FilterChips chips={chips} />
       <TasksFilterModal config={config} />
-      <HeaderSearch value={term} onChange={setTerm} placeholder="Buscar tarea o cliente" />
+      <HeaderSearch value={term} onChange={setTerm} placeholder={t("searchPlaceholder")} />
     </>
   );
 }

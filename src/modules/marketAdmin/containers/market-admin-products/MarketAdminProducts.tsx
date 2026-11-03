@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import { Package } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
@@ -39,6 +40,8 @@ function ProductImageCell({ producto }: { producto: IMarketAdminProduct }) {
 }
 
 export default function MarketAdminProducts() {
+  const t = useTranslations("marketAdmin.products");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<IMarketAdminProductsFilter>({
     lineId: null,
@@ -79,10 +82,15 @@ export default function MarketAdminProducts() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  function runAccion(accion: string) {
+  function runAccion(accion: "activate" | "inactivate" | "export") {
     setShowAcciones(false);
     setSelectedRowKeys([]);
-    alert(`Acción "${accion}" aplicada a ${selectedRowKeys.length} producto(s).`);
+    alert(
+      t("bulkActions.applied", {
+        action: t(`bulkActions.actionNames.${accion}`),
+        count: selectedRowKeys.length
+      })
+    );
   }
 
   const columns: ColumnsType<IMarketAdminProduct> = [
@@ -94,7 +102,7 @@ export default function MarketAdminProducts() {
       render: (_, p) => <ProductImageCell producto={p} />
     },
     {
-      title: "Producto",
+      title: t("columns.product"),
       dataIndex: "description",
       key: "description",
       sorter: (a, b) => a.description.localeCompare(b.description),
@@ -109,7 +117,7 @@ export default function MarketAdminProducts() {
       )
     },
     {
-      title: "Línea",
+      title: t("columns.line"),
       dataIndex: "line_name",
       key: "line_name",
       sorter: (a, b) => a.line_name.localeCompare(b.line_name),
@@ -117,7 +125,7 @@ export default function MarketAdminProducts() {
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Canal",
+      title: t("columns.channel"),
       key: "canal",
       onHeaderCell: headerCell,
       render: () => <span className="text-sm text-[#141414]">-</span>
@@ -132,7 +140,7 @@ export default function MarketAdminProducts() {
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "is_available",
       key: "is_available",
       width: 100,
@@ -144,7 +152,7 @@ export default function MarketAdminProducts() {
             isAvailable === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
           }`}
         >
-          {isAvailable === 1 ? "Activo" : "Inactivo"}
+          {isAvailable === 1 ? tCommon("status.active") : tCommon("status.inactive")}
         </span>
       )
     },
@@ -153,19 +161,19 @@ export default function MarketAdminProducts() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, p) => <GenericEyeButton href={`/market-admin/productos/${p.id}`} />
+      render: (_, p) => <GenericEyeButton href={`/market-admin/products/${p.id}`} />
     }
   ];
 
   return (
     <div className="cp-page min-h-full">
-      <Header title="Productos" back="/market-admin" />
+      <Header title={t("title")} back="/market-admin" />
 
       <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
           <UiSearchInput
-            placeholder="Buscar..."
+            placeholder={t("searchPlaceholder")}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
@@ -180,23 +188,23 @@ export default function MarketAdminProducts() {
             {showAcciones && (
               <div className="absolute left-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-30 w-48 py-1">
                 <button
-                  onClick={() => runAccion("Activar")}
+                  onClick={() => runAccion("activate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Activar
+                  {t("bulkActions.activate")}
                 </button>
                 <button
-                  onClick={() => runAccion("Inactivar")}
+                  onClick={() => runAccion("inactivate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Inactivar
+                  {t("bulkActions.inactivate")}
                 </button>
                 <div className="h-px bg-[#EEEEEE] my-1" />
                 <button
-                  onClick={() => runAccion("Exportar")}
+                  onClick={() => runAccion("export")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Exportar selección
+                  {t("bulkActions.exportSelection")}
                 </button>
               </div>
             )}
@@ -211,7 +219,7 @@ export default function MarketAdminProducts() {
           rowKey="id"
           loading={isLoading}
           showSorterTooltip={false}
-          locale={{ emptyText: "No se encontraron productos." }}
+          locale={{ emptyText: t("empty") }}
           rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
           onRow={(record) => ({
             onClick: (e) => {
@@ -231,7 +239,7 @@ export default function MarketAdminProducts() {
             total: pagination.totalRows,
             showSizeChanger: false,
             position: ["bottomRight"],
-            showTotal: (total, range) => `Mostrando ${range[0]}–${range[1]} de ${total} productos`
+            showTotal: (total, range) => t("total", { from: range[0], to: range[1], total })
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 export type NuevoEtlFormValues = {
@@ -25,6 +26,8 @@ const inputClass =
 const labelClass = "text-[13px] font-bold text-[#141414] block mb-1.5";
 
 export default function ModalNuevoEtl({ open, onClose, onSend }: Props) {
+  const t = useTranslations("marketAdmin.load.newEtl");
+  const tCommon = useTranslations("common.fields");
   const [form, setForm] = useState<NuevoEtlFormValues>(BLANK_ETL);
 
   // El form vive fuera del <Modal>, asi que destroyOnClose no lo limpia
@@ -49,14 +52,14 @@ export default function ModalNuevoEtl({ open, onClose, onSend }: Props) {
       footer={null}
       width={480}
       destroyOnClose
-      title={<span className="text-base font-bold text-[#141414]">Nuevo ETL</span>}
+      title={<span className="text-base font-bold text-[#141414]">{t("title")}</span>}
     >
       <div className="py-2 space-y-4">
         <div>
-          <label className={labelClass}>Nombre</label>
+          <label className={labelClass}>{tCommon("name")}</label>
           <input
             className={inputClass}
-            placeholder="Ej. Inventario actualizado"
+            placeholder={t("namePlaceholder")}
             value={form.nombre}
             onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
             autoFocus
@@ -64,12 +67,12 @@ export default function ModalNuevoEtl({ open, onClose, onSend }: Props) {
         </div>
         <div>
           <label className={labelClass}>
-            Observación <span className="text-[#AAAAAA] font-normal">(opcional)</span>
+            {t("notes")} <span className="text-[#AAAAAA] font-normal">{t("optional")}</span>
           </label>
           <textarea
             rows={4}
             className={`${inputClass} resize-none`}
-            placeholder="Describe qué hace este cargue y cuándo debe usarse..."
+            placeholder={t("notesPlaceholder")}
             value={form.observacion}
             onChange={(e) => setForm((f) => ({ ...f, observacion: e.target.value }))}
           />
@@ -78,7 +81,7 @@ export default function ModalNuevoEtl({ open, onClose, onSend }: Props) {
 
       <div className="mt-6">
         <FooterButtons
-          titleConfirm="Crear ETL"
+          titleConfirm={t("create")}
           isConfirmDisabled={!isValid}
           onClose={onClose}
           handleOk={handleOk}

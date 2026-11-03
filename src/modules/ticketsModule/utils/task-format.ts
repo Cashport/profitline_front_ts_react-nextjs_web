@@ -1,13 +1,14 @@
 import { fmtD } from "@/modules/walletModule/utils/format";
 import type { ITaskConfig, ITicket, TicketPriority, TicketStatus } from "@/types/tickets/ITickets";
+import { getTranslator } from "@/i18n/translator";
 import { TASK_AGE_ALERT_MINUTES } from "../constants";
 
 /** Antigüedad como en el prototipo: "40 min", "5 h", "1 día", "3 días". */
 export function formatAge(minutes: number): string {
-  if (minutes < 60) return `${Math.max(0, Math.round(minutes))} min`;
-  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} h`;
-  const days = Math.floor(minutes / (24 * 60));
-  return `${days} ${days === 1 ? "día" : "días"}`;
+  const t = getTranslator("tickets");
+  if (minutes < 60) return t("age.minutes", { count: Math.max(0, Math.round(minutes)) });
+  if (minutes < 24 * 60) return t("age.hours", { count: Math.floor(minutes / 60) });
+  return t("age.days", { count: Math.floor(minutes / (24 * 60)) });
 }
 
 export const isClosedStatus = (config: ITaskConfig | undefined, status: TicketStatus) =>

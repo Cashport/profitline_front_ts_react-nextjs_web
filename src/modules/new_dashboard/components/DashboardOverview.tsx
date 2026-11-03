@@ -9,11 +9,13 @@ import {
   CartesianGrid
 } from "recharts";
 import { Clock, FileQuestion, Timer } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { formatCompactCurrency } from "./Formatters";
 import ExpandableCard from "./ExpandableCard";
 import { COLLECTION_TREND } from "../lib/constants";
 
 const DashboardOverview: React.FC = () => {
+  const t = useTranslations("newDashboard.overview");
   // Real Data Simulation
   const goalAmount = 150000000000; // 150 Mil Millones
   const actualAmount = goalAmount * 0.36; // 36% currently
@@ -75,7 +77,7 @@ const DashboardOverview: React.FC = () => {
             <div className="flex items-center justify-between w-full">
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                Recaudo
+                {t("collectionTitle")}
               </span>
               <span className="bg-gray-100 text-[#141414] font-bold px-3 py-1 rounded-full text-[13px] md:text-sm mr-2 md:mr-0">
                 {percentActual.toFixed(1)}%
@@ -89,13 +91,15 @@ const DashboardOverview: React.FC = () => {
               {/* Metrics Headers */}
               <div className="flex justify-between items-end mb-2 px-1">
                 <div>
-                  <h4 className="text-[13px] text-gray-400 font-bold mb-1">Meta del mes</h4>
+                  <h4 className="text-[13px] text-gray-400 font-bold mb-1">{t("monthlyTarget")}</h4>
                   <p className="text-3xl md:text-4xl font-bold text-[#141414]">
                     {formatCompactCurrency(goalAmount)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <h4 className="text-[13px] text-gray-400 font-bold mb-1">Recaudo actual</h4>
+                  <h4 className="text-[13px] text-gray-400 font-bold mb-1">
+                    {t("collectedToDate")}
+                  </h4>
                   <p className="text-3xl md:text-4xl font-bold text-[#141414]">
                     {formatCompactCurrency(actualAmount)}
                   </p>
@@ -109,7 +113,7 @@ const DashboardOverview: React.FC = () => {
                 {/* Recaudo Marker */}
                 <MetricMarker
                   left={getWidth(baseFillPercent)}
-                  topLabel="Recaudo"
+                  topLabel={t("collected")}
                   bottomLabel={formatSimple(actualAmount)}
                   colorClass="text-[#141414]"
                   borderColorClass="border-[#141414]"
@@ -118,14 +122,14 @@ const DashboardOverview: React.FC = () => {
                 {/* Goal Marker - Neutral Gray */}
                 <MetricMarker
                   left={getWidth(100)}
-                  topLabel="Meta"
+                  topLabel={t("target")}
                   bottomLabel={formatSimple(goalAmount)}
                 />
 
                 {/* Forecast Marker - Neutral Gray */}
                 <MetricMarker
                   left={getWidth(percentForecast)}
-                  topLabel="Fcst"
+                  topLabel={t("forecastShort")}
                   bottomLabel={formatSimple(forecastAmount)}
                 />
 
@@ -146,12 +150,12 @@ const DashboardOverview: React.FC = () => {
               <div
                 className={`bg-gray-50 rounded-lg p-3 text-center border border-gray-100 mt-auto ${isExpanded ? "max-w-xl mx-auto w-full mb-4" : ""}`}
               >
-                <span className="text-gray-500 text-[13px]">Cumplimiento actual: </span>
+                <span className="text-gray-500 text-[13px]">{t("attainment")} </span>
                 <span className="font-bold text-[#141414] text-sm ml-1">
                   {percentActual.toFixed(1)}%
                 </span>
                 <span className="text-gray-300 mx-3">|</span>
-                <span className="text-gray-500 text-[13px]">Forecast cierre: </span>
+                <span className="text-gray-500 text-[13px]">{t("closingForecast")} </span>
                 <span className="font-bold text-[#141414] text-sm ml-1">
                   {percentForecast.toFixed(1)}%
                 </span>
@@ -167,7 +171,7 @@ const DashboardOverview: React.FC = () => {
           title={
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-              Avance diario de recaudo
+              {t("dailyProgress")}
             </div>
           }
           className="h-full"
@@ -211,7 +215,7 @@ const DashboardOverview: React.FC = () => {
                       stroke="#141414"
                       strokeWidth={2}
                       dot={false}
-                      name="Meta"
+                      name={t("target")}
                     />
 
                     {/* Actual Recaudo: Orange, ConnectNulls=false (breaks on null) */}
@@ -222,7 +226,7 @@ const DashboardOverview: React.FC = () => {
                       strokeWidth={isExpanded ? 3 : 2.5}
                       dot={{ r: 3, fill: "#ea580c" }}
                       activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
-                      name="Recaudo"
+                      name={t("collected")}
                       connectNulls={false}
                     />
 
@@ -233,7 +237,7 @@ const DashboardOverview: React.FC = () => {
                       stroke="#22C55E"
                       strokeWidth={isExpanded ? 3 : 2}
                       dot={false}
-                      name="Forecast"
+                      name={t("forecast")}
                       connectNulls={false}
                     />
                   </ComposedChart>
@@ -241,13 +245,13 @@ const DashboardOverview: React.FC = () => {
               </div>
               <div className="flex flex-wrap justify-center gap-6 mt-4 pb-2">
                 <div className="flex items-center gap-2 text-[13px] md:text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                  <span className="w-3 h-3 rounded-full bg-[#141414]"></span> Meta
+                  <span className="w-3 h-3 rounded-full bg-[#141414]"></span> {t("target")}
                 </div>
                 <div className="flex items-center gap-2 text-[13px] md:text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                  <span className="w-3 h-3 rounded-full bg-orange-600"></span> Recaudo
+                  <span className="w-3 h-3 rounded-full bg-orange-600"></span> {t("collected")}
                 </div>
                 <div className="flex items-center gap-2 text-[13px] md:text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                  <span className="w-3 h-3 rounded-full bg-green-500"></span> Forecast
+                  <span className="w-3 h-3 rounded-full bg-green-500"></span> {t("forecast")}
                 </div>
               </div>
             </div>
@@ -260,7 +264,7 @@ const DashboardOverview: React.FC = () => {
         <div className="cp-card px-[18px] py-[14px] h-full flex flex-col justify-between group">
           <div className="flex items-center justify-between mb-4">
             <span className="font-bold text-gray-700 text-sm flex items-center gap-2">
-              Pagos por aplicar
+              {t("toApply")}
             </span>
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
               <Clock size={18} />
@@ -269,7 +273,9 @@ const DashboardOverview: React.FC = () => {
           <div>
             <p className="text-2xl font-bold text-[#141414]">{formatCompactCurrency(3200000000)}</p>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[13px] text-gray-500 font-medium">142 pagos pendientes</span>
+              <span className="text-[13px] text-gray-500 font-medium">
+                {t("pendingPayments", { count: 142 })}
+              </span>
             </div>
           </div>
         </div>
@@ -279,7 +285,7 @@ const DashboardOverview: React.FC = () => {
         <div className="cp-card px-[18px] py-[14px] h-full flex flex-col justify-between group">
           <div className="flex items-center justify-between mb-4">
             <span className="font-bold text-gray-700 text-sm flex items-center gap-2">
-              Pagos no identificados
+              {t("unidentified")}
             </span>
             <div className="p-2 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-100 transition-colors">
               <FileQuestion size={18} />
@@ -288,7 +294,9 @@ const DashboardOverview: React.FC = () => {
           <div>
             <p className="text-2xl font-bold text-[#141414]">{formatCompactCurrency(150000000)}</p>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[13px] text-gray-500 font-medium">5 pagos sin referencia</span>
+              <span className="text-[13px] text-gray-500 font-medium">
+                {t("noReference", { count: 5 })}
+              </span>
             </div>
           </div>
         </div>
@@ -298,17 +306,17 @@ const DashboardOverview: React.FC = () => {
         <div className="cp-card px-[18px] py-[14px] h-full flex flex-col justify-between group">
           <div className="flex items-center justify-between mb-4">
             <span className="font-bold text-gray-700 text-sm flex items-center gap-2">
-              Días prom. aplicación
+              {t("avgDaysToApply")}
             </span>
             <div className="p-2 bg-green-50 text-green-600 rounded-lg group-hover:bg-green-100 transition-colors">
               <Timer size={18} />
             </div>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[#141414]">1.2 Días</p>
+            <p className="text-2xl font-bold text-[#141414]">{t("days", { value: "1.2" })}</p>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-[13px] text-green-700 font-bold bg-green-100 px-1.5 py-0.5 rounded">
-                -0.3 vs mes anterior
+                {t("vsLastMonth", { delta: "-0.3" })}
               </span>
             </div>
           </div>

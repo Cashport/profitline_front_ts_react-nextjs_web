@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import dayjs from "dayjs";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 import { Table } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -66,6 +67,8 @@ const mapProfit360ToApprovalRow = (raw: {
 
 export function AprobacionesList() {
   const router = useRouter();
+  const t = useTranslations("reverseLogistics");
+  const tCommon = useTranslations("common");
 
   // Filter / search / page / selection state live in ReverseLogisticsFiltersProvider
   // so they survive tab switches between Devoluciones and Aprobaciones.
@@ -106,8 +109,8 @@ export function AprobacionesList() {
   );
 
   const columns = useMemo(
-    () => getApprovalsColumns((guid) => router.push(`/logistica-inversa/aprobaciones/${guid}`)),
-    [router]
+    () => getApprovalsColumns((guid) => router.push(`/reverse-logistics/approvals/${guid}`), t),
+    [router, t]
   );
 
   // The endpoint exposes no ciudad picklist, so the options are the distinct
@@ -142,7 +145,7 @@ export function AprobacionesList() {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         <UiSearchInput
-          placeholder="Buscar"
+          placeholder={tCommon("actions.search")}
           onChange={(e) => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
@@ -176,7 +179,7 @@ export function AprobacionesList() {
             position: ["none", "bottomRight"],
             onChange: setCurrentPage,
             showTotal: (total, range) =>
-              `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
+              t("table.showingTotal", { from: range[0], to: range[1], total })
           }}
           scroll={{ x: 1000 }}
         />

@@ -1,6 +1,9 @@
+import { useTranslations } from "use-intl";
+
 import styles from "./infoCardLogin.module.scss";
 
 export const InfoCardLogin = () => {
+  const t = useTranslations("auth.infoCard");
   return (
     <div className={styles.companySection}>
       {/* TOP LINE SVG */}
@@ -32,12 +35,10 @@ export const InfoCardLogin = () => {
         </defs>
       </svg>
 
-      <h1 className={styles.main_title}>Software de Cobranzas de Última Generación</h1>
+      <h1 className={styles.main_title}>{t("title")}</h1>
 
       <h2 className={styles.subTitle}>
-        <strong>Optimiza el flujo de caja</strong> y reduce las tareas operativas
-        <strong> centralizando los datos de cartera</strong>, tomando decisiones más inteligentes y
-        priorizando acciones de alto impacto.
+        {t.rich("subtitle", { b: (chunks) => <strong>{chunks}</strong> })}
       </h2>
 
       {/* BOTTOM LINE SVG */}

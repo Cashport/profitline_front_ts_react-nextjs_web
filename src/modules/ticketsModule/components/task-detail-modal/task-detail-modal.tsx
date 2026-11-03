@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button, Input, Modal, Select } from "antd";
 import { X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
@@ -28,37 +29,42 @@ import TaskFieldInput from "../task-field-input/task-field-input";
 /** Campos que van en la cuadrícula del detalle (título, estado, responsable y descripción van aparte). */
 const OWN_PLACE: TaskFieldKey[] = ["title", "status", "assignee", "description", "created_at"];
 
-const EVENT_LABEL: Record<string, string> = {
-  CREATED: "creó la tarea",
-  ASSIGNED: "asignó",
-  REASSIGNED: "reasignó",
-  STATUS_CHANGED: "cambió el estado",
-  COMPLETED: "resolvió la tarea",
-  CANCELLED: "canceló la tarea",
-  DUE_DATE_CHANGED: "cambió la fecha límite",
-  AMOUNT_CHANGED: "cambió el monto",
-  FIELD_CHANGED: "cambió"
-};
+type DetailT = ReturnType<typeof useTranslations<"tickets.detail">>;
+
+/** Eventos del historial que tienen texto propio (el resto se muestra con su código). */
+const KNOWN_EVENTS = [
+  "CREATED",
+  "ASSIGNED",
+  "REASSIGNED",
+  "STATUS_CHANGED",
+  "COMPLETED",
+  "CANCELLED",
+  "DUE_DATE_CHANGED",
+  "AMOUNT_CHANGED"
+] as const;
+type KnownEvent = (typeof KNOWN_EVENTS)[number];
+const isKnownEvent = (event: string): event is KnownEvent =>
+  (KNOWN_EVENTS as readonly string[]).includes(event);
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-0.5 text-[13px] font-semibold text-cp-ink-3">
-    {children}
-  </div>
+  <div className="mb-0.5 text-[13px] font-semibold text-cp-ink-3">{children}</div>
 );
 
 /** Acción para pasar al estado `to` (texto del botón). */
-const actionLabel = (config: ITaskConfig, to: TicketStatus) =>
+const actionLabel = (config: ITaskConfig, to: TicketStatus, t: DetailT) =>
   to === "COMPLETED"
-    ? "Resolver"
+    ? t("actions.resolve")
     : to === "CANCELLED"
-      ? "Cancelar tarea"
-      : `Pasar a ${statusMeta(config, to)?.label.toLowerCase() ?? to}`;
+      ? t("actions.cancelTask")
+      : t("actions.moveTo", { status: statusMeta(config, to)?.label.toLowerCase() ?? to });
 
 /** Detalle de una tarea: estado, edición de los campos del proyecto, responsable e historial. */
 export default function TaskDetailModal({ config }: { config: ITaskConfig }) {
   const { detailId, closeDetail } = useTicketsView(
     useShallow((s) => ({ detailId: s.detailId, closeDetail: s.closeDetail }))
   );
+  const t = useTranslations("tickets.detail");
+  const tCommon = useTranslations("common");
   const { resolvedTheme } = useWalletTheme();
   const { ticket, isLoading, error } = useTaskDetail(detailId);
 
@@ -78,7 +84,7 @@ export default function TaskDetailModal({ config }: { config: ITaskConfig }) {
       <div className="wallet-scope relative min-h-[220px] bg-cp-surface px-6 pb-6 pt-5 text-cp-ink">
         <button
           type="button"
-          aria-label="Cerrar"
+          aria-label={tCommon("actions.close")}
           onClick={closeDetail}
           className="absolute right-4 top-4 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[7px] border-0 bg-cp-muted text-cp-ink-3 hover:text-cp-ink"
         >
@@ -92,7 +98,7 @@ export default function TaskDetailModal({ config }: { config: ITaskConfig }) {
               <ProfitLoader size="small" />
             ) : (
               <p className="px-6 text-center text-[13px] text-cp-magenta">
-                {(error as Error)?.message || "No se pudo cargar la tarea."}
+                {(error as Error)?.message || t("loadError")}
               </p>
             )}
           </div>
@@ -103,6 +109,9 @@ export default function TaskDetailModal({ config }: { config: ITaskConfig }) {
 }
 
 function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfig }) {
+  const td = useTranslations("tickets.detail");
+  const tTickets = useTranslations("tickets");
+  const tCommon = useTranslations("common");
   const refresh = useTicketsView((s) => s.refresh);
   const { showMessage } = useMessageApi();
   const [editing, setEditing] = useState(false);
@@ -130,7 +139,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
       refresh();
       return true;
     } catch (error) {
-      showMessage("error", (error as Error).message || "No se pudo guardar");
+      showMessage("error", (error as Error).message || td("saveError"));
       return false;
     } finally {
       setBusy(false);
@@ -145,7 +154,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
     }
     const done = await run(
       () => updateTaskStatus(t.id, to, closing ? comment : null),
-      `Estado: ${statusMeta(config, to)?.label ?? to}`
+      td("statusChanged", { status: statusMeta(config, to)?.label ?? to })
     );
     if (done) {
       setTarget(null);
@@ -159,7 +168,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
       setEditing(false);
       return;
     }
-    const done = await run(() => updateTask(t.id, toBody(changed, values)), "Tarea actualizada");
+    const done = await run(() => updateTask(t.id, toBody(changed, values)), td("updated"));
     if (done) setEditing(false);
   };
 
@@ -170,12 +179,15 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
         <StatusLabel config={config} ticket={t} />
         {t.incident_id && (
           <span className="rounded-[5px] bg-cp-muted px-1.5 text-[13px] text-cp-ink-3">
-            Novedad #{t.incident_id}
+            {tTickets("cells.dispute", { id: t.incident_id })}
           </span>
         )}
         <span className="text-cp-ink-3">
-          · Abierta hace {formatAge(t.open_minutes)} · Creada {formatTaskDate(t.created_at)} por{" "}
-          {t.created_by_name ?? "—"}
+          {td("meta", {
+            age: formatAge(t.open_minutes),
+            date: formatTaskDate(t.created_at),
+            author: t.created_by_name ?? "—"
+          })}
         </span>
       </div>
 
@@ -205,7 +217,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
                   value={String(t.assigned_to_user_id)}
                   options={config.assignees.map((u) => ({ value: String(u.id), label: u.name }))}
                   onChange={(v: string) =>
-                    run(() => updateTaskAssignee(t.id, Number(v)), "Responsable actualizado")
+                    run(() => updateTaskAssignee(t.id, Number(v)), td("assigneeUpdated"))
                   }
                 />
               </div>
@@ -213,13 +225,13 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
           </div>
           {t.description && (
             <div className="mt-4 border-t border-cp-line pt-3.5">
-              <Label>Descripción</Label>
+              <Label>{tCommon("fields.description")}</Label>
               <p className="whitespace-pre-line text-[13px] leading-relaxed">{t.description}</p>
             </div>
           )}
           {t.resolution_comment && (
             <div className="mt-3">
-              <Label>Comentario de cierre</Label>
+              <Label>{td("closingComment")}</Label>
               <p className="whitespace-pre-line text-[13px]">{t.resolution_comment}</p>
             </div>
           )}
@@ -230,10 +242,10 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
         {editing ? (
           <>
             <Button type="primary" loading={busy} onClick={saveEdit} className="!text-[#141414]">
-              Guardar cambios
+              {tCommon("actions.saveChanges")}
             </Button>
             <Button onClick={() => setEditing(false)} disabled={busy}>
-              Cancelar
+              {tCommon("actions.cancel")}
             </Button>
           </>
         ) : (
@@ -246,12 +258,12 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
                 className={to === "COMPLETED" ? "!text-[#141414]" : undefined}
                 onClick={() => changeStatus(to)}
               >
-                {actionLabel(config, to)}
+                {actionLabel(config, to, td)}
               </Button>
             ))}
             {editable.length > 0 && (
               <Button type="text" className="ml-auto" onClick={() => setEditing(true)}>
-                Editar
+                {tCommon("actions.edit")}
               </Button>
             )}
           </>
@@ -261,7 +273,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
       {target && !editing && (
         <div className="mt-3 flex flex-col gap-2 rounded-lg bg-cp-subtle p-3">
           <span className="text-[13px] font-semibold text-cp-ink-2">
-            {target === "COMPLETED" ? "¿Cómo se resolvió?" : "¿Por qué se cancela?"} (opcional)
+            {target === "COMPLETED" ? td("howResolved") : td("whyCanceled")}
           </span>
           <Input.TextArea
             rows={2}
@@ -276,10 +288,10 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
               className="!text-[#141414]"
               onClick={() => changeStatus(target)}
             >
-              {target === "COMPLETED" ? "Confirmar resolución" : "Confirmar cancelación"}
+              {target === "COMPLETED" ? td("confirmResolution") : td("confirmCancellation")}
             </Button>
             <Button onClick={() => setTarget(null)} disabled={busy}>
-              Volver
+              {tCommon("actions.back")}
             </Button>
           </div>
         </div>
@@ -362,13 +374,14 @@ function fieldLabel(config: ITaskConfig, column: string) {
 }
 
 function History({ ticketId, config }: { ticketId: number; config: ITaskConfig }) {
+  const t = useTranslations("tickets.detail");
   const { history, isLoading } = useTaskHistory(ticketId);
   if (isLoading && !history.length) return null;
   if (!history.length) return null;
 
   return (
     <div className="mt-5 border-t border-cp-line pt-3.5">
-      <Label>Historial</Label>
+      <Label>{t("history")}</Label>
       <ol className="m-0 flex max-h-[180px] list-none flex-col gap-1.5 overflow-y-auto p-0">
         {history.map((log) => {
           const changed =
@@ -376,10 +389,13 @@ function History({ ticketId, config }: { ticketId: number; config: ITaskConfig }
           return (
             <li key={log.id} className="text-[13px] text-cp-ink-2">
               <b className="font-semibold text-cp-ink">{log.performed_by_name ?? "—"}</b>{" "}
-              {EVENT_LABEL[log.event] ?? log.event}
-              {log.event === "FIELD_CHANGED" && log.field_changed
-                ? ` ${fieldLabel(config, log.field_changed)}`
-                : ""}
+              {log.event === "FIELD_CHANGED"
+                ? t("events.FIELD_CHANGED", {
+                    field: log.field_changed ? fieldLabel(config, log.field_changed) : ""
+                  })
+                : isKnownEvent(log.event)
+                  ? t(`events.${log.event}`)
+                  : log.event}
               {changed && (
                 <span className="text-cp-ink-3">
                   {" "}

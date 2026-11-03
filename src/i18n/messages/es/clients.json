@@ -1,0 +1,920 @@
+{
+  "home": {
+    "title": "Clientes",
+    "pending": {
+      "message": "Estamos preparando la información de cartera de este proyecto",
+      "description": "Aparecerá aquí en unos minutos; la página se actualiza sola."
+    },
+    "header": {
+      "generating": "Generando información…",
+      "cutoffPlaceholder": "Corte —",
+      "updating": "Actualizando…",
+      "reprocess": "Reprocesar",
+      "reload": "Recargar"
+    },
+    "chips": {
+      "aging": "Edad",
+      "forecast": "Forecast",
+      "date": "Fecha",
+      "coordinator": "Coordinador",
+      "executive": "Ejecutivo",
+      "dateRange": "{from} – {to}"
+    },
+    "noExecutive": "Sin ejecutivo",
+    "noCoordinator": "Sin coordinador",
+    "noMarket": "Sin mercado",
+    "aging": {
+      "current": "Corriente",
+      "currentShort": "Corr."
+    },
+    "forecastStatus": {
+      "ok": "Cumple",
+      "near": "Cerca",
+      "risk": "En riesgo"
+    },
+    "duePeriods": {
+      "today": "Hoy",
+      "thisWeek": "Esta semana",
+      "currentMonth": "Mes actual",
+      "lastMonth": "Último mes",
+      "lastQuarter": "Último trimestre",
+      "ytd": "YTD",
+      "last12Months": "Últimos 12 meses"
+    },
+    "kpis": {
+      "totalPortfolio": "Total cartera",
+      "pastDue": "Vencida",
+      "amountM": "{amount} M",
+      "bucketTip": "{label}: {amount} M",
+      "moreBuckets": "Más tramos: {list}",
+      "creditNotes": "Notas",
+      "unappliedPayments": "PNA",
+      "disputes": "Novedades",
+      "creditNotesCount": "{count, plural, one {<b>#</b> nota} other {<b>#</b> notas}}",
+      "paymentsCount": "{count, plural, one {<b>#</b> pago} other {<b>#</b> pagos}}",
+      "disputesCount": "{count, plural, one {<b>#</b> novedad} other {<b>#</b> novedades}}",
+      "collected": "Recaudo",
+      "goal": "Meta",
+      "noGoal": "Sin meta",
+      "goalTip": "Meta: {amount} M",
+      "collectedTip": "Recaudo: {amount} M",
+      "agreementsActiveTip": "Acuerdos de pago vigentes: {amount} M",
+      "agreementsBrokenTip": "Acuerdos incumplidos: {amount} M",
+      "agreements": "Acuerdos",
+      "broken": "Incumplidos",
+      "forecast": "Forecast"
+    },
+    "collectionTip": {
+      "title": "Recaudo del mes",
+      "goal": "Meta",
+      "collected": "Recaudado",
+      "agreementsActive": "Acuerdos vigentes",
+      "agreementsBroken": "Acuerdos incumplidos",
+      "forecast": "Forecast",
+      "agreementsTitle": "Acuerdos de pago",
+      "loadError": "No se pudieron cargar los acuerdos.",
+      "empty": "Sin acuerdos este mes.",
+      "compliance": "Este cliente cumple el <b>{pct}</b> de sus acuerdos",
+      "status": {
+        "EXPIRED": "Vencido",
+        "DUE_SOON": "Próximo a vencer",
+        "ACTIVE": "Vigente",
+        "FULFILLED": "Cumplido",
+        "PARTIALLY_FULFILLED": "Cumplido parcial"
+      },
+      "expiredDays": "Vencido · {days, plural, one {# día} other {# días}}"
+    },
+    "agingTip": {
+      "invoices": "Facturas",
+      "balances": "Saldos",
+      "creditNotes": "Notas",
+      "unappliedPayments": "PNA",
+      "total": "Total"
+    },
+    "table": {
+      "title": "Cartera por cliente",
+      "marketsFiltering": "{count, plural, one {# mercado filtrando} other {# mercados filtrando}} la tabla · {customers}",
+      "marketsHint": "clic en un mercado para filtrar · clic en varios para sumarlos",
+      "clearFilter": "Quitar filtro",
+      "searchPlaceholder": "Buscar cliente, NIT, ejecutivo",
+      "downloadExcel": "Descargar Excel",
+      "downloadExcelAria": "Descargar cartera por cliente en Excel",
+      "generatingExcel": "Generando Excel de cartera…",
+      "downloaded": "Archivo descargado: {filename}",
+      "downloadError": "No se pudo descargar el Excel de cartera por cliente.",
+      "hideAging": "Ocultar edades",
+      "showAging": "Ver edades en columnas",
+      "filterExecutive": "Filtrar Ejecutivo",
+      "filterForecast": "Filtrar Forecast",
+      "executive": "Ejecutivo",
+      "empty": "Ningún cliente coincide con la búsqueda o los filtros.",
+      "columns": {
+        "name": "Nombre",
+        "portfolio": "Cartera",
+        "portfolioFocus": "Cartera {bucket}",
+        "pastDue": "Vencida",
+        "pastDuePct": "% Venc.",
+        "creditNotes": "Notas",
+        "unappliedPayments": "PNA",
+        "collectedVsGoal": "Recaudo vs meta",
+        "collected": "Recaudo",
+        "forecast": "Forecast"
+      }
+    },
+    "filters": {
+      "title": "Filtros avanzados",
+      "subtitle": "Encuentra y selecciona múltiples opciones",
+      "categories": {
+        "fecha": "Fecha",
+        "coordinators": "Coordinador",
+        "executives": "Ejecutivo",
+        "markets": "Mercado"
+      },
+      "search": {
+        "coordinators": "Buscar en coordinador...",
+        "executives": "Buscar en ejecutivo...",
+        "markets": "Buscar en mercado..."
+      },
+      "selectPeriod": "SELECCIONA UN PERIODO",
+      "presetPeriods": "Periodos predefinidos",
+      "customRange": "Rango personalizado",
+      "from": "Desde",
+      "to": "Hasta",
+      "results": "{count, plural, one {# RESULTADO} other {# RESULTADOS}}",
+      "selectAll": "Seleccionar todos",
+      "clearAll": "Limpiar todo",
+      "apply": "Aplicar filtros"
+    }
+  },
+  "customerGroupsFilter": {
+    "customerGroups": "Grupos de clientes"
+  },
+  "detail": {
+    "tabs": {
+      "dashboard": "Dashboard",
+      "receivables": "Cartera",
+      "balances": "Saldos",
+      "notes": "Notas",
+      "payments": "Pagos",
+      "cashApplication": "Aplicación",
+      "contacts": "Contactos",
+      "history": "Historial"
+    }
+  },
+  "cashApplicationPage": {
+    "title": "Aplicación de pago"
+  },
+  "applyTab": {
+    "generateAction": "Generar acción",
+    "applyWithAI": "Aplicar con <brand>CashportAI</brand>",
+    "sections": {
+      "invoices": {
+        "label": "Facturas",
+        "add": "Agregar facturas",
+        "notFound": "Facturas no encontradas",
+        "itemTitle": "Factura {id}"
+      },
+      "payments": {
+        "label": "Pagos",
+        "add": "Agregar pagos",
+        "notFound": "Pagos no encontrados",
+        "itemTitle": "Pago {id}"
+      },
+      "creditMemos": {
+        "label": "Notas crédito",
+        "add": "Agregar notas crédito",
+        "notFound": "Notas crédito no encontradas",
+        "itemTitle": "Nota crédito {id}"
+      },
+      "deductions": {
+        "label": "Saldos",
+        "add": "Agregar saldos",
+        "notFound": "Saldos no encontrados",
+        "itemTitle": "Saldo {id}"
+      }
+    },
+    "messages": {
+      "addSuccess": "Se han agregado los elementos correctamente",
+      "addError": "Ha ocurrido un error al agregar los elementos",
+      "removeSuccess": "Se ha eliminado correctamente el elemento {rowId}",
+      "removeError": "Ha ocurrido un error al eliminar el elemento",
+      "markUnidentifiedSuccess": "Pago marcado como no identificado",
+      "markUnidentifiedError": "Ha ocurrido un error al marcar el pago como no identificado",
+      "saveSuccess": "Se ha guardado la aplicación correctamente",
+      "saveError": "Ha ocurrido un error al guardar la aplicación",
+      "deleteRowsSuccess": "Se han eliminado las filas correctamente",
+      "deleteRowsError": "{count, plural, one {Error al eliminar # fila} other {Error al eliminar # filas}}",
+      "noLogAvailable": "No hay log disponible para descargar",
+      "downloadLogError": "Error al descargar el log",
+      "excelLogUnavailable": "No se pudo obtener el Excel log",
+      "downloadExcelLogError": "Error al descargar el Excel log",
+      "deleteAllSuccess": "Se ha eliminado todo correctamente",
+      "deleteAllError": "Error al eliminar todo"
+    },
+    "confirm": {
+      "deleteRows": "{count, plural, one {¿Está seguro de eliminar # fila?} other {¿Está seguro de eliminar # filas?}}",
+      "deleteAll": "¿Está seguro de eliminar todo?"
+    },
+    "tables": {
+      "columns": {
+        "initialAmount": "Monto inicial",
+        "appliedAmount": "Monto aplicado",
+        "accountingAdjustment": "Ajuste contable",
+        "payment": "Pago",
+        "remaining": "Saldo",
+        "adjustmentId": "ID ajuste",
+        "adjustmentType": "Tipo de ajuste"
+      },
+      "removeItemName": "elemento",
+      "paymentNotFromCustomer": "Pago no es del cliente",
+      "markUnidentifiedConfirm": "Se marcará el pago como no identificado"
+    },
+    "addToTablesModal": {
+      "pasteError": "Error al pegar facturas. Por favor, inténtelo de nuevo.",
+      "valuesCopied": "Valores copiados",
+      "copyValues": "Copiar valores",
+      "pasteFromExcel": "Pegar desde Excel",
+      "totalCount": "Total ({count})",
+      "adjustments": "Ajustes"
+    },
+    "resultPanel": {
+      "summary": "Resumen",
+      "netBalance": "Saldo"
+    },
+    "selectAdjustmentModal": {
+      "title": "Selecciona el tipo de aplicación del ajuste",
+      "global": "Global",
+      "byInvoice": "Por factura"
+    },
+    "generateActionModal": {
+      "deleteAllRows": "Eliminar todas las filas",
+      "deleteRows": "Eliminar filas",
+      "downloadAILog": "Descargar log IA",
+      "downloadExcelLog": "Descargar Excel log de aplicación",
+      "selectDeductionToEdit": "Debes seleccionar al menos un saldo para editar",
+      "editDeductions": "Editar saldos",
+      "changeAIPrompt": "Cambiar prompt CashportAI"
+    }
+  },
+  "applyModals": {
+    "shared": {
+      "createAdjustment": "Crear ajuste",
+      "addAdjustment": "Agregar ajuste",
+      "invoiceId": "ID Factura",
+      "pasteFromExcel": "Pegar desde Excel",
+      "created": "{count, plural, one {Ajuste creado correctamente} other {Ajustes creados correctamente}}",
+      "createError": "Error al crear los ajustes"
+    },
+    "applyAI": {
+      "title": "Aplicar pagos con <ai>CashportAI</ai>",
+      "description": "Sube los documentos y <ai>CashportAI</ai> los analizará y clasificará según su tipo.",
+      "dropHint": "Arrastra y suelta tu archivo aquí o haz clic para subirlo",
+      "maxSize": "Tamaño máximo 5MB",
+      "commentPlaceholder": "Ingresar un comentario",
+      "analyze": "Analizar con <ai>CashportAI</ai>",
+      "success": "Archivos analizados con CashportAI",
+      "error": "Error al aplicar con CashportAI",
+      "fileTooLarge": "El archivo debe ser menor a 5MB",
+      "uploadFailed": "No se pudo cargar el archivo {fileName}."
+    },
+    "changePrompt": {
+      "title": "Prompt de cliente para <ai>CashportAI</ai>",
+      "description": "Si el cliente tiene condiciones especiales <ai>CashportAI</ai> las tendrá en cuenta en el proceso para la extracción de data",
+      "label": "Prompt",
+      "cancelEdit": "Cancelar edición",
+      "save": "Guardar <ai>CashportAI</ai>",
+      "notFound": "No se encontró un prompt para este cliente, por favor crea uno.",
+      "loadError": "Error al obtener el prompt del cliente",
+      "created": "Prompt creado con éxito",
+      "createError": "Error al crear el prompt",
+      "updated": "Prompt actualizado con éxito",
+      "updateError": "Error al actualizar el prompt"
+    },
+    "createAdjustment": {
+      "reasonRequired": "Motivo es obligatorio",
+      "reasonPlaceholder": "Ingresar motivo",
+      "amountRequired": "Valor es obligatorio",
+      "amountNonZero": "El valor debe ser distinto a 0"
+    },
+    "createByInvoice": {
+      "invoicesCount": "Facturas ({count})",
+      "adjustmentType": "Tipo de ajuste",
+      "adjustmentTypeRequired": "Tipo de ajuste es obligatorio",
+      "adjustmentTypePlaceholder": "Seleccionar tipo de ajuste",
+      "addAnother": "Agregar otro ajuste",
+      "process": "Procesar",
+      "pasteError": "Error al pegar facturas. Por favor, inténtelo de nuevo."
+    },
+    "applySpecific": {
+      "title": "Aplicar ajuste",
+      "subtitle": "Define el monto a aplicar a cada factura",
+      "pending": "Pendiente",
+      "newBalance": "Saldo nuevo",
+      "amountToApply": "Valor a aplicar",
+      "amountPlaceholder": "Ingresar valor",
+      "applied": "Ajuste aplicado correctamente",
+      "applyError": "Error al aplicar el ajuste"
+    },
+    "editRow": {
+      "adjustment": "Ajuste",
+      "rowType": "{type, select, payment {Pago} discount {Ajuste} other {Factura}}",
+      "title": "{type, select, payment {Pago {id}} discount {Ajuste {id}} other {Factura {id}}}",
+      "onlyNumbers": "Solo se permiten números",
+      "maxAmount": "El valor no puede superar {max}",
+      "saveError": "Error al guardar los cambios"
+    },
+    "listAdjustments": {
+      "subtitle": "Selecciona los ajustes a aplicar",
+      "creditNote": "Nota crédito {id}",
+      "noInvoicesSelected": "No hay facturas seleccionadas"
+    }
+  },
+  "invoiceActions": {
+    "title": "Generar acción",
+    "subtitle": "Selecciona la acción que vas a realizar",
+    "options": {
+      "accountingAdjustments": "Ajustes contables",
+      "generateCreditNote": "Generar nota crédito",
+      "generateDiscount": "Generar descuento",
+      "generateDebitNote": "Generar nota débito",
+      "paymentAgreement": "Acuerdo de pago",
+      "generatePaymentAgreement": "Generar acuerdo de pago",
+      "generatePayment": "Generar pago"
+    },
+    "debitNote": {
+      "title": "Aplicar nota débito",
+      "selectNotes": "Selecciona la(s) nota(s) crédito a aplicar",
+      "noteName": "Nota débito {id}",
+      "volume": "Volumen",
+      "create": "Crear nota débito",
+      "defineAmount": "Define el monto a aplicar a cada factura",
+      "columns": {
+        "invoiceId": "ID Factura",
+        "pending": "Pendiente",
+        "newBalance": "Saldo nuevo",
+        "amountToApply": "Valor a aplicar"
+      },
+      "enterAmount": "Ingresar valor",
+      "evidenceHint": "Si deseas, adjunta un documento y/o ingresa un comentario",
+      "evidence": "Evidencia",
+      "required": "*Obligatorio",
+      "selectFile": "Selecciona un archivo",
+      "fileHint": "PDF, Word, PNG. (Tamaño máx. 30MB)",
+      "enterComment": "Ingresar comentario"
+    }
+  },
+  "invoiceDownload": {
+    "defaultTitle": "factura",
+    "gotIt": "Entendido",
+    "imageAlt": "Documento"
+  },
+  "changeStatus": {
+    "title": "Cambio de estado",
+    "description": "Selecciona el nuevo estado de la factura",
+    "confirm": "Cambiar de estado",
+    "success": "La factura ha cambiado de estado correctamente.",
+    "error": "Ha ocurrido un error al cambiar el estado de la factura",
+    "states": {
+      "reconciled": "Conciliada",
+      "unreconciled": "Sin conciliar",
+      "denied": "Glosado",
+      "returned": "Devolución",
+      "voided": "Anulada",
+      "received": "Recibida",
+      "billedThisMonth": "Facturado mes actual"
+    }
+  },
+  "evidence": {
+    "title": "Evidencia",
+    "description": "Adjunta la evidencia e ingresa un comentario",
+    "required": "*Obligatorio",
+    "uploadAnother": "Cargar otro documento",
+    "commentPlaceholder": "Ingresar un comentario",
+    "attach": "Adjuntar evidencia"
+  },
+  "paymentAgreement": {
+    "title": "Acuerdo de pago",
+    "description": "Selecciona la fecha y el valor para definir el acuerdo de pago",
+    "datePlaceholder": "Selecciona la fecha",
+    "totalAgreed": "Total acordado: <total></total>",
+    "activeAgreement": "Esta factura ya tiene un acuerdo de pago activo",
+    "success": "Acuerdo de pago creado exitosamente",
+    "error": "Error al crear el acuerdo de pago.",
+    "errorRetry": "Error al crear el acuerdo de pago. Por favor, intente de nuevo.",
+    "columns": {
+      "invoiceId": "ID Factura",
+      "issueDate": "Emisión",
+      "pending": "Pendiente",
+      "agreedAmount": "Valor acordado",
+      "newDate": "Nueva fecha"
+    }
+  },
+  "bulkSearch": {
+    "title": "Búsqueda masiva",
+    "steps": {
+      "upload": "Cargar",
+      "results": "Resultados",
+      "action": "Acción"
+    },
+    "errors": {
+      "clientLoading": "Todavía se están cargando los datos del cliente.",
+      "search": "No se pudo hacer la búsqueda masiva.",
+      "download": "No se pudo descargar el Excel de resultados."
+    },
+    "progress": {
+      "searching": "Buscando facturas",
+      "downloadingStatement": "Descargando estado de cuenta",
+      "sendingStatement": "Enviando estado de cuenta",
+      "processing": "Procesando {count, plural, one {# factura} other {# facturas}}",
+      "uploadingRecords": "Subiendo {count, plural, one {# registro} other {# registros}}",
+      "uploadingFile": "Subiendo {name}",
+      "loadingTempTable": "Cargando tabla temporal",
+      "matching": "Cruzando con la cartera del cliente",
+      "preparingResults": "Preparando resultados",
+      "generatingStatement": "Generando estado de cuenta",
+      "preparingFiles": "Preparando archivos",
+      "sendingToRecipients": "Enviando a los destinatarios",
+      "validating": "Validando facturas",
+      "logging": "Registrando en historial",
+      "searchFootnote": "Si cierras esta ventana se cancela la búsqueda.",
+      "actionFootnote": "Puedes cerrar esta ventana; te avisaremos cuando termine."
+    },
+    "incidentConflict": {
+      "title": "Algunas facturas ya tienen novedades abiertas. ¿Qué deseas hacer con las novedades?",
+      "create": "Crear novedad nueva",
+      "skip": "No crear nueva novedad"
+    },
+    "actions": {
+      "changeStatus": {
+        "label": "Cambiar estado",
+        "description": "Mueve las facturas a un nuevo estado",
+        "run": "Cambiar estado de {count, plural, one {# factura} other {# facturas}}",
+        "applying": "Aplicando cambiar estado",
+        "error": "No se pudo cambiar estado."
+      },
+      "applyPayment": {
+        "label": "Aplicar pago",
+        "description": "Las lleva a la tabla de aplicación de pagos",
+        "run": "Aplicar pago a {count, plural, one {# factura} other {# facturas}}",
+        "applying": "Aplicando aplicar pago",
+        "error": "No se pudo aplicar pago."
+      },
+      "registerDispute": {
+        "label": "Registrar novedad",
+        "description": "Glosa, devolución o faltante",
+        "run": "Registrar novedad en {count, plural, one {# factura} other {# facturas}}",
+        "applying": "Aplicando registrar novedad",
+        "error": "No se pudo registrar novedad."
+      },
+      "submitInvoices": {
+        "label": "Radicar facturas",
+        "description": "Marca como radicadas ante el cliente",
+        "run": "Radicar {count, plural, one {# factura} other {# facturas}}",
+        "applying": "Aplicando radicar facturas",
+        "error": "No se pudo radicar facturas."
+      },
+      "sendStatement": {
+        "label": "Enviar estado de cuenta",
+        "description": "Por correo, WhatsApp o descarga",
+        "run": "Enviar estado de cuenta de {count, plural, one {# factura} other {# facturas}}",
+        "applying": "Aplicando enviar estado de cuenta",
+        "error": "No se pudo enviar estado de cuenta."
+      }
+    },
+    "summary": {
+      "statementEmailed": "Estado de cuenta enviado por correo.",
+      "statementWhatsapp": "Estado de cuenta enviado por WhatsApp.",
+      "statementDownloadError": "No se pudieron descargar los archivos del estado de cuenta.",
+      "statementDownloaded": "Archivos del estado de cuenta descargados.",
+      "statusChanged": "Se cambió el estado de {count, plural, one {# factura} other {# facturas}}.",
+      "paymentAdded": "Se {count, plural, one {agregó # factura} other {agregaron # facturas}} a la tabla de aplicación de pagos.",
+      "disputeRegistered": "Se registró la novedad en {count, plural, one {# factura} other {# facturas}}.",
+      "invoicesSubmitted": "Se {count, plural, one {radicó # factura} other {radicaron # facturas}}."
+    },
+    "done": {
+      "title": "{action} completado",
+      "anotherAction": "Otra acción"
+    },
+    "input": {
+      "excelReady": "Excel listo para buscar",
+      "noIds": "Sin identificadores todavía",
+      "ids": "{count, plural, one {# identificador} other {# identificadores}}",
+      "idsWithRepeated": "{count, plural, one {# identificador} other {# identificadores}} · {repeated, plural, one {# repetido} other {# repetidos}}",
+      "pasteTitle": "Pega los identificadores",
+      "fileInUse": "Se usará el archivo cargado. Quítalo para pegar identificadores.",
+      "pasteHint": "Uno por línea, o separados por espacio, coma o punto y coma.",
+      "uploadTitle": "O carga un archivo",
+      "records": "{count, plural, one {# registro} other {# registros}}",
+      "readOnSearch": "Se lee al buscar",
+      "removeFile": "Quitar archivo",
+      "dragTitle": "Arrastra o selecciona un archivo",
+      "dragHint": "Excel o CSV · una columna con el ID de factura",
+      "downloadTemplate": "Descargar plantilla",
+      "searchCount": "Buscar {count, plural, one {# factura} other {# facturas}}",
+      "search": "Buscar facturas"
+    },
+    "results": {
+      "countedOnce": "Se consideró una sola vez",
+      "dueToday": "Hoy",
+      "dueAgo": "Hace {days, plural, one {# día} other {# días}}",
+      "dueIn": "En {days, plural, one {# día} other {# días}}",
+      "cards": {
+        "foundPending": "{amount} pendiente",
+        "missing": "No existen en Cashport",
+        "other": "Pertenecen a otro cliente",
+        "dup": "Repetidas en tu archivo"
+      },
+      "kinds": {
+        "found": {
+          "label": "Encontrada",
+          "plural": "Encontradas"
+        },
+        "missing": {
+          "label": "No encontrada",
+          "plural": "No encontradas"
+        },
+        "other": {
+          "label": "De otro cliente",
+          "plural": "De otro cliente"
+        },
+        "dup": {
+          "label": "Duplicada",
+          "plural": "Duplicadas"
+        }
+      },
+      "columns": {
+        "result": "Resultado",
+        "detail": "Estado / detalle",
+        "pending": "Pendiente",
+        "due": "Vence"
+      },
+      "searchPlaceholder": "Buscar en resultados",
+      "showing": "Mostrando {visible} de {total} · el Excel trae todo",
+      "records": "{count, plural, one {# registro} other {# registros}}",
+      "downloadExcel": "Descargar Excel",
+      "empty": "Sin registros para este filtro",
+      "newSearch": "Nueva búsqueda",
+      "continue": "Continuar con {count, plural, one {# encontrada} other {# encontradas}}"
+    },
+    "action": {
+      "methods": {
+        "email": "Correo",
+        "whatsapp": "WhatsApp",
+        "download": "Descargar",
+        "emailValue": "Email"
+      },
+      "noActiveWhatsapp": "sin WhatsApp activo",
+      "downloadStatement": "Descargar estado de cuenta",
+      "sendStatement": "Enviar estado de cuenta",
+      "skippedFiles": "Se omitieron archivos repetidos o de más de {maxMb} MB.",
+      "applyTo": "Aplicar a",
+      "scopeSummary": "{count, plural, one {# factura} other {# facturas}} · {amount}",
+      "actionTitle": "Acción",
+      "newStatus": "Nuevo estado",
+      "statusPlaceholder": "Selecciona un estado",
+      "paymentTableLabel": "Se llevan a la tabla de aplicación de pagos",
+      "andMore": "y {count} más",
+      "noInvoicesInScope": "Ninguna factura en el alcance.",
+      "reasonsError": "No se pudieron cargar los motivos",
+      "reasonPlaceholder": "Selecciona un motivo",
+      "disputeAmount": "Monto novedad (opcional)",
+      "amountPlaceholder": "Ingresar monto",
+      "submissionType": "Tipo de radicación",
+      "submissionDate": "Fecha de radicación",
+      "datePlaceholder": "Selecciona la fecha",
+      "evidence": "Evidencia",
+      "dragFiles": "Arrastra o selecciona archivos",
+      "maxPerFile": "Hasta {maxMb} MB por archivo",
+      "removeFile": "Quitar {name}",
+      "files": "Archivos",
+      "noAttachments": "Sin archivos adjuntos",
+      "to": "Para",
+      "recipientsPlaceholder": "Selecciona o escribe destinatarios",
+      "statementError": "No se pudieron cargar los contactos ni los archivos del cliente.",
+      "commentOptional": "Comentario (opcional)",
+      "commentPlaceholder": "Queda en el historial de cada factura",
+      "backToResults": "Resultados"
+    }
+  },
+  "invoiceDetail": {
+    "title": "Factura {id}",
+    "image": "Imagen",
+    "viewInvoice": "Ver factura",
+    "generateAction": "Generar acción",
+    "traceability": "Trazabilidad",
+    "events": {
+      "creditNoteApplied": "Nota de crédito aplicada",
+      "debitNoteApplied": "Nota de débito aplicada",
+      "discountApplied": "Descuento aplicado",
+      "submission": "Radicación",
+      "newDispute": "Nueva novedad",
+      "invoiceIssued": "Emisión de factura",
+      "disputeClosed": "Cierre de novedad",
+      "paymentAgreement": "Acuerdo de pago",
+      "paymentAgreementExpired": "Vencimiento acuerdo de pago",
+      "dueNotice": "Aviso de vencimiento",
+      "statusChanged": "Cambiar estado",
+      "invoiceReconciled": "Factura conciliada",
+      "paymentApplied": "Pago aplicado",
+      "partialPayment": "Pago parcial",
+      "balanceConfirmed": "Saldo Confirmado"
+    },
+    "tags": {
+      "settled": "Legalizada",
+      "pendingSettlement": "Por legalizar",
+      "closed": "Cerrada",
+      "open": "Abierta",
+      "closedUnlinked": "Cerrada - Desvinculada",
+      "openUnlinked": "Abierta - Desvinculada",
+      "approved": "Aprobada",
+      "rejected": "Rechazada",
+      "pending": "Pendiente",
+      "voided": "Anulado"
+    },
+    "actionBy": "Acción: {user}",
+    "value": "Valor: {value}",
+    "agreedValue": "Valor acordado: {value}",
+    "agreedPaymentDate": "Fecha de pago acordada: {date}",
+    "adjustmentId": "ID del ajuste:",
+    "agreementId": "ID del acuerdo:",
+    "agreementIdValue": "ID del acuerdo: {id}",
+    "disputeId": "ID novedad:",
+    "paymentId": "ID del pago:",
+    "initialStatus": "Estado inicial: {status}",
+    "finalStatus": "Estado final: {status}",
+    "disputeType": "Tipo novedad: {type}",
+    "comment": "Comentario: {comment}",
+    "summary": {
+      "title": "Resumen",
+      "initialValue": "Valor inicial",
+      "creditNote": "Nota crédito",
+      "debitNote": "Nota débito",
+      "discount": "Descuento"
+    }
+  },
+  "dashboard": {
+    "graphAlt": "Gráfica",
+    "creditLimit": "Cupo",
+    "unreconciled": "Sin conciliar",
+    "disputes": "Novedades",
+    "alerts": {
+      "title": "Alertas",
+      "openDisputes": "Novedades abiertas",
+      "balances": "Saldos",
+      "availableCreditMemos": "NC disponibles"
+    },
+    "budget": {
+      "title": "Presupuesto"
+    },
+    "collectApply": {
+      "collectionTarget": "Meta de recaudo",
+      "totalApplied": "Total aplicado",
+      "pendingApplication": "Pend. aplicación",
+      "unidentifiedPayments": "Pagos no identificados"
+    },
+    "expiredPortfolio": {
+      "title": "C. vencida"
+    },
+    "historicDso": {
+      "title": "DSO histórico",
+      "days": "Días",
+      "tooltip": "DSO: {value}",
+      "months": {
+        "jan": "Ene",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Abr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Ago",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dic"
+      }
+    },
+    "invoiceStatus": {
+      "title": "Estatus de facturas",
+      "unreconciled": "Sin conciliar",
+      "reconciled": "Conciliadas",
+      "notSubmitted": "Sin radicar"
+    },
+    "portfolioAges": {
+      "title": "Cartera vencida",
+      "current": "Actual",
+      "days": "{days} días",
+      "over": "+{days} días"
+    },
+    "sellsVsPayments": {
+      "title": "Histórico ventas vs pagos",
+      "billing": "Facturación",
+      "collections": "Recaudo",
+      "payments": "Pagos"
+    },
+    "totalPortfolio": {
+      "title": "Total cartera neta",
+      "invoices": "Facturas",
+      "creditMemos": "Notas crédito",
+      "balances": "Saldos"
+    }
+  },
+  "history": {
+    "searchPlaceholder": "Buscar en el historial",
+    "loadError": "No se pudo cargar el historial del cliente",
+    "columns": {
+      "event": "Evento"
+    },
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "daysAgo": "{days, plural, one {# día} other {# días}}",
+    "noResults": "Sin resultados para esta búsqueda.",
+    "showing": "Mostrando {shown} de {total, plural, one {# evento} other {# eventos}}",
+    "rowActions": {
+      "downloadFlatFile": "Descargar plano",
+      "viewPdf": "Ver PDF",
+      "noDetail": "No hay detalle de esta comunicación",
+      "onlyPaymentEvents": "Esta opción solo aplica para eventos de Aplicación de pago o Legalización de saldo",
+      "applicationIdNotFound": "No se encontró el id de aplicación de pago en este registro",
+      "flatFileError": "No se pudo generar el plano",
+      "pdfError": "No se pudo generar el PDF"
+    },
+    "voidConfirm": {
+      "title": "¿Estás seguro de que deseas anular esta aplicación de pago?",
+      "content": "Esta acción es definitiva",
+      "okText": "Anular aplicación"
+    },
+    "generateAction": {
+      "description": "Selecciona la acción que vas a realizar",
+      "voidPayment": "Anular pago"
+    },
+    "communicationDetail": {
+      "title": "Correo enviado",
+      "to": "Para",
+      "cc": "CC",
+      "subject": "Asunto"
+    }
+  },
+  "contacts": {
+    "newContact": "Nuevo contacto",
+    "columns": {
+      "lastName": "Apellido",
+      "position": "Cargo",
+      "role": "Rol",
+      "email": "Email"
+    },
+    "modal": {
+      "titleEdit": "Datos de contacto",
+      "titleCreate": "Crear nuevo contacto",
+      "infoEdit": "Ingresa la información para editar un contacto existente",
+      "infoCreate": "Ingresa la información para crear un nuevo contacto",
+      "firstNames": "Nombres",
+      "lastNames": "Apellidos",
+      "position": "Cargo",
+      "role": "Rol",
+      "callingCode": "Indicativo",
+      "email": "Email",
+      "createContact": "Crear contacto",
+      "phoneExactDigits": "El teléfono debe tener {digits} dígitos",
+      "phoneDigitsRange": "El teléfono debe tener entre {min} y {max} dígitos",
+      "invalidEmail": "El email no es válido"
+    }
+  },
+  "payments": {
+    "tab": {
+      "addedToApplication": "Pagos añadidos a la tabla de aplicación de pagos",
+      "addToApplicationError": "Error al añadir pagos a la tabla de aplicación de pagos",
+      "markedUnidentified": "{count, plural, one {Pago marcado como no identificado} other {Pagos marcados como no identificados}}",
+      "markUnidentifiedError": "Ha ocurrido un error al marcar los pagos seleccionados como no identificados",
+      "itemName": "Pagos",
+      "generateAction": "Generar acción",
+      "identifyPayment": "Identificar pago",
+      "confirmUnidentifiedTitle": "Se marcarán los pagos seleccionados como no identificados"
+    },
+    "table": {
+      "columns": {
+        "erpId": "Id ERP",
+        "receivedDate": "Ingreso",
+        "identificationDate": "Identificación",
+        "available": "Disponible"
+      }
+    },
+    "identifiedPayments": {
+      "success": "¡Pago identificado enviado correctamente!",
+      "error": "Ocurrió un error al identificar el pago",
+      "title": "Pagos identificados",
+      "description": "Selecciona el pago que quieres aplicar",
+      "paymentId": "Pago {id}",
+      "identify": "Identificar"
+    },
+    "notIdentifiedPayment": {
+      "notificationSent": "Notificación enviada correctamente",
+      "notificationError": "Error al enviar notificación",
+      "title": "Pago no encontrado",
+      "description": "El pago no fue encontrado. Si deseas revisar la información, por favor regresa a la página anterior. De lo contrario, envía una notificación.",
+      "commentPlaceholder": "Ingresar un comentario",
+      "sendNotification": "Enviar notificación"
+    },
+    "attachment": {
+      "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de {maxMb} MB.",
+      "evidence": "Evidencia",
+      "required": "*Obligatorio",
+      "evidenceRequired": "Evidencia es obligatoria",
+      "optional": "*Opcional"
+    },
+    "identifyPayment": {
+      "noPaymentFound": "No se identificó ningún pago",
+      "identifyError": "Error al identificar pago",
+      "title": "Identificar pago",
+      "subtitle": "Ingresa la información para identificar el pago",
+      "account": "Cuenta",
+      "accountPlaceholder": "Seleccionar cuenta",
+      "dateRequired": "Fecha es obligatoria",
+      "futureDate": "La fecha no puede ser futura",
+      "amountPlaceholder": "Ingresar monto",
+      "amountRequired": "Valor es obligatorio",
+      "amountMin": "El valor debe ser mayor a 0",
+      "referencePlaceholder": "Ingresar No. de referencia",
+      "paymentType": "Tipo de pago",
+      "paymentTypePlaceholder": "Seleccionar tipo",
+      "markAsAdvance": "Marcar pago como anticipo",
+      "attachEvidence": "Adjunta la evidencia"
+    }
+  },
+  "adjustments": {
+    "item": {
+      "debitNote": "Nota débito",
+      "pendingSettlement": "Por legalizar",
+      "issueDate": "Fecha de emisión",
+      "creator": "Creador",
+      "appliedInvoices": "Facturas aplicadas",
+      "specialConditions": "Condiciones específicas",
+      "downloadEvidence": "Descargar evidencia"
+    },
+    "modal": {
+      "title": "Ajustes contables",
+      "tabs": {
+        "available": "Disponibles",
+        "managed": "Gestionados"
+      }
+    },
+    "table": {
+      "columns": {
+        "erpId": "ID ERP",
+        "createdAt": "Creación",
+        "adjustmentType": "Tipo de ajuste",
+        "initialAmount": "Monto inicial",
+        "appliedAmount": "Monto aplicado",
+        "availableAmount": "Monto disponible"
+      }
+    },
+    "tab": {
+      "addedToApplication": "{count, plural, one {Ajuste añadido a la tabla de aplicación de pagos} other {Ajustes añadidos a la tabla de aplicación de pagos}}",
+      "addToApplicationErrorDetail": "Error al añadir ajuste(s) a la tabla de aplicación de pagos {detail}",
+      "addToApplicationError": "Error al añadir ajuste(s) a la tabla de aplicación de pagos",
+      "itemName": "Ajustes",
+      "generateAction": "Generar acción"
+    },
+    "editModal": {
+      "success": "Ajustes editados correctamente",
+      "error": "Error al editar ajustes",
+      "columns": {
+        "adjustment": "Ajuste contable"
+      },
+      "commentPlaceholder": "Agrega un comentario",
+      "amountRequired": "Valor es obligatorio",
+      "amountNonZero": "El valor debe ser distinto a 0",
+      "title": "Edición de saldos",
+      "removeItemName": "ajuste"
+    }
+  },
+  "balances": {
+    "filter": {
+      "type": "Tipo",
+      "allTypes": "Todos los tipos",
+      "filters": "Filtros"
+    },
+    "view": {
+      "itemName": "Saldos"
+    }
+  },
+  "balanceSettlement": {
+    "noAdjustmentsToSettle": "No hay ajustes disponibles para legalizar",
+    "loadToSettleError": "Error al cargar ajustes a legalizar",
+    "noAdjustmentsAvailable": "No hay ajustes disponibles para seleccionar",
+    "loadAvailableError": "Error al cargar ajustes disponibles",
+    "success": "Saldos legalizados correctamente",
+    "error": "Error al legalizar los saldos: {detail}",
+    "unknownError": "desconocido",
+    "columns": {
+      "cashportAdjustment": "Ajuste Cashport",
+      "linkedInvoice": "Factura asociada",
+      "erpAdjustment": "Ajuste ERP",
+      "difference": "Diferencia",
+      "observation": "Observación"
+    },
+    "commentPlaceholder": "Agrega un comentario",
+    "title": "Legalización de Saldos",
+    "description": "Selecciona la Nota crédito generada para la Legalización del saldo."
+  }
+}

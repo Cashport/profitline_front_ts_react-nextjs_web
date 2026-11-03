@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Product } from "@/types/products/products";
 import { INivel, TipoCondicion } from "@/types/marketAdmin/IMarketAdmin";
 import CondicionObjetivo from "./CondicionObjetivo";
@@ -21,13 +22,17 @@ export default function NivelRow({
   onChange: (n: INivel) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations("marketAdmin.promotions");
   return (
     <div className="rounded-lg overflow-hidden bg-white">
       {/* Nivel header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-[#FAFAFA] border-b border-[#EEEEEE]">
-        <span className="text-[13px] font-semibold text-[#141414]">Nivel {idx + 1}</span>
+        <span className="text-[13px] font-semibold text-[#141414]">
+          {t("level", { number: idx + 1 })}
+        </span>
         <button
           onClick={onRemove}
+          aria-label={t("removeLevel")}
           className="w-6 h-6 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors"
         >
           <Trash2 size={12} />

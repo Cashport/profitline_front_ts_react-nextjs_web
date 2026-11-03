@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import {
   XAxis,
   YAxis,
@@ -29,6 +30,7 @@ interface DashboardSellsVsPaymentsProps {
 dayjs.extend(utcPlugin);
 
 const DashboardSellsVsPayments: FC<DashboardSellsVsPaymentsProps> = ({ chartData, className }) => {
+  const t = useTranslations("clients.dashboard.sellsVsPayments");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -50,19 +52,19 @@ const DashboardSellsVsPayments: FC<DashboardSellsVsPaymentsProps> = ({ chartData
   return (
     <div className={`${styles.wrapper} ${className}`}>
       <div className={styles.name}>
-        Histórico ventas vs pagos
+        {t("title")}
         <div className={styles.legends}>
           <div className={styles.legend}>
             <div className={styles.circle} style={{ backgroundColor: "#000000" }}></div>
-            Facturación
+            {t("billing")}
           </div>
           <div className={styles.legend}>
             <div className={styles.circle} style={{ backgroundColor: "#0085FF" }}></div>
-            Recaudo
+            {t("collections")}
           </div>
           <div className={styles.legend}>
             <div className={styles.circle} style={{ backgroundColor: "#CBE71E" }}></div>
-            Pagos
+            {t("payments")}
           </div>
         </div>
       </div>
@@ -83,15 +85,33 @@ const DashboardSellsVsPayments: FC<DashboardSellsVsPaymentsProps> = ({ chartData
             />
             <Tooltip content={<CustomTooltip />} />
             <CartesianGrid strokeDasharray="3 3" />
-            
+
             {/* Línea negra para Facturación */}
-            <Line type="monotone" dataKey="ventas" stroke="#000000" strokeWidth={4} />
+            <Line
+              type="monotone"
+              dataKey="ventas"
+              name={t("billing")}
+              stroke="#000000"
+              strokeWidth={4}
+            />
 
             {/* Línea azul para Recaudo */}
-            <Line type="monotone" dataKey="recaudo" stroke="#0085FF" strokeWidth={4} />
+            <Line
+              type="monotone"
+              dataKey="recaudo"
+              name={t("collections")}
+              stroke="#0085FF"
+              strokeWidth={4}
+            />
 
             {/* Línea verde para Pagos */}
-            <Line type="monotone" dataKey="bancos" stroke="#CBE71E" strokeWidth={4} />
+            <Line
+              type="monotone"
+              dataKey="bancos"
+              name={t("payments")}
+              stroke="#CBE71E"
+              strokeWidth={4}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>

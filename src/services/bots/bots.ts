@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { API, idProject } from "@/utils/api/api";
 import { MessageType } from "@/context/MessageContext";
 import { IBotRunNowResult } from "@/types/bots/IBotHealth";
@@ -19,16 +20,17 @@ export const executeBotManually = async (
     );
 
     if (response.data.accepted) {
-      showMessage("success", "Se solicitó la ejecución del bot correctamente.");
+      showMessage("success", getTranslator("shared")("services.botRunRequested"));
       return true;
     }
 
-    showMessage("error", response.data.schedulerMessage || "No se pudo iniciar la ejecución del bot.");
+    showMessage(
+      "error",
+      response.data.schedulerMessage || getTranslator("shared")("services.botRunFailed")
+    );
     return false;
   } catch (error: any) {
-    showMessage("error", error?.message || "No se pudo iniciar la ejecución del bot.");
+    showMessage("error", error?.message || getTranslator("shared")("services.botRunFailed"));
     return false;
   }
 };
-
-

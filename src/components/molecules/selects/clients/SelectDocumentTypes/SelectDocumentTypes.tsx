@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import useSWR from "swr";
 import {
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export const SelectDocumentTypes = ({ errors, field }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useSWR<IDocumentsTypes>("/document-type", fetcher, {});
   const options = data?.data.map((option) => {
     return {
@@ -37,7 +39,7 @@ export const SelectDocumentTypes = ({ errors, field }: Props) => {
   return (
     <>
       <Select
-        placeholder="Seleccione Tipo de Documento"
+        placeholder={t("selectDocumentType")}
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={isLoading}
         variant="borderless"
@@ -48,9 +50,7 @@ export const SelectDocumentTypes = ({ errors, field }: Props) => {
         labelInValue
       />
       {errors && (
-        <Typography.Text className="textError">
-          El tipo de documento es obligatorio *
-        </Typography.Text>
+        <Typography.Text className="textError">{t("documentTypeRequired")}</Typography.Text>
       )}
     </>
   );

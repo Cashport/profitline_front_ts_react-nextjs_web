@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/modules/chat/ui/badge";
 import { CaretDoubleRight, Paperclip, Pencil } from "phosphor-react";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
@@ -63,6 +64,8 @@ export function BalanceDetailModal({
   isModal = false,
   onUpdated
 }: BalanceDetailModalProps) {
+  const t = useTranslations("balances.detail");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -132,11 +135,11 @@ export function BalanceDetailModal({
     setIsSaving(true);
     try {
       await updateBalance(saldoData.id, payload);
-      showMessage("success", "Saldo actualizado correctamente");
+      showMessage("success", t("updated"));
       await onUpdated?.();
       setIsEditing(false);
     } catch (error) {
-      showMessage("error", error instanceof Error ? error.message : "Error al actualizar el saldo");
+      showMessage("error", error instanceof Error ? error.message : t("updateError"));
     } finally {
       setIsSaving(false);
     }
@@ -174,7 +177,7 @@ export function BalanceDetailModal({
                 disabled={isSaving}
                 className="px-3 py-1 text-sm font-medium text-primary-foreground bg-primary rounded hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isSaving ? "Guardando…" : "Guardar"}
+                {isSaving ? tCommon("status.saving") : tCommon("actions.save")}
               </button>
             ) : (
               <button
@@ -182,7 +185,7 @@ export function BalanceDetailModal({
                 onClick={handleToggleEdit}
                 className="px-3 py-1 text-sm font-medium text-cashport-black border border-input rounded bg-white hover:bg-[#f7f7f7] transition-colors"
               >
-                Editar
+                {tCommon("actions.edit")}
               </button>
             )}
             <Badge
@@ -205,11 +208,11 @@ export function BalanceDetailModal({
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
             <div>
-              <p className="text-[13px] text-gray-400">Cliente</p>
+              <p className="text-[13px] text-gray-400">{t("customer")}</p>
               <p className="text-sm font-semibold text-cashport-black">{saldoData.client_name}</p>
             </div>
             <div>
-              <p className="text-[13px] text-gray-400">Tipo</p>
+              <p className="text-[13px] text-gray-400">{t("type")}</p>
               {isEditing ? (
                 <Controller
                   control={control}
@@ -221,7 +224,7 @@ export function BalanceDetailModal({
                       options={motives?.map((m) => ({ value: m.id, label: m.name })) ?? []}
                       loading={motivesLoading}
                       allowClear
-                      placeholder="Selecciona un tipo"
+                      placeholder={t("typePlaceholder")}
                       getPopupContainer={(trigger) => trigger.parentElement!}
                     />
                   )}
@@ -234,18 +237,18 @@ export function BalanceDetailModal({
             </div>
             {saldoData.kam_name && (
               <div>
-                <p className="text-[13px] text-gray-400">KAM</p>
+                <p className="text-[13px] text-gray-400">{t("kam")}</p>
                 <p className="text-sm font-semibold text-cashport-black">{saldoData.kam_name}</p>
               </div>
             )}
             <div>
-              <p className="text-[13px] text-gray-400">Fecha creación</p>
+              <p className="text-[13px] text-gray-400">{t("createdAt")}</p>
               <p className="text-sm font-semibold text-cashport-black">
                 {formatDate(saldoData.created_at)}
               </p>
             </div>
             <div>
-              <p className="text-[13px] text-gray-400">Procedencia</p>
+              <p className="text-[13px] text-gray-400">{t("origin")}</p>
               {isEditing ? (
                 <Controller
                   control={control}
@@ -262,7 +265,7 @@ export function BalanceDetailModal({
                           label: e.description
                         }))}
                         allowClear
-                        placeholder="Selecciona una opción"
+                        placeholder={tCommon("placeholders.select")}
                         getPopupContainer={(trigger) => trigger.parentElement!}
                       />
                     );
@@ -289,7 +292,7 @@ export function BalanceDetailModal({
           <div className="h-px bg-gray-100" />
 
           <div>
-            <p className="text-[13px] text-gray-400">Descripción</p>
+            <p className="text-[13px] text-gray-400">{t("description")}</p>
             <p className="text-sm font-semibold text-cashport-black">
               {saldoData.COMMENTS ?? saldoData.comments ?? "-"}
             </p>
@@ -299,7 +302,7 @@ export function BalanceDetailModal({
             <>
               <div className="h-px bg-gray-100" />
               <div>
-                <p className="text-[13px] text-gray-400">Observación auditoría</p>
+                <p className="text-[13px] text-gray-400">{t("auditNote")}</p>
                 {isEditing ? (
                   <Controller
                     control={control}
@@ -307,7 +310,7 @@ export function BalanceDetailModal({
                     render={({ field }) => (
                       <textarea
                         {...field}
-                        placeholder="Ingresar una observación de auditoría"
+                        placeholder={t("auditNotePlaceholder")}
                         rows={3}
                         className="w-full mt-1 px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                       />
@@ -326,7 +329,7 @@ export function BalanceDetailModal({
             <>
               <div className="h-px bg-gray-100" />
               <div>
-                <p className="text-[13px] text-gray-400">Documento cliente</p>
+                <p className="text-[13px] text-gray-400">{t("clientDocument")}</p>
                 <div className="space-y-2 mt-1">
                   {saldoData.client_documents.map((doc, index) =>
                     isEditing ? (
@@ -338,7 +341,7 @@ export function BalanceDetailModal({
                           <input
                             {...field}
                             type="text"
-                            placeholder="Ingresar documento"
+                            placeholder={t("clientDocumentPlaceholder")}
                             className="w-full px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                           />
                         )}
@@ -358,13 +361,13 @@ export function BalanceDetailModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-[13px] text-gray-400">Saldo inicial</p>
+              <p className="text-[13px] text-gray-400">{t("originalAmount")}</p>
               <p className="text-base font-bold text-cashport-black">
                 {formatCurrency(saldoData.initial_amount)}
               </p>
             </div>
             <div>
-              <p className="text-[13px] text-gray-400">Pendiente</p>
+              <p className="text-[13px] text-gray-400">{t("pending")}</p>
               <p className="text-base font-bold text-cashport-black">
                 {formatCurrency(saldoData.pending_amount)}
               </p>
@@ -375,9 +378,7 @@ export function BalanceDetailModal({
 
           {saldoData.audit_file_url && (
             <div>
-              <p className="text-[13px] font-medium text-gray-400 mb-3">
-                Soportes
-              </p>
+              <p className="text-[13px] font-medium text-gray-400 mb-3">{t("supports")}</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -405,7 +406,7 @@ export function BalanceDetailModal({
               </div>
               {editFile && (
                 <p className="text-[13px] text-muted-foreground mt-1">
-                  Nuevo archivo: {editFile.name}
+                  {t("newFile", { name: editFile.name })}
                 </p>
               )}
             </div>

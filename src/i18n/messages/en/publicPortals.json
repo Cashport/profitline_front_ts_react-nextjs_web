@@ -1,0 +1,150 @@
+{
+  "mobile": {
+    "payment": {
+      "confirmPayment": "Confirm payment",
+      "invalidLink": "The payment link is invalid or has expired.",
+      "billed": "Billed",
+      "earlyPaymentDiscount": "Early payment discount"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "unexpected": "An unexpected error occurred. Please try again."
+    },
+    "creditBalances": {
+      "reportDispute": "Report a dispute",
+      "empty": "You have no overpayments."
+    },
+    "totalDebt": {
+      "totalDebt": "Total balance due",
+      "totalToPay": "Amount to pay",
+      "brandAlt": "Brand",
+      "goToPay": "Go to payment"
+    },
+    "myPayments": {
+      "title": "Available payments",
+      "reportPayment": "Report a payment"
+    },
+    "invoiceSummary": {
+      "invoice": "Invoice <strong>{code}</strong>",
+      "earlyPayment": "Early payment",
+      "daysLeft": "{count, plural, one {(# day left)} other {(# days left)}}",
+      "payPartially": "Make a partial payment",
+      "goToPay": "Go to payment"
+    },
+    "invoiceStatus": {
+      "pastDue": "Past due",
+      "dueSoon": "Due soon",
+      "current": "Current"
+    },
+    "invoiceDetail": {
+      "products": "Products",
+      "mockProductName": "Product name {number}",
+      "units": "{count, plural, one {# unit} other {# units}}"
+    },
+    "confirmPayment": {
+      "incompleteInfo": "The payment information is incomplete or invalid.",
+      "loadError": "We couldn't load the payment information.",
+      "title": "Payment details",
+      "includedInvoices": "Included invoices",
+      "modifyPayment": "Change payment"
+    },
+    "modifyPayment": {
+      "title": "Change and pay",
+      "description": "Enter the amount you want to pay for each invoice",
+      "addDocument": "Add document"
+    },
+    "home": {
+      "missingToken": "No access token provided",
+      "expiredLink": "The access link has expired or is invalid. Please request a new one.",
+      "loadError": "An error occurred while loading the information. Please try again.",
+      "tabs": {
+        "pendingInvoices": "Open invoices",
+        "creditBalances": "Overpayments",
+        "myPayments": "My payments"
+      },
+      "creditBalance": "Overpayment",
+      "payError": "We couldn't start the payment."
+    }
+  },
+  "paymentWeb": {
+    "headerTitle": "Payment",
+    "scriptLoadError": "We couldn't load the payment module. Please try again.",
+    "signatureError": "We couldn't get the security signature",
+    "widgetUnavailable": "Wompi WidgetCheckout is not available",
+    "registerTransactionError": "We couldn't record the transaction",
+    "startPaymentError": "Error starting the payment",
+    "processing": "Processing payment..."
+  },
+  "filePortal": {
+    "downloadStarted": "Download started",
+    "downloading": "Downloading {fileName}",
+    "downloadError": "Download failed",
+    "singleUseLink": "We couldn't download {fileName}. This is a single-use download link.",
+    "unexpectedError": "We couldn't download {fileName} due to an unexpected error.",
+    "downloadCompleted": "Download complete",
+    "filesDownloaded": "{count, plural, one {# file downloaded.} other {# files downloaded.}}",
+    "missingToken": "No file token provided",
+    "title": "Files to download",
+    "acceptReminder": "Remember to <u>allow the download</u>!"
+  },
+  "cetaphil": {
+    "landing": {
+      "mailLinkSent": "Sign-in link sent. Check your inbox.",
+      "mailLinkError": "Error sending the sign-in link",
+      "invalidDocumentType": "Invalid ID type",
+      "acceptInvitationError": "Error accepting the invitation",
+      "registrationSuccess": "Registration successful",
+      "referralSameAsEmail": "The referral email can't be the same as your registration email",
+      "referralRequired": "The referral email is required",
+      "signIn": "Sign in",
+      "signInDescription": "Enter your email to receive an access code",
+      "emailPlaceholder": "you@email.com",
+      "sendCode": "Send code",
+      "checkEmailTitle": "Check your email",
+      "requestReceived": "Thank you for submitting your request. We'll be in touch soon.",
+      "accessLinkSent": "We've emailed you a link to access the marketplace",
+      "requestAccess": "Request access",
+      "registration": {
+        "title": "Registration Request",
+        "description": "Fill out the form to access the distributor marketplace",
+        "submit": "Create my account"
+      },
+      "bannerAlt": "Cetaphil banner {number}",
+      "goToBanner": "Go to banner {number}",
+      "exclusiveBadge": "Exclusive marketplace for Galderma employees",
+      "productsTitle": "<brand>Cetaphil</brand> Products",
+      "productsSubtitle": "A complete dermatological care line for sensitive skin",
+      "products": {
+        "cleanserAlt": "Cetaphil cleanser",
+        "cleansers": "Cleansers",
+        "cleansersDescription": "Gentle cleansing for sensitive skin",
+        "moisturizerAlt": "Cetaphil moisturizer",
+        "moisturizers": "Moisturizers",
+        "moisturizersDescription": "Deep, long-lasting hydration",
+        "sunscreenAlt": "Cetaphil sunscreen",
+        "sunscreen": "Sun Protection",
+        "sunscreenDescription": "UV protection for sensitive skin"
+      },
+      "footer": "© 2025 Exclusive Marketplace for Authorized Distributors"
+    },
+    "registration": {
+      "title": "Registration Request",
+      "description": "Fill out the form to access the distributor marketplace",
+      "submit": "Create my account",
+      "fullName": "Full name",
+      "fullNameMinLength": "Name must be at least 2 characters",
+      "fullNamePlaceholder": "Enter your name",
+      "documentType": "ID type",
+      "documentTypePlaceholder": "Select your ID type",
+      "documentNumber": "ID number",
+      "onlyNumbers": "Only numbers are allowed",
+      "documentNumberPlaceholder": "ID number",
+      "emailPlaceholder": "Enter your email",
+      "referralEmail": "Referral email",
+      "referralEmailPlaceholder": "Enter the referral email",
+      "phone": "Mobile phone",
+      "phoneDigits": "Must be {count} digits",
+      "phonePlaceholder": "Enter your mobile number"
+    }
+  }
+}

@@ -21,73 +21,40 @@ export const USE_TOWER_MOCK = process.env.NEXT_PUBLIC_TOWER_MOCK === "true";
  * Para agregar uno: su vista en BOARD_VIEWS (recaudo-view) y `enabled: true`.
  */
 export const BOARDS: Board[] = [
-  {
-    id: "torre",
-    name: "Torre de control de recaudo",
-    description: "Meta, forecast, acuerdos de pago y PNA del mes",
-    enabled: true
-  },
-  {
-    id: "tramo",
-    name: "Cartera por cliente y tramo",
-    description: "Saldo por edad de mora y cliente",
-    enabled: false
-  },
-  {
-    id: "apl",
-    name: "Aplicación de pagos",
-    description: "Pagos aplicados, PNA y tiempos de aplicación",
-    enabled: false
-  },
-  {
-    id: "nov",
-    name: "Novedades",
-    description: "Novedades abiertas por responsable y antigüedad",
-    enabled: false
-  }
+  { id: "torre", enabled: true },
+  { id: "tramo", enabled: false },
+  { id: "apl", enabled: false },
+  { id: "nov", enabled: false }
 ];
 
 export const DEFAULT_BOARD: BoardId = "torre";
 
-/** Agrupaciones de las tablas "frente a su meta". */
-export const GROUPINGS: { id: Grouping; label: string; singular: string; plural: string }[] = [
-  { id: "client", label: "Por cliente", singular: "Cliente", plural: "Clientes" },
-  { id: "executive", label: "Por ejecutivo", singular: "Ejecutivo", plural: "Ejecutivos" },
-  { id: "channel", label: "Por canal", singular: "Canal", plural: "Canales" },
-  { id: "coordinator", label: "Por coordinador", singular: "Coordinador", plural: "Coordinadores" }
+/**
+ * Agrupaciones de las tablas "frente a su meta". Textos (opción, singular y título de la
+ * tabla) en `collections.groupings.<id>`.
+ */
+export const GROUPINGS: Grouping[] = ["client", "executive", "channel", "coordinator"];
+
+/** Vistas del detalle de acuerdos; nombre en `collections.agreementViews.<id>`. */
+export const AGREEMENT_VIEWS: AgreementView[] = ["all", "broken", "dueSoon", "fulfilled"];
+
+/**
+ * Filtro de los PNA por días pendientes: deja los que llevan más de `minDays`. Nombre en
+ * `collections.pnaAges.<id>`.
+ */
+export const PNA_AGES: { id: PnaAge; minDays: number | null }[] = [
+  { id: "all", minDays: null },
+  { id: "over3", minDays: 3 },
+  { id: "over7", minDays: 7 }
 ];
 
-export const GROUPING_BY_ID = Object.fromEntries(GROUPINGS.map((g) => [g.id, g])) as Record<
-  Grouping,
-  (typeof GROUPINGS)[number]
->;
+/** Referencias de "Recaudo por día"; nombre en `collections.curveReferences.<valor>`. */
+export const CURVE_REFERENCES: CurveReference[] = ["median", "previous", "both"];
 
-export const AGREEMENT_VIEWS: { id: AgreementView; label: string }[] = [
-  { id: "all", label: "Todos" },
-  { id: "broken", label: "Incumplidos" },
-  { id: "dueSoon", label: "Vencen en 7 días" },
-  { id: "fulfilled", label: "Cumplidos" }
-];
-
-/** Filtro de los PNA por días pendientes: deja los que llevan más de `minDays`. */
-export const PNA_AGES: { id: PnaAge; label: string; minDays: number | null }[] = [
-  { id: "all", label: "Todos", minDays: null },
-  { id: "over3", label: "Más de 3 días", minDays: 3 },
-  { id: "over7", label: "Más de 7 días", minDays: 7 }
-];
-
-export const CURVE_REFERENCES: { value: CurveReference; label: string }[] = [
-  { value: "median", label: "Mediana 6 meses" },
-  { value: "previous", label: "Mes anterior" },
-  { value: "both", label: "Ambas" }
-];
-
-/** Estados en plural (chips y resumen): no se arma sumando "s" a la etiqueta del API. */
-export const STATUS_PLURAL: Record<AgreementStatus, string> = {
-  FULFILLED: "Cumplidos",
-  BROKEN: "Incumplidos",
-  PENDING: "Pendientes"
-};
+/*
+ * Estados en plural (chips y resumen): `collections.statusPlural.<estado>`. No se arma
+ * sumando "s" a la etiqueta del API.
+ */
 
 /** Orden del detalle de acuerdos: incumplidos → pendientes → cumplidos. */
 export const STATUS_ORDER: Record<AgreementStatus, number> = {
@@ -119,6 +86,3 @@ export const TONE_TEXT: Record<Tone, string> = {
   warn: "text-amber-600 dark:text-amber-400",
   crit: "text-rose-600 dark:text-rose-400"
 };
-
-export const FOOT_NOTE =
-  "Forecast = recaudo a la fecha de corte + saldo de los acuerdos de pago pendientes que vencen antes del cierre del mes. Ritmo a hoy = lo que ya se debería llevar para cumplir la meta si el mes se comporta como uno típico. PNA = pago identificado que todavía no se aplica a facturas.";

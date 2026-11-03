@@ -1,5 +1,6 @@
 import { Select } from "antd";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 
 import { fetcher } from "@/utils/api/api";
 import { ICurrencies } from "@/types/currencies/ICurrencies";
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const SelectCurrencies = ({ errors, field }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useSWR<ICurrencies>("/currency", fetcher, {});
   const options = data?.data.map((option) => {
     return {
@@ -23,7 +25,7 @@ export const SelectCurrencies = ({ errors, field }: Props) => {
   return (
     <Select
       mode="multiple"
-      placeholder="Selecciona las divisas"
+      placeholder={t("selectCurrencies")}
       className={
         errors?.general?.currencies ? "selectInputCurrenciesError" : "selectInputCurrencies"
       }

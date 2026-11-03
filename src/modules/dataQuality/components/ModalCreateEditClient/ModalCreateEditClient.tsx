@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Modal, message } from "antd";
 import { CaretLeft } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { createClient, updateClient } from "@/services/dataQuality/dataQuality";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -38,6 +39,7 @@ const ModalCreateEditClient = ({
   mode,
   clientData
 }: ModalCreateEditClientProps) => {
+  const t = useTranslations("dataQuality.clientModal");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -74,22 +76,20 @@ const ModalCreateEditClient = ({
           id_country: Number(countryId),
           stakeholder: data.stakeholder
         });
-        message.success("Cliente creado exitosamente");
+        message.success(t("created"));
       } else if (clientData) {
         await updateClient(clientData.id, {
           client_name: data.client_name,
           id_country: Number(countryId),
           stakeholder: data.stakeholder
         });
-        message.success("Cliente actualizado exitosamente");
+        message.success(t("updated"));
       }
       reset();
       onSuccess();
       onClose();
     } catch {
-      message.error(
-        mode === "create" ? "Error al crear el cliente" : "Error al actualizar el cliente"
-      );
+      message.error(mode === "create" ? t("createError") : t("updateError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -112,36 +112,34 @@ const ModalCreateEditClient = ({
     >
       <button className="modalCreateEditClient__header" onClick={handleClose}>
         <CaretLeft size="1.25rem" />
-        <h4>{isCreate ? "Crear Nuevo Cliente" : "Editar Cliente"}</h4>
+        <h4>{isCreate ? t("createTitle") : t("editTitle")}</h4>
       </button>
 
       <p className="modalCreateEditClient__description">
-        {isCreate
-          ? `Ingresa el nombre del nuevo cliente para ${countryName}`
-          : "Modifica la información general del cliente"}
+        {isCreate ? t("createDescription", { country: countryName }) : t("editDescription")}
       </p>
 
       <form className="modalCreateEditClient__form">
         <InputForm
-          titleInput="Nombre del Cliente"
+          titleInput={t("nameLabel")}
           nameInput="client_name"
           control={control}
           error={undefined}
-          placeholder="Ej: Farmacia San José"
+          placeholder={t("namePlaceholder")}
         />
         <InputForm
-          titleInput="Stakeholder"
+          titleInput={t("stakeholderLabel")}
           nameInput="stakeholder"
           control={control}
           error={undefined}
-          placeholder="Ej: Juan Pérez"
+          placeholder={t("stakeholderPlaceholder")}
         />
       </form>
 
       <FooterButtons
         handleOk={() => handleSubmit(onSubmit)()}
         onClose={handleClose}
-        titleConfirm={isCreate ? "Crear Cliente" : "Guardar Cambios"}
+        titleConfirm={isCreate ? t("createButton") : t("saveButton")}
         isConfirmLoading={isSubmitting}
         isConfirmDisabled={!isValid}
       />

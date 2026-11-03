@@ -3,6 +3,7 @@ import { CaretRight } from "phosphor-react";
 import { FieldError } from "react-hook-form";
 import "./input-clickable.scss";
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 
 interface PropsInputClickable {
   title?: string;
@@ -21,6 +22,7 @@ const InputClickable = ({
   value,
   customStyles
 }: PropsInputClickable) => {
+  const t = useTranslations("components.inputClickable");
   const [className, setClassName] = useState("clickableInput");
 
   useEffect(() => {
@@ -49,7 +51,7 @@ const InputClickable = ({
         addonAfter={<CaretRight size={"16px"} />}
         variant="borderless"
         className={className}
-        placeholder="Seleccionar frecuencia"
+        placeholder={t("frequencyPlaceholder")}
         onClick={handleOnClick}
         data-tool-tip="TEST"
         value={value}

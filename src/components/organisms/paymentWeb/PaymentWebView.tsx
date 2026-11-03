@@ -5,6 +5,7 @@ import { Modal, Spin, message } from "antd";
 import { getWompiSignature, sendWompiTransaction } from "@/services/paymentWeb/payment";
 import type { IWompiSignatureResponse } from "@/services/paymentWeb/payment";
 import config from "@/config";
+import { useTranslations } from "use-intl";
 
 declare global {
   interface Window {
@@ -21,6 +22,7 @@ interface IWompiModalProps {
 }
 
 const WompiModal: FC<IWompiModalProps> = ({ visible, onClose, client, amountInCents, orderId }) => {
+  const t = useTranslations("publicPortals.paymentWeb");
   const [loading, setLoading] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
@@ -34,7 +36,7 @@ const WompiModal: FC<IWompiModalProps> = ({ visible, onClose, client, amountInCe
     script.src = "https://checkout.wompi.co/widget.js";
     script.async = true;
     script.onload = () => setScriptLoaded(true);
-    script.onerror = () => message.error("No se pudo cargar el módulo de pagos. Intenta de nuevo.");
+    script.onerror = () => message.error(t("scriptLoadError"));
     document.body.appendChild(script);
   }, []);
 
@@ -57,8 +59,8 @@ const WompiModal: FC<IWompiModalProps> = ({ visible, onClose, client, amountInCe
           currency
         });
 
-        if (!integrity) throw new Error("No se pudo obtener la firma de seguridad");
-        if (!window.WidgetCheckout) throw new Error("Wompi WidgetCheckout no está disponible");
+        if (!integrity) throw new Error(t("signatureError"));
+        if (!window.WidgetCheckout) throw new Error(t("widgetUnavailable"));
 
         const checkout = new window.WidgetCheckout({
           currency,
@@ -80,12 +82,12 @@ const WompiModal: FC<IWompiModalProps> = ({ visible, onClose, client, amountInCe
             await sendWompiTransaction({ order_id: orderId, transaction: result.transaction });
             onClose(result);
           } catch {
-            message.error("No se pudo registrar la transacción en el backend");
+            message.error(t("registerTransactionError"));
             onClose();
           }
         });
       } catch (error: any) {
-        message.error(error.message || "Error al iniciar el pago");
+        message.error(error.message || t("startPaymentError"));
         onClose();
       } finally {
         setLoading(false);
@@ -100,7 +102,7 @@ const WompiModal: FC<IWompiModalProps> = ({ visible, onClose, client, amountInCe
       open={visible}
       onCancel={() => onClose()}
       footer={null}
-      title="Procesando pago..."
+      title={t("processing")}
       centered
       closable={!loading}
     >

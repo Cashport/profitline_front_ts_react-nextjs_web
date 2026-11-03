@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { Gift, Zap, Users, ArrowRight } from "lucide-react";
 import Header from "@/components/organisms/header";
 import MarketAdminPromotions from "@/modules/marketAdmin/components/MarketAdminPromotions/MarketAdminPromotions";
@@ -11,32 +12,30 @@ type View = "hub" | "promociones" | "manuales";
 const MODULES: {
   view: Exclude<View, "hub">;
   icon: typeof Zap;
-  title: string;
-  description: string;
-  badge: string;
+  /** Clave en marketAdmin.bonusHub.modules */
+  key: "automatic" | "manual";
+  /** Cantidad del badge (por ahora fija) */
+  badgeCount: number;
   badgeColor: string;
 }[] = [
   {
     view: "promociones",
     icon: Zap,
-    title: "Promociones automáticas",
-    description:
-      "Crea y gestiona promociones por monto o combinación de productos con escalones dinámicos. Los bonificados se agregan automáticamente al carrito.",
-    badge: "2 activas",
+    key: "automatic",
+    badgeCount: 2,
     badgeColor: "bg-green-50 text-green-700 border border-green-200"
   },
   {
     view: "manuales",
     icon: Users,
-    title: "Bonificados manuales por cliente",
-    description:
-      "Asigna unidades bonificadas a clientes específicos. Cada asignación pasa por flujo de aprobación antes de quedar disponible en el marketplace.",
-    badge: "1 pendiente",
+    key: "manual",
+    badgeCount: 1,
     badgeColor: "bg-amber-50 text-amber-700 border border-amber-200"
   }
 ];
 
 export default function MarketAdminBonusAndPromotions() {
+  const t = useTranslations("marketAdmin.bonusHub");
   const [view, setView] = useState<View>("hub");
 
   if (view === "promociones") {
@@ -50,15 +49,15 @@ export default function MarketAdminBonusAndPromotions() {
   return (
     <div className="cp-page min-h-full">
       <Header
-        title="Sistema de Bonificados"
-        back="/market-admin/bonusAndDiscounts"
-        titleExtra="Gestión de productos bonificados y promociones"
+        title={t("title")}
+        back="/market-admin/bonuses-and-discounts"
+        titleExtra={t("subtitle")}
       />
 
       <div className="cp-card overflow-hidden">
         <div className="px-[18px] py-[14px]">
           <div className="grid grid-cols-2 gap-4">
-            {MODULES.map(({ view: v, icon: Icon, title, description, badge, badgeColor }) => (
+            {MODULES.map(({ view: v, icon: Icon, key, badgeCount, badgeColor }) => (
               <button
                 key={v}
                 onClick={() => setView(v)}
@@ -71,15 +70,19 @@ export default function MarketAdminBonusAndPromotions() {
                   <span
                     className={`px-2 py-0.5 text-[13px] font-semibold rounded-lg ${badgeColor}`}
                   >
-                    {badge}
+                    {t(`modules.${key}.badge`, { count: badgeCount })}
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-[#141414] mb-1">{title}</h2>
-                  <p className="text-[13px] text-[#999999] leading-relaxed">{description}</p>
+                  <h2 className="text-sm font-bold text-[#141414] mb-1">
+                    {t(`modules.${key}.title`)}
+                  </h2>
+                  <p className="text-[13px] text-[#999999] leading-relaxed">
+                    {t(`modules.${key}.description`)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1 text-[13px] font-semibold text-[#0067B1] mt-auto">
-                  Ir al módulo <ArrowRight size={12} />
+                  {t("goToModule")} <ArrowRight size={12} />
                 </div>
               </button>
             ))}

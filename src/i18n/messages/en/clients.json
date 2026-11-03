@@ -1,0 +1,920 @@
+{
+  "home": {
+    "title": "Customers",
+    "pending": {
+      "message": "We're preparing this project's receivables data",
+      "description": "It will show up here in a few minutes; the page refreshes on its own."
+    },
+    "header": {
+      "generating": "Generating data…",
+      "cutoffPlaceholder": "Cutoff —",
+      "updating": "Updating…",
+      "reprocess": "Reprocess",
+      "reload": "Reload"
+    },
+    "chips": {
+      "aging": "Aging",
+      "forecast": "Forecast",
+      "date": "Due date",
+      "coordinator": "Coordinator",
+      "executive": "Collector",
+      "dateRange": "{from} – {to}"
+    },
+    "noExecutive": "No collector",
+    "noCoordinator": "No coordinator",
+    "noMarket": "No market",
+    "aging": {
+      "current": "Current",
+      "currentShort": "Curr."
+    },
+    "forecastStatus": {
+      "ok": "On track",
+      "near": "Close",
+      "risk": "At risk"
+    },
+    "duePeriods": {
+      "today": "Today",
+      "thisWeek": "This week",
+      "currentMonth": "This month",
+      "lastMonth": "Last month",
+      "lastQuarter": "Last quarter",
+      "ytd": "YTD",
+      "last12Months": "Last 12 months"
+    },
+    "kpis": {
+      "totalPortfolio": "Total receivables",
+      "pastDue": "Past due",
+      "amountM": "{amount} M",
+      "bucketTip": "{label}: {amount} M",
+      "moreBuckets": "More buckets: {list}",
+      "creditNotes": "Credit memos",
+      "unappliedPayments": "Unapplied",
+      "disputes": "Disputes",
+      "creditNotesCount": "{count, plural, one {<b>#</b> memo} other {<b>#</b> memos}}",
+      "paymentsCount": "{count, plural, one {<b>#</b> payment} other {<b>#</b> payments}}",
+      "disputesCount": "{count, plural, one {<b>#</b> dispute} other {<b>#</b> disputes}}",
+      "collected": "Collected",
+      "goal": "Target",
+      "noGoal": "No target",
+      "goalTip": "Target: {amount} M",
+      "collectedTip": "Collected: {amount} M",
+      "agreementsActiveTip": "Active payment plans: {amount} M",
+      "agreementsBrokenTip": "Broken payment plans: {amount} M",
+      "agreements": "Plans",
+      "broken": "Broken",
+      "forecast": "Forecast"
+    },
+    "collectionTip": {
+      "title": "Collected this month",
+      "goal": "Target",
+      "collected": "Collected",
+      "agreementsActive": "Active plans",
+      "agreementsBroken": "Broken plans",
+      "forecast": "Forecast",
+      "agreementsTitle": "Payment plans",
+      "loadError": "Couldn't load the payment plans.",
+      "empty": "No payment plans this month.",
+      "compliance": "This customer keeps <b>{pct}</b> of their payment plans",
+      "status": {
+        "EXPIRED": "Past due",
+        "DUE_SOON": "Due soon",
+        "ACTIVE": "Active",
+        "FULFILLED": "Fulfilled",
+        "PARTIALLY_FULFILLED": "Partially fulfilled"
+      },
+      "expiredDays": "Past due · {days, plural, one {# day} other {# days}}"
+    },
+    "agingTip": {
+      "invoices": "Invoices",
+      "balances": "Deductions",
+      "creditNotes": "Memos",
+      "unappliedPayments": "Unapplied",
+      "total": "Total"
+    },
+    "table": {
+      "title": "Receivables by customer",
+      "marketsFiltering": "{count, plural, one {# market filtering} other {# markets filtering}} the table · {customers}",
+      "marketsHint": "click a market to filter · click several to combine them",
+      "clearFilter": "Clear filter",
+      "searchPlaceholder": "Search customer, tax ID, collector",
+      "downloadExcel": "Download Excel",
+      "downloadExcelAria": "Download receivables by customer as Excel",
+      "generatingExcel": "Generating receivables Excel…",
+      "downloaded": "File downloaded: {filename}",
+      "downloadError": "Couldn't download the receivables by customer Excel.",
+      "hideAging": "Hide aging buckets",
+      "showAging": "Show aging buckets as columns",
+      "filterExecutive": "Filter by collector",
+      "filterForecast": "Filter by forecast",
+      "executive": "Collector",
+      "empty": "No customers match your search or filters.",
+      "columns": {
+        "name": "Name",
+        "portfolio": "Receivables",
+        "portfolioFocus": "AR {bucket}",
+        "pastDue": "Past due",
+        "pastDuePct": "% Past due",
+        "creditNotes": "Memos",
+        "unappliedPayments": "Unapplied",
+        "collectedVsGoal": "Collected vs target",
+        "collected": "Collected",
+        "forecast": "Forecast"
+      }
+    },
+    "filters": {
+      "title": "Advanced filters",
+      "subtitle": "Find and select multiple options",
+      "categories": {
+        "fecha": "Due date",
+        "coordinators": "Coordinator",
+        "executives": "Collector",
+        "markets": "Market"
+      },
+      "search": {
+        "coordinators": "Search coordinators...",
+        "executives": "Search collectors...",
+        "markets": "Search markets..."
+      },
+      "selectPeriod": "SELECT A PERIOD",
+      "presetPeriods": "Preset periods",
+      "customRange": "Custom range",
+      "from": "From",
+      "to": "To",
+      "results": "{count, plural, one {# RESULT} other {# RESULTS}}",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "apply": "Apply filters"
+    }
+  },
+  "customerGroupsFilter": {
+    "customerGroups": "Customer groups"
+  },
+  "detail": {
+    "tabs": {
+      "dashboard": "Dashboard",
+      "receivables": "Collections",
+      "balances": "Deductions",
+      "notes": "Credit memos",
+      "payments": "Payments",
+      "cashApplication": "Cash application",
+      "contacts": "Contacts",
+      "history": "History"
+    }
+  },
+  "cashApplicationPage": {
+    "title": "Cash Application"
+  },
+  "applyTab": {
+    "generateAction": "Take action",
+    "applyWithAI": "Apply with <brand>CashportAI</brand>",
+    "sections": {
+      "invoices": {
+        "label": "Invoices",
+        "add": "Add invoices",
+        "notFound": "Invoices not found",
+        "itemTitle": "Invoice {id}"
+      },
+      "payments": {
+        "label": "Payments",
+        "add": "Add payments",
+        "notFound": "Payments not found",
+        "itemTitle": "Payment {id}"
+      },
+      "creditMemos": {
+        "label": "Credit memos",
+        "add": "Add credit memos",
+        "notFound": "Credit memos not found",
+        "itemTitle": "Credit memo {id}"
+      },
+      "deductions": {
+        "label": "Deductions",
+        "add": "Add deductions",
+        "notFound": "No deductions found",
+        "itemTitle": "Deduction {id}"
+      }
+    },
+    "messages": {
+      "addSuccess": "Items added",
+      "addError": "We couldn't add the items",
+      "removeSuccess": "Item {rowId} removed",
+      "removeError": "We couldn't remove the item",
+      "markUnidentifiedSuccess": "Payment marked as unidentified",
+      "markUnidentifiedError": "We couldn't mark the payment as unidentified",
+      "saveSuccess": "Cash application saved",
+      "saveError": "We couldn't save the cash application",
+      "deleteRowsSuccess": "Rows deleted",
+      "deleteRowsError": "{count, plural, one {We couldn't delete # row} other {We couldn't delete # rows}}",
+      "noLogAvailable": "There's no log available to download",
+      "downloadLogError": "We couldn't download the log",
+      "excelLogUnavailable": "We couldn't get the Excel log",
+      "downloadExcelLogError": "We couldn't download the Excel log",
+      "deleteAllSuccess": "Everything was deleted",
+      "deleteAllError": "We couldn't delete everything"
+    },
+    "confirm": {
+      "deleteRows": "{count, plural, one {Are you sure you want to delete # row?} other {Are you sure you want to delete # rows?}}",
+      "deleteAll": "Are you sure you want to delete everything?"
+    },
+    "tables": {
+      "columns": {
+        "initialAmount": "Original amount",
+        "appliedAmount": "Applied amount",
+        "accountingAdjustment": "Accounting adjustment",
+        "payment": "Payment",
+        "remaining": "Remaining",
+        "adjustmentId": "Adjustment ID",
+        "adjustmentType": "Adjustment type"
+      },
+      "removeItemName": "item",
+      "paymentNotFromCustomer": "Payment isn't from this customer",
+      "markUnidentifiedConfirm": "The payment will be marked as unidentified"
+    },
+    "addToTablesModal": {
+      "pasteError": "We couldn't paste the invoices. Please try again.",
+      "valuesCopied": "Values copied",
+      "copyValues": "Copy values",
+      "pasteFromExcel": "Paste from Excel",
+      "totalCount": "Total ({count})",
+      "adjustments": "Adjustments"
+    },
+    "resultPanel": {
+      "summary": "Summary",
+      "netBalance": "Net balance"
+    },
+    "selectAdjustmentModal": {
+      "title": "Select how to apply the adjustment",
+      "global": "Global",
+      "byInvoice": "By invoice"
+    },
+    "generateActionModal": {
+      "deleteAllRows": "Delete all rows",
+      "deleteRows": "Delete rows",
+      "downloadAILog": "Download AI log",
+      "downloadExcelLog": "Download cash application Excel log",
+      "selectDeductionToEdit": "Select at least one deduction to edit",
+      "editDeductions": "Edit deductions",
+      "changeAIPrompt": "Change CashportAI prompt"
+    }
+  },
+  "applyModals": {
+    "shared": {
+      "createAdjustment": "Create adjustment",
+      "addAdjustment": "Add adjustment",
+      "invoiceId": "Invoice ID",
+      "pasteFromExcel": "Paste from Excel",
+      "created": "{count, plural, one {Adjustment created} other {Adjustments created}}",
+      "createError": "Couldn't create the adjustments"
+    },
+    "applyAI": {
+      "title": "Apply payments with <ai>CashportAI</ai>",
+      "description": "Upload your documents and <ai>CashportAI</ai> will analyze and classify them by type.",
+      "dropHint": "Drag and drop your file here or click to upload",
+      "maxSize": "Max. size 5 MB",
+      "commentPlaceholder": "Enter a comment",
+      "analyze": "Analyze with <ai>CashportAI</ai>",
+      "success": "Files analyzed with CashportAI",
+      "error": "Couldn't apply with CashportAI",
+      "fileTooLarge": "The file must be smaller than 5 MB",
+      "uploadFailed": "{fileName} failed to upload."
+    },
+    "changePrompt": {
+      "title": "Customer prompt for <ai>CashportAI</ai>",
+      "description": "If the customer has special terms, <ai>CashportAI</ai> will take them into account when extracting data",
+      "label": "Prompt",
+      "cancelEdit": "Cancel editing",
+      "save": "Save <ai>CashportAI</ai> prompt",
+      "notFound": "No prompt found for this customer. Please create one.",
+      "loadError": "Couldn't load the customer prompt",
+      "created": "Prompt created",
+      "createError": "Couldn't create the prompt",
+      "updated": "Prompt updated",
+      "updateError": "Couldn't update the prompt"
+    },
+    "createAdjustment": {
+      "reasonRequired": "Reason is required",
+      "reasonPlaceholder": "Enter reason",
+      "amountRequired": "Amount is required",
+      "amountNonZero": "Amount must be other than 0"
+    },
+    "createByInvoice": {
+      "invoicesCount": "Invoices ({count})",
+      "adjustmentType": "Adjustment type",
+      "adjustmentTypeRequired": "Adjustment type is required",
+      "adjustmentTypePlaceholder": "Select adjustment type",
+      "addAnother": "Add another adjustment",
+      "process": "Process",
+      "pasteError": "Couldn't paste the invoices. Please try again."
+    },
+    "applySpecific": {
+      "title": "Apply adjustment",
+      "subtitle": "Set the amount to apply to each invoice",
+      "pending": "Outstanding",
+      "newBalance": "New balance",
+      "amountToApply": "Amount to apply",
+      "amountPlaceholder": "Enter amount",
+      "applied": "Adjustment applied",
+      "applyError": "Couldn't apply the adjustment"
+    },
+    "editRow": {
+      "adjustment": "Adjustment",
+      "rowType": "{type, select, payment {Payment} discount {Adjustment} other {Invoice}}",
+      "title": "{type, select, payment {Payment {id}} discount {Adjustment {id}} other {Invoice {id}}}",
+      "onlyNumbers": "Only numbers are allowed",
+      "maxAmount": "Amount can't exceed {max}",
+      "saveError": "Couldn't save the changes"
+    },
+    "listAdjustments": {
+      "subtitle": "Select the adjustments to apply",
+      "creditNote": "Credit memo {id}",
+      "noInvoicesSelected": "No invoices selected"
+    }
+  },
+  "invoiceActions": {
+    "title": "Take action",
+    "subtitle": "Select the action you want to take",
+    "options": {
+      "accountingAdjustments": "Accounting adjustments",
+      "generateCreditNote": "Create credit memo",
+      "generateDiscount": "Create discount",
+      "generateDebitNote": "Create debit memo",
+      "paymentAgreement": "Payment plan",
+      "generatePaymentAgreement": "Create payment plan",
+      "generatePayment": "Create payment"
+    },
+    "debitNote": {
+      "title": "Apply debit memo",
+      "selectNotes": "Select the credit memo(s) to apply",
+      "noteName": "Debit memo {id}",
+      "volume": "Volume",
+      "create": "Create debit memo",
+      "defineAmount": "Enter the amount to apply to each invoice",
+      "columns": {
+        "invoiceId": "Invoice ID",
+        "pending": "Outstanding",
+        "newBalance": "New balance",
+        "amountToApply": "Amount to apply"
+      },
+      "enterAmount": "Enter amount",
+      "evidenceHint": "Optionally, attach a document and/or add a comment",
+      "evidence": "Supporting document",
+      "required": "*Required",
+      "selectFile": "Select a file",
+      "fileHint": "PDF, Word, PNG (max. 30 MB)",
+      "enterComment": "Enter comment"
+    }
+  },
+  "invoiceDownload": {
+    "defaultTitle": "Invoice",
+    "gotIt": "Got it",
+    "imageAlt": "Document"
+  },
+  "changeStatus": {
+    "title": "Change status",
+    "description": "Select the new invoice status",
+    "confirm": "Change status",
+    "success": "Invoice status updated.",
+    "error": "We couldn't change the invoice status",
+    "states": {
+      "reconciled": "Reconciled",
+      "unreconciled": "Unreconciled",
+      "denied": "Medical claim",
+      "returned": "Returned",
+      "voided": "Voided",
+      "received": "Received",
+      "billedThisMonth": "Billed this month"
+    }
+  },
+  "evidence": {
+    "title": "Supporting document",
+    "description": "Attach the supporting document and add a comment",
+    "required": "*Required",
+    "uploadAnother": "Upload another document",
+    "commentPlaceholder": "Enter a comment",
+    "attach": "Attach document"
+  },
+  "paymentAgreement": {
+    "title": "Payment plan",
+    "description": "Select the date and amount to set up the payment plan",
+    "datePlaceholder": "Select a date",
+    "totalAgreed": "Total agreed: <total></total>",
+    "activeAgreement": "This invoice already has an active payment plan",
+    "success": "Payment plan created",
+    "error": "We couldn't create the payment plan.",
+    "errorRetry": "We couldn't create the payment plan. Please try again.",
+    "columns": {
+      "invoiceId": "Invoice ID",
+      "issueDate": "Issue date",
+      "pending": "Outstanding",
+      "agreedAmount": "Agreed amount",
+      "newDate": "New date"
+    }
+  },
+  "bulkSearch": {
+    "title": "Bulk search",
+    "steps": {
+      "upload": "Upload",
+      "results": "Results",
+      "action": "Action"
+    },
+    "errors": {
+      "clientLoading": "Customer data is still loading.",
+      "search": "We couldn't run the bulk search.",
+      "download": "We couldn't download the results Excel file."
+    },
+    "progress": {
+      "searching": "Searching invoices",
+      "downloadingStatement": "Downloading account statement",
+      "sendingStatement": "Sending account statement",
+      "processing": "Processing {count, plural, one {# invoice} other {# invoices}}",
+      "uploadingRecords": "Uploading {count, plural, one {# record} other {# records}}",
+      "uploadingFile": "Uploading {name}",
+      "loadingTempTable": "Loading temporary table",
+      "matching": "Matching against the customer's receivables",
+      "preparingResults": "Preparing results",
+      "generatingStatement": "Generating account statement",
+      "preparingFiles": "Preparing files",
+      "sendingToRecipients": "Sending to recipients",
+      "validating": "Validating invoices",
+      "logging": "Logging to history",
+      "searchFootnote": "Closing this window cancels the search.",
+      "actionFootnote": "You can close this window; we'll let you know when it's done."
+    },
+    "incidentConflict": {
+      "title": "Some invoices already have open disputes. What do you want to do?",
+      "create": "Create new dispute",
+      "skip": "Don't create a new dispute"
+    },
+    "actions": {
+      "changeStatus": {
+        "label": "Change status",
+        "description": "Move the invoices to a new status",
+        "run": "Change status of {count, plural, one {# invoice} other {# invoices}}",
+        "applying": "Changing status",
+        "error": "We couldn't change the status."
+      },
+      "applyPayment": {
+        "label": "Apply payment",
+        "description": "Send them to the cash application table",
+        "run": "Apply payment to {count, plural, one {# invoice} other {# invoices}}",
+        "applying": "Adding to cash application",
+        "error": "We couldn't apply the payment."
+      },
+      "registerDispute": {
+        "label": "Log dispute",
+        "description": "Medical claim, return or shortage",
+        "run": "Log dispute on {count, plural, one {# invoice} other {# invoices}}",
+        "applying": "Logging dispute",
+        "error": "We couldn't log the dispute."
+      },
+      "submitInvoices": {
+        "label": "Submit invoices",
+        "description": "Mark as submitted to the customer",
+        "run": "Submit {count, plural, one {# invoice} other {# invoices}}",
+        "applying": "Submitting invoices",
+        "error": "We couldn't submit the invoices."
+      },
+      "sendStatement": {
+        "label": "Send account statement",
+        "description": "By email, WhatsApp or download",
+        "run": "Send account statement for {count, plural, one {# invoice} other {# invoices}}",
+        "applying": "Sending account statement",
+        "error": "We couldn't send the account statement."
+      }
+    },
+    "summary": {
+      "statementEmailed": "Account statement sent by email.",
+      "statementWhatsapp": "Account statement sent by WhatsApp.",
+      "statementDownloadError": "We couldn't download the account statement files.",
+      "statementDownloaded": "Account statement files downloaded.",
+      "statusChanged": "Status changed for {count, plural, one {# invoice} other {# invoices}}.",
+      "paymentAdded": "{count, plural, one {# invoice was} other {# invoices were}} added to the cash application table.",
+      "disputeRegistered": "Dispute logged on {count, plural, one {# invoice} other {# invoices}}.",
+      "invoicesSubmitted": "{count, plural, one {# invoice} other {# invoices}} submitted."
+    },
+    "done": {
+      "title": "{action} completed",
+      "anotherAction": "Another action"
+    },
+    "input": {
+      "excelReady": "Excel file ready to search",
+      "noIds": "No IDs yet",
+      "ids": "{count, plural, one {# ID} other {# IDs}}",
+      "idsWithRepeated": "{count, plural, one {# ID} other {# IDs}} · {repeated, plural, one {# duplicate} other {# duplicates}}",
+      "pasteTitle": "Paste the IDs",
+      "fileInUse": "The uploaded file will be used. Remove it to paste IDs.",
+      "pasteHint": "One per line, or separated by spaces, commas or semicolons.",
+      "uploadTitle": "Or upload a file",
+      "records": "{count, plural, one {# record} other {# records}}",
+      "readOnSearch": "Read when you search",
+      "removeFile": "Remove file",
+      "dragTitle": "Drag or select a file",
+      "dragHint": "Excel or CSV · one column with the invoice ID",
+      "downloadTemplate": "Download template",
+      "searchCount": "Search {count, plural, one {# invoice} other {# invoices}}",
+      "search": "Search invoices"
+    },
+    "results": {
+      "countedOnce": "Counted only once",
+      "dueToday": "Today",
+      "dueAgo": "{days, plural, one {# day} other {# days}} ago",
+      "dueIn": "In {days, plural, one {# day} other {# days}}",
+      "cards": {
+        "foundPending": "{amount} outstanding",
+        "missing": "Not in Cashport",
+        "other": "Belong to another customer",
+        "dup": "Repeated in your file"
+      },
+      "kinds": {
+        "found": {
+          "label": "Found",
+          "plural": "Found"
+        },
+        "missing": {
+          "label": "Not found",
+          "plural": "Not found"
+        },
+        "other": {
+          "label": "Other customer",
+          "plural": "Other customer"
+        },
+        "dup": {
+          "label": "Duplicate",
+          "plural": "Duplicates"
+        }
+      },
+      "columns": {
+        "result": "Result",
+        "detail": "Status / detail",
+        "pending": "Outstanding",
+        "due": "Due"
+      },
+      "searchPlaceholder": "Search results",
+      "showing": "Showing {visible} of {total} · the Excel file has everything",
+      "records": "{count, plural, one {# record} other {# records}}",
+      "downloadExcel": "Download Excel",
+      "empty": "No records for this filter",
+      "newSearch": "New search",
+      "continue": "Continue with {count, plural, one {# found invoice} other {# found invoices}}"
+    },
+    "action": {
+      "methods": {
+        "email": "Email",
+        "whatsapp": "WhatsApp",
+        "download": "Download",
+        "emailValue": "Email"
+      },
+      "noActiveWhatsapp": "no active WhatsApp",
+      "downloadStatement": "Download account statement",
+      "sendStatement": "Send account statement",
+      "skippedFiles": "Duplicate files or files over {maxMb} MB were skipped.",
+      "applyTo": "Apply to",
+      "scopeSummary": "{count, plural, one {# invoice} other {# invoices}} · {amount}",
+      "actionTitle": "Action",
+      "newStatus": "New status",
+      "statusPlaceholder": "Select a status",
+      "paymentTableLabel": "They'll be added to the cash application table",
+      "andMore": "and {count} more",
+      "noInvoicesInScope": "No invoices in scope.",
+      "reasonsError": "We couldn't load the reasons",
+      "reasonPlaceholder": "Select a reason",
+      "disputeAmount": "Dispute amount (optional)",
+      "amountPlaceholder": "Enter amount",
+      "submissionType": "Submission type",
+      "submissionDate": "Submission date",
+      "datePlaceholder": "Select a date",
+      "evidence": "Supporting document",
+      "dragFiles": "Drag or select files",
+      "maxPerFile": "Up to {maxMb} MB per file",
+      "removeFile": "Remove {name}",
+      "files": "Files",
+      "noAttachments": "No attachments",
+      "to": "To",
+      "recipientsPlaceholder": "Select or type recipients",
+      "statementError": "We couldn't load the customer's contacts or files.",
+      "commentOptional": "Comment (optional)",
+      "commentPlaceholder": "Saved to each invoice's history",
+      "backToResults": "Results"
+    }
+  },
+  "invoiceDetail": {
+    "title": "Invoice {id}",
+    "image": "Image",
+    "viewInvoice": "View invoice",
+    "generateAction": "Take action",
+    "traceability": "Activity history",
+    "events": {
+      "creditNoteApplied": "Credit memo applied",
+      "debitNoteApplied": "Debit memo applied",
+      "discountApplied": "Discount applied",
+      "submission": "Invoice submission",
+      "newDispute": "New dispute",
+      "invoiceIssued": "Invoice issued",
+      "disputeClosed": "Dispute closed",
+      "paymentAgreement": "Payment plan",
+      "paymentAgreementExpired": "Payment plan expired",
+      "dueNotice": "Due date reminder",
+      "statusChanged": "Status changed",
+      "invoiceReconciled": "Invoice reconciled",
+      "paymentApplied": "Payment applied",
+      "partialPayment": "Partial payment",
+      "balanceConfirmed": "Deduction confirmed"
+    },
+    "tags": {
+      "settled": "Resolved",
+      "pendingSettlement": "Pending resolution",
+      "closed": "Closed",
+      "open": "Open",
+      "closedUnlinked": "Closed - Unlinked",
+      "openUnlinked": "Open - Unlinked",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "pending": "Pending",
+      "voided": "Voided"
+    },
+    "actionBy": "Action by: {user}",
+    "value": "Amount: {value}",
+    "agreedValue": "Agreed amount: {value}",
+    "agreedPaymentDate": "Agreed payment date: {date}",
+    "adjustmentId": "Adjustment ID:",
+    "agreementId": "Payment plan ID:",
+    "agreementIdValue": "Payment plan ID: {id}",
+    "disputeId": "Dispute ID:",
+    "paymentId": "Payment ID:",
+    "initialStatus": "Previous status: {status}",
+    "finalStatus": "New status: {status}",
+    "disputeType": "Dispute type: {type}",
+    "comment": "Comment: {comment}",
+    "summary": {
+      "title": "Summary",
+      "initialValue": "Original amount",
+      "creditNote": "Credit memo",
+      "debitNote": "Debit memo",
+      "discount": "Discount"
+    }
+  },
+  "dashboard": {
+    "graphAlt": "Chart",
+    "creditLimit": "Credit limit",
+    "unreconciled": "Unreconciled",
+    "disputes": "Disputes",
+    "alerts": {
+      "title": "Alerts",
+      "openDisputes": "Open disputes",
+      "balances": "Deductions",
+      "availableCreditMemos": "Available credit memos"
+    },
+    "budget": {
+      "title": "Budget"
+    },
+    "collectApply": {
+      "collectionTarget": "Collection target",
+      "totalApplied": "Total applied",
+      "pendingApplication": "Pending application",
+      "unidentifiedPayments": "Unidentified payments"
+    },
+    "expiredPortfolio": {
+      "title": "Past due"
+    },
+    "historicDso": {
+      "title": "DSO history",
+      "days": "Days",
+      "tooltip": "DSO: {value}",
+      "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
+      }
+    },
+    "invoiceStatus": {
+      "title": "Invoice status",
+      "unreconciled": "Unreconciled",
+      "reconciled": "Reconciled",
+      "notSubmitted": "Not submitted"
+    },
+    "portfolioAges": {
+      "title": "Past due receivables",
+      "current": "Current",
+      "days": "{days} days",
+      "over": "{days}+ days"
+    },
+    "sellsVsPayments": {
+      "title": "Sales vs. payments history",
+      "billing": "Billing",
+      "collections": "Collected",
+      "payments": "Payments"
+    },
+    "totalPortfolio": {
+      "title": "Total net receivables",
+      "invoices": "Invoices",
+      "creditMemos": "Credit memos",
+      "balances": "Deductions"
+    }
+  },
+  "history": {
+    "searchPlaceholder": "Search history",
+    "loadError": "We couldn't load the customer's history",
+    "columns": {
+      "event": "Event"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{days, plural, one {# day ago} other {# days ago}}",
+    "noResults": "No results for this search.",
+    "showing": "Showing {shown} of {total, plural, one {# event} other {# events}}",
+    "rowActions": {
+      "downloadFlatFile": "Download flat file",
+      "viewPdf": "View PDF",
+      "noDetail": "There are no details for this communication",
+      "onlyPaymentEvents": "This option only applies to Cash Application or deduction resolution events",
+      "applicationIdNotFound": "No payment application ID was found in this record",
+      "flatFileError": "We couldn't generate the flat file",
+      "pdfError": "We couldn't generate the PDF"
+    },
+    "voidConfirm": {
+      "title": "Are you sure you want to void this payment application?",
+      "content": "This action can't be undone",
+      "okText": "Void application"
+    },
+    "generateAction": {
+      "description": "Select the action you want to take",
+      "voidPayment": "Void payment"
+    },
+    "communicationDetail": {
+      "title": "Sent email",
+      "to": "To",
+      "cc": "CC",
+      "subject": "Subject"
+    }
+  },
+  "contacts": {
+    "newContact": "New contact",
+    "columns": {
+      "lastName": "Last name",
+      "position": "Job title",
+      "role": "Role",
+      "email": "Email"
+    },
+    "modal": {
+      "titleEdit": "Contact details",
+      "titleCreate": "Create new contact",
+      "infoEdit": "Enter the information to edit an existing contact",
+      "infoCreate": "Enter the information to create a new contact",
+      "firstNames": "First name(s)",
+      "lastNames": "Last name(s)",
+      "position": "Job title",
+      "role": "Role",
+      "callingCode": "Country code",
+      "email": "Email",
+      "createContact": "Create contact",
+      "phoneExactDigits": "Phone number must be {digits} digits",
+      "phoneDigitsRange": "Phone number must be between {min} and {max} digits",
+      "invalidEmail": "Email isn't valid"
+    }
+  },
+  "payments": {
+    "tab": {
+      "addedToApplication": "Payments added to the cash application table",
+      "addToApplicationError": "Couldn't add the payments to the cash application table",
+      "markedUnidentified": "{count, plural, one {Payment marked as unidentified} other {Payments marked as unidentified}}",
+      "markUnidentifiedError": "Something went wrong marking the selected payments as unidentified",
+      "itemName": "Payments",
+      "generateAction": "Take action",
+      "identifyPayment": "Identify payment",
+      "confirmUnidentifiedTitle": "The selected payments will be marked as unidentified"
+    },
+    "table": {
+      "columns": {
+        "erpId": "ERP ID",
+        "receivedDate": "Received",
+        "identificationDate": "Identified",
+        "available": "Available"
+      }
+    },
+    "identifiedPayments": {
+      "success": "Identified payment submitted",
+      "error": "Something went wrong identifying the payment",
+      "title": "Identified payments",
+      "description": "Select the payment you want to apply",
+      "paymentId": "Payment {id}",
+      "identify": "Identify"
+    },
+    "notIdentifiedPayment": {
+      "notificationSent": "Notification sent",
+      "notificationError": "Couldn't send the notification",
+      "title": "Payment not found",
+      "description": "We couldn't find the payment. To review the information, go back to the previous page. Otherwise, send a notification.",
+      "commentPlaceholder": "Enter a comment",
+      "sendNotification": "Send notification"
+    },
+    "attachment": {
+      "fileTooLarge": "The file is too large. Upload a file smaller than {maxMb} MB.",
+      "evidence": "Supporting document",
+      "required": "*Required",
+      "evidenceRequired": "A supporting document is required",
+      "optional": "*Optional"
+    },
+    "identifyPayment": {
+      "noPaymentFound": "No payment was identified",
+      "identifyError": "Couldn't identify the payment",
+      "title": "Identify payment",
+      "subtitle": "Enter the details to identify the payment",
+      "account": "Account",
+      "accountPlaceholder": "Select account",
+      "dateRequired": "Date is required",
+      "futureDate": "The date can't be in the future",
+      "amountPlaceholder": "Enter amount",
+      "amountRequired": "Amount is required",
+      "amountMin": "The amount must be greater than 0",
+      "referencePlaceholder": "Enter reference number",
+      "paymentType": "Payment type",
+      "paymentTypePlaceholder": "Select type",
+      "markAsAdvance": "Mark as advance payment",
+      "attachEvidence": "Attach the supporting document"
+    }
+  },
+  "adjustments": {
+    "item": {
+      "debitNote": "Debit memo",
+      "pendingSettlement": "Pending settlement",
+      "issueDate": "Issue date",
+      "creator": "Created by",
+      "appliedInvoices": "Applied invoices",
+      "specialConditions": "Special conditions",
+      "downloadEvidence": "Download supporting document"
+    },
+    "modal": {
+      "title": "Accounting adjustments",
+      "tabs": {
+        "available": "Available",
+        "managed": "Processed"
+      }
+    },
+    "table": {
+      "columns": {
+        "erpId": "ERP ID",
+        "createdAt": "Created",
+        "adjustmentType": "Adjustment type",
+        "initialAmount": "Original amount",
+        "appliedAmount": "Applied amount",
+        "availableAmount": "Available amount"
+      }
+    },
+    "tab": {
+      "addedToApplication": "{count, plural, one {Adjustment added to the cash application table} other {Adjustments added to the cash application table}}",
+      "addToApplicationErrorDetail": "Couldn't add the adjustments to the cash application table. {detail}",
+      "addToApplicationError": "Couldn't add the adjustments to the cash application table",
+      "itemName": "Adjustments",
+      "generateAction": "Take action"
+    },
+    "editModal": {
+      "success": "Adjustments updated",
+      "error": "Couldn't update the adjustments",
+      "columns": {
+        "adjustment": "Accounting adjustment"
+      },
+      "commentPlaceholder": "Add a comment",
+      "amountRequired": "Amount is required",
+      "amountNonZero": "The amount can't be 0",
+      "title": "Edit deductions",
+      "removeItemName": "adjustment"
+    }
+  },
+  "balances": {
+    "filter": {
+      "type": "Type",
+      "allTypes": "All types",
+      "filters": "Filters"
+    },
+    "view": {
+      "itemName": "Deductions"
+    }
+  },
+  "balanceSettlement": {
+    "noAdjustmentsToSettle": "There are no adjustments available to settle",
+    "loadToSettleError": "Couldn't load the adjustments to settle",
+    "noAdjustmentsAvailable": "There are no adjustments available to select",
+    "loadAvailableError": "Couldn't load the available adjustments",
+    "success": "Deductions resolved",
+    "error": "Couldn't resolve the deductions: {detail}",
+    "unknownError": "unknown error",
+    "columns": {
+      "cashportAdjustment": "Cashport adjustment",
+      "linkedInvoice": "Linked invoice",
+      "erpAdjustment": "ERP adjustment",
+      "difference": "Difference",
+      "observation": "Note"
+    },
+    "commentPlaceholder": "Add a comment",
+    "title": "Deduction resolution",
+    "description": "Select the credit memo issued to resolve the deduction."
+  }
+}

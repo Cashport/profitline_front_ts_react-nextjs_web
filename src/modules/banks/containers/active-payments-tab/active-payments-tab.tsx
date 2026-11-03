@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { Flex, Spin } from "antd";
 import { DotsThree } from "phosphor-react";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
@@ -50,6 +51,9 @@ const PAGO_APLICADO_STATUS_ID = 4;
 const IDENTIFICADO_STATUS_ID = 1;
 
 export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
+  const t = useTranslations("banks.activePayments");
+  const tShared = useTranslations("banks.shared");
+  const tCommon = useTranslations("common");
   const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
@@ -120,10 +124,10 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
         client_id: selectedRows?.[0]?.id_client || ""
       });
 
-      showMessage("success", "Asignación aprobada correctamente");
+      showMessage("success", tShared("approveSuccess"));
       onCloseModal();
     } catch (error) {
-      showMessage("error", "Error al aprobar la asignación");
+      showMessage("error", tShared("approveError"));
     }
     setLoadingApprove(false);
   };
@@ -131,14 +135,11 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
   const handlePaymentUnidentified = async () => {
     try {
       await markPaymentsAsUnidentified(selectedRows?.map((payment) => payment.id) || []);
-      showMessage("success", "Pago(s) marcados como no identificados");
+      showMessage("success", t("markUnidentifiedSuccess"));
       mutate();
       setSelectedRows([]);
     } catch (error) {
-      showMessage(
-        "error",
-        "Ha ocurrido un error al marcar los pagos seleccionados como no identificados"
-      );
+      showMessage("error", t("markUnidentifiedError"));
     }
     setIsSelectOpen({ selected: 0 });
   };
@@ -170,7 +171,7 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
           <BanksSlot to="header" active={isActive}>
             <BanksFilterModal setSelectedFilters={setSelectedFilters} withActive defaultLast30 />
             <OptimizedSearchComponent
-              title="Buscar referencia, valor…"
+              title={tShared("searchPlaceholder")}
               onSearch={handleSearch}
               surface="page"
               className="!w-[220px] !flex-none"
@@ -194,15 +195,15 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
               >
                 <path d="M4 6h10M4 12h16M4 18h7M17 4v4M20 16v4" />
               </svg>
-              Reglas de banco
+              {t("bankRules")}
             </button>
             <button
               type="button"
-              title="Generar acción"
-              aria-label="Generar acción"
+              title={tShared("generateAction")}
+              aria-label={tShared("generateAction")}
               onClick={() => {
                 if (!selectedRows || selectedRows.length === 0) {
-                  showMessage("error", "Seleccione al menos un pago");
+                  showMessage("error", tShared("selectAtLeastOnePayment"));
                   return;
                 }
                 setisGenerateActionOpen(true);
@@ -270,7 +271,7 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
                 selectedRows &&
                 selectedRows.length > 1
               ) {
-                showMessage("info", "Solo puedes seleccionar un pago para esta acción");
+                showMessage("info", t("singlePaymentOnly"));
                 return;
               }
 
@@ -278,7 +279,7 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
                 selected === 2 &&
                 selectedRows?.some((row) => row.id_status === PAGO_APLICADO_STATUS_ID)
               ) {
-                showMessage("info", "No puedes asignar cliente a pagos en estado Pago aplicado");
+                showMessage("info", t("cannotAssignApplied"));
                 return;
               }
 
@@ -290,20 +291,14 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
                     row.id_status !== PAGO_APLICADO_STATUS_ID
                 )
               ) {
-                showMessage(
-                  "info",
-                  "Solo puedes cambiar el periodo contable de pagos identificados o aplicados"
-                );
+                showMessage("info", t("periodOnlyIdentifiedOrApplied"));
                 return;
               }
 
               if ((selected === 6 || selected === 3) && selectedRows && selectedRows.length > 1) {
                 const clientId = selectedRows[0].id_client;
                 if (!selectedRows.every((row) => row.id_client === clientId)) {
-                  showMessage(
-                    "info",
-                    "Solo puedes seleccionar pagos del mismo cliente para esta acción"
-                  );
+                  showMessage("info", tShared("sameCustomerOnly"));
                   return;
                 }
               }
@@ -327,8 +322,8 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
             isOpen={isSelectOpen.selected === 3}
             onClose={onCloseModal}
             onOk={handleApproveAssignment}
-            title="¿Está seguro de aprobar la asignación?"
-            okText="Aprobar"
+            title={tShared("approveConfirmTitle")}
+            okText={tCommon("actions.approve")}
             okLoading={loadingApprove}
           />
           <ModalActionsSplitPayment
@@ -352,7 +347,7 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
             selectDates={handleFilterDates}
           />
           <ModalConfirmAction
-            title="¿Marcar pagos seleccionados como sin identificar?"
+            title={t("markUnidentifiedConfirm")}
             isOpen={isSelectOpen.selected === 8}
             onClose={() => setIsSelectOpen({ selected: 0 })}
             onOk={handlePaymentUnidentified}

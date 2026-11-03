@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Modal, Input, Button, Upload, Dropdown, Flex } from "antd";
 import { DownOutlined } from "@ant-design/icons";
+import { useTranslations } from "use-intl";
 import type { MenuProps } from "antd";
 import styles from "./EmailModal.module.scss";
 import {
@@ -35,6 +36,8 @@ interface SendEmailModalProps {
 }
 
 const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => {
+  const t = useTranslations("modals.sendEmail");
+  const tCommon = useTranslations("common");
   const [modalSize, setModalSize] = useState({ width: 660, height: 520 });
   const [mask, setMask] = useState(false);
   type ViewMode = "default" | "minimized" | "maximized";
@@ -236,7 +239,7 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => 
           showMinimize={true}
           showMaximize={true}
           showRestore={true}
-          title="Correo electrónico"
+          title={t("title")}
         />
       </div>
     );
@@ -268,7 +271,7 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => 
               showMinimize={true}
               showMaximize={viewMode !== "maximized"}
               showRestore={viewMode !== "default"}
-              title="Correo electrónico"
+              title={t("title")}
             />
             {node}
           </div>
@@ -279,19 +282,19 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => 
       >
         <Flex vertical gap={20} className={styles.container}>
           <MultiSelect
-            label="Para"
+            label={t("to")}
             value={recipients}
             onChange={setRecipients}
             options={emailSuggestions}
           />
           <MultiSelect
-            label="CC"
+            label={t("cc")}
             value={ccRecipients}
             onChange={setCcRecipients}
             options={emailSuggestions}
           />
           <Input
-            placeholder="Ingresar asunto"
+            placeholder={t("subjectPlaceholder")}
             value={emailData.subject}
             onChange={(e) => setEmailData({ ...emailData, subject: e.target.value })}
             className={styles.textArea}
@@ -310,7 +313,7 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => 
               plugins={plugins}
               ref={(editor: any) => (editorRef.current = editor)}
               textAlignment={textAlignment}
-              placeholder="Cuerpo"
+              placeholder={t("bodyPlaceholder")}
             />
           </div>
           <AttachmentList
@@ -371,7 +374,12 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => 
                   <LineVertical size={24} weight="light" color="#DDDDDD" />
                 </Flex>
                 <Dropdown
-                  menu={{ items: selectTemplateItems({ handleTemplateSelect }) }}
+                  menu={{
+                    items: selectTemplateItems({
+                      handleTemplateSelect,
+                      label: (key) => t(`templates.${key}`)
+                    })
+                  }}
                   dropdownRender={(menu) => (
                     <div>
                       {React.cloneElement(
@@ -384,7 +392,7 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => 
                   )}
                 >
                   <Button style={{ border: "none", fontSize: 16, fontWeight: 600 }}>
-                    Seleccionar plantilla <DownOutlined />
+                    {t("selectTemplate")} <DownOutlined />
                   </Button>
                 </Dropdown>
               </Flex>
@@ -398,7 +406,7 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({ visible, onClose }) => 
               customStyles={{ width: 200, height: 48 }}
               loading={loadingSubmit}
             >
-              Enviar
+              {tCommon("actions.send")}
             </PrincipalButton>
           </Flex>
         </Flex>

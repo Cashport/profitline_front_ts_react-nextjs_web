@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import useSWR from "swr";
 
 import { Spin } from "antd";
+import { useTranslations } from "use-intl";
 import { CheckCircle, Clock, XCircle, CircleDot } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -31,6 +32,8 @@ const normalizeSearch = (value: string) =>
   Array.from(new Set(value.split(/[\s,;]+/).filter(Boolean))).join(",");
 
 export function BalancesView() {
+  const t = useTranslations("balances.view");
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
   const [balancesFilter, setBalancesFilter] = useState<IBalancesFilter>({
@@ -111,7 +114,7 @@ export function BalancesView() {
         {selectedBalances.length > 0 && (
           <DraggableTotalModal
             totalAmount={totalPending}
-            itemName="Saldos"
+            itemName={t("itemName")}
             count={selectedBalances.length}
             initialPosition={{ x: 0, y: 0 }}
           />
@@ -120,7 +123,7 @@ export function BalancesView() {
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <UiSearchInput
-                placeholder="Buscar"
+                placeholder={tCommon("placeholders.search")}
                 onChange={(e) => setSearchTerm(normalizeSearch(e.target.value))}
               />
 

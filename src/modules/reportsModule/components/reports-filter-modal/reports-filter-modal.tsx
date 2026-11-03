@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -38,16 +39,20 @@ export default function ReportsFilterModal({
   types,
   inHeader
 }: ReportsFilterModalProps) {
+  const t = useTranslations("reports.filters");
   // El draft interno de FilterModal sólo cubre categorías de opciones, así que
   // el rango de fechas se borra aquí y se confirma al aplicar.
   const [dateDraft, setDateDraft] = useState<DateDraft>({ from: value.from, to: value.to });
 
-  const typeOptions: FilterOptionItem[] = types.map((t) => ({ id: String(t.id), name: t.name }));
+  const typeOptions: FilterOptionItem[] = types.map((type) => ({
+    id: String(type.id),
+    name: type.name
+  }));
 
   const selection: FilterSelection = {
     tipo: value.report_type_ids.map((id) => ({
       id: String(id),
-      name: types.find((t) => t.id === id)?.name ?? String(id)
+      name: types.find((type) => type.id === id)?.name ?? String(id)
     }))
   };
 
@@ -56,14 +61,14 @@ export default function ReportsFilterModal({
   const hasDraftDate = Boolean(dateDraft.from || dateDraft.to);
 
   const categories: FilterCategoryConfig[] = [
-    { key: "tipo", label: "Tipo de informe", options: typeOptions },
+    { key: "tipo", label: t("type"), options: typeOptions },
     {
       key: "fecha",
-      label: "Fecha de publicación",
+      label: t("publishedAt"),
       kind: "custom",
       metaLabel: hasDraftDate
-        ? `Periodo: ${formatDateTagValue(dateDraft)}`
-        : "Selecciona un periodo",
+        ? t("period", { value: formatDateTagValue(dateDraft) })
+        : t("selectPeriod"),
       draftCount: hasDraftDate ? 1 : 0,
       renderPanel: () => <FilterDateTab value={dateDraft} onChange={setDateDraft} />,
       // Debe ser null (no un elemento vacío) para que FilterModal no lo cuente como activo.
@@ -71,7 +76,7 @@ export default function ReportsFilterModal({
         hasCommittedDate ? (
           <DateFilterTag
             value={committedDate}
-            label="Fecha"
+            label={t("dateTag")}
             onClear={() => onChange({ ...value, from: null, to: null })}
           />
         ) : null

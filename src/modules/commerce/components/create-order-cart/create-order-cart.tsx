@@ -3,6 +3,7 @@ import { Flex, Typography } from "antd";
 import { Eye, Gift, Sparkle } from "@phosphor-icons/react";
 import { AxiosError } from "axios";
 import { BagSimple, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { formatNumber } from "@/utils/utils";
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
@@ -49,6 +50,9 @@ interface CreateOrderCartProps {
 const { Text } = Typography;
 
 const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
+  const t = useTranslations("commerce.cart");
+  const tSummary = useTranslations("commerce.summary");
+  const tCommon = useTranslations("common");
   const { formatMoney, config, projectId } = useAppStore((state) => ({
     formatMoney: state.formatMoney,
     config: state.config,
@@ -524,13 +528,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     <div className={styles.cartContainer}>
       <div className={styles.cartContainer__top}>
         <Flex className={styles.header} justify="space-between">
-          <h3>Resumen de la orden</h3>
+          <h3>{t("title")}</h3>
           <p>
-            SKUs: {numberOfSelectedProducts} - Productos: {totalProductsQuantity}
+            {t("skusAndProducts", {
+              skus: numberOfSelectedProducts,
+              products: totalProductsQuantity
+            })}
           </p>
         </Flex>
         {width <= 768 && onClose && (
-          <button onClick={onClose} className={styles.closeButton} aria-label="Cerrar carrito">
+          <button onClick={onClose} className={styles.closeButton} aria-label={t("closeCart")}>
             <X size={16} weight="bold" />
           </button>
         )}
@@ -538,10 +545,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         {selectedCategories.length === 0 && (
           <div className={styles.emptyCart}>
             <BagSimple className={styles.bagLogo} size={82} />
-            <p>Aún no has agregado productos</p>
+            <p>{t("empty")}</p>
             <button
               className={styles.discountsButton}
-              data-info="Ver todos los descuentos"
+              data-info={t("viewAllDiscounts")}
               onClick={handleOpenDiscountsModal}
             ></button>
           </div>
@@ -552,8 +559,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               <Flex className={styles.products__header} justify="space-between">
                 <h3>{category.products[0].category_name}</h3>
                 <p>
-                  SKUs: {category.products.length} - Productos:{" "}
-                  {category.products.reduce((sum, product) => sum + product.quantity, 0)}
+                  {t("skusAndProducts", {
+                    skus: category.products.length,
+                    products: category.products.reduce((sum, product) => sum + product.quantity, 0)
+                  })}
                 </p>
               </Flex>
               {category.products.map((product) => {
@@ -593,14 +602,18 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             >
               <Gift size={13} className="text-[#141414] flex-shrink-0" />
               <span className="flex-1 text-[13px] font-semibold text-[#141414] text-left">
-                Bonificados
+                {t("freeGoods")}
               </span>
               <span className="px-1.5 py-0.5 text-[13px] font-bold bg-[#CBE71E] text-[#141414] rounded-md">
                 {confirmOrderData?.promotion?.active_range?.gift_options &&
                 (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1
-                  ? `${confirmOrderData?.promotion?.active_range?.gift_options?.length} disp.`
+                  ? t("available", {
+                      count: confirmOrderData?.promotion?.active_range?.gift_options?.length ?? 0
+                    })
                   : (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0 &&
-                    `${confirmOrderData?.other_bonificated_products?.length} disp.`}
+                    t("available", {
+                      count: confirmOrderData?.other_bonificated_products?.length ?? 0
+                    })}
               </span>
               <Eye size={14} className="text-[#999999]" />
             </button>
@@ -609,7 +622,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             <>
               <button
                 className={styles.discountsButton}
-                data-info="Ver todos los descuentos"
+                data-info={t("viewAllDiscounts")}
                 onClick={handleOpenDiscountsModal}
               ></button>
               <hr className={styles.separator} />
@@ -618,13 +631,13 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
           <Flex vertical gap={"0.25rem"}>
             <Flex justify="space-between">
-              <p>Subtotal</p>
+              <p>{tSummary("subtotal")}</p>
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </Flex>
 
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
               <p className={styles.cartContainer__footer__discountExplanation}>
-                Descuentos de productos
+                {tSummary("productDiscounts")}
               </p>
               {confirmOrderData.discounts ? (
                 <Text className={styles.cartContainer__footer__discountExplanation}>
@@ -637,7 +650,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
               <p className={styles.cartContainer__footer__discountExplanation}>
-                Descuentos de la orden (Cross selling)
+                {tSummary("orderDiscounts")}
               </p>
               {confirmOrderData.discounts ? (
                 <Text className={styles.cartContainer__footer__discountExplanation}>
@@ -648,7 +661,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               )}
             </Flex>
             <Flex justify="space-between" gap={"0.25rem"}>
-              <p className={styles.cartContainer__footer__discountExplanation}>Descuento Total</p>
+              <p className={styles.cartContainer__footer__discountExplanation}>
+                {tSummary("totalDiscount")}
+              </p>
               {confirmOrderData.discounts ? (
                 <Text className={styles.cartContainer__footer__discountExplanation}>
                   -${formatNumber(confirmOrderData.discounts?.totalDiscount)}
@@ -658,22 +673,22 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               )}
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
-              <strong>Total</strong>
+              <strong>{tSummary("total")}</strong>
               <strong>${formatNumber(confirmOrderData?.total)}</strong>
             </Flex>
             <Flex justify="space-between">
-              <p>IVA</p>
+              <p>{tSummary("vat")}</p>
               <p>${formatNumber(confirmOrderData?.taxes)}</p>
             </Flex>
             <Flex justify="space-between">
-              <p>Total con pronto pago</p>
+              <p>{tSummary("totalWithEarlyPayment")}</p>
               <p>${formatNumber(confirmOrderData?.total_pronto_pago)}</p>
             </Flex>
           </Flex>
 
           {!checkingOut && (
             <PrincipalButton onClick={() => handleContinuePurchase()}>
-              Continuar compra
+              {t("continuePurchase")}
             </PrincipalButton>
           )}
         </div>
@@ -695,16 +710,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={showConfirmModal}
         onClose={handleCloseModal}
-        title="No puedes continuar con la compra"
+        title={t("cannotContinue")}
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              El pedido debe ser mínimo de {formatMoney(minimumOrderAmount)} (IVA incluido)
+              {t("minimumOrder", { amount: formatMoney(minimumOrderAmount) })}
             </p>
-            <p>Agrega más productos al carrito para continuar.</p>
+            <p>{t("addMoreProducts")}</p>
           </Flex>
         }
-        cancelText="Entendido"
+        cancelText={t("understood")}
         hideOkButton
       />
 
@@ -712,32 +727,30 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         isOpen={showCanulasModal}
         onClose={handleCloseCanulasModal}
         onOk={handleConfirmCanulas}
-        title="¿Está seguro que desea continuar?"
+        title={t("confirmContinue")}
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
-            <p className={styles.confirmationModalContent__totalLabel}>
-              No has seleccionado Canulas y/o Agua estéril
-            </p>
-            <p>Te recomendamos revisar la orden</p>
+            <p className={styles.confirmationModalContent__totalLabel}>{t("noCannulasOrWater")}</p>
+            <p>{t("reviewOrder")}</p>
           </Flex>
         }
-        okText="Confirmar"
-        cancelText="Cancelar"
+        okText={tCommon("actions.confirm")}
+        cancelText={tCommon("actions.cancel")}
       />
 
       <ModalConfirmAction
         isOpen={showOnlyCanulasOrAguaModal}
         onClose={handleCloseOnlyCanulasOrAguaModal}
-        title="No puedes continuar con la compra"
+        title={t("cannotContinue")}
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              No se pueden facturar solo cánulas ni aguas
+              {t("onlyCannulasOrWater")}
             </p>
-            <p>Agrega otros productos al carrito para continuar.</p>
+            <p>{t("addOtherProducts")}</p>
           </Flex>
         }
-        cancelText="Entendido"
+        cancelText={t("understood")}
         hideOkButton
       />
 
@@ -745,63 +758,61 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         isOpen={showOddSBVitalModal}
         onClose={handleCloseOddSBVitalModal}
         onOk={handleConfirmOddSBVital}
-        title="¿Está seguro que desea continuar?"
+        title={t("confirmContinue")}
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
-            <p className={styles.confirmationModalContent__totalLabel}>
-              Se va a cobrar la unidad impar de Skinboosters a precio full
-            </p>
+            <p className={styles.confirmationModalContent__totalLabel}>{t("oddSkinboosters")}</p>
           </Flex>
         }
-        okText="Continuar"
-        cancelText="Cancelar"
+        okText={tCommon("actions.continue")}
+        cancelText={tCommon("actions.cancel")}
       />
 
       <ModalConfirmAction
         isOpen={showOddGroupModal}
         onClose={handleCloseOddGroupModal}
         onOk={handleConfirmOddGroup}
-        title="¿Está seguro que desea continuar?"
+        title={t("confirmContinue")}
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
-            <p className={styles.confirmationModalContent__totalLabel}>
-              La suma total de unidades entre las referencias Restylane (VOLYME, REFYNE, LYFT LIDO,
-              LIDOCAINA, KYSSE, DEFYNE) es impar. Se va a cobrar la unidad impar a precio full
-            </p>
+            <p className={styles.confirmationModalContent__totalLabel}>{t("oddRestylane")}</p>
           </Flex>
         }
-        okText="Continuar"
-        cancelText="Cancelar"
+        okText={tCommon("actions.continue")}
+        cancelText={tCommon("actions.cancel")}
       />
 
       <ModalConfirmAction
         isOpen={showComplementMismatchModal}
         onClose={() => setShowComplementMismatchModal(false)}
         onOk={handleConfirmComplementMismatch}
-        title="No puedes continuar con la compra"
+        title={t("cannotContinue")}
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
-            <p className={styles.confirmationModalContent__totalLabel}>
-              Las cantidades de cánulas y agua estéril no coinciden con lo requerido por los
-              productos principales.
-            </p>
+            <p className={styles.confirmationModalContent__totalLabel}>{t("complementMismatch")}</p>
             {complementMismatch && (
               <>
                 <p>
-                  Cánulas requeridas: <strong>{complementMismatch.expectedCanulas}</strong> — En
-                  carrito: <strong>{complementMismatch.actualCanulas}</strong>
+                  {t.rich("requiredCannulas", {
+                    expected: complementMismatch.expectedCanulas,
+                    actual: complementMismatch.actualCanulas,
+                    strong: (chunks) => <strong>{chunks}</strong>
+                  })}
                 </p>
                 <p>
-                  Agua estéril requerida: <strong>{complementMismatch.expectedAgua}</strong> — En
-                  carrito: <strong>{complementMismatch.actualAgua}</strong>
+                  {t.rich("requiredWater", {
+                    expected: complementMismatch.expectedAgua,
+                    actual: complementMismatch.actualAgua,
+                    strong: (chunks) => <strong>{chunks}</strong>
+                  })}
                 </p>
-                <p>Vuelve a cargar el carrito o contacta a soporte.</p>
+                <p>{t("reloadOrContactSupport")}</p>
               </>
             )}
           </Flex>
         }
-        cancelText="Modificar"
-        okText="Continuar"
+        cancelText={t("modify")}
+        okText={tCommon("actions.continue")}
         hideOkButton={
           !!complementMismatch &&
           complementMismatch.actualCanulas > complementMismatch.expectedCanulas
@@ -811,17 +822,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={!!complementCatalogMissing}
         onClose={() => setComplementCatalogMissing(null)}
-        title="Producto complemento no disponible"
+        title={t("complementUnavailable")}
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              El producto &ldquo;{complementCatalogMissing}&rdquo; no se encontró en el catálogo y
-              no se pudo agregar automáticamente.
+              {t("complementNotFound", { product: complementCatalogMissing ?? "" })}
             </p>
-            <p>Contacta al administrador del catálogo.</p>
+            <p>{t("contactCatalogAdmin")}</p>
           </Flex>
         }
-        cancelText="Entendido"
+        cancelText={t("understood")}
         hideOkButton
       />
     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { Alert, Empty, Pagination, Segmented } from "antd";
 import { ArrowUpDown, Building2, Check, Store } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import GeneralDropdown from "@/components/ui/dropdown/dropdown";
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
@@ -16,7 +17,6 @@ import AlertsHeader from "../../components/alerts-header/alerts-header";
 import PortfolioCard from "../../components/portfolio-card/portfolio-card";
 import {
   BLOCKING_ALERTS_PATH,
-  BLOCKING_RULES,
   HEADER_BUTTON,
   MOBILE_TABS,
   PAGE_SIZE,
@@ -30,7 +30,7 @@ import {
   type AlertsStatusFilter,
   type AlertsView
 } from "../../stores/blocking-alerts-store";
-import { byUrgency, fmtCutoff, plural } from "../../utils/blocking-alerts";
+import { byUrgency, fmtCutoff } from "../../utils/blocking-alerts";
 
 type Row = IBlockingAlertRow;
 
@@ -66,6 +66,8 @@ interface BlockingAlertsViewProps {
  * bloquear y al día, con la cartera total, búsqueda, orden y paginación.
  */
 export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps) {
+  const t = useTranslations("blockingAlerts");
+  const tv = useTranslations("blockingAlerts.list");
   const { alerts, error } = useBlockingAlerts();
   const { resolvedTheme } = useWalletTheme();
   const store = useBlockingAlertsStore();
@@ -75,9 +77,8 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
 
   const scopeClient = clientId ? alerts?.clients.find((c) => c.client_id === clientId) : undefined;
   const isPos = Boolean(clientId) || store.view === "points_of_sale";
-  const noun: [string, string] = isPos
-    ? ["punto de venta", "puntos de venta"]
-    : ["cliente", "clientes"];
+  // Clave del sustantivo contado en `blockingAlerts.count`.
+  const noun = isPos ? "pointsOfSale" : "customers";
 
   const base = useMemo(() => {
     if (!alerts) return [];
@@ -115,8 +116,12 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
   const scopePos = scopeClient?.points_of_sale_count;
   const caption = clientId
     ? scopePos &&
-      `${plural(scopePos.total, ...noun)} · ${scopePos.blocked + scopePos.warning} en alerta`
-    : totals && `${plural(totals.count, ...noun)} · ${totals.alerts} en alerta`;
+      tv("caption", {
+        items: t(`count.${noun}`, { count: scopePos.total }),
+        alerts: scopePos.blocked + scopePos.warning
+      })
+    : totals &&
+      tv("caption", { items: t(`count.${noun}`, { count: totals.count }), alerts: totals.alerts });
 
   const sortLabel = SORT_OPTIONS.find((o) => o.key === store.sort)?.label;
 
@@ -142,15 +147,18 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
         alerts && (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={`Sin ${noun[1]} en esta vista`}
+            description={tv(isPos ? "emptyPointsOfSale" : "emptyCustomers")}
           />
         )
       )}
       {matches.length > PAGE_SIZE && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-[13px] text-cp-ink-3">
-            {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + visible.length} de{" "}
-            {plural(matches.length, ...noun)}
+            {tv("range", {
+              from: (page - 1) * PAGE_SIZE + 1,
+              to: (page - 1) * PAGE_SIZE + visible.length,
+              items: t(`count.${noun}`, { count: matches.length })
+            })}
           </span>
           <Pagination
             current={page}
@@ -173,10 +181,10 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
         className="w-auto flex-1 bg-cp-bg"
         placeholder={
           clientId
-            ? "Buscar punto de venta o ship-to"
+            ? tv("searchClientPointsOfSale")
             : isPos
-              ? "Buscar punto de venta, ship-to o cliente"
-              : "Buscar cliente o ship-to"
+              ? tv("searchPointsOfSale")
+              : tv("searchCustomers")
         }
       />
       <GeneralDropdown
@@ -197,8 +205,8 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
       >
         <button
           type="button"
-          aria-label="Ordenar"
-          title={`Orden: ${sortLabel}`}
+          aria-label={tv("sort")}
+          title={tv("sortBy", { label: sortLabel ?? "" })}
           className={cn(HEADER_BUTTON, "w-[var(--control-h)] px-0")}
         >
           <ArrowUpDown className="h-4 w-4" />
@@ -220,7 +228,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
           label: (
             <span className={VIEW_LABEL}>
               <Building2 className={VIEW_ICON} />
-              Clientes
+              {tv("customers")}
               <span className="font-medium opacity-60">{alerts.clients.length}</span>
             </span>
           )
@@ -230,7 +238,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
           label: (
             <span className={VIEW_LABEL}>
               <Store className={VIEW_ICON} />
-              Puntos de venta
+              {tv("pointsOfSale")}
               <span className="font-medium opacity-60">{alerts.points_of_sale.length}</span>
             </span>
           )
@@ -245,40 +253,35 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
         crumbs={
           clientId
             ? [
-                { label: "Alertas de bloqueo", href: BLOCKING_ALERTS_PATH },
+                { label: t("title"), href: BLOCKING_ALERTS_PATH },
                 {
-                  label: scopeClient?.name ?? "Cliente",
+                  label: scopeClient?.name ?? tv("customer"),
                   href: `${BLOCKING_ALERTS_PATH}/${clientId}`
                 },
-                { label: "Puntos de venta" }
+                { label: tv("pointsOfSale") }
               ]
-            : [{ label: "Alertas de bloqueo" }]
+            : [{ label: t("title") }]
         }
         info={
           alerts && (
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 shrink-0 rounded-full bg-cp-lime-dark max-md:hidden" />
-              Corte {fmtCutoff(alerts.cutoff_at)}
+              {t("cutoff", { date: fmtCutoff(alerts.cutoff_at) })}
             </span>
           )
         }
       />
 
       {error && (
-        <Alert
-          type="error"
-          showIcon
-          message="No se pudieron cargar las alertas"
-          description={error.message}
-        />
+        <Alert type="error" showIcon message={tv("loadError")} description={error.message} />
       )}
 
       {clientId && alerts && !scopeClient ? (
-        <Empty description="No encontramos este cliente" />
+        <Empty description={tv("customerNotFound")} />
       ) : (
         <>
           <PortfolioCard
-            label={clientId ? "Cartera del cliente" : "Total cartera"}
+            label={clientId ? tv("customerReceivables") : tv("totalReceivables")}
             aging={clientId ? scopeClient : totals}
             caption={caption || undefined}
           />
@@ -302,7 +305,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
                         style={{ background: STATUS_META[status].color }}
                       />
                     )}
-                    {status === "all" ? "Todos" : STATUS_META[status].tab}
+                    {status === "all" ? tv("all") : STATUS_META[status].tab}
                     <span className="font-medium opacity-60">
                       {base.filter((r) => status === "all" || r.status === status).length}
                     </span>
@@ -314,11 +317,11 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
           </section>
 
           <p className="m-0 text-center text-[13px] leading-relaxed text-cp-ink-4">
-            {BLOCKING_RULES}
+            {t("rules")}
             {isPos && (
               <>
                 <br />
-                Cada punto de venta se identifica por su código ship-to
+                {tv("shipToHint")}
               </>
             )}
           </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "use-intl";
 import Header from "@/components/organisms/header";
 import { FilterButton } from "@/components/ui/page-header-controls/page-header-controls";
 import { Tab } from "../lib/types";
@@ -12,19 +13,20 @@ import DashboardMap from "../components/DashboardMap";
 import DashboardOverview from "../components/DashboardOverview";
 
 const NewDashboardView: React.FC = () => {
+  const t = useTranslations("newDashboard.tabs");
   const [activeTab, setActiveTab] = useState<Tab>(Tab.COLLECTION);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getHeaderContent = () => {
     switch (activeTab) {
       case Tab.COLLECTION:
-        return { title: "Resumen de Recaudo", subtitle: "Metas y avance diario" };
+        return { title: t("collection.title"), subtitle: t("collection.subtitle") };
       case Tab.PORTFOLIO:
-        return { title: "Estado de Cartera", subtitle: "Análisis por vencimiento y zona" };
+        return { title: t("portfolio.title"), subtitle: t("portfolio.subtitle") };
       case Tab.MANAGEMENT:
-        return { title: "Gestión de Cobranza", subtitle: "Estrategias y riesgo" };
+        return { title: t("management.title"), subtitle: t("management.subtitle") };
       case Tab.MAP:
-        return { title: "Mapa de Riesgo", subtitle: "Geolocalización de clientes" };
+        return { title: t("map.title"), subtitle: t("map.subtitle") };
       default:
         return { title: "", subtitle: "" };
     }

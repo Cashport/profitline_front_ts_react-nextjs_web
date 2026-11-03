@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Flex, Modal, Pagination, Spin } from "antd";
 import { CaretLeft, Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { IFinancialDiscount } from "@/hooks/useAcountingAdjustment";
 import { useMessageApi } from "@/context/MessageContext";
@@ -52,6 +53,8 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { showMessage } = useMessageApi();
+  const t = useTranslations("clients.applyModals");
+  const tCommon = useTranslations("common");
   const [adjustments, setAdjustments] = useState<(IFinancialDiscount | IApplicationBalance)[]>();
   const [selectedRows, setSelectedRows] = useState<(IFinancialDiscount | IApplicationBalance)[]>(
     []
@@ -129,7 +132,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
     } else if (modalAdjustmentsState.adjustmentType === "byInvoice") {
       // rectify there are invoices selected
       if (!selectedInvoices?.length || !selectedInvoices[0].id_erp) {
-        showMessage("error", "No hay facturas seleccionadas");
+        showMessage("error", t("listAdjustments.noInvoicesSelected"));
         setLoading(false);
         return;
       }
@@ -178,12 +181,12 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
         >
           <div onClick={() => onCancel()} className="header">
             <CaretLeft size={24} />
-            <h2>Agregar ajuste</h2>
+            <h2>{t("shared.addAdjustment")}</h2>
           </div>
-          <h2 className="modal-subtitle">Selecciona los ajustes a aplicar</h2>
+          <h2 className="modal-subtitle">{t("listAdjustments.subtitle")}</h2>
           <div className="search-container">
             <UiSearchInputLong
-              placeholder="Buscar"
+              placeholder={tCommon("placeholders.search")}
               className={"custom-input"}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
@@ -201,7 +204,9 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
                   const isGlobal = modalAdjustmentsState.adjustmentType === "global";
                   const title = isGlobal
                     ? row.comments
-                    : `Nota crédito ${(row as IFinancialDiscount).erp_id}`;
+                    : t("listAdjustments.creditNote", {
+                        id: String((row as IFinancialDiscount).erp_id)
+                      });
                   const subtitle = isGlobal
                     ? formatDate((row as IApplicationBalance).created_at)
                     : (row as IFinancialDiscount).comments;
@@ -248,13 +253,13 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
           <div className="create-adjustment">
             <button onClick={handleCreateAdjustments} className="create-adjustment-btn">
               <Plus size={20} />
-              Crear ajuste
+              {t("shared.createAdjustment")}
             </button>
           </div>
 
           <div className="modal-footer">
             <SecondaryButton fullWidth onClick={() => onCancel()}>
-              Cancelar
+              {tCommon("actions.cancel")}
             </SecondaryButton>
             <PrincipalButton
               fullWidth
@@ -262,7 +267,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
               loading={loading}
               disabled={!selectedRows.length}
             >
-              Agregar
+              {tCommon("actions.add")}
             </PrincipalButton>
           </div>
         </Modal>

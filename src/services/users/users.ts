@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { IUser, IUserForm, WelcomeData } from "@/types/users/IUser";
 import { API } from "@/utils/api/api";
 import { SUCCESS } from "@/utils/constants/globalConstants";
@@ -13,7 +14,7 @@ export const getUserById = async (idUser: string): Promise<WelcomeData> => {
     const response: WelcomeData = await API.get(`/user/${idUser}`);
 
     if (!response.data || !Array.isArray(response.data.COUNTRY_IDS)) {
-      throw new Error("No se pudo cargar la asignación de países del usuario.");
+      throw new Error(getTranslator("shared")("services.userCountriesLoadError"));
     }
     return response;
   } catch (error) {
@@ -176,7 +177,9 @@ export const onChangeStatusById = async (
     if (response.status === SUCCESS) {
       showMessage(
         "success",
-        `El usuario fue ${isActive === 1 ? "activado" : "desactivado"} exitosamente.`
+        isActive === 1
+          ? getTranslator("shared")("services.userActivated")
+          : getTranslator("shared")("services.userDeactivated")
       );
       onClose();
     } else {
@@ -185,7 +188,7 @@ export const onChangeStatusById = async (
 
     return response;
   } catch (error) {
-    showMessage("error", "Oops ocurrio un error.");
+    showMessage("error", getTranslator("shared")("services.genericError"));
     onClose();
     throw error;
   }
@@ -201,16 +204,16 @@ export const onRemoveUserById = async (
   try {
     const response = await API.delete(`/user/id=${idUser}&project_id=${idProject}`);
     if (response.status === SUCCESS) {
-      showMessage("success", "El usuario fue eliminado exitosamente.");
+      showMessage("success", getTranslator("shared")("services.userDeleted"));
       onClose();
     } else {
-      showMessage("error", "Oops ocurrio un error.");
+      showMessage("error", getTranslator("shared")("services.genericError"));
       onClose();
     }
 
     return response;
   } catch (error) {
-    showMessage("error", "Oops ocurrio un error.");
+    showMessage("error", getTranslator("shared")("services.genericError"));
     onClose();
     throw error;
   }

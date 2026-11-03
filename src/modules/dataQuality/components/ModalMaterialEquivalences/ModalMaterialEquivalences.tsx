@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Modal, Button as AntButton, Dropdown, Spin } from "antd";
 import { History, MoreHorizontal, Plus, Edit, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { useCatalogMaterialEquivalences } from "../../hooks/useCatalogMaterialEquivalences";
 import { ModalAddMaterialEquivalences } from "../ModalAddMaterialEquivalences/ModalAddMaterialEquivalences";
 
@@ -30,6 +31,8 @@ export function ModalMaterialEquivalences({
   onReopenParent,
   mutateMaterials
 }: ModalMaterialEquivalencesProps) {
+  const t = useTranslations("dataQuality.equivalenceHistory");
+  const tCommon = useTranslations("common");
   const {
     data: equivalences,
     isLoading,
@@ -80,7 +83,7 @@ export function ModalMaterialEquivalences({
             <History className="w-4 h-4" style={{ color: "#8BAF00" }} />
           </div>
           <h2 className="text-base font-semibold flex-1" style={{ color: "#141414" }}>
-            Historial de equivalencias
+            {t("title")}
           </h2>
         </div>
 
@@ -91,7 +94,7 @@ export function ModalMaterialEquivalences({
               className="text-[13px] font-medium px-1.5 py-0.5 rounded"
               style={{ backgroundColor: "#F3F3F3", color: "#888" }}
             >
-              Cod. cliente
+              {t("customerCode")}
             </span>
             <span className="text-sm font-medium" style={{ color: "#333" }}>
               {clientCode}
@@ -102,7 +105,7 @@ export function ModalMaterialEquivalences({
               className="text-[13px] font-medium px-1.5 py-0.5 rounded"
               style={{ backgroundColor: "#F3F3F3", color: "#888" }}
             >
-              Producto cliente
+              {t("customerProduct")}
             </span>
             <span className="text-sm" style={{ color: "#555" }}>
               {clientName}
@@ -119,7 +122,7 @@ export function ModalMaterialEquivalences({
                   className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
                   style={{ minWidth: "320px" }}
                 >
-                  Nombre producto
+                  {t("productName")}
                 </th>
                 <th
                   className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
@@ -131,19 +134,19 @@ export function ModalMaterialEquivalences({
                   className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
                   style={{ width: "60px" }}
                 >
-                  Factor
+                  {t("factor")}
                 </th>
                 <th
                   className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
                   style={{ width: "100px" }}
                 >
-                  Desde
+                  {t("from")}
                 </th>
                 <th
                   className="text-left py-3 text-[13.5px] font-semibold text-cp-ink"
                   style={{ width: "100px" }}
                 >
-                  Hasta
+                  {t("to")}
                 </th>
                 <th style={{ width: "48px" }} />
               </tr>
@@ -159,7 +162,7 @@ export function ModalMaterialEquivalences({
               {!isLoading && equivalences.length === 0 && (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-sm" style={{ color: "#888" }}>
-                    No hay periodos registrados.
+                    {t("empty")}
                   </td>
                 </tr>
               )}
@@ -193,7 +196,7 @@ export function ModalMaterialEquivalences({
                             className="text-[13px] font-semibold px-2 py-0.5 rounded-full"
                             style={{ backgroundColor: "#CBE71E", color: "#141414" }}
                           >
-                            Vigente
+                            {t("current")}
                           </span>
                         ) : equivalence.valid_to ? (
                           <span style={{ color: rowColor }}>
@@ -219,7 +222,7 @@ export function ModalMaterialEquivalences({
                                     icon={<Edit className="w-3.5 h-3.5" />}
                                     onClick={() => {}}
                                   >
-                                    Editar
+                                    {tCommon("actions.edit")}
                                   </AntButton>
                                 )
                               },
@@ -231,7 +234,7 @@ export function ModalMaterialEquivalences({
                                     icon={<Trash2 className="w-3.5 h-3.5" />}
                                     onClick={() => {}}
                                   >
-                                    Eliminar
+                                    {tCommon("actions.delete")}
                                   </AntButton>
                                 )
                               }
@@ -261,7 +264,7 @@ export function ModalMaterialEquivalences({
             className="text-sm font-medium flex items-center gap-1 hover:opacity-70 transition-opacity"
             style={{ color: "#141414" }}
           >
-            <Plus className="w-3.5 h-3.5" /> Agregar equivalencia
+            <Plus className="w-3.5 h-3.5" /> {t("add")}
           </button>
         </div>
 
@@ -282,7 +285,7 @@ export function ModalMaterialEquivalences({
               backgroundColor: "#FFFFFF"
             }}
           >
-            Cerrar
+            {tCommon("actions.close")}
           </AntButton>
         </div>
       </Modal>

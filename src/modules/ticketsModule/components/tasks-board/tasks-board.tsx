@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import BoardLanes, { type BoardLane } from "@/components/ui/board-lanes/board-lanes";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { cn } from "@/utils/utils";
@@ -16,6 +18,7 @@ import TaskBoardCard from "./task-board-card";
  * cerradas"). Sin arrastrar: el estado se cambia desde el detalle.
  */
 export default function TasksBoard({ config }: { config: ITaskConfig }) {
+  const tr = useTranslations("tickets");
   const openDetail = useTicketsView((s) => s.openDetail);
   const { groups, error, isLoading } = useTaskGroups(config, "status");
 
@@ -44,7 +47,7 @@ export default function TasksBoard({ config }: { config: ITaskConfig }) {
     <div className={cn(isLoading && "pointer-events-none opacity-60")}>
       <BoardLanes
         lanes={lanes}
-        emptyLabel="Sin tareas"
+        emptyLabel={tr("noTasks")}
         renderCard={(t) => (
           <TaskBoardCard key={t.id} ticket={t} config={config} onOpen={openDetail} />
         )}
@@ -63,6 +66,8 @@ function LaneMore({
   group: ITaskGroup;
   onOpen: (id: number) => void;
 }) {
+  const tr = useTranslations("tickets");
+  const tCommon = useTranslations("common");
   const more = useMoreTasks(config, fieldOf(config, "status"), group.value, group.items ? 2 : 1);
   const shown = (group.items?.length ?? 0) + more.items.length;
   const remaining = Math.max(0, group.count - shown);
@@ -80,8 +85,8 @@ function LaneMore({
           className="cursor-pointer rounded-md border border-dashed border-border bg-transparent py-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground disabled:cursor-default disabled:opacity-60"
         >
           {more.isLoading
-            ? "Cargando…"
-            : `Ver ${Math.min(remaining, TASKS_PER_GROUP)} más de ${remaining}`}
+            ? tCommon("status.loading")
+            : tr("showMoreOf", { count: Math.min(remaining, TASKS_PER_GROUP), remaining })}
         </button>
       )}
     </>

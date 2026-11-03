@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
+import { useTranslations } from "use-intl";
 import { Cascader } from "antd";
 import { useAppStore } from "@/lib/store/store";
 import { getAllLinesByProject } from "@/services/line/line";
@@ -8,11 +9,12 @@ import { ILine } from "@/types/lines/line";
 import { IZone } from "@/types/zones/IZones";
 import { IChanel } from "@/types/bre/IBRE";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 
 interface FilterOption {
   value: string | number;
-  label: string;
+  label: ReactNode;
   isLeaf?: boolean;
   children?: FilterOption[];
 }
@@ -30,6 +32,7 @@ interface AccountingAdjustmentsFilterProps {
 export const AccountingAdjustmentsFilter: React.FC<AccountingAdjustmentsFilterProps> = ({
   onFilterChange
 }) => {
+  const t = useTranslations("components.filters");
   const { ID } = useAppStore((state) => state.selectedProject);
   const [cascaderOptions, setCascaderOptions] = useState<FilterOption[]>([]);
 
@@ -68,17 +71,17 @@ export const AccountingAdjustmentsFilter: React.FC<AccountingAdjustmentsFilterPr
         setCascaderOptions([
           {
             value: "lines",
-            label: "Líneas",
+            label: filterLabel("lines"),
             children: lines
           },
           {
             value: "zones",
-            label: "Zonas",
+            label: filterLabel("zones"),
             children: zones
           },
           {
             value: "channels",
-            label: "Canales",
+            label: filterLabel("channels"),
             children: channels
           }
         ]);
@@ -130,7 +133,7 @@ export const AccountingAdjustmentsFilter: React.FC<AccountingAdjustmentsFilterPr
       multiple
       maxTagCount="responsive"
       showCheckedStrategy={Cascader.SHOW_CHILD}
-      placeholder="Seleccionar filtros"
+      placeholder={t("selectFilters")}
     />
   );
 };

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { getAppZoom } from "@/utils/utils";
 import { Collapse, Flex } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 
@@ -26,6 +27,7 @@ export const ModalResultAppy = ({
   total,
   defaultPosition: defaultPositionProp
 }: Props) => {
+  const t = useTranslations("clients.applyTab");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const updateDefaultPosition = () => {
     const modalWidth = draggleRef.current?.offsetWidth || 240;
@@ -74,26 +76,26 @@ export const ModalResultAppy = ({
           expandIconPosition="end"
           className="custom-collapse"
         >
-          <Panel header="Resumen" key="1" className="custom-panel">
+          <Panel header={t("resultPanel.summary")} key="1" className="custom-panel">
             <Flex vertical gap="0.3rem">
               <Flex justify="space-between" className="facturas">
-                <div>Facturas</div>
+                <div>{t("sections.invoices.label")}</div>
                 <div className={invoices === 0 ? "no-value" : ""}>
                   {invoices === 0 ? "-" : formatMoney(invoices)}
                 </div>
               </Flex>
               <Flex justify="space-between" className="pagos">
-                <div>Pagos</div>
+                <div>{t("sections.payments.label")}</div>
                 <div>{formatMoney(payments)}</div>
               </Flex>
               <Flex justify="space-between" className="descuentos">
-                <div>Notas crédito</div>
+                <div>{t("sections.creditMemos.label")}</div>
                 <div className={desconts === 0 ? "no-value" : ""}>
                   {desconts === 0 ? "-" : formatMoney(desconts)}
                 </div>
               </Flex>
               <Flex justify="space-between" className="descuentos">
-                <div>Saldos</div>
+                <div>{t("sections.deductions.label")}</div>
                 <div className={balances === 0 ? "no-value" : ""}>
                   {balances === 0 ? "-" : formatMoney(balances)}
                 </div>
@@ -102,7 +104,7 @@ export const ModalResultAppy = ({
           </Panel>
         </Collapse>
         <Flex justify="space-between" className="divider__conciliation saldo">
-          <div>Saldo</div>
+          <div>{t("resultPanel.netBalance")}</div>
           <div>{formatMoney(total)}</div>
         </Flex>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2, Gift } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Product } from "@/types/products/products";
 import { IGrupoPremio, INivel } from "@/types/marketAdmin/IMarketAdmin";
 import GrupoPremioEditor from "./GrupoPremioEditor";
@@ -16,6 +17,7 @@ export default function PremiosEditor({
   products: Product[];
   onChange: (n: INivel) => void;
 }) {
+  const t = useTranslations("marketAdmin.promotions.rewards");
   const defaultProductId = products[0]?.id ?? 0;
 
   const addPremio = () => {
@@ -99,11 +101,11 @@ export default function PremiosEditor({
           <span className="w-5 h-5 rounded-full bg-[#E8F5C0] flex items-center justify-center">
             <Gift size={10} className="text-[#6AB000]" />
           </span>
-          <p className="text-[13px] font-semibold text-[#141414]">Regalos</p>
+          <p className="text-[13px] font-semibold text-[#141414]">{t("title")}</p>
         </div>
         {nivel.premios.length > 1 && (
           <span className="text-[13px] text-[#999999] bg-[#F0F0F0] px-2 py-0.5 rounded-full">
-            El cliente elige una opción
+            {t("customerPicksOne")}
           </span>
         )}
       </div>
@@ -120,12 +122,15 @@ export default function PremiosEditor({
                   </span>
                 )}
                 <span className="text-[13px] font-medium text-[#141414]">
-                  {nivel.premios.length > 1 ? `Opción ${getLetra(prIdx)}` : "Regalo"}
+                  {nivel.premios.length > 1
+                    ? t("option", { letter: getLetra(prIdx) })
+                    : t("single")}
                 </span>
               </div>
               {nivel.premios.length > 1 && (
                 <button
                   onClick={() => removePremio(pr.id)}
+                  aria-label={t("removeOption")}
                   className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors"
                 >
                   <Trash2 size={10} />
@@ -152,14 +157,14 @@ export default function PremiosEditor({
                   onClick={() => addGrupoToPremio(pr.id, "fijo")}
                   className="flex items-center gap-1 text-[13px] text-[#666666] hover:text-[#141414] hover:underline"
                 >
-                  <Plus size={9} /> Agregar grupo fijo
+                  <Plus size={9} /> {t("addFixedGroup")}
                 </button>
                 <span className="text-[#DDDDDD]">|</span>
                 <button
                   onClick={() => addGrupoToPremio(pr.id, "pool")}
                   className="flex items-center gap-1 text-[13px] text-[#92400E] hover:underline"
                 >
-                  <Plus size={9} /> Agregar grupo a elegir
+                  <Plus size={9} /> {t("addChoiceGroup")}
                 </button>
               </div>
             </div>
@@ -169,7 +174,7 @@ export default function PremiosEditor({
           onClick={addPremio}
           className="flex items-center gap-1.5 text-[13px] text-[#6AB000] hover:underline w-fit"
         >
-          <Plus size={11} /> Agregar opción de regalo
+          <Plus size={11} /> {t("addOption")}
         </button>
       </div>
     </div>

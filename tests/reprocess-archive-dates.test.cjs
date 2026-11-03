@@ -4,6 +4,7 @@ const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 const ts = require("typescript");
+const useIntlEs = require("./helpers/use-intl-es.cjs");
 const realDayjs = require("dayjs");
 
 const root = path.resolve(__dirname, "..");
@@ -152,6 +153,7 @@ function renderModal() {
     }
   };
   const mocks = {
+    "use-intl": useIntlEs,
     react,
     "react/jsx-runtime": { jsx, jsxs: jsx },
     dayjs: dayjsMock,

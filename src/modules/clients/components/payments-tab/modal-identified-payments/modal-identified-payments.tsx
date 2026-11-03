@@ -2,6 +2,7 @@ import { Dispatch, FC, SetStateAction, useState } from "react";
 import { Radio } from "antd";
 import { CaretLeft } from "phosphor-react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -39,6 +40,8 @@ const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
   identifiedPayments,
   onClose
 }) => {
+  const t = useTranslations("clients.payments.identifiedPayments");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { showMessage } = useMessageApi();
   const params = useParams();
@@ -62,11 +65,11 @@ const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
         clientId
       });
 
-      showMessage("success", "Pago identificado enviado correctamente!");
+      showMessage("success", t("success"));
       onClose(false, true);
       setViewInfo((prev) => ({ ...prev, current: "form" }));
     } catch (error) {
-      showMessage("error", "Ocurrió un error al identificar el pago");
+      showMessage("error", t("error"));
     }
     setLoading(false);
   };
@@ -79,9 +82,9 @@ const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
     <div className={styles.content}>
       <button className={styles.content__header} onClick={handleCancel}>
         <CaretLeft size={"1.25rem"} />
-        <h4>Pagos identificados</h4>
+        <h4>{t("title")}</h4>
       </button>
-      <p className={styles.content__description}>Selecciona el pago que quieres aplicar</p>
+      <p className={styles.content__description}>{t("description")}</p>
 
       <Radio.Group
         className={styles.content__payments}
@@ -96,7 +99,9 @@ const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
               </div>
               <div className={styles.paymentContent__content}>
                 <div className={styles.paymentContent__content__left}>
-                  <h3 className={styles.paymentContent__content__name}>Pago {payment.id}</h3>
+                  <h3 className={styles.paymentContent__content__name}>
+                    {t("paymentId", { id: payment.id })}
+                  </h3>
                   <p className={styles.paymentContent__content__date}>{payment.description}</p>
                   <p className={styles.paymentContent__content__client}>{payment.CLIENT_NAME}</p>
                 </div>
@@ -110,13 +115,13 @@ const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
       </Radio.Group>
 
       <div className={styles.footer}>
-        <SecondaryButton onClick={handleCancel}>Cancelar</SecondaryButton>
+        <SecondaryButton onClick={handleCancel}>{tCommon("actions.cancel")}</SecondaryButton>
         <PrincipalButton
           onClick={handleIdentifyPayments}
           disabled={selectedPaymentId === null}
           loading={loading}
         >
-          Identificar
+          {t("identify")}
         </PrincipalButton>
       </div>
     </div>

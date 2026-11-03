@@ -1,5 +1,6 @@
 import { FC, useContext } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "use-intl";
 
 import DashboardTotalPortfolio from "../../components/dashboard-total-portfolio";
 import DashboardGenericItem from "../../components/dashboard-generic-item";
@@ -18,6 +19,7 @@ const DynamicPortfoliAges = dynamic(() => import("../../components/dashboard-por
 interface DashboardProps {}
 
 const Dashboard: FC<DashboardProps> = () => {
+  const t = useTranslations("clients.dashboard");
   const { portfolioData } = useContext(ClientDetailsContext);
 
   const {
@@ -74,7 +76,7 @@ const Dashboard: FC<DashboardProps> = () => {
       <div className={styles.b}>
         <div className={styles.card}>
           <DashboardGenericItem
-            name="Cupo"
+            name={t("creditLimit")}
             value={quota}
             unit="M"
             badgeText={`${parseFloat(quotaPercentage).toFixed(1)}%`}
@@ -82,13 +84,13 @@ const Dashboard: FC<DashboardProps> = () => {
         </div>
         <div className={styles.card}>
           <DashboardGenericItem
-            name="Sin conciliar"
+            name={t("unreconciled")}
             value={totalUnreconciled}
             unit="M"
             quantity={totalUnreconciledCount}
           />
           <DashboardGenericItem
-            name="Novedades"
+            name={t("disputes")}
             value={openAlerts}
             unit="M"
             quantity={openAlertsCount}

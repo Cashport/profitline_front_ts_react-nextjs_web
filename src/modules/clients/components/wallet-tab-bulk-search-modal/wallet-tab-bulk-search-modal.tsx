@@ -3,9 +3,10 @@ import useSWR from "swr";
 import axios from "axios";
 import { Button, ConfigProvider, Modal, Steps, message } from "antd";
 import { Check, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
-import { cn, formatNumber } from "@/utils/utils";
+import { cn } from "@/utils/utils";
 import {
   downloadInvoicesBulkSearch,
   searchInvoicesBulk
@@ -40,7 +41,8 @@ interface Props {
   onActionDone?: (action: BulkActionKey) => void;
 }
 
-const STEP_TITLES = ["Cargar", "Resultados", "Acción"];
+// Claves en clients.bulkSearch.steps
+const STEP_TITLES = ["upload", "results", "action"] as const;
 
 // Ni la búsqueda ni las acciones informan su avance: la barra se acerca a este valor y el 100 %
 // llega con la respuesta
@@ -71,6 +73,8 @@ const WalletTabBulkSearchModal = ({
   clientName,
   onActionDone
 }: Props) => {
+  const t = useTranslations("clients.bulkSearch");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [step, setStep] = useState<BulkSearchStep>("input");
   const [busyKind, setBusyKind] = useState<BulkBusyKind>("search");
@@ -152,7 +156,7 @@ const WalletTabBulkSearchModal = ({
   const handleSearch = async () => {
     if (!file && !inputIds?.length) return;
     if (!clientUUID) {
-      messageApi.warning("Todavía se están cargando los datos del cliente.");
+      messageApi.warning(t("errors.clientLoading"));
       return;
     }
 
@@ -179,7 +183,7 @@ const WalletTabBulkSearchModal = ({
     } catch (error) {
       // Cancelada al cerrar el modal
       if (controller.signal.aborted) return;
-      messageApi.error(getErrorMessage(error, "No se pudo hacer la búsqueda masiva."));
+      messageApi.error(getErrorMessage(error, t("errors.search")));
       setStep("input");
     }
   };
@@ -191,7 +195,7 @@ const WalletTabBulkSearchModal = ({
     try {
       await downloadInvoicesBulkSearch(clientUUID, searchInput);
     } catch (error) {
-      messageApi.error(getErrorMessage(error, "No se pudo descargar el Excel de resultados."));
+      messageApi.error(getErrorMessage(error, t("errors.download")));
     } finally {
       setIsDownloading(false);
     }
@@ -239,7 +243,7 @@ const WalletTabBulkSearchModal = ({
         setIsIncidentConflict(true);
         return;
       }
-      messageApi.error(getErrorMessage(error, `No se pudo ${selectedAction.label.toLowerCase()}.`));
+      messageApi.error(getErrorMessage(error, t(`actions.${selectedAction.i18nKey}.error`)));
     }
   };
 
@@ -279,7 +283,7 @@ const WalletTabBulkSearchModal = ({
             isReached ? "text-foreground" : "text-[#8a8a8a]"
           )}
         >
-          {title}
+          {t(`steps.${title}`)}
         </span>
       ),
       icon: (
@@ -301,30 +305,32 @@ const WalletTabBulkSearchModal = ({
 
   const busyTitle =
     busyKind === "search"
-      ? "Buscando facturas"
+      ? t("progress.searching")
       : isStatement
-        ? `${isStatementDownload ? "Descargando" : "Enviando"} estado de cuenta`
-        : `Procesando ${formatNumber(scopedRows.length)} facturas`;
+        ? isStatementDownload
+          ? t("progress.downloadingStatement")
+          : t("progress.sendingStatement")
+        : t("progress.processing", { count: scopedRows.length });
 
   const busyLabels =
     busyKind === "search"
       ? [
           inputIds
-            ? `Subiendo ${formatNumber(inputIds.length)} registros`
-            : `Subiendo ${file?.name}`,
-          "Cargando tabla temporal",
-          "Cruzando con la cartera del cliente",
-          "Preparando resultados"
+            ? t("progress.uploadingRecords", { count: inputIds.length })
+            : t("progress.uploadingFile", { name: file?.name ?? "" }),
+          t("progress.loadingTempTable"),
+          t("progress.matching"),
+          t("progress.preparingResults")
         ]
       : isStatement
         ? [
-            "Generando estado de cuenta",
-            isStatementDownload ? "Preparando archivos" : "Enviando a los destinatarios"
+            t("progress.generatingStatement"),
+            isStatementDownload ? t("progress.preparingFiles") : t("progress.sendingToRecipients")
           ]
         : [
-            "Validando facturas",
-            `Aplicando ${selectedAction.label.toLowerCase()}`,
-            "Registrando en historial"
+            t("progress.validating"),
+            t(`actions.${selectedAction.i18nKey}.applying`),
+            t("progress.logging")
           ];
 
   return (
@@ -355,7 +361,7 @@ const WalletTabBulkSearchModal = ({
           <div className="flex h-[min(720px,calc(100*var(--vh)-64px))] flex-col text-foreground">
             <header className="flex flex-none flex-wrap items-center gap-x-5 gap-y-3 border-b border-[#ececec] px-[22px] py-4">
               <div className="mr-auto min-w-0 max-w-full">
-                <h3 className="text-base font-semibold">Búsqueda masiva</h3>
+                <h3 className="text-base font-semibold">{t("title")}</h3>
                 {clientName && (
                   <p className="truncate text-[13px] text-muted-foreground">{clientName}</p>
                 )}
@@ -376,7 +382,7 @@ const WalletTabBulkSearchModal = ({
               </ConfigProvider>
               <Button
                 type="text"
-                aria-label="Cerrar"
+                aria-label={tCommon("actions.close")}
                 icon={<X size={14} />}
                 onClick={handleClose}
               />
@@ -401,8 +407,8 @@ const WalletTabBulkSearchModal = ({
                 stepLabels={busyLabels}
                 footnote={
                   busyKind === "search"
-                    ? "Si cierras esta ventana se cancela la búsqueda."
-                    : "Puedes cerrar esta ventana; te avisaremos cuando termine."
+                    ? t("progress.searchFootnote")
+                    : t("progress.actionFootnote")
                 }
               />
             )}
@@ -455,9 +461,9 @@ const WalletTabBulkSearchModal = ({
           setIsIncidentConflict(false);
           handleRunAction(true);
         }}
-        title="Algunas facturas ya tienen novedades abiertas. ¿Qué deseas hacer con las novedades?"
-        okText="Crear novedad nueva"
-        cancelText="No crear nueva novedad"
+        title={t("incidentConflict.title")}
+        okText={t("incidentConflict.create")}
+        cancelText={t("incidentConflict.skip")}
       />
     </>
   );

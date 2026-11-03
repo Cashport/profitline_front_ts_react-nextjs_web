@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 import { IZones } from "@/types/zones/IZones";
 import { API, getIdToken } from "@/utils/api/api";
@@ -31,12 +32,12 @@ export const addZone = async ({
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `La zona fue creada exitosamente.`
+        content: getTranslator("shared")("services.zoneCreated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
 
@@ -65,12 +66,12 @@ export const removeZoneById = async ({
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `La zona fue eliminada exitosamente.`
+        content: getTranslator("shared")("services.zoneDeleted")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Modal, message } from "antd";
 import { CaretLeft } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import type { Dayjs } from "dayjs";
 
 import { createNewFileDate, getFileTypes } from "@/services/dataQuality/dataQuality";
@@ -31,6 +32,7 @@ const ModalCreateNewFile = ({
   clientNIT,
   onSuccess
 }: ModalCreateNewFileProps) => {
+  const t = useTranslations("dataQuality.createFileModal");
   const [fileTypeOptions, setFileTypeOptions] = useState<{ value: number; label: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,7 +58,7 @@ const ModalCreateNewFile = ({
           fileTypes.map((fileType) => ({ value: fileType.id, label: fileType.description }))
         );
       } catch {
-        message.error("Error al cargar los tipos de archivo");
+        message.error(t("fileTypesLoadError"));
       }
     };
     loadFileTypes();
@@ -70,12 +72,12 @@ const ModalCreateNewFile = ({
         date_archive: data.date!.format("YYYY-MM-DD"),
         id_client_data_archives: Number(clientId)
       });
-      message.success("Archivo creado exitosamente");
+      message.success(t("created"));
       reset();
       onSuccess?.();
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al crear el archivo");
+      message.error(error instanceof Error ? error.message : t("createError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -90,31 +92,31 @@ const ModalCreateNewFile = ({
     <Modal className="modalCreateNewFile" width={460} footer={null} open={isOpen} closable={false}>
       <button className="modalCreateNewFile__header" onClick={handleClose}>
         <CaretLeft size="1.25rem" />
-        <h4>Crear nuevo archivo</h4>
+        <h4>{t("title")}</h4>
       </button>
 
       <form className="modalCreateNewFile__form">
         <InputSelect
-          titleInput="Tipo de archivo"
+          titleInput={t("fileType")}
           nameInput="fileTypeId"
           control={control}
           error={errors.fileTypeId as any}
           options={fileTypeOptions}
-          placeholder="Seleccionar tipo de archivo"
+          placeholder={t("fileTypePlaceholder")}
         />
         <InputDateForm
-          titleInput="Fecha"
+          titleInput={t("date")}
           nameInput="date"
           control={control}
           error={errors.date}
-          placeholder="Seleccionar fecha"
+          placeholder={t("datePlaceholder")}
         />
       </form>
 
       <FooterButtons
         handleOk={() => handleSubmit(handleCreateFile)()}
         onClose={handleClose}
-        titleConfirm="Crear archivo"
+        titleConfirm={t("submit")}
         isConfirmLoading={isSubmitting}
         isConfirmDisabled={!isValid}
       />

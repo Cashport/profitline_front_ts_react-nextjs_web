@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 export interface BoardLane<T> {
   id: string;
   title: string;
@@ -21,11 +23,8 @@ interface BoardLanesProps<T> {
   emptyLabel?: string;
 }
 
-export default function BoardLanes<T>({
-  lanes,
-  renderCard,
-  emptyLabel = "Vacío"
-}: BoardLanesProps<T>) {
+export default function BoardLanes<T>({ lanes, renderCard, emptyLabel }: BoardLanesProps<T>) {
+  const t = useTranslations("components.boardLanes");
   return (
     <div className="grid auto-cols-[minmax(238px,1fr)] grid-flow-col items-start gap-3 overflow-x-auto pb-1.5">
       {lanes.map((lane) => (
@@ -46,7 +45,9 @@ export default function BoardLanes<T>({
 
           <div className="flex flex-col gap-2 p-2">
             {lane.items.length === 0 && !lane.footer ? (
-              <div className="p-2.5 text-[13px] text-muted-foreground">{emptyLabel}</div>
+              <div className="p-2.5 text-[13px] text-muted-foreground">
+                {emptyLabel ?? t("empty")}
+              </div>
             ) : (
               lane.items.map((item) => renderCard(item))
             )}

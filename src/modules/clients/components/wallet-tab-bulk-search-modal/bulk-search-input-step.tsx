@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { Button, Input, Typography, Upload } from "antd";
 import { UploadSimple, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { formatNumber } from "@/utils/utils";
 import { downloadCsv, parseIds } from "./bulk-search-utils";
 import { IBulkSearchFile } from "./types";
 
@@ -30,15 +30,19 @@ const BulkSearchInputStep = ({
   onCancel,
   onSearch
 }: Props) => {
+  const t = useTranslations("clients.bulkSearch.input");
+  const tCommon = useTranslations("common");
   const repeated = useMemo(() => (ids ? ids.length - new Set(ids).size : 0), [ids]);
   // Del Excel no se sabe cuántos trae hasta buscar
   const isInvalid = ids !== undefined && !ids.length;
 
   const summary = !ids
-    ? "Excel listo para buscar"
+    ? t("excelReady")
     : !ids.length
-      ? "Sin identificadores todavía"
-      : `${formatNumber(ids.length)} identificadores${repeated ? ` · ${formatNumber(repeated)} repetidos` : ""}`;
+      ? t("noIds")
+      : repeated
+        ? t("idsWithRepeated", { count: ids.length, repeated })
+        : t("ids", { count: ids.length });
 
   const handleBeforeUpload = (selectedFile: File) => {
     if (/\.(csv|txt)$/i.test(selectedFile.name)) {
@@ -61,10 +65,10 @@ const BulkSearchInputStep = ({
     <>
       <div className="grid min-h-0 flex-1 grid-cols-[repeat(auto-fit,minmax(min(100%,340px),1fr))] gap-4 overflow-auto px-[22px] py-5">
         <div className="flex min-h-[240px] flex-col gap-2">
-          <span className="text-[13px] font-semibold">Pega los identificadores</span>
+          <span className="text-[13px] font-semibold">{t("pasteTitle")}</span>
           {file ? (
             <div className="flex min-h-[200px] flex-1 items-center justify-center rounded-lg border border-[#ececec] bg-[#fafafa] p-4 text-center text-[13px] text-[#8a8a8a]">
-              Se usará el archivo cargado. Quítalo para pegar identificadores.
+              {t("fileInUse")}
             </div>
           ) : (
             <Input.TextArea
@@ -75,13 +79,11 @@ const BulkSearchInputStep = ({
               style={{ minHeight: 200, lineHeight: 1.6, resize: "none" }}
             />
           )}
-          <span className="text-[13px] text-[#8a8a8a]">
-            Uno por línea, o separados por espacio, coma o punto y coma.
-          </span>
+          <span className="text-[13px] text-[#8a8a8a]">{t("pasteHint")}</span>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold">O carga un archivo</span>
+          <span className="text-[13px] font-semibold">{t("uploadTitle")}</span>
           {file ? (
             <div className="flex min-h-[200px] flex-1 items-center justify-center rounded-lg border border-foreground p-4">
               <div className="flex min-w-0 max-w-full items-center gap-3">
@@ -91,12 +93,12 @@ const BulkSearchInputStep = ({
                 <span className="min-w-0">
                   <span className="block truncate text-[13px] font-medium">{file.name}</span>
                   <span className="block text-[13px] text-[#8a8a8a]">
-                    {file.ids ? `${formatNumber(file.ids.length)} registros` : "Se lee al buscar"}
+                    {file.ids ? t("records", { count: file.ids.length }) : t("readOnSearch")}
                   </span>
                 </span>
                 <Button
                   type="text"
-                  aria-label="Quitar archivo"
+                  aria-label={t("removeFile")}
                   icon={<X size={12} />}
                   onClick={() => onFileChange(null)}
                 />
@@ -112,10 +114,8 @@ const BulkSearchInputStep = ({
             >
               <div className="flex flex-col items-center gap-2 px-4">
                 <UploadSimple size={26} />
-                <span className="text-[13px] font-medium">Arrastra o selecciona un archivo</span>
-                <span className="text-[13px] text-[#8a8a8a]">
-                  Excel o CSV · una columna con el ID de factura
-                </span>
+                <span className="text-[13px] font-medium">{t("dragTitle")}</span>
+                <span className="text-[13px] text-[#8a8a8a]">{t("dragHint")}</span>
               </div>
             </Upload.Dragger>
           )}
@@ -131,7 +131,7 @@ const BulkSearchInputStep = ({
                 )
               }
             >
-              Descargar plantilla
+              {t("downloadTemplate")}
             </Typography.Link>
           </div>
         </div>
@@ -140,10 +140,10 @@ const BulkSearchInputStep = ({
       <footer className="flex flex-none items-center gap-2.5 border-t border-[#ececec] px-[22px] py-3.5">
         <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">{summary}</span>
         <Button type="text" size="large" onClick={onCancel}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </Button>
         <PrincipalButton disabled={isInvalid} onClick={onSearch}>
-          {ids?.length ? `Buscar ${formatNumber(ids.length)} facturas` : "Buscar facturas"}
+          {ids?.length ? t("searchCount", { count: ids.length }) : t("search")}
         </PrincipalButton>
       </footer>
     </>

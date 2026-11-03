@@ -1,16 +1,15 @@
 import { Check, Lock, TriangleAlert, type LucideIcon } from "lucide-react";
 
+import { getTranslator } from "@/i18n/translator";
+
 import type {
   BlockingAlertStatus,
   IBlockingAlertAging
 } from "@/types/blockingAlerts/IBlockingAlerts";
 
-export const BLOCKING_ALERTS_PATH = "/blockingAlerts";
+export const BLOCKING_ALERTS_PATH = "/blocking-alerts";
 
 export const PAGE_SIZE = 30;
-
-export const BLOCKING_RULES =
-  "Bloqueo: facturas de +60 días o cupo superado · Alerta desde 45 días";
 
 /** Semáforo por estado (docs/DESIGN.md §1). Al día no se pinta: su texto va en gris. */
 export const STATUS_META: Record<
@@ -18,19 +17,25 @@ export const STATUS_META: Record<
   { tab: string; color: string; tint: string; Icon: LucideIcon }
 > = {
   blocked: {
-    tab: "Bloqueados",
+    get tab() {
+      return getTranslator("blockingAlerts")("status.blocked");
+    },
     color: "rgb(var(--cp-red))",
     tint: "rgb(var(--cp-red) / 0.12)",
     Icon: Lock
   },
   warning: {
-    tab: "Por bloquear",
+    get tab() {
+      return getTranslator("blockingAlerts")("status.warning");
+    },
     color: "rgb(var(--cp-orange))",
     tint: "rgb(var(--cp-orange) / 0.14)",
     Icon: TriangleAlert
   },
   ok: {
-    tab: "Al día",
+    get tab() {
+      return getTranslator("blockingAlerts")("status.ok");
+    },
     color: "rgb(var(--cp-lime-dark))",
     tint: "rgb(var(--cp-lime) / 0.22)",
     Icon: Check
@@ -42,11 +47,18 @@ export const AGING_SEGMENTS: {
   key: keyof Pick<IBlockingAlertAging, "current" | "past_due_1_60" | "past_due_60_plus">;
   label: string;
   color: string;
-}[] = [
-  { key: "current", label: "Al día", color: "rgb(var(--cp-lime))" },
-  { key: "past_due_1_60", label: "Vencida 1–60 días", color: "rgb(var(--cp-orange))" },
-  { key: "past_due_60_plus", label: "Vencida +60 días", color: "rgb(var(--cp-red))" }
-];
+}[] = (
+  [
+    { key: "current", color: "rgb(var(--cp-lime))" },
+    { key: "past_due_1_60", color: "rgb(var(--cp-orange))" },
+    { key: "past_due_60_plus", color: "rgb(var(--cp-red))" }
+  ] as const
+).map((s) => ({
+  ...s,
+  get label() {
+    return getTranslator("blockingAlerts")(`aging.${s.key}`);
+  }
+}));
 
 export type AlertsSort =
   | "urgency"
@@ -55,13 +67,14 @@ export type AlertsSort =
   | "oldest_overdue_days"
   | "name";
 
-export const SORT_OPTIONS: { key: AlertsSort; label: string }[] = [
-  { key: "urgency", label: "Más urgente primero" },
-  { key: "past_due_desc", label: "Mayor pago vencido" },
-  { key: "past_due_asc", label: "Menor pago vencido" },
-  { key: "oldest_overdue_days", label: "Más días de mora" },
-  { key: "name", label: "Nombre A–Z" }
-];
+export const SORT_OPTIONS: { key: AlertsSort; label: string }[] = (
+  ["urgency", "past_due_desc", "past_due_asc", "oldest_overdue_days", "name"] as const
+).map((key) => ({
+  key,
+  get label() {
+    return getTranslator("blockingAlerts")(`sort.${key}`);
+  }
+}));
 
 /** Punto de cada tipo de nota crédito; un tipo nuevo sale en gris. */
 export const CREDIT_NOTE_COLORS: Record<string, string> = {

@@ -1,5 +1,6 @@
 import { Calendar, Eye } from "lucide-react";
 import { Table, TableProps } from "antd";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { IClientData, IClientDataArchive } from "@/types/dataQuality/IDataQuality";
@@ -25,9 +26,10 @@ export default function CountriesClientsTable({
   scrollHeight,
   onRowClick
 }: CountriesClientsTableProps) {
+  const t = useTranslations("dataQuality.clientsTable");
   const columns: TableProps<IClientData>["columns"] = [
     {
-      title: "Nombre",
+      title: t("name"),
       dataIndex: "client_name",
       key: "client_name",
       render: (name: string) => (
@@ -37,19 +39,19 @@ export default function CountriesClientsTable({
       showSorterTooltip: false
     },
     {
-      title: "Periodicidad",
+      title: t("frequency"),
       key: "periodicity",
       dataIndex: "periodicity",
       render: (periodicity) => <span className="text-gray-500">{periodicity}</span>,
       ellipsis: true
     },
     {
-      title: "Archivos",
+      title: t("files"),
       dataIndex: "client_data_archives",
       key: "archives",
       render: (archives: IClientDataArchive[]) => {
         if (!archives || archives.length === 0) {
-          return <span className="text-[13px] text-gray-500">Sin archivos</span>;
+          return <span className="text-[13px] text-gray-500">{t("noFiles")}</span>;
         }
         return (
           <div className="flex gap-1">
@@ -68,7 +70,7 @@ export default function CountriesClientsTable({
       }
     },
     {
-      title: "Actualización",
+      title: t("updatedAt"),
       dataIndex: "updated_at",
       key: "updated_at",
       render: (updatedAt: string | null) => {
@@ -96,7 +98,7 @@ export default function CountriesClientsTable({
       showSorterTooltip: false
     },
     {
-      title: "Pendientes",
+      title: t("pending"),
       dataIndex: "alerts",
       key: "alerts",
       align: "center",
@@ -118,17 +120,17 @@ export default function CountriesClientsTable({
       showSorterTooltip: false
     },
     {
-      title: "Estado",
+      title: t("status"),
       key: "status",
       dataIndex: "status",
       render: (status) => (
         <Badge variant="outline" className="text-[13px]">
-          {status || "desconocido"}
+          {status || t("unknown")}
         </Badge>
       )
     },
     {
-      title: "Ver",
+      title: t("view"),
       key: "actions",
       width: 46,
       align: "right",
@@ -139,7 +141,7 @@ export default function CountriesClientsTable({
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0"
-          title="Ver detalles del cliente"
+          title={t("viewCustomerDetails")}
           onClick={(e) => {
             e.stopPropagation();
             if (onRowClick) {
@@ -167,7 +169,7 @@ export default function CountriesClientsTable({
           onChange: onPaginationChange,
           showSizeChanger: false,
           position: ["bottomRight"],
-          showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} clientes`
+          showTotal: (total, range) => t("showTotal", { from: range[0], to: range[1], total })
         }}
         scroll={{ y: scrollHeight, x: 100 }}
         onRow={(record) => ({

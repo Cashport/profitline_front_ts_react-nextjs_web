@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import type { Sev } from "@/modules/walletModule/types";
 import type { IIncidentListKpis, IncidentCard } from "@/types/novelties/INovelties";
 import type { INoveltiesFilters, NoveltyTipoKey } from "./types";
@@ -11,15 +12,25 @@ interface TipoMeta {
   area: string | null;
 }
 
+/** El nombre sale del catálogo `novelties.types` al leerse, en el idioma activo. */
+const tipo = (id: NoveltyTipoKey, sla: number, area: string | null): TipoMeta => ({
+  id,
+  sla,
+  area,
+  get nom(): string {
+    return getTranslator("novelties")(`types.${id}`);
+  }
+});
+
 export const NOVELTY_TIPOS: TipoMeta[] = [
-  { id: "nc_comercial", nom: "Nota crédito comercial", sla: 5, area: "comercial" },
-  { id: "nc_precio", nom: "NC diferencia de precio", sla: 7, area: "rgm" },
-  { id: "refact", nom: "Refacturación", sla: 10, area: "backoffice" },
-  { id: "rechazo", nom: "Factura rechazada / sin radicar", sla: 3, area: "backoffice" },
-  { id: "cruce", nom: "Cruce de saldos / legalización", sla: 2, area: "backoffice" },
-  { id: "acuerdo", nom: "Acuerdo de pago", sla: 1, area: null },
-  { id: "pago_ni", nom: "Pago no identificado", sla: 2, area: "backoffice" },
-  { id: "faltante", nom: "Faltante / avería en entrega", sla: 8, area: "logistica" }
+  tipo("nc_comercial", 5, "comercial"),
+  tipo("nc_precio", 7, "rgm"),
+  tipo("refact", 10, "backoffice"),
+  tipo("rechazo", 3, "backoffice"),
+  tipo("cruce", 2, "backoffice"),
+  tipo("acuerdo", 1, null),
+  tipo("pago_ni", 2, "backoffice"),
+  tipo("faltante", 8, "logistica")
 ];
 
 interface CardMeta {
@@ -31,22 +42,24 @@ interface CardMeta {
   sev?: Extract<Sev, "warn" | "crit">;
 }
 
+/** Rótulo y pie salen del catálogo `novelties.kpis` al leerse. */
+const card = (id: IncidentCard, sev?: CardMeta["sev"]): CardMeta => ({
+  id,
+  sev,
+  get label(): string {
+    return getTranslator("novelties")(`kpis.${id}.label`);
+  },
+  get pie(): string {
+    return getTranslator("novelties")(`kpis.${id}.foot`);
+  }
+});
+
 export const KPI_CARDS: CardMeta[] = [
-  { id: "abiertas", label: "Abiertas", pie: "saldo agrupado en gestión" },
-  {
-    id: "vencidas",
-    label: "Con ticket vencido",
-    pie: "la acción en curso ya se pasó de fecha",
-    sev: "crit"
-  },
-  {
-    id: "frias",
-    label: "Sin gestión +7 días",
-    pie: "nadie ha registrado nada hace más de una semana",
-    sev: "warn"
-  },
-  { id: "limite", label: "Fuera de fecha límite", pie: "el caso debió estar cerrado", sev: "crit" },
-  { id: "sinresp", label: "Sin responsable", pie: "no tienen dueño asignado", sev: "crit" }
+  card("abiertas"),
+  card("vencidas", "crit"),
+  card("frias", "warn"),
+  card("limite", "crit"),
+  card("sinresp", "crit")
 ];
 
 /** Qué campos del endpoint de KPIs alimentan cada tarjeta. */

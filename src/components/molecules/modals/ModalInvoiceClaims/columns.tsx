@@ -1,15 +1,21 @@
 import { Control, Controller } from "react-hook-form";
 import { Button, DatePicker, Dropdown, Input, InputNumber, Select, TableProps } from "antd";
 import { Check, Copy, DotsThreeVertical, PencilSimple, Trash, X } from "phosphor-react";
+import type { useTranslations } from "use-intl";
 
 import { CellField } from "./CellField";
-import { DATE_FORMAT, FALLBACK_STATUS_COLOR, REQUIRED_MSG } from "./constants";
+import { DATE_FORMAT, FALLBACK_STATUS_COLOR } from "./constants";
 
 import { ClaimsForm, ClaimTableRow } from "./types";
 import { ClaimStatus, IClaimStatus } from "@/types/claims/IClaims";
 import { IFormatMoneyStore } from "@/lib/slices/formatMoneySlice";
 
+type ClaimsT = ReturnType<typeof useTranslations<"modals.invoiceClaims">>;
+type CommonT = ReturnType<typeof useTranslations<"common">>;
+
 interface GetClaimsColumnsProps {
+  t: ClaimsT;
+  tCommon: CommonT;
   control: Control<ClaimsForm>;
   statusOptions: { value: ClaimStatus; label: string }[];
   /** Catalog indexed by its `description` code, to resolve a row's label and color */
@@ -36,6 +42,8 @@ const cellControlClass = (hasError: boolean, modifier = "") =>
   `modalInvoiceClaims__cellControl${modifier && ` ${modifier}`}${hasError ? " -error" : ""}`;
 
 export const getClaimsColumns = ({
+  t,
+  tCommon,
   control,
   statusOptions,
   statusByCode,
@@ -48,21 +56,23 @@ export const getClaimsColumns = ({
   onDelete,
   onDuplicate
 }: GetClaimsColumnsProps): TableProps<ClaimTableRow>["columns"] => {
+  /** Shown under any editable cell left empty */
+  const REQUIRED_MSG = t("required");
   return [
     {
-      title: "ID glosa",
+      title: t("columns.id"),
       dataIndex: "claimNumber",
       key: "claimNumber",
       width: 140,
       render: (_, record) => (
         <span className="modalInvoiceClaims__idCell">
           {record.claimNumber || "—"}
-          {record._new && <em>nuevo</em>}
+          {record._new && <em>{t("new")}</em>}
         </span>
       )
     },
     {
-      title: "Concepto",
+      title: t("columns.concept"),
       dataIndex: "concepto",
       key: "concepto",
       ellipsis: true,
@@ -78,7 +88,7 @@ export const getClaimsColumns = ({
                   {...field}
                   variant="borderless"
                   className={cellControlClass(!!fieldState.error)}
-                  placeholder="Concepto de la glosa"
+                  placeholder={t("conceptPlaceholder")}
                 />
               </CellField>
             )}
@@ -88,7 +98,7 @@ export const getClaimsColumns = ({
         )
     },
     {
-      title: "Estado",
+      title: t("columns.status"),
       dataIndex: "estado",
       key: "estado",
       width: 150,
@@ -108,7 +118,7 @@ export const getClaimsColumns = ({
                     variant="borderless"
                     className={cellControlClass(!!fieldState.error)}
                     options={statusOptions}
-                    placeholder="Seleccionar"
+                    placeholder={tCommon("actions.select")}
                     popupMatchSelectWidth={false}
                   />
                 </CellField>
@@ -126,7 +136,7 @@ export const getClaimsColumns = ({
       }
     },
     {
-      title: "Fecha glosa",
+      title: t("columns.claimDate"),
       dataIndex: "fechaGlosa",
       key: "fechaGlosa",
       width: 150,
@@ -153,7 +163,7 @@ export const getClaimsColumns = ({
         )
     },
     {
-      title: "Fecha contestación",
+      title: t("columns.responseDate"),
       dataIndex: "fechaContestacion",
       key: "fechaContestacion",
       width: 150,
@@ -180,7 +190,7 @@ export const getClaimsColumns = ({
         )
     },
     {
-      title: "Observación",
+      title: t("columns.observation"),
       dataIndex: "observacion",
       key: "observacion",
       ellipsis: true,
@@ -196,7 +206,7 @@ export const getClaimsColumns = ({
                   {...field}
                   variant="borderless"
                   className={cellControlClass(!!fieldState.error)}
-                  placeholder="Observación"
+                  placeholder={t("columns.observation")}
                 />
               </CellField>
             )}
@@ -206,7 +216,7 @@ export const getClaimsColumns = ({
         )
     },
     {
-      title: "Monto",
+      title: t("columns.amount"),
       dataIndex: "monto",
       key: "monto",
       width: 120,
@@ -218,7 +228,7 @@ export const getClaimsColumns = ({
             control={control}
             rules={{
               required: REQUIRED_MSG,
-              min: { value: 1, message: "El monto debe ser mayor a cero" }
+              min: { value: 1, message: t("amountPositive") }
             }}
             render={({ field, fieldState }) => (
               <CellField error={fieldState.error} alignRight>
@@ -253,7 +263,7 @@ export const getClaimsColumns = ({
               loading={savingId === record.fieldId}
               onClick={() => onSave(record)}
             >
-              Guardar
+              {tCommon("actions.save")}
             </Button>
             <Button
               type="text"
@@ -271,20 +281,20 @@ export const getClaimsColumns = ({
                 items: [
                   {
                     key: "edit",
-                    label: "Editar",
+                    label: tCommon("actions.edit"),
                     icon: <PencilSimple size={16} />,
                     onClick: () => onStartEdit(record)
                   },
                   {
                     key: "duplicate",
-                    label: "Duplicar",
+                    label: t("duplicate"),
                     icon: <Copy size={16} />,
                     onClick: () => onDuplicate(record)
                   },
                   { type: "divider", key: "divider" },
                   {
                     key: "delete",
-                    label: "Eliminar",
+                    label: tCommon("actions.delete"),
                     icon: <Trash size={16} />,
                     danger: true,
                     onClick: () => onDelete(record)

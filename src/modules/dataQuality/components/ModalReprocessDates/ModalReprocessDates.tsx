@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Modal, Radio, message } from "antd";
 import { CaretLeft } from "@phosphor-icons/react";
 import dayjs, { Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { reprocessArchiveDates } from "@/services/dataQuality/dataQuality";
 import { ApiError } from "@/utils/api/api";
@@ -33,6 +34,8 @@ const ModalReprocessDates = ({
   clientId,
   onSuccess
 }: ModalReprocessDatesProps) => {
+  const t = useTranslations("dataQuality.reprocessModal");
+  const tCommon = useTranslations("common");
   const [startFrom, setStartFrom] = useState<TReprocessStartFrom>("month_start");
   const [date, setDate] = useState<Dayjs | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,9 +77,10 @@ const ModalReprocessDates = ({
       // El "hasta" es el último día del mes calculado localmente, no el toDate de la
       // respuesta, que es un límite superior exclusivo.
       message.success(
-        `Reproceso solicitado del ${formatReprocessDisplayDate(
-          fromDate!
-        )} al ${formatReprocessDisplayDate(monthEnd)}.`
+        t("requested", {
+          from: formatReprocessDisplayDate(fromDate!),
+          to: formatReprocessDisplayDate(monthEnd)
+        })
       );
       resetState();
       onSuccess?.();
@@ -85,7 +89,7 @@ const ModalReprocessDates = ({
       if (error instanceof ApiError) {
         message.error(getReprocessErrorDetail(error.message, error.data));
       } else {
-        message.error(error instanceof Error ? error.message : "Error al reprocesar las fechas");
+        message.error(error instanceof Error ? error.message : t("error"));
       }
     } finally {
       setIsSubmitting(false);
@@ -102,15 +106,19 @@ const ModalReprocessDates = ({
       maskClosable={false}
       onCancel={handleClose}
     >
-      <button className="modalReprocessDates__header" onClick={handleClose} aria-label="Volver">
+      <button
+        className="modalReprocessDates__header"
+        onClick={handleClose}
+        aria-label={tCommon("actions.back")}
+      >
         <CaretLeft size="1.25rem" />
-        <h4>Reprocesar fechas</h4>
+        <h4>{t("title")}</h4>
       </button>
 
       <div className="modalReprocessDates__form">
         <div className="modalReprocessDates__field">
           <p className="modalReprocessDates__label" id="reprocess-type-label">
-            Tipo de reproceso
+            {t("type")}
           </p>
           <Radio.Group
             className="modalReprocessDates__options"
@@ -119,18 +127,18 @@ const ModalReprocessDates = ({
             onChange={(event) => setStartFrom(event.target.value as TReprocessStartFrom)}
           >
             <Radio className="modalReprocessDates__option" value="month_start">
-              Inicio de mes
+              {t("monthStart")}
             </Radio>
             <Radio className="modalReprocessDates__option" value="specific_date">
-              Fecha específica
+              {t("specificDate")}
             </Radio>
           </Radio.Group>
         </div>
 
         {startFrom === "specific_date" && (
           <InputDate
-            titleInput="Fecha"
-            placeholder="Seleccionar fecha"
+            titleInput={t("date")}
+            placeholder={t("datePlaceholder")}
             value={date}
             onChange={(value) => setDate(value ?? undefined)}
             minDate={monthStart}
@@ -140,17 +148,18 @@ const ModalReprocessDates = ({
 
         <p className="modalReprocessDates__summary">
           {isRangeValid
-            ? `Se reprocesará del ${formatReprocessDisplayDate(
-                fromDate!
-              )} al ${formatReprocessDisplayDate(monthEnd)}.`
-            : "Selecciona la fecha desde la que se reprocesará."}
+            ? t("summary", {
+                from: formatReprocessDisplayDate(fromDate!),
+                to: formatReprocessDisplayDate(monthEnd)
+              })
+            : t("selectDateSummary")}
         </p>
       </div>
 
       <FooterButtons
         handleOk={handleReprocess}
         onClose={handleClose}
-        titleConfirm="Reprocesar"
+        titleConfirm={t("submit")}
         isConfirmLoading={isSubmitting}
         isConfirmDisabled={!isRangeValid}
       />

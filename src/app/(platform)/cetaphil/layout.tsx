@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Cetaphil - Marketplace Exclusivo",
-  description: "Marketplace exclusivo para trabajadores de Galderma"
-};
+export const generateMetadata = () => pageMetadata("cetaphil");
 
 export default function CetaphilLayout({
   children

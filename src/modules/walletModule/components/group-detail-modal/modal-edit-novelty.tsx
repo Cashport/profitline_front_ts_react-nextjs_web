@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import { useProjectUsers } from "@/hooks/useProjectUsers";
@@ -43,6 +44,8 @@ function EditNoveltyForm({
   onClose,
   onSave
 }: Omit<ModalEditNoveltyProps, "open">) {
+  const t = useTranslations("wallet.noveltyForm");
+  const tCommon = useTranslations("common");
   const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
   const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
@@ -52,7 +55,7 @@ function EditNoveltyForm({
   // en el catálogo (inactivo), su nombre queda de placeholder y se puede
   // guardar sin elegir otro: sin motive_id, el PUT conserva el tipo.
   const tipos = motives ?? [];
-  const motiveInicial = tipos.find((t) => t.name === incident.incident_name)?.id;
+  const motiveInicial = tipos.find((m) => m.name === incident.incident_name)?.id;
   const assignedInicial = incident.assigned_to ?? undefined;
 
   const [motiveElegido, setMotiveElegido] = useState<number>();
@@ -76,24 +79,24 @@ function EditNoveltyForm({
 
   return (
     <NoveltyPanel
-      title="Editar novedad"
+      title={t("editTitle")}
       subtitle={`${nov?.id ?? `NOV-${incident.incident_id}`} · ${corto(detail.cliente.nombre)} · ${fac(detail.totalFacturas)}`}
       onClose={onClose}
-      submitLabel="Guardar cambios"
-      sendingLabel="Guardando…"
+      submitLabel={tCommon("actions.saveChanges")}
+      sendingLabel={tCommon("status.saving")}
       onSubmit={handleSubmit}
       isSending={isSending}
       submitDisabled={!hayCambios}
     >
       <div>
-        <SectionTitle>Datos editables</SectionTitle>
+        <SectionTitle>{t("editable")}</SectionTitle>
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <Label>Tipo de novedad</Label>
+            <Label>{t("type")}</Label>
             <Select
               className="w-full"
               value={motiveId}
-              options={tipos.map((t) => ({ value: t.id, label: t.name, title: t.description }))}
+              options={tipos.map((m) => ({ value: m.id, label: m.name, title: m.description }))}
               onChange={setMotiveElegido}
               showSearch
               optionFilterProp="label"
@@ -103,7 +106,7 @@ function EditNoveltyForm({
             />
           </div>
           <div>
-            <Label>Responsable</Label>
+            <Label>{t("owner")}</Label>
             <Select
               className="w-full"
               value={assignedTo}
@@ -114,26 +117,22 @@ function EditNoveltyForm({
               optionFilterProp="label"
               loading={isLoadingUsers}
               disabled={isSending}
-              placeholder="Sin responsable"
+              placeholder={t("noOwner")}
             />
           </div>
         </div>
       </div>
 
       <div>
-        <SectionTitle>No editable desde aquí</SectionTitle>
+        <SectionTitle>{t("readOnly")}</SectionTitle>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
-          <ReadOnly label="Cliente" value={corto(detail.cliente.nombre)} />
-          <ReadOnly label="Monto agrupado" value={fmtFull(incident.actual_amount)} />
-          <ReadOnly label="Creada" value={fecha(incident.date)} />
-          <ReadOnly label="Fecha de compromiso" value={fecha(incident.next_ticket_date)} />
-          <ReadOnly label="Fecha límite de solución" value={fecha(incident.limit_date)} />
+          <ReadOnly label={t("customer")} value={corto(detail.cliente.nombre)} />
+          <ReadOnly label={t("groupedAmount")} value={fmtFull(incident.actual_amount)} />
+          <ReadOnly label={t("created")} value={fecha(incident.date)} />
+          <ReadOnly label={t("commitmentDate")} value={fecha(incident.next_ticket_date)} />
+          <ReadOnly label={t("resolutionDeadline")} value={fecha(incident.limit_date)} />
         </div>
-        <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
-          Las fechas no se editan a mano: el compromiso se mueve al cerrar el ticket en curso y la
-          fecha límite se fija al crear la novedad. El cambio queda registrado en la línea de tiempo
-          del grupo.
-        </p>
+        <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">{t("datesHint")}</p>
       </div>
     </NoveltyPanel>
   );

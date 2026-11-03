@@ -1,10 +1,9 @@
 "use client";
 
 import { DatePicker } from "antd";
-import esES from "antd/es/date-picker/locale/es_ES";
 import dayjs, { type Dayjs } from "dayjs";
-import "dayjs/locale/es";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { fmtDayLabel } from "../../utils/visits-format";
 
@@ -28,11 +27,12 @@ const fromPicker = (value: { valueOf(): number }) => dayjs(value.valueOf()).star
  * a cualquier fecha (el pie del calendario trae "Hoy").
  */
 export default function VisitsDateNav({ day, today, onChange }: VisitsDateNavProps) {
+  const tv = useTranslations("visits.dateNav");
   return (
     <div className="flex h-[var(--control-h)] items-stretch overflow-hidden rounded-lg border border-border bg-card">
       <button
         type="button"
-        aria-label="Día anterior"
+        aria-label={tv("previousDay")}
         className={STEP_CLASS}
         onClick={() => onChange(day.subtract(1, "day"))}
       >
@@ -45,19 +45,18 @@ export default function VisitsDateNav({ day, today, onChange }: VisitsDateNavPro
           value={day}
           onChange={(value) => value && onChange(fromPicker(value))}
           format={(value) => fmtDayLabel(fromPicker(value), today)}
-          locale={esES}
           allowClear={false}
           inputReadOnly
           variant="borderless"
           suffixIcon={null}
-          aria-label="Elegir día"
+          aria-label={tv("pickDay")}
           className="w-[156px] [&_input]:!cursor-pointer [&_input]:!text-[13px] [&_input]:!font-medium"
         />
       </div>
 
       <button
         type="button"
-        aria-label="Día siguiente"
+        aria-label={tv("nextDay")}
         className={STEP_CLASS}
         onClick={() => onChange(day.add(1, "day"))}
       >

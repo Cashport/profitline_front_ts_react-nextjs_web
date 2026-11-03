@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Checkbox, Spin } from "antd";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import {
   IMarketAdminVendorCategory,
@@ -39,6 +40,8 @@ function CategoryRow({
   disabled?: boolean;
   onToggle: (checked: boolean) => void;
 }) {
+  const t = useTranslations("marketAdmin.userDetail.linesCategories");
+  const tCommon = useTranslations("common.fields");
   const [open, setOpen] = useState(false);
   const total = category.products.length;
 
@@ -60,9 +63,7 @@ function CategoryRow({
           <span className="text-sm text-[#141414]">
             {labelOf(category.category_alias, category.description)}
           </span>
-          <span className="text-[13px] text-[#999999]">
-            {total === 1 ? "1 producto" : `${total} productos`}
-          </span>
+          <span className="text-[13px] text-[#999999]">{t("productCount", { count: total })}</span>
         </button>
       </div>
 
@@ -74,9 +75,11 @@ function CategoryRow({
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-[13px] text-[#999999]">
-                <th className="sticky top-0 bg-[#F7F7F7] px-3 py-2 font-medium">SKU</th>
-                <th className="sticky top-0 bg-[#F7F7F7] px-3 py-2 font-medium">Producto</th>
-                <th className="sticky top-0 bg-[#F7F7F7] px-3 py-2 font-medium w-28">Estado</th>
+                <th className="sticky top-0 bg-[#F7F7F7] px-3 py-2 font-medium">{t("sku")}</th>
+                <th className="sticky top-0 bg-[#F7F7F7] px-3 py-2 font-medium">{t("product")}</th>
+                <th className="sticky top-0 bg-[#F7F7F7] px-3 py-2 font-medium w-28">
+                  {tCommon("status")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -92,7 +95,7 @@ function CategoryRow({
                           : "bg-[#F0F0F0] text-[#666666]"
                       }`}
                     >
-                      {p.is_available ? "Disponible" : "No disponible"}
+                      {p.is_available ? t("available") : t("unavailable")}
                     </span>
                   </td>
                 </tr>
@@ -113,6 +116,8 @@ export default function LineasCategoriasSection({
   onRetry,
   onSave
 }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.linesCategories");
+  const tCommon = useTranslations("common");
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [openLines, setOpenLines] = useState<Set<number>>(new Set());
   const [search, setSearch] = useState("");
@@ -187,7 +192,7 @@ export default function LineasCategoriasSection({
       <div role="alert">
         <p className="text-red-600">{error}</p>
         <button onClick={onRetry} className="mt-2 text-sm underline">
-          Reintentar
+          {tCommon("actions.retry")}
         </button>
       </div>
     );
@@ -196,23 +201,20 @@ export default function LineasCategoriasSection({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <p className="text-sm font-bold text-[#141414]">Líneas y categorías</p>
+        <p className="text-sm font-bold text-[#141414]">{t("title")}</p>
         <p className="text-sm text-[#999999] mt-1">
-          Marca las categorías de cada línea cuyos productos podrá ver el usuario en el marketplace.{" "}
-          {selected.size} de {totalCategories} categorías asignadas.
+          {t("description", { assigned: selected.size, total: totalCategories })}
         </p>
       </div>
 
       <UiSearchInput
-        placeholder="Buscar línea, categoría o producto"
+        placeholder={t("searchPlaceholder")}
         onChange={(e) => setSearch(e.target.value)}
       />
 
       {filtered.length === 0 ? (
         <p className="text-sm text-[#999999] py-6 text-center">
-          {search.trim()
-            ? "No se encontraron líneas o categorías con ese criterio."
-            : "El proyecto no tiene líneas con categorías configuradas."}
+          {search.trim() ? t("noSearchResults") : t("empty")}
         </p>
       ) : (
         <div className="flex flex-col gap-3">
@@ -240,7 +242,7 @@ export default function LineasCategoriasSection({
                       {labelOf(line.line_alias, line.description)}
                     </span>
                     <span className="ml-auto text-[13px] text-[#999999]">
-                      {assignedInLine}/{line.categories.length} categorías
+                      {t("lineCount", { assigned: assignedInLine, total: line.categories.length })}
                     </span>
                   </button>
                 </div>
@@ -267,14 +269,14 @@ export default function LineasCategoriasSection({
           disabled={!isDirty || isSaving}
           className="text-sm font-semibold border border-[#DDDDDD] text-[#141414] px-5 py-2.5 rounded-lg hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Descartar
+          {t("discard")}
         </button>
         <button
           onClick={() => onSave(Array.from(selected))}
           disabled={!isDirty || isSaving}
           className="text-sm font-semibold bg-[#141414] text-white px-5 py-2.5 rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {isSaving ? "Guardando..." : "Guardar cambios"}
+          {isSaving ? tCommon("status.saving") : tCommon("actions.saveChanges")}
         </button>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import useSWR from "swr";
 import { ConfigProvider, Flex, Modal, Select, Table, Typography } from "antd";
 import { Plus, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useInvoiceClaims } from "@/hooks/useInvoiceClaims";
@@ -29,9 +30,12 @@ interface ModalInvoiceClaimsProps {
   invoice: IInvoice | null;
 }
 
+// Valor interno del filtro (no se envía al API); la etiqueta se traduce al mostrarla.
 const ALL_ESTADOS = "Todos";
 
 export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceClaimsProps) => {
+  const t = useTranslations("modals.invoiceClaims");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { showMessage } = useMessageApi();
 
@@ -98,7 +102,7 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
 
   // Without the catalog the Estado cell has nothing to offer, which would otherwise fail silently
   useEffect(() => {
-    if (isOpen && statusesError) showMessage("error", "No se pudieron cargar los estados de glosa");
+    if (isOpen && statusesError) showMessage("error", t("statusesError"));
   }, [isOpen, statusesError]);
 
   // Seeds the table from the server. Skipped while there is unsaved work on screen so a background
@@ -169,7 +173,7 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
   const handleSave = async (row: ClaimTableRow) => {
     if (!invoice) return;
     const isValid = await trigger(`claims.${row.index}`);
-    if (!isValid) return showMessage("error", "Completa los campos obligatorios");
+    if (!isValid) return showMessage("error", t("completeRequired"));
 
     const values = getValues(`claims.${row.index}`);
 
@@ -217,10 +221,10 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
     if (!row.claimId) return remove(row.index);
 
     Modal.confirm({
-      title: "Eliminar glosa",
-      content: `¿Deseas eliminar la glosa ${row.claimNumber}? Esta acción no se puede deshacer.`,
-      okText: "Eliminar",
-      cancelText: "Cancelar",
+      title: t("deleteTitle"),
+      content: t("deleteContent", { id: row.claimNumber }),
+      okText: tCommon("actions.delete"),
+      cancelText: tCommon("actions.cancel"),
       okButtonProps: { danger: true },
       onOk: async () => {
         const success = await removeClaim(row.claimId as number, showMessage);
@@ -256,16 +260,23 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
     >
       <div className="modalInvoiceClaims__header">
         <Title level={4}>
-          Glosas de <span className="modalInvoiceClaims__invoiceId">{invoice?.id_erp}</span>
+          {t.rich("title", {
+            invoice: invoice?.id_erp ?? "",
+            id: (chunks) => <span className="modalInvoiceClaims__invoiceId">{chunks}</span>
+          })}
         </Title>
-        <button className="modalInvoiceClaims__closeBtn" onClick={onClose} aria-label="Cerrar">
+        <button
+          className="modalInvoiceClaims__closeBtn"
+          onClick={onClose}
+          aria-label={tCommon("actions.close")}
+        >
           <X size={20} />
         </button>
       </div>
 
       <div className="modalInvoiceClaims__toolbar">
         <UiSearchInput
-          placeholder="Buscar glosa o concepto"
+          placeholder={t("searchPlaceholder")}
           onChange={(event) => setSearch(event.target.value)}
         />
         {/* Matches the 48px of the search input beside it. Scoped here so the Estado selects
@@ -276,7 +287,7 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
             value={estadoFilter}
             onChange={setEstadoFilter}
             loading={statusesLoading}
-            options={[{ value: ALL_ESTADOS, label: ALL_ESTADOS }, ...statusOptions]}
+            options={[{ value: ALL_ESTADOS, label: tCommon("status.all") }, ...statusOptions]}
           />
         </ConfigProvider>
       </div>
@@ -287,6 +298,8 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
         <Table
           className="modalInvoiceClaims__table"
           columns={getClaimsColumns({
+            t,
+            tCommon,
             control,
             statusOptions,
             statusByCode,
@@ -305,7 +318,7 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
           pagination={false}
           size="small"
           scroll={{ y: "calc(40 * var(--vh))", x: 1050 }}
-          locale={{ emptyText: "Esta factura no tiene glosas registradas." }}
+          locale={{ emptyText: t("empty") }}
           footer={() => (
             <button
               className="modalInvoiceClaims__addRow"
@@ -313,7 +326,7 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
               disabled={statusesLoading}
             >
               <Plus size={16} />
-              Agregar glosa
+              {t("add")}
             </button>
           )}
         />
@@ -340,11 +353,11 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
 
         <Flex gap={"1.5rem"} className="modalInvoiceClaims__totals">
           <p>
-            Total glosas:{" "}
+            {t("total")}{" "}
             <strong className={isBalanced ? "" : "-unbalanced"}>{formatMoney(claimsTotal)}</strong>
           </p>
           <p>
-            Factura: <strong>{formatMoney(invoiceTotal)}</strong>
+            {t("invoice")} <strong>{formatMoney(invoiceTotal)}</strong>
           </p>
         </Flex>
       </div>

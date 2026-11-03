@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Modal, Select } from "antd";
+import { useTranslations } from "use-intl";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { useMarketAdminRoles } from "@/modules/marketAdmin/hooks/useMarketAdminRoles";
 
@@ -39,6 +40,8 @@ const inputClass =
 const labelClass = "text-[13px] font-bold text-[#141414] block mb-1.5";
 
 export default function ModalCrearUsuario({ open, onClose, onSend, isLoading }: Props) {
+  const t = useTranslations("marketAdmin.users.createModal");
+  const tCommon = useTranslations("common.fields");
   const [form, setForm] = useState<CrearUsuarioFormValues>(BLANK_USER);
 
   const { data: roles, isLoading: isLoadingRoles } = useMarketAdminRoles();
@@ -74,45 +77,45 @@ export default function ModalCrearUsuario({ open, onClose, onSend, isLoading }: 
       footer={null}
       width={560}
       destroyOnClose
-      title={<span className="text-base font-bold text-[#141414]">Crear usuario</span>}
+      title={<span className="text-base font-bold text-[#141414]">{t("title")}</span>}
     >
       <div className="py-2 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Nombre del contacto</label>
+            <label className={labelClass}>{t("contactName")}</label>
             <input
               className={inputClass}
-              placeholder="Nombre del contacto"
+              placeholder={t("contactName")}
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               autoFocus
             />
           </div>
           <div>
-            <label className={labelClass}>Cargo</label>
+            <label className={labelClass}>{t("position")}</label>
             <input
               className={inputClass}
-              placeholder="Cargo"
+              placeholder={t("position")}
               value={form.position}
               onChange={(e) => setForm((f) => ({ ...f, position: e.target.value }))}
             />
           </div>
           <div>
-            <label className={labelClass}>Correo electrónico</label>
+            <label className={labelClass}>{tCommon("email")}</label>
             <input
               type="email"
               className={inputClass}
-              placeholder="Correo electrónico"
+              placeholder={tCommon("email")}
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
             />
           </div>
           <div>
-            <label className={labelClass}>Teléfono</label>
+            <label className={labelClass}>{tCommon("phone")}</label>
             <input
               type="tel"
               className={inputClass}
-              placeholder="Teléfono"
+              placeholder={tCommon("phone")}
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
             />
@@ -120,11 +123,11 @@ export default function ModalCrearUsuario({ open, onClose, onSend, isLoading }: 
         </div>
 
         <div>
-          <label className={labelClass}>Rol</label>
+          <label className={labelClass}>{t("role")}</label>
           <Select
             showSearch
             size="large"
-            placeholder="Selecciona el rol"
+            placeholder={t("selectRole")}
             className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
             popupClassName="[&_.ant-select-item]:!text-sm"
             value={form.role_id ?? undefined}
@@ -142,7 +145,7 @@ export default function ModalCrearUsuario({ open, onClose, onSend, isLoading }: 
 
       <div className="mt-6">
         <FooterButtons
-          titleConfirm="Crear usuario"
+          titleConfirm={t("title")}
           isConfirmDisabled={!isValid}
           isConfirmLoading={isLoading}
           onClose={onClose}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import { KpiAside, KpiCard, KpiValue } from "@/components/ui/kpi-card/kpi-card";
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
@@ -15,6 +16,7 @@ import {
   pastDuePill
 } from "../../../constants/clients-home";
 import { useClientsHomeFilters } from "../../../stores/clients-home-filters";
+import { useClientsHomeLabels } from "../../../hooks/clients-home/use-clients-home-labels";
 import { fmt, fmtHeroShort, pct1 } from "../../../utils/clients-home-format";
 
 interface ClientsHomeKpisProps {
@@ -37,6 +39,8 @@ export default function ClientsHomeKpis({ totals, loading }: ClientsHomeKpisProp
 }
 
 const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
+  const t = useTranslations("clients.home.kpis");
+  const labels = useClientsHomeLabels();
   const [aging, setAging] = useClientsHomeFilters(
     useShallow((s) => [s.aging, s.setAging] as const)
   );
@@ -46,15 +50,15 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
-        <KpiValue label="Total cartera" value={fmt(totals.portfolio)} unit="M" />
+        <KpiValue label={t("totalPortfolio")} value={fmt(totals.portfolio)} unit="M" />
         <KpiAside
-          label="Vencida"
+          label={t("pastDue")}
           pill={
             <StatusBadge bg={pill.bg} color={pill.color} className="text-[13px]">
               {pct1(totals.pastDuePct)}
             </StatusBadge>
           }
-          value={`${fmt(totals.pastDue)} M`}
+          value={t("amountM", { amount: fmt(totals.pastDue) })}
         />
       </div>
       <div className="flex flex-col gap-2">
@@ -65,7 +69,7 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
             key: b.key,
             value: totals.aging[b.key],
             color: b.color,
-            tip: `${b.label}: ${fmt(totals.aging[b.key])} M`
+            tip: t("bucketTip", { label: labels.aging(b.key), amount: fmt(totals.aging[b.key]) })
           }))}
         />
         {/* Clic en un tramo: la tabla muestra solo la cartera de esa edad. Una sola línea:
@@ -73,9 +77,14 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
         <OneLineLegend
           more={(hidden) => ({
             label: `+${hidden.length}`,
-            title: `Más tramos: ${hidden
-              .map((b) => `${b.label} ${fmt(totals.aging[b.key])} M`)
-              .join(" · ")}`
+            title: t("moreBuckets", {
+              list: hidden
+                .map(
+                  (b) =>
+                    `${labels.aging(b.key)} ${t("amountM", { amount: fmt(totals.aging[b.key]) })}`
+                )
+                .join(" · ")
+            })
           })}
           items={AGING_BUCKETS.map((b) => {
             const active = aging === b.key;
@@ -85,7 +94,10 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
                 <div
                   key={b.key}
                   onClick={() => toggle(b.key)}
-                  title={`${b.label}: ${fmt(totals.aging[b.key])} M`}
+                  title={t("bucketTip", {
+                    label: labels.aging(b.key),
+                    amount: fmt(totals.aging[b.key])
+                  })}
                   className="-mx-1 flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-[5px] px-1 text-[13px] leading-tight text-cp-ink-3 hover:!bg-cp-muted"
                   style={{
                     opacity: aging === null || active ? 1 : 0.35,
@@ -97,7 +109,7 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
                     className="h-1.5 w-1.5 shrink-0 rounded-sm"
                     style={{ background: b.color }}
                   />
-                  {b.short}
+                  {labels.agingShort(b.key)}
                   <span className="font-semibold text-cp-ink">
                     {fmtHeroShort(totals.aging[b.key])}
                   </span>
@@ -112,29 +124,38 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
 };
 
 const DocumentsCard = ({ totals }: { totals: IClientsHomeTotals }) => {
+  const t = useTranslations("clients.home.kpis");
   const items = [
-    { label: "Notas", ...totals.creditNotes, noun: "notas" },
-    { label: "PNA", ...totals.unappliedPayments, noun: "pagos" },
-    { label: "Novedades", ...totals.novelties, noun: "novedades" }
-  ];
+    {
+      key: "creditNotes",
+      label: t("creditNotes"),
+      ...totals.creditNotes,
+      noun: "creditNotesCount"
+    },
+    {
+      key: "unappliedPayments",
+      label: t("unappliedPayments"),
+      ...totals.unappliedPayments,
+      noun: "paymentsCount"
+    },
+    { key: "novelties", label: t("disputes"), ...totals.novelties, noun: "disputesCount" }
+  ] as const;
   return (
     <>
       {/* El monto baja de 20px a 18px con el ancho de su columna; si aún no cabe, elipsis. */}
       {items.map((it, i) => (
         <KpiValue
-          key={it.label}
+          key={it.key}
           size="md"
           label={it.label}
           value={fmt(it.amount)}
           unit="M"
           valueClassName="text-[clamp(18px,21cqi,20px)]"
           className={`justify-between gap-2 px-3.5 [container-type:inline-size] ${i > 0 ? "border-l border-cp-line" : ""}`}
-          caption={
-            <>
-              <b className="font-semibold text-cp-ink">{it.count.toLocaleString("es-CO")}</b>{" "}
-              {it.noun}
-            </>
-          }
+          caption={t.rich(it.noun, {
+            count: it.count,
+            b: (chunks) => <b className="font-semibold text-cp-ink">{chunks}</b>
+          })}
         />
       ))}
     </>
@@ -142,13 +163,14 @@ const DocumentsCard = ({ totals }: { totals: IClientsHomeTotals }) => {
 };
 
 const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
+  const t = useTranslations("clients.home.kpis");
   const c = totals.collection;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
-        <KpiValue label="Recaudo" value={fmt(c.collected)} unit="M" />
+        <KpiValue label={t("collected")} value={fmt(c.collected)} unit="M" />
         <KpiAside
-          label="Meta"
+          label={t("goal")}
           pill={
             c.goal !== null && (
               <StatusBadge bg="#cbe71e" color="#141414" className="text-[13px]">
@@ -156,7 +178,7 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
               </StatusBadge>
             )
           }
-          value={c.goal === null ? "Sin meta" : `${fmt(c.goal)} M`}
+          value={c.goal === null ? t("noGoal") : t("amountM", { amount: fmt(c.goal) })}
         />
       </div>
       <div className="flex flex-col gap-2">
@@ -164,25 +186,25 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
           className="my-0.5"
           goal={c.goal}
           goalScale={GOAL_SCALE}
-          goalTip={c.goal === null ? undefined : `Meta: ${fmt(c.goal)} M`}
+          goalTip={c.goal === null ? undefined : t("goalTip", { amount: fmt(c.goal) })}
           segments={[
             {
               key: "collected",
               value: c.collected,
               color: COLLECTION_COLORS.collected,
-              tip: `Recaudo: ${fmt(c.collected)} M`
+              tip: t("collectedTip", { amount: fmt(c.collected) })
             },
             {
               key: "agreementsActive",
               value: c.agreementsActive,
               color: COLLECTION_COLORS.agreementsActive,
-              tip: `Acuerdos de pago vigentes: ${fmt(c.agreementsActive)} M`
+              tip: t("agreementsActiveTip", { amount: fmt(c.agreementsActive) })
             },
             {
               key: "agreementsBroken",
               value: c.agreementsBroken,
               color: COLLECTION_COLORS.agreementsBroken,
-              tip: `Acuerdos incumplidos: ${fmt(c.agreementsBroken)} M`
+              tip: t("agreementsBrokenTip", { amount: fmt(c.agreementsBroken) })
             }
           ]}
         />
@@ -191,22 +213,22 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
           <span className="flex min-w-0 items-center gap-x-2">
             <LegendItem
               color={COLLECTION_COLORS.agreementsActive}
-              label="Acuerdos"
-              value={`${fmt(c.agreementsActive)} M`}
+              label={t("agreements")}
+              value={t("amountM", { amount: fmt(c.agreementsActive) })}
             />
             <LegendItem
               color={COLLECTION_COLORS.agreementsBroken}
-              label="Incumplidos"
-              value={`${fmt(c.agreementsBroken)} M`}
+              label={t("broken")}
+              value={t("amountM", { amount: fmt(c.agreementsBroken) })}
             />
           </span>
           <span
             className="ml-auto min-w-0 truncate"
-            title={`Forecast ${fmt(c.forecast)} M${
+            title={`${t("forecast")} ${t("amountM", { amount: fmt(c.forecast) })}${
               c.forecastPct !== null ? ` · ${pct1(c.forecastPct)}` : ""
             }`}
           >
-            Forecast <b className="font-semibold text-cp-ink">{fmt(c.forecast)} M</b>
+            {t("forecast")} <b className="font-semibold text-cp-ink">{fmt(c.forecast)} M</b>
             {c.forecastPct !== null && ` · ${pct1(c.forecastPct)}`}
           </span>
         </div>

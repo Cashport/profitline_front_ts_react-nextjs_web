@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useMessageApi } from "@/context/MessageContext";
 import { acceptInvitation, AcceptInvitationRequest } from "@/services/cetaphil/acceptInvitation";
 import { getDocumentTypeId } from "@/constants/documentTypes";
+import { useTranslations } from "use-intl";
 
 export interface RegisterFormData {
   fullName: string;
@@ -16,6 +17,7 @@ export interface RegisterFormData {
 
 export const useRegisterForm = (decodedToken: any) => {
   const { showMessage } = useMessageApi();
+  const t = useTranslations("publicPortals.cetaphil.landing");
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -54,7 +56,7 @@ export const useRegisterForm = (decodedToken: any) => {
         const documentTypeId = getDocumentTypeId(data.documentType);
 
         if (!documentTypeId) {
-          showMessage("error", "Tipo de documento inválido");
+          showMessage("error", t("invalidDocumentType"));
           return;
         }
 
@@ -72,12 +74,12 @@ export const useRegisterForm = (decodedToken: any) => {
         };
 
         await acceptInvitation(payload);
-        
-        showMessage("success", "Registro exitoso");
+
+        showMessage("success", t("registrationSuccess"));
         reset();
       } catch (error: any) {
         console.error("Error:", error);
-        showMessage("error", error.message || "Error al aceptar la invitación");
+        showMessage("error", error.message || t("acceptInvitationError"));
       }
     },
     [
@@ -86,7 +88,8 @@ export const useRegisterForm = (decodedToken: any) => {
       decodedToken?.claims?.uuid,
       token,
       reset,
-      showMessage
+      showMessage,
+      t
     ]
   );
 

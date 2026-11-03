@@ -4,6 +4,7 @@ const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 const ts = require("typescript");
+const useIntlEs = require("./helpers/use-intl-es.cjs");
 
 const root = path.resolve(__dirname, "..");
 const servicesFile = "src/services/users/users.ts";
@@ -23,6 +24,8 @@ function loadSource(file, mocks) {
   const loadedModule = { exports: {} };
   const localRequire = (name) => {
     if (name in mocks) return mocks[name];
+    if (name === "use-intl") return useIntlEs;
+    if (name === "@/i18n/translator") return useIntlEs.translatorEs;
     if (name.endsWith(".scss")) return {};
     if (
       name.startsWith("@/") ||
@@ -373,10 +376,10 @@ for (const failure of [
     let tree = view.render();
     find(
       tree,
-      (node) => node.type === "Button" && node.props.children === "Editar Usuario"
+      (node) => node.type === "Button" && node.props.children === "Editar usuario"
     ).props.onClick();
     await find(view.render(), (node) => node.type === "form").props.onSubmit(userForm);
-    assert.match(messages.at(-1)[1], /email ya esta en uso/);
+    assert.match(messages.at(-1)[1], /email ya está en uso/);
     tree = view.render();
     assert.ok(find(tree, (node) => node.type === "Button" && node.props.htmlType === "submit"));
   });

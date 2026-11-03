@@ -1,0 +1,63 @@
+{
+  "header": {
+    "title": "Reports",
+    "publish": "Publish report",
+    "searchPlaceholder": "Search reports"
+  },
+  "filters": {
+    "type": "Report type",
+    "publishedAt": "Published date",
+    "period": "Period: {value}",
+    "selectPeriod": "Select a period",
+    "dateTag": "Date"
+  },
+  "list": {
+    "columns": {
+      "name": "Report name",
+      "type": "Report type",
+      "publishedAt": "Published date"
+    },
+    "viewReport": "View report",
+    "newBadge": "New",
+    "loadError": "We couldn't load the reports.",
+    "empty": "No reports have been published yet.",
+    "noMatch": "No reports match these criteria",
+    "clearCriteria": "Clear search and filters",
+    "count": "{total, plural, one {# report} other {# reports}}",
+    "countFiltered": "{shown} of {total, plural, one {# report} other {# reports}}"
+  },
+  "detail": {
+    "fallbackTitle": "Report",
+    "publishedOn": "Published {date}",
+    "previous": "Previous report",
+    "next": "Next report",
+    "position": "{index} of {total}",
+    "loadError": "We couldn't load the report."
+  },
+  "createModal": {
+    "title": "Publish report",
+    "subtitle": "Your team will see it in the reports list.",
+    "typeLabel": "Report type",
+    "createType": "+ Create type",
+    "typePlaceholder": "Select a type",
+    "nameLabel": "Report name",
+    "namePlaceholder": "e.g. July close report",
+    "fileLabel": "HTML file",
+    "dropTitle": "Drag the HTML file here",
+    "dropSubtitle": ".html file generated in Claude · max {maxMb} MB",
+    "readyToPublish": "{size} · Ready to publish",
+    "published": "Report published",
+    "errors": {
+      "notHtml": "The file must be .html",
+      "tooLarge": "The file exceeds {maxMb} MB",
+      "publish": "We couldn't publish the report."
+    }
+  },
+  "typeModal": {
+    "title": "Create report type",
+    "nameLabel": "Report type name",
+    "namePlaceholder": "e.g. Receivables report",
+    "created": "Report type created",
+    "createError": "We couldn't create the report type."
+  }
+}

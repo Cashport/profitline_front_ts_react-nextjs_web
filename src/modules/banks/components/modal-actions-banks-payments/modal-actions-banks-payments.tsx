@@ -1,5 +1,6 @@
 "use client";
 import { Flex, Modal } from "antd";
+import { useTranslations } from "use-intl";
 import {
   PencilLine,
   User,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 const ModalActionsBanksPayments = ({ isOpen, onClose, setSelectOpen }: Props) => {
+  const t = useTranslations("banks.actionsModal");
   const handleOpenModal = (type: number) => {
     setSelectOpen({
       selected: type
@@ -37,69 +39,67 @@ const ModalActionsBanksPayments = ({ isOpen, onClose, setSelectOpen }: Props) =>
       footer={null}
       onCancel={onClose}
     >
-      <p className="modalActionsBanksPayments__description">
-        Selecciona la acción que vas a realizar
-      </p>
+      <p className="modalActionsBanksPayments__description">{t("selectAction")}</p>
       <Flex vertical gap="0.75rem">
         <ButtonGenerateAction
           onClick={() => {
             handleOpenModal(1);
           }}
           icon={<PencilLine size={16} />}
-          title="Editar cliente"
+          title={t("editCustomer")}
         />
         <ButtonGenerateAction
           icon={<User size={16} />}
-          title="Asignar cliente"
+          title={t("assignCustomer")}
           onClick={() => {
             handleOpenModal(2);
           }}
         />
         <ButtonGenerateAction
           icon={<CheckCircle size={16} />}
-          title="Aprobar asignación"
+          title={t("approveAssignment")}
           onClick={() => {
             handleOpenModal(3);
           }}
         />
         <ButtonGenerateAction
           icon={<CirclesFour size={16} />}
-          title="Fraccionar pago"
+          title={t("splitPayment")}
           onClick={() => {
             handleOpenModal(4);
           }}
         />
         <ButtonGenerateAction
           icon={<FileArrowUp size={16} />}
-          title="Cargar tirilla"
+          title={t("uploadSlip")}
           onClick={() => {
             handleOpenModal(5);
           }}
         />
         <ButtonGenerateAction
           icon={<ArrowsClockwise size={16} />}
-          title="Cambiar de estado"
+          title={t("changeStatus")}
           onClick={() => {
             handleOpenModal(6);
           }}
         />
         <ButtonGenerateAction
           icon={<ArrowsClockwise size={16} />}
-          title="Cambiar id ERP"
+          title={t("changeErpId")}
           onClick={() => {
             handleOpenModal(9);
           }}
         />
         <ButtonGenerateAction
           icon={<CalendarBlank size={16} />}
-          title="Cambiar periodo contable"
+          title={t("changePeriod")}
           onClick={() => {
             handleOpenModal(10);
           }}
         />
         <ButtonGenerateAction
           icon={<ArrowDownLeft size={20} />}
-          title="Marcar como sin identificar"
+          title={t("markUnidentified")}
           onClick={() => {
             handleOpenModal(8);
           }}

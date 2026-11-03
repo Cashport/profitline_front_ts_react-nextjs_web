@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { DatePicker, Flex, Typography } from "antd";
 import dayjs from "dayjs";
 import {
@@ -45,6 +46,7 @@ export const InputDateForm = ({
   hiddenIcon,
   minDate
 }: InputDateFormProps) => {
+  const tInputs = useTranslations("components.inputs");
   return (
     <Flex vertical className={`datePickerContainer ${className}`} style={customStyleContainer}>
       {!hiddenTitle && <p className="input-date-custom-title">{titleInput}</p>}
@@ -59,7 +61,9 @@ export const InputDateForm = ({
             value={field.value}
             size="large"
             disabled={disabled}
-            placeholder={placeholder || `Select ${titleInput.toLowerCase()}`}
+            placeholder={
+              placeholder || tInputs("selectPlaceholder", { field: titleInput.toLowerCase() })
+            }
             suffixIcon={
               !hiddenIcon ? <Calendar weight="light" className="dateInputForm__icon" /> : false
             }
@@ -70,7 +74,7 @@ export const InputDateForm = ({
       />
       {error && (
         <Typography.Text className="textError">
-          {error.message || `${titleInput} es obligatorio *`}
+          {error.message || tInputs("requiredField", { field: titleInput })}
         </Typography.Text>
       )}
     </Flex>

@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import useSWR from "swr";
 
@@ -23,11 +24,12 @@ interface Props<T extends FieldValues> {
 }
 
 export const SelectPaymentConditions = <T extends FieldValues>({ errors, field }: Props<T>) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useSWR<IPaymentConditions>("/client/condition-payments", fetcher, {});
   const options = data?.data.map((option) => {
     return {
       value: option.id,
-      label: `A ${option.condition_day} días`,
+      label: t("paymentConditionDays", { days: option.condition_day }),
       className: "selectOptions"
     };
   });
@@ -35,7 +37,7 @@ export const SelectPaymentConditions = <T extends FieldValues>({ errors, field }
   return (
     <>
       <Select
-        placeholder="A 30 días"
+        placeholder={t("paymentConditionDays", { days: 30 })}
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={isLoading}
         variant="borderless"
@@ -46,9 +48,7 @@ export const SelectPaymentConditions = <T extends FieldValues>({ errors, field }
         labelInValue
       />
       {errors && (
-        <Typography.Text className="textError">
-          La condición de pago es obligatoria *
-        </Typography.Text>
+        <Typography.Text className="textError">{t("paymentConditionRequired")}</Typography.Text>
       )}
     </>
   );

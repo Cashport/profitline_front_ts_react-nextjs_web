@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button, Select, Typography } from "antd";
 import { CaretLeft, DownloadSimple, UploadSimple } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiSearchInput from "@/components/ui/search-input";
@@ -28,14 +29,10 @@ import {
   UploadFailedPanel,
   UploadProcessingBanner
 } from "../../components/upload-status/upload-status";
-import { CONCILIATION_STATUSES, DOCUMENT_TYPE_LABEL, TEMPLATE_URL } from "../../constants";
+import { CONCILIATION_STATUSES, DOCUMENT_TYPES, TEMPLATE_URL } from "../../constants";
 import { useConciliationUpload } from "../../hooks/use-conciliation-upload";
 import { usePortfolioConciliation } from "../../hooks/use-portfolio-conciliation";
 import { formatDateTime } from "../../utils/format";
-
-const DOCUMENT_TYPE_OPTIONS = (Object.keys(DOCUMENT_TYPE_LABEL) as ConciliationDocumentType[]).map(
-  (value) => ({ value, label: DOCUMENT_TYPE_LABEL[value] })
-);
 
 /**
  * Conciliación masiva Cashport (HU 86e3915mm): el analista sube el Excel de
@@ -44,6 +41,8 @@ const DOCUMENT_TYPE_OPTIONS = (Object.keys(DOCUMENT_TYPE_LABEL) as ConciliationD
  * resultado por status_cashport.
  */
 const PortfolioConciliationView = () => {
+  const t = useTranslations("reconciliation");
+  const tv = useTranslations("reconciliation.view");
   const params = useParams();
   const clientUUID = extractSingleParam(params.clientId) || "";
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -84,12 +83,9 @@ const PortfolioConciliationView = () => {
     setPage(1);
     refreshAll();
     if (polledUpload.status === "DONE") {
-      showMessage(
-        "success",
-        `Cartera conciliada: ${formatNumber(polledUpload.total_rows ?? 0)} documentos`
-      );
+      showMessage("success", tv("done", { count: formatNumber(polledUpload.total_rows ?? 0) }));
     } else {
-      showMessage("error", "La carga no se aplicó; revisa los errores");
+      showMessage("error", tv("failed"));
     }
   }, [polledUpload?.uuid, polledUpload?.status]);
 
@@ -145,7 +141,7 @@ const PortfolioConciliationView = () => {
     try {
       await downloadConciliationUploadFile(clientUUID, currentUpload);
     } catch (err) {
-      showMessage("error", err instanceof Error ? err.message : "No se pudo descargar el archivo");
+      showMessage("error", err instanceof Error ? err.message : tv("downloadError"));
     } finally {
       setIsDownloading(false);
     }
@@ -157,42 +153,49 @@ const PortfolioConciliationView = () => {
       ? latestUpload
       : null;
   const hasPortfolio = Boolean(currentUpload) || Boolean(portfolio?.summary.total.count);
+  const documentTypeOptions = DOCUMENT_TYPES.map((value: ConciliationDocumentType) => ({
+    value,
+    label: t(`documentType.${value}`)
+  }));
 
   return (
     <div className="flex flex-col gap-4 p-1 text-foreground">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <div className="mr-auto flex min-w-0 items-center gap-2">
           <Link
-            href={`/clientes/detail/${clientUUID}/project/${projectId}`}
-            aria-label="Volver al cliente"
+            href={`/clients/detail/${clientUUID}/project/${projectId}`}
+            aria-label={tv("backToCustomer")}
             className="flex h-8 w-8 flex-none items-center justify-center rounded-lg text-foreground hover:bg-[#f0f0f0]"
           >
             <CaretLeft size={18} />
           </Link>
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold">Conciliación masiva de cartera</h2>
+            <h2 className="text-lg font-semibold">{tv("title")}</h2>
             {portfolio?.client && (
               <p className="truncate text-[13px] text-muted-foreground">
-                {portfolio.client.name ?? "Cliente"} · NIT {portfolio.client.nit}
+                {tv("clientLine", {
+                  name: portfolio.client.name ?? tv("customer"),
+                  taxId: portfolio.client.nit
+                })}
               </p>
             )}
           </div>
         </div>
         <Typography.Link href={TEMPLATE_URL} download underline className="!text-[13px]">
-          Descargar plantilla
+          {tv("downloadTemplate")}
         </Typography.Link>
         <PrincipalButton
           icon={<UploadSimple size={16} />}
           disabled={isProcessing || !portfolio}
           onClick={() => setIsUploadOpen(true)}
         >
-          Cargar cartera
+          {tv("upload")}
         </PrincipalButton>
       </header>
 
       {error && !portfolio && (
         <div className="rounded-lg bg-[#fdecec] px-4 py-3 text-[13px] text-[#c4321c]">
-          {error.message || "No se pudo cargar la conciliación del cliente."}
+          {error.message || tv("loadError")}
         </div>
       )}
 
@@ -212,15 +215,10 @@ const PortfolioConciliationView = () => {
 
       {portfolio && !hasPortfolio && !isProcessing && (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-[#d6d6d6] px-6 py-14 text-center">
-          <span className="text-[15px] font-semibold">
-            Este cliente todavía no tiene cartera conciliada
-          </span>
-          <span className="max-w-[460px] text-[13px] text-[#8a8a8a]">
-            Carga el Excel con Id documento, Tipo y Monto cliente. Cashport cruza cada documento y
-            lo marca como conciliado, con novedad o inexistente.
-          </span>
+          <span className="text-[15px] font-semibold">{tv("emptyTitle")}</span>
+          <span className="max-w-[460px] text-[13px] text-[#8a8a8a]">{tv("emptyDescription")}</span>
           <PrincipalButton icon={<UploadSimple size={16} />} onClick={() => setIsUploadOpen(true)}>
-            Cargar cartera
+            {tv("upload")}
           </PrincipalButton>
         </div>
       )}
@@ -230,11 +228,13 @@ const PortfolioConciliationView = () => {
           {currentUpload && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-[#8a8a8a]">
               <span>
-                Cartera vigente: <b className="text-foreground">{currentUpload.file_name}</b> ·
-                cargada el {formatDateTime(currentUpload.finished_at ?? currentUpload.created_at)}
-                {currentUpload.created_by_name
-                  ? ` por ${currentUpload.created_by_name}`
-                  : ""} · {formatNumber(currentUpload.total_rows ?? 0)} documentos
+                {tv.rich(currentUpload.created_by_name ? "currentUploadBy" : "currentUpload", {
+                  fileName: currentUpload.file_name,
+                  date: formatDateTime(currentUpload.finished_at ?? currentUpload.created_at),
+                  user: currentUpload.created_by_name ?? "",
+                  count: formatNumber(currentUpload.total_rows ?? 0),
+                  b: (chunks) => <b className="text-foreground">{chunks}</b>
+                })}
               </span>
               {currentUpload.has_file && (
                 <Button
@@ -245,7 +245,7 @@ const PortfolioConciliationView = () => {
                   onClick={handleDownload}
                   className="!px-0"
                 >
-                  Descargar archivo
+                  {tv("downloadFile")}
                 </Button>
               )}
             </div>
@@ -256,17 +256,17 @@ const PortfolioConciliationView = () => {
           <div className="flex flex-wrap items-center gap-2">
             <UiSearchInput
               id="portfolio-conciliation-search"
-              placeholder="Buscar por ID documento"
+              placeholder={tv("searchPlaceholder")}
               value={searchText}
               onChange={(event) => changeSearch(event.target.value)}
               showBorder
             />
             <Select
               allowClear
-              placeholder="Todos los tipos"
+              placeholder={tv("allTypes")}
               value={documentType ?? undefined}
               onChange={(value) => changeDocumentType(value ?? null)}
-              options={DOCUMENT_TYPE_OPTIONS}
+              options={documentTypeOptions}
               className="min-w-[180px]"
             />
           </div>

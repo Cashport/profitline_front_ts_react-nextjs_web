@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Alert } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import ClientsHomeKpis from "../../components/clients-home/clients-home-kpis/clients-home-kpis";
@@ -23,6 +24,7 @@ import { executivesForCoordinators } from "../../utils/clients-home-format";
  * bajar, los KPIs se esconden para que la tabla tome su lugar; al subir vuelven.
  */
 export default function ClientsHome() {
+  const t = useTranslations("clients.home.pending");
   const projectId = useAppStore((s) => s.selectedProject?.ID ?? null);
   const syncProject = useClientsHomeFilters((s) => s.syncProject);
   const coordinators = useClientsHomeFilters((s) => s.coordinators);
@@ -46,8 +48,8 @@ export default function ClientsHome() {
           className="mb-3"
           type="info"
           showIcon
-          message="Estamos preparando la información de cartera de este proyecto"
-          description="Aparecerá aquí en unos minutos; la página se actualiza sola."
+          message={t("message")}
+          description={t("description")}
         />
       )}
       {summary.error && !pending && (

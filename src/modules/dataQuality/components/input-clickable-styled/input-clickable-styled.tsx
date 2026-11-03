@@ -1,4 +1,6 @@
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 
 interface InputClickableStyledProps {
@@ -11,13 +13,14 @@ interface InputClickableStyledProps {
 }
 
 export function InputClickableStyled({
-  placeholder = "Seleccionar frecuencia",
+  placeholder,
   value,
   error,
   disabled,
   onClick,
   className
 }: InputClickableStyledProps) {
+  const t = useTranslations("dataQuality.intakeModal");
   const handleClick = () => {
     if (!disabled) onClick();
   };
@@ -35,7 +38,7 @@ export function InputClickableStyled({
       )}
     >
       <span className={cn("truncate", !value && "text-muted-foreground")}>
-        {value || placeholder}
+        {value || placeholder || t("frequencyPlaceholder")}
       </span>
       <ChevronDownIcon className="size-4 opacity-50 shrink-0" />
     </button>

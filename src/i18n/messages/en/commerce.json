@@ -1,0 +1,598 @@
+{
+  "layout": {
+    "myOrders": "My Orders",
+    "orderConfirmed": "Order Confirmed",
+    "createOrder": "Create Order"
+  },
+  "createOrder": {
+    "title": "Create order",
+    "noClientSelected": "No customer selected"
+  },
+  "ordersView": {
+    "generateAction": "Take action",
+    "createOrder": "Create order",
+    "removeName": "orders",
+    "noOrdersSelected": "No orders selected"
+  },
+  "confirmedOrder": {
+    "orderNumber": "Order #{number}",
+    "created": "Your order has been created",
+    "shippingData": "Shipping details",
+    "generateAction": "Take action",
+    "appliedDiscount": "Discount applied",
+    "exit": "Exit"
+  },
+  "summary": {
+    "title": "Summary",
+    "skus": "SKUs: {count}",
+    "totalProducts": "Total products: {count}",
+    "subtotal": "Subtotal",
+    "discounts": "Discounts",
+    "productDiscounts": "Product discounts",
+    "orderDiscounts": "Order discounts (cross-selling)",
+    "totalDiscount": "Total discount",
+    "totalWithoutVat": "Total before VAT",
+    "vat19": "VAT 19%",
+    "vat": "VAT",
+    "total": "Total",
+    "totalWithEarlyPayment": "Total with early payment discount"
+  },
+  "shippingFields": {
+    "dispatchAddress": "Shipping address",
+    "city": "City",
+    "businessUnit": "Business unit",
+    "warehouse": "Warehouse",
+    "dispatchWarehouse": "Shipping warehouse",
+    "email": "Email",
+    "contact": "Contact",
+    "seller": "Sales rep",
+    "comments": "Notes"
+  },
+  "blockedOrderModal": {
+    "title": "Order on hold: insufficient credit",
+    "description": "The customer doesn't have enough available credit to place this order",
+    "sendToApproval": "Send for approval",
+    "cashOrder": "This is a cash order",
+    "sentToApproval": "Order sent for approval",
+    "uploadRemittance": "Upload remittance advice",
+    "attachEvidence": "Attach proof of payment",
+    "sendRemittance": "Send remittance",
+    "attachRemittance": "Please attach the remittance advice.",
+    "remittanceAdded": "Remittance advice added",
+    "remittanceError": "Error adding the remittance advice."
+  },
+  "orderActions": {
+    "title": "Take action",
+    "description": "Select the action you want to take",
+    "moveToBilled": "Move order to billed"
+  },
+  "sendInvite": {
+    "title": "Send invitation",
+    "description": "Enter an email address to send an invitation to access the marketplace",
+    "email": "Email",
+    "emailPlaceholder": "name@mail.com",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Email is not valid",
+    "submit": "Send code",
+    "success": "Invitation sent",
+    "error": "Error sending the invitation"
+  },
+  "searchClient": {
+    "newOrder": "New order",
+    "newOrderDescription": "Fill in the details to get started",
+    "newClient": "New customer",
+    "channel": "Channel",
+    "selectChannel": "Select a channel",
+    "noChannels": "This customer has no available channels",
+    "selectClient": "Select a customer",
+    "searchClient": "Search customer...",
+    "noResults": "No results",
+    "selectAddress": "Select an address",
+    "noSavedAddresses": "No saved addresses",
+    "newAddress": "New address",
+    "maxChars": "Maximum {count} characters",
+    "warehouseValue": "Warehouse {warehouse}",
+    "createOrder": "Create order",
+    "selectClientHint": "Select a customer to see their information",
+    "selectedClient": "Selected customer",
+    "taxIdValue": "Tax ID: {nit}",
+    "invalidDocumentType": "Invalid ID type",
+    "clientRegistered": "Customer registered",
+    "clientRegisterError": "Error registering the customer. Please try again.",
+    "registerDialog": {
+      "title": "Register New Customer",
+      "description": "Enter the customer details to create the order",
+      "submit": "Save customer"
+    },
+    "receivables": {
+      "title": "Receivables",
+      "total": "Total receivables",
+      "pastDue": "Past due receivables",
+      "availableCredit": "Available credit",
+      "creditLimit": "Credit limit",
+      "availablePct": "Available: {pct}%",
+      "usedPct": "Used: {pct}%"
+    }
+  },
+  "selects": {
+    "selectWarehouse": "Select a warehouse",
+    "selectCity": "Select or type a city",
+    "addCity": "Add \"{city}\""
+  },
+  "discountsModal": {
+    "title": "Discounts",
+    "notCumulative": "Keep in mind that some discounts can't be combined"
+  },
+  "product": {
+    "pack": "Pack",
+    "productsCount": "{count, plural, one {# product} other {# products}}",
+    "ean": "EAN: {ean}",
+    "insufficientStock": "Insufficient stock",
+    "units": "{count} units",
+    "autoQuantity": "Quantity calculated automatically",
+    "auto": "Auto"
+  },
+  "cart": {
+    "title": "Order summary",
+    "skusAndProducts": "SKUs: {skus} - Products: {products}",
+    "closeCart": "Close cart",
+    "empty": "You haven't added any products yet",
+    "viewAllDiscounts": "View all discounts",
+    "freeGoods": "Free goods",
+    "available": "{count} avail.",
+    "continuePurchase": "Continue to checkout",
+    "cannotContinue": "You can't continue with the purchase",
+    "minimumOrder": "The minimum order is {amount} (VAT included)",
+    "addMoreProducts": "Add more products to the cart to continue.",
+    "addOtherProducts": "Add other products to the cart to continue.",
+    "understood": "Got it",
+    "confirmContinue": "Are you sure you want to continue?",
+    "noCannulasOrWater": "You haven't selected cannulas and/or sterile water",
+    "reviewOrder": "We recommend reviewing the order",
+    "onlyCannulasOrWater": "An order can't be billed with only cannulas or water",
+    "oddSkinboosters": "The odd Skinboosters unit will be charged at full price",
+    "oddRestylane": "The total units across the Restylane references (VOLYME, REFYNE, LYFT LIDO, LIDOCAINA, KYSSE, DEFYNE) is an odd number. The odd unit will be charged at full price",
+    "complementMismatch": "The cannula and sterile water quantities don't match what the main products require.",
+    "requiredCannulas": "Required cannulas: <strong>{expected}</strong> — In cart: <strong>{actual}</strong>",
+    "requiredWater": "Required sterile water: <strong>{expected}</strong> — In cart: <strong>{actual}</strong>",
+    "reloadOrContactSupport": "Reload the cart or contact support.",
+    "modify": "Edit",
+    "complementUnavailable": "Complementary product not available",
+    "complementNotFound": "The product “{product}” wasn't found in the catalog and couldn't be added automatically.",
+    "contactCatalogAdmin": "Contact the catalog administrator."
+  },
+  "productsTable": {
+    "columns": {
+      "product": "Product",
+      "sku": "SKU",
+      "originalPrice": "List price",
+      "discount": "Discount",
+      "finalPrice": "Net price",
+      "quantity": "Qty",
+      "total": "Total",
+      "remaining": "Rem."
+    },
+    "noDiscount": "No disc.",
+    "pack": "Pack",
+    "packs": "Packs",
+    "removePack": "Remove pack",
+    "packProducts": "Products in pack",
+    "removeProduct": "Remove product",
+    "freeGoods": "Free goods",
+    "autoPromo": "Auto promo",
+    "manual": "Manual",
+    "fullDiscount": "100% off",
+    "removeFreeGood": "Remove free good",
+    "totals": "Totals"
+  },
+  "bonusModal": {
+    "title": "Free goods",
+    "choosePromotion": "Choose the promotion to apply",
+    "noFreeGoods": "No free goods available",
+    "promotionFreeGoods": "Promotion free goods",
+    "option": "Option {number}",
+    "included": "Included",
+    "chooseUnits": "Choose {count} units",
+    "otherFreeGoods": "Other free goods",
+    "availableQty": "Avail. {available}/{assigned}",
+    "backToPromotions": "Back to the promotions list",
+    "flex": "Flex",
+    "monthPromos": "{month} promos",
+    "others": "Others",
+    "total": "Total: <strong>{total}</strong>"
+  },
+  "checkout": {
+    "clientNotFound": "Customer not found",
+    "createdOrderNotFound": "We couldn't retrieve the created order",
+    "createOrderError": "Error creating the order",
+    "invalidTotal": "The total is not valid",
+    "missingShippingData": "Shipping details are missing",
+    "paymentNotCompleted": "Payment not completed; the order was not created",
+    "attachRemittance": "Please attach the remittance advice",
+    "createDraftError": "Error creating draft",
+    "confirmCrossSelling": "Continue the order with cross-selling?",
+    "yesContinue": "Yes, continue",
+    "electronicBilling": "Do you need an electronic invoice?",
+    "yesINeedIt": "Yes, I do",
+    "cashClientRemittance": "Cash customer: attach proof of payment",
+    "productDetails": "Product details",
+    "otherDiscounts": "Other discounts",
+    "newAddressOption": "+ New address",
+    "phoneDigits": "Phone number must have 10 digits",
+    "phoneDigitsRange": "Phone number must have 10 to 12 digits",
+    "newDestination": "New destination",
+    "editDestination": "Edit destination",
+    "addDestination": "Add destination",
+    "removeDestination": "Remove destination",
+    "availableShort": "Avail.",
+    "totalUnits": "Total <muted>({count} units)</muted>",
+    "deliveryAddress": "Delivery address",
+    "emailPlaceholder": "name@example.com",
+    "invalidEmail": "Invalid email address",
+    "contactPhone": "Contact phone",
+    "commentsPlaceholder": "Special instructions for this delivery",
+    "cannotSaveDelivery": "You can't save this delivery",
+    "deliveryMinimum": "Each delivery must be at least {amount}",
+    "reassignQuantities": "Reassign quantities to this delivery to continue.",
+    "addOtherProductsToDelivery": "Add other products to this delivery to continue.",
+    "noCannulasOrWaterInDelivery": "You haven't selected cannulas and/or sterile water in this delivery",
+    "completeMissingData": "Fill in the missing details to finish the order",
+    "multipleDeliveries": "Multiple deliveries",
+    "shippingData": "Shipping details",
+    "splitDeliveries": "Split deliveries",
+    "singleShipment": "Single shipment",
+    "selectDeliveryAddress": "Select a delivery address",
+    "addressWithoutWarehouse": "The selected address has no associated warehouse",
+    "enterCity": "Enter the city",
+    "enterDispatchAddress": "Enter the shipping address",
+    "selectDispatchWarehouse": "Select a shipping warehouse",
+    "enterEmail": "Enter an email address",
+    "enterPhone": "Enter a contact phone",
+    "enterComment": "Enter a comment",
+    "noAddress": "No address",
+    "editPurchaseOrder": "Edit purchase order",
+    "removePurchaseOrder": "Remove purchase order",
+    "attachPurchaseOrder": "Attach purchase order",
+    "requiredForChannel": "Required for the {channel} channel",
+    "discountsWithName": "Discounts ({name})",
+    "orderDiscount": "Order discount",
+    "appliedDiscounts": "Discounts applied",
+    "saveDraft": "Save draft",
+    "finishOrder": "Place order"
+  },
+  "purchaseOrderModal": {
+    "title": "Purchase order",
+    "numberLabel": "PO number",
+    "numberPlaceholder": "Enter the PO number",
+    "pdf": "Purchase order PDF",
+    "fileTooLarge": "The file is too large. Please upload a file under {size} MB."
+  },
+  "ordersTable": {
+    "columns": {
+      "id": "ID",
+      "elapsedTime": "Time elapsed"
+    },
+    "earlyPayment": "Early payment",
+    "viewDispute": "View dispute",
+    "viewWarehouse": "View warehouse",
+    "continueOrder": "Continue order",
+    "history": "History",
+    "resendToBilling": "Resend to billing",
+    "resendingToBilling": "Resending to billing...",
+    "resentToBilling": "Order resent to billing",
+    "resendToBillingError": "Error resending to billing",
+    "orderLabel": "Order #{number}"
+  },
+  "billingExcelModal": {
+    "title": "Download detailed billing report",
+    "description": "Select the report date range",
+    "presets": {
+      "today": "Today",
+      "last7": "Last 7 days",
+      "thisMonth": "This month",
+      "lastMonth": "Last month"
+    },
+    "rangeSummary": "{start} – {end} · {days, plural, one {# day} other {# days}}"
+  },
+  "generateAction": {
+    "title": "Take action",
+    "description": "Select the action you want to take",
+    "selectedCount": "{count, plural, one {# selected:} other {# selected:}}",
+    "selectedDrafts": "Selected drafts:",
+    "actions": {
+      "moveToBilled": "Move order to billed",
+      "downloadCsv": "Download CSV",
+      "downloadBillingReport": "Download billing report",
+      "downloadBillingDetail": "Download detailed billing report",
+      "downloadSalesReport": "Download sales report",
+      "partialCsv": "Partial CSV download",
+      "downloadPoFormatCsv": "Download CSV (PO format)",
+      "sendInvite": "Send invitation",
+      "returnToSeller": "Return to sales rep",
+      "uploadPurchaseOrder": "Upload purchase order"
+    },
+    "noOrdersSelected": "No orders selected",
+    "csvDownloadError": "Error downloading CSV",
+    "downloadSuccess": "Download complete",
+    "downloadAllClientSuccess": "Downloaded all of the customer's orders in the same status",
+    "downloadingBillingReport": "Downloading billing report...",
+    "downloadingBillingDetail": "Downloading detailed billing report...",
+    "downloadingSalesReport": "Downloading sales report...",
+    "fileDownloadError": "Error downloading the file",
+    "partialCsvError": "Error downloading the partial CSV",
+    "backordersCreated": "{count, plural, one {# backorder created: {ids}} other {# backorders created: {ids}}}",
+    "failedOrders": "Orders with errors: {ids}",
+    "statusChanged": "Status updated",
+    "statusChangeError": "Error changing the order status",
+    "onlyXlsx": "Only Excel files (.xlsx) are allowed",
+    "purchaseOrdersError": "Error processing the purchase orders",
+    "billingFileTitle": "Billing file download",
+    "ordersWithoutStock": "Orders without stock",
+    "splitOrderConfirm": "Are you sure you want to split the order?",
+    "splitOrderContent": "Products with no units will be sent to backorder",
+    "poFormat": {
+      "title": "Download CSV (PO format)",
+      "question": "Which orders do you want to download?",
+      "client": "Customer: <strong>{name}</strong>",
+      "status": "Status: <strong>{status}</strong>",
+      "onlySelectedHelp": "<b>Selected only</b>: downloads only the {count, plural, one {# selected order} other {# selected orders}}.",
+      "allClientHelp": "<b>All customer orders in this status</b>: downloads all orders from the same customer that are in the same status.",
+      "onlySelected": "Selected only",
+      "allClient": "All customer orders"
+    }
+  },
+  "uploadPurchaseOrders": {
+    "processingTitle": "Processing purchase order",
+    "defaultFileName": "file.xlsx",
+    "waitingServer": "Waiting for the server to respond, please wait...",
+    "summaryTitle": "Purchase orders processed",
+    "successBanner": "POs processed successfully",
+    "columns": {
+      "order": "Order #",
+      "iscalaCode": "iScala code",
+      "address": "Address",
+      "city": "City"
+    },
+    "tiles": {
+      "package": "Package",
+      "draft": "Draft",
+      "ordersCreated": "Orders created",
+      "skusProcessed": "SKUs processed",
+      "totalAmount": "Total amount"
+    },
+    "ordersDetail": "Order details ({count})",
+    "showing": "Showing {shown} of {total}"
+  },
+  "dashboard": {
+    "loadError": "We couldn't load the dashboard",
+    "vatToggle": {
+      "ariaWithVat": "Showing amounts including VAT",
+      "ariaWithoutVat": "Showing amounts excluding VAT",
+      "titleWithVat": "Amounts include VAT. Click to see net sales.",
+      "titleWithoutVat": "Amounts are net (excluding VAT). Click to include VAT.",
+      "withVat": "With VAT",
+      "withoutVat": "Without VAT"
+    },
+    "kpis": {
+      "totalBilled": "Total billed",
+      "ordersInProcess": "Orders in process",
+      "ordersCount": "{count, plural, one {# order} other {# orders}}",
+      "expectedBilling": "Expected billing",
+      "orderCount": "Number of orders",
+      "avgOrderValue": "Average order value"
+    },
+    "tabs": {
+      "clientDetails": "Customer details",
+      "regionSeller": "Region/Sales rep",
+      "promotions": "Promotions",
+      "backorder": "Backorder",
+      "negotiations": "Negotiations",
+      "grossToNetTitle": "Gross to Net Analysis",
+      "grossToNetDescription": "Financial bridge from gross sales to net revenue visualization."
+    },
+    "filters": {
+      "date": "Date",
+      "dateLabel": "Date:",
+      "selectPeriod": "Select a period",
+      "frequencyLabel": "Frequency",
+      "selectedCount": "{count} selected",
+      "presetPeriods": "Preset Periods",
+      "customRange": "Custom Range",
+      "from": "From",
+      "to": "To",
+      "datePresets": {
+        "hoy": "Today",
+        "esta_semana": "This week",
+        "mes_actual": "Current month",
+        "ultimo_mes": "Last month",
+        "ultimo_trimestre": "Last quarter",
+        "ytd": "YTD",
+        "ultimos_12_meses": "Last 12 months"
+      },
+      "frequency": {
+        "diaria": "Daily",
+        "semanal": "Weekly",
+        "mensual": "Monthly",
+        "trimestral": "Quarterly",
+        "anual": "Yearly"
+      },
+      "categories": {
+        "channelIds": "Business unit",
+        "productIds": "Product",
+        "productTypes": "Product type",
+        "sellerIds": "Sales rep",
+        "clientIds": "Customer",
+        "cityIds": "City",
+        "lineIds": "Category"
+      }
+    },
+    "topSales": {
+      "title": "Top sales",
+      "summary": "{name} {total} - <highlight>Pareto {pareto}</highlight>",
+      "sales": "Sales",
+      "units": {
+        "units": "Units",
+        "orders": "Orders"
+      },
+      "categories": {
+        "producto": {
+          "singular": "Product",
+          "plural": "Products"
+        },
+        "cliente": {
+          "singular": "Customer",
+          "plural": "Customers"
+        },
+        "ciudad": {
+          "singular": "City",
+          "plural": "Cities"
+        },
+        "vendedor": {
+          "singular": "Sales rep",
+          "plural": "Sales reps"
+        }
+      }
+    },
+    "revenueChart": {
+      "title": "Revenue trend",
+      "cumulative": "Cumulative",
+      "periodSales": "Period sales",
+      "targetLine": "TARGET: ${value}M",
+      "weekShort": "W{week}",
+      "frequencyShort": {
+        "diaria": "D",
+        "semanal": "W",
+        "mensual": "M"
+      },
+      "subtext": {
+        "diaria": "Daily sales and cumulative progress",
+        "semanal": "Cumulative weekly sales",
+        "mensual": "Cumulative monthly trend",
+        "trimestral": "Cumulative quarterly trend",
+        "anual": "Cumulative yearly trend"
+      },
+      "fullscreenDescription": "{subtext} for <b>{range}</b> ({frequency}).",
+      "monthsShort": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
+      }
+    },
+    "treemap": {
+      "title": "Cross analysis (2D treemap)",
+      "description": "Explore two combined dimensions at once",
+      "fullscreen": "Full screen",
+      "detailTitle": "Detailed cross analysis",
+      "detailDescription": "Grouped by <b>{dim1}</b> crossed with <b>{dim2}</b>. Hover over the boxes to see the figures.",
+      "percentOfTotal": "{pct}% of total",
+      "dimensions": {
+        "linea": "Business line",
+        "producto": "Product",
+        "vendedor": "Sales rep",
+        "ciudad": "City",
+        "cliente": "Customer",
+        "canal": "Sales channel"
+      }
+    },
+    "tables": {
+      "loading": "Loading data...",
+      "noData": "No data available",
+      "export": "Export",
+      "searchClientOrTaxId": "Search customer or tax ID...",
+      "showingResults": "Showing {from} to {to} of {total} results",
+      "downloadSuccess": "Download complete",
+      "fileDownloadError": "Error downloading the file"
+    },
+    "salesTable": {
+      "loading": "Loading data...",
+      "noData": "No data available",
+      "title": "Sales summary by region and sales rep",
+      "description": "Sales grouped by region with sales rep detail",
+      "columns": {
+        "regionSeller": "Region / Sales rep",
+        "draft": "Draft",
+        "creditHold": "Credit hold",
+        "inProcess": "In process",
+        "billed": "Billed",
+        "target": "Target",
+        "remaining": "Remaining to target"
+      }
+    },
+    "negotiations": {
+      "title": "Negotiations Report",
+      "descriptionMonths": "Customers with a negotiated discount (annual plan). Average billed sales over the last {months} closed months; only customers with an average above zero.",
+      "descriptionNoMonths": "Customers with a negotiated discount (annual plan). Average billed sales over the closed months; only customers with an average above zero.",
+      "includeExpired": "Include expired",
+      "generating": "Generating negotiations report...",
+      "loadError": "Error loading negotiations",
+      "columns": {
+        "start": "Start",
+        "end": "End",
+        "negotiation": "Negotiation",
+        "monthlyAverage": "Monthly average",
+        "lastMonth": "Last month",
+        "lastPurchase": "Last purchase"
+      }
+    },
+    "promotions": {
+      "title": "Promotions Report",
+      "description": "An order with two promotions counts toward both, so the total can exceed sales for the period.",
+      "searchPlaceholder": "Search promotion or sales rep...",
+      "showClientDetail": "Show customer breakdown for {promotion}",
+      "hideClientDetail": "Hide customer breakdown for {promotion}",
+      "columns": {
+        "promotion": "Promotion",
+        "seller": "Sales rep",
+        "orders": "Orders",
+        "units": "Units",
+        "amount": "Amount"
+      }
+    },
+    "backorder": {
+      "title": "Backorder Report",
+      "description": "Sales pending due to lack of stock. Only orders in backorder status, dated by creation date.",
+      "searchPlaceholder": "Search product or SKU...",
+      "showClientDetail": "Show customer breakdown for {product}",
+      "hideClientDetail": "Hide customer breakdown for {product}",
+      "columns": {
+        "product": "Product",
+        "sku": "SKU"
+      }
+    },
+    "clientDetails": {
+      "title": "Customer Details",
+      "searchPlaceholder": "Search...",
+      "columns": {
+        "monthSales": "Month sales",
+        "target": "Target",
+        "monthlyAvg": "Monthly avg.",
+        "prevMonth": "Prev. month",
+        "prevYtd": "Prev. YTD",
+        "ytd": "YTD",
+        "ytdPct": "YTD %"
+      },
+      "csv": {
+        "client": "Customer",
+        "monthSales": "Month sales",
+        "target": "Target",
+        "targetPct": "Target %",
+        "monthlyAvg": "Monthly average",
+        "monthlyAvgPct": "Monthly average %",
+        "prevMonth": "Previous month",
+        "prevMonthPct": "Previous month %",
+        "prevYtd": "Previous YTD",
+        "currentYtd": "Current YTD",
+        "roiYtdPct": "ROI YTD %"
+      }
+    }
+  }
+}

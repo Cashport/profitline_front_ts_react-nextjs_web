@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import discountCategories, { getOptionsByType } from "../../../constants/discountTypes";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -18,6 +19,9 @@ type Props = {
 
 export default function useCreateDiscountView({ params }: Props) {
   const discountId = !!Number(params?.id) ? Number(params?.id) : undefined;
+  const t = useTranslations("discounts.form");
+  const tValidation = useTranslations("discounts.validation");
+  const validationSchema = useMemo(() => generalResolver(tValidation), [tValidation]);
   const [messageApi, contextHolder] = message.useMessage();
   // initialCategory is a key of discountCategories (e.g. "annual"); unknown values fall back to "Por orden"
   const initialType = discountCategories[params?.initialCategory ?? ""]?.id ?? 1;
@@ -112,7 +116,7 @@ export default function useCreateDiscountView({ params }: Props) {
   };
 
   const form = useForm<DiscountSchema>({
-    resolver: yupResolver(generalResolver),
+    resolver: yupResolver(validationSchema),
     defaultValues: Number(params?.id) ? fetchDiscount : defaultDiscount,
     disabled: statusForm === "review"
   });
@@ -121,16 +125,15 @@ export default function useCreateDiscountView({ params }: Props) {
     setLoading(true);
     try {
       const res = await createDiscount({ ...e, project_id: ID }, files);
-      messageApi.success("Descuento creado exitosamente");
-      router.push(`${basePath}/regla/${res.idDiscount}`);
+      messageApi.success(t("createSuccess"));
+      router.push(`${basePath}/rule/${res.idDiscount}`);
     } catch (e: any) {
       if (e instanceof ApiError) {
         console.error(e);
         messageApi.error(e.message);
       } else {
         console.error(e);
-        const errorMessage =
-          e.response?.data?.message || e.message || "Error al crear el descuento";
+        const errorMessage = e.response?.data?.message || e.message || t("createError");
         messageApi.error(errorMessage);
       }
     } finally {
@@ -142,7 +145,7 @@ export default function useCreateDiscountView({ params }: Props) {
     setLoading(true);
     try {
       const res = await updateDiscount({ ...e, project_id: ID }, discountId as number, files);
-      messageApi.success("Descuento actualizado exitosamente");
+      messageApi.success(t("updateSuccess"));
       setDefaultDiscount(mapDiscountGetOneToDiscountSchema(res));
       setStatusForm("review");
       form.reset(mapDiscountGetOneToDiscountSchema(res));
@@ -151,8 +154,7 @@ export default function useCreateDiscountView({ params }: Props) {
       if (e instanceof ApiError) {
         messageApi.error(e.message);
       } else {
-        const errorMessage =
-          e.response?.data?.message || e.message || "Error al actualizar el descuento";
+        const errorMessage = e.response?.data?.message || e.message || t("updateError");
         messageApi.error(errorMessage);
       }
     } finally {

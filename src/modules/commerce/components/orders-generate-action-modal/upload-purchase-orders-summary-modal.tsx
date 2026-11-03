@@ -9,6 +9,7 @@ import {
   ShoppingCartSimple,
   Storefront
 } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { formatCurrencyMoney } from "@/utils/utils";
 import { IUploadedPurchaseOrder, IUploadPurchaseOrdersData } from "@/services/commerce/commerce";
@@ -45,6 +46,8 @@ const SummaryTile = ({ icon, label, value, highlight }: SummaryTileProps) => (
 );
 
 export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Props) => {
+  const t = useTranslations("commerce.uploadPurchaseOrders");
+  const tCommon = useTranslations("common");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -53,7 +56,7 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
   const columns: ColumnsType<IUploadedPurchaseOrder> = useMemo(
     () => [
       {
-        title: "# Orden",
+        title: t("columns.order"),
         dataIndex: "orderId",
         key: "orderId",
         width: 110,
@@ -62,7 +65,7 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
         )
       },
       {
-        title: "Código Iscala",
+        title: t("columns.iscalaCode"),
         dataIndex: "codigoIscala",
         key: "codigoIscala",
         width: 150,
@@ -71,7 +74,7 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
         )
       },
       {
-        title: "Dirección",
+        title: t("columns.address"),
         dataIndex: "direccion",
         key: "direccion",
         render: (value: string) => (
@@ -82,13 +85,13 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
         )
       },
       {
-        title: "Ciudad",
+        title: t("columns.city"),
         dataIndex: "ciudad",
         key: "ciudad",
         width: 140
       },
       {
-        title: "Total",
+        title: tCommon("fields.total"),
         dataIndex: "total",
         key: "total",
         width: 160,
@@ -100,7 +103,7 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
         )
       }
     ],
-    []
+    [t, tCommon]
   );
 
   return (
@@ -111,7 +114,7 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
       footer={
         <Flex justify="flex-end" gap="0.5rem">
           <Button type="primary" onClick={onClose} className="uploadPurchaseOrdersSummaryModal__ok">
-            Aceptar
+            {tCommon("actions.accept")}
           </Button>
         </Flex>
       }
@@ -126,7 +129,7 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
             className="uploadPurchaseOrdersSummaryModal__titleIcon"
           />
           <Title level={4} style={{ margin: 0 }}>
-            Órdenes de compra procesadas
+            {t("summaryTitle")}
           </Title>
         </Flex>
       }
@@ -135,34 +138,34 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
         <Flex vertical gap="1.25rem">
           <div className="uploadPurchaseOrdersSummaryModal__successBanner">
             <CheckCircle size={20} weight="fill" />
-            <Text strong>OC procesadas correctamente</Text>
+            <Text strong>{t("successBanner")}</Text>
           </div>
 
           <div className="uploadPurchaseOrdersSummaryModal__tiles">
             <SummaryTile
               icon={<Package size={22} weight="duotone" />}
-              label="Paquete"
+              label={t("tiles.package")}
               value={`#${data.packageId}`}
             />
             <SummaryTile
               icon={<Receipt size={22} weight="duotone" />}
-              label="Borrador"
+              label={t("tiles.draft")}
               value={`#${data.draftId}`}
             />
             <SummaryTile
               icon={<ShoppingCartSimple size={22} weight="duotone" />}
-              label="Órdenes creadas"
+              label={t("tiles.ordersCreated")}
               value={data.summary.ordersCreated}
               highlight
             />
             <SummaryTile
               icon={<Storefront size={22} weight="duotone" />}
-              label="SKUs procesados"
+              label={t("tiles.skusProcessed")}
               value={data.summary.skusProcessed}
             />
             <SummaryTile
               icon={<Receipt size={22} weight="duotone" />}
-              label="Monto total"
+              label={t("tiles.totalAmount")}
               value={formatCurrencyMoney(data.summary.totalAmount)}
               highlight
             />
@@ -174,9 +177,9 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
               justify="space-between"
               className="uploadPurchaseOrdersSummaryModal__tableHeader"
             >
-              <Text strong>Detalle de órdenes ({orders.length})</Text>
+              <Text strong>{t("ordersDetail", { count: orders.length })}</Text>
               <Text type="secondary" className="uploadPurchaseOrdersSummaryModal__tableHint">
-                Mostrando {Math.min(pageSize, orders.length)} de {orders.length}
+                {t("showing", { shown: Math.min(pageSize, orders.length), total: orders.length })}
               </Text>
             </Flex>
             <Table<IUploadedPurchaseOrder>

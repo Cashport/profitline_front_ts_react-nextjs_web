@@ -4,6 +4,7 @@ const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 const ts = require("typescript");
+const useIntlEs = require("./helpers/use-intl-es.cjs");
 
 const root = path.resolve(__dirname, "..");
 const hookFile = "src/hooks/useConfirmBotExecution.tsx";
@@ -36,6 +37,7 @@ function renderConfirmation(onExecute) {
   }).outputText;
   const loadedModule = { exports: {} };
   const mocks = {
+    "use-intl": useIntlEs,
     react,
     "react/jsx-runtime": { jsx, jsxs: jsx },
     antd: { Modal: "Modal", Typography: { Paragraph: "Paragraph", Text: "Text" } },

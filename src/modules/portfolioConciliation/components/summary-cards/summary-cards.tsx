@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { useAppStore } from "@/lib/store/store";
 import { cn, formatNumber } from "@/utils/utils";
 import {
@@ -16,6 +18,7 @@ interface Props {
 
 /** Totales por status_cashport; cada tarjeta filtra la tabla. */
 const SummaryCards = ({ summary, selected, onSelect }: Props) => {
+  const t = useTranslations("reconciliation.summary");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const money = (amount: number) => formatMoney(amount, { hideDecimals: true });
 
@@ -28,12 +31,12 @@ const SummaryCards = ({ summary, selected, onSelect }: Props) => {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2">
       <button type="button" onClick={() => onSelect(null)} className={cardClass(!selected)}>
-        <span className="text-[13px] text-[#444]">Todos los documentos</span>
+        <span className="text-[13px] text-[#444]">{t("allDocuments")}</span>
         <span className="text-lg font-semibold tabular-nums">
           {formatNumber(summary.total.count)}
         </span>
         <span className="max-w-full truncate text-[13px] text-[#8a8a8a]">
-          Cliente {money(summary.total.client_amount)}
+          {t("customerAmount", { amount: money(summary.total.client_amount) })}
         </span>
       </button>
 
@@ -57,8 +60,14 @@ const SummaryCards = ({ summary, selected, onSelect }: Props) => {
             <span className="text-lg font-semibold tabular-nums">{formatNumber(totals.count)}</span>
             <span className="max-w-full truncate text-[13px] text-[#8a8a8a]">
               {status === "NO_EXISTE"
-                ? `Cliente ${money(totals.client_amount)} · ${meta.hint.toLowerCase()}`
-                : `Cliente ${money(totals.client_amount)} · Cashport ${money(totals.cashport_amount)}`}
+                ? t("missingFoot", {
+                    amount: money(totals.client_amount),
+                    hint: meta.hint.toLowerCase()
+                  })
+                : t("foot", {
+                    amount: money(totals.client_amount),
+                    cashport: money(totals.cashport_amount)
+                  })}
             </span>
           </button>
         );

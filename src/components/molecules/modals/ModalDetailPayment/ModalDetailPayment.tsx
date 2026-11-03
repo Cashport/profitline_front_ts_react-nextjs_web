@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { Button, Flex, Spin } from "antd";
+import { useTranslations } from "use-intl";
 import { CaretDoubleRight, DotsThree, Receipt } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -31,6 +32,7 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
   handleOpenPaymentDetail,
   mutatedPaymentDetail
 }) => {
+  const t = useTranslations("modals.detailPayment");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const [paymentData, setPaymentData] = useState<IPaymentDetail>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -78,7 +80,9 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
           <>
             <div className={styles.header}>
               <h4 className={styles.numberInvoice}>
-                ID pago {paymentData?.ID_ERP ? paymentData?.ID_ERP : paymentData?.id}
+                {t("paymentId", {
+                  id: String((paymentData?.ID_ERP ? paymentData?.ID_ERP : paymentData?.id) ?? "")
+                })}
               </h4>
               <Flex gap="1rem">
                 {paymentData?.evidence_url && (
@@ -90,7 +94,7 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
                     className={styles.viewInvoice}
                   >
                     <Receipt size={20} />
-                    Ver tirilla
+                    {t("viewReceipt")}
                   </Flex>
                 )}
 
@@ -102,7 +106,7 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
                     handleActionInDetail && handleActionInDetail(paymentData as ISingleBank)
                   }
                 >
-                  Generar acción
+                  {t("takeAction")}
                 </Button>
               </Flex>
             </div>
@@ -127,19 +131,19 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
       )}
 
       <div className={styles.footer}>
-        <h4 className={styles.resume}>Resumen</h4>
+        <h4 className={styles.resume}>{t("summary")}</h4>
         <div className={styles.bodyContent}>
           <div className={styles.initialValue}>
-            <p className={styles.value}>Valor inicial</p>
+            <p className={styles.value}>{t("initialValue")}</p>
             <p className={styles.result}>{formatMoney(paymentData?.initial_value)}</p>
           </div>
           <div className={styles.initialValue}>
-            <p className={styles.value}>Monto aplicado</p>
+            <p className={styles.value}>{t("appliedAmount")}</p>
             <p className={styles.result}>{formatMoney(paymentData?.ammount_applied)}</p>
           </div>
           <hr />
           <div className={styles.total}>
-            <p className={styles.value}>Disponible</p>
+            <p className={styles.value}>{t("available")}</p>
             <p className={styles.result}>{formatMoney(paymentData?.current_value)}</p>
           </div>
         </div>
@@ -147,7 +151,7 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
       <InvoiceDownloadModal
         isModalOpen={isModalFileDetailOpen}
         handleCloseModal={setIsModalFileDetailOpen}
-        title="Imagen"
+        title={t("image")}
         url={fileURL}
       />
     </aside>

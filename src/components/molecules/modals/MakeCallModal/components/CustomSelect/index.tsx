@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Select, SelectProps, Tag, Typography } from "antd";
 import { Flex } from "antd";
+import { useTranslations } from "use-intl";
 import styles from "./CustomSelect.module.scss"; // Archivo de estilos opcional
 import { UserPhoneOption } from "@/types/makeCall";
 import { PhoneCall, X } from "phosphor-react";
@@ -20,10 +21,12 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   value,
   onChange,
   options,
-  label = "Seleccionar",
+  label,
   selectProps = {},
   onClickIcon
 }) => {
+  const t = useTranslations("modals.makeCall");
+  const tCommon = useTranslations("common");
   const handleChange = (selectedPhone: string) => {
     const selectedOption = options.find((opt) => opt.phone === selectedPhone);
     if (selectedOption) {
@@ -35,7 +38,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
   return (
     <Flex gap={16} className={styles.customSelect}>
-      <span className={styles.label}>{label}</span>
+      <span className={styles.label}>{label ?? tCommon("actions.select")}</span>
       <Select
         value={value ? value.phone : undefined}
         onChange={handleChange}
@@ -68,7 +71,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 {selectedOption ? selectedOption.name : option.data.value}
               </Text>
               <Text style={{ fontSize: 13, color: "#14141452" }}>
-                {selectedOption ? selectedOption.companyPosition : "Correo personalizado"}
+                {selectedOption ? selectedOption.companyPosition : t("customContact")}
               </Text>
             </Flex>
           );

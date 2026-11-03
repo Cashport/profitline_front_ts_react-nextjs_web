@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button, Flex, Input, Switch, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 
@@ -20,6 +21,7 @@ import { ModalAddress } from "../ModalAddress/ModalAddress";
 import { ISelectType } from "@/types/clients/IClients";
 import { CaretRight } from "phosphor-react";
 import { ShipToContext } from "../ModalShipTo";
+import { billingDayLabel, billingOrderLabel } from "../../ModalBillingPeriod/ModalBillingPeriod";
 import { stringToBoolean } from "@/utils/utils";
 const { Text, Title } = Typography;
 interface Props {
@@ -49,6 +51,9 @@ export const ModalCreateShipTo = ({
   setIsBillingPeriodOpen,
   getClientValues
 }: Props) => {
+  const t = useTranslations("modals.shipTo");
+  const tBilling = useTranslations("modals.billingPeriod");
+  const tCommon = useTranslations("common");
   const [isModalAddressOpen, setIsModalAddressOpen] = useState(false);
   const {
     selectedShipToData,
@@ -130,25 +135,25 @@ export const ModalCreateShipTo = ({
       ) : (
         <form className="createShipToModal">
           <h5 className="modalTitle">
-            {isShipToModalOpen.accounting_code ? "Editar ShipTo" : "Crear nuevo Ship To"}
+            {isShipToModalOpen.accounting_code ? t("editTitle") : t("createTitle")}
           </h5>
           <div className="nonHereditaryInputs">
             <InputForm
               readOnly={!!isShipToModalOpen.accounting_code}
-              titleInput="Código Ship To"
+              titleInput={t("code")}
               control={control}
               nameInput="shipTo.code"
               error={errors.shipTo?.code}
               validationRules={{
                 pattern: {
                   value: /^[^\s]*$/,
-                  message: "El código no puede contener espacios en blanco"
+                  message: t("codeNoSpaces")
                 }
               }}
             />
             <Flex className="inputContainer" vertical>
               <Title className="inputContainer__title" level={5}>
-                Ubicacion
+                {t("location")}
               </Title>
               <Controller
                 control={control}
@@ -161,13 +166,13 @@ export const ModalCreateShipTo = ({
                       addonAfter={<CaretRight size={"16px"} />}
                       variant="borderless"
                       className="input -address"
-                      placeholder="Ingresar ubicacion"
+                      placeholder={t("locationPlaceholder")}
                       onClick={() => setIsModalAddressOpen(true)}
                       {...field}
                     />
                     {error && (
                       <Typography.Text className="textError">
-                        La dirección es obligatoria *
+                        {t("addressRequired")}
                       </Typography.Text>
                     )}
                   </>
@@ -182,7 +187,7 @@ export const ModalCreateShipTo = ({
               render={({ field }) => (
                 <>
                   <Switch {...field} checked={field.value} />
-                  <Text>Heredar parámetros del cliente</Text>
+                  <Text>{t("inherit")}</Text>
                 </>
               )}
             />
@@ -191,7 +196,7 @@ export const ModalCreateShipTo = ({
           <div className="hereditaryInputs">
             <div className="inputContainer">
               <Title className="inputContainer__title" level={5}>
-                Período de facturación
+                {tBilling("title")}
               </Title>
               <Controller
                 disabled={watchDependencyClient}
@@ -205,20 +210,23 @@ export const ModalCreateShipTo = ({
                       addonAfter={<CaretRight size={"16px"} />}
                       variant="borderless"
                       className={error ? "inputError" : "input"}
-                      placeholder="Segundo miércoles del mes"
+                      placeholder={t("billingPlaceholder")}
                       onClick={() => setIsBillingPeriodOpen(true)}
                       {...field}
                       value={
                         billingPeriod
                           ? stringToBoolean(billingPeriod.day_flag)
-                            ? `El dia ${billingPeriod.day} del mes`
-                            : `El ${billingPeriod?.order} ${billingPeriod?.day_of_week} del mes`
+                            ? tBilling("dayOfMonth", { day: billingPeriod.day ?? "" })
+                            : tBilling("weekdayOfMonth", {
+                                order: billingOrderLabel(tBilling, billingPeriod?.order),
+                                weekday: billingDayLabel(tBilling, billingPeriod?.day_of_week)
+                              })
                           : undefined
                       }
                     />
                     {error && (
                       <Typography.Text className="textError">
-                        El Periodo de facturacion es obligatorio *
+                        {t("billingRequired")}
                       </Typography.Text>
                     )}
                   </>
@@ -228,7 +236,7 @@ export const ModalCreateShipTo = ({
 
             <div className="inputContainer">
               <Title className="inputContainer__title" level={5}>
-                Tipo de radicación
+                {t("submissionType")}
               </Title>
               <Controller
                 disabled={watchDependencyClient}
@@ -245,7 +253,7 @@ export const ModalCreateShipTo = ({
             </div>
             <div className="inputContainer">
               <Title className="inputContainer__title" level={5}>
-                Condición de pago
+                {t("paymentTerms")}
               </Title>
               <Controller
                 disabled={watchDependencyClient}
@@ -269,14 +277,14 @@ export const ModalCreateShipTo = ({
               className="cancelButton"
               onClick={() => setIsShipToModalOpen({ open: false, accounting_code: undefined })}
             >
-              Cancelar
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               disabled={!isValid}
               onClick={handleSubmit(onSubmitHandler)}
               className="acceptButton"
             >
-              Siguiente
+              {tCommon("actions.next")}
             </Button>
           </div>
         </form>

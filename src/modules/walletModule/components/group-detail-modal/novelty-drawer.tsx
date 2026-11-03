@@ -2,6 +2,7 @@
 
 import { Drawer } from "antd";
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 
@@ -9,15 +10,11 @@ import { useWalletTheme } from "../../contexts/wallet-theme-context";
 export type NoveltyModalMode = "crear" | "editar" | "vincular";
 
 export const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h4 className="mb-[11px] text-[13px] font-semibold text-muted-foreground">
-    {children}
-  </h4>
+  <h4 className="mb-[11px] text-[13px] font-semibold text-muted-foreground">{children}</h4>
 );
 
 export const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="mb-1 block text-[13px] font-semibold text-muted-foreground">
-    {children}
-  </label>
+  <label className="mb-1 block text-[13px] font-semibold text-muted-foreground">{children}</label>
 );
 
 interface NoveltyPanelProps {
@@ -49,6 +46,7 @@ export function NoveltyPanel({
   submitDisabled = false,
   children
 }: NoveltyPanelProps) {
+  const tCommon = useTranslations("common");
   return (
     <div className="wallet-scope flex h-full flex-col bg-card text-foreground">
       <header className="flex flex-none items-start gap-4 border-b border-border px-[22px] pb-4 pt-[18px]">
@@ -60,7 +58,7 @@ export function NoveltyPanel({
         </div>
         <button
           type="button"
-          aria-label="Cerrar"
+          aria-label={tCommon("actions.close")}
           disabled={isSending}
           onClick={onClose}
           className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[7px] border border-border bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-45"
@@ -80,7 +78,7 @@ export function NoveltyPanel({
           onClick={onClose}
           className="rounded-md border border-border bg-card px-3 py-1.5 text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45"
         >
-          Cancelar
+          {tCommon("actions.cancel")}
         </button>
         <button
           type="button"

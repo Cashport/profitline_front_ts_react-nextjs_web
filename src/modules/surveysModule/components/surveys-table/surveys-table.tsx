@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Pencil } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import { fmtReportDate } from "@/modules/reportsModule/utils/reports-format";
@@ -25,16 +26,18 @@ const ICON_LINK_CLASS =
 
 /** Listado en escritorio: una fila por encuesta. Las columnas secundarias se ocultan en pantallas medianas. */
 export default function SurveysTable({ forms, sort, onSort, onOpen }: SurveysTableProps) {
+  const t = useTranslations("surveys.table");
+  const tCommon = useTranslations("common");
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-[13px]">
         <thead>
           <tr>
-            <SortableTh col="name" label="Encuesta" sort={sort} onSort={onSort} />
-            <SortableTh col="status" label="Estado" sort={sort} onSort={onSort} />
+            <SortableTh col="name" label={t("name")} sort={sort} onSort={onSort} />
+            <SortableTh col="status" label={tCommon("fields.status")} sort={sort} onSort={onSort} />
             <SortableTh
               col="question_count"
-              label="Preguntas"
+              label={t("questions")}
               align="right"
               sort={sort}
               onSort={onSort}
@@ -42,28 +45,28 @@ export default function SurveysTable({ forms, sort, onSort, onOpen }: SurveysTab
             />
             <SortableTh
               col="response_count"
-              label="Respuestas"
+              label={t("responses")}
               align="right"
               sort={sort}
               onSort={onSort}
             />
             <SortableTh
               col="last_response_at"
-              label="Última respuesta"
+              label={t("lastResponse")}
               sort={sort}
               onSort={onSort}
               className="hidden xl:table-cell"
             />
             <SortableTh
               col="created_by_name"
-              label="Creada por"
+              label={t("createdBy")}
               sort={sort}
               onSort={onSort}
               className="hidden xl:table-cell"
             />
             <SortableTh
               col="updated_at"
-              label="Actualizada"
+              label={t("updatedAt")}
               sort={sort}
               onSort={onSort}
               className="hidden lg:table-cell"
@@ -72,7 +75,7 @@ export default function SurveysTable({ forms, sort, onSort, onOpen }: SurveysTab
               scope="col"
               className="border-b border-cp-line bg-cp-surface px-3 py-3 text-right text-[13.5px] font-semibold text-cp-ink"
             >
-              Acciones
+              {tCommon("fields.actions")}
             </th>
           </tr>
         </thead>
@@ -107,11 +110,11 @@ export default function SurveysTable({ forms, sort, onSort, onOpen }: SurveysTab
               </td>
               <td className="px-3 py-1.5">
                 <div className="flex items-center justify-end gap-1.5">
-                  <GenericEyeButton href={`/surveys/${f.id}`} title="Ver encuesta" />
+                  <GenericEyeButton href={`/surveys/${f.id}`} title={t("viewSurvey")} />
                   <Link
                     href={`/surveys/${f.id}?edit=1`}
-                    title="Editar"
-                    aria-label="Editar"
+                    title={tCommon("actions.edit")}
+                    aria-label={tCommon("actions.edit")}
                     onClick={(e) => e.stopPropagation()}
                     className={ICON_LINK_CLASS}
                   >
@@ -122,7 +125,7 @@ export default function SurveysTable({ forms, sort, onSort, onOpen }: SurveysTab
                     onClick={(e) => e.stopPropagation()}
                     className="flex h-8 items-center whitespace-nowrap rounded-md border border-border px-2.5 text-[13px] font-semibold text-foreground transition-colors hover:border-[#9bb514] hover:text-foreground"
                   >
-                    Ver respuestas
+                    {t("viewResponses")}
                   </Link>
                 </div>
               </td>

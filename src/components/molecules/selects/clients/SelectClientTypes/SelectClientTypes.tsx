@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 
 import {
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export const SelectClientTypes = ({ errors, field }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, loading } = useClientTypes();
   const options = data?.map((option) => {
     return {
@@ -33,7 +35,7 @@ export const SelectClientTypes = ({ errors, field }: Props) => {
   return (
     <>
       <Select
-        placeholder="Seleccione Tipo de Cliente"
+        placeholder={t("selectCustomerType")}
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={loading}
         variant="borderless"
@@ -45,7 +47,7 @@ export const SelectClientTypes = ({ errors, field }: Props) => {
       />
 
       {errors && (
-        <Typography.Text className="textError">El tipo de cliente es obligatorio *</Typography.Text>
+        <Typography.Text className="textError">{t("customerTypeRequired")}</Typography.Text>
       )}
     </>
   );

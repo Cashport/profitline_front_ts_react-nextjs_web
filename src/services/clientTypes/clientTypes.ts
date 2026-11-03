@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 import { API } from "@/utils/api/api";
 
@@ -17,12 +18,12 @@ export const addClientType = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `Tipo de  fue cliente creado exitosamente.`
+        content: getTranslator("shared")("services.customerTypeCreated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
     return response;
@@ -38,12 +39,12 @@ export const removeClientType = async (id: number, messageApi: MessageInstance) 
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: "Tipo de cliente eliminado exitosamente."
+        content: getTranslator("shared")("services.customerTypeDeleted")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error eliminando tipo de cliente."
+        content: getTranslator("shared")("services.deleteCustomerTypeError")
       });
     }
     return response;
@@ -58,12 +59,12 @@ export const addDocumentsClientType = async (formData: FormData, messageApi: Mes
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: "Tipo de Documento creado exitosamente."
+        content: getTranslator("shared")("services.documentTypeCreated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error creando tipo de documento."
+        content: getTranslator("shared")("services.createDocumentTypeError")
       });
     }
     return response;
@@ -79,12 +80,12 @@ export const removeDocumentsClientType = async (id: number, messageApi?: Message
     if (response.status === SUCCESS) {
       messageApi?.open({
         type: "success",
-        content: "Tipo de Documento eliminado exitosamente."
+        content: getTranslator("shared")("services.documentTypeDeleted")
       });
     } else {
       messageApi?.open({
         type: "error",
-        content: "Oops ocurrio un error eliminando tipo de documento."
+        content: getTranslator("shared")("services.deleteDocumentTypeError")
       });
     }
     return response;

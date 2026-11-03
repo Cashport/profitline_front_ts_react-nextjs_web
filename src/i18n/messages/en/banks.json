@@ -1,0 +1,211 @@
+{
+  "view": {
+    "title": "Banks",
+    "tabs": {
+      "activePayments": "Active payments",
+      "otherPayments": "Other payments",
+      "paymentApplications": "Payment applications",
+      "informalPaymentApplications": "Informal payment applications",
+      "settlements": "Settlements"
+    }
+  },
+  "shared": {
+    "searchPlaceholder": "Search reference, amount…",
+    "generateAction": "Take action",
+    "selectAtLeastOnePayment": "Select at least one payment",
+    "sameCustomerOnly": "For this action, you can only select payments from the same customer",
+    "approveConfirmTitle": "Are you sure you want to approve the assignment?",
+    "approveSuccess": "Assignment approved",
+    "approveError": "Couldn't approve the assignment",
+    "fileTooLarge": "The file is too large. Upload a file smaller than {maxMb} MB.",
+    "evidence": "Evidence",
+    "optional": "*Optional",
+    "required": "*Required",
+    "commentPlaceholder": "Enter a comment (optional)"
+  },
+  "activePayments": {
+    "bankRules": "Bank rules",
+    "markUnidentifiedSuccess": "Payment(s) marked as unidentified",
+    "markUnidentifiedError": "Couldn't mark the selected payments as unidentified",
+    "markUnidentifiedConfirm": "Mark the selected payments as unidentified?",
+    "singlePaymentOnly": "You can only select one payment for this action",
+    "cannotAssignApplied": "You can't assign a customer to payments with the Payment applied status",
+    "periodOnlyIdentifiedOrApplied": "You can only change the accounting period of identified or applied payments"
+  },
+  "table": {
+    "erpId": "ERP ID",
+    "account": "Account",
+    "image": "Image"
+  },
+  "applicationsTable": {
+    "columns": {
+      "applicationId": "Application ID",
+      "cashportPaymentId": "Cashport payment ID",
+      "erpPaymentId": "ERP payment ID",
+      "collected": "Collected"
+    },
+    "noFile": "No file available to download",
+    "uploading": "Uploading file...",
+    "uploadSuccess": "File uploaded",
+    "uploadError": "Couldn't upload the file",
+    "regenerating": "Regenerating file...",
+    "regenerateError": "Couldn't regenerate the file",
+    "reverseSuccess": "Application reversed",
+    "reverseError": "Couldn't reverse it. Try again.",
+    "settling": "Settling...",
+    "settleSuccess": "Status updated to Applied",
+    "settleError": "Couldn't settle it",
+    "template": "Template",
+    "regenerateExcel": "Regenerate Excel",
+    "regeneratePdf": "Regenerate PDF",
+    "uploadTemplate": "Upload template",
+    "reverse": "Reverse application",
+    "settle": "Settle",
+    "downloadFinalFile": "Download final file",
+    "reverseModal": {
+      "title": "Reverse payment application",
+      "confirm": "Confirm reversal",
+      "question": "Are you sure you want to reverse this payment application?",
+      "applicationId": "Application ID:",
+      "customer": "Customer:",
+      "collected": "Collected:",
+      "cashportPaymentId": "Cashport payment ID:",
+      "warning": "This action can't be undone. The linked invoices will become available again and the payments will be unapplied."
+    }
+  },
+  "actionsModal": {
+    "selectAction": "Select the action you want to take",
+    "editCustomer": "Edit customer",
+    "assignCustomer": "Assign customer",
+    "approveAssignment": "Approve assignment",
+    "splitPayment": "Split payment",
+    "uploadSlip": "Upload deposit slip",
+    "changeStatus": "Change status",
+    "changeErpId": "Change ERP ID",
+    "changePeriod": "Change accounting period",
+    "markUnidentified": "Mark as unidentified"
+  },
+  "paymentApplicationsActions": {
+    "selectAtLeastOne": "Select at least one payment application",
+    "noPayments": "The selected applications have no linked payments",
+    "downloading": "Downloading flat file...",
+    "downloadSuccess": "Flat file downloaded",
+    "downloadError": "Couldn't download the flat file",
+    "downloadLayout": "Download layout"
+  },
+  "walletActions": {
+    "selectExactlyOne": "Select exactly one payment",
+    "mustBeIdentified": "All selected payments must have the Identified status",
+    "mustBeUploadedToErp": "The selected payment must have the Uploaded to ERP status",
+    "erpUploadSuccess": "ERP upload confirmed",
+    "erpUploadError": "Couldn't confirm the ERP upload",
+    "confirmErpUpload": "Confirm ERP upload",
+    "confirmCompensation": "Confirm clearing",
+    "erpUploadConfirmTitle": "Do you want to confirm the ERP upload?",
+    "dontConfirm": "Don't confirm"
+  },
+  "changeErpId": {
+    "title": "Change ERP ID",
+    "erpId": "ERP ID",
+    "erpIdPlaceholder": "Enter ERP ID",
+    "commentPlaceholder": "Enter a comment (optional)",
+    "maxLength": "Maximum {max} characters",
+    "updated": "ERP ID updated",
+    "deleted": "ERP ID removed",
+    "error": "Couldn't change the ERP ID"
+  },
+  "changePeriod": {
+    "title": "Change accounting period",
+    "confirm": "Change period",
+    "description": "The accounting period of {count, plural, one {# payment} other {# payments}} will be updated. The deposit date and payment status won't change.",
+    "periodLabel": "Accounting period (YYYY-MM)",
+    "required": "Period is required",
+    "invalidFormat": "Invalid format. Use YYYY-MM (e.g. 2026-08)",
+    "success": "Accounting period updated",
+    "error": "Couldn't change the accounting period"
+  },
+  "confirmCompensation": {
+    "title": "Confirm clearing",
+    "paymentId": "Payment ID",
+    "compensationId": "Clearing ID",
+    "dontConfirm": "Don't confirm",
+    "success": "Clearing confirmed",
+    "error": "Couldn't confirm the clearing"
+  },
+  "assignCustomer": {
+    "title": "Assign customer",
+    "subtitle": "Select the customer to assign to the payment",
+    "searchCustomer": "Search customer",
+    "success": "Customer assigned",
+    "error": "Couldn't assign the customer"
+  },
+  "editCustomer": {
+    "title": "Edit customer",
+    "subtitle": "Enter the customer name to make the change",
+    "changeTo": "Change to",
+    "customerPlaceholder": "Enter customer",
+    "success": "Customer updated",
+    "error": "Couldn't update the customer"
+  },
+  "uploadSlip": {
+    "title": "Upload deposit slip",
+    "subtitle": "Upload the corresponding file",
+    "slip": "Deposit slip",
+    "success": "Deposit slip sent",
+    "error": "Couldn't send the deposit slip"
+  },
+  "changeStatus": {
+    "title": "Status change",
+    "selectStatus": "Select the new payment status",
+    "changeStatus": "Change status",
+    "evidenceDescription": "Attach the evidence and enter a comment",
+    "attachEvidence": "Attach evidence",
+    "changeWithoutEvidence": "Change without evidence",
+    "success": "Status changed",
+    "error": "Couldn't change the payment status",
+    "uploadAnother": "Upload another document"
+  },
+  "splitPayment": {
+    "title": "Split payment",
+    "payment": "Payment {id}",
+    "paymentPart": "Payment {id} - {index}",
+    "customerRequired": "Customer is required",
+    "customerPlaceholder": "Enter customer",
+    "valueRequired": "Amount is required",
+    "valueMin": "The amount must be greater than 0",
+    "evidenceRequired": "Evidence is required",
+    "addPayment": "Add payment",
+    "success": "Payment split",
+    "error": "Couldn't split the payment"
+  },
+  "rules": {
+    "title": "Bank rules",
+    "createRule": "Create new rule",
+    "deleteSuccess": "{count, plural, one {# rule deleted} other {# rules deleted}}",
+    "deleteError": "Couldn't delete the rules",
+    "createSuccess": "Rule created",
+    "createError": "Couldn't create the rule",
+    "columns": {
+      "customerName": "Customer name",
+      "match": "Match"
+    },
+    "matchExact": "Exact match",
+    "matchContains": "Contains",
+    "modal": {
+      "newTitle": "New rule",
+      "editTitle": "Edit rule",
+      "description": "Enter the description and customer name",
+      "customerPlaceholder": "Enter name",
+      "matchPlaceholder": "Select match type"
+    }
+  },
+  "filters": {
+    "dates": "Dates",
+    "active": "Active",
+    "periodValue": "Period: {period}",
+    "selectPeriod": "Select a period",
+    "selectDates": "Select dates",
+    "from": "From",
+    "to": "To"
+  }
+}

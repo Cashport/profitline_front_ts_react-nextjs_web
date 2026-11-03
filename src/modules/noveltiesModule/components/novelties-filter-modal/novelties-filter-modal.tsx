@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -51,6 +52,7 @@ export default function NoveltiesFilterModal({
   onChange,
   inHeader
 }: NoveltiesFilterModalProps) {
+  const t = useTranslations("novelties.filters");
   const { statuses, isLoading: isLoadingStatuses } = useNoveltyStatuses();
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
@@ -105,47 +107,53 @@ export default function NoveltiesFilterModal({
   const categories: FilterCategoryConfig[] = [
     {
       key: "estado",
-      label: "Estado",
+      label: t("status"),
       selectMode: "single",
       options: estadoOptions,
       status: isLoadingStatuses ? "loading" : undefined
     },
     {
       key: "motivo",
-      label: "Tipo de novedad",
+      label: t("type"),
       selectMode: "single",
       options: motivoOptions,
       status: filtersStatus
     },
     {
       key: "coordinador",
-      label: "Coordinador",
+      label: t("coordinator"),
       selectMode: "single",
       options: coordinadorOptions,
       status: filtersStatus
     },
-    { key: "kam", label: "KAM", selectMode: "single", options: kamOptions, status: filtersStatus },
+    {
+      key: "kam",
+      label: t("kam"),
+      selectMode: "single",
+      options: kamOptions,
+      status: filtersStatus
+    },
     {
       key: "mercado",
-      label: "Mercado",
+      label: t("market"),
       selectMode: "single",
       options: mercadoOptions,
       status: filtersStatus
     },
     {
       key: "ejecutivo",
-      label: "Ejecutivo",
+      label: t("collector"),
       selectMode: "single",
       options: ejecutivoOptions,
       status: filtersStatus
     },
     {
       key: "fechas",
-      label: "Fechas",
+      label: t("dates"),
       kind: "custom",
       metaLabel: hasDraftDate
-        ? `Periodo: ${formatDateTagValue(dateDraft)}`
-        : "Selecciona un periodo",
+        ? t("period", { range: formatDateTagValue(dateDraft) })
+        : t("selectPeriod"),
       draftCount: hasDraftDate ? 1 : 0,
       renderPanel: () => <FilterDateTab value={dateDraft} onChange={setDateDraft} />,
       // Debe ser null (no un elemento vacío) para que el contador de filtros
@@ -154,7 +162,7 @@ export default function NoveltiesFilterModal({
         hasCommittedDate ? (
           <DateFilterTag
             value={committedDate}
-            label="Fechas"
+            label={t("dates")}
             onClear={() => onChange({ ...value, date_from: null, date_to: null })}
           />
         ) : null

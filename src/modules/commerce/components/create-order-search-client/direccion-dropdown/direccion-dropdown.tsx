@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useState } from "react";
 import { ChevronDown, MapPin, Plus, Check } from "lucide-react";
 
@@ -20,6 +21,7 @@ function DireccionDropdown({
   onCreateNew,
   disabled = false
 }: IDireccionDropdownProps) {
+  const t = useTranslations("commerce.searchClient");
   const [open, setOpen] = useState(false);
 
   // Collapse the menu if it was open before becoming disabled (e.g. canal cleared).
@@ -41,7 +43,7 @@ function DireccionDropdown({
               <span className="text-[#999999]"> — {selected.city}</span>
             </span>
           ) : (
-            <span className="text-[#999999]">Seleccione una dirección</span>
+            <span className="text-[#999999]">{t("selectAddress")}</span>
           )}
         </div>
         <ChevronDown
@@ -57,7 +59,7 @@ function DireccionDropdown({
             <ul className="py-1 max-h-56 overflow-y-auto">
               {addresses.length === 0 ? (
                 <li className="px-4 py-3 text-sm text-[#999999] text-center">
-                  Sin direcciones guardadas
+                  {t("noSavedAddresses")}
                 </li>
               ) : (
                 addresses.map((d) => {
@@ -108,7 +110,7 @@ function DireccionDropdown({
               className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium text-[#141414] hover:bg-[#F7F7F7] transition-colors"
             >
               <Plus size={14} />
-              Nueva dirección
+              {t("newAddress")}
             </button>
           </div>
         </>

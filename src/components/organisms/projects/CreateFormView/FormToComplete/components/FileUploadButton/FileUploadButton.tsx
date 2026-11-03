@@ -2,6 +2,7 @@ import React from "react";
 import { Controller, Control } from "react-hook-form";
 import { Typography, Upload } from "antd";
 import { ArrowLineUp } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -15,9 +16,10 @@ interface FileUploadButtonProps {
 const FileUploadButton: React.FC<FileUploadButtonProps> = ({
   name,
   control,
-  placeholder = "Cargar archivo",
+  placeholder,
   required = false
 }) => {
+  const tCommon = useTranslations("common");
   return (
     <Controller
       name={name}
@@ -52,12 +54,14 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({
               }}
             >
               <ArrowLineUp color="#DDDDDD" size={16} />
-              <Text style={{ color: "#DDDDDD" }}>{field.value?.name || placeholder}</Text>
+              <Text style={{ color: "#DDDDDD" }}>
+                {field.value?.name || placeholder || tCommon("actions.uploadFile")}
+              </Text>
             </div>
           </Upload>
           {fieldState.error && (
             <Text type="danger" style={{ marginTop: 4, display: "block" }}>
-              {"Este campo es obligatorio"}
+              {tCommon("validation.required")}
             </Text>
           )}
         </div>

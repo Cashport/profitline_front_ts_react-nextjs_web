@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, message } from "antd";
+import { useTranslations } from "use-intl";
 import { Paperclip, Plus, X, Upload } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
 
@@ -43,6 +44,8 @@ export function ModalUploadInvoicesPurchaseOrders({
   packages = [],
   onSuccess
 }: ModalUploadInvoicesPurchaseOrdersProps) {
+  const t = useTranslations("purchaseOrders.uploadInvoicesModal");
+  const tCommon = useTranslations("common");
   const [facturaInputs, setFacturaInputs] = useState<Record<number, FacturaRow[]>>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,7 +70,7 @@ export function ModalUploadInvoicesPurchaseOrders({
 
     const incomplete = allRows.some((r) => !r.numero.trim() || !r.archivo);
     if (incomplete) {
-      message.warning("Cada factura debe tener un número y un archivo adjunto");
+      message.warning(t("incomplete"));
       return;
     }
 
@@ -97,11 +100,11 @@ export function ModalUploadInvoicesPurchaseOrders({
         modelData
       );
 
-      message.success("Facturas cargadas correctamente");
+      message.success(t("success"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error al cargar las facturas";
+      const errorMessage = error instanceof Error ? error.message : t("error");
       message.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -112,11 +115,11 @@ export function ModalUploadInvoicesPurchaseOrders({
     <Modal
       open={isOpen}
       onCancel={onClose}
-      title={<span className="text-base font-semibold text-cashport-black">Subir facturas</span>}
+      title={<span className="text-base font-semibold text-cashport-black">{t("title")}</span>}
       footer={
         <div className="flex justify-end gap-2">
           <Button onClick={onClose} style={{ boxShadow: "none" }}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="primary"
@@ -130,7 +133,7 @@ export function ModalUploadInvoicesPurchaseOrders({
             }}
             icon={<Upload className="h-3.5 w-3.5" />}
           >
-            Cargar facturas
+            {t("submit")}
           </Button>
         </div>
       }
@@ -138,20 +141,30 @@ export function ModalUploadInvoicesPurchaseOrders({
       width={1200}
     >
       {Object.keys(facturaInputs).length === 0 ? (
-        <p className="text-sm text-gray-500 py-4 text-center">
-          Selecciona al menos una OC del listado para subir facturas.
-        </p>
+        <p className="text-sm text-gray-500 py-4 text-center">{t("selectAtLeastOne")}</p>
       ) : (
         <div className="overflow-auto max-h-[calc(65*var(--vh))]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-cp-line bg-cp-surface">
-                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-44">OC</th>
-                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">Cliente</th>
-                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-36">Estado</th>
-                <th className="text-right px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-36">Monto</th>
-                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">No. Factura</th>
-                <th className="px-3 py-3 w-12 text-center text-[13.5px] font-semibold text-cp-ink">PDF</th>
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-44">
+                  {t("columns.po")}
+                </th>
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
+                  {tCommon("fields.customer")}
+                </th>
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-36">
+                  {tCommon("fields.status")}
+                </th>
+                <th className="text-right px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-36">
+                  {tCommon("fields.amount")}
+                </th>
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
+                  {t("columns.invoiceNumber")}
+                </th>
+                <th className="px-3 py-3 w-12 text-center text-[13.5px] font-semibold text-cp-ink">
+                  PDF
+                </th>
                 <th className="px-3 py-3 w-10"></th>
               </tr>
             </thead>
@@ -220,7 +233,7 @@ export function ModalUploadInvoicesPurchaseOrders({
                     {/* No. Factura input */}
                     <td className="px-4 py-2.5 align-middle">
                       <Input
-                        placeholder="Ej: FAC-2024-001"
+                        placeholder={t("invoiceNumberPlaceholder")}
                         value={row.numero}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -256,7 +269,7 @@ export function ModalUploadInvoicesPurchaseOrders({
                               ? "border-green-400 bg-green-50 text-green-600"
                               : "border-gray-300 bg-white text-gray-400 hover:bg-gray-50"
                           }`}
-                          title={row.archivo?.name ?? "Adjuntar PDF"}
+                          title={row.archivo?.name ?? t("attachPdf")}
                         >
                           <Paperclip className="h-4 w-4" />
                         </div>
@@ -269,7 +282,7 @@ export function ModalUploadInvoicesPurchaseOrders({
                         <Button
                           size="small"
                           icon={<Plus className="h-3.5 w-3.5" />}
-                          title="Agregar factura"
+                          title={t("addInvoice")}
                           onClick={() =>
                             setFacturaInputs((prev) => ({
                               ...prev,
@@ -282,7 +295,7 @@ export function ModalUploadInvoicesPurchaseOrders({
                           size="small"
                           danger
                           icon={<X className="h-3.5 w-3.5" />}
-                          title="Quitar factura"
+                          title={t("removeInvoice")}
                           onClick={() =>
                             setFacturaInputs((prev) => {
                               const updated = [...(prev[order.id] ?? [])];

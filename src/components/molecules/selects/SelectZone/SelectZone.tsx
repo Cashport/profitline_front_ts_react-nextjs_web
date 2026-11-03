@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Dispatch, SetStateAction } from "react";
 import { Checkbox, Flex, Spin, Typography } from "antd";
 import useSWR from "swr";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const SelectZone = ({ zones, setZones, disabled }: Props) => {
+  const t = useTranslations("shared.selects");
   const { ID } = useAppStore((state) => state.selectedProject);
   const { data, isLoading } = useSWR<IZones>(`/zone/project/${ID}`, fetcher, {});
 
@@ -28,7 +30,7 @@ export const SelectZone = ({ zones, setZones, disabled }: Props) => {
 
   return (
     <div className="selectzone">
-      <Typography.Text className="title">Zonas</Typography.Text>
+      <Typography.Text className="title">{t("zones")}</Typography.Text>
       <Flex vertical className="zones">
         {isLoading ? (
           <Spin />

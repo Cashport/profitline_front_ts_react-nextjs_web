@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Flex, Input, Modal, Typography } from "antd";
 import { FileText, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -22,6 +23,7 @@ interface ModalUploadInvoiceProps {
 const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
 function FileChip({ file, label, onRemove }: { file: File; label: string; onRemove: () => void }) {
+  const t = useTranslations("medicalAccounts");
   return (
     <div className="flex items-center gap-3 rounded-xl border-2 border-emerald-200 bg-emerald-50/40 p-3">
       <FileText size={24} className="shrink-0 text-red-400" />
@@ -35,7 +37,7 @@ function FileChip({ file, label, onRemove }: { file: File; label: string; onRemo
         type="button"
         onClick={onRemove}
         className="shrink-0 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-        aria-label="Quitar archivo"
+        aria-label={t("upload.removeFile")}
       >
         <X size={18} />
       </button>
@@ -49,6 +51,7 @@ export function ModalUploadInvoice({
   onClose,
   onSuccess
 }: ModalUploadInvoiceProps) {
+  const t = useTranslations("medicalAccounts");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [zipFile, setZipFile] = useState<File | null>(null);
@@ -58,7 +61,7 @@ export function ModalUploadInvoice({
   const handlePdfUpload = (file: File) => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      showMessage("error", "Solo se permiten archivos PDF.");
+      showMessage("error", t("upload.onlyPdf"));
       return;
     }
     setPdfFile(file);
@@ -70,7 +73,7 @@ export function ModalUploadInvoice({
       file.type === "application/x-zip-compressed" ||
       file.name.toLowerCase().endsWith(".zip");
     if (!isZip) {
-      showMessage("error", "Solo se permiten archivos ZIP.");
+      showMessage("error", t("upload.onlyZip"));
       return;
     }
     setZipFile(file);
@@ -87,14 +90,11 @@ export function ModalUploadInvoice({
         pdfFile,
         zipFile
       );
-      showMessage("success", "Factura cargada correctamente.");
+      showMessage("success", t("invoiceModal.success"));
       onSuccess(response.data);
       onClose();
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al cargar la factura."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("invoiceModal.error"));
     } finally {
       setIsLoading(false);
     }
@@ -115,10 +115,10 @@ export function ModalUploadInvoice({
       open={isOpen}
       width={560}
       onCancel={handleClose}
-      title={<Title level={4}>Facturar</Title>}
+      title={<Title level={4}>{t("invoiceModal.title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Facturar"
+          titleConfirm={t("invoiceModal.confirm")}
           showLeftButton={false}
           isConfirmDisabled={!invoiceNumber.trim() || !pdfFile}
           isConfirmLoading={isLoading}
@@ -129,16 +129,14 @@ export function ModalUploadInvoice({
       destroyOnClose
     >
       <Flex vertical gap="1.25rem">
-        <p className="-mt-2 text-sm text-gray-500">
-          Ingresa el número de factura y adjunta el PDF. El ZIP es opcional.
-        </p>
+        <p className="-mt-2 text-sm text-gray-500">{t("invoiceModal.description")}</p>
 
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            Número de factura <span className="text-red-500">*</span>
+            {t("invoiceModal.invoiceNumber")} <span className="text-red-500">*</span>
           </p>
           <Input
-            placeholder="Ej: FAC-001"
+            placeholder={t("invoiceModal.invoiceNumberPlaceholder")}
             value={invoiceNumber}
             onChange={(e) => setInvoiceNumber(e.target.value)}
           />
@@ -146,7 +144,7 @@ export function ModalUploadInvoice({
 
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            PDF de la factura <span className="text-red-500">*</span>
+            {t("invoiceModal.invoicePdf")} <span className="text-red-500">*</span>
           </p>
           {pdfFile ? (
             <FileChip file={pdfFile} label="PDF" onRemove={() => setPdfFile(null)} />
@@ -154,16 +152,18 @@ export function ModalUploadInvoice({
             <UploadDropZone
               onFileUpload={handlePdfUpload}
               allowedExtensions={[".pdf"]}
-              title="Arrastra el PDF aquí"
-              subtitle="o haz clic para seleccionarlo"
+              title={t("upload.dropTitle")}
+              subtitle={t("upload.dropSubtitle")}
             />
           )}
         </div>
 
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            ZIP de la factura{" "}
-            <span className="font-normal normal-case text-gray-400">(opcional)</span>
+            {t("invoiceModal.invoiceZip")}{" "}
+            <span className="font-normal normal-case text-gray-400">
+              {t("invoiceModal.optional")}
+            </span>
           </p>
           {zipFile ? (
             <FileChip file={zipFile} label="ZIP" onRemove={() => setZipFile(null)} />
@@ -171,8 +171,8 @@ export function ModalUploadInvoice({
             <UploadDropZone
               onFileUpload={handleZipUpload}
               allowedExtensions={[".zip"]}
-              title="Arrastra el ZIP aquí"
-              subtitle="o haz clic para seleccionarlo"
+              title={t("upload.dropZipTitle")}
+              subtitle={t("upload.dropSubtitle")}
             />
           )}
         </div>

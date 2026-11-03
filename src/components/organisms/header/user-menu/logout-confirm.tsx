@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import { logOut } from "../../../../../firebase-utils";
 
@@ -29,6 +30,8 @@ export const LogoutIcon = ({ size = 17, stroke = "currentColor" }) => (
  */
 export function useLogoutConfirm() {
   const router = useRouter();
+  const t = useTranslations("shell.logout");
+  const tCommon = useTranslations("common.actions");
   const [open, setOpen] = useState(false);
 
   // Esc cancela, como en los demás modales.
@@ -58,10 +61,10 @@ export function useLogoutConfirm() {
               </span>
               <div className="flex flex-col gap-1.5">
                 <span id="logout-confirm-title" className="text-[17px] font-semibold">
-                  ¿Cerrar sesión?
+                  {t("title")}
                 </span>
                 <span className="text-[13px] leading-normal text-cp-ink-2">
-                  Saldrás de Cashport en este equipo. Tus filtros y preferencias quedan guardados.
+                  {t("description")}
                 </span>
               </div>
               <div className="flex justify-end gap-2">
@@ -71,14 +74,14 @@ export function useLogoutConfirm() {
                   onClick={() => setOpen(false)}
                   className="h-10 cursor-pointer rounded-[10px] border-0 bg-transparent px-4 text-[13.5px] font-semibold text-cp-ink hover:bg-cp-bg"
                 >
-                  Cancelar
+                  {tCommon("cancel")}
                 </button>
                 <button
                   type="button"
                   onClick={() => logOut(router)}
                   className="h-10 cursor-pointer rounded-[10px] border-0 bg-[#e0007a] px-[18px] text-[13.5px] font-semibold text-white hover:bg-[#c4006b]"
                 >
-                  Cerrar sesión
+                  {t("confirm")}
                 </button>
               </div>
             </div>

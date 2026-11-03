@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Flex, Typography } from "antd";
 import { Pencil } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { SelectHoldingBR } from "@/components/molecules/selects/SelectHoldingBR/SelectHoldingBR";
 import { SelectStructureBR } from "@/components/molecules/selects/SelectStructureBR/SelectStructureBR";
@@ -10,12 +11,13 @@ import { DocumentClientBR } from "@/components/atoms/DocumentClientBR/DocumentCl
 const { Title } = Typography;
 
 export const BusinessRulesView = () => {
+  const t = useTranslations("projects.businessRules");
   const [isDisabledRules, setIsDisabledRules] = useState(true);
 
   return (
     <Flex vertical>
       <Flex justify="space-between">
-        <Title level={5}>Configurar reglas de negocio</Title>
+        <Title level={5}>{t("title")}</Title>
         <Button
           size="large"
           onClick={() => setIsDisabledRules(!isDisabledRules)}
@@ -23,7 +25,7 @@ export const BusinessRulesView = () => {
           style={{ display: "flex" }}
           icon={<Pencil size={"1.45rem"} />}
         >
-          {isDisabledRules ? "Editar Reglas" : "Ver Reglas"}
+          {isDisabledRules ? t("editRules") : t("viewRules")}
         </Button>
       </Flex>
       <Flex style={{ paddingTop: "1rem" }} gap="2rem">

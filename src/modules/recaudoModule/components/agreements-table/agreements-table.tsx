@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
@@ -19,7 +20,7 @@ import { useProgressiveRows } from "../../hooks/use-progressive-rows";
 import type { AgreementView } from "../../types";
 import { withAlpha } from "../../utils/chart";
 import { CatalogIndex, indexCatalogs } from "../../utils/filters";
-import { fecha, fechaCorta, full, money, plural } from "../../utils/format";
+import { fecha, fechaCorta, full, money } from "../../utils/format";
 import { agreementRows, clientName, clientSub, nextSort, sumBy } from "../../utils/rows";
 import { FOREGROUND } from "../shared/chart-styles";
 import ExcelButton from "../shared/excel-button";
@@ -39,19 +40,19 @@ import {
 } from "../shared/styles";
 import TowerTooltip from "../shared/tower-tooltip";
 
+/** Nombre de cada columna: `collections.agreementsTable.columns.<col>`. */
 const COLUMNS: {
-  col: string;
-  label: string;
+  col: "client" | "dueDate" | "days" | "balance" | "status";
   align?: "right";
   width: string;
   hideSm?: boolean;
   dir: SortState["dir"];
 }[] = [
-  { col: "client", label: "Cliente", width: "w-[42%]", dir: "asc" },
-  { col: "dueDate", label: "Fecha", width: "w-[15%]", hideSm: true, dir: "asc" },
-  { col: "days", label: "Atraso", width: "w-[13%]", dir: "desc" },
-  { col: "balance", label: "Saldo", align: "right", width: "w-[14%]", dir: "desc" },
-  { col: "status", label: "Estado", width: "w-[16%]", dir: "asc" }
+  { col: "client", width: "w-[42%]", dir: "asc" },
+  { col: "dueDate", width: "w-[15%]", hideSm: true, dir: "asc" },
+  { col: "days", width: "w-[13%]", dir: "desc" },
+  { col: "balance", align: "right", width: "w-[14%]", dir: "desc" },
+  { col: "status", width: "w-[16%]", dir: "asc" }
 ];
 
 /** Sin orden elegido: la lista va en el orden de la vista. */
@@ -76,24 +77,25 @@ function StateChip({ status }: { status?: ITowerSeries }) {
 
 /** Atraso de un incumplido, días para vencer de un pendiente o "a tiempo". */
 function DaysCell({ a }: { a: ITowerAgreement }) {
+  const tc = useTranslations("collections.agreementsTable");
   if (a.lateDays) {
     return (
       <StatusChip
         sev={a.lateDays > LATE_DAYS_CRIT ? "crit" : "warn"}
         className="rounded tabular-nums"
       >
-        {plural(a.lateDays, "día", "días")}
+        {tc("days", { count: a.lateDays })}
       </StatusChip>
     );
   }
   if (a.status === "PENDING") {
     return (
       <StatusChip sev="idle" className="rounded tabular-nums">
-        {a.daysToDue <= 0 ? "vence hoy" : `vence en ${a.daysToDue} d`}
+        {a.daysToDue <= 0 ? tc("dueToday") : tc("dueIn", { days: a.daysToDue })}
       </StatusChip>
     );
   }
-  return <span className="text-[13px] text-muted-foreground">a tiempo</span>;
+  return <span className="text-[13px] text-muted-foreground">{tc("onTime")}</span>;
 }
 
 // El saldo va en rojo si ya venció sin pagarse completo.
@@ -115,6 +117,7 @@ const AgreementRow = memo(function AgreementRow({
   selected,
   onToggle
 }: AgreementRowProps) {
+  const tc = useTranslations("collections.agreementsTable");
   return (
     <tr className={cn(ROW_CLICK, selected && ROW_SELECTED)} onClick={() => onToggle(a.clientId)}>
       <td className={TD}>
@@ -124,8 +127,8 @@ const AgreementRow = memo(function AgreementRow({
       <td className={cn(TD, HIDE_SM)}>
         <span className="block tabular-nums">{fecha(a.dueDate)}</span>
         <span className={SUB}>
-          cargado {fechaCorta(a.loadedAt)}
-          {a.reschedules ? ` · reprog. ×${a.reschedules}` : ""}
+          {tc("loaded", { date: fechaCorta(a.loadedAt) })}
+          {a.reschedules ? ` · ${tc("rescheduled", { count: a.reschedules })}` : ""}
         </span>
       </td>
       <td className={TD}>
@@ -133,19 +136,19 @@ const AgreementRow = memo(function AgreementRow({
       </td>
       <td className={cn(TD, "text-right")}>
         <TowerTooltip
-          title="Acuerdo"
+          title={tc("agreementTitle")}
           rows={[
-            { key: "a", color: FOREGROUND, label: "Acordado", value: full(a.agreed) },
+            { key: "a", color: FOREGROUND, label: tc("agreed"), value: full(a.agreed) },
             {
               key: "p",
               color: statuses.get("FULFILLED")?.color,
-              label: "Pagado",
+              label: tc("paid"),
               value: full(a.paid)
             },
             {
               key: "s",
               color: statuses.get("BROKEN")?.color,
-              label: "Saldo",
+              label: tc("balance"),
               value: full(a.balance)
             }
           ]}
@@ -154,7 +157,7 @@ const AgreementRow = memo(function AgreementRow({
             <span className={cn(AMOUNT, "block", overdue(a) && TONE_TEXT.crit)}>
               {money(a.balance)}
             </span>
-            <span className={SUB}>de {money(a.agreed)}</span>
+            <span className={SUB}>{tc("ofAgreed", { amount: money(a.agreed) })}</span>
           </span>
         </TowerTooltip>
       </td>
@@ -170,6 +173,8 @@ const AgreementRow = memo(function AgreementRow({
  * monto. Con segmentos elegidos en el gráfico muestra sólo esos.
  */
 export default function AgreementsTable({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections");
+  const tCommon = useTranslations("common");
   const { filters, patch, toggleClient } = useTowerFilters();
   const [view, setView] = useState<AgreementView>("all");
   const [sort, setSort] = useState<SortState | null>(null);
@@ -195,24 +200,24 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
 
   return (
     <PanelCard
-      title="Detalle de acuerdos"
-      hint={plural(list.length, "acuerdo", "acuerdos")}
+      title={tc("agreementsTable.title")}
+      hint={tc("agreementsTable.count", { count: list.length })}
       flush
       actions={
         <>
           <Select
             size="small"
-            aria-label="Ver acuerdos"
+            aria-label={tc("agreementsTable.viewAria")}
             className="w-[140px]"
             popupMatchSelectWidth={false}
             value={view}
-            options={AGREEMENT_VIEWS.map((v) => ({ value: v.id, label: v.label }))}
+            options={AGREEMENT_VIEWS.map((v) => ({ value: v, label: tc(`agreementViews.${v}`) }))}
             onChange={changeView}
           />
           <ExcelButton
             table="agreements"
             state={{ view: bySegments ? undefined : view, sortBy: sort?.col, sortDir: sort?.dir }}
-            name="Detalle de acuerdos"
+            name={tc("agreementsTable.title")}
             periodLabel={data.period.label}
           />
         </>
@@ -227,7 +232,13 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
                   <SortableTh
                     key={c.col}
                     col={c.col}
-                    label={c.label}
+                    label={
+                      c.col === "client"
+                        ? tCommon("fields.customer")
+                        : c.col === "status"
+                          ? tCommon("fields.status")
+                          : tc(`agreementsTable.columns.${c.col}`)
+                    }
                     align={c.align}
                     sort={sort ?? NO_SORT}
                     onSort={(col) => setSort((s) => nextSort(s, col, c.dir))}
@@ -251,16 +262,16 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
               ) : (
                 <tr>
                   <td colSpan={COLUMNS.length} className={EMPTY}>
-                    Nada en esta vista para la selección actual
+                    {tc("agreementsTable.empty")}
                   </td>
                 </tr>
               )}
               {hasMore && <SentinelRow ref={sentinelRef} colSpan={COLUMNS.length} />}
               {list.length > 0 && (
                 <tr>
-                  <td className={TD_TOTAL}>Total</td>
+                  <td className={TD_TOTAL}>{tc("rows.total")}</td>
                   <td className={cn(TD_TOTAL, HIDE_SM)}>
-                    {plural(list.length, "acuerdo", "acuerdos")}
+                    {tc("agreementsTable.count", { count: list.length })}
                   </td>
                   <td className={TD_TOTAL} />
                   <td className={cn(TD_TOTAL, "text-right tabular-nums")}>

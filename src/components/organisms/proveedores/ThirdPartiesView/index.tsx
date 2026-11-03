@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { Tabs, Table, Space, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Circle, DotsThreeVertical, Eye } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { TabsEnum } from "@/lib/slices/providersViewSlice";
@@ -32,6 +33,8 @@ const formatDate = (isoString: string): string => {
 const ThirdPartiesView: React.FC = () => {
   // const { activeTab, setActiveTab } = useProviderViewContext();
   const { activeTab, setActiveTab } = useAppStore();
+  const t = useTranslations("suppliers");
+  const tCommon = useTranslations("common");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,26 +81,26 @@ const ThirdPartiesView: React.FC = () => {
 
   const columns: ColumnsType<IThirdPartiesData> = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "name",
       key: "name",
       width: "30%"
     },
     {
-      title: "Tipo",
+      title: tCommon("fields.type"),
       dataIndex: "subtypeName",
       key: "subtypeName",
       width: "20%"
     },
     {
-      title: "Fecha creación",
+      title: t("list.columns.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       render: (createdAt) => formatDate(createdAt),
       width: "20%"
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "status",
       key: "status",
       render: (status) => {
@@ -123,18 +126,20 @@ const ThirdPartiesView: React.FC = () => {
       width: "20%"
     },
     {
-      title: "Acciones",
+      title: tCommon("fields.actions"),
       key: "actions",
       render: (_, record) => (
         <Space>
           <IconButton
             style={{ backgroundColor: "#F7F7F7" }}
             icon={<DotsThreeVertical size={20} />}
+            aria-label={t("list.moreActions")}
           />
           <IconButton
             style={{ backgroundColor: "#F7F7F7" }}
             icon={<Eye size={20} />}
-            onClick={() => router.push(`/proveedores/${record.id}`)}
+            aria-label={t("list.viewDetail")}
+            onClick={() => router.push(`/suppliers/${record.id}`)}
           />
         </Space>
       )
@@ -143,7 +148,7 @@ const ThirdPartiesView: React.FC = () => {
 
   return (
     <div className="cp-page min-h-0 flex-1">
-      <Header title="Proveedores" />
+      <Header title={t("title")} />
       {/* Tarjeta compartida (docs/DESIGN.md §3); el buscador es el de la tabla. */}
       <div className="cp-card flex flex-col gap-6 overflow-y-auto px-[18px] py-[14px]">
         <Tabs
@@ -155,12 +160,14 @@ const ThirdPartiesView: React.FC = () => {
             fontWeight: 700
           }}
         >
-          <Tabs.TabPane tab="Clientes" key={TabsEnum.Clients} />
-          <Tabs.TabPane tab="Proveedores" key={TabsEnum.Providers} />
+          <Tabs.TabPane tab={t("list.tabs.customers")} key={TabsEnum.Clients} />
+          <Tabs.TabPane tab={t("list.tabs.suppliers")} key={TabsEnum.Providers} />
         </Tabs>
         <Flex gap={8} align="center">
           <UiSearchInput
-            placeholder={`Buscar ${activeTab === TabsEnum.Clients ? "clientes" : "proveedores"}`}
+            placeholder={
+              activeTab === TabsEnum.Clients ? t("list.searchCustomers") : t("list.searchSuppliers")
+            }
             onChange={handleSearch}
           />
           <FilterClients setFilterClients={() => {}} />

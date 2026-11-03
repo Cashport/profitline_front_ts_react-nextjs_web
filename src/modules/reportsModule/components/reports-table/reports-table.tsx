@@ -1,6 +1,7 @@
 "use client";
 
 import { FileText } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
@@ -27,21 +28,23 @@ export default function ReportsTable({
   newReportId,
   onOpen
 }: ReportsTableProps) {
+  const t = useTranslations("reports.list");
+  const tCommon = useTranslations("common");
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-[13px]">
         <thead>
           <tr>
-            <SortableTh col="name" label="Nombre del informe" sort={sort} onSort={onSort} />
+            <SortableTh col="name" label={t("columns.name")} sort={sort} onSort={onSort} />
             <SortableTh
               col="report_type_name"
-              label="Tipo de informe"
+              label={t("columns.type")}
               sort={sort}
               onSort={onSort}
             />
             <SortableTh
               col="created_at"
-              label="Fecha de publicación"
+              label={t("columns.publishedAt")}
               sort={sort}
               onSort={onSort}
               className="hidden lg:table-cell"
@@ -50,7 +53,7 @@ export default function ReportsTable({
               scope="col"
               className="border-b border-cp-line bg-cp-surface px-3 py-3 text-right text-[13.5px] font-semibold text-cp-ink"
             >
-              Acciones
+              {tCommon("fields.actions")}
             </th>
           </tr>
         </thead>
@@ -80,7 +83,7 @@ export default function ReportsTable({
                   {fmtReportDate(r.created_at)}
                 </td>
                 <td className="px-3 py-1.5">
-                  <GenericEyeButton href={`/reports/${r.id}`} title="Ver informe" />
+                  <GenericEyeButton href={`/reports/${r.id}`} title={t("viewReport")} />
                 </td>
               </tr>
             );

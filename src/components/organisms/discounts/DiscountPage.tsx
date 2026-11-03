@@ -15,6 +15,7 @@ import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDi
 import DropdownDiscount from "@/components/molecules/dropdown/discount/DropdownDiscount";
 import { ModalDeleteDiscount } from "@/components/molecules/modals/modalDeleteDiscount/ModalDeleteDiscount";
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { GenericResponsePage } from "@/types/global/IGlobal";
 import { DiscountPackage } from "@/types/discount/DiscountPackage";
 import { DiscountBasics } from "@/types/discount/DiscountBasics";
@@ -22,6 +23,8 @@ import { DiscountBasics } from "@/types/discount/DiscountBasics";
 export type DiscountTabs = "1" | "2";
 
 function DiscountPage() {
+  const t = useTranslations("discounts");
+  const tCommon = useTranslations("common");
   const [messageApi, messageContex] = message.useMessage();
   const [tabActive, setTabActive] = useState<string>("1");
 
@@ -46,7 +49,7 @@ function DiscountPage() {
   const items: TabsProps["items"] = [
     {
       key: "1",
-      label: "Paquete de descuentos",
+      label: t("tabs.packages"),
       children: (
         <DiscountPackages
           data={data as DiscountPackageState[]}
@@ -61,7 +64,7 @@ function DiscountPage() {
     },
     {
       key: "2",
-      label: "Reglas de descuentos",
+      label: t("tabs.rules"),
       children: (
         <Discounts
           data={data as DiscountBasicsState[]}
@@ -81,7 +84,10 @@ function DiscountPage() {
       <Flex className={styles.flexContainer} vertical gap={20}>
         <Flex gap={20} justify="space-between" wrap="wrap">
           <Flex className={styles.header} gap={"10px"}>
-            <UiSearchInput placeholder="Buscar" onChange={handleChangeSearch} />
+            <UiSearchInput
+              placeholder={tCommon("placeholders.search")}
+              onChange={handleChangeSearch}
+            />
             <FilterDiscounts handleChangeActive={handleChangeActive} />
             <DropdownDiscount
               disableDelete={!data.some((item) => item.checked)}
@@ -90,12 +96,12 @@ function DiscountPage() {
           </Flex>
           <Flex vertical className={styles.ctaContainer} style={{ width: "fit-content" }}>
             <Link
-              href={`/descuentos/${tabActive === "1" ? "paquete" : "regla"}/create`}
+              href={`/discounts/${tabActive === "1" ? "package" : "rule"}/create`}
               passHref
               legacyBehavior
             >
               <ButtonHeader>
-                {tabActive === "1" ? "Crear paquete de descuentos" : "Crear descuento"}
+                {tabActive === "1" ? t("list.createPackage") : t("list.createDiscount")}
               </ButtonHeader>
             </Link>
           </Flex>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Flex, Modal, Progress, Typography } from "antd";
 import { FileArrowUp, FileXls } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import "./upload-purchase-orders-progress-modal.scss";
 
@@ -30,6 +31,8 @@ const formatTime = (totalSeconds: number) => {
 };
 
 export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Props) => {
+  const t = useTranslations("commerce.uploadPurchaseOrders");
+  const tCommon = useTranslations("common");
   const [progress, setProgress] = useState(0);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -77,7 +80,7 @@ export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Pr
       centered
       title={
         <Title className="uploadPurchaseOrdersProgressModal__title" level={4}>
-          Procesando orden de compra
+          {t("processingTitle")}
         </Title>
       }
     >
@@ -86,7 +89,7 @@ export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Pr
           <FileXls size={28} weight="duotone" />
           <Flex vertical>
             <Text strong className="uploadPurchaseOrdersProgressModal__fileName">
-              {file?.name ?? "archivo.xlsx"}
+              {file?.name ?? t("defaultFileName")}
             </Text>
             <Text type="secondary" className="uploadPurchaseOrdersProgressModal__fileSize">
               {fileSizeKb} KB
@@ -105,7 +108,7 @@ export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Pr
         <Flex justify="space-between" className="uploadPurchaseOrdersProgressModal__footer">
           <Text type="secondary">
             <FileArrowUp size={14} style={{ marginRight: 4, verticalAlign: -2 }} />
-            Esperando respuesta del servidor, por favor espere...
+            {t("waitingServer")}
           </Text>
           <Text strong>{formatTime(secondsElapsed)}</Text>
         </Flex>
@@ -115,7 +118,7 @@ export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Pr
           className="uploadPurchaseOrdersProgressModal__cancel"
           onClick={onCancel}
         >
-          Cancelar
+          {tCommon("actions.cancel")}
         </button>
       </Flex>
     </Modal>

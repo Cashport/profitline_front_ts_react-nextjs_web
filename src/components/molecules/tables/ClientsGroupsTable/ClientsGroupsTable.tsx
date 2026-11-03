@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Flex, Popconfirm, Table, TableProps, Typography, Spin, MenuProps } from "antd";
 
@@ -29,6 +30,8 @@ interface PropsClientsGroupsTable {
 }
 
 export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTable) => {
+  const t = useTranslations("shared.tables");
+  const tCommon = useTranslations("common");
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalStatus, setIsOpenModalStatus] = useState(false);
   const [height, setHeight] = useState<number>(window.innerHeight / getAppZoom());
@@ -105,7 +108,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
       key: "1",
       label: (
         <Button className="buttonOutlined" onClick={handleOpenChangeGroupsState}>
-          Cambiar de estado
+          {t("changeStatus")}
         </Button>
       )
     },
@@ -113,7 +116,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
       key: "2",
       label: (
         <Button className="buttonOutlined" onClick={deleteGroups}>
-          Eliminar
+          {tCommon("actions.delete")}
         </Button>
       )
     }
@@ -121,7 +124,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
 
   const columns: TableProps<IClientsGroup>["columns"] = [
     {
-      title: "Nombre Grupo",
+      title: t("clientsGroups.columns.groupName"),
       dataIndex: "group_name",
       key: "group_name",
       sorter: (a, b) => a.group_name.localeCompare(b.group_name),
@@ -132,28 +135,28 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
       )
     },
     {
-      title: "Clientes",
+      title: t("clientsGroups.columns.customers"),
       dataIndex: "clients_count",
       key: "clients_count",
       sorter: (a, b) => (a.clients_count || 0) - (b.clients_count || 0),
       render: (clients, row) => <Text>{row?.clients_count}</Text>
     },
     {
-      title: "Suscritos",
+      title: t("clientsGroups.columns.subscribers"),
       key: "subscribers",
       dataIndex: "subscribers",
       sorter: (a, b) => (a.subscribers || 0) - (b.subscribers || 0),
       render: (text) => <Text>{text ? text : 0}</Text>
     },
     {
-      title: "Ship To",
+      title: t("shipTo"),
       key: "shipto_count",
       dataIndex: "shipto_count",
       sorter: (a, b) => (a.shipto_count || 0) - (b.shipto_count || 0),
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       key: "active",
       dataIndex: "active",
       sorter: (a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1),
@@ -162,22 +165,22 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
           {active ? (
             <Flex align="center" className={active ? "statusContainer" : "statusContainerPending"}>
               <div className={active ? "statusActive" : "statusPending"} />
-              <Text>{active ? "Activo" : "Inactivo"}</Text>
+              <Text>{active ? tCommon("status.active") : tCommon("status.inactive")}</Text>
             </Flex>
           ) : (
             <Popconfirm
               placement="topRight"
-              title={"Invitación pendiente de aprobación"}
-              description={"Volver a Enviar invitacion?"}
-              okText="Si"
-              cancelText="No"
+              title={t("invitationPending")}
+              description={t("resendInvitation")}
+              okText={tCommon("status.yes")}
+              cancelText={tCommon("status.no")}
             >
               <Flex
                 align="center"
                 className={active ? "statusContainer" : "statusContainerPending"}
               >
                 <div className={active ? "statusActive" : "statusPending"} />
-                <Text>{active ? "Activo" : "Inactivo"}</Text>
+                <Text>{active ? tCommon("status.active") : tCommon("status.inactive")}</Text>
               </Flex>
             </Popconfirm>
           )}
@@ -196,14 +199,14 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
   ];
 
   const getFilters = async (): Promise<FilterOption[]> => {
-    return [{ id: "status", name: "Estado" }];
+    return [{ id: "status", name: tCommon("fields.status") }];
   };
 
   const apiCallbacks = {
     status: async () => {
       return [
-        { id: "active", name: "Activo" },
-        { id: "inactive", name: "Inactivo" }
+        { id: "active", name: tCommon("status.active") },
+        { id: "inactive", name: tCommon("status.inactive") }
       ];
     }
   };
@@ -221,7 +224,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
       <Flex justify="space-between" align="center" className="mainClientsGroupsTable_header">
         <Flex gap={"1.75rem"}>
           <UiSearchInput
-            placeholder="Buscar grupos de clientes"
+            placeholder={t("clientsGroups.searchPlaceholder")}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <GenericCascaderFilter
@@ -238,7 +241,7 @@ export const ClientsGroupsTable = ({ setShowGroupDetails }: PropsClientsGroupsTa
           onClick={onCreateClientsGroup}
           icon={<Plus weight="bold" size={18} />}
         >
-          Crear Grupo de Clientes
+          {t("clientsGroups.create")}
         </Button>
       </Flex>
 

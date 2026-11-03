@@ -8,6 +8,7 @@ import { getOptionsByType } from "../../../../constants/discountTypes";
 import { useEffect, useMemo, useState } from "react";
 import { DiscountSchema } from "../../resolvers/generalResolver";
 import { Pencil } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 const { Title, Text } = Typography;
 
@@ -32,6 +33,8 @@ export default function DefinitionDiscounts({
   handleChangeStatusForm,
   loadingMain
 }: Props) {
+  const t = useTranslations("discounts");
+  const tCommon = useTranslations("common");
   const {
     watch,
     setValue,
@@ -41,7 +44,14 @@ export default function DefinitionDiscounts({
     formState: { errors }
   } = form;
 
-  const options = useMemo(() => getOptionsByType(selectedType), [selectedType]);
+  const options = useMemo(
+    () =>
+      getOptionsByType(selectedType).map((option) => ({
+        value: option.value,
+        label: t(`types.${option.labelKey}`)
+      })),
+    [selectedType, t]
+  );
 
   const [oldValue, setOldValue] = useState<Date | undefined>(undefined);
   useEffect(() => {
@@ -58,7 +68,7 @@ export default function DefinitionDiscounts({
   return (
     <Flex className={style.HeaderContainer} vertical gap={20}>
       <Flex gap={20} justify="space-between">
-        <Title level={4}>Definiciones</Title>
+        <Title level={4}>{t("form.definitions")}</Title>
         {statusForm !== "create" && (
           <Button
             className={style.buttonEdit}
@@ -69,13 +79,13 @@ export default function DefinitionDiscounts({
             }}
             loading={loadingMain}
           >
-            {statusForm === "review" ? "Editar Descuento" : "Cancelar Edicion"}
+            {statusForm === "review" ? t("form.editDiscount") : t("form.cancelEdit")}
             <Pencil size={"1.2rem"} />
           </Button>
         )}
       </Flex>
       <Flex vertical>
-        <Text type="secondary">Tipo de descuento</Text>
+        <Text type="secondary">{t("form.discountType")}</Text>
         <Controller
           name="discount_type"
           rules={{ required: true }}
@@ -84,7 +94,7 @@ export default function DefinitionDiscounts({
             return (
               <>
                 <Select
-                  placeholder="Tipo de descuento"
+                  placeholder={t("form.discountType")}
                   placement="bottomLeft"
                   labelRender={(e) => e.label}
                   className={`${style.selectInput} translate `}
@@ -103,24 +113,24 @@ export default function DefinitionDiscounts({
           }}
         />
       </Flex>
-      <Title level={4}>Descripción</Title>
+      <Title level={4}>{t("form.description")}</Title>
       <Flex gap={20}>
         <InputForm
           control={control}
           error={errors.name}
           nameInput="name"
-          titleInput="Nombre"
+          titleInput={tCommon("fields.name")}
           className={style.input}
         ></InputForm>
         <InputForm
           control={control}
           error={errors.description}
           nameInput="description"
-          titleInput="Descripción"
+          titleInput={tCommon("fields.description")}
           className={style.inputDesc}
         ></InputForm>
       </Flex>
-      <Title level={4}>Fechas</Title>
+      <Title level={4}>{t("form.dates")}</Title>
       <Controller
         name="is_active"
         control={control}
@@ -132,7 +142,7 @@ export default function DefinitionDiscounts({
                 size="small"
                 {...field}
               />
-              <Text type="secondary">No tiene fin</Text>
+              <Text type="secondary">{t("form.noEndDate")}</Text>
             </Flex>
           );
         }}
@@ -145,10 +155,10 @@ export default function DefinitionDiscounts({
             render={({ field: { value, ...field } }) => {
               return (
                 <>
-                  <Text type="secondary">Inicio</Text>
+                  <Text type="secondary">{t("form.start")}</Text>
                   <DatePicker
                     className={style.inputDatePicker}
-                    placeholder="Inicio"
+                    placeholder={t("form.start")}
                     type="secondary"
                     format="YYYY-MM-DD"
                     value={value}
@@ -169,11 +179,11 @@ export default function DefinitionDiscounts({
             render={({ field: { onChange, ...field } }) => {
               return (
                 <>
-                  <Text type="secondary">Fin</Text>
+                  <Text type="secondary">{t("form.end")}</Text>
                   <DatePicker
                     disabled={watch("is_active")}
                     className={style.inputDatePicker}
-                    placeholder="Fin"
+                    placeholder={t("form.end")}
                     type="secondary"
                     onChange={(e) => {
                       onChange(e);
@@ -191,7 +201,7 @@ export default function DefinitionDiscounts({
         </Flex>
       </Flex>
       <hr></hr>
-      <Title level={4}>Características del descuento</Title>
+      <Title level={4}>{t("form.features")}</Title>
       {byOrderTypes.includes(watch("discount_type") || 0) && (
         <FeatByOrder
           discountType={watch("discount_type") || 0}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Alert, Empty, Skeleton } from "antd";
 import { ChevronRight, Download, Info, Link2, Send, Store, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiTab from "@/components/ui/ui-tab";
@@ -26,7 +27,7 @@ import {
   STATUS_META
 } from "../../constants";
 import { useBlockingAlertDetail } from "../../hooks/use-blocking-alerts";
-import { fmtDay, plural, statusLabel } from "../../utils/blocking-alerts";
+import { fmtDay, statusLabel } from "../../utils/blocking-alerts";
 
 type DetailTab =
   | "all"
@@ -38,15 +39,6 @@ type DetailTab =
 
 /** "Todas" y "Vencidas" comparten la selección de facturas. */
 type SelectionKey = Exclude<DetailTab, "all" | "past_due"> | "invoices";
-
-/** Barra de selección: "26 facturas seleccionadas". */
-const SELECTED_NOUN: Record<SelectionKey, [string, string]> = {
-  invoices: ["factura seleccionada", "facturas seleccionadas"],
-  credit_notes: ["nota crédito seleccionada", "notas crédito seleccionadas"],
-  available_payments: ["pago seleccionado", "pagos seleccionados"],
-  pending_balances: ["saldo seleccionado", "saldos seleccionados"],
-  paid_invoices: ["pagada seleccionada", "pagadas seleccionadas"]
-};
 
 /** Acciones del cliente: botones redondos, solo ícono, junto al nombre (prototipo). */
 const ROUND_BUTTON = cn(HEADER_BUTTON, "h-[38px] w-[38px] rounded-full px-0");
@@ -72,6 +64,8 @@ export default function BlockingAlertDetailView({
   clientId,
   shipToCode
 }: BlockingAlertDetailViewProps) {
+  const t = useTranslations("blockingAlerts");
+  const td = useTranslations("blockingAlerts.detail");
   const { detail, error } = useBlockingAlertDetail(clientId, shipToCode);
   const formatMoney = useAppStore((s) => s.formatMoney);
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
@@ -81,9 +75,11 @@ export default function BlockingAlertDetailView({
 
   const clientHref = `${BLOCKING_ALERTS_PATH}/${clientId}`;
   const crumbs = [
-    { label: "Alertas de bloqueo", href: BLOCKING_ALERTS_PATH },
-    ...(shipToCode ? [{ label: detail?.client_name ?? "Cliente", href: clientHref }] : []),
-    { label: detail?.name ?? (shipToCode ? `Ship-to ${shipToCode}` : "Cliente") }
+    { label: t("title"), href: BLOCKING_ALERTS_PATH },
+    ...(shipToCode ? [{ label: detail?.client_name ?? td("customer"), href: clientHref }] : []),
+    {
+      label: detail?.name ?? (shipToCode ? t("card.shipTo", { code: shipToCode }) : td("customer"))
+    }
   ];
 
   if (!detail) {
@@ -99,7 +95,8 @@ export default function BlockingAlertDetailView({
     );
   }
 
-  const who = shipToCode ? "este punto de venta" : "este cliente";
+  // Sujeto de los vacíos ("para este cliente" / "para este punto de venta").
+  const target = shipToCode ? "pos" : "customer";
   const overdue = detail.invoices.filter((i) => i.days_overdue > 0);
   const docs: Record<SelectionKey, { id: string; amount: number }[]> = {
     invoices: detail.invoices,
@@ -131,8 +128,8 @@ export default function BlockingAlertDetailView({
         title: i.number,
         subtitle: [
           i.days_overdue > 0
-            ? `Vencida · ${plural(i.days_overdue, "día", "días")}`
-            : `Vence el ${fmtDay(i.due_date)}`,
+            ? td("overdueBy", { days: i.days_overdue })
+            : td("dueOn", { date: fmtDay(i.due_date) }),
           !shipToCode && i.ship_to_name
         ]
           .filter(Boolean)
@@ -140,7 +137,7 @@ export default function BlockingAlertDetailView({
         dot: invoiceDot(i.days_overdue)
       })}
       {...selection("invoices")}
-      noun={["factura", "facturas"]}
+      countLabel={(count) => t("count.invoices", { count })}
       empty={empty}
     />
   );
@@ -148,19 +145,19 @@ export default function BlockingAlertDetailView({
   const tabs: { key: DetailTab; label: string; count: number; content: React.ReactNode }[] = [
     {
       key: "all",
-      label: "Todas",
+      label: td("tabs.all"),
       count: detail.invoices.length,
-      content: invoiceList(detail.invoices, `No hay facturas pendientes para ${who}.`)
+      content: invoiceList(detail.invoices, td("empty.invoices", { target }))
     },
     {
       key: "past_due",
-      label: "Vencidas",
+      label: td("tabs.pastDue"),
       count: overdue.length,
-      content: invoiceList(overdue, "Sin facturas vencidas. Puede comprar con normalidad.")
+      content: invoiceList(overdue, td("empty.pastDue"))
     },
     {
       key: "credit_notes",
-      label: "Notas crédito",
+      label: td("tabs.creditNotes"),
       count: detail.credit_notes.length,
       content: (
         <DocumentList
@@ -173,14 +170,14 @@ export default function BlockingAlertDetailView({
             dot: CREDIT_NOTE_COLORS[n.type] ?? "rgb(var(--cp-ink-4))"
           })}
           {...selection("credit_notes")}
-          noun={["nota crédito", "notas crédito"]}
-          empty={`No hay notas crédito para ${who}.`}
+          countLabel={(count) => td("count.creditNotes", { count })}
+          empty={td("empty.creditNotes", { target })}
         />
       )
     },
     {
       key: "available_payments",
-      label: "Pagos disponibles",
+      label: td("tabs.availablePayments"),
       count: detail.available_payments.length,
       content: (
         <DocumentList
@@ -189,18 +186,18 @@ export default function BlockingAlertDetailView({
           getAmount={(p) => p.amount}
           describe={(p) => ({
             title: fmtDay(p.date),
-            subtitle: `Pago ${p.id} · disponible`,
+            subtitle: td("paymentSubtitle", { id: p.id }),
             dot: "rgb(var(--cp-lime))"
           })}
           {...selection("available_payments")}
-          noun={["pago disponible", "pagos disponibles"]}
-          empty={`No hay pagos disponibles para ${who}.`}
+          countLabel={(count) => td("count.availablePayments", { count })}
+          empty={td("empty.availablePayments", { target })}
         />
       )
     },
     {
       key: "pending_balances",
-      label: "Saldos",
+      label: td("tabs.pendingBalances"),
       count: detail.pending_balances.length,
       content: (
         <DocumentList
@@ -208,19 +205,19 @@ export default function BlockingAlertDetailView({
           getId={(b) => b.id}
           getAmount={(b) => b.amount}
           describe={(b) => ({
-            title: `Saldo ${b.id}`,
+            title: td("balanceTitle", { id: b.id }),
             subtitle: `${b.status} · ${fmtDay(b.date)}`,
             dot: "rgb(var(--cp-ink-4))"
           })}
           {...selection("pending_balances")}
-          noun={["saldo pendiente", "saldos pendientes"]}
-          empty={`No hay saldos pendientes para ${who}.`}
+          countLabel={(count) => td("count.pendingBalances", { count })}
+          empty={td("empty.pendingBalances", { target })}
         />
       )
     },
     {
       key: "paid_invoices",
-      label: "Pagadas",
+      label: td("tabs.paidInvoices"),
       count: detail.paid_invoices.length,
       content: (
         <DocumentList
@@ -229,18 +226,18 @@ export default function BlockingAlertDetailView({
           getAmount={(i) => i.amount}
           describe={(i) => ({
             title: i.number,
-            subtitle: `Pagada el ${fmtDay(i.paid_at)} · depuración SAP`,
+            subtitle: td("paidSubtitle", { date: fmtDay(i.paid_at) }),
             dot: "rgb(var(--cp-blue))"
           })}
           {...selection("paid_invoices")}
-          noun={["factura", "facturas"]}
-          empty="No hay facturas pagadas pendientes de depuración."
+          countLabel={(count) => t("count.invoices", { count })}
+          empty={td("empty.paidInvoices")}
           notice={
             <Alert
               type="info"
               showIcon
               icon={<Info className="h-4 w-4" />}
-              message="En depuración SAP · no suman a la cartera ni se cobran"
+              message={td("paidNotice")}
               className="my-2 text-[13px]"
             />
           }
@@ -270,10 +267,7 @@ export default function BlockingAlertDetailView({
             {detail.name}
           </p>
           <p
-            className={cn(
-              "m-0 mt-0.5 truncate text-[13px] font-medium",
-              isOk && "text-cp-ink-3"
-            )}
+            className={cn("m-0 mt-0.5 truncate text-[13px] font-medium", isOk && "text-cp-ink-3")}
             style={isOk ? undefined : { color: meta.color }}
           >
             {statusLabel(detail)}
@@ -281,8 +275,8 @@ export default function BlockingAlertDetailView({
         </div>
         <button
           type="button"
-          aria-label="Estado de cuenta"
-          title="Estado de cuenta"
+          aria-label={td("statement")}
+          title={td("statement")}
           className={ROUND_BUTTON}
           onClick={() => setModal("statement")}
         >
@@ -290,8 +284,8 @@ export default function BlockingAlertDetailView({
         </button>
         <button
           type="button"
-          aria-label="Enviar al cliente"
-          title="Enviar al cliente"
+          aria-label={td("sendToCustomer")}
+          title={td("sendToCustomer")}
           className={ROUND_BUTTON}
           onClick={() => setModal("send")}
         >
@@ -305,12 +299,17 @@ export default function BlockingAlertDetailView({
           className="flex items-center gap-2 rounded-[12px] bg-cp-surface px-4 py-2.5 text-[13px] text-cp-ink-3 hover:text-cp-ink"
         >
           <Store className="h-4 w-4 shrink-0" />
-          <span className="shrink-0 font-semibold text-cp-ink">Ship-to {detail.ship_to_code}</span>
+          <span className="shrink-0 font-semibold text-cp-ink">
+            {t("card.shipTo", { code: detail.ship_to_code ?? "" })}
+          </span>
           <span className="min-w-0 flex-1 truncate">
-            de <b className="font-semibold text-cp-ink">{detail.client_name}</b>
+            {td.rich("ofCustomer", {
+              name: detail.client_name,
+              b: (chunks) => <b className="font-semibold text-cp-ink">{chunks}</b>
+            })}
           </span>
           <span className="flex shrink-0 items-center gap-0.5 font-semibold text-cp-blue">
-            Ver cliente
+            {td("viewCustomer")}
             <ChevronRight className="h-3.5 w-3.5" />
           </span>
         </Link>
@@ -319,20 +318,20 @@ export default function BlockingAlertDetailView({
       <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-3">
           <PortfolioCard
-            label="Cartera"
+            label={td("receivables")}
             aging={detail}
             stacked
             extras={[
-              { label: "Saldos pendientes", value: sum(detail.pending_balances) },
-              { label: "Notas crédito", value: sum(detail.credit_notes) },
-              { label: "Pagos disponibles", value: sum(detail.available_payments) }
+              { label: td("extras.pendingBalances"), value: sum(detail.pending_balances) },
+              { label: td("extras.creditNotes"), value: sum(detail.credit_notes) },
+              { label: td("extras.availablePayments"), value: sum(detail.available_payments) }
             ]}
           />
 
           {showPay && (
             <section className="flex items-center justify-between gap-3 rounded-[14px] bg-cp-surface px-[18px] py-[14px]">
               <span className="min-w-0">
-                <span className="block text-[13px] font-medium text-cp-ink-3">Pago vencido</span>
+                <span className="block text-[13px] font-medium text-cp-ink-3">{td("pastDue")}</span>
                 <span className="block truncate text-[18px] font-semibold tabular-nums text-cp-ink md:text-[20px]">
                   {money(detail.past_due)}
                 </span>
@@ -341,7 +340,7 @@ export default function BlockingAlertDetailView({
                 icon={<Link2 className="h-4 w-4" />}
                 onClick={() => setModal("payment")}
               >
-                Link de pago
+                {td("paymentLink")}
               </PrincipalButton>
             </section>
           )}
@@ -355,15 +354,15 @@ export default function BlockingAlertDetailView({
           <UiTab
             activeKey={tab}
             onChangeTab={(key) => setTab(key as DetailTab)}
-            tabs={tabs.map((t) => ({
-              key: t.key,
+            tabs={tabs.map((item) => ({
+              key: item.key,
               label: (
                 <span className="flex items-center gap-1.5">
-                  {t.label}
-                  <span className="font-medium opacity-60">{t.count}</span>
+                  {item.label}
+                  <span className="font-medium opacity-60">{item.count}</span>
                 </span>
               ),
-              children: t.key === tab ? t.content : null
+              children: item.key === tab ? item.content : null
             }))}
           />
         </section>
@@ -374,7 +373,7 @@ export default function BlockingAlertDetailView({
         <div className="sticky bottom-2 z-10 flex items-center gap-3 rounded-[14px] border border-cp-line bg-cp-surface px-4 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
           <span className="min-w-0 flex-1">
             <span className="block text-[13px] text-cp-ink-3">
-              {plural(barItems.length, ...SELECTED_NOUN[barKey])}
+              {td(`selected.${barKey}`, { count: barItems.length })}
             </span>
             <span className="block truncate text-[16px] font-semibold tabular-nums text-cp-ink">
               {money(sum(barItems))}
@@ -386,7 +385,7 @@ export default function BlockingAlertDetailView({
             className="flex shrink-0 cursor-pointer items-center gap-1 border-0 bg-transparent text-[13px] font-medium text-cp-ink-4 hover:text-cp-ink"
           >
             <X className="h-3 w-3" />
-            Limpiar
+            {td("clear")}
           </button>
         </div>
       )}

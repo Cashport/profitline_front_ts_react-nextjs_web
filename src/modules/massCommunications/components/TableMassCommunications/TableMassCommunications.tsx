@@ -6,6 +6,7 @@ import { Table, Dropdown, message, Spin } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { MenuProps } from "antd";
 import { Eye, MoreHorizontal, Trash2, Users, Send } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import ModalDetailClientCommunication from "../ModalDetailClientCommunication/ModalDetailClientCommunication";
@@ -39,6 +40,8 @@ export default function TableMassCommunications({
   onPageChange,
   isWhatsapp
 }: TableMassCommunicationsProps) {
+  const t = useTranslations("massCommunications.table");
+  const tCommon = useTranslations("common");
   const { communicationId } = useParams<{ communicationId: string }>();
   const router = useRouter();
   const [confirmChecked, setConfirmChecked] = useState(false);
@@ -54,10 +57,10 @@ export default function TableMassCommunications({
       } else {
         await sendEmailCommunicationFromCache(Number(communicationId));
       }
-      message.success("Comunicación activada correctamente");
+      message.success(t("activated"));
       router.push("/mass-communications");
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al activar la comunicación");
+      message.error(error instanceof Error ? error.message : t("activateError"));
     } finally {
       setIsSending(false);
     }
@@ -69,10 +72,10 @@ export default function TableMassCommunications({
     setIsRemovingClient(true);
     try {
       await removeClientFromCircularization(Number(communicationId), clientId);
-      message.success("Cliente eliminado del envío");
+      message.success(t("clientRemoved"));
       onClientRemoved?.();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al eliminar cliente");
+      message.error(error instanceof Error ? error.message : t("removeError"));
     } finally {
       setIsRemovingClient(false);
     }
@@ -81,7 +84,7 @@ export default function TableMassCommunications({
 
   const columns: ColumnsType<IPreviewClient> = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "client_name",
       key: "client_name",
       width: "35%",
@@ -97,7 +100,7 @@ export default function TableMassCommunications({
       )
     },
     {
-      title: "Contactos",
+      title: t("columns.contacts"),
       key: "contacts",
       align: "center",
       render: (_, record) => (
@@ -111,7 +114,7 @@ export default function TableMassCommunications({
       )
     },
     {
-      title: "Cartera",
+      title: t("columns.receivables"),
       dataIndex: "total_portfolio",
       key: "total_portfolio",
       align: "right",
@@ -120,7 +123,7 @@ export default function TableMassCommunications({
       )
     },
     {
-      title: "Vencida",
+      title: t("columns.pastDue"),
       dataIndex: "past_due_amount",
       key: "past_due_amount",
       align: "right",
@@ -131,7 +134,7 @@ export default function TableMassCommunications({
       )
     },
     {
-      title: "Acuerdos de pago",
+      title: t("columns.paymentPlans"),
       dataIndex: "active_payment_agreements",
       key: "active_payment_agreements",
       align: "right",
@@ -158,7 +161,7 @@ export default function TableMassCommunications({
             label: (
               <span className="flex items-center gap-2 text-red-600 text-[13px]">
                 <Trash2 className="w-3.5 h-3.5" />
-                Eliminar del envio
+                {t("removeFromSend")}
               </span>
             ),
             onClick: () => handleRemoveClient(record.client_id)
@@ -171,7 +174,7 @@ export default function TableMassCommunications({
               type="button"
               onClick={() => handleViewEmail(record)}
               className="inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-[#141414] hover:bg-gray-100 transition-all"
-              title={`Ver correo de ${record.client_name}`}
+              title={t("viewEmailOf", { name: record.client_name })}
               disabled={isWhatsapp}
             >
               <Eye className="w-4 h-4" />
@@ -216,10 +219,7 @@ export default function TableMassCommunications({
             onCheckedChange={(v) => setConfirmChecked(v === true)}
             className="mt-0.5"
           />
-          <span className="text-sm text-gray-600 leading-relaxed">
-            Confirmo que he revisado el contenido y los destinatarios. Esta accion no se puede
-            deshacer.
-          </span>
+          <span className="text-sm text-gray-600 leading-relaxed">{t("confirm")}</span>
         </label>
         <Button
           onClick={handleSend}
@@ -229,12 +229,12 @@ export default function TableMassCommunications({
           {isSending ? (
             <>
               <Spin size="small" className="mr-2" />
-              Enviando...
+              {tCommon("status.sending")}
             </>
           ) : (
             <>
               <Send className="w-4 h-4 mr-2" />
-              Enviar comunicacion
+              {t("send")}
             </>
           )}
         </Button>

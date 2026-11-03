@@ -5,6 +5,7 @@ import { useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR, { preload } from "swr";
 import { message } from "antd";
+import { useTranslations } from "use-intl";
 import dynamic from "next/dynamic";
 import { FileText, GripVertical } from "lucide-react";
 
@@ -94,6 +95,8 @@ const ModalConfirmRebilling = dynamic(
 );
 
 export function DetailPurchaseOrder() {
+  const t = useTranslations("purchaseOrders.detail");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const router = useRouter();
   const orderId = extractSingleParam(params.orderId);
@@ -141,7 +144,7 @@ export function DetailPurchaseOrder() {
   if (isLoading) {
     return (
       <div className="h-screen bg-cashport-gray-lighter flex items-center justify-center">
-        <ProfitLoader size="large" message="Cargando orden de compra..." />
+        <ProfitLoader size="large" message={t("loading")} />
       </div>
     );
   }
@@ -150,8 +153,8 @@ export function DetailPurchaseOrder() {
   if (!isLoading && !data) {
     return (
       <div className="h-screen bg-cashport-gray-lighter flex items-center justify-center flex-col gap-4">
-        <p>Orden de compra no encontrada</p>
-        <Button onClick={() => router.push("/purchase-orders")}>Volver al listado</Button>
+        <p>{t("notFound")}</p>
+        <Button onClick={() => router.push("/purchase-orders")}>{t("backToList")}</Button>
       </div>
     );
   }
@@ -179,10 +182,10 @@ export function DetailPurchaseOrder() {
       const payload = mapFormDataToApi(formData);
       await editPurchaseOrder(orderId!, payload);
       mutate();
-      message.success("Información actualizada correctamente");
+      message.success(t("updateSuccess"));
       setIsEditMode(false);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar la información");
+      message.error(error instanceof Error ? error.message : t("updateError"));
       throw error;
     }
   };
@@ -211,9 +214,7 @@ export function DetailPurchaseOrder() {
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar el plano de la orden de compra"
-      );
+      message.error(error instanceof Error ? error.message : t("downloadFlatFileError"));
     }
   };
 
@@ -325,7 +326,7 @@ export function DetailPurchaseOrder() {
         isOpen={whichModalIsOpen.selected === 1}
         onClose={closeModals}
         orderId={data.id}
-        orderLabel={`OC ${data.purchase_order_number}`}
+        orderLabel={t("poLabel", { number: data.purchase_order_number })}
       />
 
       <SendToBackorderModal
@@ -362,10 +363,10 @@ export function DetailPurchaseOrder() {
         onClose={cancelNavigation}
         onOk={handleSaveAndLeave}
         onCancel={confirmNavigation}
-        title="Cambios sin guardar"
-        content="Tienes cambios sin guardar. ¿Deseas guardarlos antes de salir?"
-        okText="Guardar"
-        cancelText="No guardar"
+        title={t("unsavedTitle")}
+        content={t("unsavedContent")}
+        okText={tCommon("actions.save")}
+        cancelText={t("dontSave")}
       />
     </div>
   );

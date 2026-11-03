@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useEffect } from "react";
 import { Select, Typography } from "antd";
 import {
@@ -41,6 +42,7 @@ export const SelectContactIndicative = <T extends FieldValues>({
   defaultValue,
   isLoading
 }: Props<T>) => {
+  const t = useTranslations("shared.selects");
   useEffect(() => {
     if (isColombia && options.length > 0 && !field.value) {
       const colombiaOption = options.find((option) => option.value === 1);
@@ -53,7 +55,7 @@ export const SelectContactIndicative = <T extends FieldValues>({
   return (
     <>
       <Select
-        placeholder="Seleccione indicativo"
+        placeholder={t("selectDialCode")}
         className={
           errors ? "selectInputError" : `selectInputCustom ${readOnly && "--readOnly"} ${className}`
         }
@@ -68,7 +70,7 @@ export const SelectContactIndicative = <T extends FieldValues>({
         popupMatchSelectWidth={false}
         defaultValue={defaultValue}
       />
-      {errors && <Typography.Text className="textError">Obligatorio *</Typography.Text>}
+      {errors && <Typography.Text className="textError">{t("required")}</Typography.Text>}
     </>
   );
 };

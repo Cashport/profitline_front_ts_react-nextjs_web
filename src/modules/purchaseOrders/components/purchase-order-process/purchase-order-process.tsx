@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { LucideIcon, History, Edit } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -16,9 +17,17 @@ interface SubValidation {
   isCompleted: boolean;
 }
 
+export type OrderStageKey =
+  | "purchaseOrder"
+  | "validations"
+  | "invoiced"
+  | "inDispatch"
+  | "delivered";
+
 interface OrderStage {
   id: number;
-  name: string;
+  /** i18n key under purchaseOrders.stages */
+  name: OrderStageKey;
   icon: LucideIcon;
   completedBy: string | null;
   completedAt: string | null;
@@ -40,11 +49,14 @@ export function PurchaseOrderProcess({
   onShowStock,
   onPrefetchHistory
 }: PurchaseOrderProcessProps) {
+  const t = useTranslations("purchaseOrders.process");
+  const tStages = useTranslations("purchaseOrders.stages");
+  const tCommon = useTranslations("common");
   return (
     <TooltipProvider>
       <div className="mb-8 pt-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-cashport-black">Proceso de la orden</h3>
+          <h3 className="text-lg font-semibold text-cashport-black">{t("title")}</h3>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
@@ -53,7 +65,7 @@ export function PurchaseOrderProcess({
               className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-white"
             >
               <Edit className="h-4 w-4 mr-2" />
-              Ver stock
+              {t("viewStock")}
             </Button>
             <Button
               variant="outline"
@@ -63,7 +75,7 @@ export function PurchaseOrderProcess({
               className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-white"
             >
               <History className="h-4 w-4 mr-2" />
-              Ver historial completo
+              {t("viewFullHistory")}
             </Button>
           </div>
         </div>
@@ -91,14 +103,14 @@ export function PurchaseOrderProcess({
                         <StageIcon className="h-6 w-6" />
                       </div>
                       <span className="text-[13px] mt-2 text-center max-w-[80px] text-cashport-black font-medium">
-                        {stage.name}
+                        {tStages(stage.name)}
                       </span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="bg-cashport-black text-white">
                     {stage.subValidations ? (
                       <div className="text-[13px] space-y-2">
-                        <p className="font-semibold mb-2">{stage.name}</p>
+                        <p className="font-semibold mb-2">{tStages(stage.name)}</p>
                         {stage.subValidations.map((subVal, idx) => (
                           <div
                             key={idx}
@@ -111,15 +123,15 @@ export function PurchaseOrderProcess({
                                 <p className="text-gray-400">{subVal.createdAt}</p>
                               </>
                             ) : (
-                              <p className="text-gray-400">Pendiente</p>
+                              <p className="text-gray-400">{tCommon("status.pending")}</p>
                             )}
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="text-[13px]">
-                        <p className="font-semibold mb-1">{stage.name}</p>
-                        <p className="text-gray-400">Pendiente</p>
+                        <p className="font-semibold mb-1">{tStages(stage.name)}</p>
+                        <p className="text-gray-400">{tCommon("status.pending")}</p>
                       </div>
                     )}
                   </TooltipContent>

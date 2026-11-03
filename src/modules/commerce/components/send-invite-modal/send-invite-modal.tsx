@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Modal, Typography, message } from "antd";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "use-intl";
 
 import { sendInvitationMarketplace } from "@/services/commerce/commerce";
 
@@ -22,6 +23,7 @@ interface ISendInviteForm {
 }
 
 export const SendInviteModal = ({ isOpen, onClose }: Props) => {
+  const t = useTranslations("commerce.sendInvite");
   const [isLoading, setIsLoading] = useState(false);
   const {
     control,
@@ -36,10 +38,10 @@ export const SendInviteModal = ({ isOpen, onClose }: Props) => {
     setIsLoading(true);
     try {
       await sendInvitationMarketplace(data.email);
-      message.success("Invitación enviada correctamente");
+      message.success(t("success"));
       onClose();
     } catch (error) {
-      message.error("Error al enviar la invitación");
+      message.error(t("error"));
     } finally {
       setIsLoading(false);
     }
@@ -58,28 +60,26 @@ export const SendInviteModal = ({ isOpen, onClose }: Props) => {
       open={isOpen}
       title={
         <Title className="sendInviteModal__title" level={4}>
-          Enviar invitación
+          {t("title")}
         </Title>
       }
       footer={null}
       onCancel={onClose}
     >
-      <p className="sendInviteModal__description">
-        Ingresa un email para enviar una invitación de acceso al marketplace
-      </p>
+      <p className="sendInviteModal__description">{t("description")}</p>
 
       <InputForm
-        titleInput="Email"
+        titleInput={t("email")}
         nameInput="email"
         control={control}
         error={errors.email}
         typeInput="email"
-        placeholder="correo@mail.com"
+        placeholder={t("emailPlaceholder")}
         validationRules={{
-          required: "El email es requerido",
+          required: t("emailRequired"),
           pattern: {
             value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-            message: "El email no es válido"
+            message: t("emailInvalid")
           }
         }}
       />
@@ -90,7 +90,7 @@ export const SendInviteModal = ({ isOpen, onClose }: Props) => {
         fullWidth
         loading={isLoading}
       >
-        Enviar Código
+        {t("submit")}
       </PrincipalButton>
     </Modal>
   );

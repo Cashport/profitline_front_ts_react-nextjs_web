@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useState, useEffect } from "react";
 import { getAppZoom } from "@/utils/utils";
 import { useParams, useRouter } from "next/navigation";
@@ -14,6 +15,8 @@ import "./clientsprojecttable.scss";
 const { Text } = Typography;
 
 export const ClientsProjectTable = () => {
+  const t = useTranslations("shared.tables");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [page, setPage] = useState(1);
@@ -47,7 +50,7 @@ export const ClientsProjectTable = () => {
   };
 
   const onCreateClient = () => {
-    router.push(`/proyectos/review/${idProject}/clients/new`);
+    router.push(`/projects/review/${idProject}/clients/new`);
   };
 
   useEffect(() => {
@@ -82,12 +85,12 @@ export const ClientsProjectTable = () => {
   }, [error]);
 
   const handleOpenClient = (clientId: number) => {
-    router.push(`/proyectos/review/${idProject}/clients/${clientId}`);
+    router.push(`/projects/review/${idProject}/clients/${clientId}`);
   };
 
   const columns: TableProps<IClient>["columns"] = [
     {
-      title: "Name",
+      title: tCommon("fields.name"),
       dataIndex: "client_name",
       key: "client_name",
       render: (text, { nit }) => (
@@ -103,50 +106,50 @@ export const ClientsProjectTable = () => {
       )
     },
     {
-      title: "NIT",
+      title: tCommon("fields.taxId"),
       dataIndex: "nit",
       key: "nit",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Tipo de Cliente",
+      title: t("clients.columns.customerType"),
       key: "cliet_type",
       dataIndex: "cliet_type",
       render: (text) => <Text>{text}</Text>
     },
     {
       width: 96,
-      title: "Usuarios",
+      title: t("clients.columns.users"),
       key: "users",
       dataIndex: "users",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Facturas",
+      title: t("clients.columns.invoices"),
       key: "bills",
       dataIndex: "bills",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Cartera",
+      title: t("clients.columns.receivables"),
       key: "budget",
       dataIndex: "budget",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Riesgo",
+      title: t("clients.columns.risk"),
       key: "risk",
       dataIndex: "risk",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Holding",
+      title: t("clients.columns.holding"),
       key: "holding_name",
       dataIndex: "holding_name",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       key: "status",
       width: "150px",
       dataIndex: "status",
@@ -186,7 +189,7 @@ export const ClientsProjectTable = () => {
       key: "1",
       label: (
         <Button className="buttonOutlined" onClick={deleteClients}>
-          Eliminar clientes
+          {t("clients.deleteCustomers")}
         </Button>
       )
     },
@@ -194,7 +197,7 @@ export const ClientsProjectTable = () => {
       key: "2",
       label: (
         <Button className="buttonOutlined" onClick={bulkLoadShipTo}>
-          Carga Masiva Ship To
+          {t("clients.bulkUploadShipTo")}
         </Button>
       )
     },
@@ -202,7 +205,7 @@ export const ClientsProjectTable = () => {
       key: "3",
       label: (
         <Button className="buttonOutlined" onClick={downloadTemplateShipTo}>
-          Descarga Plantilla Ship To
+          {t("clients.downloadShipToTemplate")}
         </Button>
       )
     },
@@ -210,7 +213,7 @@ export const ClientsProjectTable = () => {
       key: "4",
       label: (
         <Button className="buttonOutlined" onClick={changeClientsState}>
-          Cambiar estado
+          {t("changeStatus")}
         </Button>
       )
     }
@@ -221,7 +224,7 @@ export const ClientsProjectTable = () => {
       <Flex justify="space-between" align="center" className="mainClientsProjectTable_header">
         <Flex gap={"0.625rem"}>
           <UiSearchInput
-            placeholder="Buscar clientes"
+            placeholder={t("clients.searchPlaceholder")}
             onChange={(e) => {
               setPage(1);
               setSearchQuery(e.target.value);
@@ -238,7 +241,7 @@ export const ClientsProjectTable = () => {
           onClick={onCreateClient}
           icon={<Plus weight="bold" size={18} />}
         >
-          Nuevo Cliente
+          {t("clients.newCustomer")}
         </Button>
       </Flex>
 

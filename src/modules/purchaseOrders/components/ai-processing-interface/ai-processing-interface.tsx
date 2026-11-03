@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "use-intl";
 
 import {
   Brain,
@@ -24,15 +25,17 @@ interface AIProcessingInterfaceProps {
 }
 
 const processingSteps = [
-  { id: 1, name: "Analizando documento PDF", icon: FileText },
-  { id: 2, name: "Extrayendo información de la factura", icon: Receipt },
-  { id: 3, name: "Identificando datos del comprador y vendedor", icon: User },
-  { id: 4, name: "Procesando detalle de productos", icon: Package },
-  { id: 5, name: "Calculando montos y totales", icon: DollarSign },
-  { id: 6, name: "Validando información extraída", icon: CheckCircle }
-];
+  { id: 1, name: "analyzingPdf", icon: FileText },
+  { id: 2, name: "extractingInvoice", icon: Receipt },
+  { id: 3, name: "identifyingParties", icon: User },
+  { id: 4, name: "processingProducts", icon: Package },
+  { id: 5, name: "calculatingTotals", icon: DollarSign },
+  { id: 6, name: "validatingData", icon: CheckCircle }
+] as const;
 
 export function AIProcessingInterface({ file, onClose }: AIProcessingInterfaceProps) {
+  const t = useTranslations("purchaseOrders.aiProcessing");
+  const tCommon = useTranslations("common");
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const hasProcessedRef = useRef(false);
@@ -85,9 +88,9 @@ export function AIProcessingInterface({ file, onClose }: AIProcessingInterfacePr
               <Brain className="h-6 w-6 text-cashport-green" />
             </div>
             <div>
-              <CardTitle className="text-cashport-black">Procesamiento con IA</CardTitle>
+              <CardTitle className="text-cashport-black">{t("title")}</CardTitle>
               <p className="text-sm text-muted-foreground truncate max-w-md">
-                Analizando {file.name}
+                {t("analyzingFile", { fileName: file.name })}
               </p>
             </div>
           </div>
@@ -96,6 +99,7 @@ export function AIProcessingInterface({ file, onClose }: AIProcessingInterfacePr
             size="sm"
             onClick={onClose}
             className="text-cashport-black hover:bg-cashport-gray-lighter"
+            aria-label={tCommon("actions.close")}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -104,9 +108,7 @@ export function AIProcessingInterface({ file, onClose }: AIProcessingInterfacePr
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-cashport-black">
-                Progreso del análisis
-              </span>
+              <span className="text-sm font-medium text-cashport-black">{t("progress")}</span>
               <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -115,10 +117,10 @@ export function AIProcessingInterface({ file, onClose }: AIProcessingInterfacePr
               <Loader2 className="h-5 w-5 text-cashport-green animate-spin" />
               <div>
                 <p className="font-medium text-cashport-black">
-                  {processingSteps[currentStep]?.name}
+                  {processingSteps[currentStep] && t(`steps.${processingSteps[currentStep].name}`)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Paso {currentStep + 1} de {processingSteps.length}
+                  {t("stepOf", { current: currentStep + 1, total: processingSteps.length })}
                 </p>
               </div>
             </div>
@@ -164,7 +166,7 @@ export function AIProcessingInterface({ file, onClose }: AIProcessingInterfacePr
                             : "text-gray-500"
                       }`}
                     >
-                      {step.name}
+                      {t(`steps.${step.name}`)}
                     </span>
                   </div>
                 );

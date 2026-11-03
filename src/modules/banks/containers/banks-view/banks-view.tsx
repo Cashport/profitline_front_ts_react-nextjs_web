@@ -1,6 +1,7 @@
 "use client";
 import { FC, useCallback, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useTranslations } from "use-intl";
 import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
 import { BanksChromeContext } from "../../contexts/banks-chrome-context";
@@ -22,6 +23,7 @@ const TAB_KEYS = {
 const VALID_TABS = new Set<string>(Object.values(TAB_KEYS));
 
 export const BanksView: FC = () => {
+  const t = useTranslations("banks.view");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,17 +47,17 @@ export const BanksView: FC = () => {
   const items = [
     {
       key: TAB_KEYS.activePayments,
-      label: "Pagos activos",
+      label: t("tabs.activePayments"),
       children: <ActivePaymentsTab isActive={activeKey === TAB_KEYS.activePayments} />
     },
     {
       key: TAB_KEYS.walletPayments,
-      label: "Otros pagos",
+      label: t("tabs.otherPayments"),
       children: <WalletPaymentsTab isActive={activeKey === TAB_KEYS.walletPayments} />
     },
     {
       key: TAB_KEYS.paymentApplications,
-      label: "Aplicaciones de pago",
+      label: t("tabs.paymentApplications"),
       children: (
         <PaymentApplicationsTab
           isActive={activeKey === TAB_KEYS.paymentApplications}
@@ -65,7 +67,7 @@ export const BanksView: FC = () => {
     },
     {
       key: TAB_KEYS.paymentApplicationsInformal,
-      label: "Aplicación de pago Informal",
+      label: t("tabs.informalPaymentApplications"),
       children: (
         <PaymentApplicationsTab
           isActive={activeKey === TAB_KEYS.paymentApplicationsInformal}
@@ -75,7 +77,7 @@ export const BanksView: FC = () => {
     },
     {
       key: TAB_KEYS.legalizaciones,
-      label: "Legalizaciones",
+      label: t("tabs.settlements"),
       children: (
         <PaymentApplicationsTab
           isActive={activeKey === TAB_KEYS.legalizaciones}
@@ -89,7 +91,7 @@ export const BanksView: FC = () => {
     <BanksChromeContext.Provider value={{ headerSlot, tabsSlot }}>
       <div className="cp-page">
         <Header
-          title="Bancos"
+          title={t("title")}
           actionsExtra={<div ref={setHeaderSlot} className="cp-on-page flex items-center gap-2" />}
         />
         <div className={styles.banksView}>

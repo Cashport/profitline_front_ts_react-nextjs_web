@@ -1,0 +1,113 @@
+{
+  "title": "Task Manager",
+  "searchPlaceholder": "Search task",
+  "newTask": "New task",
+  "showingRange": "Showing {from} to {to} of {total} results",
+  "filters": {
+    "dates": "Dates",
+    "selectPeriod": "Select a period",
+    "dateTag": "Date:",
+    "taskType": "Task type",
+    "typesCount": "{count} types"
+  },
+  "dateTab": {
+    "presets": "Preset periods",
+    "presetNames": {
+      "ultimos_7_dias": "Last 7 days",
+      "ultimos_30_dias": "Last 30 days",
+      "este_mes": "This month",
+      "este_trimestre": "This quarter",
+      "este_ano": "This year",
+      "trimestre_pasado": "Last quarter"
+    },
+    "customRange": "Custom range",
+    "from": "From",
+    "to": "To"
+  },
+  "changeStatus": {
+    "title": "Change status",
+    "description": "Select the task's new status",
+    "confirm": "Change status",
+    "menuLabel": "Change status",
+    "success": "Task status updated.",
+    "error": "Something went wrong while changing the status.",
+    "options": {
+      "completed": "Completed",
+      "spam": "Spam",
+      "dispute": "Dispute"
+    }
+  },
+  "generateAction": {
+    "title": "Select the action you want to take",
+    "sendEmail": "Send email",
+    "call": "Call",
+    "selectTask": "Select at least one task"
+  },
+  "intake": {
+    "title": "Process intake",
+    "confirmClient": "Confirm customer",
+    "country": "Country",
+    "loadingCountries": "Loading countries...",
+    "selectCountry": "Select country",
+    "noCountries": "No countries available",
+    "loadingClients": "Loading customers...",
+    "selectClient": "Select customer",
+    "noClients": "No customers available",
+    "selectFileType": "Select file type",
+    "noFiles": "No files available for this customer",
+    "fileType": "File type",
+    "fileDate": "File date"
+  },
+  "detail": {
+    "loadError": "Couldn't load the task details",
+    "loadingDetails": "Loading details...",
+    "updated": "Task updated",
+    "updateError": "Couldn't update the task",
+    "reprocessing": "Reprocessing attachment: {name}",
+    "reprocessError": "Couldn't reprocess the attachment",
+    "noSubject": "No subject",
+    "from": "From:",
+    "to": "To:",
+    "date": "Date:",
+    "attachments": "Attachments ({count})",
+    "reprocess": "Reprocess",
+    "processIntake": "Process intake",
+    "customFields": "Custom fields",
+    "loadingClients": "Loading customers...",
+    "assignClient": "Assign customer...",
+    "noClients": "No customers available",
+    "taskType": "Task type",
+    "loadingTypes": "Loading types...",
+    "selectType": "Select type...",
+    "assignee": "Assignee",
+    "loadingAssignees": "Loading assignees...",
+    "assignAssignee": "Select assignee...",
+    "addDescription": "Add description...",
+    "processedByAi": "Processed by Cashport AI",
+    "originalMessage": "Original message",
+    "noOriginalMessage": "No original message available"
+  },
+  "table": {
+    "taskType": "Task type",
+    "unassigned": "Unassigned",
+    "noDescription": "No description",
+    "viewDetails": "View details"
+  },
+  "legacyTable": {
+    "taskType": "Task type",
+    "assignee": "Assignee",
+    "receivables": "Receivables",
+    "order": "Order",
+    "actions": {
+      "sendEmail": "Send email",
+      "call": "Call",
+      "scheduleVisit": "Schedule visit",
+      "reconcile": "Reconcile",
+      "applyPayment": "Apply payment",
+      "submitInvoice": "Submit invoice",
+      "reportPayment": "Report payment",
+      "settleDeduction": "Resolve deduction",
+      "releaseOrder": "Release order"
+    }
+  }
+}

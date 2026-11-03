@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Form, Input, InputNumber, Modal, Select, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import { Button } from "@/modules/chat/ui/button";
@@ -10,12 +11,16 @@ import {
   IReferenceScopeLevel,
   IReferenceType
 } from "@/types/dataQuality/IDataQuality";
-import { IReferenceClient, IReferenceCountry, IReferenceRegion } from "@/services/dataQuality/references";
+import {
+  IReferenceClient,
+  IReferenceCountry,
+  IReferenceRegion
+} from "@/services/dataQuality/references";
 import {
   REFERENCE_ALLOWED_EXTENSIONS,
-  REFERENCE_SCOPE_OPTIONS,
   isAllowedReferenceFile
 } from "../../references/references.utils";
+import { useReferenceScopeLabels } from "../../hooks/useReferenceScopeLabels";
 
 interface ModalReferenceFormProps {
   isOpen: boolean;
@@ -45,6 +50,9 @@ export function ModalReferenceForm({
   lockedOwnerId,
   onSubmit
 }: ModalReferenceFormProps) {
+  const t = useTranslations("dataQuality.references.form");
+  const tCommon = useTranslations("common");
+  const scopeLabels = useReferenceScopeLabels();
   const [form] = Form.useForm<ICreateReferenceFormValues>();
   const [scope, setScope] = useState<IReferenceScopeLevel | undefined>(undefined);
   const [file, setFile] = useState<File | null>(null);
@@ -95,7 +103,7 @@ export function ModalReferenceForm({
   const handleFile = (selected: File) => {
     if (!isAllowedReferenceFile(selected)) {
       setFile(null);
-      setFileError(`Formato no permitido. Usa ${REFERENCE_ALLOWED_EXTENSIONS.join(", ")}.`);
+      setFileError(t("formatNotAllowed", { extensions: REFERENCE_ALLOWED_EXTENSIONS.join(", ") }));
       return;
     }
     setFile(selected);
@@ -105,19 +113,17 @@ export function ModalReferenceForm({
   const handleFinish = async (values: ICreateReferenceFormValues) => {
     if (submitting) return;
     if (!file) {
-      setFileError("El archivo Excel es obligatorio.");
+      setFileError(t("fileRequired"));
       return;
     }
     setSubmitting(true);
     try {
       await onSubmit({ ...values, file });
-      message.success("Referencia creada exitosamente.");
+      message.success(t("created"));
       onCreated();
       onClose();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "No se pudo crear la referencia."
-      );
+      message.error(error instanceof Error ? error.message : t("createError"));
     } finally {
       setSubmitting(false);
     }
@@ -127,7 +133,7 @@ export function ModalReferenceForm({
     <Modal
       open={isOpen}
       onCancel={submitting ? undefined : onClose}
-      title="Nueva referencia"
+      title={t("title")}
       footer={null}
       destroyOnClose
       maskClosable={!submitting}
@@ -135,71 +141,83 @@ export function ModalReferenceForm({
       <Form form={form} layout="vertical" onFinish={handleFinish} disabled={submitting}>
         <Form.Item
           name="reference_type"
-          label="Tipo de referencia"
-          rules={[{ required: true, message: "Selecciona el tipo de referencia" }]}
+          label={t("type")}
+          rules={[{ required: true, message: t("typeRequired") }]}
         >
           <Select
-            placeholder="Selecciona un tipo"
-            options={(referenceTypes || []).map((t) => ({ value: t.code, label: t.description }))}
+            placeholder={t("typePlaceholder")}
+            options={(referenceTypes || []).map((type) => ({
+              value: type.code,
+              label: type.description
+            }))}
           />
         </Form.Item>
 
         <Form.Item
           name="scope_level"
-          label="Ámbito"
-          rules={[{ required: true, message: "Selecciona el ámbito" }]}
+          label={t("scope")}
+          rules={[{ required: true, message: t("scopeRequired") }]}
         >
-          <Select placeholder="Selecciona el ámbito" options={REFERENCE_SCOPE_OPTIONS} onChange={handleScopeChange} disabled={!!lockedScopeLevel} />
+          <Select
+            placeholder={t("scopeRequired")}
+            options={scopeLabels.options}
+            onChange={handleScopeChange}
+            disabled={!!lockedScopeLevel}
+          />
         </Form.Item>
 
         <Form.Item
           name="owner"
           label={
-            scope === "client" ? "Cliente" : scope === "region" ? "Región" : "País"
+            scope === "client"
+              ? scopeLabels.labels.client
+              : scope === "region"
+                ? scopeLabels.labels.region
+                : scopeLabels.labels.country
           }
-          rules={[{ required: true, message: "Selecciona el propietario" }]}
+          rules={[{ required: true, message: t("ownerRequired") }]}
         >
           <Select
             showSearch
             optionFilterProp="label"
             disabled={!scope || lockedOwnerId != null}
-            placeholder={scope ? "Selecciona el propietario" : "Primero selecciona el ámbito"}
+            placeholder={scope ? t("ownerRequired") : t("selectScopeFirst")}
             options={ownerOptions}
           />
         </Form.Item>
 
-        <Form.Item label="Archivo Excel" required>
+        <Form.Item label={t("excelFile")} required>
           <UploadDropZone
             onFileUpload={handleFile}
             allowedExtensions={[...REFERENCE_ALLOWED_EXTENSIONS]}
-            title="Arrastra el archivo Excel aquí"
+            title={t("dropTitle")}
           />
           {file && <p className="mt-2 text-sm text-[#141414]">{file.name}</p>}
           {fileError && <p className="mt-2 text-sm text-red-600">{fileError}</p>}
         </Form.Item>
 
-        <Form.Item name="sheet_name" label="Nombre de hoja (opcional)">
-          <Input placeholder="p. ej. Sheet1" maxLength={128} />
+        <Form.Item name="sheet_name" label={t("sheetName")}>
+          <Input placeholder={t("sheetNamePlaceholder")} maxLength={128} />
         </Form.Item>
 
-        <Form.Item name="header_row" label="Fila de encabezado (opcional)">
+        <Form.Item name="header_row" label={t("headerRow")}>
           <InputNumber min={0} className="w-full" placeholder="0" />
         </Form.Item>
 
-        <Form.Item name="description" label="Descripción (opcional)">
+        <Form.Item name="description" label={t("description")}>
           <Input.TextArea rows={2} maxLength={500} />
         </Form.Item>
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="submit"
             className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119]"
             disabled={submitting}
           >
-            {submitting ? "Guardando..." : "Crear referencia"}
+            {submitting ? tCommon("status.saving") : t("submit")}
           </Button>
         </div>
       </Form>

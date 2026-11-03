@@ -1,14 +1,16 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 
 import { getAllCountries } from "@/services/countries/countries";
 import { getAllCurrencies } from "@/services/currencies/currencies";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 
 interface Option {
   value: string;
-  label: string;
+  label: ReactNode;
   disableCheckbox?: boolean;
   isLeaf?: boolean;
   children?: Option[];
@@ -18,6 +20,7 @@ interface Props {
   setSelecetedProjects: Dispatch<SetStateAction<{ country: string[]; currency: string[] }>>;
 }
 export const FilterProjects = ({ setSelecetedProjects }: Props) => {
+  const tCommon = useTranslations("common");
   const [countries, setCountries] = useState<any>([]);
   const [currencies, setCurrencies] = useState<any>([]);
 
@@ -77,7 +80,7 @@ export const FilterProjects = ({ setSelecetedProjects }: Props) => {
       multiple
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomRight"
       onClear={() => setSelecetedProjects({ country: [], currency: [] })}
       options={optionsList}
@@ -92,13 +95,13 @@ export const FilterProjects = ({ setSelecetedProjects }: Props) => {
 const options: Option[] = [
   {
     value: "Pais",
-    label: "Pais",
+    label: filterLabel("country"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Currencia",
-    label: "Currencia",
+    label: filterLabel("currency"),
     isLeaf: false,
     disableCheckbox: true
   }

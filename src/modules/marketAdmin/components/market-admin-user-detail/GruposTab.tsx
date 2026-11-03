@@ -5,6 +5,7 @@ import { Dropdown, Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { DotsThreeVertical } from "@phosphor-icons/react";
 import { Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import ModalAgregarGrupos from "@/modules/marketAdmin/components/market-admin-user-detail/ModalAgregarGrupos";
 
@@ -29,6 +30,8 @@ export default function GruposTab({
   onAgregar,
   onQuitar
 }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.groupsTab");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
 
@@ -45,7 +48,7 @@ export default function GruposTab({
 
   const columns: ColumnsType<GrupoItem> = [
     {
-      title: "Grupo",
+      title: t("group"),
       dataIndex: "group_name",
       key: "group_name",
       onHeaderCell: headerCell,
@@ -65,7 +68,7 @@ export default function GruposTab({
             items: [
               {
                 key: "eliminar",
-                label: "Eliminar",
+                label: tCommon("actions.delete"),
                 icon: <Trash2 size={14} />,
                 onClick: () => onQuitar(g.id)
               }
@@ -73,7 +76,8 @@ export default function GruposTab({
           }}
         >
           <button
-            title="Acciones"
+            title={tCommon("fields.actions")}
+            aria-label={tCommon("fields.actions")}
             disabled={disabled}
             className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-transparent"
           >
@@ -95,12 +99,15 @@ export default function GruposTab({
   return (
     <div className="cp-fill">
       <div className="flex items-center justify-between gap-4 mb-4">
-        <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
+        <UiSearchInput
+          placeholder={tCommon("placeholders.search")}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors flex-shrink-0"
         >
-          <Plus size={18} /> Agregar grupo de clientes
+          <Plus size={18} /> {t("add")}
         </button>
       </div>
 
@@ -112,9 +119,7 @@ export default function GruposTab({
         loading={disabled}
         pagination={false}
         locale={{
-          emptyText: search.trim()
-            ? "No se encontraron grupos con ese nombre."
-            : "Este usuario aún no tiene grupos de clientes asignados."
+          emptyText: search.trim() ? t("noSearchResults") : t("empty")
         }}
       />
 

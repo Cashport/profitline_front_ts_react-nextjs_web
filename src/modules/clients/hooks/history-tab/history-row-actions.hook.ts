@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useMessageApi } from "@/context/MessageContext";
 import { reprocessExcel, reprocessPDF } from "@/services/paymentApplications/paymentApplications";
 
@@ -25,28 +26,26 @@ const getApplicationIdFromRow = (row: IHistoryRow) => {
 /** Acciones por fila del historial del cliente: ver detalle, regenerar plano y PDF. */
 export const useHistoryRowActions = ({ onOpenCommunicationDetail }: UseHistoryRowActionsProps) => {
   const { showMessage } = useMessageApi();
+  const t = useTranslations("clients.history.rowActions");
 
   const handleOpenDetail = (row: IHistoryRow) => {
     if (row.url) {
       window.open(row.url, "_blank");
       return;
     }
-    if (!row.id_mongo_log) return showMessage("info", "No hay detalle de esta comunicación");
+    if (!row.id_mongo_log) return showMessage("info", t("noDetail"));
     onOpenCommunicationDetail(row.id_mongo_log);
   };
 
   const handleRegenerateExcel = async (row: IHistoryRow) => {
     if (!isPaymentApplicationEvent(row)) {
-      return showMessage(
-        "info",
-        "Esta opción solo aplica para eventos de Aplicación de pago o Legalización de saldo"
-      );
+      return showMessage("info", t("onlyPaymentEvents"));
     }
 
     const applicationId = getApplicationIdFromRow(row);
 
     if (!applicationId) {
-      return showMessage("info", "No se encontró el id de aplicación de pago en este registro");
+      return showMessage("info", t("applicationIdNotFound"));
     }
 
     try {
@@ -58,23 +57,20 @@ export const useHistoryRowActions = ({ onOpenCommunicationDetail }: UseHistoryRo
         return;
       }
 
-      const message = error instanceof Error ? error.message : "No se pudo generar el plano";
+      const message = error instanceof Error ? error.message : t("flatFileError");
       showMessage("error", message);
     }
   };
 
   const handleRegeneratePDF = async (row: IHistoryRow) => {
     if (!isPaymentApplicationEvent(row)) {
-      return showMessage(
-        "info",
-        "Esta opción solo aplica para eventos de Aplicación de pago o Legalización de saldo"
-      );
+      return showMessage("info", t("onlyPaymentEvents"));
     }
 
     const applicationId = getApplicationIdFromRow(row);
 
     if (!applicationId) {
-      return showMessage("info", "No se encontró el id de aplicación de pago en este registro");
+      return showMessage("info", t("applicationIdNotFound"));
     }
 
     try {
@@ -86,7 +82,7 @@ export const useHistoryRowActions = ({ onOpenCommunicationDetail }: UseHistoryRo
         return;
       }
 
-      const message = error instanceof Error ? error.message : "No se pudo generar el PDF";
+      const message = error instanceof Error ? error.message : t("pdfError");
       showMessage("error", message);
     }
   };

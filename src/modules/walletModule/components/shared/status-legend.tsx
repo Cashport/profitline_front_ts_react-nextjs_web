@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 import { ORDEN_EST } from "../../constants";
 import { estadoMeta } from "../../utils/estados";
@@ -33,10 +35,12 @@ export default function StatusLegend({
   selectable = [],
   onSelect
 }: StatusLegendProps) {
+  // También re-renderiza la leyenda al cambiar de idioma (los nombres salen de estadoMeta).
+  const t = useTranslations("wallet.legend");
   return (
     <div
       role={onSelect ? "group" : undefined}
-      aria-label={onSelect ? "Filtrar por estado" : undefined}
+      aria-label={onSelect ? t("filterByStatus") : undefined}
       className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-muted-foreground"
     >
       {estados.map((e) => {

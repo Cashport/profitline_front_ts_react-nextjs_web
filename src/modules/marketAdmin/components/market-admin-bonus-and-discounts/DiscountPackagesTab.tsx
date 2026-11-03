@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Select, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -18,13 +19,13 @@ import DiscountsToolbar from "./DiscountsToolbar";
 import {
   DateCell,
   ESTADO_FILTER_ALL,
-  ESTADO_FILTER_OPTIONS,
   ESTADO_SELECT_CLASSNAME,
   PAGE_SIZE,
   StatusPill,
   TextCell,
   TypePill,
-  headerCell
+  headerCell,
+  useEstadoFilterOptions
 } from "./discountsTableConfig";
 
 interface DiscountPackagesTabProps {
@@ -32,6 +33,9 @@ interface DiscountPackagesTabProps {
 }
 
 export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTabProps) {
+  const t = useTranslations("marketAdmin.discountsTable");
+  const tCommon = useTranslations("common");
+  const estadoFilterOptions = useEstadoFilterOptions();
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState(ESTADO_FILTER_ALL);
   const [page, setPage] = useState(1);
@@ -58,7 +62,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
 
   const columns: ColumnsType<DiscountPackage> = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
@@ -66,7 +70,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
       render: (v: string) => <TextCell value={v} />
     },
     {
-      title: "Tipo",
+      title: tCommon("fields.type"),
       dataIndex: "discountType",
       key: "discountType",
       width: 130,
@@ -75,7 +79,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
       render: (tipo: string) => <TypePill tipo={tipo} />
     },
     {
-      title: "Inicio",
+      title: t("columns.start"),
       dataIndex: "startDate",
       key: "startDate",
       sorter: (a, b) => a.startDate.localeCompare(b.startDate),
@@ -83,7 +87,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
       render: (v: string) => <DateCell value={v} />
     },
     {
-      title: "Fin",
+      title: t("columns.end"),
       dataIndex: "endDate",
       key: "endDate",
       sorter: (a, b) => (a.endDate ?? "").localeCompare(b.endDate ?? ""),
@@ -91,7 +95,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
       render: (v: string | null) => <DateCell value={v} />
     },
     {
-      title: "Reglas",
+      title: t("columns.rules"),
       dataIndex: "reglas",
       key: "reglas",
       width: 90,
@@ -99,7 +103,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
       render: () => <span className="text-sm text-[#141414]">-</span>
     },
     {
-      title: "Aprobación",
+      title: t("columns.approval"),
       dataIndex: "approvalEntityStatusId",
       key: "approvalEntityStatusId",
       width: 140,
@@ -111,7 +115,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
       render: (statusId: number | null) => <ApprovalStatusPill statusId={statusId} />
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "active",
       key: "active",
       width: 110,
@@ -124,7 +128,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, r) => <GenericEyeButton href={`${MARKET_ADMIN_DISCOUNTS_BASE}/paquete/${r.id}`} />
+      render: (_, r) => <GenericEyeButton href={`${MARKET_ADMIN_DISCOUNTS_BASE}/package/${r.id}`} />
     }
   ];
 
@@ -132,7 +136,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
     <>
       <DiscountsToolbar onCrearNuevo={onCrearNuevo}>
         <UiSearchInput
-          placeholder="Buscar..."
+          placeholder={t("searchPlaceholder")}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
@@ -140,7 +144,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
         />
         <AccionesDropdown
           selectedCount={selectedRowKeys.length}
-          entityLabel="bonificado(s)"
+          entity="packages"
           onClearSelection={() => setSelectedRowKeys([])}
         />
         <Select
@@ -149,8 +153,8 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
             setEstadoFilter(value);
             setPage(1);
           }}
-          options={ESTADO_FILTER_OPTIONS}
-          placeholder="Estado"
+          options={estadoFilterOptions}
+          placeholder={tCommon("fields.status")}
           style={{ minWidth: 140 }}
           className={ESTADO_SELECT_CLASSNAME}
         />
@@ -166,7 +170,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
           dataSource={filtered}
           rowKey="id"
           showSorterTooltip={false}
-          locale={{ emptyText: "No se encontraron bonificados." }}
+          locale={{ emptyText: t("packages.empty") }}
           rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
           onRow={(record) => ({
             onClick: (e) => {
@@ -186,7 +190,7 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} bonificados · ${activos} activos`
+              t("packages.total", { from: range[0], to: range[1], total, active: activos })
           }}
           onChange={(pag, _filters, _sorter, extra) =>
             setPage(extra.action === "paginate" ? pag.current ?? 1 : 1)

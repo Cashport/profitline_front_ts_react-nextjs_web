@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, Flex, message, Table, TableProps } from "antd";
 import { Eye } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import "./BalancesTable.scss";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
@@ -57,6 +58,7 @@ export function BalancesTable({
   onOpenDetail,
   onUploaded
 }: BalancesTableProps) {
+  const t = useTranslations("balances.table");
   const width = useScreenWidth();
   const { showMessage } = useMessageApi();
 
@@ -79,14 +81,13 @@ export function BalancesTable({
   };
 
   const handleSendOtherBalances = async (record: IBalanceRow) => {
-    const hideLoading = message.loading("Enviando a otros saldos...", 0);
+    const hideLoading = message.loading(t("sendingToOther"), 0);
     try {
       await sendToOtherBalances(record.id);
-      showMessage("success", "Saldo enviado a otros saldos correctamente");
+      showMessage("success", t("sentToOther"));
       onUploaded?.();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Ocurrió un error al enviar a otros saldos";
+      const errorMessage = error instanceof Error ? error.message : t("sendToOtherError");
       showMessage("error", errorMessage);
     } finally {
       hideLoading();
@@ -101,7 +102,7 @@ export function BalancesTable({
 
   const columns: TableProps<IBalanceRow>["columns"] = [
     {
-      title: "Id",
+      title: t("columns.id"),
       dataIndex: "id",
       key: "id",
       width: colWidth(120),
@@ -110,7 +111,7 @@ export function BalancesTable({
       render: (value: number) => <span className="text-sm text-cashport-black">{value}</span>
     },
     {
-      title: "Fecha saldo",
+      title: t("columns.date"),
       dataIndex: "financial_record_date",
       key: "fecha",
       fixed: "left",
@@ -123,7 +124,7 @@ export function BalancesTable({
       )
     },
     {
-      title: "Días",
+      title: t("columns.days"),
       key: "diasSaldo",
       width: colWidth(90),
       showSorterTooltip: false,
@@ -136,7 +137,7 @@ export function BalancesTable({
     ...(context === "balances"
       ? [
           {
-            title: "Cliente",
+            title: t("columns.customer"),
             dataIndex: "client_name",
             key: "cliente",
             sorter: (a: IBalanceRow, b: IBalanceRow) =>
@@ -153,7 +154,7 @@ export function BalancesTable({
         ]
       : []),
     {
-      title: "Tipo",
+      title: t("columns.type"),
       dataIndex: "motive_name",
       key: "tipo",
       width: colWidth(195),
@@ -162,7 +163,7 @@ export function BalancesTable({
       render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
     },
     {
-      title: "Procedencia",
+      title: t("columns.origin"),
       dataIndex: "origin_name",
       key: "procedencia",
       render: (_: unknown, record: IBalanceRow) => {
@@ -184,7 +185,7 @@ export function BalancesTable({
       }
     },
     {
-      title: "Descripción",
+      title: t("columns.description"),
       key: "descripcion",
       dataIndex: "COMMENTS",
       showSorterTooltip: false,
@@ -195,7 +196,7 @@ export function BalancesTable({
       )
     },
     {
-      title: "Saldo inicial",
+      title: t("columns.originalAmount"),
       dataIndex: "initial_amount",
       key: "initial_amount",
       width: colWidth(200),
@@ -209,7 +210,7 @@ export function BalancesTable({
       )
     },
     {
-      title: "Pendiente",
+      title: t("columns.pending"),
       dataIndex: "pending_amount",
       key: "pending_amount",
       width: colWidth(200),

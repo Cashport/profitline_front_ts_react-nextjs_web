@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { DateDraft, formatDateTagValue } from "./FilterDateTab";
 
@@ -12,12 +13,13 @@ interface DateFilterTagProps {
 
 // Committed counterpart of FilterDateTab, rendered by FilterModal through the
 // "fecha" category's renderTag. Styling mirrors the option tags in ActiveFilterTags.
-export function DateFilterTag({ value, onClear, label = "Fecha" }: DateFilterTagProps) {
+export function DateFilterTag({ value, onClear, label }: DateFilterTagProps) {
+  const t = useTranslations("reverseLogistics.dateFilter");
   if (!value.from && !value.to) return null;
 
   return (
     <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-[13px]">
-      <span className="text-muted-foreground font-medium">{label}:</span>
+      <span className="text-muted-foreground font-medium">{label ?? t("tagLabel")}:</span>
       <span className="font-bold text-foreground">{formatDateTagValue(value)}</span>
       <button
         type="button"

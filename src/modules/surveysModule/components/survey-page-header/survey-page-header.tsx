@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import UserMenu from "@/components/organisms/header/user-menu/user-menu";
 
@@ -25,11 +26,12 @@ export default function SurveyPageHeader({
   titleExtra,
   actions
 }: SurveyPageHeaderProps) {
+  const t = useTranslations("surveys.pageHeader");
   return (
     <header className="flex flex-wrap items-center gap-3.5 pb-3 max-[768px]:px-2">
       <Link
         href={backHref}
-        title={`Volver a ${backLabel}`}
+        title={t("backTo", { label: backLabel })}
         onClick={
           onBack
             ? (e) => {

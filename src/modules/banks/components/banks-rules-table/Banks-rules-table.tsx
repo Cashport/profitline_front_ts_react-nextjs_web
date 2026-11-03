@@ -1,6 +1,7 @@
 import { Dispatch, Key, SetStateAction } from "react";
 import { Button, Flex, Table, TableProps } from "antd";
 import { PencilLine, Triangle } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { IAllRules, IRules } from "@/types/banks/IBanks";
 
@@ -29,6 +30,8 @@ export const BanksRulesTable = ({
   onChangePage,
   setShowBankRuleModal
 }: PropsBanksRulesTable) => {
+  const t = useTranslations("banks.rules");
+  const tCommon = useTranslations("common");
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
@@ -47,7 +50,7 @@ export const BanksRulesTable = ({
 
   const columns: TableProps<IRules>["columns"] = [
     {
-      title: "Descripción",
+      title: tCommon("fields.description"),
       dataIndex: "description",
       className: "tableColumn",
       render: (text) => <p className="tableInfo">{text}</p>
@@ -58,17 +61,17 @@ export const BanksRulesTable = ({
       render: () => <p>=</p>
     },
     {
-      title: "Nombre de cliente",
+      title: t("columns.customerName"),
       dataIndex: "client_name",
       className: "tableColumn",
       render: (client_name) => <p className="tableInfo">{client_name || "-"}</p>
     },
     {
-      title: "Coincidencia",
+      title: t("columns.match"),
       dataIndex: "is_exactly",
       className: "tableColumn",
       render: (is_exactly) => (
-        <p className="tableInfo">{is_exactly ? "Coincidencia exacta" : "Contiene"}</p>
+        <p className="tableInfo">{is_exactly ? t("matchExact") : t("matchContains")}</p>
       )
     },
     {

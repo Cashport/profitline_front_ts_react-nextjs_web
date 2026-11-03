@@ -1,11 +1,15 @@
 import React from "react";
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { formatCompactCurrency } from "./Formatters";
 import RiskBadge from "./RiskBadge";
 import ExpandableCard from "./ExpandableCard";
-import { CUSTOMERS_RISK, RISK_STATS, STRATEGIES_DATA } from "../lib/constants";
+import { CUSTOMERS_RISK, RISK_KEYS, RISK_STATS, STRATEGIES_DATA } from "../lib/constants";
 
 const DashboardManagement: React.FC = () => {
+  const t = useTranslations("newDashboard.management");
+  const tRisk = useTranslations("newDashboard.risk");
+  const tCommon = useTranslations("common");
   return (
     <div className="grid grid-cols-12 gap-[var(--card-gap)] animate-fade-in">
       {/* Left Column */}
@@ -14,7 +18,7 @@ const DashboardManagement: React.FC = () => {
         <ExpandableCard
           title={
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span> Riesgo por clientes
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span> {t("customerRisk")}
             </span>
           }
         >
@@ -24,9 +28,9 @@ const DashboardManagement: React.FC = () => {
                 className={`flex justify-between items-end ${isExpanded ? "mb-12 px-12" : "mb-6"}`}
               >
                 {[
-                  { label: "Clientes", count: 868, subtitle: "Total" },
-                  { label: "Clientes", count: 2387, subtitle: "Activos" },
-                  { label: "Clientes", count: 5208, subtitle: "Inactivos" }
+                  { count: 868, subtitle: t("customersTotal") },
+                  { count: 2387, subtitle: t("customersActive") },
+                  { count: 5208, subtitle: t("customersInactive") }
                 ].map((item, idx) => (
                   <div key={idx} className="text-center">
                     <p
@@ -61,7 +65,7 @@ const DashboardManagement: React.FC = () => {
                       className={`w-2 h-2 rounded-full ${isExpanded ? "inline-block" : "hidden"}`}
                       style={{ backgroundColor: stat.color }}
                     ></span>
-                    {stat.label}
+                    {tRisk(RISK_KEYS[stat.label])}
                   </span>
                 ))}
               </div>
@@ -73,7 +77,7 @@ const DashboardManagement: React.FC = () => {
         <ExpandableCard
           title={
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span> Estrategias de cobro
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span> {t("strategies")}
             </span>
           }
           noPadding={true}
@@ -83,10 +87,18 @@ const DashboardManagement: React.FC = () => {
               <table className={`w-full text-[13px] ${isExpanded ? "text-sm" : ""}`}>
                 <thead className="bg-cp-surface">
                   <tr>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-left rounded-tl">Tipo de cliente</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">Cartera</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">%</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center rounded-tr">Visitas</th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-left rounded-tl">
+                      {t("columns.customerType")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {t("columns.receivables")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">
+                      %
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center rounded-tr">
+                      {t("columns.visits")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -110,7 +122,7 @@ const DashboardManagement: React.FC = () => {
         <ExpandableCard
           title={
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span> Novedades
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span> {t("disputes")}
             </span>
           }
         >
@@ -124,7 +136,7 @@ const DashboardManagement: React.FC = () => {
                 >
                   1290
                 </p>
-                <p className="text-[13px] text-gray-500">Total novedades</p>
+                <p className="text-[13px] text-gray-500">{t("totalDisputes")}</p>
               </div>
               <div className="text-right">
                 <p
@@ -132,7 +144,7 @@ const DashboardManagement: React.FC = () => {
                 >
                   1280
                 </p>
-                <p className="text-[13px] text-gray-500">Mes actual</p>
+                <p className="text-[13px] text-gray-500">{t("thisMonth")}</p>
               </div>
               <div
                 className={`${isExpanded ? "h-24 w-32" : "h-14 w-20 md:h-16 md:w-24"} bg-[#141414] rounded flex flex-col items-center justify-center text-white p-2`}
@@ -142,7 +154,7 @@ const DashboardManagement: React.FC = () => {
                 >
                   16
                 </span>
-                <span className="text-[13px] text-center leading-none mt-1">Dias prom.</span>
+                <span className="text-[13px] text-center leading-none mt-1">{t("avgDays")}</span>
               </div>
             </div>
           )}
@@ -157,11 +169,13 @@ const DashboardManagement: React.FC = () => {
           title={
             <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center w-full pr-10">
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-orange-500"></span> Detallado por cliente
+                <span className="w-2 h-2 rounded-full bg-orange-500"></span> {t("byCustomer")}
               </span>
               <button className="flex items-center gap-2 px-4 py-1.5 bg-purple-100 text-purple-700 rounded-full text-[13px] font-bold hover:bg-purple-200 transition-colors">
-                <Sparkles size={14} /> <span className="hidden sm:inline">Análisis con</span>{" "}
-                CashportAI
+                <Sparkles size={14} />{" "}
+                {t.rich("analyzeWith", {
+                  wide: (chunks) => <span className="hidden sm:inline">{chunks}</span>
+                })}
               </button>
             </div>
           }
@@ -174,12 +188,24 @@ const DashboardManagement: React.FC = () => {
                 >
                   <thead className="bg-cp-surface">
                     <tr>
-                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink">Cliente</th>
-                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">Cartera</th>
-                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">Vencido</th>
-                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">% Venc</th>
-                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">Visitas</th>
-                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center w-28">Riesgo</th>
+                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
+                        {tCommon("fields.customer")}
+                      </th>
+                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                        {t("columns.receivables")}
+                      </th>
+                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                        {t("columns.pastDue")}
+                      </th>
+                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">
+                        {t("columns.pastDuePct")}
+                      </th>
+                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">
+                        {t("columns.visits")}
+                      </th>
+                      <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center w-28">
+                        {t("columns.risk")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -205,10 +231,10 @@ const DashboardManagement: React.FC = () => {
                 </table>
               </div>
               <div className="p-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-center text-[13px] font-bold text-gray-700 gap-2">
-                <span>Total</span>
+                <span>{t("total")}</span>
                 <div className="flex gap-4 md:gap-8 flex-col sm:flex-row text-center sm:text-right">
-                  <span>Cartera: $ 269.7B</span>
-                  <span>Vencido: $ 95.6B</span>
+                  <span>{t("totalReceivables", { amount: "$ 269.7B" })}</span>
+                  <span>{t("totalPastDue", { amount: "$ 95.6B" })}</span>
                 </div>
               </div>
             </div>

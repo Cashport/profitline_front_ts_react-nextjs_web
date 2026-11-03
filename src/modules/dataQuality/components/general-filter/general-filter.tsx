@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Filter, ChevronDown, Calendar, FileText, Package } from "lucide-react";
+import { useTranslations } from "use-intl";
+
 import { Button } from "@/modules/chat/ui/button";
 import { ICountryClientsFilters } from "@/types/dataQuality/IDataQuality";
 
@@ -18,6 +20,8 @@ export function DataQualityGeneralFilter({
   activeFilters,
   onChange
 }: DataQualityGeneralFilterProps) {
+  const t = useTranslations("dataQuality.generalFilter");
+  const tCommon = useTranslations("common");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -34,40 +38,40 @@ export function DataQualityGeneralFilter({
 
   const statusOptions = useMemo(
     () => [
-      { value: null as string | null, label: "Todos los estados" },
+      { value: null as string | null, label: t("allStatuses") },
       ...(filterOptions?.status ?? []).map((s) => ({ value: s as string | null, label: s }))
     ],
-    [filterOptions?.status]
+    [filterOptions?.status, t]
   );
 
   const periodicityOptions = useMemo(
     () => [
-      { value: null as string | null, label: "Todas las periodicidades" },
+      { value: null as string | null, label: t("allFrequencies") },
       ...(filterOptions?.periodicity ?? []).map((p) => ({ value: p as string | null, label: p }))
     ],
-    [filterOptions?.periodicity]
+    [filterOptions?.periodicity, t]
   );
 
   const fileTypeOptions = useMemo(
     () => [
-      { value: null as string | null, label: "Todos los archivos" },
+      { value: null as string | null, label: t("allFiles") },
       ...(filterOptions?.archive_types ?? []).map((a) => ({
         value: String(a.id) as string | null,
         label: a.description
       }))
     ],
-    [filterOptions?.archive_types]
+    [filterOptions?.archive_types, t]
   );
 
   const intakeTypeOptions = useMemo(
     () => [
-      { value: null as string | null, label: "Todos los tipos de ingesta" },
+      { value: null as string | null, label: t("allIntakeTypes") },
       ...(filterOptions?.intake_types ?? []).map((i) => ({
         value: String(i.id) as string | null,
         label: i.description
       }))
     ],
-    [filterOptions?.intake_types]
+    [filterOptions?.intake_types, t]
   );
 
   const sections: {
@@ -78,25 +82,25 @@ export function DataQualityGeneralFilter({
   }[] = [
     {
       key: "status",
-      label: "Estados",
+      label: t("statuses"),
       icon: <Filter className="h-3 w-3 inline mr-1" />,
       options: statusOptions
     },
     {
       key: "periodicity",
-      label: "Periodicidad",
+      label: t("frequency"),
       icon: <Calendar className="h-3 w-3 inline mr-1" />,
       options: periodicityOptions
     },
     {
       key: "fileType",
-      label: "Tipo de archivo",
+      label: t("fileType"),
       icon: <FileText className="h-3 w-3 inline mr-1" />,
       options: fileTypeOptions
     },
     {
       key: "intakeType",
-      label: "Tipo de ingesta",
+      label: t("intakeType"),
       icon: <Package className="h-3 w-3 inline mr-1" />,
       options: intakeTypeOptions
     }
@@ -111,7 +115,7 @@ export function DataQualityGeneralFilter({
         onClick={() => setIsOpen(!isOpen)}
       >
         <Filter className="h-4 w-4 mr-2" />
-        <span className="hidden min-[930px]:inline">Filtros</span>
+        <span className="hidden min-[930px]:inline">{t("filters")}</span>
         <ChevronDown className="h-4 w-4 ml-2" />
       </Button>
 
@@ -159,7 +163,7 @@ export function DataQualityGeneralFilter({
                 onClick={() => setIsOpen(false)}
                 className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter"
               >
-                Cerrar
+                {tCommon("actions.close")}
               </Button>
             </div>
           </div>

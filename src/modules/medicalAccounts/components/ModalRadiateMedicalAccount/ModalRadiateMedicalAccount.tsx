@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Flex, Modal, Typography } from "antd";
 import { FileText, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -28,13 +29,14 @@ export function ModalRadiateMedicalAccount({
   onSuccess
 }: ModalRadiateMedicalAccountProps) {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const t = useTranslations("medicalAccounts");
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
 
   const handleFileUpload = (file: File) => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      showMessage("error", "Solo se permiten archivos PDF.");
+      showMessage("error", t("upload.onlyPdf"));
       return;
     }
     setPdfFile(file);
@@ -46,14 +48,11 @@ export function ModalRadiateMedicalAccount({
     setIsLoading(true);
     try {
       const response = await radicateMedicalAccount(accountId, pdfFile);
-      showMessage("success", "Cuenta médica radicada correctamente.");
+      showMessage("success", t("submitModal.success"));
       onSuccess(response.data);
       onClose();
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al radicar la cuenta."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("submitModal.error"));
     } finally {
       setIsLoading(false);
     }
@@ -72,10 +71,10 @@ export function ModalRadiateMedicalAccount({
       open={isOpen}
       width={520}
       onCancel={handleClose}
-      title={<Title level={4}>Radicar</Title>}
+      title={<Title level={4}>{t("submitModal.title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Radicar"
+          titleConfirm={t("submitModal.confirm")}
           showLeftButton={false}
           isConfirmDisabled={!pdfFile}
           isConfirmLoading={isLoading}
@@ -86,13 +85,11 @@ export function ModalRadiateMedicalAccount({
       destroyOnClose
     >
       <Flex vertical gap="1.25rem">
-        <p className="-mt-2 text-sm text-gray-500">
-          Adjunta el PDF con la evidencia de radicación.
-        </p>
+        <p className="-mt-2 text-sm text-gray-500">{t("submitModal.description")}</p>
 
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            Evidencia PDF <span className="text-red-500">*</span>
+            {t("submitModal.evidence")} <span className="text-red-500">*</span>
           </p>
 
           {pdfFile ? (
@@ -106,7 +103,7 @@ export function ModalRadiateMedicalAccount({
                 type="button"
                 onClick={() => setPdfFile(null)}
                 className="shrink-0 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                aria-label="Quitar archivo"
+                aria-label={t("upload.removeFile")}
               >
                 <X size={18} />
               </button>
@@ -115,8 +112,8 @@ export function ModalRadiateMedicalAccount({
             <UploadDropZone
               onFileUpload={handleFileUpload}
               allowedExtensions={[".pdf"]}
-              title="Arrastra el PDF aquí"
-              subtitle="o haz clic para seleccionarlo"
+              title={t("upload.dropTitle")}
+              subtitle={t("upload.dropSubtitle")}
             />
           )}
         </div>

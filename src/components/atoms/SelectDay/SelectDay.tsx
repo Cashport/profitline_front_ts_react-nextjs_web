@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 import "./selectDay.scss";
 
 type Option = {
@@ -14,6 +15,7 @@ type SelecDayProps = {
 };
 
 export const SelectDay = ({ value, onChange, disabled, readonly }: SelecDayProps) => {
+  const t = useTranslations("components.selectDay");
   const [selectedOptions, setSelectedOptions] = useState<Option[]>(value);
 
   const handleSelected = (option: Option) => {
@@ -45,11 +47,24 @@ export const SelectDay = ({ value, onChange, disabled, readonly }: SelecDayProps
           onClick={() => handleSelected(option)}
           key={option.value}
         >
-          <p className="selectDayContainer__day__label">{option.label}</p>
+          <p className="selectDayContainer__day__label">
+            {DAY_KEYS[option.value] ? t(DAY_KEYS[option.value]) : option.label}
+          </p>
         </div>
       ))}
     </div>
   );
+};
+
+// `value` es el día que guarda el backend; la inicial visible se traduce por día.
+const DAY_KEYS: Record<string, "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat"> = {
+  Domingo: "sun",
+  Lunes: "mon",
+  Martes: "tue",
+  Miércoles: "wed",
+  Jueves: "thu",
+  Viernes: "fri",
+  Sábado: "sat"
 };
 
 export const selectDayOptions: Option[] = [

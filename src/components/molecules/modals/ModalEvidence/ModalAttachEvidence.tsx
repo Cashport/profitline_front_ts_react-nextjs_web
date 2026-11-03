@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Button, Flex, Modal } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
 import { CaretLeft, Plus } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 
@@ -68,13 +69,15 @@ const ModalAttachEvidence = ({
   setShowDefaultFile,
   showDefaultFile
 }: EvidenceModalProps) => {
+  const t = useTranslations("modals.attachEvidence");
+  const tCommon = useTranslations("common");
   const handleOnChangeDocument: any = (info: UploadChangeParam<File>) => {
     const { file } = info;
     if (file) {
       const fileSizeInMB = file.size / (1024 * 1024);
 
       if (fileSizeInMB > 30) {
-        alert("El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.");
+        alert(t("fileTooLarge"));
         return;
       }
 
@@ -92,7 +95,7 @@ const ModalAttachEvidence = ({
 
     for (let i = 0; i < files.length; i++) {
       if (selectedEvidence.some((file) => file.name === files[i].name)) {
-        alert("Ya existe un archivo con el mismo nombre");
+        alert(t("duplicateName"));
         return;
       }
     }
@@ -122,22 +125,20 @@ const ModalAttachEvidence = ({
         {!noTitle && (
           <button className={styles.content__header} onClick={handleCancel}>
             <CaretLeft size={"1.25rem"} />
-            <h4>{customTexts?.title ? customTexts?.title : "Evidencia"}</h4>
+            <h4>{customTexts?.title ? customTexts?.title : t("title")}</h4>
           </button>
         )}
         {!noDescription && (
           <p className={styles.content__description}>
-            {customTexts?.description
-              ? customTexts?.description
-              : "Adjunta la evidencia e ingresa un comentario"}
+            {customTexts?.description ? customTexts?.description : t("description")}
           </p>
         )}
         <div className={styles.content__evidence}>
           <Flex vertical>
-            <p>Evidencia</p>
+            <p>{t("evidence")}</p>
             <em className="descriptionDocument">
               {" "}
-              *{isMandatory?.evidence ? "Obligatorio" : "Opcional"}
+              *{isMandatory?.evidence ? t("required") : t("optional")}
             </em>
           </Flex>
 
@@ -190,7 +191,7 @@ const ModalAttachEvidence = ({
                 className={styles.addDocument}
                 icon={<Plus size={"1rem"} />}
               >
-                <p>Cargar otro documento</p>
+                <p>{t("uploadAnother")}</p>
               </Button>
               <input
                 type="file"
@@ -205,15 +206,15 @@ const ModalAttachEvidence = ({
           {noComment ? null : (
             <>
               <Flex vertical>
-                <p>Comentarios</p>
+                <p>{tCommon("fields.comments")}</p>
                 <em className="descriptionDocument">
-                  *{isMandatory?.commentary ? "Obligatorio" : "Opcional"}
+                  *{isMandatory?.commentary ? t("required") : t("optional")}
                 </em>
               </Flex>
               <textarea
                 value={commentary || ""}
                 onChange={handleOnChangeTextArea}
-                placeholder="Ingresar un comentario"
+                placeholder={t("commentPlaceholder")}
               />
             </>
           )}
@@ -222,7 +223,9 @@ const ModalAttachEvidence = ({
         <FooterButtons
           handleOk={handleAttachEvidence}
           onClose={handleCancel}
-          titleConfirm={customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Guardar"}
+          titleConfirm={
+            customTexts?.acceptButtonText ? customTexts?.acceptButtonText : tCommon("actions.save")
+          }
           isConfirmLoading={loading}
           isConfirmDisabled={confirmDisabled}
         />

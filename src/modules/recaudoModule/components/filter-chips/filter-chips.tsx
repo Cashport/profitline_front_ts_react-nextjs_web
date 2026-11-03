@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { filterChips } from "../../utils/filters";
@@ -10,6 +12,8 @@ import { filterChips } from "../../utils/filters";
  * el -mb-3.5 del header para dejar 12px antes del contenido.
  */
 export default function FilterChips({ data }: { data?: ICollectionTower }) {
+  const tc = useTranslations("collections.filters");
+  const tCommon = useTranslations("common");
   const { filters, patch, clear } = useTowerFilters();
   const chips = filterChips(filters, data);
   if (!chips.length) return null;
@@ -25,7 +29,7 @@ export default function FilterChips({ data }: { data?: ICollectionTower }) {
           {c.label}: <b className="min-w-0 truncate font-semibold">{c.value}</b>
           <button
             type="button"
-            aria-label={`Quitar ${c.label}`}
+            aria-label={tc("remove", { label: c.label })}
             onClick={() => patch(c.remove)}
             className="flex h-full shrink-0 cursor-pointer items-center border-0 bg-transparent px-1.5 text-[18px] leading-none text-cp-ink-4 hover:text-cp-ink"
           >
@@ -39,7 +43,7 @@ export default function FilterChips({ data }: { data?: ICollectionTower }) {
           onClick={clear}
           className="cursor-pointer border-0 bg-transparent px-2 text-[14px] font-semibold text-cp-ink-2 hover:underline"
         >
-          Limpiar filtros
+          {tCommon("actions.clearFilters")}
         </button>
       )}
     </div>

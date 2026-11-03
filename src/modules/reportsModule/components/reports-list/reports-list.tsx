@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import ProfitLoader from "@/components/ui/profit-loader";
 import type { SortState } from "@/modules/walletModule/types";
 import type { IReport } from "@/types/reports/IReports";
 
 import ReportCard from "../report-card/report-card";
 import ReportsTable from "../reports-table/reports-table";
-import { fmtReportsCount } from "../../utils/reports-format";
 
 interface ReportsListProps {
   /** Los que quedan tras búsqueda y filtros, ya ordenados. */
@@ -37,34 +38,29 @@ export default function ReportsList({
   onOpen,
   onClearCriteria
 }: ReportsListProps) {
+  const t = useTranslations("reports.list");
   const renderContent = () => {
     if (isLoading) return <ProfitLoader size="small" />;
     if (error) {
       return (
         <p className="p-9 text-center text-sm text-destructive">
-          {error.message || "No se pudieron cargar los informes."}
+          {error.message || t("loadError")}
         </p>
       );
     }
     if (!total && !hasFilters) {
-      return (
-        <p className="p-9 text-center text-sm text-muted-foreground">
-          Aún no hay informes publicados.
-        </p>
-      );
+      return <p className="p-9 text-center text-sm text-muted-foreground">{t("empty")}</p>;
     }
     if (!reports.length) {
       return (
         <div className="flex flex-col items-center gap-2 p-9 text-center">
-          <p className="text-[13.5px] font-semibold text-foreground">
-            No hay informes con esos criterios
-          </p>
+          <p className="text-[13.5px] font-semibold text-foreground">{t("noMatch")}</p>
           <button
             type="button"
             onClick={onClearCriteria}
             className="text-[13px] font-medium text-[#1677ff] hover:underline"
           >
-            Limpiar búsqueda y filtros
+            {t("clearCriteria")}
           </button>
         </div>
       );
@@ -98,7 +94,9 @@ export default function ReportsList({
       {!isLoading && !error && reports.length > 0 && (
         <div className="flex justify-end pt-3">
           <span className="whitespace-nowrap text-[13px] text-muted-foreground">
-            {fmtReportsCount(reports.length, total)}
+            {reports.length === total
+              ? t("count", { total })
+              : t("countFiltered", { shown: reports.length, total })}
           </span>
         </div>
       )}

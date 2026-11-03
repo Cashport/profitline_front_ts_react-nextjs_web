@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2, History } from "lucide-react";
 import { Button as AntButton, Dropdown, Pagination, Spin, message } from "antd";
 import { DotsThreeVertical, DropboxLogo } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { Switch } from "@/modules/chat/ui/switch";
@@ -60,6 +61,9 @@ const getStatusBadge = (status: string) => {
 };
 
 export function CatalogsTable() {
+  const t = useTranslations("dataQuality.catalogsTable");
+  const tUploads = useTranslations("dataQuality.countryView");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const countryId = Number(params.countryId) || 0;
   const clientId = Number(params.clientId) || 0;
@@ -103,7 +107,7 @@ export function CatalogsTable() {
     try {
       await convertMaterialToPack(item.id);
       mutate();
-      message.success("Material marcado como pack exitosamente");
+      message.success(t("markedAsPack"));
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message);
@@ -116,11 +120,9 @@ export function CatalogsTable() {
     try {
       await editCatalog(item.id, { excluded });
       mutate();
-      message.success(
-        excluded ? "Producto excluido exitosamente" : "Producto incluido exitosamente"
-      );
+      message.success(excluded ? t("productExcluded") : t("productIncluded"));
     } catch (error) {
-      message.error("Error al actualizar la exclusión del producto");
+      message.error(t("exclusionError"));
     } finally {
       setIsLoadingAction(false);
     }
@@ -130,7 +132,7 @@ export function CatalogsTable() {
     setIsDownloadCatalogLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando catálogo...",
+      content: tUploads("downloadingCatalog"),
       duration: 0
     });
     try {
@@ -141,11 +143,11 @@ export function CatalogsTable() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      message.success("Catálogo descargado exitosamente.");
+      message.success(tUploads("catalogDownloaded"));
       setWhichModalOpen({ selected: 0 });
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message || error?.message || "Error al descargar el catálogo.";
+        error?.response?.data?.message || error?.message || tUploads("catalogDownloadError");
       message.error(errorMessage);
     } finally {
       hide();
@@ -157,15 +159,11 @@ export function CatalogsTable() {
     setIsUploadLoading(true);
     try {
       await uploadCatalogMaterial(file);
-      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      message.success(tUploads("materialsAuxUploaded"));
       setWhichModalOpen({ selected: 0 });
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al cargar el archivo de auxiliar de materiales."
-      );
+      message.error(error instanceof Error ? error.message : tUploads("materialsAuxUploadError"));
     } finally {
       setIsUploadLoading(false);
     }
@@ -199,19 +197,17 @@ export function CatalogsTable() {
       if (mode === "create") {
         await createCatalog(modelData);
         mutate();
-        message.success("Catálogo creado exitosamente");
+        message.success(t("created"));
       } else {
         if (!selectedCatalog) return;
         await editCatalog(selectedCatalog.id, modelData);
         mutate();
-        message.success("Catálogo actualizado exitosamente");
+        message.success(t("updated"));
       }
       setWhichModalOpen({ selected: 0 });
       setSelectedCatalog(null);
     } catch (error) {
-      message.error(
-        mode === "create" ? "Error al crear el catálogo" : "Error al actualizar el catálogo"
-      );
+      message.error(mode === "create" ? t("createError") : t("updateError"));
     } finally {
       setIsLoadingAction(false);
     }
@@ -222,11 +218,11 @@ export function CatalogsTable() {
     try {
       await deleteCatalog(catalog.id);
       mutate();
-      message.success("Catálogo eliminado exitosamente");
+      message.success(t("deleted"));
       setWhichModalOpen({ selected: 0 });
       setSelectedCatalog(null);
     } catch (error) {
-      message.error("Error al eliminar el catálogo");
+      message.error(t("deleteError"));
     } finally {
       setIsLoadingAction(false);
     }
@@ -239,7 +235,7 @@ export function CatalogsTable() {
         <div className="flex items-center justify-between pb-4 gap-2 ">
           <div className="flex items-center gap-3">
             <UiSearchInput
-              placeholder="Buscar"
+              placeholder={tCommon("placeholders.search")}
               onChange={(e) => handleSearchChange(e.target.value)}
             />
             <GenerateActionButton onClick={() => setWhichModalOpen({ selected: 3 })} />
@@ -254,15 +250,13 @@ export function CatalogsTable() {
             }}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Nueva Equivalencia
+            {t("newEquivalence")}
           </Button>
         </div>
         {error ? (
           <div className="bg-white rounded-lg p-6 text-center">
             <p className="text-red-600">
-              {error instanceof Error
-                ? error.message
-                : "No se pudo cargar el catálogo de equivalencias."}
+              {error instanceof Error ? error.message : t("loadError")}
             </p>
           </div>
         ) : (
@@ -270,17 +264,17 @@ export function CatalogsTable() {
             <Table>
               <TableHeader>
                 <TableRow style={{ borderColor: "#DDDDDD" }}>
-                  <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.customerCode")}</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.customerProduct")}</TableHead>
                   <TableHead style={{ color: "#141414" }}>GMN</TableHead>
                   <TableHead style={{ color: "#141414" }}>MATCH</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Factor</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Exclusión</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Estado</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Fecha Actualización</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Usuario</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Acciones</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.productName")}</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.factor")}</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.exclusion")}</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.status")}</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.updatedAt")}</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.user")}</TableHead>
+                  <TableHead style={{ color: "#141414" }}>{t("columns.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -327,7 +321,7 @@ export function CatalogsTable() {
                           }
                         />
                         <span style={{ color: item.excluded === 1 ? "#cf1322" : "#141414" }}>
-                          {item.excluded === 1 ? "Excluido" : "Incluido"}
+                          {item.excluded === 1 ? t("excluded") : t("included")}
                         </span>
                       </div>
                     </TableCell>
@@ -349,7 +343,7 @@ export function CatalogsTable() {
                                 className="buttonNoBorder"
                                 onClick={() => handleEdit(item)}
                               >
-                                Editar
+                                {tCommon("actions.edit")}
                               </AntButton>
                             )
                           },
@@ -364,7 +358,7 @@ export function CatalogsTable() {
                                   setWhichModalOpen({ selected: 2 });
                                 }}
                               >
-                                Eliminar
+                                {tCommon("actions.delete")}
                               </AntButton>
                             )
                           },
@@ -376,7 +370,7 @@ export function CatalogsTable() {
                                 className="buttonNoBorder"
                                 onClick={() => handleMarkAsPack(item)}
                               >
-                                Marcar como pack
+                                {t("markAsPack")}
                               </AntButton>
                             )
                           },
@@ -391,7 +385,7 @@ export function CatalogsTable() {
                                   setHistoryOpen(true);
                                 }}
                               >
-                                Ver histórico
+                                {t("viewHistory")}
                               </AntButton>
                             )
                           }
@@ -423,7 +417,10 @@ export function CatalogsTable() {
               style={{ borderColor: "#DDDDDD" }}
             >
               <div className="text-sm" style={{ color: "#141414" }}>
-                Mostrando {paginatedEquivalencies.length} de {equivalencies.length} productos
+                {t("showing", {
+                  count: paginatedEquivalencies.length,
+                  total: equivalencies.length
+                })}
               </div>
               <Pagination
                 current={currentPage}
@@ -452,8 +449,8 @@ export function CatalogsTable() {
           onOk={() => {
             if (selectedCatalog) handleDeleteCatalog(selectedCatalog);
           }}
-          title="¿Está seguro de eliminar?"
-          okText="Eliminar"
+          title={t("confirmDelete")}
+          okText={tCommon("actions.delete")}
           okLoading={isLoadingAction}
         />
 

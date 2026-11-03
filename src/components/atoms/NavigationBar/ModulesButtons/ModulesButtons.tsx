@@ -3,6 +3,8 @@ import Link from "next/link";
 import { checkUserViewPermissions, cn } from "@/utils/utils";
 import useScrollFade from "@/components/hooks/useScrollFade";
 import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
+import { useTranslations } from "use-intl";
+import type { Messages } from "@/i18n/types";
 
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 
@@ -65,11 +67,13 @@ interface ModulesButtonsProps {
   isMobileMenu?: boolean;
 }
 
-type RailGroup = "Cartera" | "Recaudo" | "Comercial" | "Automatización" | "Gestión";
+type RailGroup = keyof Messages["shell"]["nav"]["groups"];
+type ModuleKey = keyof Messages["shell"]["nav"]["modules"];
 
 interface RailModule {
   href: string;
-  label: string;
+  /** Clave en shell.nav.modules */
+  label: ModuleKey;
   group: RailGroup;
   icon: React.ReactNode;
   visible: (project: ISelectedProject | undefined, path: string) => boolean;
@@ -85,170 +89,170 @@ const can = (view: string) => (project: ISelectedProject | undefined) =>
    nuevo están desactivados en el menú. */
 const MODULES: RailModule[] = [
   {
-    href: "/clientes/all",
-    label: "Cartera",
-    group: "Cartera",
+    href: "/clients/all",
+    label: "receivables",
+    group: "receivables",
     icon: <RailIcon name="cartera" />,
     visible: can("Clientes"),
-    isActive: (p) => p.startsWith("/clientes")
+    isActive: (p) => p.startsWith("/clients")
   },
   {
     href: "/wallet",
-    label: "Cartera por edad",
-    group: "Cartera",
+    label: "aging",
+    group: "receivables",
     icon: <RailIcon name="carteraEdad" />,
     visible: can("Wallet"),
     isActive: (p) => p.startsWith("/wallet")
   },
   {
     href: "/novelties",
-    label: "Novedades",
-    group: "Cartera",
+    label: "novelties",
+    group: "receivables",
     icon: <RailIcon name="novedades" />,
     visible: can("Novelties"),
     isActive: (p) => p.startsWith("/novelties")
   },
   {
     href: "/balances",
-    label: "Saldos",
-    group: "Cartera",
+    label: "balances",
+    group: "receivables",
     icon: <RailIcon name="saldos" />,
     visible: can("Balances"),
     isActive: (p) => p.startsWith("/balances")
   },
   {
-    href: "/blockingAlerts",
-    label: "Alertas de bloqueo",
-    group: "Cartera",
+    href: "/blocking-alerts",
+    label: "blockingAlerts",
+    group: "receivables",
     icon: <RailIcon name="alertasBloqueo" />,
     visible: can("BlockingAlerts"),
-    isActive: (p) => p.startsWith("/blockingAlerts")
+    isActive: (p) => p.startsWith("/blocking-alerts")
   },
   {
-    href: "/cuentas-medicas",
-    label: "Cuentas médicas",
-    group: "Cartera",
+    href: "/medical-accounts",
+    label: "medicalAccounts",
+    group: "receivables",
     icon: <RailIcon name="cuentasMedicas" />,
     visible: can("MedicalAccounts"),
-    isActive: (p) => p.startsWith("/cuentas-medicas")
+    isActive: (p) => p.startsWith("/medical-accounts")
   },
   {
     href: "/dashboard",
-    label: "Torre de recaudo",
-    group: "Recaudo",
+    label: "collectionsTower",
+    group: "collections",
     icon: <RailIcon name="torreRecaudo" />,
     visible: can("Dashboard"),
     isActive: (p) => p.startsWith("/dashboard")
   },
   {
-    href: "/banco",
-    label: "Bancos",
-    group: "Recaudo",
+    href: "/banks",
+    label: "banks",
+    group: "collections",
     icon: <RailIcon name="bancos" />,
     visible: can("Bancos"),
-    isActive: (p) => p === "/banco"
+    isActive: (p) => p === "/banks"
   },
   {
-    href: "/applyModule",
-    label: "Aplicación de pagos",
-    group: "Recaudo",
+    href: "/cash-application",
+    label: "cashApplication",
+    group: "collections",
     icon: <RailIcon name="aplicacionPagos" />,
-    visible: (_project, p) => p === "/applyModule",
-    isActive: (p) => p === "/applyModule"
+    visible: (_project, p) => p === "/cash-application",
+    isActive: (p) => p === "/cash-application"
   },
   {
-    href: "/comercio",
-    label: "Marketplace",
-    group: "Comercial",
+    href: "/commerce",
+    label: "marketplace",
+    group: "commercial",
     icon: <RailIcon name="marketplace" />,
     visible: can("Marketplace"),
-    isActive: (p) => p.startsWith("/comercio")
+    isActive: (p) => p.startsWith("/commerce")
   },
   {
     href: "/purchase-orders",
-    label: "Órdenes de compra",
-    group: "Comercial",
+    label: "purchaseOrders",
+    group: "commercial",
     icon: <RailIcon name="ordenesCompra" />,
     visible: can("PurchaseOrders"),
     isActive: (p) => p.startsWith("/purchase-orders")
   },
   {
     href: "/visits",
-    label: "Visitas",
-    group: "Comercial",
+    label: "visits",
+    group: "commercial",
     icon: <RailIcon name="visitas" />,
     visible: can("Visits"),
     isActive: (p) => p.startsWith("/visits")
   },
   {
     href: "/surveys",
-    label: "Encuestas",
-    group: "Comercial",
+    label: "surveys",
+    group: "commercial",
     icon: <RailIcon name="encuestas" />,
     visible: can("Surveys"),
     isActive: (p) => p.startsWith("/surveys")
   },
   {
-    href: "/logistica-inversa",
-    label: "Logística inversa",
-    group: "Comercial",
+    href: "/reverse-logistics",
+    label: "reverseLogistics",
+    group: "commercial",
     icon: <RailIcon name="logisticaInversa" />,
     visible: can("ReverseLogistics"),
-    isActive: (p) => p.startsWith("/logistica-inversa")
+    isActive: (p) => p.startsWith("/reverse-logistics")
   },
   {
     // Salud de Automatizaciones vive bajo Data Quality (no hay permiso propio).
     href: "/data-quality/automations",
-    label: "Bots",
-    group: "Automatización",
+    label: "bots",
+    group: "automation",
     icon: <RailIcon name="bots" />,
     visible: can("DataQuality"),
     isActive: (p) => p.startsWith("/data-quality/automations")
   },
   {
     href: "/task-manager",
-    label: "Mail",
-    group: "Automatización",
+    label: "mail",
+    group: "automation",
     icon: <RailIcon name="mail" />,
     visible: can("GestorTareas"),
     isActive: (p) => p === "/task-manager"
   },
   {
     href: "/chat",
-    label: "WhatsApp",
-    group: "Automatización",
+    label: "whatsapp",
+    group: "automation",
     icon: <RailIcon name="whatsapp" />,
     visible: can("Whatsapp"),
     isActive: (p) => p === "/chat"
   },
   {
     href: "/data-quality",
-    label: "Data Quality",
-    group: "Automatización",
+    label: "dataQuality",
+    group: "automation",
     icon: <RailIcon name="dataQuality" />,
     visible: can("DataQuality"),
     isActive: (p) => p.startsWith("/data-quality") && !p.startsWith("/data-quality/automations")
   },
   {
-    href: "/aprobaciones",
-    label: "Aprobaciones",
-    group: "Gestión",
+    href: "/approvals",
+    label: "approvals",
+    group: "management",
     icon: <RailIcon name="aprobaciones" />,
     visible: can("Aprobaciones"),
-    isActive: (p) => p === "/aprobaciones"
+    isActive: (p) => p === "/approvals"
   },
   {
     href: "/tickets",
-    label: "Tareas",
-    group: "Gestión",
+    label: "tasks",
+    group: "management",
     icon: <RailIcon name="tickets" />,
     visible: can("Tickets"),
     isActive: (p) => p.startsWith("/tickets")
   },
   {
     href: "/reports",
-    label: "Informes",
-    group: "Gestión",
+    label: "reports",
+    group: "management",
     icon: <RailIcon name="informes" />,
     visible: can("Reports"),
     isActive: (p) => p.startsWith("/reports")
@@ -258,7 +262,7 @@ const MODULES: RailModule[] = [
 /** Configuración (administración del market) va fija abajo, junto a "Fijar menú" y "Cerrar sesión". */
 const SETTINGS_MODULE: Omit<RailModule, "group"> = {
   href: "/market-admin",
-  label: "Configuración",
+  label: "settings",
   icon: <RailIcon name="configuracion" />,
   visible: can("MarketAdmin"),
   isActive: (p) =>
@@ -302,11 +306,12 @@ export const RailItem = ({ label, icon, active, href, onClick }: RailItemProps) 
 /** "Configuración" fija al pie del riel; no se muestra sin el permiso de administración. */
 export const SettingsRailItem = ({ path, project }: Omit<ModulesButtonsProps, "isMobileMenu">) => {
   const { attemptNavigation } = useUnsavedChanges();
+  const t = useTranslations("shell.nav.modules");
   if (!SETTINGS_MODULE.visible(project, path)) return null;
   return (
     <RailItem
       href={SETTINGS_MODULE.href}
-      label={SETTINGS_MODULE.label}
+      label={t(SETTINGS_MODULE.label)}
       icon={SETTINGS_MODULE.icon}
       active={SETTINGS_MODULE.isActive(path)}
       onClick={(e) => {
@@ -318,6 +323,7 @@ export const SettingsRailItem = ({ path, project }: Omit<ModulesButtonsProps, "i
 
 export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesButtonsProps) => {
   const { attemptNavigation } = useUnsavedChanges();
+  const t = useTranslations("shell.nav");
   // the mobile dropdown lays out in a row and never scrolls, so it needs no fade
   const { ref: containerRef, fade } = useScrollFade<HTMLDivElement>(!isMobileMenu);
 
@@ -349,12 +355,12 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
           grupos, una línea que se ve abierto y cerrado (diseño 6e). */}
       {groups.map(([group, modules]) => (
         <section key={group} className={styles.group}>
-          <span className={styles.groupTitle}>{group}</span>
+          <span className={styles.groupTitle}>{t(`groups.${group}`)}</span>
           {modules.map((m) => (
             <RailItem
               key={m.href}
               href={m.href}
-              label={m.label}
+              label={t(`modules.${m.label}`)}
               icon={m.icon}
               active={m.isActive(path)}
               onClick={(e) => handleNavClick(e, m.href)}

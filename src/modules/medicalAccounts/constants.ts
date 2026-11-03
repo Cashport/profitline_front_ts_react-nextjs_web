@@ -1,44 +1,30 @@
-export const SERVICE_TYPES = [
-  { code: "ACC", label: "Accesorios" },
-  { code: "PRO", label: "Monitoreos o Programación" },
-  { code: "RH", label: "Rehabilitación" },
-  { code: "SYS", label: "Cirugía" },
-  { code: "UPG", label: "Actualización" }
-];
+// Códigos de tipo de servicio; la etiqueta se traduce en medicalAccounts.serviceTypes.<code>.
+export const SERVICE_TYPE_CODES = ["ACC", "PRO", "RH", "SYS", "UPG"] as const;
+export type ServiceTypeCode = (typeof SERVICE_TYPE_CODES)[number];
+export const isServiceTypeCode = (code: string | null | undefined): code is ServiceTypeCode =>
+  !!code && (SERVICE_TYPE_CODES as readonly string[]).includes(code);
 
-export const SERVICE_TYPE_LABELS: Record<string, string> = SERVICE_TYPES.reduce(
-  (acc, { code, label }) => ({ ...acc, [code]: label }),
-  {} as Record<string, string>
-);
+// Códigos de tipo de documento; la etiqueta se traduce en medicalAccounts.documentTypes.<code>.
+export const DOCUMENT_TYPE_CODES = ["CC", "TI", "CE", "RC", "PA", "PEP", "PPT", "NIT"] as const;
+export type DocumentTypeCode = (typeof DOCUMENT_TYPE_CODES)[number];
+export const isDocumentTypeCode = (code: string | null | undefined): code is DocumentTypeCode =>
+  !!code && (DOCUMENT_TYPE_CODES as readonly string[]).includes(code);
 
-export const TIPO_DOCUMENTO_LABELS: Record<string, string> = {
-  CC: "Cédula de Ciudadanía",
-  TI: "Tarjeta de Identidad",
-  CE: "Cédula de Extranjería",
-  RC: "Registro Civil",
-  PA: "Pasaporte",
-  PEP: "Permiso Especial de Permanencia",
-  PPT: "Permiso por Protección Temporal",
-  NIT: "NIT"
-};
-
-// Derived options for the edit-mode document-type <select>.
-export const TIPO_DOCUMENTO_OPTIONS: { value: string; label: string }[] = Object.entries(
-  TIPO_DOCUMENTO_LABELS
-).map(([value, label]) => ({ value, label: `${value} — ${label}` }));
-
-// Human-readable titles for novedades, keyed by their `tipo` code.
-export const NOVEDAD_TYPE_LABELS: Record<string, string> = {
-  tipo_documento: "Tipo de documento",
-  tipo_regimen: "Tipo de régimen",
-  no_coinciden_fechas: "No coinciden fechas",
-  nombre_servicio: "Nombre de servicio",
-  codigo_producto: "Código producto",
-  documento_diferente: "Documento diferente",
-  falta_factura: "Falta factura",
-  falta_autorizacion: "Falta autorización",
-  falta_preautorizacion: "Falta preautorización"
-};
+// Códigos (`tipo`) de novedades; el título se traduce en medicalAccounts.noveltyTypes.<code>.
+export const NOVELTY_TYPE_CODES = [
+  "tipo_documento",
+  "tipo_regimen",
+  "no_coinciden_fechas",
+  "nombre_servicio",
+  "codigo_producto",
+  "documento_diferente",
+  "falta_factura",
+  "falta_autorizacion",
+  "falta_preautorizacion"
+] as const;
+export type NoveltyTypeCode = (typeof NOVELTY_TYPE_CODES)[number];
+export const isNoveltyTypeCode = (code: string | null | undefined): code is NoveltyTypeCode =>
+  !!code && (NOVELTY_TYPE_CODES as readonly string[]).includes(code);
 
 // Status colors keyed by status_code (labels come dynamically from /statuses).
 export const STATUS_COLORS: Record<string, string> = {

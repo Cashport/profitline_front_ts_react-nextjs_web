@@ -1,6 +1,7 @@
 "use client";
 import { Typography } from "antd";
 import { Mail, MessageCircle } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -11,22 +12,13 @@ interface ChannelSectionProps {
   onChannelChange: (channel: ChannelType) => void;
 }
 
-const channels: { key: ChannelType; icon: typeof Mail; label: string; description: string }[] = [
-  {
-    key: "email",
-    icon: Mail,
-    label: "Email",
-    description: "Correo electronico con adjuntos"
-  },
-  {
-    key: "whatsapp",
-    icon: MessageCircle,
-    label: "WhatsApp",
-    description: "Plantillas aprobadas con URL de descarga"
-  }
+const channels: { key: ChannelType; icon: typeof Mail; label: string }[] = [
+  { key: "email", icon: Mail, label: "Email" },
+  { key: "whatsapp", icon: MessageCircle, label: "WhatsApp" }
 ];
 
 export default function ChannelSection({ channel, onChannelChange }: ChannelSectionProps) {
+  const t = useTranslations("massCommunications.channel");
   return (
     <section className="cp-card px-[18px] py-[14px]">
       <div className="flex items-center gap-2 mb-4">
@@ -34,12 +26,12 @@ export default function ChannelSection({ channel, onChannelChange }: ChannelSect
           1
         </div>
         <Text strong className="text-[15px]">
-          Canal de comunicacion
+          {t("title")}
         </Text>
       </div>
 
       <div className="flex gap-3">
-        {channels.map(({ key, icon: Icon, label, description }) => {
+        {channels.map(({ key, icon: Icon, label }) => {
           const isSelected = channel === key;
           return (
             <button
@@ -58,7 +50,7 @@ export default function ChannelSection({ channel, onChannelChange }: ChannelSect
                   {label}
                 </Text>
                 <Text type="secondary" className="block text-[13px]">
-                  {description}
+                  {t(`descriptions.${key}`)}
                 </Text>
               </div>
             </button>

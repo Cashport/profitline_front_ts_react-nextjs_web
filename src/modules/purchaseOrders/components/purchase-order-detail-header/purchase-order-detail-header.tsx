@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dropdown as AntDropdown, message } from "antd";
+import { useTranslations } from "use-intl";
 import {
   Edit,
   MoreHorizontal,
@@ -69,6 +70,9 @@ export function PurchaseOrderDetailHeader({
   mutate,
   onNavigate
 }: PurchaseOrderDetailHeaderProps) {
+  const t = useTranslations("purchaseOrders.detailHeader");
+  const tActions = useTranslations("purchaseOrders.actionsModal");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -98,13 +102,13 @@ export function PurchaseOrderDetailHeader({
   const handleDownloadTxtErp = async () => {
     if (!orderId) return;
     setIsTxtErpLoading(true);
-    const hideLoading = message.loading("Generando TXT ERP...", 0);
+    const hideLoading = message.loading(t("generatingTxtErp"), 0);
     try {
       await downloadMvpTxt({ orderIds: [Number(orderId)], variant: "sku" });
-      message.success("TXT ERP generado correctamente");
+      message.success(t("txtErpGenerated"));
       mutate?.();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al generar el TXT ERP");
+      message.error(error instanceof Error ? error.message : t("txtErpError"));
     } finally {
       hideLoading();
       setIsTxtErpLoading(false);
@@ -114,13 +118,13 @@ export function PurchaseOrderDetailHeader({
   const handleDownloadTxtEan = async () => {
     if (!orderId) return;
     setIsTxtEanLoading(true);
-    const hideLoading = message.loading("Generando TXT EAN...", 0);
+    const hideLoading = message.loading(tActions("generatingTxtEan"), 0);
     try {
       await downloadMvpTxtV2({ orderIds: [Number(orderId)], variant: "sku" });
-      message.success("TXT EAN generado correctamente");
+      message.success(tActions("txtEanGenerated"));
       mutate?.();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al generar el TXT EAN");
+      message.error(error instanceof Error ? error.message : tActions("txtEanError"));
     } finally {
       hideLoading();
       setIsTxtEanLoading(false);
@@ -158,7 +162,9 @@ export function PurchaseOrderDetailHeader({
                     ))}
                   </div>
                   <div className="border-t border-gray-200 px-4 py-2.5">
-                    <span className="text-[13px] text-gray-500">{files.length} archivos</span>
+                    <span className="text-[13px] text-gray-500">
+                      {t("filesCount", { count: files.length })}
+                    </span>
                   </div>
                 </div>
               )}
@@ -166,7 +172,7 @@ export function PurchaseOrderDetailHeader({
               <button className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer">
                 <FileText className="h-3.5 w-3.5 text-cashport-green" />
                 <span className="text-sm font-medium truncate max-w-[200px]">
-                  {activeFile?.name ?? "Sin archivo"}
+                  {activeFile?.name ?? t("noFile")}
                 </span>
                 <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
               </button>
@@ -176,7 +182,7 @@ export function PurchaseOrderDetailHeader({
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-200 bg-gray-50">
               <FileText className="h-3.5 w-3.5 text-cashport-green" />
               <span className="text-sm font-medium truncate max-w-[200px]">
-                {activeFile?.name ?? "Sin archivo"}
+                {activeFile?.name ?? t("noFile")}
               </span>
             </div>
           )}
@@ -190,21 +196,21 @@ export function PurchaseOrderDetailHeader({
     if (!packageId) return;
 
     setIsBillingLoading(true);
-    const hideLoading = message.loading("Enviando pedido a facturación...", 0);
+    const hideLoading = message.loading(tActions("sendingToBilling"), 0);
 
     try {
       await sendPackageToBilling(String(packageId), send_approval ? 1 : 0);
-      message.success("Pedido enviado a facturación exitosamente");
+      message.success(tActions("sentToBilling"));
       mutate?.();
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.data?.misstake_type === "INSUFFICIENT_QUOTA") {
           setIsBillingConfirmOpen(true);
         } else {
-          message.error(error.message || "Error enviando pedido a facturación");
+          message.error(error.message || tActions("sendToBillingError"));
         }
       } else {
-        message.error("Error enviando pedido a facturación");
+        message.error(tActions("sendToBillingError"));
       }
     } finally {
       hideLoading();
@@ -215,17 +221,17 @@ export function PurchaseOrderDetailHeader({
   const handleSendToRebilling = async () => {
     if (!orderId) return;
 
-    const hideLoading = message.loading("Enviando orden a refacturación...", 0);
+    const hideLoading = message.loading(t("sendingToRebilling"), 0);
 
     try {
       await sendPurchaseOrderToRebilling(orderId);
-      message.success("Orden enviada a refacturación exitosamente");
+      message.success(t("sentToRebilling"));
       mutate?.();
     } catch (error) {
       if (error instanceof ApiError) {
-        message.error(error.message || "Error enviando orden a refacturación");
+        message.error(error.message || t("sendToRebillingError"));
       } else {
-        message.error("Error enviando orden a refacturación");
+        message.error(t("sendToRebillingError"));
       }
     } finally {
       hideLoading();
@@ -235,42 +241,42 @@ export function PurchaseOrderDetailHeader({
   const actionItems: DropdownItem[] = [
     {
       key: "billing",
-      label: "Enviar a facturación",
+      label: tActions("sendToBilling"),
       icon: <Invoice className="h-4 w-4" />,
       onClick: () => handleSendToBilling(),
       disabled: data?.status_name !== "Procesado" || isBillingLoading || txtErpLocked
     },
     {
       key: "invoice",
-      label: "Cargar factura",
+      label: t("uploadInvoice"),
       icon: <Receipt className="h-4 w-4" />,
       onClick: () => onOpenModal?.(3),
       disabled: data?.status_name !== "En facturación" || txtErpLocked
     },
     {
       key: "dispatch",
-      label: "Confirmar despacho/entrega",
+      label: t("confirmDispatchDelivery"),
       icon: <PackageCheck className="h-4 w-4" />,
       onClick: () => onOpenModal?.(4),
       disabled: data?.status_name !== "En despacho" || txtErpLocked
     },
     {
       key: "back-order",
-      label: "Marcar como Backorder",
+      label: t("markAsBackorder"),
       icon: <Boxes className="h-4 w-4" />,
       onClick: () => onOpenModal?.(8),
       disabled: !allowedStatesForBackOrder.includes(data?.status_name ?? "") || txtErpLocked
     },
     {
       key: "rebilling",
-      label: "Refacturar",
+      label: t("rebill"),
       icon: <Invoice className="h-4 w-4" />,
       onClick: () => setIsRebillingConfirmOpen(true),
       disabled: data?.status_name !== "Facturado" || txtErpLocked
     },
     {
       key: "confirm-rebilling",
-      label: "Confirmar refacturación",
+      label: t("confirmRebilling"),
       icon: <Receipt className="h-4 w-4" />,
       onClick: () => onOpenModal?.(11),
       disabled: data?.status_name !== "En refacturación" || txtErpLocked
@@ -280,7 +286,7 @@ export function PurchaseOrderDetailHeader({
       ? [
           {
             key: "txt-erp",
-            label: "Descargar TXT ERP",
+            label: tActions("downloadTxtErp"),
             icon: <FileOutput className="h-4 w-4" />,
             onClick: handleDownloadTxtErp,
             disabled: isTxtErpLoading
@@ -291,7 +297,7 @@ export function PurchaseOrderDetailHeader({
       ? [
           {
             key: "txt-ean",
-            label: "Descargar TXT EAN",
+            label: tActions("downloadTxtEan"),
             icon: <FileOutput className="h-4 w-4" />,
             onClick: handleDownloadTxtEan,
             disabled: isTxtEanLoading
@@ -304,7 +310,7 @@ export function PurchaseOrderDetailHeader({
     },
     {
       key: "download",
-      label: "Descargar plano",
+      label: tActions("downloadFlatFile"),
       icon: <FileOutput className="h-4 w-4" />,
       onClick: onDownloadCSV,
       disabled: !allowedStatesForDownload.includes(data?.status_name ?? "") || txtErpLocked
@@ -319,7 +325,7 @@ export function PurchaseOrderDetailHeader({
           <GeneralDropdown items={actionItems} align="start" customDropdownClass="m-0">
             <ButtonGenerateAction
               icon={<MoreHorizontal className="h-4 w-4" />}
-              title="Generar acción"
+              title={t("generateAction")}
               hideArrow
             />
           </GeneralDropdown>
@@ -341,21 +347,23 @@ export function PurchaseOrderDetailHeader({
               {isEditMode ? (
                 <>
                   <Save className="h-4 w-4 " />
-                  Guardar
+                  {tCommon("actions.save")}
                 </>
               ) : (
                 <>
                   <Edit className="h-4 w-4" />
-                  Editar
+                  {tCommon("actions.edit")}
                 </>
               )}
             </Button>
           )}
           {data?.project_id === 204 && (data?.region || data?.delivery_destination_code) && (
             <span className="ml-2 text-[13px] text-gray-500">
-              {data?.region ? `Región: ${data.region}` : ""}
+              {data?.region ? t("region", { region: data.region }) : ""}
               {data?.region && data?.delivery_destination_code ? " · " : ""}
-              {data?.delivery_destination_code ? `Destino: ${data.delivery_destination_code}` : ""}
+              {data?.delivery_destination_code
+                ? t("destination", { code: data.delivery_destination_code })
+                : ""}
             </span>
           )}
         </div>
@@ -367,7 +375,7 @@ export function PurchaseOrderDetailHeader({
               onClick={() => onOpenModal?.(10)}
               className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
             >
-              Ver aprobación
+              {t("viewApproval")}
             </Button>
           )}
           {siblingOrders.length > 1 && (
@@ -409,7 +417,7 @@ export function PurchaseOrderDetailHeader({
                   </div>
                   <div className="border-t border-gray-200 px-4 py-2.5 flex items-center justify-between">
                     <span className="text-[13px] text-gray-500">
-                      {data?.package.totalOrders} ordenes
+                      {t("ordersCount", { count: data?.package.totalOrders ?? 0 })}
                     </span>
                     <span className="text-sm font-bold">
                       {formatMoney(data?.package.totalAmount ?? 0)}
@@ -441,7 +449,7 @@ export function PurchaseOrderDetailHeader({
                   : data?.status_color || "#B0BEC5"
             }}
           >
-            {data?.status_name ? data.status_name : "Desconocido"}
+            {data?.status_name ? data.status_name : t("unknownStatus")}
           </Badge>
         </div>
       </div>
@@ -453,10 +461,10 @@ export function PurchaseOrderDetailHeader({
           setIsBillingConfirmOpen(false);
           handleSendToBilling(true);
         }}
-        title="¿Desea enviar a aprobación? "
-        content="El cliente no tiene cupo suficiente para gestionar el pedido"
-        okText="Enviar aprobación"
-        cancelText="Cancelar"
+        title={tActions("confirmSendToApproval")}
+        content={tActions("insufficientCredit")}
+        okText={tActions("sendForApproval")}
+        cancelText={tCommon("actions.cancel")}
       />
 
       <ModalConfirmAction
@@ -466,10 +474,10 @@ export function PurchaseOrderDetailHeader({
           setIsRebillingConfirmOpen(false);
           handleSendToRebilling();
         }}
-        title="¿Está seguro que quiere refacturar?"
-        content="Esta opción no se puede regresar"
-        okText="Confirmar"
-        cancelText="Cancelar"
+        title={t("confirmRebillTitle")}
+        content={t("confirmRebillContent")}
+        okText={tCommon("actions.confirm")}
+        cancelText={tCommon("actions.cancel")}
       />
     </>
   );

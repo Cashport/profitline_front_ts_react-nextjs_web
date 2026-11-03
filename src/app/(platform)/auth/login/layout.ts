@@ -1,8 +1,5 @@
-import { Metadata } from "next";
 import LoginPage from "./page"; // import your Demo's page
 
-export const metadata: Metadata = {
-  title: "Inicio de sesion",
-  description: "Your Description"
-};
+export const generateMetadata = () => pageMetadata("signIn");
+import { pageMetadata } from "@/i18n/metadata";
 export default LoginPage;

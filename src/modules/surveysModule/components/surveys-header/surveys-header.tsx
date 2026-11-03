@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
@@ -25,9 +26,10 @@ export default function SurveysHeader({
   onFiltersChange,
   onCreate
 }: SurveysHeaderProps) {
+  const t = useTranslations("surveys.header");
   return (
     <Header
-      title="Encuestas"
+      title={t("title")}
       actionsExtra={
         <>
           <button
@@ -36,10 +38,14 @@ export default function SurveysHeader({
             className="flex h-[var(--control-h)] shrink-0 items-center gap-2 rounded-lg bg-primary px-4 text-[14px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Plus className="h-[18px] w-[18px]" />
-            Nueva encuesta
+            {t("newSurvey")}
           </button>
           <SurveysFilterModal inHeader value={filters} onChange={onFiltersChange} />
-          <HeaderSearch value={search} onChange={onSearchChange} placeholder="Buscar encuesta" />
+          <HeaderSearch
+            value={search}
+            onChange={onSearchChange}
+            placeholder={t("searchPlaceholder")}
+          />
         </>
       }
     />

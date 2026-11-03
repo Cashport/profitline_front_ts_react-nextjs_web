@@ -1,0 +1,733 @@
+{
+  "actionAccountingAdjustments": {
+    "title": "Selecciona la acción que vas a realizar",
+    "apply": "Aplicar ajustes contables",
+    "selectAtLeastOne": "Debes seleccionar al menos un ajuste contable para aplicar",
+    "settleDeduction": "Legalizar saldo"
+  },
+  "actionAdjustment": {
+    "title": "Selecciona la acción que vas a realizar",
+    "settle": "Legalizar ajuste contable",
+    "edit": "Editar ajuste contable",
+    "delete": "Eliminar ajuste contable",
+    "pendingSettlement": "{type} por legalizar",
+    "reference": "NC{id}",
+    "success": "Ajuste contable legalizado correctamente",
+    "error": "Error al legalizar el ajuste contable",
+    "insufficientValue": "El valor actual de la nota seleccionada es menor al valor de la nota por legalizar",
+    "badRequest": "Error 400: Solicitud incorrecta",
+    "unknownError": "Error desconocido al legalizar el ajuste contable",
+    "selectDebitMemos": "Selecciona la(s) nota(s) débito a aplicar",
+    "selectCreditMemos": "Selecciona la(s) nota(s) crédito a aplicar",
+    "selectDiscounts": "Selecciona los descuentos a aplicar"
+  },
+  "actionDiscountCredit": {
+    "createDebitMemo": "Crear nota débito",
+    "createCreditMemo": "Crear nota crédito",
+    "createDiscount": "Crear descuento",
+    "applyDebitMemo": "Aplicar nota débito",
+    "applyCreditMemo": "Aplicar nota crédito",
+    "applyDiscount": "Aplicar descuento"
+  },
+  "actionPayment": {
+    "title": "Selecciona la acción que vas a realizar",
+    "identify": "Identificar pago",
+    "apply": "Aplicar pagos",
+    "noneToApply": "No hay pagos seleccionados para aplicar.",
+    "changeStatus": "Cambiar de estado",
+    "notCustomerPayment": "Pago no es del cliente",
+    "noneToUnidentify": "No hay pagos seleccionados para marcar como no identificados"
+  },
+  "addDiscount": {
+    "title": "Agregar descuento",
+    "placeholder": "Seleccione el descuento"
+  },
+  "agreementDetail": {
+    "title": "Acuerdo de pago",
+    "columns": {
+      "invoiceId": "ID Factura",
+      "issued": "Emisión",
+      "outstanding": "Pendiente",
+      "agreedAmount": "$ acordado",
+      "date": "Fecha"
+    },
+    "alreadyVoided": "El acuerdo ya se encuentra anulado",
+    "voidError": "Error al anular el acuerdo",
+    "void": "Anular acuerdo",
+    "owner": "Responsable",
+    "status": "Estado del acuerdo",
+    "amount": "Valor del acuerdo",
+    "invoiceCount": "No. de facturas",
+    "createdAt": "Fecha de creación",
+    "dueDate": "Fecha de vencimiento",
+    "evidence": "Evidencia",
+    "tabs": {
+      "summary": "Resumen",
+      "invoices": "Facturas"
+    }
+  },
+  "applyAdjustment": {
+    "subtitle": "Define el monto a aplicar a cada factura",
+    "columns": {
+      "invoiceId": "ID Factura",
+      "outstanding": "Pendiente",
+      "newBalance": "Saldo nuevo",
+      "amountToApply": "Valor a aplicar"
+    },
+    "success": "Ajuste contable aplicado correctamente",
+    "error": "Error al aplicar el ajuste contable",
+    "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
+  },
+  "attachEvidence": {
+    "title": "Evidencia",
+    "description": "Adjunta la evidencia e ingresa un comentario",
+    "evidence": "Evidencia",
+    "required": "Obligatorio",
+    "optional": "Opcional",
+    "uploadAnother": "Cargar otro documento",
+    "commentPlaceholder": "Ingresar un comentario",
+    "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.",
+    "duplicateName": "Ya existe un archivo con el mismo nombre"
+  },
+  "billingPeriod": {
+    "title": "Periodo de facturación",
+    "selectCutoff": "Selecciona el corte de facturación",
+    "theDay": "El día",
+    "the": "El",
+    "startsOnDay": "El periodo de facturación inicia el día {day} de cada mes",
+    "startsOnWeekday": "El periodo de facturación inicia el {order} {weekday} de cada mes",
+    "dayOfMonth": "El día {day} del mes",
+    "weekdayOfMonth": "El {order} {weekday} del mes",
+    "orders": {
+      "Primero": "Primero",
+      "Segundo": "Segundo",
+      "Tercero": "Tercero",
+      "Cuarto": "Cuarto",
+      "Ultimo": "Último"
+    },
+    "days": {
+      "Lunes": "Lunes",
+      "Martes": "Martes",
+      "Miercoles": "Miércoles",
+      "Jueves": "Jueves",
+      "Viernes": "Viernes",
+      "Sabado": "Sábado",
+      "Domingo": "Domingo"
+    }
+  },
+  "businessRules": {
+    "title": "Reglas de negocio"
+  },
+  "changeStatus": {
+    "title": "Cambio de estado",
+    "ok": "Cambiar de estado",
+    "selectNewStatus": "Selecciona el nuevo estado",
+    "remove": "Eliminar {name}"
+  },
+  "changeWarehouse": {
+    "title": "Cambiar bodega",
+    "detailTitle": "Bodega {warehouse}",
+    "save": "Guardar bodega",
+    "updated": "Bodega actualizada",
+    "updateError": "Error al actualizar la bodega",
+    "stockError": "Error al obtener el detalle de stock de la bodega",
+    "inStock": "Stock disponible",
+    "outOfStock": "No hay stock",
+    "columns": {
+      "warehouse": "Bodega",
+      "inventory": "Inventario",
+      "detail": "Detalle",
+      "product": "Producto",
+      "ordered": "Pedido",
+      "stock": "Stock"
+    }
+  },
+  "clientsGroup": {
+    "selectCustomersWarning": "Selecciona clientes para añadir al grupo",
+    "newTitle": "Nuevo grupo de clientes",
+    "enterName": "Ingresa el nombre del grupo de clientes",
+    "groupName": "Nombre del grupo",
+    "update": "Actualizar grupo",
+    "create": "Crear grupo",
+    "selectToEdit": "Selecciona los clientes para añadir/quitar del grupo",
+    "selectToAdd": "Selecciona los clientes para añadir al grupo"
+  },
+  "createAdjustment": {
+    "required": "Campo obligatorio",
+    "negative": "El valor no puede ser negativo",
+    "percentageMax": "El porcentaje no puede ser mayor al 100%",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Seleccionar motivo",
+    "totalAmount": "Cupo total",
+    "adjustmentAmount": "Valor del ajuste",
+    "amountPlaceholder": "Ingresar valor",
+    "percentage": "Porcentaje a aplicar",
+    "issueDate": "Fecha de expedición",
+    "issueDatePlaceholder": "Seleccionar fecha de expedición",
+    "validityRange": "Rango de vigencia",
+    "credit": {
+      "subtitle": "Ingresa la información para crear el nuevo descuento",
+      "submit": "Crear nota crédito",
+      "success": "Nota crédito creada con éxito",
+      "error": "Oops, ocurrió un error creando la nota crédito. Por favor, intente nuevamente."
+    },
+    "debit": {
+      "subtitle": "Ingresa la información para crear la nueva nota débito",
+      "submit": "Crear nota débito",
+      "success": "Nota débito creada con éxito",
+      "error": "Oops, ocurrió un error creando la nota débito. Por favor, intente nuevamente."
+    },
+    "discount": {
+      "subtitle": "Ingresa la información para crear el nuevo descuento",
+      "submit": "Crear descuento",
+      "success": "Descuento creado con éxito",
+      "error": "Oops, ocurrió un error creando el descuento. Por favor, intente nuevamente."
+    }
+  },
+  "deleteDiscount": {
+    "title": "¿Estás seguro de que deseas eliminar este/os descuento(s)?",
+    "ok": "Eliminar descuento",
+    "irreversible": "Esta acción es definitiva"
+  },
+  "detailAdjustment": {
+    "events": {
+      "creditMemoApplied": "Nota de crédito aplicada",
+      "debitMemoApplied": "Nota de débito aplicada",
+      "discountApplied": "Descuento aplicado",
+      "submission": "Radicación",
+      "dispute": "Novedad",
+      "settled": "Legalizado desde ajuste CashPort",
+      "created": "Creación de ajuste",
+      "issued": "Emisión del ajuste"
+    },
+    "types": {
+      "debitMemo": "Nota de débito",
+      "creditMemo": "Nota de crédito",
+      "discount": "Descuento"
+    },
+    "takeAction": "Generar acción",
+    "history": "Trazabilidad",
+    "owner": "Responsable: {name}",
+    "amount": "Valor: {amount}",
+    "comments": "comentarios",
+    "adjustmentId": "ID del ajuste:",
+    "summary": "Resumen",
+    "initialAmount": "Monto inicial",
+    "appliedAmount": "Monto aplicado",
+    "availableAmount": "Valor disponible"
+  },
+  "detailPayment": {
+    "paymentId": "ID pago {id}",
+    "viewReceipt": "Ver tirilla",
+    "takeAction": "Generar acción",
+    "summary": "Resumen",
+    "initialValue": "Valor inicial",
+    "appliedAmount": "Monto aplicado",
+    "available": "Disponible",
+    "image": "Imagen",
+    "events": {
+      "title": "Trazabilidad",
+      "owner": "Responsable: {name}",
+      "parentPaymentId": "Id del pago padre:",
+      "customer": "Cliente: {name}",
+      "previousCustomer": "Cliente previo: {name}",
+      "newCustomer": "Nuevo cliente: {name}",
+      "applicationId": "Id de la aplicación:",
+      "appliedAmount": "Valor aplicado: {amount}",
+      "invoiceIds": "Id de las facturas:",
+      "comments": "Comentarios: {comments}"
+    }
+  },
+  "digitalRecord": {
+    "title": "Enviar acta digital",
+    "to": "Para",
+    "subject": "Asunto",
+    "send": "Enviar acta",
+    "success": "Acta digital enviada correctamente",
+    "error": "Error al enviar acta digital"
+  },
+  "enterProcess": {
+    "title": "Ingresar gestión",
+    "submit": "Ingresar gestión",
+    "loadError": "Error cargando datos de gestión",
+    "success": "Gestión registrada correctamente",
+    "error": "Error al registrar la gestión",
+    "typePlaceholder": "Tipo de gestión",
+    "statusPlaceholder": "Estado de gestión",
+    "contactPlaceholder": "Contacto (opcional)",
+    "bodyPlaceholder": "Escribe la gestión..."
+  },
+  "fileDownload": {
+    "defaultTitle": "Documento adjunto",
+    "gotIt": "Entendido",
+    "imageAlt": "Documento"
+  },
+  "generateAction": {
+    "title": "Generar acción",
+    "description": "Selecciona la acción que vas a realizar",
+    "groups": {
+      "payments": "Pagos y cartera",
+      "billing": "Facturación",
+      "case": "Gestión del caso",
+      "send": "Envíos al cliente"
+    },
+    "paymentPlan": "Acuerdo de pago",
+    "applyPayments": "Aplicar pagos",
+    "bulkReconciliation": "Conciliación masiva",
+    "markAsDeduction": "Marcar como saldo",
+    "submitInvoice": "Radicar factura",
+    "accountingAdjustments": "Ajustes contables",
+    "registerDispute": "Registrar novedad",
+    "changeStatus": "Cambio de estado",
+    "logActivity": "Ingresar gestión",
+    "accountStatement": "Estado de cuenta",
+    "sendLink": "Enviar link a cliente"
+  },
+  "generateActionProjectForm": {
+    "title": "Generar acción",
+    "description": "Selecciona la acción que vas a realizar",
+    "changeStatus": "Cambio de estado",
+    "cancelEdit": "Cancelar edición",
+    "editProject": "Editar proyecto",
+    "closePeriod": "Cerrar periodo contable"
+  },
+  "intakeStructure": {
+    "uploading": "Subiendo archivo...",
+    "cancelUpload": "Cancelar cargue",
+    "unnamed": "(sin nombre)",
+    "headersFrom": "encabezados desde {cell}",
+    "shell": {
+      "eyebrow": "CASHPORT · VALIDACIÓN DE CARGUE",
+      "close": "Cerrar"
+    },
+    "structureErrors": {
+      "title": "El archivo no tiene la estructura esperada",
+      "sheet": "hoja {sheet}",
+      "stepCritical": "1 · Críticas",
+      "stepWarnings": "2 · Advertencias",
+      "stepConfirm": "3 · Confirmar",
+      "heading": "{count, plural, one {# alerta crítica} other {# alertas críticas}}",
+      "subheading": "Corrige el archivo y vuelve a cargarlo. No se procesó ningún dato.",
+      "gotIt": "Entendido",
+      "warnings": "Advertencias",
+      "headersFound": "Encabezados encontrados en el archivo:"
+    },
+    "templateDecision": {
+      "title": "Este archivo aún no tiene template",
+      "sheet": "Hoja {sheet}",
+      "delimiter": "separador {delimiter}",
+      "columnsDetected": "{count, plural, one {# columna detectada} other {# columnas detectadas}}",
+      "cannotUse": "No se puede usar como template",
+      "useHint": "Si lo usas como template, los próximos archivos deberán traer estas mismas columnas, en el mismo orden y en la misma ubicación.",
+      "fixHint": "Corrige el archivo o cárgalo sin template.",
+      "uploadWithout": "Cargar sin template",
+      "useAsTemplate": "Usar como template",
+      "reviewBeforeConfirm": "Revisa antes de confirmar"
+    },
+    "loaderValidations": {
+      "types": {
+        "text": "Texto",
+        "number": "Número",
+        "integer": "Entero",
+        "date": "Fecha",
+        "boolean": "Sí / No",
+        "any": "Cualquiera"
+      },
+      "calcs": {
+        "none": "Ninguno",
+        "sum": "Sumar",
+        "count": "Contar",
+        "count_distinct": "Contar distintos",
+        "avg": "Promedio"
+      },
+      "severities": {
+        "warning": "Advertir",
+        "block": "Bloquear"
+      },
+      "atLeastOneRule": "Activa al menos una regla además del total de filas.",
+      "saveError": "No se pudieron guardar las validaciones.",
+      "titleUpload": "Define las validaciones",
+      "titleEdit": "Validaciones",
+      "templateSaved": "el template ya está guardado",
+      "stepStructure": "1 · Estructura",
+      "stepValidations": "2 · Validaciones",
+      "stepUpload": "3 · Cargue",
+      "headingUpload": "Este ETL todavía no tiene validaciones",
+      "headingEdit": "Qué se revisa en cada cargue",
+      "subheadingUpload": "Elige qué revisar en cada columna antes de cargar. Las sugerencias salen del archivo.",
+      "subheadingEdit": "Los cambios aplican desde el próximo cargue.",
+      "rulesToCreate": "{count, plural, one {Se creará # regla} other {Se crearán # reglas}}",
+      "saveAndUpload": "Guardar y cargar",
+      "columns": {
+        "column": "Columna",
+        "type": "Tipo",
+        "required": "Oblig.",
+        "calc": "Calcular",
+        "deviation": "Desv. %",
+        "ifOut": "Si se sale"
+      },
+      "filled": "{count} con valor",
+      "empty": "{count, plural, one {# vacía} other {# vacías}}",
+      "aria": {
+        "type": "Tipo de {name}",
+        "required": "{name} obligatoria",
+        "calc": "Cálculo de {name}",
+        "deviation": "Desviación permitida de {name}",
+        "ifOut": "Qué pasa si {name} se sale",
+        "rowCountDeviation": "Desviación permitida del total de filas",
+        "rowCountIfOut": "Qué pasa si el total de filas se sale",
+        "window": "Cargas que forman el promedio"
+      },
+      "rowCount": "Total de filas",
+      "alwaysChecked": "siempre se revisa",
+      "countRows": "Contar filas",
+      "windowBefore": "Comparar contra el promedio de las últimas",
+      "windowAfter": "{count, plural, one {carga} other {cargas}}",
+      "footnote": "Mientras no haya cargas anteriores solo se revisan tipos y obligatorias; las desviaciones empiezan a contar desde la segunda carga. \"Bloquear\" detiene el cargue; \"Advertir\" lo deja pasar y queda en el historial."
+    }
+  },
+  "invoiceBalances": {
+    "title": "Saldos de <b>{invoice}</b>",
+    "columns": {
+      "id": "Balance",
+      "reason": "Motivo",
+      "initialValue": "Valor inicial",
+      "currentValue": "Valor actual",
+      "status": "Estado",
+      "date": "Fecha",
+      "comments": "Comentarios"
+    },
+    "empty": "Esta factura no tiene saldos asociados"
+  },
+  "invoiceClaims": {
+    "title": "Glosas de <id>{invoice}</id>",
+    "required": "* campo obligatorio",
+    "new": "nuevo",
+    "columns": {
+      "id": "ID glosa",
+      "concept": "Concepto",
+      "status": "Estado",
+      "claimDate": "Fecha glosa",
+      "responseDate": "Fecha contestación",
+      "observation": "Observación",
+      "amount": "Monto"
+    },
+    "conceptPlaceholder": "Concepto de la glosa",
+    "amountPositive": "El monto debe ser mayor a cero",
+    "duplicate": "Duplicar",
+    "statusesError": "No se pudieron cargar los estados de glosa",
+    "completeRequired": "Completa los campos obligatorios",
+    "deleteTitle": "Eliminar glosa",
+    "deleteContent": "¿Deseas eliminar la glosa {id}? Esta acción no se puede deshacer.",
+    "searchPlaceholder": "Buscar glosa o concepto",
+    "empty": "Esta factura no tiene glosas registradas.",
+    "add": "Agregar glosa",
+    "total": "Total glosas:",
+    "invoice": "Factura:"
+  },
+  "makeCall": {
+    "customContact": "Correo personalizado",
+    "title": "Llamada",
+    "callTo": "Llamar a",
+    "summaryPlaceholder": "Resumen de la llamada",
+    "callStatus": "Estado de la llamada",
+    "callStates": {
+      "NO_ANSWER": "No contestó",
+      "WRONG_PHONE": "Teléfono equivocado",
+      "CALL_BACK_LATER": "Llamar luego",
+      "SUCCESS": "Llamada exitosa"
+    }
+  },
+  "monthlyClosing": {
+    "title": "Cerrar periodo contable",
+    "fetchError": "Error al obtener el cierre de mes",
+    "success": "Periodo contable cerrado con éxito",
+    "closeError": "Error al cerrar periodo contable",
+    "mismatch": "El texto de confirmación no coincide",
+    "noClosing": "No hay cierre para este proyecto",
+    "description": "Vas a cerrar el periodo <b>{period}</b> que va desde el <b>{start}</b> hasta hoy <b>{end}</b>",
+    "confirmPrompt": "Si estás seguro escribe el mes que vas a cerrar <b>\"{period}\"</b>",
+    "closePeriod": "Cerrar periodo"
+  },
+  "noveltyDetail": {
+    "info": {
+      "owner": "Responsable: ",
+      "date": "Fecha: ",
+      "customer": "Cliente: ",
+      "approvers": "Aprobadores:"
+    },
+    "evidence": {
+      "title": "Evidencia"
+    },
+    "invoices": {
+      "values": "Valores",
+      "initialAmount": "Monto inicial",
+      "currentAmount": "Monto actual",
+      "recovered": "Recuperado",
+      "documents": "Documentos ({active}/{total} activos)",
+      "showClosed": "Ver cerradas ({count})",
+      "invoice": "Factura",
+      "deduction": "Saldo",
+      "inactiveReasons": {
+        "PAID": "Pagada",
+        "MANUALLY_REMOVED": "Retirada manualmente",
+        "CANCELLED": "Anulada",
+        "OTHER": "Otro"
+      },
+      "closed": "Cerrada",
+      "noActiveDocuments": "Sin documentos activos"
+    },
+    "approved": "Incidente aprobado exitosamente",
+    "rejected": "Incidente rechazado exitosamente",
+    "processError": "Hubo un error al procesar el incidente. Por favor, inténtalo de nuevo.",
+    "closed": "Cerrada",
+    "noName": "Sin nombre",
+    "events": {
+      "title": "Eventos",
+      "unknownUser": "Usuario desconocido",
+      "unknownAction": "Acción desconocida",
+      "commentRequired": "Por favor, ingrese un comentario",
+      "commentAdded": "Comentario agregado exitosamente",
+      "commentError": "Error al agregar el comentario",
+      "commentPlaceholder": "Agrega un comentario"
+    }
+  },
+  "orderTracking": {
+    "header": {
+      "customer": "Cliente",
+      "createdAt": "Fecha creación",
+      "delivery": "Entrega",
+      "contact": "Contacto"
+    },
+    "tracking": "Seguimiento",
+    "invoice": "Factura {id}",
+    "purchaseOrderId": "ID orden de compra <b>{id}</b>",
+    "history": "Trazabilidad",
+    "owner": "Responsable: {name}",
+    "estimatedValue": "Valor estimado: ",
+    "statuses": {
+      "picking": "Alistando",
+      "inTransit": "En tránsito",
+      "delivered": "Entregado",
+      "rejected": "Rechazado"
+    }
+  },
+  "periodicity": {
+    "title": "Establecer periodicidad",
+    "start": "Inicio",
+    "repeatEvery": "Repetir cada",
+    "invalidValue": "valor inválido",
+    "end": "Fin",
+    "endAfterStart": "La fecha debe ser mínimo un día más que la fecha inicial",
+    "frequencies": {
+      "Semanal": "Semanal",
+      "Mensual": "Mensual"
+    },
+    "frequenciesInline": {
+      "Semanal": "Semanal",
+      "Mensual": "Mensual"
+    },
+    "weekdays": {
+      "sunday": "Domingo",
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado"
+    },
+    "summaryDays": "Se produce {frequency} cada {days} iniciando el {date}",
+    "summaryTimes": "Se produce {frequency} {count} veces iniciando el {date}"
+  },
+  "radication": {
+    "title": "Radicación",
+    "description": "Adjunta la evidencia e ingresa un comentario",
+    "type": "Tipo de radicación",
+    "date": "Fecha de radicación",
+    "invalidDate": "Debe ser una fecha válida",
+    "dateRequired": "La fecha de radicación es requerida",
+    "success": "Factura radicada con éxito",
+    "error": "Error al radicar la factura"
+  },
+  "redirect": {
+    "title": "No tienes ningún proyecto seleccionado",
+    "content": "Por favor, selecciona un proyecto para continuar.",
+    "gotIt": "Entendido"
+  },
+  "registerNews": {
+    "title": "Registrar novedad",
+    "description": "Adjunta la evidencia e ingresa un comentario",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Seleccionar motivo",
+    "amount": "Monto novedad",
+    "amountPlaceholder": "Ingresar monto",
+    "success": "Evidencia adjuntada con éxito",
+    "error": "Error al adjuntar la evidencia",
+    "openDisputes": {
+      "title": "Las facturas ya tienen novedades abiertas. ¿Qué deseas hacer con las novedades?",
+      "ok": "Crear novedad nueva",
+      "cancel": "No crear nueva novedad"
+    }
+  },
+  "remove": {
+    "titleOne": "¿Estás seguro de que deseas eliminar este {name}?",
+    "titleMany": "¿Estás seguro de que deseas eliminar estos {name}?",
+    "irreversible": "Esta acción es definitiva"
+  },
+  "removeChannel": {
+    "title": "¿Estás seguro de que deseas eliminar este canal?",
+    "ok": "Eliminar canal",
+    "contains": "Este canal contiene:",
+    "line": "Línea: {name}",
+    "irreversible": "Esta acción es definitiva"
+  },
+  "removeLine": {
+    "title": "¿Estás seguro de que deseas eliminar esta línea?",
+    "ok": "Eliminar línea",
+    "line": "Línea: {name}",
+    "irreversible": "Esta acción es definitiva"
+  },
+  "removeSubline": {
+    "title": "¿Estás seguro de que deseas eliminar esta sublínea?",
+    "ok": "Eliminar sublínea",
+    "subline": "Sublínea: {name}",
+    "irreversible": "Esta acción es definitiva"
+  },
+  "resolveNovelty": {
+    "titleResolve": "Resolver novedad",
+    "titleReject": "Rechazar novedad",
+    "titleAdjustment": "Ajuste contable",
+    "titleApply": "Aplicar ajuste",
+    "selectDebitMemo": "Seleccionar nota débito",
+    "selectCreditMemo": "Seleccionar nota crédito",
+    "selectDiscount": "Seleccionar descuento",
+    "intro": "Si deseas, adjunta un documento y/o ingresa un comentario",
+    "generatedAdjustment": "Marca esta casilla si esta novedad generó un ajuste contable",
+    "resolve": "Resolver",
+    "selectAdjustmentType": "Selecciona el tipo de ajuste contable a aplicar"
+  },
+  "selectAccountingAdjustment": {
+    "createDebit": "Crear débito",
+    "createCredit": "Crear crédito",
+    "createDiscount": "Crear descuento",
+    "selectDebitMemos": "Selecciona la(s) nota(s) débito a aplicar",
+    "selectCreditMemos": "Selecciona la(s) nota(s) crédito a aplicar",
+    "selectDiscounts": "Selecciona los descuentos a aplicar"
+  },
+  "selectNoveltyNote": {
+    "selectDebitMemos": "Selecciona la(s) nota(s) débito a aplicar",
+    "selectCreditMemos": "Selecciona la(s) nota(s) crédito a aplicar",
+    "selectDiscounts": "Selecciona los descuentos a aplicar"
+  },
+  "sendEmail": {
+    "title": "Correo electrónico",
+    "to": "Para",
+    "cc": "CC",
+    "subjectPlaceholder": "Ingresar asunto",
+    "bodyPlaceholder": "Cuerpo",
+    "selectTemplate": "Seleccionar plantilla",
+    "templates": {
+      "statement": "Estado de cuenta",
+      "disputes": "Envío de novedades",
+      "paymentPlan": "Envío de acuerdo de pago",
+      "preLegal": "Cobro prejurídico",
+      "legal": "Cobro jurídico"
+    },
+    "notSpecified": "No especificado",
+    "customEmail": "Correo personalizado"
+  },
+  "sendEmailNotification": {
+    "attachmentsError": "No se pudieron cargar los archivos adjuntos.",
+    "templateAttachmentsError": "Ocurrió un error al recuperar los archivos adjuntos de la plantilla.",
+    "templateError": "Ocurrió un error al obtener la plantilla",
+    "sendError": "Ocurrió un error al enviar el correo",
+    "confirm": {
+      "title": "¿Deseas enviar un correo notificando esta acción?",
+      "description": "Se enviará un correo a los aprobadores notificando esta acción",
+      "ok": "Sí, enviar correo",
+      "cancel": "No, no enviar"
+    },
+    "template": {
+      "title": "Enviar correo",
+      "to": "Para",
+      "cc": "CC",
+      "subject": "Asunto",
+      "uploadAnother": "Cargar otro documento",
+      "send": "Enviar correo"
+    },
+    "success": {
+      "title": "Correo enviado exitosamente",
+      "description": "Se ha enviado el correo a:",
+      "gotIt": "Entendido"
+    }
+  },
+  "sendExternalLink": {
+    "title": "Enviar link externo",
+    "to": "Para",
+    "sendEmail": "Enviar correo",
+    "sent": "Link enviado correctamente",
+    "sendError": "Error al enviar link",
+    "unexpectedError": "Error inesperado al enviar link",
+    "successTitle": "Link enviado exitosamente",
+    "successMessage": "Se ha enviado el link de ingreso a:",
+    "gotIt": "Entendido"
+  },
+  "shared": {
+    "optional": "*Opcional",
+    "attachment": "Adjunto",
+    "selectFile": "Seleccionar archivo",
+    "fileHint30": "PDF, Word, PNG (Tamaño max 30mb)",
+    "commentPlaceholder": "Ingresar comentario",
+    "creditMemo": "Nota crédito",
+    "debitMemo": "Nota débito",
+    "discount": "Descuento"
+  },
+  "shipTo": {
+    "update": "Actualizar Ship To",
+    "create": "Crear Ship To",
+    "editTitle": "Editar Ship To",
+    "createTitle": "Crear nuevo Ship To",
+    "code": "Código Ship To",
+    "codeNoSpaces": "El código no puede contener espacios en blanco",
+    "location": "Ubicación",
+    "locationPlaceholder": "Ingresar ubicación",
+    "addressRequired": "La dirección es obligatoria *",
+    "inherit": "Heredar parámetros del cliente",
+    "billingPlaceholder": "Segundo miércoles del mes",
+    "billingRequired": "El periodo de facturación es obligatorio *",
+    "submissionType": "Tipo de radicación",
+    "paymentTerms": "Condición de pago",
+    "address": {
+      "title": "Ingresar ubicación",
+      "addError": "Ocurrió un error al agregar la dirección.",
+      "existing": "Ubicaciones disponibles ya creadas",
+      "empty": "Aún no hay ubicaciones creadas para esta ciudad",
+      "create": "Crear ubicación del Ship To",
+      "save": "Guardar ubicación"
+    }
+  },
+  "statusClient": {
+    "title": "Cambio de estado",
+    "selectStatusFirst": "Por favor selecciona un estado antes de continuar.",
+    "selectNewStatus": "Selecciona el nuevo estado del cliente",
+    "loadingStatuses": "Cargando estados...",
+    "deleteCustomer": "Eliminar cliente"
+  },
+  "uploadDocument": {
+    "okReplace": "Reemplazar documentos",
+    "okAttach": "Adjuntar documentos",
+    "titleEdit": "Editar documentos",
+    "titleUpload": "Cargar documentos",
+    "descriptionEdit": "Los documentos seleccionados reemplazarán los actuales",
+    "descriptionUpload": "Haz clic en cada casilla para adjuntar los documentos requeridos"
+  },
+  "uploadIntakeFiles": {
+    "title": "Subir archivos",
+    "intake": "Ingesta",
+    "test": "Prueba",
+    "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de 100 MB.",
+    "uploading": "Subiendo archivo de ingesta...",
+    "success": "Archivo de ingesta subido exitosamente.",
+    "error": "Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo."
+  }
+}

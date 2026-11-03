@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { TONE_TEXT } from "../../constants";
@@ -18,6 +20,7 @@ interface GoalCardProps {
 
 /** Recaudo frente a la meta: recaudado, acuerdos pendientes e incumplidos, forecast y marca de meta. */
 export default function GoalCard({ data, className }: GoalCardProps) {
+  const tc = useTranslations("collections.goalCard");
   const { summary: s, period } = data;
   const { collected: cs, pendingAgreements: ps, brokenAgreements: bs } = s.series;
   const open = period.open;
@@ -44,7 +47,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
     {
       key: "rec",
       color: cs.color,
-      label: "Recaudado",
+      label: tc("collected"),
       value: money(s.collected),
       tag: ofGoal(s.collected)
     },
@@ -58,14 +61,14 @@ export default function GoalCard({ data, className }: GoalCardProps) {
     { key: "sep", separator: true },
     {
       key: "fc",
-      label: "Cierre estimado",
+      label: tc("estimatedClose"),
       value: money(s.forecast),
       tag: ofGoal(s.forecast),
       strong: true
     },
     {
       key: "dif",
-      label: "Frente a la meta",
+      label: tc("vsTarget"),
       value: money(s.forecast - s.goal, true),
       tone: s.forecast >= s.goal ? "pos" : "neg",
       tag: ""
@@ -76,7 +79,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
     <div className={cn("cp-card flex min-w-0 flex-col px-[18px] py-[14px]", className)}>
       <div className="flex items-end gap-3.5">
         <div className="min-w-0">
-          <div className={KPI_LABEL}>Recaudo</div>
+          <div className={KPI_LABEL}>{tc("title")}</div>
           <div className="whitespace-nowrap text-[36px] font-bold leading-[1.1] tracking-[-0.03em] tabular-nums text-foreground">
             {value}
             {unit && (
@@ -86,15 +89,15 @@ export default function GoalCard({ data, className }: GoalCardProps) {
             )}
           </div>
           <TowerTooltip
-            title="vs promedio 3 meses"
+            title={tc("vsAvgTitle")}
             rows={[
               {
                 key: "mes",
                 color: cs.color,
-                label: `Este mes al día ${period.cutoffDay}`,
+                label: tc("thisMonthAtDay", { day: period.cutoffDay }),
                 value: pct(compliance)
               },
-              { key: "avg", color: MUTED, label: "Promedio 3 meses", value: pct(s.complianceAvg3) }
+              { key: "avg", color: MUTED, label: tc("avg3"), value: pct(s.complianceAvg3) }
             ]}
           >
             <span
@@ -103,13 +106,13 @@ export default function GoalCard({ data, className }: GoalCardProps) {
                 isFinite(vsAvg3) && TONE_TEXT[vsAvg3 >= 0 ? "ok" : "crit"]
               )}
             >
-              {pp(vsAvg3)} vs prom. 3M
+              {tc("vsAvgShort", { value: pp(vsAvg3) })}
             </span>
           </TowerTooltip>
         </div>
 
         <div className="ml-auto pb-0.5 text-right">
-          <div className={KPI_LABEL}>Meta</div>
+          <div className={KPI_LABEL}>{tc("target")}</div>
           <div className="mt-1 flex items-center gap-2.5">
             {/* Fondo tenue del color del recaudo y texto del tema: el color del API
                 es uno solo para los dos temas y no garantiza contraste como texto. */}
@@ -137,10 +140,10 @@ export default function GoalCard({ data, className }: GoalCardProps) {
             value: s.collected,
             color: cs.color,
             tip: {
-              title: "Recaudo",
+              title: tc("title"),
               rows: [
-                { key: "v", color: cs.color, label: "Recaudado", value: money(s.collected) },
-                { key: "p", color: cs.color, label: "De la meta", value: pct(compliance) }
+                { key: "v", color: cs.color, label: tc("collected"), value: money(s.collected) },
+                { key: "p", color: cs.color, label: tc("ofTarget"), value: pct(compliance) }
               ]
             }
           },
@@ -149,12 +152,12 @@ export default function GoalCard({ data, className }: GoalCardProps) {
             value: s.pendingAgreements,
             color: ps.color,
             tip: {
-              title: "Acuerdos",
+              title: tc("agreements"),
               rows: [
                 {
                   key: "v",
                   color: ps.color,
-                  label: "Pendientes antes del cierre",
+                  label: tc("pendingBeforeClose"),
                   value: money(s.pendingAgreements)
                 }
               ]
@@ -170,7 +173,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
                 {
                   key: "v",
                   color: bs.color,
-                  label: "Saldo vencido",
+                  label: tc("overdueBalance"),
                   value: money(s.brokenAgreements)
                 }
               ]
@@ -183,7 +186,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
                 from: s.collected,
                 to: s.forecast,
                 color: FORECAST,
-                tip: { title: "Forecast", rows: forecastRows }
+                tip: { title: tc("forecast"), rows: forecastRows }
               }
             : null
         }
@@ -193,18 +196,23 @@ export default function GoalCard({ data, className }: GoalCardProps) {
             : {
                 value: expected,
                 tip: {
-                  title: "Ritmo a hoy",
+                  title: tc("paceTitle"),
                   rows: [
                     {
                       key: "esp",
                       color: MUTED,
-                      label: `Esperado al día ${period.cutoffDay}`,
+                      label: tc("expectedAtDay", { day: period.cutoffDay }),
                       value: money(expected)
                     },
-                    { key: "rec", color: cs.color, label: "Recaudado", value: money(s.collected) },
+                    {
+                      key: "rec",
+                      color: cs.color,
+                      label: tc("collected"),
+                      value: money(s.collected)
+                    },
                     {
                       key: "dif",
-                      label: "Diferencia",
+                      label: tc("difference"),
                       value: money(s.collected - expected, true),
                       tone: s.collected >= expected ? "pos" : "neg"
                     }
@@ -215,13 +223,13 @@ export default function GoalCard({ data, className }: GoalCardProps) {
         goal={{
           value: s.goal,
           tip: {
-            title: "Meta",
+            title: tc("target"),
             rows: [
-              { key: "meta", color: FOREGROUND, label: "Meta del mes", value: money(s.goal) },
+              { key: "meta", color: FOREGROUND, label: tc("monthlyTarget"), value: money(s.goal) },
               {
                 key: "faltan",
                 color: MUTED,
-                label: "Faltan",
+                label: tc("remaining"),
                 value: money(Math.max(0, s.goal - s.collected))
               }
             ]
@@ -248,20 +256,24 @@ export default function GoalCard({ data, className }: GoalCardProps) {
         {expected !== null && (
           <span className="inline-flex items-center gap-[5px] whitespace-nowrap">
             <i className="inline-block h-[9px] w-0 border-l-2 border-dotted border-muted-foreground" />
-            Ritmo a hoy <b className="font-bold tabular-nums text-foreground">{money(expected)}</b>
+            {tc.rich("paceLegend", {
+              value: money(expected),
+              b: (chunks) => <b className="font-bold tabular-nums text-foreground">{chunks}</b>
+            })}
           </span>
         )}
         <span className="ml-auto inline-flex items-center gap-[5px] whitespace-nowrap">
           {open ? (
             <>
               <Swatch color={FORECAST} outline />
-              Forecast <b className="font-bold tabular-nums text-foreground">
-                {money(s.forecast)}
-              </b>{" "}
-              · {pct(forecastRatio)}
+              {tc.rich("forecastLegend", {
+                value: money(s.forecast),
+                pct: pct(forecastRatio),
+                b: (chunks) => <b className="font-bold tabular-nums text-foreground">{chunks}</b>
+              })}
             </>
           ) : (
-            <>Mes cerrado · {pct(compliance)}</>
+            <>{tc("monthClosed", { pct: pct(compliance) })}</>
           )}
         </span>
       </div>

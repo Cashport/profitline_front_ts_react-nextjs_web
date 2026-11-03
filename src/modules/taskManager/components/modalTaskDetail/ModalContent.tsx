@@ -6,6 +6,7 @@ import { Mail, Sparkles, User, Building, FileText, Paperclip, Download } from "l
 import { Button as AntButton, Dropdown, Select as AntSelect, message } from "antd";
 import { DotsThreeVertical, ArrowCounterClockwise, Upload } from "@phosphor-icons/react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { useTranslations } from "use-intl";
 
 import "./modalContent.scss";
 
@@ -26,6 +27,7 @@ import { IUser } from "@/types/users/IUser";
 import { reprocessAttachmentTask } from "@/services/tasks/tasks";
 import { getClients } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
+import { getActiveLocale } from "@/i18n/translator";
 import { ModalProcessIntake } from "../modalProcessIntake/ModalProcessIntake";
 
 export type TaskFormValues = {
@@ -52,7 +54,7 @@ interface IModalContentProps {
 
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleString("es-CO", {
+  return date.toLocaleString(getActiveLocale() === "en" ? "en-GB" : "es-CO", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -70,6 +72,8 @@ export function ModalContent({
   onAttachmentReprocessed,
   canEdit
 }: IModalContentProps) {
+  const t = useTranslations("taskManager.detail");
+  const tCommon = useTranslations("common");
   const { control, setValue, getValues } = useFormContext<TaskFormValues>();
 
   const clientId = useWatch({ control, name: "client_id" });
@@ -101,11 +105,12 @@ export function ModalContent({
   const handleAssignToAI = () => {
     const currentStatus = getValues("status");
     setValue("assigned_to", CASHPORT_AI_USER_ID);
+    // Nombre del estado que entiende el backend: no se traduce.
     setValue("status", { ...currentStatus, name: "En progreso" });
   };
 
   const taskTypeOptions = (() => {
-    const options = taskTypes.map((t) => ({ value: t.ID, label: t.NAME }));
+    const options = taskTypes.map((tt) => ({ value: tt.ID, label: tt.NAME }));
     const knownIds = new Set(options.map((o) => o.value));
     if (
       taskType !== null &&
@@ -130,13 +135,13 @@ export function ModalContent({
 
   const EmailMessage = ({ emailDetails }: { emailDetails: IEmailDetails }) => {
     const handleReprocessAttachment = async (attachment: IEmailAttachment) => {
-      const hideMessage = message.loading(`Reprocesando adjunto: ${attachment.file_name}`, 0);
+      const hideMessage = message.loading(t("reprocessing", { name: attachment.file_name }), 0);
       try {
         await reprocessAttachmentTask(attachment.process_id);
-        message.success(`Reprocesando adjunto: ${attachment.file_name}`);
+        message.success(t("reprocessing", { name: attachment.file_name }));
         onAttachmentReprocessed();
       } catch (error) {
-        message.error(error instanceof Error ? error.message : "Error al reprocesar adjunto");
+        message.error(error instanceof Error ? error.message : t("reprocessError"));
       } finally {
         hideMessage();
       }
@@ -148,17 +153,17 @@ export function ModalContent({
           <div className="flex items-center gap-2 mb-2">
             <Mail className="h-5 w-5 text-blue-600" />
             <h3 className="font-semibold text-gray-900">
-              {emailDetails.details.subject || "Sin asunto"}
+              {emailDetails.details.subject || t("noSubject")}
             </h3>
           </div>
         </div>
         <div className="p-4 space-y-3">
           <div className="grid grid-cols-[80px_1fr] gap-2 text-sm">
-            <span className="text-gray-600 font-medium">De:</span>
+            <span className="text-gray-600 font-medium">{t("from")}</span>
             <span className="text-gray-900">{emailDetails.details.from_address}</span>
-            <span className="text-gray-600 font-medium">Para:</span>
+            <span className="text-gray-600 font-medium">{t("to")}</span>
             <span className="text-gray-900">{emailDetails.details.to_address}</span>
-            <span className="text-gray-600 font-medium">Fecha:</span>
+            <span className="text-gray-600 font-medium">{t("date")}</span>
             <span className="text-gray-900">
               {formatDateTime(emailDetails.details.received_date)}
             </span>
@@ -173,7 +178,7 @@ export function ModalContent({
               <div className="flex items-center gap-2 mb-2">
                 <Paperclip className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium text-gray-700">
-                  Adjuntos ({emailDetails.attachments.length})
+                  {t("attachments", { count: emailDetails.attachments.length })}
                 </span>
               </div>
               <div className="space-y-2">
@@ -207,7 +212,7 @@ export function ModalContent({
                                 className="buttonNoBorder"
                                 onClick={() => handleReprocessAttachment(attachment)}
                               >
-                                Reprocesar
+                                {t("reprocess")}
                               </AntButton>
                             )
                           },
@@ -219,7 +224,7 @@ export function ModalContent({
                                 className="buttonNoBorder"
                                 onClick={() => window.open(attachment.s3_url, "_blank")}
                               >
-                                Descargar
+                                {tCommon("actions.download")}
                               </AntButton>
                             )
                           },
@@ -231,7 +236,7 @@ export function ModalContent({
                                 className="buttonNoBorder"
                                 onClick={() => setIsProcessIntakeOpen(true)}
                               >
-                                Procesar ingesta
+                                {t("processIntake")}
                               </AntButton>
                             )
                           }
@@ -262,9 +267,7 @@ export function ModalContent({
         <div className="space-y-8 max-w-[700px]">
           {/* Custom Fields */}
           <div className="space-y-0">
-            <h3 className="text-sm font-semibold text-gray-600 mb-3">
-              Campos personalizados
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-600 mb-3">{t("customFields")}</h3>
 
             <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
               {/* Cliente */}
@@ -274,7 +277,7 @@ export function ModalContent({
                 <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
                   <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
                   <Label className="text-sm text-gray-700">
-                    Cliente
+                    {tCommon("fields.customer")}
                     {!clientId && <span className="text-rose-600 ml-1">*</span>}
                   </Label>
                 </div>
@@ -291,8 +294,8 @@ export function ModalContent({
                       onBlur={field.onBlur}
                       options={clientOptions}
                       loading={clientsLoading}
-                      placeholder={clientsLoading ? "Cargando clientes..." : "Asignar cliente..."}
-                      notFoundContent="No hay clientes disponibles"
+                      placeholder={clientsLoading ? t("loadingClients") : t("assignClient")}
+                      notFoundContent={t("noClients")}
                       filterOption={(input, option) =>
                         ((option?.label as string) ?? "")
                           .toLowerCase()
@@ -312,7 +315,7 @@ export function ModalContent({
                 <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
                   <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
                   <Label className="text-sm text-gray-700">
-                    Tipo de tarea
+                    {t("taskType")}
                     {taskType === null && <span className="text-rose-600 ml-1">*</span>}
                   </Label>
                 </div>
@@ -328,9 +331,7 @@ export function ModalContent({
                       options={taskTypeOptions}
                       loading={taskTypes.length === 0}
                       disabled={!canEdit || taskTypes.length === 0}
-                      placeholder={
-                        taskTypes.length === 0 ? "Cargando tipos..." : "Seleccionar tipo..."
-                      }
+                      placeholder={taskTypes.length === 0 ? t("loadingTypes") : t("selectType")}
                       variant="borderless"
                       className={ANT_SELECT_CLASS(
                         field.value === null || field.value === undefined
@@ -347,7 +348,7 @@ export function ModalContent({
                 <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
                   <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
                   <Label className="text-sm text-gray-700">
-                    Responsable
+                    {t("assignee")}
                     {assignedTo === null && <span className="text-rose-600 ml-1">*</span>}
                   </Label>
                 </div>
@@ -369,9 +370,7 @@ export function ModalContent({
                       onBlur={field.onBlur}
                       options={assignedUserOptions}
                       loading={usersLoading}
-                      placeholder={
-                        usersLoading ? "Cargando responsables..." : "Asignar responsable..."
-                      }
+                      placeholder={usersLoading ? t("loadingAssignees") : t("assignAssignee")}
                       filterOption={(input, option) =>
                         ((option?.label as string) ?? "")
                           .toLowerCase()
@@ -402,7 +401,7 @@ export function ModalContent({
                   <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-[13px]">
                     $
                   </div>
-                  <Label className="text-sm text-gray-700">Monto</Label>
+                  <Label className="text-sm text-gray-700">{tCommon("fields.amount")}</Label>
                 </div>
                 <Input
                   type="number"
@@ -418,13 +417,13 @@ export function ModalContent({
               <div className="flex items-start gap-2 px-3 py-2 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-2 w-[140px] flex-shrink-0 mt-1.5">
                   <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                  <Label className="text-sm text-gray-700">Descripción</Label>
+                  <Label className="text-sm text-gray-700">{tCommon("fields.description")}</Label>
                 </div>
                 <Textarea
                   value={taskDetail.description || ""}
                   readOnly
                   disabled
-                  placeholder="Agregar descripción..."
+                  placeholder={t("addDescription")}
                   rows={2}
                   className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 resize-none px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
@@ -436,7 +435,7 @@ export function ModalContent({
             <div className="pt-4">
               <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
                 <Sparkles className="h-3 w-3 mr-1" />
-                Procesado por Cashport AI
+                {t("processedByAi")}
               </Badge>
             </div>
           )}
@@ -447,14 +446,14 @@ export function ModalContent({
       <div className="overflow-y-auto px-10 py-8 pt-0 border-l border-gray-200 bg-white">
         <div className="space-y-6">
           <h3 className="text-sm font-semibold text-gray-600 sticky top-0 bg-white py-2 pt-[40px] z-10">
-            Mensaje original
+            {t("originalMessage")}
           </h3>
           {taskDetail.emailDetails ? (
             <EmailMessage emailDetails={taskDetail.emailDetails} />
           ) : (
             <div className="text-center py-12 text-gray-500">
               <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
-              <p>No hay mensaje original disponible</p>
+              <p>{t("noOriginalMessage")}</p>
               {taskDetail.description && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left">
                   <p className="text-gray-700 text-sm">{taskDetail.description}</p>

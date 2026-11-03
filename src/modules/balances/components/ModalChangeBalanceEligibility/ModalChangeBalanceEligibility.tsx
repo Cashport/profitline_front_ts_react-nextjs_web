@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Radio } from "antd";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import {
   changeBalanceEligibility,
@@ -25,6 +26,8 @@ export const ModalChangeBalanceEligibility: React.FC<Props> = ({
   balanceIds,
   onSuccess
 }) => {
+  const t = useTranslations("balances.changeOrigin");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
 
   const [eligibilityStatuses, setEligibilityStatuses] = useState<EligibilityStatusOption[]>([]);
@@ -52,12 +55,12 @@ export const ModalChangeBalanceEligibility: React.FC<Props> = ({
     setLoading(true);
     try {
       await changeBalanceEligibility(balanceIds, Number(selectedEligibilityId));
-      showMessage("success", "La procedencia de los saldos se actualizó correctamente.");
+      showMessage("success", t("success"));
       onSuccess();
       onClose();
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Ha ocurrido un error al cambiar la procedencia.";
+        error instanceof Error ? error.message : tCommon("feedback.genericError");
       showMessage("error", errorMessage);
     }
     setLoading(false);
@@ -67,10 +70,10 @@ export const ModalChangeBalanceEligibility: React.FC<Props> = ({
     <Modal className={styles.wrapper} width="50%" open={isOpen} footer={null} closable={false}>
       <Button onClick={onClose} className={styles.content__header}>
         <CaretLeft size="1.25rem" />
-        <span>Cambio de procedencia</span>
+        <span>{t("title")}</span>
       </Button>
       <div className={styles.content}>
-        <p className={styles.content__description}>Selecciona la nueva procedencia del saldo</p>
+        <p className={styles.content__description}>{t("description")}</p>
 
         <div className={styles.content__status}>
           <Radio.Group
@@ -92,7 +95,7 @@ export const ModalChangeBalanceEligibility: React.FC<Props> = ({
         <FooterButtons
           handleOk={handleConfirm}
           onClose={onClose}
-          titleConfirm="Cambiar procedencia"
+          titleConfirm={t("confirm")}
           isConfirmDisabled={!selectedEligibilityId}
           isConfirmLoading={loading}
         />

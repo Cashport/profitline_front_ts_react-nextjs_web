@@ -1,6 +1,7 @@
 import { Dispatch, FC, SetStateAction } from "react";
 import "./clients-view-table-filter-clients.scss";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 
 interface filterClientsProps {
   setFilterClientsAccount?: Dispatch<
@@ -19,6 +20,8 @@ interface Option {
 }
 
 const clientsViewTableFilterClients: FC<filterClientsProps> = ({ setFilterClientsAccount }) => {
+  const t = useTranslations("clients.customerGroupsFilter");
+  const tCommon = useTranslations("common");
   const onChange = (selectedValue: any[]) => {
     const clientsGroups: number[] = [];
 
@@ -39,7 +42,7 @@ const clientsViewTableFilterClients: FC<filterClientsProps> = ({ setFilterClient
   const options: Option[] = [
     {
       value: "clientsGroups",
-      label: "Grupos de clientes",
+      label: t("customerGroups"),
       isLeaf: false,
       disableCheckbox: true,
       children: []
@@ -54,7 +57,7 @@ const clientsViewTableFilterClients: FC<filterClientsProps> = ({ setFilterClient
       size="large"
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomLeft"
       options={options}
       onChange={onChange}

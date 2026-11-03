@@ -2,13 +2,14 @@
 
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import type { SortState } from "@/modules/walletModule/types";
 import { cn } from "@/utils/utils";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
-import { AVANCE_SCALE, GROUPINGS, GROUPING_BY_ID, TONE_TEXT } from "../../constants";
+import { AVANCE_SCALE, GROUPINGS, TONE_TEXT } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { useProgressiveRows } from "../../hooks/use-progressive-rows";
 import type { Grouping, Tone } from "../../types";
@@ -37,21 +38,23 @@ import {
 } from "../shared/styles";
 import TowerTooltip from "../shared/tower-tooltip";
 
+/** Columnas con nombre propio (`collections.goalTable.columns`); la del nombre es la agrupación. */
+type GoalCol = "collected" | "goal" | "diff" | "compliance" | "forecast";
+
 const COLUMNS: {
-  col: keyof GoalRow;
-  label: string;
+  col: "name" | GoalCol;
   align?: "right";
   width: string;
   hideSm?: boolean;
   /** Dirección del primer clic. */
   dir: SortState["dir"];
 }[] = [
-  { col: "name", label: "", width: "w-[30%]", dir: "asc" },
-  { col: "collected", label: "Recaudo", align: "right", width: "w-[14%]", dir: "desc" },
-  { col: "goal", label: "Meta", align: "right", width: "w-[14%]", hideSm: true, dir: "desc" },
-  { col: "diff", label: "Dif.", align: "right", width: "w-[14%]", dir: "asc" },
-  { col: "compliance", label: "Avance", width: "w-[14%]", dir: "asc" },
-  { col: "forecast", label: "Forecast", align: "right", width: "w-[14%]", dir: "desc" }
+  { col: "name", width: "w-[30%]", dir: "asc" },
+  { col: "collected", align: "right", width: "w-[14%]", dir: "desc" },
+  { col: "goal", align: "right", width: "w-[14%]", hideSm: true, dir: "desc" },
+  { col: "diff", align: "right", width: "w-[14%]", dir: "asc" },
+  { col: "compliance", width: "w-[14%]", dir: "asc" },
+  { col: "forecast", align: "right", width: "w-[14%]", dir: "desc" }
 ];
 
 const diffTone = (diff: number) => TONE_TEXT[diff < 0 ? "crit" : "ok"];
@@ -66,8 +69,9 @@ interface AvanceProps {
 
 /** Barra hasta el 130% de la meta: recaudado, forecast punteado y marca de meta. */
 function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
+  const tc = useTranslations("collections.goalTable");
   // Sin meta la barra salía llena (escala 0) y con 0 %.
-  if (goal <= 0) return <span className={NO_GOAL}>Sin meta</span>;
+  if (goal <= 0) return <span className={NO_GOAL}>{tc("noGoal")}</span>;
   const c = collected / goal;
   const f = forecast / goal;
   // Tono del recaudado: contra el ritmo esperado al día de corte, no contra la meta del mes.
@@ -78,16 +82,21 @@ function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
 
   return (
     <TowerTooltip
-      title="Avance vs meta"
+      title={tc("progressTitle")}
       rows={[
-        { key: "rec", color, label: "Recaudado", value: `${money(collected)} · ${pct(c, 0)}` },
+        {
+          key: "rec",
+          color,
+          label: tc("collected"),
+          value: `${money(collected)} · ${pct(c, 0)}`
+        },
         {
           key: "fc",
           color: withAlpha(FORECAST, 0.16),
-          label: "Forecast",
+          label: tc("columns.forecast"),
           value: `${money(forecast)} · ${pct(f, 0)}`
         },
-        { key: "meta", color: FOREGROUND, label: "Meta", value: money(goal) }
+        { key: "meta", color: FOREGROUND, label: tc("columns.goal"), value: money(goal) }
       ]}
     >
       <div className="flex min-w-0 max-w-[84px] flex-col gap-[5px]">
@@ -125,6 +134,7 @@ const GoalTableRow = memo(function GoalTableRow({
   color,
   onSelect
 }: GoalTableRowProps) {
+  const tc = useTranslations("collections.goalTable");
   return (
     <tr className={cn(ROW_CLICK, selected && ROW_SELECTED)} onClick={() => onSelect(r)}>
       <td className={TD}>
@@ -133,8 +143,8 @@ const GoalTableRow = memo(function GoalTableRow({
       </td>
       <td className={cn(TD, "text-right")}>
         <TowerTooltip
-          title="Recaudo"
-          rows={[{ key: "v", color, label: "Valor", value: full(r.collected) }]}
+          title={tc("columns.collected")}
+          rows={[{ key: "v", color, label: tc("value"), value: full(r.collected) }]}
         >
           <span className={AMOUNT}>{money(r.collected)}</span>
         </TowerTooltip>
@@ -156,19 +166,19 @@ const GoalTableRow = memo(function GoalTableRow({
       </td>
       <td className={cn(TD, "text-right")}>
         <TowerTooltip
-          title="Forecast"
+          title={tc("columns.forecast")}
           rows={[
-            { key: "rec", color, label: "Recaudado", value: money(r.collected) },
+            { key: "rec", color, label: tc("collected"), value: money(r.collected) },
             {
               key: "in",
               color: withAlpha(FORECAST, 0.16),
-              label: "Por entrar",
+              label: tc("toCome"),
               value: money(r.forecast - r.collected)
             },
             {
               key: "dif",
               color: FOREGROUND,
-              label: "Frente a la meta",
+              label: tc("vsTarget"),
               value: money(r.forecast - r.goal, true)
             }
           ]}
@@ -185,13 +195,14 @@ const GoalTableRow = memo(function GoalTableRow({
  * meta, diferencia, avance y forecast. Clic en una fila filtra el tablero.
  */
 export default function GoalTable({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections");
   const { filters, patch } = useTowerFilters();
   const [by, setBy] = useState<Grouping>("client");
   const [sort, setSort] = useState<SortState>({ col: "diff", dir: "asc" });
   const scrollRef = useRef<HTMLDivElement>(null);
   const ix = indexCatalogs(data.catalogs);
   const color = data.summary.series.collected.color;
-  const grouping = GROUPING_BY_ID[by];
+  const title = tc(`groupings.${by}.title`);
   const rows = useMemo(
     () =>
       sortRows(
@@ -223,24 +234,24 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
 
   return (
     <PanelCard
-      title={`${grouping.plural} frente a su meta`}
-      hint={`${onPace} de ${withGoal} con meta van al ritmo`}
+      title={title}
+      hint={tc("goalTable.onPace", { onPace, withGoal })}
       flush
       actions={
         <>
           <Select
             size="small"
-            aria-label="Ver meta por"
+            aria-label={tc("goalTable.viewBy")}
             className="w-[136px]"
             popupMatchSelectWidth={false}
             value={by}
-            options={GROUPINGS.map((g) => ({ value: g.id, label: g.label }))}
+            options={GROUPINGS.map((g) => ({ value: g, label: tc(`groupings.${g}.label`) }))}
             onChange={setBy}
           />
           <ExcelButton
             table="goals"
             state={{ groupBy: by, sortBy: sort.col, sortDir: sort.dir }}
-            name={`${grouping.plural} frente a su meta`}
+            name={title}
             periodLabel={data.period.label}
           />
         </>
@@ -255,7 +266,11 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
                   <SortableTh
                     key={c.col}
                     col={c.col}
-                    label={c.col === "name" ? grouping.singular : c.label}
+                    label={
+                      c.col === "name"
+                        ? tc(`groupings.${by}.singular`)
+                        : tc(`goalTable.columns.${c.col}`)
+                    }
                     align={c.align}
                     sort={sort}
                     onSort={(col) => setSort((s) => nextSort(s, col, c.dir))}
@@ -278,14 +293,14 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
               ) : (
                 <tr>
                   <td colSpan={COLUMNS.length} className={EMPTY}>
-                    Sin clientes
+                    {tc("goalTable.empty")}
                   </td>
                 </tr>
               )}
               {hasMore && <SentinelRow ref={sentinelRef} colSpan={COLUMNS.length} />}
               {rows.length > 0 && (
                 <tr>
-                  <td className={TD_TOTAL}>Total</td>
+                  <td className={TD_TOTAL}>{tc("rows.total")}</td>
                   <td className={cn(TD_TOTAL, "text-right tabular-nums")}>{money(tCollected)}</td>
                   <td className={cn(TD_TOTAL, "text-right tabular-nums", HIDE_SM)}>
                     {money(tGoal)}

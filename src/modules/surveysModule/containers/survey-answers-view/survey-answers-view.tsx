@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import Pagination from "@/components/ui/pagination";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -19,6 +20,7 @@ import { useVisitFormResponses } from "../../hooks/useVisitFormResponses";
  * periodo y el listado paginado; cada fila abre la respuesta completa.
  */
 export default function SurveyAnswersView({ formId }: { formId: number }) {
+  const t = useTranslations("surveys.answers");
   const { form } = useVisitForm(formId);
   const { responsesPage, page, setPage, isLoading, error } = useVisitFormResponses(formId);
   const [openResponseId, setOpenResponseId] = useState<number | null>(null);
@@ -29,21 +31,21 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
   const cards: StatCardItem[] = [
     {
       id: "total",
-      label: "Total respuestas",
+      label: t("stats.total"),
       value: fmt(responsesPage?.total),
-      foot: "Completas y parciales"
+      foot: t("stats.totalFoot")
     },
     {
       id: "month",
-      label: "Este mes",
+      label: t("stats.month"),
       value: fmt(responsesPage?.month_total),
-      foot: "Desde el día 1"
+      foot: t("stats.monthFoot")
     },
     {
       id: "users",
-      label: "Asesores",
+      label: t("stats.users"),
       value: fmt(responsesPage?.user_count),
-      foot: "Han respondido la encuesta"
+      foot: t("stats.usersFoot")
     }
   ];
 
@@ -52,16 +54,12 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
     if (error) {
       return (
         <p className="p-9 text-center text-sm text-destructive">
-          {error.message || "No se pudieron cargar las respuestas."}
+          {error.message || t("loadError")}
         </p>
       );
     }
     if (!total) {
-      return (
-        <p className="p-9 text-center text-sm text-muted-foreground">
-          Esta encuesta aún no tiene respuestas.
-        </p>
-      );
+      return <p className="p-9 text-center text-sm text-muted-foreground">{t("empty")}</p>;
     }
     return <ResponsesTable responses={responses} onOpen={setOpenResponseId} />;
   };
@@ -70,8 +68,8 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
     <div className="flex flex-col gap-4 pb-6">
       <SurveyPageHeader
         backHref={`/surveys/${formId}`}
-        backLabel={form?.name ?? "Encuesta"}
-        title="Respuestas"
+        backLabel={form?.name ?? t("backFallback")}
+        title={t("title")}
       />
 
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
@@ -81,10 +79,10 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
 
       <section className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm">
         <div className="flex flex-wrap items-baseline justify-between gap-2.5 px-1">
-          <h2 className="text-sm font-semibold text-foreground">Respuestas recientes</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("recent")}</h2>
           {responsesPage && (
             <span className="text-[13px] text-muted-foreground">
-              Mostrando {responses.length} de {total.toLocaleString("es-CO")}
+              {t("showing", { shown: responses.length, total: total.toLocaleString("es-CO") })}
             </span>
           )}
         </div>

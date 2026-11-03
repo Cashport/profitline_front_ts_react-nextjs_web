@@ -7,6 +7,7 @@ import GroupClients from "../../groupClients/GroupClients";
 import useDiscountFeats from "../hooks/useDiscountFeats";
 import { DiscountSchema } from "../../../../resolvers/generalResolver";
 import { useClientsGroups } from "@/hooks/useClientsGroups";
+import { useTranslations } from "use-intl";
 
 const { Title, Text } = Typography;
 
@@ -17,6 +18,7 @@ type FeatByOrderProps = {
 };
 
 export default function FeatByCient({ form, statusForm }: FeatByOrderProps) {
+  const t = useTranslations("discounts");
   const {
     setValue,
     watch,
@@ -30,15 +32,15 @@ export default function FeatByCient({ form, statusForm }: FeatByOrderProps) {
 
   return (
     <Flex className={styles.principalContainer} vertical gap={20}>
-      <Title level={5}>Descuento aplicable</Title>
+      <Title level={5}>{t("byClient.applicableDiscount")}</Title>
       <Radio.Group
         onChange={onChange}
         value={watch("computation_type")}
         className={styles.radioGroup}
         disabled={statusForm === "review"}
       >
-        <Radio value={1}>Descuento aplicable en porcentaje</Radio>
-        <Radio value={2}>Descuento aplicable en valor fijo</Radio>
+        <Radio value={1}>{t("byOrder.percentage")}</Radio>
+        <Radio value={2}>{t("byOrder.fixedAmount")}</Radio>
       </Radio.Group>
       <Text type="danger" hidden={!errors?.computation_type}>
         {errors?.computation_type?.message}
@@ -50,7 +52,7 @@ export default function FeatByCient({ form, statusForm }: FeatByOrderProps) {
         placeholder="0%"
         className={styles.input}
       />
-      <Title level={5}>Selecciona un grupo de clientes</Title>
+      <Title level={5}>{t("byClient.selectCustomerGroup")}</Title>
       <GroupClients
         clients={data?.data}
         error={error}

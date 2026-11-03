@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
@@ -24,6 +25,8 @@ const PaymentsTable = ({
   paymentStatusId,
   handleOpenPaymentDetail
 }: PropsInvoicesTable) => {
+  const t = useTranslations("clients.payments.table.columns");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const { selectedPayments, setSelectedPayments } = useSelectedPayments();
@@ -77,7 +80,7 @@ const PaymentsTable = ({
       width: 130
     },
     {
-      title: "Id ERP",
+      title: t("erpId"),
       dataIndex: "ID_ERP",
       key: "ID_ERP",
       render: (erpId) => <p>{erpId || "-"}</p>,
@@ -86,7 +89,7 @@ const PaymentsTable = ({
       width: 130
     },
     {
-      title: "Ingreso",
+      title: t("receivedDate"),
       dataIndex: "payment_date",
       key: "payment_date",
       render: (text) => <Text className="cell">{formatDate(text)}</Text>,
@@ -95,7 +98,7 @@ const PaymentsTable = ({
       width: 120
     },
     {
-      title: "Identificación",
+      title: t("identificationDate"),
       dataIndex: "identification_date",
       key: "identification_date",
       render: (text) => <Text className="cell">{text ? formatDate(text) : "-"}</Text>,
@@ -104,14 +107,14 @@ const PaymentsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Referencia",
+      title: tCommon("fields.reference"),
       key: "description",
       dataIndex: "description",
       render: (text) => <p className="cell__description">{text}</p>,
       showSorterTooltip: false
     },
     {
-      title: "Monto",
+      title: tCommon("fields.amount"),
       key: "initial_value",
       dataIndex: "initial_value",
       align: "right",
@@ -120,7 +123,7 @@ const PaymentsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Disponible",
+      title: t("available"),
       key: "current_value",
       dataIndex: "current_value",
       align: "right",

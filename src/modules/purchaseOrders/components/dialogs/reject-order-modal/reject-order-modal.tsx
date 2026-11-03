@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "use-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -18,6 +19,8 @@ interface RejectOrderModalProps {
 }
 
 export function RejectOrderModal({ open, onOpenChange, onConfirm }: RejectOrderModalProps) {
+  const t = useTranslations("purchaseOrders.rejectModal");
+  const tCommon = useTranslations("common");
   const [rejectReason, setRejectReason] = useState("");
   const [rejectObservation, setRejectObservation] = useState("");
 
@@ -43,44 +46,43 @@ export function RejectOrderModal({ open, onOpenChange, onConfirm }: RejectOrderM
       <DialogContent className="sm:max-w-lg mx-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleCancel}
-              className="h-8 w-8 p-0"
-            >
+            <Button variant="ghost" size="icon" onClick={handleCancel} className="h-8 w-8 p-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <DialogTitle className="text-xl font-semibold">Rechazar orden</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">{t("title")}</DialogTitle>
           </div>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-gray-600">Selecciona el motivo y agrega una observación</p>
+          <p className="text-sm text-gray-600">{t("description")}</p>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Motivo de rechazo</label>
+            <label className="text-sm font-medium text-gray-700">{t("reasonLabel")}</label>
             <Select value={rejectReason} onValueChange={setRejectReason}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar motivo" />
+                <SelectValue placeholder={t("reasonPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="precio-incorrecto">Precio incorrecto</SelectItem>
-                <SelectItem value="producto-no-disponible">Producto no disponible</SelectItem>
-                <SelectItem value="informacion-incompleta">Información incompleta</SelectItem>
-                <SelectItem value="error-cliente">Error del cliente</SelectItem>
-                <SelectItem value="otro">Otro</SelectItem>
+                <SelectItem value="precio-incorrecto">{t("reasons.wrongPrice")}</SelectItem>
+                <SelectItem value="producto-no-disponible">
+                  {t("reasons.productUnavailable")}
+                </SelectItem>
+                <SelectItem value="informacion-incompleta">
+                  {t("reasons.incompleteInfo")}
+                </SelectItem>
+                <SelectItem value="error-cliente">{t("reasons.customerError")}</SelectItem>
+                <SelectItem value="otro">{t("reasons.other")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
-              Observación <span className="text-red-500">*</span>
+              {t("observationLabel")} <span className="text-red-500">*</span>
             </label>
             <Textarea
               value={rejectObservation}
               onChange={(e) => setRejectObservation(e.target.value)}
-              placeholder="Escribe una observación..."
+              placeholder={t("observationPlaceholder")}
               className="min-h-[100px] resize-none"
             />
           </div>
@@ -91,7 +93,7 @@ export function RejectOrderModal({ open, onOpenChange, onConfirm }: RejectOrderM
             onClick={handleCancel}
             className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             onClick={handleConfirm}
@@ -99,7 +101,7 @@ export function RejectOrderModal({ open, onOpenChange, onConfirm }: RejectOrderM
             className="flex-1 text-black font-semibold disabled:opacity-50"
             style={{ backgroundColor: "#CBE71E" }}
           >
-            Guardar
+            {tCommon("actions.save")}
           </Button>
         </div>
       </DialogContent>

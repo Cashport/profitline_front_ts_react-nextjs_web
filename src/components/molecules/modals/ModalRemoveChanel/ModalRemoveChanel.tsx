@@ -1,4 +1,5 @@
 import { Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import "./modalremovechanel.scss";
 import { IChanel } from "@/types/bre/IBRE";
 import { Fragment } from "react";
@@ -14,25 +15,26 @@ interface Props {
   channelData: IChanel;
 }
 export const ModalRemoveChanel = ({ isOpen, isLoading, channelData, onClose, onRemove }: Props) => {
+  const t = useTranslations("modals.removeChannel");
   return (
     <Modal
       open={isOpen}
       onCancel={onClose}
       okButtonProps={{ className: "acceptButton", loading: isLoading }}
-      okText="Eliminar Canal"
+      okText={t("ok")}
       cancelButtonProps={{
         className: "buttonCancel"
       }}
       className="modalChangeStatusChanel"
-      title={`¿Estás seguro que deseas eliminar este canal?`}
+      title={t("title")}
       onOk={onRemove}
     >
-      <Text className="title">Este canal contiene:</Text>
+      <Text className="title">{t("contains")}</Text>
       <br />
       <br />
       {channelData?.CHANNEL_LINES?.map((line) => (
         <Fragment key={line.id}>
-          <Text className="title">Linea: {line.description} </Text>
+          <Text className="title">{t("line", { name: line.description })} </Text>
           <br />
           {line?.sublines?.map((subline) => (
             <Text key={subline.id}> {subline.description ?? ""}.</Text>
@@ -42,7 +44,7 @@ export const ModalRemoveChanel = ({ isOpen, isLoading, channelData, onClose, onR
         </Fragment>
       ))}
 
-      <Text className="title">Esta acción es definitiva </Text>
+      <Text className="title">{t("irreversible")} </Text>
     </Modal>
   );
 };

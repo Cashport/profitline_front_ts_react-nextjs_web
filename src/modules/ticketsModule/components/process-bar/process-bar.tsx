@@ -1,6 +1,7 @@
 "use client";
 
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import type { ITaskConfig } from "@/types/tickets/ITickets";
@@ -14,6 +15,7 @@ import { useTicketsView } from "../../stores/tickets-view-store";
  * Comparte el filtro `process` con el modal de filtros.
  */
 export default function ProcessBar({ config }: { config: ITaskConfig }) {
+  const t = useTranslations("tickets");
   const { view, search, setFilter } = useTicketsView(
     useShallow((s) => ({ view: s.view, search: s.search, setFilter: s.setFilter }))
   );
@@ -33,14 +35,17 @@ export default function ProcessBar({ config }: { config: ITaskConfig }) {
   const items = [
     ...config.processes.map((p) => ({ value: String(p.id), label: p.name, color: p.color })),
     // Acciones de novedad y tareas viejas sin proceso: solo si hay alguna.
-    ...(counts.get("none") ? [{ value: "none", label: "Sin proceso", color: undefined }] : [])
+    ...(counts.get("none") ? [{ value: "none", label: t("noProcess"), color: undefined }] : [])
   ];
 
   const toggle = (value: string) =>
     setFilter("process", selected.length === 1 && selected[0] === value ? [] : [value]);
 
   return (
-    <nav aria-label="Procesos" className="flex min-w-0 flex-wrap items-center gap-1">
+    <nav
+      aria-label={t("processBar.ariaLabel")}
+      className="flex min-w-0 flex-wrap items-center gap-1"
+    >
       {items.map((p) => {
         const on = selected.includes(p.value);
         return (

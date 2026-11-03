@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Flex, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
@@ -40,6 +41,9 @@ interface Props {
 }
 
 const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
+  const t = useTranslations("banks.assignCustomer");
+  const tShared = useTranslations("banks.shared");
+  const tCommon = useTranslations("common");
   const [clients, setClients] = useState<ISelect[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { ID } = useAppStore((state) => state.selectedProject);
@@ -92,10 +96,7 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        showMessage(
-          "error",
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
+        showMessage("error", tShared("fileTooLarge", { maxMb: 30 }));
         return;
       }
       setValue("evidence", rawFile);
@@ -119,10 +120,10 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
         evidence: data.evidence
       });
 
-      showMessage("success", "Cliente asignado correctamente");
+      showMessage("success", t("success"));
       onClose();
     } catch (error) {
-      showMessage("error", "Error al asignar cliente");
+      showMessage("error", t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -137,11 +138,9 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
       closable={false}
       destroyOnClose
     >
-      <Title level={4}>Asignar cliente</Title>
+      <Title level={4}>{t("title")}</Title>
 
-      <p className="modalActionsAssignClient__subTitle">
-        Selecciona el cliente para asignar al pago
-      </p>
+      <p className="modalActionsAssignClient__subTitle">{t("subtitle")}</p>
 
       <Controller
         name="client"
@@ -151,8 +150,8 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
           <GeneralSelect
             errors={errors.client}
             field={field}
-            title="Cliente"
-            placeholder="Buscar cliente"
+            title={tCommon("fields.customer")}
+            placeholder={t("searchCustomer")}
             options={clients}
             titleAbsolute
             showSearch
@@ -163,8 +162,8 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
 
       <div className="modalActionsAssignClient__file">
         <Flex vertical>
-          <p>Evidencia</p>
-          <em>*Opcional</em>
+          <p>{tShared("evidence")}</p>
+          <em>{tShared("optional")}</em>
         </Flex>
         <DocumentButton
           key={evidence?.name}
@@ -177,14 +176,14 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
       </div>
 
       <div className="modalActionsAssignClient__footer">
-        <SecondaryButton onClick={() => onClose(true)}>Cancelar</SecondaryButton>
+        <SecondaryButton onClick={() => onClose(true)}>{tCommon("actions.cancel")}</SecondaryButton>
 
         <PrincipalButton
           onClick={handleSubmit(onSubmit)}
           disabled={!isValid}
           loading={isSubmitting}
         >
-          Asignar cliente
+          {t("title")}
         </PrincipalButton>
       </div>
     </Modal>

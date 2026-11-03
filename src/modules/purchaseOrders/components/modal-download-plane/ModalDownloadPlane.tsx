@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Checkbox, message, Spin } from "antd";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import {
@@ -17,6 +18,8 @@ type Props = {
 };
 
 export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageIds }) => {
+  const t = useTranslations("purchaseOrders.downloadPlane");
+  const tCommon = useTranslations("common");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [files, setFiles] = useState<IAvailableDocument[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +34,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
         const data = await getDownloadableFiles(packageIds);
         setFiles(data.documents);
       } catch (error) {
-        message.error("Error al obtener los archivos disponibles");
+        message.error(t("fetchError"));
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -39,7 +42,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
     };
 
     fetchFiles();
-  }, [isOpen, packageIds]);
+  }, [isOpen, packageIds, t]);
 
   const total = files.length;
   const selectedCount = selectedTypes.length;
@@ -75,10 +78,10 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      message.success("Archivos descargados exitosamente");
+      message.success(t("success"));
       handleClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al descargar los archivos");
+      message.error(error instanceof Error ? error.message : t("downloadError"));
     } finally {
       setIsDownloading(false);
     }
@@ -94,14 +97,14 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
     <Modal
       open={isOpen}
       onCancel={handleClose}
-      title="Descargar plano"
+      title={t("title")}
       footer={null}
       centered
       destroyOnClose
       className="modalDownloadPlane"
       width={520}
     >
-      <p className="modalDownloadPlane__subtitle">Selecciona los archivos que deseas descargar:</p>
+      <p className="modalDownloadPlane__subtitle">{t("subtitle")}</p>
 
       {isLoading ? (
         <div className="modalDownloadPlane__loading">
@@ -111,10 +114,10 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
         <>
           <div className="modalDownloadPlane__selectAllRow">
             <Checkbox checked={allSelected} indeterminate={someSelected} onChange={handleToggleAll}>
-              Seleccionar todos
+              {t("selectAll")}
             </Checkbox>
             <span className="modalDownloadPlane__counter">
-              {selectedCount} de {total} seleccionados
+              {t("selectedCount", { selected: selectedCount, total })}
             </span>
           </div>
 
@@ -138,8 +141,8 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
       )}
 
       <FooterButtons
-        titleConfirm="Descargar"
-        titleCancel="Cancelar"
+        titleConfirm={tCommon("actions.download")}
+        titleCancel={tCommon("actions.cancel")}
         isConfirmDisabled={selectedCount === 0 || isDownloading}
         isConfirmLoading={isDownloading}
         onClose={handleClose}

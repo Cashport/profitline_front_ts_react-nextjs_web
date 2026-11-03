@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { cn } from "@/utils/utils";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
@@ -15,13 +17,14 @@ import TowerTooltip from "../shared/tower-tooltip";
  * tablero; los demás se atenúan pero no desaparecen.
  */
 export default function AgingCard({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections.agingCard");
   const { filters, toggleAging } = useTowerFilters();
   const buckets = data.agingBuckets;
   const total = sumBy(buckets, (b) => b.amount) || 1;
 
   return (
     <div className={KPI_CARD}>
-      <div className={KPI_LABEL}>Recaudo por tramo</div>
+      <div className={KPI_LABEL}>{tc("title")}</div>
 
       <AgingBar
         height={10}
@@ -34,11 +37,11 @@ export default function AgingCard({ data }: { data: ICollectionTower }) {
             <TowerTooltip
               title={bucket?.label ?? seg.key}
               rows={[
-                { key: "v", color: seg.color, label: "Recaudado", value: money(seg.value) },
+                { key: "v", color: seg.color, label: tc("collected"), value: money(seg.value) },
                 {
                   key: "p",
                   color: seg.color,
-                  label: "Participación",
+                  label: tc("share"),
                   value: pct(seg.value / total)
                 }
               ]}

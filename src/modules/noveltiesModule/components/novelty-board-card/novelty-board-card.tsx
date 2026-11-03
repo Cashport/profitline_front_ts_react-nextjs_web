@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import BoardCard from "@/components/ui/board-lanes/board-card";
 import PersonBadge from "@/modules/walletModule/components/shared/person-badge";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
@@ -15,6 +17,8 @@ interface NoveltyBoardCardProps {
 
 /** Tarjeta de una novedad dentro de una columna del tablero. */
 export default function NoveltyBoardCard({ item, onOpenDetail }: NoveltyBoardCardProps) {
+  const t = useTranslations("novelties.card");
+  const tSla = useTranslations("wallet.sla");
   const sla = slaDe(item);
   const dias = diasSinGestion(item);
 
@@ -41,14 +45,16 @@ export default function NoveltyBoardCard({ item, onOpenDetail }: NoveltyBoardCar
       </div>
 
       <div className="mt-[5px] flex items-center gap-2 text-[13px] text-muted-foreground">
-        Últ. gestión
+        {t("lastActivity")}
         {dias === null ? (
           <span>—</span>
         ) : (
-          <StatusChip sev={sevGestion(dias)}>{dias === 0 ? "Hoy" : `${dias}d`}</StatusChip>
+          <StatusChip sev={sevGestion(dias)}>
+            {dias === 0 ? tSla("today") : tSla("days", { days: dias })}
+          </StatusChip>
         )}
         <span className="ml-auto tabular-nums">
-          Límite {item.limit_date ? fmtD(new Date(item.limit_date)) : "—"}
+          {t("deadline", { date: item.limit_date ? fmtD(new Date(item.limit_date)) : "—" })}
         </span>
       </div>
     </BoardCard>

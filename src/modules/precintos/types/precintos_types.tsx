@@ -1,10 +1,10 @@
-export type EstadoPrecinto = 'BODEGA' | 'ASIGNADO' | 'USADO' | 'ANULADO';
+export type EstadoPrecinto = "BODEGA" | "ASIGNADO" | "USADO" | "ANULADO";
 
 export interface IPrecintoEstadoSummary {
   id: EstadoPrecinto;
-  title: string;
+  /** Clave de `seals.status` con el título y la descripción del estado. */
+  labelKey: "warehouse" | "assigned" | "used" | "voided";
   count: number;
-  description: string;
   colorClass: string;
   badgeBg: string;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 
 import { getClientsByProject } from "@/services/banksPayments/banksPayments";
 import { useAppStore } from "@/lib/store/store";
@@ -30,6 +31,8 @@ interface Props {
 }
 
 export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => {
+  const t = useTranslations("banks.rules");
+  const tCommon = useTranslations("common");
   const [ruleCount, setRuleCount] = useState(1);
   const [clients, setClients] = useState<ISelect[]>([]);
   const { ID } = useAppStore((state) => state.selectedProject);
@@ -87,11 +90,11 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
 
       try {
         await createBankRule(modelData);
-        showMessage("success", "Regla creada con éxito");
+        showMessage("success", t("createSuccess"));
         mutate();
         onClose();
       } catch (error) {
-        showMessage("error", "Error al crear la regla");
+        showMessage("error", t("createError"));
       }
     }
   };
@@ -112,15 +115,15 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
       destroyOnClose
     >
       <h2 className="bankRuleModal__title">
-        {showBankRuleModal.ruleId ? "Editar regla" : "Nueva regla"}
+        {showBankRuleModal.ruleId ? t("modal.editTitle") : t("modal.newTitle")}
       </h2>
-      <p className="bankRuleModal__description">Ingresa descripcion y nombre del cliente</p>
+      <p className="bankRuleModal__description">{t("modal.description")}</p>
 
       <div className="bankRuleModal__rules">
         {[...Array(ruleCount)].map((_, index) => (
           <div key={index} className="bankRuleModal__singleRule">
             <InputForm
-              titleInput="Descripción"
+              titleInput={tCommon("fields.description")}
               control={control}
               nameInput={`rules.${index}.description`}
             />
@@ -132,8 +135,8 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
               render={({ field }) => (
                 <GeneralSelect
                   field={field}
-                  title="Nombre del cliente"
-                  placeholder="Ingresar nombre"
+                  title={t("columns.customerName")}
+                  placeholder={t("modal.customerPlaceholder")}
                   options={clients?.map((client) => client)}
                   showSearch
                 />
@@ -146,9 +149,12 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
               render={({ field }) => (
                 <GeneralSelect
                   field={field}
-                  title="Coincidencia"
-                  placeholder="Seleccione coincidencia"
-                  options={mockCoincidences?.map((coincidence) => coincidence)}
+                  title={t("columns.match")}
+                  placeholder={t("modal.matchPlaceholder")}
+                  options={mockCoincidences.map((coincidence) => ({
+                    value: coincidence.value,
+                    label: t(coincidence.labelKey)
+                  }))}
                 />
               )}
             />
@@ -169,9 +175,9 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
         </Button>
       )} */}
       <div className="bankRuleModal__footer">
-        <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+        <SecondaryButton onClick={onClose}>{tCommon("actions.cancel")}</SecondaryButton>
         <PrincipalButton disabled={!isValid} onClick={handleSubmit(handleAddEditRule)}>
-          {showBankRuleModal.ruleId ? "Guardar cambios" : "Crear nueva regla"}
+          {showBankRuleModal.ruleId ? tCommon("actions.saveChanges") : t("createRule")}
         </PrincipalButton>
       </div>
     </Modal>
@@ -179,6 +185,6 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
 };
 
 const mockCoincidences = [
-  { value: "1", label: "Coincidencia exacta" },
-  { value: "0", label: "Contiene" }
-];
+  { value: "1", labelKey: "matchExact" },
+  { value: "0", labelKey: "matchContains" }
+] as const;

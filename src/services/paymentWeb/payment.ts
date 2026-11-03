@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { API } from "@/utils/api/api";
 
 export interface IWompiSignatureRequest {
@@ -20,11 +21,10 @@ export const getWompiSignature = async (
 ): Promise<IWompiSignatureResponse> => {
   try {
     const response = await API.post("marketplace/wompi/signature", payload);
-    const integrity =
-      response.data?.integrity || response.data?.data?.integrity;
+    const integrity = response.data?.integrity || response.data?.data?.integrity;
 
     if (!integrity) {
-      throw new Error("No se encontró 'integrity' en la respuesta del backend");
+      throw new Error(getTranslator("shared")("services.paymentSignatureError"));
     }
     return { integrity };
   } catch (error) {
@@ -33,9 +33,7 @@ export const getWompiSignature = async (
   }
 };
 
-export const sendWompiTransaction = async (
-  payload: IWompiWebhookPayload
-): Promise<void> => {
+export const sendWompiTransaction = async (payload: IWompiWebhookPayload): Promise<void> => {
   try {
     await API.post("marketplace/wompi/webhook", payload);
   } catch (error) {
@@ -43,4 +41,3 @@ export const sendWompiTransaction = async (
     throw error;
   }
 };
-

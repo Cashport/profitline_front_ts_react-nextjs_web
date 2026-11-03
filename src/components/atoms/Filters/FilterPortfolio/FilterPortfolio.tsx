@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 import { useAppStore } from "@/lib/store/store";
 
 import { extractChannelLineSublines } from "@/utils/utils";
@@ -10,10 +11,11 @@ import { getAllZones } from "@/services/zone/zones";
 
 import { IClientsGroupsFull } from "@/types/clientsGroups/IClientsGroups";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 interface Option {
   value: string;
-  label: string;
+  label: ReactNode;
   disableCheckbox?: boolean;
   isLeaf?: boolean;
   children?: Option[];
@@ -35,6 +37,7 @@ interface Props {
 }
 
 export const FilterPortfolio = ({ setSelectedFilters }: Props) => {
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
   const [holdings, setHoldings] = useState<Option[]>([]);
   const [clientGroups, setClientGroups] = useState<Option[]>([]);
@@ -215,7 +218,7 @@ export const FilterPortfolio = ({ setSelectedFilters }: Props) => {
       multiple
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomLeft"
       onClear={() => setSelectedFilters(initValueFiltersData)}
       options={optionsList}
@@ -230,47 +233,47 @@ export const FilterPortfolio = ({ setSelectedFilters }: Props) => {
 const options: Option[] = [
   {
     value: "Holding",
-    label: "Holding",
+    label: filterLabel("holding"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Grupo de Cliente",
-    label: "Grupo de Cliente",
+    label: filterLabel("customerGroup"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Zona",
-    label: "Zona",
+    label: filterLabel("zone"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Canal",
-    label: "Canal",
+    label: filterLabel("channel"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Linea",
-    label: "Línea",
+    label: filterLabel("line"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Sublinea",
-    label: "Sublínea",
+    label: filterLabel("subline"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "radicado",
-    label: "Radicado"
+    label: filterLabel("submitted")
   },
   {
     value: "novedad",
-    label: "Novedad"
+    label: filterLabel("dispute")
   }
 ];
 

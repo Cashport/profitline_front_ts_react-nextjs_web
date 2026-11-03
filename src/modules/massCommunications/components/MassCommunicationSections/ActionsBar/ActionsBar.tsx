@@ -1,6 +1,7 @@
 "use client";
 import { Button, Flex, Typography } from "antd";
 import { FlaskConical, Eye } from "lucide-react";
+import { useTranslations } from "use-intl";
 import type { ChannelType } from "../ChannelSection/ChannelSection";
 
 const { Text } = Typography;
@@ -20,17 +21,19 @@ export default function ActionsBar({
   onTestCommunication,
   onPreviewAndSend
 }: ActionsBarProps) {
+  const t = useTranslations("massCommunications.actionsBar");
   return (
     <div className="sticky bottom-[-1rem] pt-2 pb-4 z-10 bg-[#F7F7F7]">
       <Flex align="center" justify="space-between" className="cp-card px-[18px] py-[14px]">
         <Text className="text-[13px]">
           {recipientCount > 0 ? (
-            <>
-              <Text strong>{recipientCount}</Text> destinatarios via{" "}
-              <Text strong>{channel === "email" ? "Email" : "WhatsApp"}</Text>
-            </>
+            t.rich("recipientsVia", {
+              count: recipientCount,
+              channel: channel === "email" ? "Email" : "WhatsApp",
+              b: (chunks) => <Text strong>{chunks}</Text>
+            })
           ) : (
-            <Text type="secondary">Selecciona destinatarios para continuar</Text>
+            <Text type="secondary">{t("selectRecipients")}</Text>
           )}
         </Text>
 
@@ -49,7 +52,7 @@ export default function ActionsBar({
             icon={<Eye size={16} />}
             className="!bg-[#CBE71E] !border-[#CBE71E] !text-[#141414] font-semibold hover:!bg-[#b8d119]"
           >
-            Vista previa y enviar
+            {t("previewAndSend")}
           </Button>
         </Flex>
       </Flex>

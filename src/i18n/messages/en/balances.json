@@ -1,0 +1,132 @@
+{
+  "view": {
+    "itemName": "Deductions"
+  },
+  "table": {
+    "sendingToOther": "Sending to other deductions…",
+    "sentToOther": "Deduction sent to other deductions",
+    "sendToOtherError": "Something went wrong sending to other deductions",
+    "columns": {
+      "id": "ID",
+      "date": "Deduction date",
+      "days": "Days",
+      "customer": "Customer",
+      "type": "Type",
+      "origin": "Origin",
+      "description": "Description",
+      "originalAmount": "Original amount",
+      "pending": "Pending"
+    }
+  },
+  "rowActions": {
+    "sendToOther": "Send to other deductions",
+    "uploadSupport": "Upload supporting document",
+    "rejectSupports": "Reject supporting documents",
+    "sendToApproval": "Send for approval",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "changeStatus": {
+    "options": {
+      "novelty": "Dispute",
+      "pendingCreditMemo": "Credit memo approved - pending creation",
+      "creditMemoCreated": "Credit memo created - pending offset"
+    },
+    "success": "Deduction status updated.",
+    "title": "Change status",
+    "description": "Select the deduction's new status",
+    "confirm": "Change status"
+  },
+  "decision": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "Deduction approved",
+    "rejected": "Deduction rejected",
+    "error": "Something went wrong processing the decision",
+    "observations": "Notes",
+    "observationsPlaceholder": "Enter notes"
+  },
+  "changeOrigin": {
+    "success": "Deduction origin updated.",
+    "title": "Change origin",
+    "description": "Select the deduction's new origin",
+    "confirm": "Change origin"
+  },
+  "actions": {
+    "downloadingReport": "Downloading commercial report…",
+    "downloadSuccess": "Download complete",
+    "downloadError": "Couldn't download the file",
+    "title": "Select the action you want to take",
+    "downloadReport": "Download commercial report",
+    "changeStatus": "Change status",
+    "changeOrigin": "Change origin"
+  },
+  "sendToApproval": {
+    "success": "Deduction sent for approval",
+    "error": "Something went wrong sending for approval",
+    "title": "Send for approval",
+    "approver": "Approver",
+    "approverPlaceholder": "Select the approver"
+  },
+  "filters": {
+    "kam": "KAM",
+    "customer": "Customer",
+    "reason": "Reason",
+    "origin": "Origin",
+    "date": "Date",
+    "selectPeriod": "Select a period",
+    "dateTag": "Date:",
+    "tagCount": {
+      "kam": "{count} KAMs",
+      "cliente": "{count} customers",
+      "motivo": "{count} reasons",
+      "procedencia": "{count} origins"
+    }
+  },
+  "dateTab": {
+    "presetsTitle": "Preset periods",
+    "presets": {
+      "currentMonth": "This month",
+      "lastMonth": "Last month",
+      "lastQuarter": "Last quarter",
+      "ytd": "YTD",
+      "last12Months": "Last 12 months"
+    },
+    "customRange": "Custom range",
+    "from": "From",
+    "to": "To"
+  },
+  "upload": {
+    "tooLarge": "The file is too large. Upload a file under {max} MB.",
+    "duplicate": "A file with the same name already exists",
+    "success": "Supporting document uploaded",
+    "error": "Something went wrong uploading the supporting document",
+    "title": "Upload supporting document",
+    "type": "Dispute type",
+    "typePlaceholder": "Select the dispute type",
+    "support": "Supporting document",
+    "observation": "Note",
+    "observationPlaceholder": "Enter a note",
+    "clientDocument": "Customer document *"
+  },
+  "detail": {
+    "updated": "Deduction updated",
+    "updateError": "Couldn't update the deduction",
+    "customer": "Customer",
+    "type": "Type",
+    "typePlaceholder": "Select a type",
+    "kam": "KAM",
+    "createdAt": "Created on",
+    "origin": "Origin",
+    "description": "Description",
+    "auditNote": "Audit note",
+    "auditNotePlaceholder": "Enter an audit note",
+    "clientDocument": "Customer document",
+    "clientDocumentPlaceholder": "Enter document",
+    "originalAmount": "Original amount",
+    "pending": "Pending",
+    "supports": "Supporting documents",
+    "newFile": "New file: {name}"
+  },
+  "title": "Deductions"
+}

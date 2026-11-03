@@ -8,6 +8,7 @@ import useCreateDiscountView from "./hooks/useCreateDiscountView";
 import AnnualDiscountDefinition from "./components/annualDiscountDefinition/AnnualDiscountDefinition";
 import discountCategories from "../../constants/discountTypes";
 import Link from "next/link";
+import { useTranslations } from "use-intl";
 
 const commonDiscount = [discountCategories.byOrder.id, discountCategories.byClient.id];
 const annualDiscount = [discountCategories.annual.id];
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function CreateDiscountView({ params }: Props) {
+  const t = useTranslations("discounts.form");
   const {
     discountId,
     selectedType,
@@ -68,7 +70,7 @@ export function CreateDiscountView({ params }: Props) {
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}
             >
-              Volver a la lista
+              {t("backToList")}
             </Button>
           </Link>
           {statusForm !== "review" && (
@@ -77,7 +79,7 @@ export function CreateDiscountView({ params }: Props) {
               onClick={handleExecCallback}
               loading={loading}
             >
-              {discountId ? "Guardar Descuento" : "Crear Descuento"}
+              {discountId ? t("saveDiscount") : t("createDiscount")}
             </PrincipalButton>
           )}
         </Flex>

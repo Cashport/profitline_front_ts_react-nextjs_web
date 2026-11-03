@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { DatePicker, Input, InputNumber, Select } from "antd";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { useDebounce } from "@/hooks/useDeabouce";
 import type { ITaskFieldConfig, ITaskOptionItem } from "@/types/tickets/ITickets";
@@ -29,6 +30,7 @@ export default function TaskFieldInput({
   initialLabel,
   disabled
 }: TaskFieldInputProps) {
+  const t = useTranslations("tickets.fieldInput");
   switch (field.type) {
     case "text":
       return (
@@ -89,7 +91,7 @@ export default function TaskFieldInput({
           optionFilterProp="label"
           allowClear={!field.required}
           disabled={disabled}
-          placeholder={field.key === "assignee" ? "Yo (por defecto)" : undefined}
+          placeholder={field.key === "assignee" ? t("meDefault") : undefined}
           value={value ?? undefined}
           options={(field.options ?? []).map((o) => ({ value: o.value, label: o.label }))}
           onChange={(v?: string) => onChange(v ?? null)}
@@ -105,6 +107,8 @@ function RemoteClientSelect({
   initialLabel,
   disabled
 }: Omit<TaskFieldInputProps, "field"> & { field: ITaskFieldConfig }) {
+  const t = useTranslations("tickets.fieldInput");
+  const tCommon = useTranslations("common");
   const [term, setTerm] = useState("");
   const debounced = useDebounce(term, 300);
   const { options, isLoading } = useTaskOptions(
@@ -124,8 +128,8 @@ function RemoteClientSelect({
       allowClear={!field.required}
       disabled={disabled}
       loading={isLoading}
-      placeholder="Buscar cliente…"
-      notFoundContent={isLoading ? "Buscando…" : "Sin resultados"}
+      placeholder={t("searchClient")}
+      notFoundContent={isLoading ? t("searching") : tCommon("status.noResults")}
       value={value ?? undefined}
       options={items}
       onSearch={setTerm}

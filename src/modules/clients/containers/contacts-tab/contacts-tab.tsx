@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, MenuProps, Spin } from "antd";
 import { Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import { extractSingleParam } from "@/utils/utils";
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
@@ -19,6 +20,8 @@ type showContactModalType = {
 };
 
 const ContactsTab = () => {
+  const t = useTranslations("clients.contacts");
+  const tCommon = useTranslations("common");
   const [selectedRows, setSelectedRows] = useState<IContact[] | undefined>(undefined);
   const [showContactModal, setShowContactModal] = useState<showContactModalType>(
     {} as showContactModalType
@@ -46,7 +49,7 @@ const ContactsTab = () => {
       key: "1",
       label: (
         <Button className="buttonOutlined" onClick={handleDeleteClients}>
-          Eliminar
+          {tCommon("actions.delete")}
         </Button>
       )
     }
@@ -62,7 +65,10 @@ const ContactsTab = () => {
         <div className="contactsTab">
           <Flex justify="space-between" align="center" className="contactsTab__header">
             <Flex gap={"0.5rem"} align="center">
-              <UiSearchInput className="standardSearch" placeholder="Buscar" />
+              <UiSearchInput
+                className="standardSearch"
+                placeholder={tCommon("placeholders.search")}
+              />
               <DotsDropdown
                 items={items}
                 dotsSize="18px"
@@ -71,7 +77,7 @@ const ContactsTab = () => {
             </Flex>
 
             <Button type="primary" className="newContactButton" onClick={handleCreateNewContact}>
-              Nuevo Contacto
+              {t("newContact")}
               <Plus size={18} style={{ marginLeft: "0.5rem" }} />
             </Button>
           </Flex>

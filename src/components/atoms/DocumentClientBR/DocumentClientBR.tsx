@@ -1,5 +1,6 @@
 import { Button, Flex, Popover, Spin, Typography, message } from "antd";
 import { CaretRight, X, Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useClientTypes } from "@/hooks/useClientTypes";
 import { InputCreateClientType } from "@/components/atoms/inputs/InputCreateClientType/InputCreateClientType";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const DocumentClientBR = ({ isDisabledEdit }: Props) => {
+  const t = useTranslations("components.documentClientBR");
   const { data, loading, removeClient } = useClientTypes();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -25,7 +27,7 @@ export const DocumentClientBR = ({ isDisabledEdit }: Props) => {
   return (
     <div className="contianerdocumentclientbr">
       {contextHolder}
-      <Typography.Text className="title">Documentos por cliente</Typography.Text>
+      <Typography.Text className="title">{t("title")}</Typography.Text>
       <Flex vertical className="clientTypes">
         {loading ? (
           <Spin />
@@ -56,7 +58,7 @@ export const DocumentClientBR = ({ isDisabledEdit }: Props) => {
                       className="addButtonLineSub"
                       type="text"
                     >
-                      Agregar documento
+                      {t("addDocument")}
                     </Button>
                   </Popover>
                 )}
@@ -69,7 +71,7 @@ export const DocumentClientBR = ({ isDisabledEdit }: Props) => {
                 placement="bottom"
               >
                 <Button icon={<Plus size={"16px"} />} className="addButtonLineSub" type="text">
-                  Agregar cliente
+                  {t("addClientType")}
                 </Button>
               </Popover>
             )}

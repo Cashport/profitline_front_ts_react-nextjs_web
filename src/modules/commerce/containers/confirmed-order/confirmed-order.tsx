@@ -3,6 +3,7 @@ import { Button, Flex, Spin, Typography } from "antd";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "phosphor-react";
 import { DotsThree } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { extractSingleParam, formatNumber, generateShortUuid } from "@/utils/utils";
 import { getSingleOrder } from "@/services/commerce/commerce";
@@ -25,6 +26,10 @@ import styles from "./confirmed-order.module.scss";
 const { Text } = Typography;
 
 export const ConfirmedOrderView: FC = () => {
+  const t = useTranslations("commerce.confirmedOrder");
+  const tSummary = useTranslations("commerce.summary");
+  const tShipping = useTranslations("commerce.shippingFields");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const searchParams = useSearchParams();
@@ -59,7 +64,7 @@ export const ConfirmedOrderView: FC = () => {
   }, [params, projectId]);
 
   const handleGoBack = () => {
-    router.push("/comercio/");
+    router.push("/commerce/");
   };
 
   const tableCategories: ProductsTableCategory[] = (order?.detail?.products ?? []).map(
@@ -108,9 +113,9 @@ export const ConfirmedOrderView: FC = () => {
           <div className={styles.confirmedOrderView}>
             <div className={styles.confirmedOrderView__content}>
               <div className={styles.confirmedOrderView__content__header}>
-                <p>Pedido #{order?.operation_number}</p>
+                <p>{t("orderNumber", { number: order?.operation_number ?? "" })}</p>
                 <div className={styles.title}>
-                  <h2>Tu pedido ha sido creado</h2>
+                  <h2>{t("created")}</h2>
                   <CheckCircle className={styles.check} size={90} weight="fill" />
                 </div>
               </div>
@@ -119,7 +124,7 @@ export const ConfirmedOrderView: FC = () => {
                 <div className={styles.summaryContainer__top}>
                   <Flex justify="space-between" align="center">
                     <h2>
-                      <strong>Datos de envío</strong>
+                      <strong>{t("shippingData")}</strong>
                     </h2>
                     <Button
                       className={styles.generateActionButton}
@@ -127,30 +132,48 @@ export const ConfirmedOrderView: FC = () => {
                       icon={<DotsThree size={"1.5rem"} />}
                       onClick={() => setIsActionsModalOpen(true)}
                     >
-                      Generar acción
+                      {t("generateAction")}
                     </Button>
                   </Flex>
                   <div className={styles.shippingData}>
-                    <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
-                    <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
                     <ConfirmedOrderShippingInfo
-                      title="Dirección de despacho"
+                      title={tCommon("fields.customer")}
+                      data={order?.client_name}
+                    />
+                    <ConfirmedOrderShippingInfo
+                      title={tCommon("fields.taxId")}
+                      data={order?.client_id}
+                    />
+                    <ConfirmedOrderShippingInfo
+                      title={tShipping("dispatchAddress")}
                       data={order?.shipping_info?.dispatch_address}
                     />
-                    <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
                     <ConfirmedOrderShippingInfo
-                      title="Unidad de negocio"
+                      title={tShipping("city")}
+                      data={order?.shipping_info?.city}
+                    />
+                    <ConfirmedOrderShippingInfo
+                      title={tShipping("businessUnit")}
                       data={order?.business_unit}
                     />
-                    <ConfirmedOrderShippingInfo title="Bodega" data={order?.warehouse_name} />
-                    <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
                     <ConfirmedOrderShippingInfo
-                      title="Contacto"
+                      title={tShipping("warehouse")}
+                      data={order?.warehouse_name}
+                    />
+                    <ConfirmedOrderShippingInfo
+                      title={tShipping("email")}
+                      data={order?.shipping_info?.email}
+                    />
+                    <ConfirmedOrderShippingInfo
+                      title={tShipping("contact")}
                       data={order?.shipping_info?.phone_number}
                     />
-                    <ConfirmedOrderShippingInfo title="Vendedor" data={order?.vendor_name} />
                     <ConfirmedOrderShippingInfo
-                      title="Observaciones"
+                      title={tShipping("seller")}
+                      data={order?.vendor_name}
+                    />
+                    <ConfirmedOrderShippingInfo
+                      title={tShipping("comments")}
                       data={order?.shipping_info?.comments}
                     />
                   </div>
@@ -160,24 +183,31 @@ export const ConfirmedOrderView: FC = () => {
                     align="center"
                     justify="space-between"
                   >
-                    <strong>Resumen</strong>
+                    <strong>{tSummary("title")}</strong>
                     <Flex className={styles.quantities}>
                       <p className={styles.quantity}>
-                        SKUs:{" "}
-                        {order?.detail?.products?.reduce(
-                          (acc, category) => acc + category.products.length,
-                          0
-                        )}
+                        {tSummary("skus", {
+                          count:
+                            order?.detail?.products?.reduce(
+                              (acc, category) => acc + category.products.length,
+                              0
+                            ) ?? 0
+                        })}
                       </p>
                       <p className={styles.quantity}>
-                        Total Productos:{" "}
-                        {order?.detail?.products?.length &&
-                          order?.detail?.products.reduce(
-                            (acc, category) =>
-                              acc +
-                              category.products.reduce((acc, product) => acc + product.quantity, 0),
-                            0
-                          )}
+                        {tSummary("totalProducts", {
+                          count: order?.detail?.products?.length
+                            ? order.detail.products.reduce(
+                                (acc, category) =>
+                                  acc +
+                                  category.products.reduce(
+                                    (acc, product) => acc + product.quantity,
+                                    0
+                                  ),
+                                0
+                              )
+                            : 0
+                        })}
                       </p>
                     </Flex>
                   </Flex>
@@ -191,7 +221,7 @@ export const ConfirmedOrderView: FC = () => {
 
                   {order?.detail.discount_package_id ? (
                     <div className={styles.discountsContainer}>
-                      <h2 className={styles.discountsContainer__title}>Descuento aplicado</h2>
+                      <h2 className={styles.discountsContainer__title}>{t("appliedDiscount")}</h2>
                       <div className={styles.discountsContainer__discounts}>
                         <p key={order?.detail?.discount_package_id}>
                           {order?.detail?.discount_name ?? ""}
@@ -205,16 +235,16 @@ export const ConfirmedOrderView: FC = () => {
               <div className={styles.footer}>
                 <Flex vertical gap={"0.25rem"}>
                   <Flex justify="space-between">
-                    <p>Subtotal</p>
+                    <p>{tSummary("subtotal")}</p>
                     <p>${formatNumber(order?.detail?.subtotal ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between">
-                    <p>Descuentos</p>
+                    <p>{tSummary("discounts")}</p>
                     <p>-${formatNumber(order?.detail?.discounts?.totalDiscount ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between">
                     <Text className={styles.footer__discountExplanation}>
-                      Descuentos de productos
+                      {tSummary("productDiscounts")}
                     </Text>
                     <Text className={styles.footer__discountExplanation}>
                       -${formatNumber(order?.detail?.discounts?.totalProductDiscount ?? 0)}
@@ -222,7 +252,7 @@ export const ConfirmedOrderView: FC = () => {
                   </Flex>
                   <Flex justify="space-between">
                     <Text className={styles.footer__discountExplanation}>
-                      Descuentos de la orden (Cross selling)
+                      {tSummary("orderDiscounts")}
                     </Text>
                     <Text className={styles.footer__discountExplanation}>
                       -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
@@ -230,23 +260,23 @@ export const ConfirmedOrderView: FC = () => {
                   </Flex>
                   <div className={styles.footer__separator} />
                   <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
-                    <p>Total sin IVA</p>
+                    <p>{tSummary("totalWithoutVat")}</p>
                     <p>${formatNumber(order?.total_without_taxes ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between">
-                    <p>IVA 19%</p>
+                    <p>{tSummary("vat19")}</p>
                     <p>${formatNumber(order?.detail?.taxes ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
-                    <strong>Total</strong>
+                    <strong>{tSummary("total")}</strong>
                     <strong>${formatNumber(order?.total ?? 0)}</strong>
                   </Flex>
                   <Flex className={styles.footer__earlyPaymentTotal} justify="space-between">
-                    <p>Total con pronto pago</p>
+                    <p>{tSummary("totalWithEarlyPayment")}</p>
                     <p>${formatNumber(order?.total_pronto_pago ?? 0)}</p>
                   </Flex>
                 </Flex>
-                <PrincipalButton onClick={handleGoBack}>Salir</PrincipalButton>
+                <PrincipalButton onClick={handleGoBack}>{t("exit")}</PrincipalButton>
               </div>
             </div>
           </div>

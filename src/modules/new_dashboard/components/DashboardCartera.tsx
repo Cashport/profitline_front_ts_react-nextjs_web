@@ -1,9 +1,12 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { formatCompactCurrency } from "./Formatters";
 import ExpandableCard from "./ExpandableCard";
 import { CITY_METRICS, PORTFOLIO_AGES } from "../lib/constants";
 
 const DashboardCartera: React.FC = () => {
+  const t = useTranslations("newDashboard.portfolio");
+  const tAges = useTranslations("newDashboard.ages");
   return (
     <div className="flex flex-col gap-[var(--section-gap)] animate-fade-in">
       {/* Top Section: Metrics/Ages and Division split */}
@@ -13,7 +16,7 @@ const DashboardCartera: React.FC = () => {
           <ExpandableCard
             title={
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-orange-500"></span> Estado de cartera
+                <span className="w-2 h-2 rounded-full bg-orange-500"></span> {t("status")}
               </span>
             }
             className="h-full"
@@ -30,7 +33,7 @@ const DashboardCartera: React.FC = () => {
                     >
                       249.7MM
                     </p>
-                    <p className="text-[13px] text-gray-500 mt-1 font-medium">Total cartera</p>
+                    <p className="text-[13px] text-gray-500 mt-1 font-medium">{t("total")}</p>
                   </div>
                   <div className="text-center">
                     <p
@@ -38,7 +41,7 @@ const DashboardCartera: React.FC = () => {
                     >
                       20 %
                     </p>
-                    <p className="text-[13px] text-gray-500 mt-1 font-medium">Vencido</p>
+                    <p className="text-[13px] text-gray-500 mt-1 font-medium">{t("pastDue")}</p>
                   </div>
                   <div className="text-right">
                     <p
@@ -52,7 +55,7 @@ const DashboardCartera: React.FC = () => {
 
                 {/* Ages Chart */}
                 <div>
-                  <p className="text-[13px] text-gray-500 mb-3 font-semibold">Edades de cartera</p>
+                  <p className="text-[13px] text-gray-500 mb-3 font-semibold">{t("aging")}</p>
                   <div
                     className={`${isExpanded ? "h-32" : "h-16 md:h-20"} w-full flex rounded-xl overflow-hidden shadow-sm`}
                   >
@@ -64,7 +67,7 @@ const DashboardCartera: React.FC = () => {
                       >
                         <div
                           className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all cursor-pointer"
-                          title={`${age.name}: ${age.value}%`}
+                          title={`${tAges(age.key)}: ${age.value}%`}
                         ></div>
                       </div>
                     ))}
@@ -77,7 +80,7 @@ const DashboardCartera: React.FC = () => {
                           style={{ backgroundColor: age.color }}
                         ></span>
                         <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
-                          {age.name}
+                          {tAges(age.key)}
                         </span>
                       </div>
                     ))}
@@ -93,7 +96,7 @@ const DashboardCartera: React.FC = () => {
           <ExpandableCard
             title={
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-orange-500"></span> División de cartera
+                <span className="w-2 h-2 rounded-full bg-orange-500"></span> {t("breakdown")}
               </span>
             }
             className="h-full"
@@ -108,7 +111,7 @@ const DashboardCartera: React.FC = () => {
                       Formal
                     </span>
                     <div className="text-right">
-                      <span className="block text-[13px] text-gray-400">Total</span>
+                      <span className="block text-[13px] text-gray-400">{t("totalShort")}</span>
                       <span className="font-bold text-sm md:text-base">98.2M</span>
                     </div>
                   </div>
@@ -136,7 +139,7 @@ const DashboardCartera: React.FC = () => {
         <ExpandableCard
           title={
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span> Cartera por ciudad
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span> {t("byCity")}
             </span>
           }
           className="w-full"
@@ -149,15 +152,33 @@ const DashboardCartera: React.FC = () => {
               >
                 <thead className="bg-cp-surface">
                   <tr>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink">Ciudad</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">Cartera</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">% Cartera</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">Corriente</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">0 a 30</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">30 a 60</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">60 a 90</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">90 a 180</th>
-                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">{">"} 180</th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
+                      {t("columns.city")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {t("columns.receivables")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-center">
+                      {t("columns.share")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {tAges("current")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {tAges("d0_30")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {tAges("d30_60")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {tAges("d60_90")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {t("columns.d90_180")}
+                    </th>
+                    <th className="border-b border-cp-line px-4 py-3 text-[13.5px] font-semibold text-cp-ink text-right">
+                      {">"} 180
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">

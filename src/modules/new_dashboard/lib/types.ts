@@ -18,7 +18,7 @@ export interface CustomerRisk {
   overduePercentage: number;
   visits: number;
   news: number;
-  risk: 'Alto' | 'Medio alto' | 'Medio' | 'Medio bajo' | 'Bajo';
+  risk: "Alto" | "Medio alto" | "Medio" | "Medio bajo" | "Bajo";
   lat: number;
   lng: number;
 }
@@ -30,15 +30,18 @@ export interface CollectionData {
   forecast: number | null;
 }
 
+/** Tramo de edad de cartera: su nombre sale de `newDashboard.ages.<clave>`. */
+export type PortfolioAgeKey = "current" | "d0_30" | "d30_60" | "d60_90" | "gt90";
+
 export interface PortfolioAge {
-  name: string;
+  key: PortfolioAgeKey;
   value: number;
   color: string;
 }
 
 export enum Tab {
-  COLLECTION = 'collection', // Recaudo
-  PORTFOLIO = 'portfolio',   // Cartera
-  MANAGEMENT = 'management', // Gestión
-  MAP = 'map'                // Mapa
+  COLLECTION = "collection", // Recaudo
+  PORTFOLIO = "portfolio", // Cartera
+  MANAGEMENT = "management", // Gestión
+  MAP = "map" // Mapa
 }

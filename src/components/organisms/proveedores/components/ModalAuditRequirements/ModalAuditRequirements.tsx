@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Modal, Select, Table, TableProps, Typography } from "antd";
 import { DownloadSimple, Sparkle } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { auditRequirements } from "@/services/providers/providers";
 import { useMessageApi } from "@/context/MessageContext";
@@ -38,6 +39,8 @@ interface Props {
 }
 
 const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
+  const t = useTranslations("suppliers");
+  const tCommon = useTranslations("common");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localSelectedRows, setLocalSelectedRows] = useState<Document[]>([]);
   const height = useScreenHeight();
@@ -82,22 +85,22 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
 
     try {
       await auditRequirements(data.rows);
-      showMessage("success", "Requerimientos auditados correctamente");
+      showMessage("success", t("audit.success"));
       onClose();
     } catch (error) {
-      showMessage("error", "Error al auditar requerimientos");
+      showMessage("error", t("audit.error"));
     }
     setIsSubmitting(false);
   };
 
   const columns: TableProps<IAuditTableRow>["columns"] = [
     {
-      title: "Tipo de requerimiento",
+      title: t("audit.requirementType"),
       dataIndex: "requrementType",
       key: "requrementType"
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "requirementsState",
       key: "requirementsState",
       render: (requirementsState) => {
@@ -105,7 +108,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       }
     },
     {
-      title: "Comentario",
+      title: tCommon("fields.comment"),
       dataIndex: "commentary",
       key: "commentary",
       render: (_: any, record: any, index: number) => {
@@ -117,13 +120,12 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
             control={control}
             name={`rows.${index}.commentary`}
             rules={{
-              validate: (value) =>
-                isRejection && !value ? "Este campo es obligatorio al rechazar" : true
+              validate: (value) => (isRejection && !value ? t("audit.commentRequired") : true)
             }}
             render={({ field, fieldState }) => (
               <Input
                 {...field}
-                placeholder="Agrega un comentario"
+                placeholder={t("audit.commentPlaceholder")}
                 className={
                   fieldState.invalid && isRejection
                     ? "inputAuditRequirements inputAuditRequirements__error"
@@ -137,7 +139,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       width: 300
     },
     {
-      title: "Auditar",
+      title: t("audit.audit"),
       dataIndex: "audit",
       key: "audit",
       render: (_: any, record: any, index: number) => (
@@ -150,8 +152,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
               {...field}
               placeholder=" - "
               options={[
-                { value: "Aprobar", label: "Aprobar" },
-                { value: "Rechazar", label: "Rechazar" }
+                { value: "Aprobar", label: tCommon("actions.approve") },
+                { value: "Rechazar", label: tCommon("actions.reject") }
               ]}
               className="selectAuditRequirements"
             />
@@ -169,6 +171,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           <IconButton
             icon={<DownloadSimple size={26} className="icon" />}
             className="iconDocument"
+            aria-label={t("audit.downloadDocument")}
           />
         );
       },
@@ -195,7 +198,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       closable={false}
       destroyOnClose
     >
-      <Title level={4}>Auditar Requerimientos</Title>
+      <Title level={4}>{t("audit.title")}</Title>
 
       <Table
         className="modalAuditRequirements__documentsTable"
@@ -210,24 +213,22 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
         <Button className="iaButton">
           <Sparkle size={14} color="#5b21b6" weight="fill" />
           <span className="textNormal">
-            Analizar con{" "}
-            <span
-              className="cashportIATextGradient"
-              style={{
-                fontWeight: 500
-              }}
-            >
-              Cashport IA
-            </span>
+            {t.rich("ai.analyzeWith", {
+              ai: (chunks) => (
+                <span className="cashportIATextGradient" style={{ fontWeight: 500 }}>
+                  {chunks}
+                </span>
+              )
+            })}
           </span>
         </Button>
 
         <FooterButtons
           className="modalAuditRequirements__footerButtons"
-          titleCancel="Volver"
+          titleCancel={tCommon("actions.back")}
           onClose={() => onClose(true)}
           handleOk={handleSubmit(onSubmit)}
-          titleConfirm="Guardar"
+          titleConfirm={tCommon("actions.save")}
           isConfirmLoading={isSubmitting}
         />
       </div>

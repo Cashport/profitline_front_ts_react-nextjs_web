@@ -1,4 +1,5 @@
 import { Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { Line } from "@/types/bre/IBRE";
 
@@ -15,27 +16,28 @@ interface Props {
   lineData: Line;
 }
 export const ModalRemoveLine = ({ isOpen, isLoading, lineData, onClose, onRemove }: Props) => {
+  const t = useTranslations("modals.removeLine");
   return (
     <Modal
       open={isOpen}
       onCancel={onClose}
       okButtonProps={{ className: "acceptButton", loading: isLoading }}
-      okText="Eliminar Linea"
+      okText={t("ok")}
       cancelButtonProps={{
         className: "buttonCancel"
       }}
       className="modalChangeStatusChanel"
-      title={`¿Estás seguro que deseas eliminar esta linea?`}
+      title={t("title")}
       onOk={onRemove}
     >
-      <Text className="title">Linea: {lineData.description} </Text>
+      <Text className="title">{t("line", { name: lineData.description })} </Text>
       <br />
       {lineData?.sublines?.map((subline) => (
         <Text key={subline.id}> {subline.description ?? ""}.</Text>
       ))}
       <br />
       <br />
-      <Text className="title">Esta acción es definitiva </Text>
+      <Text className="title">{t("irreversible")} </Text>
     </Modal>
   );
 };

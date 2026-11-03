@@ -1,5 +1,6 @@
 import { Dispatch, Key, SetStateAction, useEffect, useRef, useState } from "react";
 import { Flex, message, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import {
   ArrowULeftDown,
   DownloadSimple,
@@ -67,6 +68,8 @@ export const OrdersGenerateActionModal = ({
   const statusName = selectedOrders[0]?.order_status ?? "";
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
+  const t = useTranslations("commerce.generateAction");
+  const tCommon = useTranslations("common");
 
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -89,7 +92,7 @@ export const OrdersGenerateActionModal = ({
 
   const validateOrdersSelected = (): boolean => {
     if (ordersId.length === 0) {
-      message.error("No hay órdenes seleccionadas");
+      message.error(t("noOrdersSelected"));
       return false;
     }
     return true;
@@ -115,11 +118,11 @@ export const OrdersGenerateActionModal = ({
       if (!res || !res.data) {
         if (res?.message) {
           return showMessage("error", res.message);
-        } else return showMessage("error", "Error al descargar CSV");
+        } else return showMessage("error", t("csvDownloadError"));
       }
       createAndDownloadTxt(res.data);
       if (res.message == "") {
-        showMessage("success", "Descarga exitosa");
+        showMessage("success", t("downloadSuccess"));
       } else {
         setErrorMessage(res?.message);
         setIsErrorModalOpen(true);
@@ -140,15 +143,13 @@ export const OrdersGenerateActionModal = ({
       if (!res || !res.data) {
         if (res?.message) {
           return showMessage("error", res.message);
-        } else return showMessage("error", "Error al descargar CSV");
+        } else return showMessage("error", t("csvDownloadError"));
       }
       createAndDownloadTxt(res.data);
       if (res.message == "") {
         showMessage(
           "success",
-          downloadAllClient
-            ? "Descarga de todas las órdenes del cliente en el mismo estado exitosa"
-            : "Descarga exitosa"
+          downloadAllClient ? t("downloadAllClientSuccess") : t("downloadSuccess")
         );
       } else {
         setErrorMessage(res?.message);
@@ -191,19 +192,16 @@ export const OrdersGenerateActionModal = ({
     setIsBillingReportLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando informe de facturación...",
+      content: t("downloadingBillingReport"),
       duration: 0
     });
     try {
       const res = await downloadBillingReportExcel(projectId);
       downloadFileFromUrl(res.url, res.filename);
-      showMessage("success", "Descarga exitosa");
+      showMessage("success", t("downloadSuccess"));
       onClose();
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Error al descargar el archivo"
-      );
+      showMessage("error", error instanceof Error ? error.message : t("fileDownloadError"));
       console.error(error);
     } finally {
       hide();
@@ -219,20 +217,17 @@ export const OrdersGenerateActionModal = ({
     setIsBillingDetailLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando informe de facturación detallado...",
+      content: t("downloadingBillingDetail"),
       duration: 0
     });
     try {
       const res = await downloadBillingDetailExcel(projectId, startDate, endDate);
       downloadFileFromUrl(res.url, res.filename);
-      showMessage("success", "Descarga exitosa");
+      showMessage("success", t("downloadSuccess"));
       setIsBillingDetailModalOpen(false);
       onClose();
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Error al descargar el archivo"
-      );
+      showMessage("error", error instanceof Error ? error.message : t("fileDownloadError"));
       console.error(error);
     } finally {
       hide();
@@ -244,19 +239,16 @@ export const OrdersGenerateActionModal = ({
     setIsSalesDetailLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando informe de ventas...",
+      content: t("downloadingSalesReport"),
       duration: 0
     });
     try {
       const res = await downloadSalesDetailExcel(projectId);
       downloadFileFromUrl(res.url, res.filename);
-      showMessage("success", "Descarga exitosa");
+      showMessage("success", t("downloadSuccess"));
       onClose();
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Error al descargar el archivo"
-      );
+      showMessage("error", error instanceof Error ? error.message : t("fileDownloadError"));
       console.error(error);
     } finally {
       hide();
@@ -269,7 +261,7 @@ export const OrdersGenerateActionModal = ({
     try {
       const res = await downloadPartialOrderCSV(ordersId, createBackorder);
       if (!res?.data) {
-        return showMessage("error", res?.message || "Error al descargar el CSV parcial");
+        return showMessage("error", res?.message || t("partialCsvError"));
       }
       const { txtContent, createdBackorderIds, failedOrders } = res.data;
       if (txtContent) {
@@ -278,15 +270,16 @@ export const OrdersGenerateActionModal = ({
       if (createdBackorderIds?.length) {
         showMessage(
           "success",
-          `Se ${createdBackorderIds.length === 1 ? "ha" : "han"} creado ${
-            createdBackorderIds.length
-          } orden${createdBackorderIds.length === 1 ? "" : "es"} de backorder: ${createdBackorderIds.join(", ")}`
+          t("backordersCreated", {
+            count: createdBackorderIds.length,
+            ids: createdBackorderIds.join(", ")
+          })
         );
       } else {
-        showMessage("success", res.message || "Descarga exitosa");
+        showMessage("success", res.message || t("downloadSuccess"));
       }
       if (failedOrders?.length) {
-        setErrorMessage(`Órdenes con error: ${failedOrders.join(", ")}`);
+        setErrorMessage(t("failedOrders", { ids: failedOrders.join(", ") }));
         setIsErrorModalOpen(true);
       }
       setFetchMutate();
@@ -294,7 +287,7 @@ export const OrdersGenerateActionModal = ({
       setSelectedRowKeys([]);
       onClose();
     } catch (error: any) {
-      showMessage("error", error?.message || "Error al descargar el CSV parcial");
+      showMessage("error", error?.message || t("partialCsvError"));
       console.error(error);
     }
   };
@@ -318,13 +311,13 @@ export const OrdersGenerateActionModal = ({
     if (!validateOrdersSelected()) return;
     try {
       await changeStatusOrder(ordersId[0]);
-      showMessage("success", "Estado cambiado correctamente");
+      showMessage("success", t("statusChanged"));
       setFetchMutate();
       setSelectedRows([]);
       setSelectedRowKeys([]);
       onClose();
     } catch (error: any) {
-      showMessage("error", error?.message || "Error al cambiar el estado de la orden");
+      showMessage("error", error?.message || t("statusChangeError"));
       console.error(error);
     }
   };
@@ -345,7 +338,7 @@ export const OrdersGenerateActionModal = ({
       file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     if (!isXlsx) {
-      showMessage("error", "Solo se permiten archivos Excel (.xlsx)");
+      showMessage("error", t("onlyXlsx"));
       return;
     }
 
@@ -385,8 +378,7 @@ export const OrdersGenerateActionModal = ({
         if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadFile(null);
-        const errorMessage =
-          error instanceof Error ? error.message : "Error al procesar las órdenes de compra";
+        const errorMessage = error instanceof Error ? error.message : t("purchaseOrdersError");
         showMessage("error", errorMessage);
       });
 
@@ -403,24 +395,20 @@ export const OrdersGenerateActionModal = ({
         open={isOpen && !isPartialCsvModalOpen && !isOcFormatModalOpen && !isBillingDetailModalOpen}
         title={
           <Title className="ordersGenerateActionModal__title" level={4}>
-            Generar acción
+            {t("title")}
           </Title>
         }
         footer={null}
         onCancel={onClose}
       >
-        <p className="ordersGenerateActionModal__description">
-          Selecciona la acción que vas a realizar
-        </p>
+        <p className="ordersGenerateActionModal__description">{t("description")}</p>
         <div className="ordersGenerateActionModal__selectedOrders">
-          <Text strong>
-            {selectedCount} {selectedCount === 1 ? "seleccionada" : "seleccionadas"}:{" "}
-          </Text>
+          <Text strong>{t("selectedCount", { count: selectedCount })} </Text>
           <Text>{operationNumbersText}</Text>
         </div>
         {draftsCount > 0 && (
           <div className="ordersGenerateActionModal__selectedOrders">
-            <Text strong>draft seleccionados: </Text>
+            <Text strong>{t("selectedDrafts")} </Text>
             <Text>{draftOperationNumbersText}</Text>
           </div>
         )}
@@ -428,61 +416,61 @@ export const OrdersGenerateActionModal = ({
           <ButtonGenerateAction
             onClick={handleChangeOrderState}
             icon={<NewspaperClipping size={16} />}
-            title="Enviar pedido a facturado"
+            title={t("actions.moveToBilled")}
           />
           <ButtonGenerateAction
             onClick={handleDownloadCSV}
             icon={<DownloadSimple size={16} />}
-            title="Descargar CSV"
+            title={t("actions.downloadCsv")}
           />
           <ButtonGenerateAction
             onClick={handleDownloadBillingReport}
             icon={<DownloadSimple size={16} />}
-            title="Descargar informe de facturación"
+            title={t("actions.downloadBillingReport")}
             disabled={isBillingReportLoading}
           />
           <ButtonGenerateAction
             onClick={handleOpenBillingDetailModal}
             icon={<DownloadSimple size={16} />}
-            title="Descargar informe de facturación detallado"
+            title={t("actions.downloadBillingDetail")}
             disabled={isBillingDetailLoading}
           />
           <ButtonGenerateAction
             onClick={handleDownloadSalesDetail}
             icon={<DownloadSimple size={16} />}
-            title="Descargar informe de ventas"
+            title={t("actions.downloadSalesReport")}
             disabled={isSalesDetailLoading}
           />
           <ButtonGenerateAction
             onClick={handleDownloadPartialCsvShowQuestion}
             icon={<DownloadSimple size={16} />}
-            title="Descarga parcial CSV"
+            title={t("actions.partialCsv")}
           />
           <ButtonGenerateAction
             onClick={handleDownloadCSVOCFormatShowQuestion}
             icon={<DownloadSimple size={16} />}
-            title="Descargar csv Formato OC"
+            title={t("actions.downloadPoFormatCsv")}
           />
           <ButtonGenerateAction
             onClick={handleDeleteRows}
             icon={<Trash size={16} />}
-            title="Eliminar"
+            title={tCommon("actions.delete")}
           />
           <ButtonGenerateAction
             onClick={handleSendInvite}
             icon={<EnvelopeSimple size={16} />}
-            title="Enviar invitación"
+            title={t("actions.sendInvite")}
           />
           <ButtonGenerateAction
             onClick={handleReturnToSeller}
             icon={<ArrowULeftDown size={16} />}
-            title="Retornar al vendedor"
+            title={t("actions.returnToSeller")}
             disabled={ordersId.length !== 1}
           />
           <ButtonGenerateAction
             onClick={handleOpenUploadPurchaseOrders}
             icon={<FileArrowUp size={16} />}
-            title="Subir orden de compra"
+            title={t("actions.uploadPurchaseOrder")}
           />
         </Flex>
 
@@ -500,10 +488,10 @@ export const OrdersGenerateActionModal = ({
         onCancel={() => setIsErrorModalOpen(false)}
         footer={null}
         centered
-        title={<Title level={4}>Descarga de plano de facturación</Title>}
+        title={<Title level={4}>{t("billingFileTitle")}</Title>}
       >
         <Flex vertical gap={12}>
-          <Text>Ordenes sin stock</Text>
+          <Text>{t("ordersWithoutStock")}</Text>
           <Text strong>{errorMessage}</Text>
         </Flex>
       </Modal>
@@ -512,10 +500,10 @@ export const OrdersGenerateActionModal = ({
         isOpen={isPartialCsvModalOpen}
         onClose={() => setIsPartialCsvModalOpen(false)}
         onOk={handleConfirmPartialCsv}
-        title="¿Está seguro de querer dividir el pedido?"
-        content="Productos sin unidades se enviarán a backorder"
-        okText="Sí"
-        cancelText="No"
+        title={t("splitOrderConfirm")}
+        content={t("splitOrderContent")}
+        okText={tCommon("status.yes")}
+        cancelText={tCommon("status.no")}
         okLoading={isPartialCsvLoading}
       />
 
@@ -524,30 +512,35 @@ export const OrdersGenerateActionModal = ({
         onClose={() => setIsOcFormatModalOpen(false)}
         onOk={() => handleConfirmOcFormat(false)}
         onCancel={() => handleConfirmOcFormat(true)}
-        title="Descargar CSV Formato OC"
+        title={t("poFormat.title")}
         content={
           <Flex vertical gap={8}>
-            <Text>¿Qué órdenes deseas descargar?</Text>
+            <Text>{t("poFormat.question")}</Text>
             <Text type="secondary">
-              Cliente: <Text strong>{clientName}</Text>
+              {t.rich("poFormat.client", {
+                name: clientName,
+                strong: (chunks) => <Text strong>{chunks}</Text>
+              })}
             </Text>
             <Text type="secondary">
-              Estado: <Text strong>{statusName}</Text>
+              {t.rich("poFormat.status", {
+                status: statusName,
+                strong: (chunks) => <Text strong>{chunks}</Text>
+              })}
             </Text>
             <ul style={{ paddingLeft: 18, margin: 0 }}>
               <li>
-                <b>Solo seleccionadas</b>: descarga únicamente las {selectedCount}{" "}
-                {selectedCount === 1 ? "orden" : "órdenes"} marcadas.
+                {t.rich("poFormat.onlySelectedHelp", {
+                  count: selectedCount,
+                  b: (chunks) => <b>{chunks}</b>
+                })}
               </li>
-              <li>
-                <b>Todas del cliente en este estado</b>: descarga todas las órdenes del mismo
-                cliente que estén en el mismo estado.
-              </li>
+              <li>{t.rich("poFormat.allClientHelp", { b: (chunks) => <b>{chunks}</b> })}</li>
             </ul>
           </Flex>
         }
-        okText="Solo seleccionadas"
-        cancelText="Todas del cliente"
+        okText={t("poFormat.onlySelected")}
+        cancelText={t("poFormat.allClient")}
         okLoading={isOcFormatLoading}
         cancelLoading={isOcFormatLoading}
       />

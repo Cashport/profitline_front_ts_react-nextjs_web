@@ -2,6 +2,7 @@ import { Flex, message, Modal, Spin } from "antd";
 import { CaretRight, Pencil, Trash } from "phosphor-react";
 import React, { useState } from "react";
 import { Gavel } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import ItemsModalLegalize from "@/components/atoms/ItemsModalLegalize/ItemsModalLegalize";
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -34,7 +35,17 @@ const extractType = (type: string | undefined) => {
   return 1;
 };
 export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: Props) => {
+  const t = useTranslations("modals.actionAdjustment");
+  const tShared = useTranslations("modals.shared");
+  const tCommon = useTranslations("common");
   const [currentView, setCurrentView] = useState<string>("selectAccountingAdjustment");
+  // adjustment.type llega en español ("Nota debito"...) y se usa en extractType: solo se traduce al mostrarlo.
+  const typeLabel = (type: string | undefined) => {
+    if (type === "Nota debito") return tShared("debitMemo");
+    if (type === "Nota credito") return tShared("creditMemo");
+    if (type === "Descuento") return tShared("discount");
+    return type ?? "";
+  };
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
@@ -67,11 +78,11 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
         );
         if (response.success) {
           setSelectedItemId(null);
-          messageApi.success("Ajuste contable legalizado correctamente");
+          messageApi.success(t("success"));
           setCurrentView("selectAccountingAdjustment");
           onClose();
         } else {
-          messageApi.error(response.message || "Error al legalizar el ajuste contable");
+          messageApi.error(response.message || t("error"));
         }
       } catch (error: any) {
         console.error("Error in legalizeFinancialDiscount:", error);
@@ -81,16 +92,14 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
             errorMessage ===
             "The current value of the financial discount to be legalized is less than the current value of the financial discount not to be legalized"
           ) {
-            messageApi.error(
-              "El valor actual de la nota seleccionada es menor al valor de la nota por legalizar"
-            );
+            messageApi.error(t("insufficientValue"));
           } else {
-            messageApi.error(errorMessage || "Error 400: Solicitud incorrecta");
+            messageApi.error(errorMessage || t("badRequest"));
           }
         } else if (error instanceof Error) {
           messageApi.error(`Error: ${error.name}`);
         } else {
-          messageApi.error("Error desconocido al legalizar el ajuste contable");
+          messageApi.error(t("unknownError"));
         }
       } finally {
         setSelectIsLoading(false);
@@ -108,19 +117,20 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
       title={
         currentView === "legalizeAccountingAdjustment" ? (
           <div className="title_modal_adjusment">
-            <div> {adjustment.type} por legalizar</div>
+            <div> {t("pendingSettlement", { type: typeLabel(adjustment.type) })}</div>
             <div>
-              NC{adjustment.id} {formatMoney(adjustment.amount)}
+              {t("reference", { id: adjustment.id })} {formatMoney(adjustment.amount)}
             </div>
           </div>
         ) : (
-          "Selecciona la acción que vas a realizar"
+          t("title")
         )
       }
       footer={null}
       width={"40%"}
       style={{
-        height: currentView === "legalizeAccountingAdjustment" ? "calc(80 * var(--vh) - 20px)" : "auto"
+        height:
+          currentView === "legalizeAccountingAdjustment" ? "calc(80 * var(--vh) - 20px)" : "auto"
       }}
     >
       {contextHolder}
@@ -132,7 +142,7 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
               onClick={() => setCurrentView("legalizeAccountingAdjustment")}
             >
               <p className="actionButton__text">
-                <Gavel size={24} /> Legalizar ajuste contable
+                <Gavel size={24} /> {t("settle")}
               </p>
               <CaretRight className="actionButton__caretRight" />
             </button>
@@ -162,7 +172,7 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
       {currentView === "legalizeAccountingAdjustment" && (
         <div className="mal-modalContent">
           <p className="mal-subTitleModalAction">
-            {subtitleMap[extractType(adjustment.type) || 1]}
+            {t(subtitleMap[extractType(adjustment.type) || 1] ?? subtitleMap[1])}
           </p>
           <Flex vertical gap="small" className="mal-conten_modal_select_ajust">
             <div className="mal-modalContentScroll">
@@ -193,7 +203,7 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
                 className="button__action__text button__action__text__white"
                 onClick={() => setCurrentView("selectAccountingAdjustment")}
               >
-                Cancelar
+                {tCommon("actions.cancel")}
               </button>
               <button
                 type="button"
@@ -205,7 +215,7 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
                 onClick={handleContinue}
                 disabled={selectedItemId === null || selectIsLoading}
               >
-                {selectIsLoading ? "Procesando..." : "Continuar"}
+                {selectIsLoading ? tCommon("status.processing") : tCommon("actions.continue")}
               </button>
             </Flex>
           </Flex>
@@ -220,7 +230,7 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
             >
               <p className="actionButton__text">
                 <Pencil size={24} />
-                Editar ajuste contable
+                {t("edit")}
               </p>
               <CaretRight className="actionButton__caretRight" />
             </button>
@@ -236,7 +246,7 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
             >
               <p className="actionButton__text">
                 <Trash size={24} />
-                Eliminar ajuste contable
+                {t("delete")}
               </p>
               <CaretRight className="actionButton__caretRight" />
             </button>
@@ -247,8 +257,8 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
   );
 };
 
-const subtitleMap: Record<number, string> = {
-  1: "Selecciona la(s) nota(s) débito a aplicar",
-  2: "Selecciona la(s) nota(s) crédito a aplicar",
-  3: "Selecciona los descuento a aplicar"
+const subtitleMap: Record<number, "selectDebitMemos" | "selectCreditMemos" | "selectDiscounts"> = {
+  1: "selectDebitMemos",
+  2: "selectCreditMemos",
+  3: "selectDiscounts"
 };

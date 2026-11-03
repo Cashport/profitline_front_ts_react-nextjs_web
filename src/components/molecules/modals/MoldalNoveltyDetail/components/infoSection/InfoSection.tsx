@@ -1,6 +1,7 @@
 import React from "react";
 import { User, Calendar, ShoppingBag, Users, Check, Info } from "phosphor-react";
 import { Tag } from "antd";
+import { useTranslations } from "use-intl";
 import "./infosection.scss";
 import { IconLabel } from "@/components/atoms/IconLabel/IconLabel";
 import { formatDatePlane } from "@/utils/utils";
@@ -22,22 +23,23 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   projectId,
   aprobadores
 }) => {
+  const t = useTranslations("modals.noveltyDetail.info");
   return (
     <div className="info-section">
       <div className="info-row">
-        <IconLabel icon={<User size={20} />} text={`Responsable: `} />
+        <IconLabel icon={<User size={20} />} text={t("owner")} />
         <p>{responsable}</p>
       </div>
       <div className="info-row">
-        <IconLabel icon={<Calendar size={20} />} text={`Fecha: `} />
+        <IconLabel icon={<Calendar size={20} />} text={t("date")} />
         <p>{formatDatePlane(fecha)}</p>
       </div>
       <div className="info-row">
-        <IconLabel icon={<ShoppingBag size={20} />} text={`Cliente: `} />
+        <IconLabel icon={<ShoppingBag size={20} />} text={t("customer")} />
         {clienteId && projectId !== undefined ? (
           <a
             className="client-link"
-            href={`/clientes/detail/${clienteId}/project/${projectId}`}
+            href={`/clients/detail/${clienteId}/project/${projectId}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -48,7 +50,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
         )}
       </div>
       <div className="info-row">
-        <IconLabel icon={<Users size={20} />} text="Aprobadores:" />
+        <IconLabel icon={<Users size={20} />} text={t("approvers")} />
         <div className="approved">
           <div className="approved-tags">
             {aprobadores.map((aprobador, index) => (

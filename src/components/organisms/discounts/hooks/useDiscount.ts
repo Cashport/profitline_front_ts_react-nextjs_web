@@ -15,6 +15,7 @@ import { GenericResponsePage } from "@/types/global/IGlobal";
 import { MessageInstance } from "antd/es/message/interface";
 import { ChangeEvent, useEffect, useState } from "react";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 
 type Props = {
   messageApi: MessageInstance;
@@ -25,6 +26,7 @@ export type DiscountBasicsState = DiscountBasics & { checked: boolean };
 export type DiscountPackageState = DiscountPackage & { checked: boolean };
 
 export default function useDiscount({ messageApi, tabActive }: Props) {
+  const t = useTranslations("discounts.list");
   const [page, setPage] = useState(1);
   const [isOpenModalDelete, setIsOpenModalDelete] = useState(false);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
@@ -148,9 +150,9 @@ export default function useDiscount({ messageApi, tabActive }: Props) {
     if (response.success) {
       let message = "";
       if (tabActive === "1") {
-        message = `Paquete de descuentos ${newStatus ? "activado" : "desactivado"} con éxito`;
+        message = newStatus ? t("packageActivated") : t("packageDeactivated");
       } else {
-        message = `Descuento ${newStatus ? "activado" : "desactivado"} con éxito`;
+        message = newStatus ? t("discountActivated") : t("discountDeactivated");
       }
       messageApi.success(message);
     } else {

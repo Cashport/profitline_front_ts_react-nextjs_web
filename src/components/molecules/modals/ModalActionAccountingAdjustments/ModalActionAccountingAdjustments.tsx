@@ -1,6 +1,7 @@
 import React from "react";
 import { message, Modal } from "antd";
 import { HandTap, Invoice } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
@@ -24,11 +25,12 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
   balanceLegalization,
   selectedRows
 }) => {
+  const t = useTranslations("modals.actionAccountingAdjustments");
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Selecciona la acción que vas a realizar"
+      title={t("title")}
       footer={null}
       onCancel={onClose}
       className="modal-action-payment"
@@ -37,10 +39,10 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
       <div className="modal-content">
         <ButtonGenerateAction
           icon={<HandTap size={20} />}
-          title="Aplicar ajustes contables"
+          title={t("apply")}
           onClick={() => {
             if (!selectedRows || selectedRows.length === 0) {
-              message.error("Debes seleccionar al menos un ajuste contable para aplicar");
+              message.error(t("selectAtLeastOne"));
               return;
             }
             addAdjustmentsToApplicationTable();
@@ -48,7 +50,7 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
         />
         <ButtonGenerateAction
           icon={<Invoice size={16} />}
-          title="Legalizar saldo"
+          title={t("settleDeduction")}
           onClick={balanceLegalization}
         />
       </div>

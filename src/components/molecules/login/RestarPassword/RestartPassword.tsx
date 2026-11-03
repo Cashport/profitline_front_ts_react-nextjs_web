@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { Flex } from "antd";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslations } from "use-intl";
 
 import styles from "./restartPassword.module.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -21,6 +22,9 @@ interface RestartFormProps {
   setResetPassword: Dispatch<SetStateAction<boolean>>;
 }
 export const RestartPassword = ({ setResetPassword }: RestartFormProps) => {
+  const t = useTranslations("auth.resetPassword");
+  const tLogin = useTranslations("auth.login");
+  const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState<string>();
   const {
@@ -51,29 +55,28 @@ export const RestartPassword = ({ setResetPassword }: RestartFormProps) => {
     <div className={styles.restartContainer}>
       {email ? (
         <p className={styles.sentText}>
-          Hemos enviado un correo a <strong>{email}</strong>, sigue las instrucciones para
-          restablecer tu contraseña
+          {t.rich("emailSent", { email, b: (chunks) => <strong>{chunks}</strong> })}
         </p>
       ) : (
         <>
-          <h4 className={styles.restartContainer__title}>Restablece tu contraseña</h4>
-          <p>Ingresa tu correo electrónico para restablecer tu contraseña</p>
+          <h4 className={styles.restartContainer__title}>{t("title")}</h4>
+          <p>{t("text")}</p>
 
           <Flex vertical gap={"1.5rem"} className={styles.restartContent}>
             <div>
-              <p className={styles.restartContainer__inputTitle}>Correo electrónico</p>
+              <p className={styles.restartContainer__inputTitle}>{tCommon("fields.email")}</p>
               <InputForm
                 customStyle={{ with: "100%" }}
-                placeholder="Ingresar usuario"
+                placeholder={tLogin("userPlaceholder")}
                 hiddenTitle
                 control={control}
                 nameInput="email"
                 typeInput="email"
-                validationRules={{ required: "Email es obligatorio" }}
+                validationRules={{ required: tLogin("emailRequired") }}
               />
             </div>
             <p className={styles.forgotPassword} onClick={() => setResetPassword(false)}>
-              Volver al Login
+              {t("backToLogin")}
             </p>
           </Flex>
         </>
@@ -84,7 +87,7 @@ export const RestartPassword = ({ setResetPassword }: RestartFormProps) => {
         loading={isLoading}
         onClick={email ? handleUnderstood : handleSubmit(onSubmitHandler)}
       >
-        {email ? "Entendido" : "Enviar"}
+        {email ? t("understood") : tCommon("actions.send")}
       </PrincipalButton>
     </div>
   );

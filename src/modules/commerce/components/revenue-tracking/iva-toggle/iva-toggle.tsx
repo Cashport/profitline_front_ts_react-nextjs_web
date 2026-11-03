@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Receipt } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 
@@ -14,25 +15,22 @@ import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking
  */
 export default function IvaToggle() {
   const { includeIva, setIncludeIva } = useRevenueTracking();
+  const t = useTranslations("commerce.dashboard.vatToggle");
 
   return (
     <button
       type="button"
       role="switch"
       aria-checked={includeIva}
-      aria-label={includeIva ? "Mostrando valores con IVA" : "Mostrando valores sin IVA"}
-      title={
-        includeIva
-          ? "Los valores incluyen IVA. Click para ver ventas netas."
-          : "Los valores son netos (sin IVA). Click para incluir IVA."
-      }
+      aria-label={includeIva ? t("ariaWithVat") : t("ariaWithoutVat")}
+      title={includeIva ? t("titleWithVat") : t("titleWithoutVat")}
       onClick={() => setIncludeIva(!includeIva)}
       // Control del header (DESIGN.md §4): mismo alto, radio y borde que "Filtrar".
       className="box-border flex h-[var(--control-h)] shrink-0 items-center gap-2.5 rounded-lg border-0 bg-cp-surface px-4 text-cp-ink transition-colors hover:bg-cp-muted"
     >
       <Receipt className="w-4 h-4" />
       <span className="text-sm font-medium whitespace-nowrap">
-        {includeIva ? "Con IVA" : "Sin IVA"}
+        {includeIva ? t("withVat") : t("withoutVat")}
       </span>
       <span
         aria-hidden

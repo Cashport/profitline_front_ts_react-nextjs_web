@@ -1,0 +1,30 @@
+{
+  "filters": {
+    "statuses": "Statuses",
+    "types": "Types"
+  },
+  "table": {
+    "columns": {
+      "approvalType": "Approval type",
+      "daysPending": "Days pending"
+    },
+    "days": "{count, plural, one {# day} other {# days}}",
+    "unknownStatus": "Unknown"
+  },
+  "timeline": {
+    "noApprovers": "No approvers assigned",
+    "step": "Step {order}",
+    "approversCount": "({count, plural, one {# approver} other {# approvers}})"
+  },
+  "detail": {
+    "requestedBy": "Requested by",
+    "requestDate": "Request date",
+    "daysElapsed": "({count, plural, one {# day} other {# days}})",
+    "attachments": "Attachments ({count})",
+    "approvalDetail": "Approval details",
+    "rejectReason": "Rejection reason *",
+    "rejectPlaceholder": "Briefly explain why you are rejecting this request...",
+    "confirmReject": "Confirm rejection",
+    "approvers": "Approvers"
+  }
+}

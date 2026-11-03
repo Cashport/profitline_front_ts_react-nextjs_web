@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Flex, Tabs, Spin } from "antd";
 import { Eye } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useModalDetail } from "@/context/ModalContext";
@@ -16,12 +17,11 @@ import { INotification } from "@/types/notifications/INotifications";
 
 import "./notificationsView.scss";
 
-const ListPanel = [
-  { key: "opened", value: "Abiertas" },
-  { key: "closed", value: "Cerradas" }
-];
+const ListPanel = [{ key: "opened" }, { key: "closed" }] as const;
 
 export const NotificationsView = () => {
+  const t = useTranslations("projects.notifications");
+  const tCommon = useTranslations("common");
   const { openModal, modalType } = useModalDetail();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [filters, setFilters] = useState<ISelectFilterNotifications>({
@@ -86,7 +86,7 @@ export const NotificationsView = () => {
     const isError = type === "opened" ? isErrorOpen : isErrorClosed;
 
     if (isLoading) return <Spin size="large" />;
-    if (isError) return <div>Error al cargar las notificaciones</div>;
+    if (isError) return <div>{t("loadError")}</div>;
 
     return currentNotifications.map((item, index) => (
       <Flex className="notifications__container" key={index}>
@@ -117,6 +117,8 @@ export const NotificationsView = () => {
               )} */}
               <div
                 className="eyeIcon"
+                role="button"
+                aria-label={t("viewDetail")}
                 onClick={() => {
                   if (item.notification_type_name === "Novedad") {
                     openModal("novelty", { noveltyId: item.incident_id ?? 0 });
@@ -139,13 +141,18 @@ export const NotificationsView = () => {
         style={{ width: "100%", height: "100%" }}
         items={ListPanel.map((item, i) => {
           return {
-            label: `${item.value} (${item.key === "opened" ? filteredOpenNotifications.length : filteredClosedNotifications.length})`,
+            label: t(item.key, {
+              count:
+                item.key === "opened"
+                  ? filteredOpenNotifications.length
+                  : filteredClosedNotifications.length
+            }),
             key: String(i),
             children: (
               <Flex vertical>
                 <Flex className="searchBar__container">
                   <UiSearchInput
-                    placeholder="Buscar"
+                    placeholder={tCommon("placeholders.search")}
                     onChange={(event) => {
                       setTimeout(() => {
                         handleSearch(event.target.value);
@@ -154,7 +161,7 @@ export const NotificationsView = () => {
                   />
                   <FiltersNotifications setSelectedFilters={setFilters} />
                 </Flex>
-                {renderNotifications(item.key as "opened" | "closed")}
+                {renderNotifications(item.key)}
               </Flex>
             )
           };

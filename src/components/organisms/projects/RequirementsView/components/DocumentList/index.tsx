@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FileArrowDown, Plus } from "phosphor-react";
 import { Table, Checkbox, Button, Typography, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import {
@@ -38,6 +39,7 @@ interface Props {
 }
 
 const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }: Props) => {
+  const t = useTranslations("projects.requirements.documentList");
   const [selectedRows, setSelectedRows] = useState<(IDocument | Form)[]>([]);
   const [documentList, setDocumentList] = useState<IDocument[]>();
   const [loadingOkButtton, setLoadingOkButtton] = useState(false);
@@ -64,7 +66,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
 
   const documentColumns: ColumnsType<IDocument> = [
     {
-      title: "Documento",
+      title: t("document"),
       dataIndex: "name",
       key: "name",
       render: (text, record) => (
@@ -77,7 +79,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
       )
     },
     {
-      title: "Vigencia",
+      title: t("validity"),
       dataIndex: "validity",
       key: "validity",
       align: "left",
@@ -85,7 +87,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
       width: 100
     },
     {
-      title: "Plantilla",
+      title: t("template"),
       dataIndex: "template_url",
       key: "template_url",
       align: "center",
@@ -100,7 +102,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
             }}
             href={`/requisitos/plantilla/${template}`}
           >
-            Documento <FileArrowDown size={16} />
+            {t("templateLink")} <FileArrowDown size={16} />
           </Link>
         ) : (
           <Text>-</Text>
@@ -110,7 +112,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
   ];
   const formColumns: ColumnsType<any> = [
     {
-      title: "Formulario",
+      title: t("form"),
       dataIndex: "formName",
       key: "formName",
       render: (text, record) => (
@@ -123,12 +125,12 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
       )
     },
     {
-      title: "Vigencia",
+      title: t("validity"),
       dataIndex: "validity",
       key: "validity"
     },
     {
-      title: "Preguntas",
+      title: t("questions"),
       dataIndex: "questions_quantity",
       key: "questions_quantity"
     }
@@ -159,7 +161,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
   const columns = listType === "documents" ? documentColumns : formColumns;
 
   const handleCloseAndReset = () => {
-    showMessage("success", "Documentos agregados correctamente");
+    showMessage("success", t("addSuccess"));
     setSelectedRows([]);
     setDocumentList(undefined);
     onClose();
@@ -176,7 +178,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
             await createDocumentBySubjectId(selectedClientType, row.id);
           } catch (error) {
             console.error(`Error al crear documento con ID ${row.id}:`, error);
-            showMessage("error", `Error al crear documento con ID ${row.id}`);
+            showMessage("error", t("createError", { id: row.id }));
             allSuccessful = false;
           }
         }
@@ -218,14 +220,14 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
                 onClick={addNewDocument}
                 icon={<Plus size={16} />}
               >
-                {`Nuevo ${listType === "documents" ? "documento" : "formulario"}`}
+                {listType === "documents" ? t("newDocument") : t("newForm")}
               </Button>
             </Table.Summary.Cell>
           </Table.Summary.Row>
         )}
       />
       <FooterButtons
-        titleConfirm={`Agregar ${listType === "documents" ? "documentos" : "formularios"}`}
+        titleConfirm={listType === "documents" ? t("addDocuments") : t("addForms")}
         onClose={() => onClose(true)}
         handleOk={handleAdd}
         isConfirmDisabled={selectedRows.length === 0}

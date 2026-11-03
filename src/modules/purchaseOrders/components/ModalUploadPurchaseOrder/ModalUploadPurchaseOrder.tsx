@@ -5,6 +5,7 @@ import type React from "react";
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { message, Tabs } from "antd";
+import { useTranslations } from "use-intl";
 
 import { Upload, FileText, X, Scan, AlertTriangle, Loader2, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
@@ -33,6 +34,8 @@ const formatFileSize = (bytes: number): string => {
 };
 
 export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadPurchaseOrderProps) {
+  const t = useTranslations("purchaseOrders.uploadModal");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const selectedProject = useAppStore((state) => state.selectedProject);
   const projectId = selectedProject?.ID;
@@ -47,11 +50,11 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
 
   const validateFile = (file: File): string | null => {
     if (file.type !== "application/pdf") {
-      return "Solo se permiten archivos PDF";
+      return t("onlyPdf");
     }
     if (file.size > 50 * 1024 * 1024) {
       // 50MB limit
-      return "El archivo es demasiado grande (máximo 50MB)";
+      return t("fileTooLarge", { maxMb: 50 });
     }
     return null;
   };
@@ -81,20 +84,19 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
           setTimeout(() => {
             setShowAIProcessing(false);
             if (onClose) onClose();
-            message.success("La orden fue enviada a procesamiento");
+            message.success(t("sentToProcessing"));
           }, 1200);
         } else {
           // Flujo actual (Gilead y demás proyectos).
           const response = await uploadPurchaseOrder(file);
 
-          message.success("Orden cargada con éxito");
+          message.success(t("uploadSuccess"));
           router.push(`/purchase-orders/${response.marketplace_order_id}`);
         }
       } catch (error) {
         setShowAIProcessing(false);
 
-        const errorMessage =
-          error instanceof Error ? error.message : "Error al cargar la orden de compra";
+        const errorMessage = error instanceof Error ? error.message : t("uploadError");
 
         setError(errorMessage);
         message.error(errorMessage);
@@ -104,7 +106,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
         onFileUpload([file]);
       }
     },
-    [onFileUpload, router, projectId]
+    [onFileUpload, router, projectId, t]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -161,16 +163,14 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
 
         handleFile(mockFile);
       } else {
-        setError("La función de escaneo no está disponible en este navegador");
+        setError(t("scanUnavailable"));
       }
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error al acceder a la cámara para escanear"
-      );
+      setError(error instanceof Error ? error.message : t("scanError"));
     } finally {
       setIsScanning(false);
     }
-  }, [handleFile]);
+  }, [handleFile, t]);
 
   const handleAIProcessingClose = useCallback(() => {
     setShowAIProcessing(false);
@@ -198,7 +198,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
   const tabItems = [
     {
       key: "ai",
-      label: "Procesar con IA",
+      label: t("tabs.ai"),
       children: (
         <div className="space-y-6">
           <div
@@ -216,11 +216,9 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
                 <Upload className="h-8 w-8 text-cashport-green" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-cashport-black mb-2">
-                  Arrastra tu archivo PDF aquí
-                </h3>
+                <h3 className="text-lg font-semibold text-cashport-black mb-2">{t("dropPdf")}</h3>
                 <p className="mb-4" style={{ color: "#909090" }}>
-                  O selecciona un archivo desde tu dispositivo
+                  {t("orSelectFile")}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -229,7 +227,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
                   className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
                 >
                   <FileText className="h-4 w-4 mr-2" />
-                  Seleccionar Archivo
+                  {t("selectFile")}
                 </Button>
                 <Button
                   onClick={handleScan}
@@ -242,7 +240,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
                   ) : (
                     <Scan className="h-4 w-4 mr-2" />
                   )}
-                  {isScanning ? "Escaneando..." : "Escanear Documento"}
+                  {isScanning ? t("scanning") : t("scanDocument")}
                 </Button>
               </div>
             </div>
@@ -267,19 +265,19 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
     },
     {
       key: "manual",
-      label: "Procesar manualmente",
+      label: t("tabs.manual"),
       children: (
         <>
           <UploadDropZone
             onFileUpload={handleManualFileUpload}
-            title="Arrastra tu archivo PDF aquí"
+            title={t("dropPdf")}
             allowedExtensions={[".pdf"]}
             multiple
           />
 
           {manualFiles.length > 0 && (
             <div className="uploadInterface__fileList">
-              <p className="uploadInterface__fileListTitle">Archivos Cargados</p>
+              <p className="uploadInterface__fileListTitle">{t("uploadedFiles")}</p>
               <div style={{ maxHeight: "150px", overflowY: "auto", scrollbarWidth: "thin" }}>
                 {manualFiles.map((file, index) => (
                   <div key={index} className="uploadInterface__fileItem">
@@ -296,6 +294,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
                       className="uploadInterface__removeButton"
                       onClick={() => handleRemoveManualFile(index)}
                       type="button"
+                      aria-label={tCommon("actions.remove")}
                     >
                       <X size={16} />
                     </button>
@@ -311,7 +310,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
               onClick={handleContinueManual}
               disabled={manualFiles.length === 0}
             >
-              Continuar a digitación manual
+              {t("continueManual")}
             </PrincipalButton>
           </div>
         </>
@@ -323,12 +322,13 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl bg-cashport-white border-cashport-gray-light max-h-[calc(90*var(--vh))] overflow-y-auto uploadInterface">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-cashport-black">Cargar Orden de compra</CardTitle>
+          <CardTitle className="text-cashport-black">{t("title")}</CardTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
             className="text-cashport-black hover:bg-cashport-gray-lighter"
+            aria-label={tCommon("actions.close")}
           >
             <X className="h-4 w-4" />
           </Button>

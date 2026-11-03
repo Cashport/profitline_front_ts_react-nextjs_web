@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, Pencil, Table2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import type { IVisitFormStatus } from "@/types/surveys/ISurveys";
 
@@ -47,11 +48,13 @@ export default function SurveyEditorHeader({
   onEdit,
   onAnswers
 }: SurveyEditorHeaderProps) {
-  const title = name.trim() || (isNew ? "Nueva encuesta" : "Encuesta sin título");
+  const t = useTranslations("surveys.editorHeader");
+  const tCommon = useTranslations("common");
+  const title = name.trim() || (isNew ? t("newSurvey") : t("untitled"));
 
   const narrowPreview = (
     <ActionButton className="lg:hidden" icon={<Eye />} onClick={onOpenPreview}>
-      Vista previa
+      {t("preview")}
     </ActionButton>
   );
 
@@ -63,27 +66,29 @@ export default function SurveyEditorHeader({
           icon={previewOpen ? <EyeOff /> : <Eye />}
           onClick={onTogglePreview}
         >
-          {previewOpen ? "Ocultar vista previa" : "Vista previa"}
+          {previewOpen ? t("hidePreview") : t("preview")}
         </ActionButton>
         {narrowPreview}
-        <ActionButton onClick={onExit}>{isNew ? "Cancelar" : "Salir del editor"}</ActionButton>
+        <ActionButton onClick={onExit}>
+          {isNew ? tCommon("actions.cancel") : t("exitEditor")}
+        </ActionButton>
         <ActionButton
           variant="primary"
           loading={isSaving}
           disabled={!isReady || (!isNew && !isDirty)}
           onClick={onPublish}
         >
-          {isNew ? "Publicar" : isDirty ? "Publicar cambios" : "Publicada"}
+          {isNew ? t("publish") : isDirty ? t("publishChanges") : t("published")}
         </ActionButton>
       </>
     ) : (
       <>
         {narrowPreview}
         <ActionButton disabled={!isReady} icon={<Table2 />} onClick={onAnswers}>
-          Ver respuestas
+          {t("viewResponses")}
         </ActionButton>
         <ActionButton variant="primary" disabled={!isReady} icon={<Pencil />} onClick={onEdit}>
-          Editar
+          {tCommon("actions.edit")}
         </ActionButton>
       </>
     );
@@ -91,7 +96,7 @@ export default function SurveyEditorHeader({
   return (
     <SurveyPageHeader
       backHref="/surveys"
-      backLabel="Encuestas"
+      backLabel={t("backLabel")}
       onBack={onBack}
       title={title}
       titleExtra={!isNew && isReady ? <SurveyStatus status={status} /> : null}

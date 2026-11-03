@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Flex, Modal } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
 import { CaretLeft } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -43,6 +44,8 @@ const DigitalRecordModal = ({
   clientId,
   messageShow
 }: DigitalRecordModalProps) => {
+  const t = useTranslations("modals.digitalRecord");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [recipients, setRecipients] = useState<
     {
@@ -83,11 +86,11 @@ const DigitalRecordModal = ({
     setIsSubmitting(true);
     try {
       await sendDigitalRecord(clientId, data);
-      messageShow.success("Acta digital enviada correctamente");
+      messageShow.success(t("success"));
 
       onClose();
     } catch (error) {
-      messageShow.error("Error al enviar acta digital");
+      messageShow.error(t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +107,7 @@ const DigitalRecordModal = ({
     >
       <button className="digitalRecordModal__goBackBtn" onClick={onClose}>
         <CaretLeft size="1.25rem" />
-        Enviar acta digital
+        {t("title")}
       </button>
 
       <Flex vertical gap="0.5rem">
@@ -116,7 +119,7 @@ const DigitalRecordModal = ({
             <GeneralSearchSelect
               errors={errors.forward_to}
               field={field}
-              title="Para"
+              title={t("to")}
               placeholder=""
               options={recipients}
               suffixIcon={null}
@@ -127,7 +130,7 @@ const DigitalRecordModal = ({
 
         <InputForm
           validationRules={{ required: true }}
-          titleInput="Asunto"
+          titleInput={t("subject")}
           control={control}
           nameInput="subject"
           error={errors.subject}
@@ -136,10 +139,10 @@ const DigitalRecordModal = ({
       </Flex>
 
       <div className="digitalRecordModal__footer">
-        <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+        <SecondaryButton onClick={onClose}>{tCommon("actions.cancel")}</SecondaryButton>
 
         <PrincipalButton onClick={handleSubmit(onSubmit)} disabled={!isValid || isSubmitting}>
-          {isSubmitting ? "...enviando" : "Enviar acta"}
+          {isSubmitting ? tCommon("status.sending") : t("send")}
         </PrincipalButton>
       </div>
     </Modal>

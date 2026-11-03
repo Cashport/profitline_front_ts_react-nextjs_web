@@ -1,10 +1,13 @@
 import { Flex } from "antd";
 import { SideBar } from "../../molecules/SideBar/SideBar";
 import Header from "../header";
+import type { Messages } from "@/i18n/types";
 import styles from "./ViewWrapper.module.scss";
 
 interface IViewWrapper {
-  headerTitle: string;
+  headerTitle?: string;
+  /** Título traducido desde el catálogo `meta`; úsalo en vez de `headerTitle` desde layouts de servidor. */
+  headerTitleKey?: keyof Messages["meta"];
   /** Línea pequeña bajo el título (corte, "Proyectar a cierre"…). */
   headerTitleExtra?: React.ReactNode;
   /** Acciones del encabezado, a la izquierda del perfil (chips, "Filtrar", buscador). */
@@ -20,6 +23,7 @@ interface IViewWrapper {
 }
 export default function ViewWrapper({
   headerTitle,
+  headerTitleKey,
   headerTitleExtra,
   headerActions,
   headerBack,
@@ -37,6 +41,7 @@ export default function ViewWrapper({
         {!hideHeader ? (
           <Header
             title={headerTitle}
+            titleKey={headerTitleKey}
             titleExtra={headerTitleExtra}
             actionsExtra={headerActions}
             back={headerBack}

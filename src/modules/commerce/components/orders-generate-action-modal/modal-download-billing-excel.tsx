@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Flex, Modal, Typography } from "antd";
 import dayjs, { Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { InputDate } from "@/components/atoms/inputs/InputDate/InputDate";
@@ -14,25 +15,22 @@ const DISPLAY_DATE_FORMAT = "DD/MM/YYYY";
 
 type PresetKey = "today" | "last7" | "thisMonth" | "lastMonth";
 
-const PRESETS: { key: PresetKey; label: string; getRange: () => [Dayjs, Dayjs] }[] = [
+// `key` es también la clave del texto en commerce.billingExcelModal.presets.
+const PRESETS: { key: PresetKey; getRange: () => [Dayjs, Dayjs] }[] = [
   {
     key: "today",
-    label: "Hoy",
     getRange: () => [dayjs().startOf("day"), dayjs().startOf("day")]
   },
   {
     key: "last7",
-    label: "Últimos 7 días",
     getRange: () => [dayjs().subtract(6, "day").startOf("day"), dayjs().startOf("day")]
   },
   {
     key: "thisMonth",
-    label: "Este mes",
     getRange: () => [dayjs().startOf("month"), dayjs().startOf("day")]
   },
   {
     key: "lastMonth",
-    label: "Mes anterior",
     getRange: () => [
       dayjs().subtract(1, "month").startOf("month"),
       dayjs().subtract(1, "month").endOf("month").startOf("day")
@@ -42,11 +40,11 @@ const PRESETS: { key: PresetKey; label: string; getRange: () => [Dayjs, Dayjs] }
 
 const DEFAULT_PRESET: PresetKey = "thisMonth";
 
-const formatRangeSummary = (start: Dayjs, end: Dayjs) => {
-  const days = end.startOf("day").diff(start.startOf("day"), "day") + 1;
-  const range = `${start.format(DISPLAY_DATE_FORMAT)} – ${end.format(DISPLAY_DATE_FORMAT)}`;
-  return `${range} · ${days} ${days === 1 ? "día" : "días"}`;
-};
+const getRangeSummaryValues = (start: Dayjs, end: Dayjs) => ({
+  start: start.format(DISPLAY_DATE_FORMAT),
+  end: end.format(DISPLAY_DATE_FORMAT),
+  days: end.startOf("day").diff(start.startOf("day"), "day") + 1
+});
 
 interface Props {
   isOpen: boolean;
@@ -56,6 +54,8 @@ interface Props {
 }
 
 export const ModalDownloadBillingExcel = ({ isOpen, onClose, onDownload, isLoading }: Props) => {
+  const t = useTranslations("commerce.billingExcelModal");
+  const tCommon = useTranslations("common");
   const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
@@ -101,15 +101,13 @@ export const ModalDownloadBillingExcel = ({ isOpen, onClose, onDownload, isLoadi
       open={isOpen}
       title={
         <Title className="modalDownloadBillingExcel__title" level={4}>
-          Descargar informe de facturación detallado
+          {t("title")}
         </Title>
       }
       footer={null}
       onCancel={handleClose}
     >
-      <p className="modalDownloadBillingExcel__description">
-        Selecciona el rango de fechas del informe
-      </p>
+      <p className="modalDownloadBillingExcel__description">{t("description")}</p>
 
       <Flex wrap gap="0.375rem">
         {PRESETS.map((preset) => (
@@ -119,15 +117,15 @@ export const ModalDownloadBillingExcel = ({ isOpen, onClose, onDownload, isLoadi
             onClick={() => handleSelectPreset(preset.key)}
             disabled={isLoading}
           >
-            {preset.label}
+            {t(`presets.${preset.key}`)}
           </Button>
         ))}
       </Flex>
 
       <div className="modalDownloadBillingExcel__dates">
         <InputDate
-          titleInput="Fecha inicial"
-          placeholder="Seleccionar fecha"
+          titleInput={tCommon("fields.startDate")}
+          placeholder={tCommon("placeholders.selectDate")}
           value={startDate ?? undefined}
           onChange={handleStartDateChange}
           maxDate={endDate ?? undefined}
@@ -136,8 +134,8 @@ export const ModalDownloadBillingExcel = ({ isOpen, onClose, onDownload, isLoadi
           disabled={isLoading}
         />
         <InputDate
-          titleInput="Fecha final"
-          placeholder="Seleccionar fecha"
+          titleInput={tCommon("fields.endDate")}
+          placeholder={tCommon("placeholders.selectDate")}
           value={endDate ?? undefined}
           onChange={handleEndDateChange}
           minDate={startDate ?? undefined}
@@ -149,12 +147,12 @@ export const ModalDownloadBillingExcel = ({ isOpen, onClose, onDownload, isLoadi
 
       {startDate && endDate && (
         <p className="modalDownloadBillingExcel__summary">
-          {formatRangeSummary(startDate, endDate)}
+          {t("rangeSummary", getRangeSummaryValues(startDate, endDate))}
         </p>
       )}
 
       <FooterButtons
-        titleConfirm="Descargar"
+        titleConfirm={tCommon("actions.download")}
         onClose={handleClose}
         handleOk={handleDownload}
         isConfirmDisabled={!startDate || !endDate}

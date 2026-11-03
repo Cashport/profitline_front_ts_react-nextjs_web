@@ -1,0 +1,123 @@
+{
+  "title": "Campaigns",
+  "clientPreview": {
+    "loadError": "Couldn't load the message preview.",
+    "backToList": "Back to list",
+    "personalizedEmail": "Personalized email for {name}",
+    "to": "To: {recipients}",
+    "noSubject": "No subject",
+    "noContent": "No content",
+    "attachments": "Attachments:",
+    "attachmentsTitle": "Attachments",
+    "subject": "Subject",
+    "recipientCount": "{count, plural, one {# recipient} other {# recipients}}"
+  },
+  "actionsBar": {
+    "recipientsVia": "<b>{count}</b> recipients via <b>{channel}</b>",
+    "selectRecipients": "Select recipients to continue",
+    "previewAndSend": "Preview and send"
+  },
+  "channel": {
+    "title": "Channel",
+    "descriptions": {
+      "email": "Email with attachments",
+      "whatsapp": "Approved templates with a download URL"
+    }
+  },
+  "message": {
+    "title": "Message",
+    "createTemplate": "Create template",
+    "emailTemplates": "Email templates",
+    "preview": "Preview",
+    "selectApprovedTemplate": "Select an approved template",
+    "loadingTemplates": "Loading templates…",
+    "noTemplates": "No templates available",
+    "variablesHint": "The variables <code>{variables}</code> are filled in automatically with each customer's data when the message is sent.",
+    "emailPreview": "Email preview",
+    "sampleRecipient": "To: recipient@example.com",
+    "noSubject": "No subject",
+    "bodyPlaceholder": "The message content will appear here...",
+    "attachments": "Attachments",
+    "selected": "Selected",
+    "templateTag": "Template",
+    "subjectLabel": "Subject:",
+    "approved": "Approved"
+  },
+  "recipients": {
+    "title": "Recipients",
+    "validationDone": "Validation complete: {valid} valid, {invalid} not found",
+    "validateError": "Couldn't validate the customers",
+    "downloadError": "Couldn't download the report",
+    "placeholder": "COL-001, COL-002, MEX-001\nor one per line:\nCOL-001\nCOL-002\nMEX-001",
+    "validate": "Validate",
+    "found": "{count, plural, one {# customer found} other {# customers found}}",
+    "notFound": "{count} not found",
+    "ofTotal": "{total, plural, one {of # customer in total} other {of # customers in total}}",
+    "downloadReport": "Download report"
+  },
+  "addClient": {
+    "title": "Add customer",
+    "success": "Customer added to the communication",
+    "error": "Couldn't add the customer",
+    "placeholder": "Search and select a customer"
+  },
+  "createTemplate": {
+    "title": "Create email template",
+    "subtitle": "Write the email content using dynamic tags. The preview updates in real time.",
+    "name": "Template name",
+    "namePlaceholder": "E.g., Monthly receivables reminder",
+    "subject": "Subject",
+    "subjectPlaceholder": "E.g., {receivables} report - {clientName}",
+    "body": "Message body",
+    "bodyPlaceholder": "Dear {clientName},\n\nYour current receivables balance is {receivables}...\n\nBest regards,\n{signature}",
+    "contentPlaceholder": "The content will appear here...",
+    "selectTag": "Select tag",
+    "insertInto": "{field, select, subject {It will be inserted into the subject} other {It will be inserted into the body}}",
+    "recipientRoles": "Recipient roles",
+    "templateAttachments": "Template attachments",
+    "save": "Save template",
+    "clientRole": "Customer - {name}",
+    "success": "Template created",
+    "error": "Something went wrong while creating the template",
+    "validation": {
+      "roleRequired": "Select at least one role",
+      "nameRequired": "Name is required",
+      "subjectRequired": "Subject is required",
+      "bodyRequired": "Body is required"
+    }
+  },
+  "testCommunication": {
+    "title": "Test message",
+    "description": "Send a test message to your email to check that everything looks right.",
+    "testEmail": "Test email",
+    "emailPlaceholder": "you@email.com",
+    "sent": "Sent",
+    "send": "Send test"
+  },
+  "whatsappPreview": {
+    "title": "WhatsApp preview",
+    "empty": "Select a template to see the preview",
+    "sampleTime": "10:30 AM"
+  },
+  "table": {
+    "activated": "Communication activated",
+    "activateError": "Couldn't activate the communication",
+    "clientRemoved": "Customer removed from the send",
+    "removeError": "Couldn't remove the customer",
+    "columns": {
+      "contacts": "Contacts",
+      "receivables": "Receivables",
+      "pastDue": "Past due",
+      "paymentPlans": "Payment plans"
+    },
+    "removeFromSend": "Remove from send",
+    "viewEmailOf": "View email for {name}",
+    "confirm": "I confirm that I've reviewed the content and recipients. This action can't be undone.",
+    "send": "Send communication"
+  },
+  "tableView": {
+    "title": "Bulk communication send",
+    "searchPlaceholder": "Search customer...",
+    "addClient": "+Add customer"
+  }
+}

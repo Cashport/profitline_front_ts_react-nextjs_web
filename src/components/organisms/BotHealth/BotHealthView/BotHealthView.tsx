@@ -4,6 +4,7 @@ import { Table, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Eye, ArrowsClockwise } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import UiSearchInput from "@/components/ui/search-input";
 import IconButton from "@/components/atoms/IconButton/IconButton";
@@ -25,6 +26,8 @@ const PAGE_SIZE = 10;
 // listado completo (sin paginación server-side); paginación/búsqueda/resumen se calculan
 // en cliente dentro de useBotsHealth.
 export const BotHealthView: React.FC = () => {
+  const t = useTranslations("botHealth");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { showMessage } = useMessageApi();
   const [searchValue, setSearchValue] = useState("");
@@ -71,14 +74,14 @@ export const BotHealthView: React.FC = () => {
 
   const columns: ColumnsType<IBotHealth> = [
     {
-      title: "Bot",
+      title: t("fields.bot"),
       dataIndex: "bot",
       key: "bot",
       sorter: (a, b) => a.bot.localeCompare(b.bot),
       showSorterTooltip: false
     },
     {
-      title: "Cliente",
+      title: t("fields.customer"),
       dataIndex: "cliente",
       key: "cliente",
       sorter: (a, b) => a.cliente.localeCompare(b.cliente),
@@ -101,31 +104,31 @@ export const BotHealthView: React.FC = () => {
       )
     },
     {
-      title: "País",
+      title: t("fields.country"),
       dataIndex: "pais",
       key: "pais",
-      render: (pais) => pais || "No disponible"
+      render: (pais) => pais || t("notAvailable")
     },
     {
-      title: "Tipo de archivo",
+      title: t("fields.fileType"),
       dataIndex: "tipo_archivo",
       key: "tipo_archivo",
-      render: (tipo) => tipo || "No disponible"
+      render: (tipo) => tipo || t("notAvailable")
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "estado",
       key: "estado",
       render: (estado) => <BotStatusBadge estado={estado} />
     },
     {
-      title: "Última ejecución",
+      title: t("fields.lastRun"),
       dataIndex: "ultima_ejecucion",
       key: "ultima_ejecucion",
-      render: (fecha) => fecha || "No disponible"
+      render: (fecha) => fecha || t("notAvailable")
     },
     {
-      title: "Acciones",
+      title: tCommon("fields.actions"),
       key: "actions",
       render: (_, row) => (
         <Flex gap={4}>
@@ -134,11 +137,13 @@ export const BotHealthView: React.FC = () => {
             icon={<ArrowsClockwise size={20} color="#141414" weight="bold" />}
             loading={executingId === row.schedule_id}
             onClick={() => requestExecution(row)}
+            aria-label={t("actions.run")}
           />
           <IconButton
             style={{ backgroundColor: "#F7F7F7" }}
             icon={<Eye size={20} color="#141414" weight="bold" />}
             onClick={() => openDrawer(row)}
+            aria-label={t("actions.viewDetail")}
           />
         </Flex>
       )
@@ -151,7 +156,7 @@ export const BotHealthView: React.FC = () => {
 
       <div className="cp-card flex flex-col gap-3 px-[18px] py-[14px]">
         <Flex gap={8}>
-          <UiSearchInput placeholder="Buscar bot o cliente" onChange={handleSearch} />
+          <UiSearchInput placeholder={t("searchPlaceholder")} onChange={handleSearch} />
         </Flex>
 
         <Table

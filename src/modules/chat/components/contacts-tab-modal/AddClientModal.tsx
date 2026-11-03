@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { Controller, useForm } from "react-hook-form";
 import { Flex, Modal, Select, Typography, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import { getWhatsappClients } from "@/services/chat/clients";
 import { postContact } from "@/services/contacts/contacts";
@@ -44,6 +45,8 @@ const AddClientModal = ({
   initialPhone,
   onSuccess
 }: PropsInvoicesTable) => {
+  const t = useTranslations("chat.addClient");
+  const tCommon = useTranslations("common");
   const [clients, setClients] = useState<
     { uuid: string; id: string; name: string; acountCodes: string[] }[]
   >([]);
@@ -117,14 +120,14 @@ const AddClientModal = ({
 
       await postContact(body);
 
-      message.success("Cliente agregado exitosamente");
+      message.success(t("success"));
       setShowAddClientModal(false);
       onSuccess && onSuccess(data);
     } catch (error) {
       if (error instanceof ApiError) {
         message.error(error.message);
       } else {
-        message.error("Error al agregar el cliente");
+        message.error(t("error"));
       }
       console.error("Error submitting form:", error);
     }
@@ -153,29 +156,32 @@ const AddClientModal = ({
     >
       <Flex vertical gap={24}>
         <div className="AddClientModalContainer__header">
-          <h2 className="AddClientModalContainer__header__title">Agregar cliente</h2>
-          <p className="AddClientModalContainer__header__info">
-            Ingresa la información del nuevo cliente.
-          </p>
+          <h2 className="AddClientModalContainer__header__title">{t("title")}</h2>
+          <p className="AddClientModalContainer__header__info">{t("subtitle")}</p>
         </div>
 
         <div className="AddClientModalContainer__content">
-          <InputForm titleInput="Nombres" control={control} nameInput="name" error={errors.name} />
           <InputForm
-            titleInput="Apellidos"
+            titleInput={t("firstName")}
+            control={control}
+            nameInput="name"
+            error={errors.name}
+          />
+          <InputForm
+            titleInput={t("lastName")}
             control={control}
             nameInput="lastname"
             error={errors.lastname}
             validationRules={{ required: false }}
           />
           <InputForm
-            titleInput="Cargo"
+            titleInput={t("jobTitle")}
             control={control}
             nameInput="position"
             error={errors.position}
           />
           <div className="inputContainer">
-            <h5 className="inputContainer__title">Rol</h5>
+            <h5 className="inputContainer__title">{t("role")}</h5>
             <Controller
               name="role"
               control={control}
@@ -191,7 +197,7 @@ const AddClientModal = ({
             />
           </div>
           <div className="inputContainer">
-            <h5 className="inputContainer__title">Indicativo</h5>
+            <h5 className="inputContainer__title">{t("countryCode")}</h5>
             <Controller
               name="indicative"
               control={control}
@@ -207,7 +213,7 @@ const AddClientModal = ({
             />
           </div>
           <InputForm
-            titleInput="Teléfono"
+            titleInput={tCommon("fields.phone")}
             control={control}
             nameInput="phone"
             error={errors.phone}
@@ -217,9 +223,9 @@ const AddClientModal = ({
                 const isColombia = formValues.indicative?.value === 1;
 
                 if (isColombia) {
-                  return /^\d{10}$/.test(value) || "El teléfono debe tener 10 dígitos";
+                  return /^\d{10}$/.test(value) || t("phoneTenDigits");
                 }
-                return /^\d{7,12}$/.test(value) || "El teléfono debe tener entre 7 y 12 dígitos";
+                return /^\d{7,12}$/.test(value) || t("phoneDigitsRange");
               }
             }}
           />
@@ -232,12 +238,12 @@ const AddClientModal = ({
             validationRules={{
               pattern: {
                 value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: "El email no es válido"
+                message: tCommon("validation.invalidEmail")
               }
             }}
           />
           <div className="inputContainer">
-            <h5 className="inputContainer__title">Cliente</h5>
+            <h5 className="inputContainer__title">{tCommon("fields.customer")}</h5>
             <Controller
               name="client"
               control={control}
@@ -246,7 +252,7 @@ const AddClientModal = ({
                 <>
                   <Select
                     showSearch
-                    placeholder="Seleccione cliente"
+                    placeholder={t("selectClient")}
                     className={errors.client ? "selectInputError" : "selectInputCustom"}
                     variant="borderless"
                     optionLabelProp="label"
@@ -264,9 +270,7 @@ const AddClientModal = ({
                     filterOption={filterOption}
                   />
                   {errors.client && (
-                    <Typography.Text className="textError">
-                      El cliente es obligatorio *
-                    </Typography.Text>
+                    <Typography.Text className="textError">{t("clientRequired")}</Typography.Text>
                   )}
                 </>
               )}
@@ -280,14 +284,14 @@ const AddClientModal = ({
                 setShowAddClientModal(false);
               }}
             >
-              Cancelar
+              {tCommon("actions.cancel")}
             </SecondaryButton>
             <PrincipalButton
               disabled={!isValid}
               onClick={handleSubmit(onSubmitForm)}
               loading={isActionLoading}
             >
-              Agregar
+              {tCommon("actions.add")}
             </PrincipalButton>
           </>
         </div>

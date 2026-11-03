@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "use-intl";
 import { EstadoAprobacion } from "@/types/marketAdmin/IMarketAdmin";
 import { ESTADO_CONFIG } from "./estadoConfig";
 import SearchField from "@/components/ui/search-field/search-field";
@@ -17,12 +18,13 @@ export default function AsignacionesFilters({
   filtroEstado: EstadoAprobacion | "todos";
   onFiltroChange: (value: EstadoAprobacion | "todos") => void;
 }) {
+  const t = useTranslations("marketAdmin.manualBonus");
   return (
     <div className="flex items-center gap-3 px-6 py-3 border-b border-[#EEEEEE]">
       <SearchField
         value={search}
         onChange={onSearchChange}
-        placeholder="Buscar cliente o producto..."
+        placeholder={t("searchPlaceholder")}
         className="w-72"
       />
       <div className="flex items-center gap-1">
@@ -36,7 +38,7 @@ export default function AsignacionesFilters({
                 : "text-[#666666] hover:bg-[#F7F7F7]"
             }`}
           >
-            {estado === "todos" ? "Todos" : ESTADO_CONFIG[estado].label}
+            {estado === "todos" ? t("status.all") : t(`status.${ESTADO_CONFIG[estado].labelKey}`)}
           </button>
         ))}
       </div>

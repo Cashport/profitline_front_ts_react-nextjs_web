@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { ConfigProvider, theme as antdTheme } from "antd";
+import { useTranslations } from "use-intl";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { MessageProvider } from "@/context/MessageContext";
@@ -13,6 +14,7 @@ import {
 import TasksHeaderActions from "../../components/tasks-header-actions/tasks-header-actions";
 
 function TicketsChrome({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("tickets");
   const { resolvedTheme } = useWalletTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -54,7 +56,7 @@ function TicketsChrome({ children }: { children: React.ReactNode }) {
       {/* Own message holder so toasts render under this theme, not the root (light) one. */}
       <MessageProvider>
         <ViewWrapper
-          headerTitle="Task manager"
+          headerTitle={t("title")}
           headerActions={<TasksHeaderActions />}
           className={isDark ? "dark" : ""}
         >

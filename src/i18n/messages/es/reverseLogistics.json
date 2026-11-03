@@ -1,0 +1,133 @@
+{
+  "view": {
+    "title": "Listado de devoluciones",
+    "lotApprovalTitle": "Aprobación de lotes",
+    "tabs": {
+      "returns": "Devoluciones",
+      "approvals": "Aprobaciones"
+    }
+  },
+  "table": {
+    "showingTotal": "Mostrando {from} a {to} de {total} resultados"
+  },
+  "phases": {
+    "logistics": "Profitline",
+    "transport": "Transporte",
+    "warehouse": "Bodega",
+    "creditMemo": "Nota Crédito"
+  },
+  "statsBar": {
+    "average": "Prom {phase}",
+    "totalDays": "Total Días",
+    "days": "días",
+    "notAvailable": "N/A"
+  },
+  "returns": {
+    "columns": {
+      "id": "Id",
+      "date": "Fecha",
+      "customer": "Cliente",
+      "channelLine": "Canal / Línea",
+      "reason": "Causal",
+      "status": "Estado",
+      "units": "Unid.",
+      "amount": "Monto"
+    },
+    "groupCount": "{count, plural, one {# dev.} other {# devs.}}",
+    "viewPdf": "Ver PDF"
+  },
+  "approvals": {
+    "columns": {
+      "date": "Fecha",
+      "customer": "Cliente",
+      "city": "Ciudad",
+      "channelLine": "Canal / Línea",
+      "approvalType": "Tipo de Aprobación",
+      "lots": "Lotes",
+      "units": "Unid.",
+      "amount": "Monto"
+    },
+    "goToApprove": "Ir a Aprobar"
+  },
+  "approvalTypes": {
+    "outOfPolicyDate": "Fuera de políticas fecha",
+    "reasonNeedsApproval": "Causal con aprobación",
+    "exceedsMaxAmount": "Supera monto máximo",
+    "noPickupAuthorization": "Sin autorización recogida"
+  },
+  "filters": {
+    "customer": "Cliente",
+    "status": "Estado",
+    "reason": "Causal",
+    "approvalType": "Tipo de Aprobación",
+    "city": "Ciudad",
+    "registrationDate": "Fecha de registro",
+    "date": "Fecha",
+    "period": "Periodo: {value}",
+    "selectPeriod": "Selecciona un periodo",
+    "typesCount": "{count} Tipos",
+    "citiesCount": "{count} Ciudades",
+    "pendingApproval": "Pendiente aprobación"
+  },
+  "dateFilter": {
+    "tagLabel": "Fecha",
+    "presetPeriods": "Periodos Predefinidos",
+    "customRange": "Rango Personalizado",
+    "from": "Desde",
+    "to": "Hasta",
+    "presets": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "last7Days": "Últimos 7 días",
+      "last15Days": "Últimos 15 días",
+      "last30Days": "Últimos 30 días",
+      "thisMonth": "Este mes"
+    }
+  },
+  "approveModal": {
+    "title": "¿Confirma aprobación?",
+    "reason": "Causal Aprobación",
+    "selectReason": "Selecciona una causal",
+    "observation": "Observación",
+    "observationPlaceholder": "Digite la observación aquí...",
+    "reject": "No Aprobar"
+  },
+  "detail": {
+    "customer": "Cliente:",
+    "customerCode": "Código Cliente:",
+    "businessLine": "Línea de Negocio:",
+    "documentValue": "Valor del Documento:",
+    "returnReason": "Causal Devolución:",
+    "documentUnits": "Unidades Documentos:",
+    "registeredUnits": "Unidades Registradas:",
+    "ruleFallback": "Regla devoluciones / venta mensual — límite 5,00%",
+    "exceedsLimit": "Supera el límite permitido",
+    "maxAllowed": "Máximo permitido",
+    "pctOfSales": "{pct} de {sales} en ventas",
+    "returnsThisMonth": "Devoluciones este mes",
+    "accumulated": "{amount} acumulado",
+    "withThisApproval": "Con esta aprobación",
+    "exceedsBy": "Supera en {pct}",
+    "remaining": "Quedan {pct} disponibles",
+    "observations": "Observaciones:",
+    "observationFallback": "autorizado por el lab vía correo",
+    "viewSupportingDocs": "Ver soportes",
+    "records": "{count, plural, one {# registro} other {# registros}}",
+    "showingRecords": "Mostrando 1 a {count} de {count} registros",
+    "supportingDocsTitle": "Soportes de la aprobación",
+    "openInNewTab": "Abrir en pestaña nueva",
+    "supportingDocAlt": "Soporte de aprobación",
+    "noSupportingDocs": "No hay soportes adjuntos.",
+    "cannotApprove": "No puede aprobar, supera el límite permitido",
+    "approvedSuccess": "Devolución aprobada correctamente",
+    "columns": {
+      "product": "Producto",
+      "lot": "Lote",
+      "expirationDate": "Fecha Vencimiento",
+      "units": "Unidades",
+      "value": "Valor",
+      "document": "Documento",
+      "status": "Estado"
+    }
+  }
+}

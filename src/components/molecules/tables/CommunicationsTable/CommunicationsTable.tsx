@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -38,6 +39,8 @@ export const CommunicationsTable = ({
   showCommunicationDetails,
   onCreateCommunication
 }: PropsCommunicationsTable) => {
+  const t = useTranslations("shared.tables.communications");
+  const tCommon = useTranslations("common");
   const pathname = usePathname();
   const [communications, setCommunications] = useState<ICommunication[]>([]);
   const [page, setPage] = useState(1);
@@ -64,9 +67,9 @@ export const CommunicationsTable = ({
     setSendingId(communicationId);
     try {
       await sendIndividualCommunication(projectId, communicationId);
-      message.success("Comunicación enviada exitosamente");
+      message.success(t("sentSuccess"));
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al enviar comunicación");
+      message.error(error instanceof Error ? error.message : t("sendError"));
     } finally {
       setSendingId(null);
     }
@@ -96,7 +99,7 @@ export const CommunicationsTable = ({
 
   const columns: TableProps<ICommunication>["columns"] = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "name",
       key: "name",
       render: (text, row) => (
@@ -108,7 +111,7 @@ export const CommunicationsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Motivo",
+      title: tCommon("fields.reason"),
       dataIndex: "description",
       key: "description",
       render: (text) => <Text>{text}</Text>,
@@ -116,7 +119,7 @@ export const CommunicationsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Via",
+      title: t("columns.via"),
       key: "via",
       dataIndex: "via",
       render: (text) => <Text>{text}</Text>,
@@ -124,7 +127,7 @@ export const CommunicationsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Frecuencia",
+      title: t("columns.frequency"),
       key: "JSON_frecuency",
       dataIndex: "JSON_frecuency",
       render: (_, row) => {
@@ -132,15 +135,15 @@ export const CommunicationsTable = ({
         const interval = row?.JSON_frecuency?.repeat?.interval;
         const day = row?.JSON_frecuency?.repeat?.day;
         if (frequency?.toLowerCase() === "semanal") {
-          return <Text>{`${day}, cada ${interval > 1 ? `${interval} semanas` : "semana"}`}</Text>;
+          return <Text>{t("weeklyFrequency", { day, interval: Number(interval) || 1 })}</Text>;
         } else if (frequency?.toLowerCase() === "mensual") {
-          return <Text>{`El día ${day}, cada ${interval > 1 ? `${interval} meses` : "mes"}`}</Text>;
+          return <Text>{t("monthlyFrequency", { day, interval: Number(interval) || 1 })}</Text>;
         }
       },
       showSorterTooltip: false
     },
     {
-      title: "Cantidad clientes",
+      title: t("columns.customerCount"),
       key: "clients",
       dataIndex: "clients",
       render: (text) => <Text>{text}</Text>,
@@ -162,7 +165,7 @@ export const CommunicationsTable = ({
                 disabled={sendingId === row.id}
                 onClick={() => handleSendNow(row.id)}
               >
-                Enviar ahora
+                {t("sendNow")}
               </Button>
             )
           }
@@ -200,7 +203,7 @@ export const CommunicationsTable = ({
       key: "discount-option-1",
       label: (
         <Button className="buttonOutlined" onClick={handleDeleteCommunications}>
-          Eliminar
+          {tCommon("actions.delete")}
         </Button>
       )
     }
@@ -210,14 +213,14 @@ export const CommunicationsTable = ({
     <main className="mainCommunicationsTable">
       <Flex justify="space-between" align="center">
         <Flex gap={"0.625rem"} align="center">
-          <UiSearchInput className="search" placeholder="Buscar" />
+          <UiSearchInput className="search" placeholder={tCommon("placeholders.search")} />
           <UiFilterDropdown />
           <DotsDropdown items={items} />
         </Flex>
         {/* PrincipalButton toma el 100% del alto: el contenedor lo deja en --control-h. */}
         <div style={{ height: "var(--control-h)" }}>
           <PrincipalButton onClick={onCreateCommunication} customStyles={{ fontSize: 14 }}>
-            Crear Comunicación
+            {t("create")}
             <Plus weight="bold" size={18} />
           </PrincipalButton>
         </div>

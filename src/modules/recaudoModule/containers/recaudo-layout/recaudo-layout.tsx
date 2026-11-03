@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { ConfigProvider, theme as antdTheme } from "antd";
+import { useTranslations } from "use-intl";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { MessageProvider } from "@/context/MessageContext";
@@ -12,6 +13,7 @@ import {
 } from "@/modules/walletModule/contexts/wallet-theme-context";
 
 function RecaudoChrome({ children }: { children: React.ReactNode }) {
+  const tc = useTranslations("collections");
   const { resolvedTheme } = useWalletTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -61,7 +63,7 @@ function RecaudoChrome({ children }: { children: React.ReactNode }) {
       {/* Own message holder so toasts render under this theme, not the root (light) one. */}
       <MessageProvider>
         <ViewWrapper
-          headerTitle="Torre de control de recaudo"
+          headerTitle={tc("boards.torre.name")}
           hideHeader
           className={isDark ? "dark" : ""}
         >

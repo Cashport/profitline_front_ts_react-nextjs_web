@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { Store, Tag } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { useAppStore } from "@/lib/store/store";
 import type { IBlockingAlertRow } from "@/types/blockingAlerts/IBlockingAlerts";
 
 import { AGING_SEGMENTS, STATUS_META } from "../../constants";
-import { plural, statusLabel } from "../../utils/blocking-alerts";
+import { statusLabel } from "../../utils/blocking-alerts";
 
 interface AlertCardProps {
   row: IBlockingAlertRow;
@@ -21,6 +22,8 @@ interface AlertCardProps {
 
 /** Tarjeta de un cliente o punto de venta: monto, estado, puntos de venta y tramos. */
 export default function AlertCard({ row, href, matchedStore, showClient }: AlertCardProps) {
+  const t = useTranslations("blockingAlerts");
+  const tc = useTranslations("blockingAlerts.card");
   const formatMoney = useAppStore((s) => s.formatMoney);
   const meta = STATUS_META[row.status];
   const isOk = row.status === "ok";
@@ -49,7 +52,7 @@ export default function AlertCard({ row, href, matchedStore, showClient }: Alert
           {statusLabel(row)}
         </span>
         <span className="shrink-0 text-[13px] text-cp-ink-4">
-          {isOk ? "cartera al día" : "pago vencido"}
+          {isOk ? tc("receivablesCurrent") : tc("pastDuePayment")}
         </span>
       </span>
 
@@ -58,32 +61,34 @@ export default function AlertCard({ row, href, matchedStore, showClient }: Alert
           {row.ship_to_code ? (
             <>
               <Tag className="h-3 w-3 shrink-0" />
-              <b className="font-semibold text-cp-ink-3">Ship-to {row.ship_to_code}</b>
+              <b className="font-semibold text-cp-ink-3">
+                {tc("shipTo", { code: row.ship_to_code })}
+              </b>
               {showClient && row.client_name !== row.name && <span>· {row.client_name}</span>}
             </>
           ) : matchedStore ? (
             <>
               <Tag className="h-3 w-3 shrink-0" />
               <b className="font-semibold text-cp-ink-3">
-                Coincide · Ship-to {matchedStore.ship_to_code} · {matchedStore.name}
+                {tc("match", { code: matchedStore.ship_to_code ?? "", name: matchedStore.name })}
               </b>
             </>
           ) : (
             pos && (
               <>
                 <Store className="h-3 w-3 shrink-0" />
-                {plural(pos.total, "punto de venta", "puntos de venta")}
+                {t("count.pointsOfSale", { count: pos.total })}
                 {pos.blocked > 0 && (
                   <b className="font-semibold" style={{ color: STATUS_META.blocked.color }}>
-                    · {plural(pos.blocked, "bloqueado", "bloqueados")}
+                    · {tc("blockedCount", { count: pos.blocked })}
                   </b>
                 )}
                 {pos.warning > 0 && (
                   <b className="font-semibold" style={{ color: STATUS_META.warning.color }}>
-                    · {pos.warning} por bloquear
+                    · {tc("warningCount", { count: pos.warning })}
                   </b>
                 )}
-                {!pos.blocked && !pos.warning && <span>· todos al día</span>}
+                {!pos.blocked && !pos.warning && <span>· {tc("allCurrent")}</span>}
               </>
             )
           )}

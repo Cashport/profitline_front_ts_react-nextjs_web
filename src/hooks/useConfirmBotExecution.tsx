@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "use-intl";
 import { useRef, useState } from "react";
 import { Modal, Typography } from "antd";
 
@@ -8,6 +9,8 @@ import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 export function useConfirmBotExecution<T extends { bot: string }>(
   onExecute: (bot: T) => Promise<void>
 ) {
+  const t = useTranslations("shared.confirmBotExecution");
+  const tCommon = useTranslations("common");
   const [pendingBot, setPendingBot] = useState<T | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
@@ -37,7 +40,7 @@ export function useConfirmBotExecution<T extends { bot: string }>(
   const confirmationModal = (
     <Modal
       open={pendingBot !== null}
-      title="Confirmar ejecución"
+      title={t("title")}
       centered
       width={480}
       onCancel={closeConfirmation}
@@ -46,8 +49,8 @@ export function useConfirmBotExecution<T extends { bot: string }>(
       keyboard={!isSubmitting}
       footer={
         <FooterButtons
-          titleCancel="Cancelar"
-          titleConfirm="Sí, ejecutar"
+          titleCancel={tCommon("actions.cancel")}
+          titleConfirm={t("confirm")}
           onClose={closeConfirmation}
           handleOk={confirmExecution}
           isConfirmDisabled={isSubmitting}
@@ -55,9 +58,9 @@ export function useConfirmBotExecution<T extends { bot: string }>(
         />
       }
     >
-      <Typography.Paragraph>¿Está seguro de que desea ejecutar este bot?</Typography.Paragraph>
+      <Typography.Paragraph>{t("question")}</Typography.Paragraph>
       <Typography.Paragraph style={{ overflowWrap: "anywhere" }}>
-        <Typography.Text strong>Bot: </Typography.Text>
+        <Typography.Text strong>{t("botLabel")} </Typography.Text>
         {pendingBot?.bot}
       </Typography.Paragraph>
     </Modal>

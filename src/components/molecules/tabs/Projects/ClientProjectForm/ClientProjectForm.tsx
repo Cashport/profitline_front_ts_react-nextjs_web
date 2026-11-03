@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, Input, Spin, Typography } from "antd";
@@ -48,6 +49,10 @@ interface Props {
   onGoBackTable: () => void;
 }
 export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props) => {
+  const t = useTranslations("shared.clientForm");
+  const tSelects = useTranslations("shared.selects");
+  const tProject = useTranslations("shared.projectForm");
+  const tCommon = useTranslations("common");
   const [isUploadDocument, setIsUploadDocument] = useState(false);
   const [isBillingPeriodOpen, setIsBillingPeriodOpen] = useState(false);
   const [isModalStatus, setIsModalStatus] = useState({ status: false, remove: false });
@@ -94,7 +99,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
         },
         holding_id: {
           value: data.holding_id === null ? 0 : data.holding_id,
-          label: data.holding_name === null ? "- Sin Asignar -" : data.holding_name
+          label: data.holding_name === null ? tSelects("unassignedOption") : data.holding_name
         },
         phone: data.phone,
         email: data.email,
@@ -106,7 +111,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
         },
         condition_payment: {
           value: data.condition_payment_id,
-          label: `A ${data.condition_payment} días`
+          label: tSelects("paymentConditionDays", { days: Number(data.condition_payment) })
         },
         payment_type: {
           value: data.payment_type,
@@ -143,7 +148,10 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
     // so react-hook-form can validate the field
     const formattedBillingPeriod = billingPeriod?.day_flag
       ? `El dia ${billingPeriod?.day} del mes`
-      : `El ${billingPeriod?.order} ${billingPeriod?.day_of_week} del mes`;
+      : tProject("billingWeekdayOfMonth", {
+          order: billingPeriod?.order ?? "",
+          dayOfWeek: billingPeriod?.day_of_week ?? ""
+        });
 
     setValue("infoClient.billing_period", formattedBillingPeriod, { shouldValidate: true });
   }, [billingPeriod, setValue, dataClient.data.billing_period]);
@@ -269,7 +277,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
               className="buttonGoBack"
               icon={<CaretLeft size={"1.45rem"} />}
             >
-              Ver Clientes
+              {t("viewCustomers")}
             </Button>
             {isViewDetailsClient?.id !== "" && (
               <Flex gap="1.5rem">
@@ -283,7 +291,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                   }}
                   icon={<ArrowsClockwise size={"1.45rem"} />}
                 >
-                  Cambiar Estado
+                  {t("changeStatus")}
                 </Button>
                 <Button
                   size="large"
@@ -294,7 +302,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                   htmlType="button"
                   icon={<Pencil size={"1.45rem"} />}
                 >
-                  {isEditAvailable ? "Cancelar" : "Editar Cliente"}
+                  {isEditAvailable ? tCommon("actions.cancel") : t("editCustomer")}
                 </Button>
               </Flex>
             )}
@@ -303,12 +311,12 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
             <Spin />
           ) : (
             <Flex vertical component={"main"} className="mainClientForm">
-              <Title level={4}>Información del Cliente</Title>
+              <Title level={4}>{t("customerInfo")}</Title>
               {/* -----------------------------------Informacion del Cliente--------------------------------------- */}
               <div className="generalProject">
                 <Flex vertical className="inputContainer">
                   <Title className="inputContainer__title" level={5}>
-                    Tipo de documento
+                    {t("documentType")}
                   </Title>
                   <Controller
                     name="infoClient.document_type"
@@ -323,21 +331,21 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                   />
                 </Flex>
                 <InputForm
-                  titleInput="No. de documento"
+                  titleInput={t("documentNumber")}
                   control={control}
                   nameInput="infoClient.nit"
                   error={errors.infoClient?.nit}
                   disabled={isViewDetailsClient.id && isEditAvailable ? true : false}
                 />
                 <InputForm
-                  titleInput="Razon Social"
+                  titleInput={t("legalName")}
                   control={control}
                   nameInput="infoClient.client_name"
                   error={errors.infoClient?.client_name}
                   disabled={isViewDetailsClient.id && isEditAvailable ? true : false}
                 />
                 <InputForm
-                  titleInput="Nombre de la compañía"
+                  titleInput={t("companyName")}
                   control={control}
                   nameInput="infoClient.business_name"
                   error={errors.infoClient?.business_name}
@@ -345,7 +353,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                 />
                 <Flex vertical className="inputContainer">
                   <Title className="inputContainer__title" level={5}>
-                    Tipo de cliente
+                    {t("customerType")}
                   </Title>
                   <Controller
                     name="infoClient.client_type"
@@ -361,7 +369,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                 </Flex>
                 <Flex vertical className="inputContainer">
                   <Title className="inputContainer__title" level={5}>
-                    Holding
+                    {t("holding")}
                   </Title>
                   <Controller
                     name="infoClient.holding_id"
@@ -373,13 +381,13 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                   />
                 </Flex>
                 <InputForm
-                  titleInput="Teléfono"
+                  titleInput={tCommon("fields.phone")}
                   control={control}
                   nameInput="infoClient.phone"
                   error={errors.infoClient?.phone}
                 />
                 <InputForm
-                  titleInput="Correo electrónico"
+                  titleInput={tCommon("fields.email")}
                   control={control}
                   nameInput="infoClient.email"
                   error={errors.infoClient?.email}
@@ -393,14 +401,14 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                   )}
                 />
                 <InputForm
-                  titleInput="Dirección"
+                  titleInput={t("address")}
                   control={control}
                   nameInput="infoClient.address"
                   error={errors.infoClient?.address}
                 />
                 <Flex vertical className="inputContainer">
                   <Title className="inputContainer__title" level={5}>
-                    Riesgo
+                    {t("risk")}
                   </Title>
                   <Controller
                     name="infoClient.risk"
@@ -419,7 +427,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                   justify="center"
                 >
                   <Title className="inputContainer__title" level={5}>
-                    Período de facturación
+                    {tProject("billingPeriod")}
                   </Title>
                   <Controller
                     name="infoClient.billing_period"
@@ -431,20 +439,20 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                           disabled={!isEditAvailable}
                           variant="borderless"
                           className={error ? "inputError" : "input"}
-                          placeholder="Segundo miércoles del mes"
+                          placeholder={tProject("billingPeriodPlaceholder")}
                           onClick={() => setIsBillingPeriodOpen(true)}
                           {...field}
                           value={
                             billingPeriod
                               ? stringToBoolean(billingPeriod.day_flag)
-                                ? `El dia ${billingPeriod.day} del mes`
+                                ? tProject("billingDayOfMonth", { day: billingPeriod.day ?? "" })
                                 : `El ${billingPeriod?.order} ${billingPeriod?.day_of_week} del mes`
                               : undefined
                           }
                         />
                         {error && (
                           <Typography.Text className="textError">
-                            El Periodo de facturacion es obligatorio *
+                            {tProject("billingPeriodRequired")}
                           </Typography.Text>
                         )}
                       </>
@@ -453,7 +461,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                 </Flex>
                 <Flex vertical className="inputContainer">
                   <Title className="inputContainer__title" level={5}>
-                    Tipo de radicación
+                    {t("submissionType")}
                   </Title>
                   <Controller
                     name="infoClient.radication_type"
@@ -469,7 +477,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                 </Flex>
                 <Flex vertical className="inputContainer">
                   <Title className="inputContainer__title" level={5}>
-                    Condición de pago
+                    {t("paymentTerms")}
                   </Title>
                   <Controller
                     name="infoClient.condition_payment"
@@ -487,7 +495,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                 </Flex>
                 <Flex vertical className="inputContainer">
                   <Title className="inputContainer__title" level={5}>
-                    Tipo de pago
+                    {t("paymentType")}
                   </Title>
                   <Controller
                     name="infoClient.payment_type"
@@ -503,7 +511,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                 </Flex>
               </div>
               {/* -----------------------------------Experiencia----------------------------------- */}
-              <Title level={4}>Documentos</Title>
+              <Title level={4}>{t("documents")}</Title>
               <Flex className="clientDocuments">
                 <div className="clientDocuments__docs">
                   {clientDocuments?.map((document, index) => (
@@ -527,8 +535,8 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                     icon={<Plus weight="bold" size={15} />}
                   >
                     {isViewDetailsClient?.active && isEditAvailable
-                      ? "Editar documentos"
-                      : "Cargar Documentos"}
+                      ? t("editDocuments")
+                      : t("uploadDocuments")}
                   </Button>
                 ) : null}
               </Flex>
@@ -555,7 +563,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                     size="large"
                     icon={isCreateLoading ? <Spin /> : <Plus weight="bold" size={15} />}
                   >
-                    {isViewDetailsClient?.id ? "Actualizar cliente" : "Registrar cliente"}
+                    {isViewDetailsClient?.id ? t("updateCustomer") : t("registerCustomer")}
                   </Button>
                 </Flex>
               )}
@@ -591,7 +599,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
         initialStatus={dataClient.data.status}
       />
       <ModalRemove
-        name="cliente"
+        name={t("entityName")}
         isOpen={isModalStatus.remove}
         onClose={() => setIsModalStatus((s) => ({ ...s, remove: false }))}
         onRemove={onDeleteClient}

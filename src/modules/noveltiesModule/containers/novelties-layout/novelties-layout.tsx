@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { ConfigProvider, theme as antdTheme } from "antd";
+import { useTranslations } from "use-intl";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { MessageProvider } from "@/context/MessageContext";
@@ -14,6 +15,7 @@ import {
 function NoveltiesChrome({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useWalletTheme();
   const isDark = resolvedTheme === "dark";
+  const t = useTranslations("novelties.header");
 
   // CSS can't style an ancestor, so mirror the dark state onto <body> to theme the page
   // background (and overscroll). Cleaned up on leave/unmount.
@@ -52,7 +54,7 @@ function NoveltiesChrome({ children }: { children: React.ReactNode }) {
     >
       {/* Own message holder so toasts render under this theme, not the root (light) one. */}
       <MessageProvider>
-        <ViewWrapper headerTitle="Novedades" hideHeader className={isDark ? "dark" : ""}>
+        <ViewWrapper headerTitle={t("title")} hideHeader className={isDark ? "dark" : ""}>
           {children}
         </ViewWrapper>
       </MessageProvider>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import StatusPill from "@/modules/visitsModule/components/shared/status-pill";
 import type { IVisitFormResponseListItem } from "@/types/surveys/ISurveys";
@@ -24,6 +26,9 @@ const responseDate = (r: IVisitFormResponseListItem) =>
  * angostas. Ciudad va vacía: el backend todavía no la manda.
  */
 export default function ResponsesTable({ responses, onOpen }: ResponsesTableProps) {
+  const t = useTranslations("surveys.responsesTable");
+  const tStatus = useTranslations("surveys.responseStatus");
+  const tCommon = useTranslations("common");
   return (
     <>
       <div className="hidden overflow-x-auto md:block">
@@ -31,22 +36,22 @@ export default function ResponsesTable({ responses, onOpen }: ResponsesTableProp
           <thead>
             <tr>
               <th scope="col" className={TH}>
-                Fecha
+                {tCommon("fields.date")}
               </th>
               <th scope="col" className={TH}>
-                Asesor
+                {t("salesRep")}
               </th>
               <th scope="col" className={TH}>
-                Cliente
+                {tCommon("fields.customer")}
               </th>
               <th scope="col" className={cn(TH, "hidden lg:table-cell")}>
-                Ciudad
+                {t("city")}
               </th>
               <th scope="col" className={TH}>
-                Estado
+                {tCommon("fields.status")}
               </th>
               <th scope="col" className={cn(TH, "text-right")}>
-                Ver
+                {tCommon("actions.view")}
               </th>
             </tr>
           </thead>
@@ -67,19 +72,19 @@ export default function ResponsesTable({ responses, onOpen }: ResponsesTableProp
                   </span>
                   {r.client_nit && (
                     <span className="block text-[13px] text-muted-foreground">
-                      NIT {r.client_nit}
+                      {t("taxId", { taxId: r.client_nit })}
                     </span>
                   )}
                 </td>
                 <td className="hidden px-3 py-2.5 text-muted-foreground lg:table-cell">—</td>
                 <td className="px-3 py-2.5">
-                  <StatusPill
-                    label={RESPONSE_STATUS[r.status].label}
-                    color={RESPONSE_STATUS[r.status].color}
-                  />
+                  <StatusPill label={tStatus(r.status)} color={RESPONSE_STATUS[r.status].color} />
                 </td>
                 <td className="px-3 py-1.5">
-                  <GenericEyeButton onClick={() => onOpen(r.response_id)} title="Ver respuesta" />
+                  <GenericEyeButton
+                    onClick={() => onOpen(r.response_id)}
+                    title={t("viewResponse")}
+                  />
                 </td>
               </tr>
             ))}
@@ -101,10 +106,7 @@ export default function ResponsesTable({ responses, onOpen }: ResponsesTableProp
             <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted-foreground">
               <span>{responseDate(r)}</span>
               <span>{r.user_name ?? "—"}</span>
-              <StatusPill
-                label={RESPONSE_STATUS[r.status].label}
-                color={RESPONSE_STATUS[r.status].color}
-              />
+              <StatusPill label={tStatus(r.status)} color={RESPONSE_STATUS[r.status].color} />
             </span>
           </button>
         ))}

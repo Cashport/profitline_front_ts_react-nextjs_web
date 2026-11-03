@@ -1,0 +1,187 @@
+{
+  "channelBR": {
+    "addSubline": "Add subline",
+    "addLine": "Add product line"
+  },
+  "dateRangeFilter": {
+    "label": "Date range",
+    "start": "Start date",
+    "end": "End date",
+    "clear": "Clear dates"
+  },
+  "documentButton": {
+    "selectFile": "Select file",
+    "allowedFiles": "PDF, Word, PNG, XLS, MSG, EML (max. 30 MB)"
+  },
+  "documentClientBR": {
+    "title": "Documents by customer type",
+    "addDocument": "Add document",
+    "addClientType": "Add customer type",
+    "required": "Required"
+  },
+  "filters": {
+    "selectFilters": "Select filters",
+    "customDate": "Custom date",
+    "radicationTypes": {
+      "email": "Email",
+      "web": "Web",
+      "radian": "RADIAN",
+      "physical": "Physical",
+      "physicalAndWeb": "Physical and web"
+    },
+    "labels": {
+      "lines": "Product lines",
+      "sublines": "Sublines",
+      "zones": "Zones",
+      "channels": "Channels",
+      "line": "Product line",
+      "subline": "Subline",
+      "zone": "Zone",
+      "channel": "Channel",
+      "paymentAgreement": "Payment plan",
+      "radicationType": "Submission type",
+      "radicationTypeShort": "Submission type",
+      "submitted": "Submitted",
+      "dispute": "Dispute",
+      "dates": "Dates",
+      "active": "Active",
+      "inactive": "Inactive",
+      "yes": "Yes",
+      "no": "No",
+      "city": "City",
+      "holding": "Corporate group",
+      "status": "Status",
+      "risk": "Risk",
+      "customerGroup": "Customer group",
+      "country": "Country",
+      "currency": "Currency",
+      "userStatus": "User status",
+      "roles": "Roles",
+      "notificationType": "Notification type",
+      "taskType": "Task type",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "thisMonth": "This month",
+      "thisQuarter": "This quarter",
+      "thisYear": "This year",
+      "lastQuarter": "Last quarter"
+    }
+  },
+  "itemsModal": {
+    "debitMemo": "Debit memo",
+    "creditMemo": "Credit memo",
+    "discount": "Discount",
+    "volume": "Volume",
+    "invoice": "Invoice {id}"
+  },
+  "generateActionButton": {
+    "label": "Take action"
+  },
+  "selectDay": {
+    "sun": "S",
+    "mon": "M",
+    "tue": "T",
+    "wed": "W",
+    "thu": "T",
+    "fri": "F",
+    "sat": "S"
+  },
+  "uploadDropZone": {
+    "title": "Drag your file here",
+    "subtitle": "Or select a file from your device",
+    "selectFile": "Select file"
+  },
+  "uploadDocumentButton": {
+    "fileTooLarge": "The file is too large. Please upload a file smaller than 30 MB.",
+    "required": "Required",
+    "optional": "Optional"
+  },
+  "uploadImg": {
+    "invalidType": "You can only upload JPG or PNG files.",
+    "tooLarge": "The image must be smaller than 2 MB.",
+    "logoAlt": "Project logo",
+    "watermarkAlt": "Watermark",
+    "hint": "* Upload the logo for the project you're creating"
+  },
+  "inputCreate": {
+    "channelPlaceholder": "Enter channel name",
+    "clientTypePlaceholder": "Enter customer type",
+    "holdingPlaceholder": "Enter corporate group name",
+    "linePlaceholder": "Enter product line name",
+    "sublinePlaceholder": "Enter subline name",
+    "zonePlaceholder": "Enter zone name",
+    "documentPlaceholder": "Enter document name",
+    "required": "Required",
+    "uploadTemplate": "Upload template"
+  },
+  "inputAddress": {
+    "address": "Enter address",
+    "streetTypePlaceholder": "Street",
+    "complement": "Address line 2",
+    "complementPlaceholder": "Suite 1A"
+  },
+  "expirationNoticeDays": {
+    "title": "Due date reminder",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "required": "Reminder value is required *"
+  },
+  "search": {
+    "customerPlaceholder": "Search customer"
+  },
+  "inputs": {
+    "selectPlaceholder": "Select {field}",
+    "requiredField": "{field} is required *",
+    "loadOptionsError": "Couldn't load the options",
+    "optional": "Optional"
+  },
+  "filterModal": {
+    "title": "Advanced Filters",
+    "subtitle": "Find and select multiple options",
+    "removeFilter": "Remove {category}",
+    "clearAll": "Clear all",
+    "apply": "Apply filters",
+    "searchIn": "Search {category}...",
+    "results": "{count, plural, one {# result} other {# results}}",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "loadingOptions": "Loading options...",
+    "loadOptionsError": "Couldn't load the options",
+    "noResults": "No results found"
+  },
+  "headerCutoff": {
+    "placeholder": "As of —",
+    "reprocess": "Reprocess",
+    "today": "Today",
+    "cutoffLabel": "{day} {time}",
+    "cutoffTitle": "{day} at {time}",
+    "cadence": "Data is refreshed every {minutes} minutes so everyone sees the same numbers. Next: {next}.",
+    "projectedTo": "Projected to {date}",
+    "project": "Project to month-end",
+    "projectedHint": "You're viewing estimated month-end figures. Click to go back to today.",
+    "projectHint": "Estimate how the month will close ({date})."
+  },
+  "pageHeader": {
+    "searchPlaceholder": "Search…",
+    "clearSearch": "Clear search"
+  },
+  "boardLanes": {
+    "empty": "Empty"
+  },
+  "inputClickable": {
+    "frequencyPlaceholder": "Select frequency"
+  },
+  "pagination": {
+    "showing": "Showing {start} to {end} of {total} results"
+  },
+  "walletTab": {
+    "selectAtLeastOne": "Select at least one invoice",
+    "addedToApplication": "Invoices added to the cash application table",
+    "addToApplicationError": "Couldn't add the invoice(s) to the cash application table: {error}",
+    "markedAsBalance": "Invoice(s) marked as deductions",
+    "markAsBalanceError": "Couldn't mark the invoice(s) as deductions",
+    "invoices": "Invoices",
+    "searchById": "Search by ID",
+    "bulkSearch": "Bulk search",
+    "generateAction": "Take action"
+  }
+}

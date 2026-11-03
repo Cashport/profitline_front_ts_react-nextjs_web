@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { columnMeta } from "../../constants";
 import { estadoMeta } from "../../utils/estados";
 import { fmtD, fmtFull, fmtM } from "../../utils/format";
@@ -39,16 +41,18 @@ const Row = ({
 
 /** Días sin gestión, con el mismo semáforo que la tabla de grupos. */
 const GestionChip = ({ dias }: { dias: number | null }) => {
+  const t = useTranslations("wallet.sla");
   if (dias === null) return <span className="text-muted-foreground">—</span>;
   return (
     <StatusChip sev={dias <= 3 ? "ok" : dias <= 7 ? "warn" : "crit"}>
-      {dias === 0 ? "Hoy" : `${dias}d`}
+      {dias === 0 ? t("today") : t("days", { days: dias })}
     </StatusChip>
   );
 };
 
 /** Cabecera del panel izquierdo: cifras del grupo y su reparto por tramo. */
 export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
+  const t = useTranslations("wallet.rail");
   const nov = detail.novedad;
   const vencido = vencidoDeTramos(detail.tramos);
 
@@ -56,7 +60,8 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
   // saldo, reparto y conteo son su parte, no la del grupo entero. Se rotula
   // para que no se lea como el total de la gestión.
   const tramo = detail.tramo ?? null;
-  const sufijo = tramo === null ? "" : ` en ${columnMeta(tramo).short}`;
+  const bucket = tramo === null ? null : columnMeta(tramo).short;
+  const inBucket = (label: string) => (bucket ? t("inBucket", { label, bucket }) : label);
 
   const compromiso = nov?.compromiso && sevDias(nov.compromiso);
   const limite = nov?.limite && sevDias(nov.limite, 5);
@@ -64,32 +69,32 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
   return (
     <div className="px-[18px] pb-3 pt-[11px]">
       <dl className="m-0 grid grid-cols-2 gap-x-[18px] gap-y-1.5">
-        <Row label={`Saldo${sufijo}`} value={fmtFull(detail.monto)} />
-        <Row label={`Facturas${sufijo}`} value={detail.totalFacturas} />
+        <Row label={inBucket(t("amount"))} value={fmtFull(detail.monto)} />
+        <Row label={inBucket(t("invoices"))} value={detail.totalFacturas} />
 
         {nov ? (
           <>
-            <Row label="Responsable" value={<PersonBadge person={nov.responsable} mini />} />
-            <Row label="Últ. gestión" chip={<GestionChip dias={detail.diasSinGestion} />} />
+            <Row label={t("owner")} value={<PersonBadge person={nov.responsable} mini />} />
+            <Row label={t("lastActivity")} chip={<GestionChip dias={detail.diasSinGestion} />} />
             <Row
-              label="Compromiso"
+              label={t("commitment")}
               value={nov.compromiso ? fmtD(nov.compromiso) : "—"}
               chip={compromiso && <StatusChip sev={compromiso.sev}>{compromiso.txt}</StatusChip>}
             />
             <Row
-              label="Fecha límite"
+              label={t("deadline")}
               value={nov.limite ? fmtD(nov.limite) : "—"}
               chip={limite && <StatusChip sev={limite.sev}>{limite.txt}</StatusChip>}
             />
           </>
         ) : (
           <>
-            <Row label="Ejecutivo" value={<PersonBadge person={detail.ejecutivo} mini />} />
-            <Row label="Últ. gestión" chip={<GestionChip dias={detail.diasSinGestion} />} />
-            <Row label="Vencido" value={fmtM(vencido)} />
+            <Row label={t("collector")} value={<PersonBadge person={detail.ejecutivo} mini />} />
+            <Row label={t("lastActivity")} chip={<GestionChip dias={detail.diasSinGestion} />} />
+            <Row label={t("pastDue")} value={fmtM(vencido)} />
             {/* La mora promedio necesita las facturas de verdad; ninguna de las
                 dos respuestas del API la trae, así que se marca pendiente. */}
-            <Row label="Mora prom." value={<Pendiente />} />
+            <Row label={t("avgDpd")} value={<Pendiente />} />
           </>
         )}
       </dl>
@@ -97,7 +102,7 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
       {/* El div envolvente es para AntD: DistBar no reenvía el ref del Tooltip. */}
       {sumaTramos(detail.tramos) > 0 && (
         <DetailTooltip
-          title="Reparto por tramo"
+          title={t("splitByBucket")}
           rows={tramoRows(detail.tramos)}
           // El pie cierra con las filas del propio tooltip, no con `monto`, que
           // el API recorta cuando se pide un tramo.

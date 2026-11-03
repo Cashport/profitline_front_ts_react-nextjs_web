@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Table, MenuProps } from "antd";
 import { useForm, Controller } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import { Paperclip } from "phosphor-react";
 import dayjs from "dayjs";
 
@@ -41,6 +42,7 @@ interface FormData {
 }
 
 export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementOpen, onClose }) => {
+  const t = useTranslations("modals.agreementDetail");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [paymentAgreementData, setPaymentAgreementData] = useState<IPaymentDetail>();
@@ -80,30 +82,30 @@ export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementO
 
   const columns = [
     {
-      title: "ID Factura",
+      title: t("columns.invoiceId"),
       dataIndex: "invoice_id",
       key: "invoice_id",
       render: (text: string) => <a>{text}</a>
     },
     {
-      title: "Emisión",
+      title: t("columns.issued"),
       dataIndex: "CREATE_AT",
       key: "CREATE_AT"
     },
     {
-      title: "Pendiente",
+      title: t("columns.outstanding"),
       dataIndex: "current_financial_record",
       key: "current_financial_record",
       render: (text: number) => <span>{formatMoney(text)}</span>
     },
     {
-      title: "$ acordado",
+      title: t("columns.agreedAmount"),
       dataIndex: "amount",
       key: "amount",
       render: (text: number) => <span>{formatMoney(text)}</span>
     },
     {
-      title: "Fecha",
+      title: t("columns.date"),
       dataIndex: "payment_date",
       key: "payment_date"
     }
@@ -116,14 +118,14 @@ export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementO
 
   const handleCancelAgreement = async () => {
     if (paymentAgreementData?.status_name === "Anulada") {
-      showMessage("error", "El acuerdo ya se encuentra anulado");
+      showMessage("error", t("alreadyVoided"));
       return;
     }
     try {
       await cancelPaymentAgreement(isModalPaymentAgreementOpen.incident_id);
       onClose();
     } catch (error) {
-      showMessage("error", "Error al anular el acuerdo");
+      showMessage("error", t("voidError"));
     }
   };
 
@@ -132,7 +134,7 @@ export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementO
       key: "1",
       label: (
         <Button className="buttonOutlined" onClick={handleCancelAgreement}>
-          Anular acuerdo
+          {t("void")}
         </Button>
       )
     }
@@ -141,35 +143,35 @@ export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementO
   const renderSummaryTab = () => (
     <form onSubmit={handleSubmit(onSubmit)} className="agreement-form">
       <div className="form-grid">
-        <InputForm titleInput="Responsable" nameInput="responsible" control={control} readOnly />
+        <InputForm titleInput={t("owner")} nameInput="responsible" control={control} readOnly />
         <InputForm
-          titleInput="Estado del acuerdo"
+          titleInput={t("status")}
           nameInput="agreementStatus"
           control={control}
           readOnly
         />
         <InputFormMoney
-          titleInput="Valor del acuerdo"
+          titleInput={t("amount")}
           nameInput="agreementValue"
           control={control}
           error={undefined}
           readOnly
         />
         <InputForm
-          titleInput="No. de facturas"
+          titleInput={t("invoiceCount")}
           nameInput="invoicesCount"
           control={control}
           readOnly
         />
         <InputDateForm
-          titleInput="Fecha de creación"
+          titleInput={t("createdAt")}
           nameInput="creationDate"
           control={control}
           disabled
           error={undefined}
         />
         <InputDateForm
-          titleInput="Fecha de vencimiento"
+          titleInput={t("dueDate")}
           nameInput="dueDate"
           control={control}
           disabled
@@ -177,7 +179,7 @@ export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementO
         />
       </div>
       <div className="evidenceSection">
-        <p className="evidenceSection__title">Evidencia</p>
+        <p className="evidenceSection__title">{t("evidence")}</p>
         <Controller
           name="evidence"
           control={control}
@@ -215,12 +217,12 @@ export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementO
   const items = [
     {
       key: "1",
-      label: "Resumen",
+      label: t("tabs.summary"),
       children: renderSummaryTab()
     },
     {
       key: "2",
-      label: "Facturas",
+      label: t("tabs.invoices"),
       children: renderInvoicesTab()
     }
   ];
@@ -233,7 +235,7 @@ export const ModalAgreementDetail: React.FC<Props> = ({ isModalPaymentAgreementO
         title={
           <div className="modal-header">
             <div className="agreement-detail-modal__modal-title">
-              Acuerdo de pago{" "}
+              {t("title")}{" "}
               <span className="agreement-id">{isModalPaymentAgreementOpen.incident_id}</span>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Modal, Button, Upload, Dropdown, Flex } from "antd";
 import { DownOutlined } from "@ant-design/icons";
+import { useTranslations } from "use-intl";
 import type { MenuProps } from "antd";
 import styles from "./MakeCallModal.module.scss";
 import {
@@ -35,6 +36,8 @@ interface MakeCallModalProps {
 }
 
 const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
+  const t = useTranslations("modals.makeCall");
+  const tCommon = useTranslations("common");
   const [modalSize, setModalSize] = useState({ width: 660, height: 520 });
   const [mask, setMask] = useState(false);
   type ViewMode = "default" | "minimized" | "maximized";
@@ -88,24 +91,9 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
     }));
   };
 
-  const callStateOptions = [
-    {
-      value: "NO_ANSWER",
-      label: "No contestó"
-    },
-    {
-      value: "WRONG_PHONE",
-      label: "Teléfono equivocado"
-    },
-    {
-      value: "CALL_BACK_LATER",
-      label: "Llamar luego"
-    },
-    {
-      value: "SUCCESS",
-      label: "Llamada exitosa"
-    }
-  ];
+  const callStateOptions = (
+    ["NO_ANSWER", "WRONG_PHONE", "CALL_BACK_LATER", "SUCCESS"] as const
+  ).map((value) => ({ value, label: t(`callStates.${value}`) }));
   const handleCallStateChange = (state: string) => {
     setPhoneCallData((prev) => ({
       ...prev,
@@ -144,15 +132,12 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
   const phoneCallStateLabel = (state: string) => {
     switch (state) {
       case "NO_ANSWER":
-        return "No contestó";
       case "WRONG_PHONE":
-        return "Teléfono equivocado";
       case "CALL_BACK_LATER":
-        return "Llamar luego";
       case "SUCCESS":
-        return "Llamada exitosa";
+        return t(`callStates.${state}`);
       default:
-        return "Estado de la llamada";
+        return t("callStatus");
     }
   };
 
@@ -265,7 +250,7 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
           showMinimize={true}
           showMaximize={true}
           showRestore={true}
-          title="Llamada"
+          title={t("title")}
         />
       </div>
     );
@@ -297,7 +282,7 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
               showMinimize={true}
               showMaximize={viewMode !== "maximized"}
               showRestore={viewMode !== "default"}
-              title="Llamada"
+              title={t("title")}
             />
             {node}
           </div>
@@ -308,7 +293,7 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
       >
         <Flex vertical gap={20} className={styles.container}>
           <CustomSelect
-            label="Llamar a"
+            label={t("callTo")}
             value={userToCall}
             onChange={setUserToCall}
             options={phoneSuggestions}
@@ -321,7 +306,7 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
               plugins={plugins}
               ref={(editor: any) => (editorRef.current = editor)}
               textAlignment={textAlignment}
-              placeholder="Resumen de la llamada"
+              placeholder={t("summaryPlaceholder")}
             />
           </div>
           <AttachmentList
@@ -397,7 +382,7 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
                   <Button style={{ border: "none", fontSize: 16, fontWeight: 600 }}>
                     {phoneCallData.state
                       ? phoneCallStateLabel(phoneCallData.state)
-                      : "Estado de la llamada"}{" "}
+                      : t("callStatus")}{" "}
                     <DownOutlined />
                   </Button>
                 </Dropdown>
@@ -412,7 +397,7 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
               customStyles={{ width: 200, height: 48 }}
               loading={loadingSubmit}
             >
-              Enviar
+              {tCommon("actions.send")}
             </PrincipalButton>
           </Flex>
         </Flex>

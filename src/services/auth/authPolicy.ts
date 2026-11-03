@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { API, ApiError } from "@/utils/api/api";
 import {
   IAuthActionResponse,
@@ -21,7 +22,7 @@ const toActionResponse = (error: unknown): IAuthActionResponse => {
   }
   return {
     status: 500,
-    message: "No se pudo completar la operación. Por favor intenta de nuevo."
+    message: getTranslator("shared")("services.operationFailed")
   };
 };
 

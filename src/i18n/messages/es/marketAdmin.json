@@ -1,0 +1,824 @@
+{
+  "home": {
+    "title": "Administración",
+    "sections": {
+      "clients": {
+        "label": "Clientes",
+        "description": "Gestiona clientes, sus productos, descuentos y usuarios asignados."
+      },
+      "users": {
+        "label": "Usuarios",
+        "description": "Administra los usuarios del Marketplace, roles y clientes asociados."
+      },
+      "products": {
+        "label": "Productos",
+        "description": "Revisa el catálogo: líneas, canales, SKUs, lotes, precios e imágenes."
+      },
+      "packs": {
+        "label": "Packs de productos",
+        "description": "Arma packs con productos del catálogo: SKU propio, imagen y cantidades."
+      },
+      "discounts": {
+        "label": "Descuentos y bonificados",
+        "description": "Gestiona descuentos y bonificados: reglas, fechas, estado y categoría."
+      },
+      "load": {
+        "label": "Cargue de información",
+        "description": "Alimenta el app con ETLs manuales: inventario, precios, clientes y más."
+      },
+      "massCommunications": {
+        "label": "Comunicaciones Masivas",
+        "description": "Envía comunicaciones masivas a los clientes en minutos."
+      },
+      "settings": {
+        "label": "Configuraciones",
+        "description": "Gestión administrativa del proyecto."
+      }
+    }
+  },
+  "bonusAndDiscounts": {
+    "title": "Descuentos y bonificados",
+    "tabs": {
+      "packages": "Paquete de descuentos",
+      "rules": "Reglas de descuentos",
+      "bonuses": "Bonificados"
+    }
+  },
+  "bonusHub": {
+    "title": "Sistema de Bonificados",
+    "subtitle": "Gestión de productos bonificados y promociones",
+    "goToModule": "Ir al módulo",
+    "modules": {
+      "automatic": {
+        "title": "Promociones automáticas",
+        "description": "Crea y gestiona promociones por monto o combinación de productos con escalones dinámicos. Los bonificados se agregan automáticamente al carrito.",
+        "badge": "{count, plural, one {# activa} other {# activas}}"
+      },
+      "manual": {
+        "title": "Bonificados manuales por cliente",
+        "description": "Asigna unidades bonificadas a clientes específicos. Cada asignación pasa por flujo de aprobación antes de quedar disponible en el marketplace.",
+        "badge": "{count, plural, one {# pendiente} other {# pendientes}}"
+      }
+    }
+  },
+  "promotionTypes": {
+    "amount": "Por monto",
+    "combination": "Por combinación"
+  },
+  "createNewModal": {
+    "title": "Crear nuevo",
+    "discountTypeTitle": "Tipo de descuento",
+    "selectType": "Selecciona el tipo que quieres crear.",
+    "selectDiscountType": "Selecciona el tipo de descuento.",
+    "options": {
+      "discount": {
+        "title": "Descuento",
+        "description": "Crea reglas de descuento por producto y fechas de vigencia."
+      },
+      "bonus": {
+        "title": "Bonificado",
+        "description": "Asigna unidades bonificadas a clientes específicos con flujo de aprobación."
+      },
+      "discountGroup": {
+        "title": "Grupo de descuentos",
+        "description": "Agrupa múltiples reglas de descuento bajo un mismo conjunto."
+      },
+      "discountRule": {
+        "title": "Regla de descuento",
+        "description": "Define una condición específica de descuento por producto, canal o volumen."
+      }
+    }
+  },
+  "discountsTable": {
+    "createNew": "Crear nuevo",
+    "searchPlaceholder": "Buscar...",
+    "columns": {
+      "start": "Inicio",
+      "end": "Fin",
+      "approval": "Aprobación",
+      "rules": "Reglas",
+      "discountType": "Tipo descuentos",
+      "definitions": "Definiciones",
+      "levels": "Niveles",
+      "businessUnit": "Unidad de negocio"
+    },
+    "bulkActions": {
+      "activate": "Activar",
+      "markExpired": "Marcar como vencido",
+      "exportSelection": "Exportar selección",
+      "actionNames": {
+        "activate": "Activar",
+        "expire": "Vencer",
+        "export": "Exportar"
+      },
+      "applied": "Acción \"{action}\" aplicada a {entity, select, rules {{count, plural, one {# regla} other {# reglas}}} other {{count, plural, one {# paquete} other {# paquetes}}}}."
+    },
+    "packages": {
+      "empty": "No se encontraron paquetes de descuento.",
+      "total": "Mostrando {from}–{to} de {total} paquetes · {active, plural, one {# activo} other {# activos}}"
+    },
+    "rules": {
+      "empty": "No se encontraron reglas de descuento.",
+      "total": "Mostrando {from}–{to} de {total} reglas · {active, plural, one {# activa} other {# activas}}"
+    },
+    "bonuses": {
+      "empty": "No hay promociones para mostrar.",
+      "allBusinessUnits": "Todas",
+      "total": "Mostrando {from}–{to} de {total} promociones · {active, plural, one {# activa} other {# activas}}"
+    }
+  },
+  "promotions": {
+    "title": "Promociones automáticas",
+    "subtitle": "Define condiciones y productos bonificados por escalones",
+    "newPromotion": "Nueva promoción",
+    "empty": "No hay promociones creadas",
+    "createFirst": "Crear primera promoción",
+    "save": "Guardar promoción",
+    "level": "Nivel {number}",
+    "removeLevel": "Eliminar nivel",
+    "validation": {
+      "incomplete": "Cada promoción necesita fecha de inicio, fecha de fin y al menos un nivel."
+    },
+    "feedback": {
+      "saved": "Promociones guardadas exitosamente.",
+      "saveError": "Ocurrió un error al guardar las promociones."
+    },
+    "productSelect": {
+      "placeholder": "Selecciona un producto",
+      "notFound": "Sin productos disponibles"
+    },
+    "rewards": {
+      "title": "Regalos",
+      "customerPicksOne": "El cliente elige una opción",
+      "option": "Opción {letter}",
+      "single": "Regalo",
+      "removeOption": "Eliminar opción",
+      "addFixedGroup": "Agregar grupo fijo",
+      "addChoiceGroup": "Agregar grupo a elegir",
+      "addOption": "Agregar opción de regalo"
+    },
+    "rewardGroup": {
+      "customerPicks": "El cliente elige",
+      "unitsFrom": "und. entre:",
+      "fixed": "Fijo",
+      "removeGroup": "Eliminar grupo",
+      "unitsShort": "und.",
+      "removeProduct": "Quitar producto",
+      "addProduct": "Agregar producto"
+    },
+    "target": {
+      "title": "Objetivo",
+      "purchaseRange": "Rango de compra",
+      "rangeTo": "a",
+      "individualProducts": "Productos individuales",
+      "removeProduct": "Quitar producto",
+      "productBundle": "Paquete de productos",
+      "removeBundle": "Eliminar paquete",
+      "orders": "Pide",
+      "units": "unidades",
+      "across": "entre",
+      "differentProducts": "productos diferentes",
+      "eligibleProducts": "Productos elegibles",
+      "addEligibleProduct": "Agregar producto elegible",
+      "addProduct": "Agregar producto",
+      "addBundle": "Agregar paquete de productos"
+    },
+    "summary": {
+      "unnamedProduct": "Producto sin nombre",
+      "anyProductInCategory": "Cualquier producto de la categoría {category}",
+      "noLimit": "Sin límite",
+      "minimumPurchase": "Compra mínima de <strong>{amount}</strong>",
+      "noConditions": "Sin condiciones",
+      "conditionProduct": "<strong>{qty} und.</strong> de {product}",
+      "conditionGroup": "<strong>{qty} und.</strong> entre {distinct, plural, =0 {} other {al menos # productos diferentes de: }}{products}",
+      "noRewards": "Sin premios",
+      "option": "Opción {letter}",
+      "fixedQuantities": "Cantidades fijas",
+      "customerPicksFrom": "El cliente elige {qty} und. entre:",
+      "units": "{qty} und.",
+      "behavior": {
+        "flex": "Promoción flex",
+        "firstEligibleRange": "Toma el primer rango elegible",
+        "noCrossSelling": "Sin cross-selling",
+        "compatible": "Compatible con negociaciones"
+      },
+      "approval": "Aprobación",
+      "conditionType": "Tipo de condición",
+      "businessUnit": "Unidad de negocio",
+      "allBusinessUnits": "Todas",
+      "accumulable": "Acumulable",
+      "behaviorLabel": "Comportamiento",
+      "maxUsesPerOrder": "Máx. usos por pedido",
+      "maxUsesPerCustomer": "Máx. usos por cliente",
+      "maxUsesPerCustomerMonth": "Máx. usos por cliente/mes",
+      "maxGlobalUses": "Máx. usos global",
+      "levels": "Niveles / escalones",
+      "noLevels": "La promoción no tiene niveles activos.",
+      "level": "Nivel {number}",
+      "condition": "Condición",
+      "rewards": "Premios"
+    },
+    "card": {
+      "infoAbout": "Información sobre {label}",
+      "subtitle": "{type, select, amount {Por monto} other {Por combinación}} · {count, plural, one {# nivel} other {# niveles}}",
+      "activeToggle": "Promoción activa",
+      "byPurchaseAmount": "Por monto de compra",
+      "byProductCombination": "Por combinación de productos",
+      "validityAndLimits": "Vigencia y límites",
+      "advancedSettings": "(configuración avanzada)",
+      "restrictByBusinessUnit": "Restringir por unidad de negocio",
+      "noBusinessUnits": "Sin BUs configuradas en el proyecto",
+      "selectBusinessUnit": "Selecciona una unidad de negocio",
+      "isFlex": "Es promoción flex",
+      "takeFirstEligibleRange": "Tomar primer rango elegible",
+      "allowCrossSelling": "Permitir cross-selling",
+      "compatibleWithNegotiations": "Compatible con negociaciones",
+      "addLevel": "Agregar nivel",
+      "tooltips": {
+        "accumulable": "Multiplicador del regalo. Cuando vale ≥ 2 y la promoción tiene un solo rango, el regalo se entrega hasta ''accumulable'' veces según cuántas veces se cumpla la condición mínima (ej. si vale 3 y la condición mínima es 1, el cliente puede llevarse hasta 3 regalos si compra 3 unidades que cumplen el mínimo).",
+        "maxUsagePerOrder": "Número máximo de veces que el cliente puede aplicar esta promoción en un solo pedido. Déjalo vacío para sin límite.",
+        "maxUsagePerClient": "Número máximo de veces que el cliente puede usar esta promoción en total (histórico). Déjalo vacío para sin límite.",
+        "maxUsagePerClientPerMonth": "Máximo de redenciones por cliente en el mes en curso. Vacío o 0 = sin restricción mensual.",
+        "maxGlobalUsage": "Máximo de redenciones totales entre todos los clientes del proyecto. Déjalo vacío para sin límite global.",
+        "businessUnit": "Restringe la promoción a una sola unidad de negocio (ej. ''Institucional'', ''Retail''). Si queda vacío, aplica a todas las unidades del proyecto. Solo se mostrará a clientes cuya BU en client_marketplace coincida.",
+        "isFlex": "Promoción ''flex'': el cliente recibe el regalo automáticamente, sin tener que elegir entre las opciones A/B/C. Si está apagada, el cliente debe elegir una opción.",
+        "takeFirstEligibleRangeDiscount": "Si está activo, se aplica SOLO el primer rango elegible del descuento que esté aplicando. Por defecto (apagado), se aplica el mejor rango disponible.",
+        "applyCrossSelling": "Si está activo (default), la promoción permite aplicar cross-selling (descuentos secundarios / descuentos de la orden). Si está apagado, se deshabilita el cross-selling y el array de descuentos secundarios llega vacío al calcular el descuento del paquete.",
+        "isPromotionCompatibleWithAllNegotiations": "Permite que esta promoción se acumule con los precios negociados del cliente. Si está apagada, la promoción NO se aplica cuando el cliente tiene negociaciones activas."
+      }
+    }
+  },
+  "promotionDetail": {
+    "fallbackTitle": "Promoción",
+    "subtitle": "Promoción automática #{id}",
+    "notFound": "No se encontró la promoción.",
+    "editBlocked": "Esta promoción tiene premios por categoría y no se puede editar desde aquí.",
+    "edit": "Editar promoción",
+    "validation": {
+      "incomplete": "La promoción necesita nombre, fecha de inicio y al menos un nivel.",
+      "endBeforeStart": "La fecha de fin no puede ser anterior a la fecha de inicio."
+    },
+    "feedback": {
+      "updated": "Promoción actualizada exitosamente.",
+      "updateError": "Ocurrió un error al actualizar la promoción."
+    }
+  },
+  "shared": {
+    "taxIdValue": "NIT: {taxId}",
+    "responsibles": {
+      "asigned_user": "Ejecutivo",
+      "coordinator": "Coordinador",
+      "kam": "KAM",
+      "kam_lider": "KAM líder"
+    }
+  },
+  "manualBonus": {
+    "title": "Bonificados manuales",
+    "subtitle": "Asignaciones por cliente con flujo de aprobación",
+    "pendingCount": "{count, plural, one {# pendiente} other {# pendientes}}",
+    "empty": "No hay asignaciones",
+    "searchPlaceholder": "Buscar cliente o producto...",
+    "status": {
+      "all": "Todos",
+      "pendiente": "Pendiente",
+      "aprobado": "Aprobado",
+      "rechazado": "Rechazado"
+    },
+    "columns": {
+      "freeGoodsProduct": "Producto bonificado",
+      "assigned": "Asignadas",
+      "available": "Disponibles"
+    },
+    "feedback": {
+      "created": "Bonificado creado exitosamente.",
+      "createError": "Ocurrió un error al crear el bonificado."
+    },
+    "customerSearch": {
+      "placeholder": "Buscar cliente...",
+      "noResults": "Sin resultados"
+    },
+    "newAssignment": {
+      "button": "Nueva asignación",
+      "title": "Crear bonificado",
+      "freeGoods": "Productos bonificados",
+      "totalToAssign": "Total a asignar: <b>{total}</b> und.",
+      "expirationDate": "Fecha de expiración",
+      "endDate": "Fecha de fin",
+      "comments": "Comentarios (opcional)",
+      "commentsPlaceholder": "Motivo de la asignación..."
+    }
+  },
+  "clients": {
+    "title": "Clientes",
+    "searchPlaceholder": "Buscar...",
+    "noMarketplace": "Sin marketplace",
+    "empty": "No se encontraron clientes.",
+    "total": "Mostrando {from}–{to} de {total} clientes · {active, plural, one {# activo} other {# activos}}",
+    "columns": {
+      "city": "Ciudad",
+      "users": "Usuarios",
+      "lines": "Líneas"
+    },
+    "actions": {
+      "activate": "Activar",
+      "inactivate": "Inactivar",
+      "bulkUpdate": "Actualización masiva",
+      "export": "Exportar clientes"
+    },
+    "filters": {
+      "line": "Línea"
+    },
+    "feedback": {
+      "statusUpdated": "{count, plural, one {# cliente {action, select, activate {activado} other {inactivado}}} other {# clientes {action, select, activate {activados} other {inactivados}}}} correctamente.",
+      "updateError": "Ocurrió un error al actualizar los clientes.",
+      "bulkUpdated": "{count, plural, one {# cliente actualizado} other {# clientes actualizados}} correctamente.",
+      "taxIdsNotFound": "NIT no encontrados: {list}{more, plural, =0 {} other { y # más}}.",
+      "uploadError": "Ocurrió un error al cargar el archivo.",
+      "exportError": "Ocurrió un error al exportar los clientes."
+    }
+  },
+  "clientDetail": {
+    "loadError": "No se pudo cargar el cliente.",
+    "noMarketplace": "Sin marketplace",
+    "generalInfo": "Información general",
+    "fields": {
+      "city": "Ciudad",
+      "channel": "Canal",
+      "businessLines": "Líneas de negocio"
+    },
+    "tabs": {
+      "promotions": "Promociones",
+      "addresses": "Direcciones ({count})",
+      "users": "Usuarios ({count})",
+      "products": "Productos ({count})",
+      "settings": "Configuraciones"
+    },
+    "feedback": {
+      "addressCreated": "Dirección creada correctamente.",
+      "addressCreateError": "Ocurrió un error al crear la dirección.",
+      "addressUpdated": "Dirección actualizada correctamente.",
+      "addressUpdateError": "Ocurrió un error al actualizar la dirección.",
+      "addressDeleted": "Dirección eliminada correctamente.",
+      "addressDeleteError": "Ocurrió un error al eliminar la dirección.",
+      "bonusCreated": "Bonificado creado exitosamente.",
+      "bonusCreateError": "Ocurrió un error al crear el bonificado.",
+      "discountCreated": "Descuento creado exitosamente.",
+      "discountCreateError": "Ocurrió un error al crear el descuento.",
+      "discountToggled": "Descuento {active, select, true {activado} other {desactivado}} con éxito.",
+      "statusError": "Ocurrió un error al cambiar el estado.",
+      "configUpdated": "Configuración actualizada correctamente.",
+      "configUpdateError": "Ocurrió un error al actualizar la configuración."
+    },
+    "promotionsTab": {
+      "attachment": "Adjunto",
+      "viewContract": "Ver contrato",
+      "createDiscount": "Crear descuento",
+      "noDiscounts": "No hay descuentos creados aún.",
+      "manualBonuses": "Bonificados manuales",
+      "bonusTotals": "{assigned} asignadas · {available} disponibles · {consumed} consumidas",
+      "createBonus": "Crear bonificado",
+      "noBonuses": "No hay bonificados manuales creados aún."
+    },
+    "bonuses": {
+      "status": {
+        "available": "Disponible"
+      },
+      "subgroup": "Subgrupo {number}",
+      "fixed": "Fijo",
+      "pickUpTo": "Elige hasta {qty}",
+      "columns": {
+        "products": "Productos",
+        "assigned": "Asignadas",
+        "available": "Disponibles",
+        "consumed": "Consumidas",
+        "approval": "Aprobación",
+        "expires": "Vence",
+        "created": "Creado",
+        "note": "Nota"
+      }
+    },
+    "discountGroup": {
+      "discount": "Descuento",
+      "minQuantity": "Cantidad mínima",
+      "line": "Línea",
+      "allLines": "Todas las líneas",
+      "removeGroup": "Eliminar grupo",
+      "noResults": "Sin resultados disponibles.",
+      "noMoreProducts": "No hay más productos disponibles.",
+      "searchInLine": "Buscar producto de {line}",
+      "searchToAdd": "Buscar producto para agregar...",
+      "addAll": "Agregar todos",
+      "emptyHint": "Busca y agrega los productos a los que aplica este descuento.",
+      "removeProduct": "Quitar producto"
+    },
+    "createDiscount": {
+      "title": "Nueva promoción",
+      "subtitle": "Descuento negociado para este cliente",
+      "footerSummary": "{groups, plural, one {# grupo} other {# grupos}} · {products, plural, one {# producto} other {# productos}}",
+      "submitForApproval": "Enviar a aprobación",
+      "validity": "Vigencia",
+      "startDate": "Fecha de inicio",
+      "start": "Inicio",
+      "endDate": "Fecha de fin",
+      "end": "Fin",
+      "attachment": "Adjunto (contrato / acuerdo)",
+      "noFile": "Sin archivo adjunto",
+      "uploadFile": "Subir archivo",
+      "viewFile": "Ver archivo",
+      "removeFile": "Quitar archivo",
+      "discountGroups": "Grupos de descuento",
+      "productsCount": "({count, plural, one {# producto} other {# productos}})",
+      "addGroup": "Agregar grupo de descuento",
+      "noProducts": "No hay productos para este cliente.",
+      "emptyHint": "Agrega un grupo para definir un % de descuento y una cantidad, y luego busca los productos que quieres incluir."
+    },
+    "codeSelect": {
+      "noCustomers": "Sin clientes disponibles",
+      "searchCustomer": "Buscar cliente",
+      "code": "Código"
+    },
+    "addresses": {
+      "columns": {
+        "address": "Dirección",
+        "city": "Ciudad",
+        "warehouse": "Bodega"
+      },
+      "main": "Principal",
+      "deleteConfirm": {
+        "title": "Eliminar dirección",
+        "description": "¿Eliminar \"{address}\"?"
+      },
+      "count": "{count, plural, one {# dirección registrada} other {# direcciones registradas}}",
+      "new": "Nueva dirección",
+      "edit": "Editar dirección",
+      "save": "Guardar dirección",
+      "empty": "No hay direcciones registradas.",
+      "form": {
+        "addressPlaceholder": "Ej. Calle 100 # 15-20",
+        "cityPlaceholder": "Ej. Bogotá",
+        "addressCode": "Código de dirección",
+        "addressCodePlaceholder": "Ej. 01 — usa \"00\" para la dirección principal",
+        "costCenter": "Centro de costo",
+        "optional": "Opcional"
+      }
+    },
+    "users": {
+      "role": "Rol",
+      "empty": "No hay usuarios asociados."
+    },
+    "products": {
+      "summary": "{products, plural, one {# producto} other {# productos}} en {categories, plural, one {# categoría} other {# categorías}}",
+      "addLine": "Agregar línea",
+      "noMoreLines": "No hay más líneas disponibles",
+      "empty": "Este cliente no tiene productos disponibles.",
+      "productCount": "{count, plural, one {# producto} other {# productos}}",
+      "product": "Producto",
+      "active": "Activo"
+    },
+    "settings": {
+      "marketsLoadError": "No fue posible cargar los mercados disponibles",
+      "currentUnavailable": "{market} (actual — no disponible)",
+      "customerData": "Ajustes datos del cliente",
+      "selectUser": "Seleccione un usuario",
+      "noUsers": "Sin usuarios disponibles",
+      "market": "Mercado",
+      "marketPlaceholder": "Mercado del cliente",
+      "noMarkets": "Sin mercados disponibles",
+      "financialSettings": "Ajustes financieros y operativos del cliente",
+      "paymentTermsPlaceholder": "Código de condición de pago",
+      "selectPaymentType": "Seleccione un tipo de pago",
+      "priceListPlaceholder": "ID de la lista de precios",
+      "notInMarketplace": "Este cliente no está en el marketplace, por lo que sus opciones de marketplace no están disponibles.",
+      "fields": {
+        "creditLimit": "Cupo de crédito",
+        "earlyPaymentDiscount": "Descuento pronto pago",
+        "paymentTerms": "Condición de pago",
+        "paymentType": "Tipo de pago",
+        "defaultWarehouse": "Bodega por defecto",
+        "priceList": "Lista de precios",
+        "partialLots": "Recibe parciales de lotes",
+        "lotsGreaterThan": "Lotes mayores a"
+      }
+    }
+  },
+  "products": {
+    "title": "Productos",
+    "searchPlaceholder": "Buscar...",
+    "empty": "No se encontraron productos.",
+    "total": "Mostrando {from}–{to} de {total} productos",
+    "columns": {
+      "product": "Producto",
+      "line": "Línea",
+      "channel": "Canal"
+    },
+    "bulkActions": {
+      "activate": "Activar",
+      "inactivate": "Inactivar",
+      "exportSelection": "Exportar selección",
+      "actionNames": {
+        "activate": "Activar",
+        "inactivate": "Inactivar",
+        "export": "Exportar"
+      },
+      "applied": "Acción \"{action}\" aplicada a {count, plural, one {# producto} other {# productos}}."
+    },
+    "filters": {
+      "line": "Línea",
+      "category": "Categoría"
+    }
+  },
+  "productDetail": {
+    "loadError": "No se pudo cargar el producto.",
+    "saved": "Guardado",
+    "visibleName": "Nombre visible",
+    "internalName": "Nombre interno: {sku}",
+    "changeImage": "Cambiar imagen",
+    "feedback": {
+      "updated": "Producto actualizado correctamente.",
+      "updateError": "Ocurrió un error al actualizar el producto."
+    },
+    "info": {
+      "title": "Información del producto",
+      "line": "Línea",
+      "channel": "Canal",
+      "priceAndStatus": "Precio y estado",
+      "basePrice": "Precio base",
+      "lots": "Lotes",
+      "visibleInMarketplace": "Visible en Marketplace"
+    },
+    "lots": {
+      "title": "Lotes",
+      "count": "{count, plural, one {# lote} other {# lotes}}",
+      "loading": "Cargando lotes…",
+      "empty": "Sin lotes disponibles.",
+      "columns": {
+        "lot": "Lote",
+        "warehouse": "Bodega",
+        "expires": "Vence",
+        "units": "Unidades"
+      }
+    },
+    "prices": {
+      "title": "Listas de precio",
+      "empty": "Sin listas de precio asignadas.",
+      "priceList": "Lista de precio",
+      "price": "Precio"
+    },
+    "skus": {
+      "sku": "SKU"
+    }
+  },
+  "packs": {
+    "title": "Packs de productos",
+    "new": "Nuevo pack",
+    "listTitle": "Packs",
+    "count": "{count, plural, one {# pack} other {# packs}}",
+    "searchPlaceholder": "Buscar SKU o nombre…",
+    "empty": "Aún no hay packs en este proyecto.",
+    "createFirst": "Crear el primero",
+    "total": "Mostrando {from}–{to} de {total} packs",
+    "statusFilter": {
+      "all": "Todos",
+      "active": "Activos",
+      "inactive": "Inactivos"
+    },
+    "columns": {
+      "pack": "Pack",
+      "line": "Línea",
+      "category": "Categoría"
+    },
+    "actions": {
+      "activate": "Activar",
+      "deactivate": "Inactivar"
+    },
+    "deleteConfirm": {
+      "title": "¿Eliminar este pack?",
+      "description": "{name} ({sku}) dejará de estar disponible en el marketplace."
+    },
+    "feedback": {
+      "activated": "Pack activado.",
+      "deactivated": "Pack inactivado.",
+      "stateError": "No se pudo cambiar el estado del pack.",
+      "deleted": "Pack eliminado.",
+      "deleteError": "No se pudo eliminar el pack."
+    },
+    "form": {
+      "createTitle": "Nuevo pack de productos",
+      "editTitle": "Editar pack",
+      "subtitle": "Agrupa productos del catálogo en un solo SKU. El precio se calcula con la lista de precios de cada cliente.",
+      "changeImage": "Cambiar imagen",
+      "uploadImage": "Subir imagen",
+      "activeOnCreate": "Activo al crear",
+      "sku": "SKU del pack",
+      "skuPlaceholder": "Ej. PACK-ALAS-001",
+      "visibleName": "Nombre visible",
+      "visibleNamePlaceholder": "Ej. Kit rutina antiedad",
+      "line": "Línea",
+      "selectLine": "Selecciona una línea",
+      "category": "Categoría",
+      "selectCategory": "Selecciona una categoría",
+      "selectLineFirst": "Primero elige la línea",
+      "items": "Productos del pack",
+      "itemsSummary": "{products, plural, one {# producto} other {# productos}} · {units, plural, one {# unidad} other {# unidades}}",
+      "searchProduct": "Buscar producto por SKU o nombre…",
+      "noProducts": "No se encontraron productos",
+      "product": "Producto",
+      "decrease": "Restar",
+      "increase": "Sumar",
+      "removeProduct": "Quitar producto",
+      "create": "Crear pack",
+      "validation": {
+        "skuRequired": "El SKU es obligatorio",
+        "descriptionRequired": "La descripción es obligatoria",
+        "maxLength": "Máximo {max} caracteres",
+        "itemsRequired": "Agrega al menos un producto"
+      },
+      "feedback": {
+        "imageUploadError": "El pack se creó, pero no se pudo subir la imagen.",
+        "updated": "Pack actualizado correctamente.",
+        "created": "Pack creado correctamente.",
+        "saveError": "Ocurrió un error al guardar el pack."
+      }
+    }
+  },
+  "users": {
+    "title": "Usuarios",
+    "searchPlaceholder": "Buscar...",
+    "create": "Crear usuario",
+    "empty": "No se encontraron usuarios.",
+    "total": "Mostrando {from}–{to} de {total} usuarios · {active, plural, one {# activo} other {# activos}}",
+    "columns": {
+      "role": "Rol",
+      "customers": "Clientes",
+      "biller": "Facturador"
+    },
+    "bulkActions": {
+      "activate": "Activar",
+      "inactivate": "Inactivar",
+      "changeRole": "Cambiar rol",
+      "exportSelection": "Exportar selección",
+      "actionNames": {
+        "activate": "Activar",
+        "inactivate": "Inactivar",
+        "changeRole": "Cambiar rol",
+        "export": "Exportar"
+      },
+      "applied": "Acción \"{action}\" aplicada a {count, plural, one {# usuario} other {# usuarios}}."
+    },
+    "feedback": {
+      "created": "El usuario fue creado exitosamente.",
+      "createError": "Oops ocurrió un error creando el usuario.",
+      "emailInUse": "Este email ya está en uso, prueba otro."
+    },
+    "createModal": {
+      "title": "Crear usuario",
+      "contactName": "Nombre del contacto",
+      "position": "Cargo",
+      "role": "Rol",
+      "selectRole": "Selecciona el rol"
+    }
+  },
+  "userDetail": {
+    "loadError": "No se pudo cargar el usuario.",
+    "generalInfo": "Información general",
+    "assignments": "Asignaciones",
+    "assignedCustomers": "Clientes asignados",
+    "role": "Rol",
+    "tabs": {
+      "customers": "Clientes ({count})",
+      "customerGroups": "Grupos de clientes ({count})",
+      "countries": "Países ({count})",
+      "settings": "Configuraciones"
+    },
+    "feedback": {
+      "groupsLoadError": "No se pudo cargar los grupos.",
+      "userCountriesLoadError": "No se pudo cargar los países del usuario.",
+      "groupsAdded": "{count, plural, one {Grupo agregado correctamente.} other {# grupos agregados correctamente.}}",
+      "groupAddError": "No se pudo agregar el grupo.",
+      "groupRemoved": "Grupo removido correctamente.",
+      "groupRemoveError": "No se pudo quitar el grupo.",
+      "countriesAdded": "{count, plural, one {País agregado correctamente.} other {# países agregados correctamente.}}",
+      "countrySavedReloadError": "El país se guardó, pero no se pudo actualizar la lista.",
+      "countryAddError": "No se pudo agregar el país.",
+      "countryRemoved": "País removido correctamente.",
+      "countryRemovedReloadError": "El país se quitó, pero no se pudo actualizar la lista.",
+      "countryRemoveError": "No se pudo quitar el país.",
+      "customersAssigned": "{count, plural, one {Cliente asignado correctamente.} other {# clientes asignados correctamente.}}",
+      "customerAssignError": "Ocurrió un error al asignar el cliente.",
+      "customerRemoved": "Cliente removido correctamente.",
+      "customerRemoveError": "Ocurrió un error al quitar el cliente.",
+      "billerRemoved": "Facturador eliminado correctamente.",
+      "billerUpdated": "Facturador actualizado correctamente.",
+      "billerUpdateError": "Ocurrió un error al actualizar el facturador.",
+      "categoriesUpdated": "Líneas y categorías actualizadas correctamente.",
+      "categoriesUpdateError": "Ocurrió un error al actualizar las categorías.",
+      "countryCatalogLoadError": "No se pudo cargar el catálogo de países.",
+      "countriesLoadError": "No se pudo cargar los países.",
+      "linesLoadError": "No se pudo cargar las líneas y categorías."
+    },
+    "customersTab": {
+      "add": "Agregar clientes",
+      "noSearchResults": "No se encontraron clientes con ese nombre o NIT.",
+      "empty": "Este usuario aún no tiene clientes asignados."
+    },
+    "groupsTab": {
+      "group": "Grupo",
+      "add": "Agregar grupo de clientes",
+      "noSearchResults": "No se encontraron grupos con ese nombre.",
+      "empty": "Este usuario aún no tiene grupos de clientes asignados."
+    },
+    "countriesTab": {
+      "title": "Países",
+      "country": "País",
+      "add": "Agregar países",
+      "noSearchResults": "No se encontraron países con ese nombre.",
+      "empty": "Este usuario aún no tiene países asignados."
+    },
+    "billerTab": {
+      "noBiller": "Sin Facturador",
+      "description": "Facturador asignado al vendedor dentro del proyecto actual.",
+      "biller": "Facturador"
+    },
+    "addCustomersModal": {
+      "title": "Agregar clientes",
+      "city": "Ciudad",
+      "searchPlaceholder": "Buscar cliente...",
+      "empty": "No se encontraron clientes.",
+      "total": "Mostrando {from}–{to} de {total} clientes",
+      "selected": "{count, plural, one {# cliente seleccionado} other {# clientes seleccionados}}",
+      "confirm": "Agregar seleccionados"
+    },
+    "addGroupsModal": {
+      "title": "Agregar grupo de clientes",
+      "group": "Grupo",
+      "searchPlaceholder": "Buscar grupo...",
+      "empty": "Todos los grupos ya están asignados.",
+      "selected": "{count, plural, one {# grupo seleccionado} other {# grupos seleccionados}}",
+      "confirm": "Agregar seleccionados"
+    },
+    "addCountriesModal": {
+      "title": "Agregar países",
+      "country": "País",
+      "searchPlaceholder": "Buscar país...",
+      "empty": "Todos los países ya están asignados.",
+      "selected": "{count, plural, one {# país seleccionado} other {# países seleccionados}}",
+      "confirm": "Agregar seleccionados"
+    },
+    "linesCategories": {
+      "title": "Líneas y categorías",
+      "description": "Marca las categorías de cada línea cuyos productos podrá ver el usuario en el marketplace. {assigned} de {total} categorías asignadas.",
+      "searchPlaceholder": "Buscar línea, categoría o producto",
+      "noSearchResults": "No se encontraron líneas o categorías con ese criterio.",
+      "empty": "El proyecto no tiene líneas con categorías configuradas.",
+      "lineCount": "{assigned}/{total} categorías",
+      "discard": "Descartar",
+      "productCount": "{count, plural, one {# producto} other {# productos}}",
+      "sku": "SKU",
+      "product": "Producto",
+      "available": "Disponible",
+      "unavailable": "No disponible"
+    }
+  },
+  "load": {
+    "title": "Cargue de información",
+    "subtitle": "ETLs manuales para alimentar el app cuando la sincronización automática falla.",
+    "empty": "No hay ETLs configurados.",
+    "total": "Mostrando {from}–{to} de {total} ETLs",
+    "noUploadsYet": "Sin cargues aún",
+    "template": "Template",
+    "downloadTemplate": "Descargar template",
+    "uploadFile": "Cargar archivo",
+    "upload": "Cargar",
+    "uploading": "Cargando...",
+    "columns": {
+      "lastFile": "Último archivo cargado",
+      "lastUpload": "Último cargue"
+    },
+    "feedback": {
+      "validationsSaved": "Validaciones guardadas.",
+      "noTemplateYet": "Este ETL todavía no tiene template: carga un archivo para crearlo y definir sus validaciones.",
+      "validationsLoadError": "No se pudieron leer las validaciones.",
+      "createUnavailable": "La creación de ETLs aún no está disponible.",
+      "fileReceived": "Archivo \"{fileName}\" recibido. Se está validando y procesando; revisa el resultado en el historial.",
+      "uploadError": "No se pudo cargar el archivo. Intenta de nuevo.",
+      "noTemplate": "No hay plantilla disponible para este ETL."
+    },
+    "detail": {
+      "whatItDoes": "¿Qué hace este ETL?",
+      "lastFile": "Último archivo",
+      "downloadCurrentFile": "Descargar archivo actual",
+      "validations": "Validaciones",
+      "history": "Historial de cargues",
+      "historyEmpty": "Aún no se han registrado cargues para este ETL.",
+      "downloadFile": "Descargar {fileName}"
+    },
+    "newEtl": {
+      "title": "Nuevo ETL",
+      "namePlaceholder": "Ej. Inventario actualizado",
+      "notes": "Observación",
+      "optional": "(opcional)",
+      "notesPlaceholder": "Describe qué hace este cargue y cuándo debe usarse...",
+      "create": "Crear ETL"
+    }
+  }
+}

@@ -3,6 +3,7 @@
 import { Fragment } from "react";
 import { Upload, Hourglass, ShieldCheck, Receipt, FileCheck2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import {
   Tooltip,
@@ -45,10 +46,11 @@ const formatDateTime = (dateString: string) => {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
-const getActor = (item: IMedicalAccountHistoryItem): string => {
+// null = acción del sistema (el texto se traduce al renderizar).
+const getActor = (item: IMedicalAccountHistoryItem): string | null => {
   if (item.created_by_name) return item.created_by_name;
   if (item.created_by) return item.created_by;
-  return "Sistema";
+  return null;
 };
 
 // NOVEDAD no es una etapa del flujo: es una condición del CARGUE.
@@ -63,12 +65,13 @@ export function MedicalAccountTimeline({
   accountId,
   currentStatusCode
 }: MedicalAccountTimelineProps) {
+  const t = useTranslations("medicalAccounts.timeline");
   const { history } = useMedicalAccountHistory(accountId);
   const { statuses } = useMedicalAccountStatuses();
 
   const statusNameByCode = new Map(statuses.map((s) => [s.code, s.name]));
 
-  const stageInfo: Record<string, { actor: string; when: string; from: string | null }> = {};
+  const stageInfo: Record<string, { actor: string | null; when: string; from: string | null }> = {};
   history.forEach((item) => {
     stageInfo[item.to_status_code] = {
       actor: getActor(item),
@@ -121,17 +124,17 @@ export function MedicalAccountTimeline({
                               {info.from} → {name}
                             </p>
                           )}
-                          <p>Por: {info.actor}</p>
+                          <p>{t("by", { actor: info.actor ?? t("system") })}</p>
                           <p className="text-gray-400">{info.when}</p>
                         </>
                       ) : isCurrent ? (
                         currentStatusCode === "NOVEDAD" ? (
-                          <p className="text-gray-300">Con novedades · Estado actual</p>
+                          <p className="text-gray-300">{t("currentWithNovelties")}</p>
                         ) : (
-                          <p className="text-gray-300">Estado actual</p>
+                          <p className="text-gray-300">{t("current")}</p>
                         )
                       ) : (
-                        <p className="text-gray-300">Pendiente</p>
+                        <p className="text-gray-300">{t("pending")}</p>
                       )}
                     </div>
                   </TooltipContent>

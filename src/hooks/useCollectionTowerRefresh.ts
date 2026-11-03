@@ -1,18 +1,26 @@
+import { useTranslations } from "use-intl";
+
 import {
   getCollectionTowerStatus,
   refreshCollectionTower
 } from "@/services/collectionTower/collectionTower";
 import { ISnapshotRefreshMessages, useSnapshotRefresh } from "./useSnapshotRefresh";
 
-const MESSAGES: ISnapshotRefreshMessages = {
-  started: "Actualizando la torre de control…",
-  alreadyRunning: "Ya hay una actualización en curso, se mostrará al terminar",
-  done: "Torre de control actualizada",
-  failed: "No se pudo actualizar la torre. Se mantiene el último corte disponible.",
-  notCompleted: "La actualización en curso no se completó. Se mantiene el último corte disponible.",
-  timeout:
-    "La actualización está tardando más de lo esperado. Se muestra el último corte disponible.",
-  startFailed: "No se pudo iniciar la actualización de la torre"
+const MESSAGE_KEYS = [
+  "started",
+  "alreadyRunning",
+  "done",
+  "failed",
+  "notCompleted",
+  "timeout",
+  "startFailed"
+] as const;
+
+const useRefreshMessages = (): ISnapshotRefreshMessages => {
+  const t = useTranslations("shared.collectionTowerRefresh");
+  return Object.fromEntries(
+    MESSAGE_KEYS.map((key) => [key, t(key)])
+  ) as unknown as ISnapshotRefreshMessages;
 };
 
 /** En los proyectos grandes la foto tarda varios minutos (FEMSA ~4). */
@@ -29,6 +37,6 @@ export const useCollectionTowerRefresh = (
     start: () => refreshCollectionTower(projectId as number),
     getStatus: () => getCollectionTowerStatus(projectId as number),
     onDone,
-    messages: MESSAGES,
+    messages: useRefreshMessages(),
     timeoutMs: TOWER_REFRESH_TIMEOUT_MS
   });

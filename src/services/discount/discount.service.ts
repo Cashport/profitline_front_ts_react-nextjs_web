@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { discountTypeByAnnual } from "@/components/organisms/discounts/constants/discountTypes";
 import { DiscountSchema } from "@/components/organisms/discounts/discount-rules/create/resolvers/generalResolver";
@@ -149,7 +150,7 @@ export const updateDiscount = async (
   const form = new FormData();
   form.append("request", JSON.stringify(body));
   if (discountTypeByAnnual.includes(Number(discount.discount_type)) && !discount.contract_archive) {
-    if (!invoiceFile) throw new Error("El contrato es obligatorio");
+    if (!invoiceFile) throw new Error(getTranslator("shared")("services.contractRequired"));
     form.append("invoice", invoiceFile);
   }
   body = form;

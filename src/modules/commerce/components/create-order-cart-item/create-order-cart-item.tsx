@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import Image from "next/image";
 import { Button, Flex } from "antd";
 import { Minus, Plus, Trash } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { formatNumber } from "@/utils/utils";
 
@@ -26,6 +27,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
     handleIncrementQuantity,
     handleChangeQuantity
   } = useHandleProductsItems(product, categoryName);
+  const t = useTranslations("commerce.product");
   const { config } = useAppStore((state) => ({ config: state.config }));
   const [imgSrc, setImgSrc] = useState(() => getProductImageSrc(product.image));
 
@@ -67,7 +69,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
   const price = config?.include_iva ? product.price_taxes || product.price : product.price;
 
   const isLocked = product.autoAssigned === true;
-  const lockedTitle = "Cantidad calculada automáticamente";
+  const lockedTitle = t("autoQuantity");
 
   return (
     <div className={styles.cartItemCard}>
@@ -86,19 +88,21 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
         {product.name}{" "}
         {product.shipment_unit > 1 && (alreadySelectedProduct?.quantity ?? 0) > 0 && (
           <span className={styles.name__uds}>
-            ({product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)} und)
+            (
+            {t("units", { count: product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0) })}
+            )
           </span>
         )}
         {!product.stock && (
           <SimpleTag
-            text="Stock insuficiente"
+            text={t("insufficientStock")}
             colorTag="#ff350d"
             colorText="#ffffff"
             fontSize="13px"
           />
         )}
         {isLocked && (
-          <SimpleTag text="Auto" colorTag="#CBE71E" colorText="#000000" fontSize="13px" />
+          <SimpleTag text={t("auto")} colorTag="#CBE71E" colorText="#000000" fontSize="13px" />
         )}
       </h4>
 

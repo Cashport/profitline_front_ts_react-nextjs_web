@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useTranslations } from "use-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
@@ -33,6 +34,8 @@ export function InvoiceModal({
   purchaseOrderId,
   onSuccess
 }: InvoiceModalProps) {
+  const t = useTranslations("purchaseOrders.invoiceModal");
+  const tCommon = useTranslations("common");
   const [invoices, setInvoices] = useState<InvoiceEntry[]>([createEmptyInvoice()]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,12 +53,12 @@ export function InvoiceModal({
 
   const handleInvoicePdfChange = (invoiceEntryId: string, file: File | null) => {
     if (file && file.type !== "application/pdf") {
-      setError("Solo se permiten archivos PDF");
+      setError(t("onlyPdf"));
       return;
     }
 
     if (file && file.size > 50 * 1024 * 1024) {
-      setError("El archivo es demasiado grande (máximo 50MB)");
+      setError(t("fileTooLarge", { maxMb: 50 }));
       return;
     }
 
@@ -82,7 +85,7 @@ export function InvoiceModal({
     const incompleteInvoices = invoices.filter((inv) => !inv.invoiceId.trim() || !inv.file);
 
     if (incompleteInvoices.length > 0) {
-      setError("Cada factura debe tener un ID y un archivo PDF");
+      setError(t("incomplete"));
       return;
     }
 
@@ -105,11 +108,11 @@ export function InvoiceModal({
 
       await purchaseOrderActions(purchaseOrderId, payload, files);
 
-      message.success("Facturas agregadas correctamente");
+      message.success(t("success"));
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error al agregar las facturas";
+      const errorMessage = error instanceof Error ? error.message : t("error");
       setError(errorMessage);
       message.error(errorMessage);
       if (error instanceof ApiError && Array.isArray(error.data?.invoices)) {
@@ -133,13 +136,10 @@ export function InvoiceModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Facturar Orden de Compra</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-gray-600">
-            Puede dividir esta orden en múltiples facturas. Agregue el ID y el PDF de cada factura
-            generada.
-          </p>
+          <p className="text-sm text-gray-600">{t("description")}</p>
 
           <div
             className="space-y-3 max-h-[calc(30*var(--vh))] overflow-y-auto"
@@ -168,13 +168,13 @@ export function InvoiceModal({
                     className="border-gray-300 hover:bg-gray-50"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    {invoice.file ? "Cambiar PDF" : "Subir PDF"}
+                    {invoice.file ? t("changePdf") : t("uploadPdf")}
                   </Button>
                 </div>
 
                 <div className="flex-1">
                   <Input
-                    placeholder="ID de factura (Ej: FV-2024-001)"
+                    placeholder={t("invoiceIdPlaceholder")}
                     value={invoice.invoiceId}
                     onChange={(e) => handleInvoiceIdChange(invoice.id, e.target.value)}
                     className={
@@ -200,6 +200,7 @@ export function InvoiceModal({
                     size="sm"
                     onClick={() => handleRemoveInvoice(invoice.id)}
                     className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
+                    aria-label={tCommon("actions.remove")}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -213,16 +214,14 @@ export function InvoiceModal({
             onClick={handleAddInvoice}
             className="w-full border-dashed border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 bg-transparent"
           >
-            + Agregar otra factura
+            {t("addAnother")}
           </Button>
 
           {(error || hasDuplicates) && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <div className="flex gap-2 items-center align-center">
                 <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800">
-                  {hasDuplicates ? "Hay IDs de factura duplicados" : error}
-                </p>
+                <p className="text-sm text-red-800">{hasDuplicates ? t("duplicateIds") : error}</p>
               </div>
             </div>
           )}
@@ -231,18 +230,15 @@ export function InvoiceModal({
             <div className="flex gap-2">
               <AlertTriangle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">Información importante</p>
-                <p>
-                  Asegúrese de que la suma de todas las facturas corresponda al monto total de la
-                  orden de compra.
-                </p>
+                <p className="font-medium mb-1">{t("importantInfo")}</p>
+                <p>{t("totalsHint")}</p>
               </div>
             </div>
           </div>
         </div>
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             onClick={handleSaveInvoices}
@@ -252,10 +248,10 @@ export function InvoiceModal({
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Guardando...
+                {tCommon("status.saving")}
               </>
             ) : (
-              "Guardar facturas"
+              t("save")
             )}
           </Button>
         </div>

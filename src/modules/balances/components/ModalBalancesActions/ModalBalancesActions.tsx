@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { message, Modal } from "antd";
 import { ArrowsClockwise, DownloadSimple } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalChangeBalanceStatus } from "../ModalChangeBalanceStatus/ModalChangeBalanceStatus";
@@ -22,6 +23,7 @@ export const ModalBalancesActions: React.FC<Props> = ({
   balanceIds,
   onSuccess
 }) => {
+  const t = useTranslations("balances.actions");
   const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
   const [isChangeEligibilityOpen, setIsChangeEligibilityOpen] = useState(false);
   const [isDownloadLoading, setIsDownloadLoading] = useState(false);
@@ -39,16 +41,16 @@ export const ModalBalancesActions: React.FC<Props> = ({
     setIsDownloadLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando informe comercial...",
+      content: t("downloadingReport"),
       duration: 0
     });
     try {
       const res = await downloadBalanceAuditExcel();
       downloadFileFromUrl(res.url, res.filename);
-      message.success("Descarga exitosa");
+      message.success(t("downloadSuccess"));
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al descargar el archivo");
+      message.error(error instanceof Error ? error.message : t("downloadError"));
       console.error(error);
     } finally {
       hide();
@@ -60,7 +62,7 @@ export const ModalBalancesActions: React.FC<Props> = ({
     <>
       <Modal
         open={isOpen}
-        title="Selecciona la acción que vas a realizar"
+        title={t("title")}
         footer={null}
         onCancel={onClose}
         className="modal-action-payment"
@@ -69,7 +71,7 @@ export const ModalBalancesActions: React.FC<Props> = ({
         <div className="modal-content">
           <ButtonGenerateAction
             icon={<DownloadSimple size={20} />}
-            title="Descargar informe comercial"
+            title={t("downloadReport")}
             onClick={handleDownloadCommercialReport}
             disabled={isDownloadLoading}
           />
@@ -77,7 +79,7 @@ export const ModalBalancesActions: React.FC<Props> = ({
           {balanceIds.length > 0 && (
             <ButtonGenerateAction
               icon={<ArrowsClockwise size={20} />}
-              title="Cambiar estado"
+              title={t("changeStatus")}
               onClick={() => {
                 setIsChangeStatusOpen(true);
                 onClose();
@@ -87,7 +89,7 @@ export const ModalBalancesActions: React.FC<Props> = ({
           {balanceIds.length > 0 && (
             <ButtonGenerateAction
               icon={<ArrowsClockwise size={20} />}
-              title="Cambiar procedencia"
+              title={t("changeOrigin")}
               onClick={() => {
                 setIsChangeEligibilityOpen(true);
                 onClose();

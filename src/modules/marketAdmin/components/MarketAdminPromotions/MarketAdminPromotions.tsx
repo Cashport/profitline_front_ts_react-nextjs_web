@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import { Plus, Gift, Save } from "lucide-react";
 import Header from "@/components/organisms/header";
 import HeaderBackTitle from "../header-back-title/HeaderBackTitle";
@@ -20,6 +21,8 @@ interface Props {
 }
 
 export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
+  const t = useTranslations("marketAdmin.promotions");
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { data: productsResponse } = useSWR(ID ? ["ma-products", ID] : null, () =>
@@ -41,7 +44,7 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
       ...prev,
       {
         id,
-        nombre: "Nueva promoción",
+        nombre: t("newPromotion"),
         tipoCondicion: "monto",
         activa: true,
         fechaInicio: "",
@@ -67,20 +70,17 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
       (p) => !p.fechaInicio || !p.fechaFin || p.niveles.length === 0
     );
     if (invalida) {
-      showMessage(
-        "error",
-        "Cada promoción necesita fecha de inicio, fecha de fin y al menos un nivel."
-      );
+      showMessage("error", t("validation.incomplete"));
       return;
     }
 
     try {
       setSaving(true);
       await Promise.all(promociones.map((p) => createBonification(buildPromotionPayload(p))));
-      showMessage("success", "Promociones guardadas exitosamente.");
+      showMessage("success", t("feedback.saved"));
       onSaved?.();
     } catch (error) {
-      showMessage("error", "Ocurrió un error al guardar las promociones.");
+      showMessage("error", t("feedback.saveError"));
     } finally {
       setSaving(false);
     }
@@ -90,9 +90,9 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
     <div className="cp-page min-h-full">
       {/* Header compartido (docs/DESIGN.md §4): volver a la vista anterior + acción principal */}
       <Header
-        title="Promociones automáticas"
-        titleNode={<HeaderBackTitle title="Promociones automáticas" onBack={onBack} />}
-        titleExtra="Define condiciones y productos bonificados por escalones"
+        title={t("title")}
+        titleNode={<HeaderBackTitle title={t("title")} onBack={onBack} />}
+        titleExtra={t("subtitle")}
         actionsExtra={
           // PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo
           <div className="h-[var(--control-h)] flex-shrink-0">
@@ -101,7 +101,7 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
               icon={<Plus size={18} />}
               customStyles={{ fontSize: 14 }}
             >
-              Nueva promoción
+              {t("newPromotion")}
             </PrincipalButton>
           </div>
         }
@@ -113,9 +113,9 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
           {promociones.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 gap-3">
               <Gift size={32} className="text-[#DDDDDD]" />
-              <p className="text-sm text-[#999999]">No hay promociones creadas</p>
+              <p className="text-sm text-[#999999]">{t("empty")}</p>
               <div className="h-10 flex-shrink-0">
-                <PrincipalButton onClick={addPromocion}>Crear primera promoción</PrincipalButton>
+                <PrincipalButton onClick={addPromocion}>{t("createFirst")}</PrincipalButton>
               </div>
             </div>
           ) : (
@@ -140,7 +140,7 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
                     loading={saving}
                     icon={<Save size={15} />}
                   >
-                    {saving ? "Guardando…" : "Guardar promoción"}
+                    {saving ? tCommon("status.saving") : t("save")}
                   </PrincipalButton>
                 </div>
               </div>

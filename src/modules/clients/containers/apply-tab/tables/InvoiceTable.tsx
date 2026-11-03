@@ -1,5 +1,6 @@
 import React, { ReactNode, useState } from "react";
 import { Button, Dropdown, Table, TableProps } from "antd";
+import { useTranslations } from "use-intl";
 import { DotsThreeVertical, Eye, Trash } from "phosphor-react";
 
 import { formatDate } from "@/utils/utils";
@@ -37,10 +38,12 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const [removeModal, setRemoveModal] = useState(false);
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { openModal } = useModalDetail();
+  const t = useTranslations("clients.applyTab.tables");
+  const tCommon = useTranslations("common");
 
   const columns: TableProps<IApplyTabRecord>["columns"] = [
     {
-      title: "Factura",
+      title: tCommon("fields.invoice"),
       dataIndex: "id_erp",
       key: "id_erp",
       render: (id_erp, row) => {
@@ -67,7 +70,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       showSorterTooltip: false
     },
     {
-      title: "Fecha",
+      title: tCommon("fields.date"),
       dataIndex: "created_at",
       key: "created_at",
       render: (date) => <p>{date ? formatDate(date) : "-"}</p>,
@@ -75,7 +78,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       showSorterTooltip: false
     },
     {
-      title: "Monto inicial",
+      title: t("columns.initialAmount"),
       dataIndex: "initial_value",
       key: "initial_value",
       render: (initial_value) => <p className="fontMonoSpace">{formatMoney(initial_value)}</p>,
@@ -84,7 +87,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       align: "right"
     },
     {
-      title: "Ajuste contable",
+      title: t("columns.accountingAdjustment"),
       dataIndex: "adjustments",
       key: "adjustments",
       render: (_, row: IApplyTabRecord) => {
@@ -114,7 +117,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       align: "right"
     },
     {
-      title: "Monto aplicado",
+      title: t("columns.appliedAmount"),
       dataIndex: "amount",
       key: "amount",
       render: (amount) => <p className="fontMonoSpace">{formatMoney(amount)}</p>,
@@ -123,7 +126,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       align: "right"
     },
     {
-      title: "Detalle",
+      title: tCommon("fields.detail"),
       width: 76,
       render: (_, row) => {
         const items = [
@@ -138,7 +141,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                   handleEditRow(row, "invoice");
                 }}
               >
-                Editar
+                {tCommon("actions.edit")}
               </Button>
             )
           },
@@ -153,7 +156,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                   setRemoveModal(true);
                 }}
               >
-                Eliminar
+                {tCommon("actions.delete")}
               </Button>
             )
           }
@@ -193,7 +196,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       />
 
       <ModalRemove
-        name="elemento"
+        name={t("removeItemName")}
         isOpen={removeModal}
         onClose={() => {
           setActiveRow(null);

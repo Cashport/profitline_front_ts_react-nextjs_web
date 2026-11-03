@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 import { fmtD } from "../../utils/format";
 import { estadoTicket } from "../../utils/group-detail";
@@ -21,12 +23,9 @@ const DOT: Record<string, string> = {
 
 /** Bitácora del grupo: comentarios, adjuntos, eventos y tickets. */
 export default function GroupTimeline({ entries, tickets }: GroupTimelineProps) {
+  const t = useTranslations("wallet.timeline");
   if (!entries.length) {
-    return (
-      <p className="text-[13px] leading-relaxed text-muted-foreground">
-        Todavía no hay gestiones registradas en este grupo.
-      </p>
-    );
+    return <p className="text-[13px] leading-relaxed text-muted-foreground">{t("empty")}</p>;
   }
 
   return (
@@ -57,8 +56,8 @@ export default function GroupTimeline({ entries, tickets }: GroupTimelineProps) 
 
             <div className="min-w-0 text-[13px] text-foreground">
               <div className="mb-0.5 text-[13px] text-muted-foreground">
-                {e.autor?.nombre ?? "Sistema"} · {fmtD(e.fecha)}
-                {e.tipo === "evento" ? " · evento" : ""}
+                {e.autor?.nombre ?? t("system")} · {fmtD(e.fecha)}
+                {e.tipo === "evento" ? ` · ${t("event")}` : ""}
               </div>
 
               {ticket && st ? (

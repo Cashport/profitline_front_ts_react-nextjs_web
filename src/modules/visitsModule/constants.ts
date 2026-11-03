@@ -22,18 +22,11 @@ export const PLAYBACK_TICK_MS = 60;
 export const PLAYBACK_SPEEDS = [1, 4] as const;
 export const SEEK_STEP_MIN = 5;
 
-/**
- * Chips, filtro y leyendas. El asesor y cada punto traen su propia etiqueta
- * (`state_name`); éstas son para cuando se habla del estado en general.
+/*
+ * Chips, filtro y leyendas: el nombre de cada estado sale de `visits.status.<código>`. El
+ * asesor y cada punto traen su propia etiqueta (`state_name`); aquéllas son para cuando se
+ * habla del estado en general.
  */
-export const STATUS_LABELS: Record<AdvisorStatus | SegmentKind, string> = {
-  IN_VISIT: "En visita",
-  AT_POINT: "En punto",
-  EN_ROUTE: "En viaje",
-  NO_VISITS: "Sin visitas",
-  IN_TRANSIT: "En tránsito",
-  ON_PAUSE: "En pausa"
-};
 
 /** Orden de los chips de estado y de las opciones del filtro Estado. */
 export const STATUS_ORDER: AdvisorStatus[] = ["IN_VISIT", "AT_POINT", "EN_ROUTE", "NO_VISITS"];
@@ -47,39 +40,15 @@ export const SEGMENT_KINDS: SegmentKind[] = ["IN_VISIT", "IN_TRANSIT", "ON_PAUSE
 /** Dato que el backend aún no envía: se pinta así a propósito, para ver qué falta. */
 export const MISSING = "0";
 
-export const RESULT_LABELS: Record<VisitResult, string> = {
-  efectiva: "Efectiva",
-  reprogramada: "Reprogramada",
-  sincontacto: "Sin contacto"
-};
+/* Nombre de cada resultado: `visits.result.<código>`. */
 
 export const RESULT_ORDER: VisitResult[] = ["efectiva", "reprogramada", "sincontacto"];
 
-export const PROJECTS: Record<AdvisorProject, { name: string; unit: string; definition: string }> =
-  {
-    ventas: {
-      name: "Ventas",
-      unit: "ventas",
-      definition: "Formulario de venta con pedido cerrado"
-    },
-    cartera: {
-      name: "Cartera",
-      unit: "acuerdos y pagos",
-      definition: "Acuerdo de pago o pago registrado en cartera"
-    },
-    encuestas: {
-      name: "Encuestas",
-      unit: "encuestas",
-      definition: "Encuesta completa y enviada"
-    }
-  };
+/* Nombre de cada proyecto y qué cuenta como actividad exitosa: `visits.projects.<código>`. */
 
 export const PROJECT_ORDER: AdvisorProject[] = ["ventas", "cartera", "encuestas"];
 
-export const OPERATION_LABELS: Record<OperationType, string> = {
-  ruta: "Ruta de visitas",
-  fijo: "Punto fijo"
-};
+/* Nombre de cada tipo de operación: `visits.operation.<código>`. */
 
 export const OPERATION_ORDER: OperationType[] = ["ruta", "fijo"];
 

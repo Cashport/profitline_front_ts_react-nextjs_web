@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "use-intl";
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
   FilterCategoryConfig,
@@ -13,19 +14,20 @@ export interface IMarketAdminUsersFilter {
   status: 0 | 1 | null;
 }
 
-const ESTADO_OPTIONS: FilterOptionItem[] = [
-  { id: "1", name: "Activo" },
-  { id: "0", name: "Inactivo" }
-];
-
-
 interface FilterUsersModalProps {
   value: IMarketAdminUsersFilter;
   onChange: (next: IMarketAdminUsersFilter) => void;
 }
 
 export default function FilterUsersModal({ value, onChange }: FilterUsersModalProps) {
+  const t = useTranslations("marketAdmin.users");
+  const tCommon = useTranslations("common");
   const { data: roles, isLoading: isLoadingRoles } = useMarketAdminRoles();
+
+  const estadoOptions: FilterOptionItem[] = [
+    { id: "1", name: tCommon("status.active") },
+    { id: "0", name: tCommon("status.inactive") }
+  ];
 
   const rolOptions: FilterOptionItem[] = roles.map((r) => ({
     id: String(r.ID),
@@ -38,7 +40,12 @@ export default function FilterUsersModal({ value, onChange }: FilterUsersModalPr
     rol: rolId ? [{ id: rolId, name: rolOptions.find((o) => o.id === rolId)?.name ?? rolId }] : [],
     estado:
       value.status !== null
-        ? [{ id: String(value.status), name: value.status === 1 ? "Activo" : "Inactivo" }]
+        ? [
+            {
+              id: String(value.status),
+              name: value.status === 1 ? tCommon("status.active") : tCommon("status.inactive")
+            }
+          ]
         : []
   };
 
@@ -53,16 +60,16 @@ export default function FilterUsersModal({ value, onChange }: FilterUsersModalPr
   const categories: FilterCategoryConfig[] = [
     {
       key: "rol",
-      label: "Rol",
+      label: t("columns.role"),
       selectMode: "single",
       options: rolOptions,
       status: isLoadingRoles ? "loading" : undefined
     },
     {
       key: "estado",
-      label: "Estado",
+      label: tCommon("fields.status"),
       selectMode: "single",
-      options: ESTADO_OPTIONS
+      options: estadoOptions
     }
   ];
 

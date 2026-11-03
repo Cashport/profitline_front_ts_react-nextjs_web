@@ -1,5 +1,6 @@
 import { Flex, Checkbox, Button, Typography, Spin } from "antd";
 import { FileArrowUp, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import { useDocumentByClient } from "@/hooks/useDocumentByClient";
 import "./documentCards.scss";
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export const DocumentCards = ({ clientTypeId, isDisabledEdit }: Props) => {
+  const t = useTranslations("components.documentClientBR");
   const { data, isLoading, removeDocument } = useDocumentByClient(clientTypeId);
   const documents = data?.data;
   return (
@@ -34,7 +36,7 @@ export const DocumentCards = ({ clientTypeId, isDisabledEdit }: Props) => {
                 )}
               </Flex>
               <Checkbox className="documentCard__check" checked={Boolean(doc.required)}>
-                Obligatorio
+                {t("required")}
               </Checkbox>
               {doc.format_document && (
                 <Button

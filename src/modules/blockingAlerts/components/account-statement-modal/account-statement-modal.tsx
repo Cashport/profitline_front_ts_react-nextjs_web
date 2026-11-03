@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Input } from "antd";
 import { Download, Mail } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiTab from "@/components/ui/ui-tab";
@@ -12,7 +13,7 @@ import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlert
 import { cn } from "@/utils/utils";
 
 import { MOBILE_TABS } from "../../constants";
-import { fmtDay, plural } from "../../utils/blocking-alerts";
+import { fmtDay } from "../../utils/blocking-alerts";
 import AlertModal from "../alert-modal/alert-modal";
 
 type StatementFormat = "pdf" | "xlsx";
@@ -20,10 +21,8 @@ type StatementMode = "download" | "email";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const FIELD_LABEL =
-  "w-12 shrink-0 text-[13px] font-medium text-cp-ink-4 max-md:w-11";
-const SECTION_LABEL =
-  "text-[13px] font-semibold text-cp-ink-4";
+const FIELD_LABEL = "w-12 shrink-0 text-[13px] font-medium text-cp-ink-4 max-md:w-11";
+const SECTION_LABEL = "text-[13px] font-semibold text-cp-ink-4";
 
 interface AccountStatementModalProps {
   detail: IBlockingAlertDetail;
@@ -32,6 +31,8 @@ interface AccountStatementModalProps {
 
 /** Estado de cuenta: qué incluir, formato y si se descarga o se envía por correo. */
 export default function AccountStatementModal({ detail, onClose }: AccountStatementModalProps) {
+  const t = useTranslations("blockingAlerts.statement");
+  const tCount = useTranslations("blockingAlerts.count");
   const formatMoney = useAppStore((s) => s.formatMoney);
   const { showMessage } = useMessageApi();
   const [excluded, setExcluded] = useState<string[]>([]);
@@ -47,23 +48,23 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
   const sections = [
     {
       key: "past_due",
-      label: "Facturas vencidas",
-      meta: `${plural(pastDue.length, "factura", "facturas")} · ${total(pastDue)}`
+      label: t("sections.pastDue"),
+      meta: `${tCount("invoices", { count: pastDue.length })} · ${total(pastDue)}`
     },
     {
       key: "upcoming",
-      label: "Facturas por vencer",
-      meta: `${plural(upcoming.length, "factura", "facturas")} · ${total(upcoming)}`
+      label: t("sections.upcoming"),
+      meta: `${tCount("invoices", { count: upcoming.length })} · ${total(upcoming)}`
     },
     {
       key: "pending_balances",
-      label: "Saldos pendientes",
-      meta: `${plural(detail.pending_balances.length, "movimiento", "movimientos")} · ${total(detail.pending_balances)}`
+      label: t("sections.pendingBalances"),
+      meta: `${tCount("movements", { count: detail.pending_balances.length })} · ${total(detail.pending_balances)}`
     },
     {
       key: "credit_notes",
-      label: "Notas crédito",
-      meta: `${plural(detail.credit_notes.length, "nota", "notas")} · ${total(detail.credit_notes)}`
+      label: t("sections.creditNotes"),
+      meta: `${tCount("notes", { count: detail.credit_notes.length })} · ${total(detail.credit_notes)}`
     }
   ];
 
@@ -83,16 +84,16 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
     showMessage(
       "success",
       mode === "download"
-        ? `Descargando el estado de cuenta de ${detail.name} (${ext})`
-        : `Estado de cuenta enviado a ${to.trim()}`
+        ? t("downloading", { name: detail.name, format: ext })
+        : t("sent", { email: to.trim() })
     );
     onClose();
   };
 
   return (
-    <AlertModal onClose={onClose} title="Estado de cuenta" subtitle={detail.name}>
+    <AlertModal onClose={onClose} title={t("title")} subtitle={detail.name}>
       <div className="flex flex-col gap-2">
-        <span className={SECTION_LABEL}>Incluir en el estado de cuenta</span>
+        <span className={SECTION_LABEL}>{t("include")}</span>
         <div className="flex flex-col gap-2">
           {sections.map((s) => {
             const on = !excluded.includes(s.key);
@@ -105,12 +106,8 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
                 )}
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-semibold">
-                    {s.label}
-                  </span>
-                  <span className="block truncate text-[13px] text-cp-ink-3">
-                    {s.meta}
-                  </span>
+                  <span className="block text-[13px] font-semibold">{s.label}</span>
+                  <span className="block truncate text-[13px] text-cp-ink-3">{s.meta}</span>
                 </span>
                 <input
                   type="checkbox"
@@ -137,19 +134,19 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
         />
       </div>
 
-      <span className={SECTION_LABEL}>¿Qué quieres hacer?</span>
+      <span className={SECTION_LABEL}>{t("whatToDo")}</span>
       <div className="grid grid-cols-2 gap-2">
         {[
           {
             key: "download" as const,
-            label: "Descargar",
-            sub: "Guárdalo en este dispositivo",
+            label: t("download"),
+            sub: t("downloadHint"),
             Icon: Download
           },
           {
             key: "email" as const,
-            label: "Enviar por correo",
-            sub: "Le llega al cliente como adjunto",
+            label: t("email"),
+            sub: t("emailHint"),
             Icon: Mail
           }
         ].map(({ key, label, sub, Icon }) => (
@@ -173,9 +170,7 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
             </span>
             <span>
               <span className="block text-[13px] font-semibold">{label}</span>
-              <span className="block text-[13px] leading-snug text-cp-ink-3">
-                {sub}
-              </span>
+              <span className="block text-[13px] leading-snug text-cp-ink-3">{sub}</span>
             </span>
           </button>
         ))}
@@ -185,11 +180,17 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
         <div className="flex flex-col gap-2">
           <div className="rounded-[14px] border border-cp-line bg-cp-bg px-3 py-1">
             {[
-              { label: "Para", value: to, onChange: setTo, placeholder: "correo@cliente.com" },
-              { label: "CC", value: cc, onChange: setCc, placeholder: "Opcional" }
+              {
+                key: "to",
+                label: t("to"),
+                value: to,
+                onChange: setTo,
+                placeholder: t("toPlaceholder")
+              },
+              { key: "cc", label: "CC", value: cc, onChange: setCc, placeholder: t("optional") }
             ].map((field) => (
               <label
-                key={field.label}
+                key={field.key}
                 className="flex min-h-[44px] items-center gap-2.5 border-b border-cp-line max-md:min-h-[38px]"
               >
                 <span className={FIELD_LABEL}>{field.label}</span>
@@ -198,7 +199,7 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
                   variant="borderless"
                   aria-label={field.label}
                   placeholder={field.placeholder}
-                  status={field.label === "Para" && badEmail ? "error" : undefined}
+                  status={field.key === "to" && badEmail ? "error" : undefined}
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
                   className="!px-0 !text-[13px] max-md:!text-[13px]"
@@ -206,9 +207,9 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
               </label>
             ))}
             <div className="flex items-start gap-2.5 py-3 max-md:py-2">
-              <span className={FIELD_LABEL}>Asunto</span>
+              <span className={FIELD_LABEL}>{t("subject")}</span>
               <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-cp-ink">
-                Estado de cuenta · {detail.name} · corte {fmtDay(detail.cutoff_at, true)}
+                {t("subjectValue", { name: detail.name, date: fmtDay(detail.cutoff_at, true) })}
               </span>
             </div>
           </div>
@@ -219,13 +220,9 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
             <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-cp-ink">
               {fileName}
             </span>
-            <span className="shrink-0 text-[13px] text-cp-ink-4">Adjunto</span>
+            <span className="shrink-0 text-[13px] text-cp-ink-4">{t("attachment")}</span>
           </div>
-          {badEmail && (
-            <span className="text-[13px] text-cp-red">
-              Escribe un correo válido para enviar.
-            </span>
-          )}
+          {badEmail && <span className="text-[13px] text-cp-red">{t("invalidEmail")}</span>}
         </div>
       )}
 
@@ -236,10 +233,10 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
         onClick={submit}
       >
         {!included
-          ? "Elige qué incluir"
+          ? t("chooseWhat")
           : mode === "download"
-            ? `Descargar estado de cuenta · ${ext}`
-            : "Enviar estado de cuenta"}
+            ? t("submitDownload", { format: ext })
+            : t("submitEmail")}
       </PrincipalButton>
     </AlertModal>
   );

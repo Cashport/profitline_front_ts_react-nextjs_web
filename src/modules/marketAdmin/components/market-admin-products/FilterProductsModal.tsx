@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "use-intl";
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
   FilterCategoryConfig,
@@ -15,19 +16,20 @@ export interface IMarketAdminProductsFilter {
   status: 0 | 1 | null;
 }
 
-const ESTADO_OPTIONS: FilterOptionItem[] = [
-  { id: "1", name: "Activo" },
-  { id: "0", name: "Inactivo" }
-];
-
-
 interface FilterProductsModalProps {
   value: IMarketAdminProductsFilter;
   onChange: (next: IMarketAdminProductsFilter) => void;
 }
 
 export default function FilterProductsModal({ value, onChange }: FilterProductsModalProps) {
+  const t = useTranslations("marketAdmin.products.filters");
+  const tCommon = useTranslations("common");
   const { data: productLines, isLoading: isLoadingLines } = useMarketAdminProductLines();
+
+  const estadoOptions: FilterOptionItem[] = [
+    { id: "1", name: tCommon("status.active") },
+    { id: "0", name: tCommon("status.inactive") }
+  ];
   const { data: productCategories, isLoading: isLoadingCategories } =
     useMarketAdminProductCategories();
 
@@ -62,7 +64,12 @@ export default function FilterProductsModal({ value, onChange }: FilterProductsM
       : [],
     estado:
       value.status !== null
-        ? [{ id: String(value.status), name: value.status === 1 ? "Activo" : "Inactivo" }]
+        ? [
+            {
+              id: String(value.status),
+              name: value.status === 1 ? tCommon("status.active") : tCommon("status.inactive")
+            }
+          ]
         : []
   };
 
@@ -78,23 +85,23 @@ export default function FilterProductsModal({ value, onChange }: FilterProductsM
   const categories: FilterCategoryConfig[] = [
     {
       key: "linea",
-      label: "Línea",
+      label: t("line"),
       selectMode: "single",
       options: lineaOptions,
       status: isLoadingLines ? "loading" : undefined
     },
     {
       key: "categoria",
-      label: "Categoría",
+      label: t("category"),
       selectMode: "single",
       options: categoriaOptions,
       status: isLoadingCategories ? "loading" : undefined
     },
     {
       key: "estado",
-      label: "Estado",
+      label: tCommon("fields.status"),
       selectMode: "single",
-      options: ESTADO_OPTIONS
+      options: estadoOptions
     }
   ];
 

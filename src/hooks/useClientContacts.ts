@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { MessageType } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import { deleteContact, postContact, putContact } from "@/services/contacts/contacts";
@@ -7,6 +8,7 @@ import { useState } from "react";
 import useSWR from "swr";
 
 export const useClientContacts = (clientId: string) => {
+  const t = useTranslations("shared.contacts");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
@@ -36,13 +38,13 @@ export const useClientContacts = (clientId: string) => {
     try {
       const response = await postContact(contact);
       if (response.status === 200) {
-        showMessage("success", "Contacto creado exitosamente");
+        showMessage("success", t("created"));
       }
     } catch (error) {
       if (error instanceof ApiError) {
         showMessage("error", error.message);
       } else {
-        showMessage("error", "Error al crear contacto");
+        showMessage("error", t("createError"));
         console.warn("Error al crear contacto", error);
       }
       return false;
@@ -74,13 +76,13 @@ export const useClientContacts = (clientId: string) => {
     try {
       const response = await putContact(contact, contactId);
       if (response.status === 200) {
-        showMessage("success", "Contacto actualizado exitosamente");
+        showMessage("success", t("updated"));
       }
     } catch (error) {
       if (error instanceof ApiError) {
         showMessage("error", error.message);
       } else {
-        showMessage("error", "Error al actualizar contacto");
+        showMessage("error", t("updateError"));
         console.warn("Error al actualizar contacto", error);
       }
       return false;
@@ -102,10 +104,10 @@ export const useClientContacts = (clientId: string) => {
     try {
       const response = await deleteContact(formattedIds, inactivate, clientId, projectId);
       if (response.status === 200) {
-        showMessage("success", "Contactos eliminados exitosamente");
+        showMessage("success", t("deleted"));
       }
     } catch (error) {
-      showMessage("error", "Error al eliminar contactos");
+      showMessage("error", t("deleteError"));
       console.warn("Error al eliminar contactos", error);
     } finally {
       mutate();

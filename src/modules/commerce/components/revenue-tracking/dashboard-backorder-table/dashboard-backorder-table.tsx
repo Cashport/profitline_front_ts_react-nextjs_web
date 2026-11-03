@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Pagination } from "antd";
 import { ChevronRight, Download } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -16,12 +17,11 @@ import SearchField from "@/components/ui/search-field/search-field";
 const PAGE_SIZE = 25;
 
 // Una fila por cliente, repitiendo el producto, para que sirva en una tabla dinámica.
-const exportToCsv = (items: IDashboardSalesBackorderItem[]) => {
+const exportToCsv = (items: IDashboardSalesBackorderItem[], header: string[]) => {
   const escape = (value: unknown) => {
     const str = value === null || value === undefined ? "" : String(value);
     return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
   };
-  const header = ["Producto", "SKU", "Cliente", "Pedidos", "Unidades", "Monto"];
   const rows = [
     header.join(","),
     ...items.flatMap((item) =>
@@ -48,6 +48,18 @@ const exportToCsv = (items: IDashboardSalesBackorderItem[]) => {
 
 export default function DashboardBackorderTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const t = useTranslations("commerce.dashboard.backorder");
+  const tPromo = useTranslations("commerce.dashboard.promotions");
+  const tTables = useTranslations("commerce.dashboard.tables");
+  const tCommon = useTranslations("common");
+  const csvHeader = [
+    t("columns.product"),
+    t("columns.sku"),
+    tCommon("fields.customer"),
+    tPromo("columns.orders"),
+    tPromo("columns.units"),
+    tPromo("columns.amount")
+  ];
   const { filters, includeIva } = useRevenueTracking();
 
   const [search, setSearch] = useState("");
@@ -86,29 +98,24 @@ export default function DashboardBackorderTable() {
       <CardHeader className="sm:px-[18px] sm:pt-[14px] !pb-0">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div>
-            <CardTitle className="text-base sm:text-lg font-semibold">
-              Informe de Backorder
-            </CardTitle>
-            <p className="text-[13px] text-muted-foreground mt-1">
-              Venta pendiente por falta de stock. Solo pedidos en estado backorder, fechados por su
-              fecha de creación.
-            </p>
+            <CardTitle className="text-base sm:text-lg font-semibold">{t("title")}</CardTitle>
+            <p className="text-[13px] text-muted-foreground mt-1">{t("description")}</p>
           </div>
           <div className="flex items-center gap-2 sm:ml-auto">
             <SearchField
               value={search}
               onChange={setSearch}
-              placeholder="Buscar producto o SKU..."
+              placeholder={t("searchPlaceholder")}
               className="sm:w-56"
             />
             <button
               type="button"
-              onClick={() => exportToCsv(items)}
+              onClick={() => exportToCsv(items, csvHeader)}
               disabled={items.length === 0}
               className="flex h-[var(--control-h)] items-center gap-2 px-4 text-sm font-medium bg-background border border-border rounded-lg hover:bg-secondary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="h-4 w-4" />
-              Export
+              {tTables("export")}
             </button>
           </div>
         </div>
@@ -116,11 +123,11 @@ export default function DashboardBackorderTable() {
       <CardContent className="p-0 sm:px-[18px] sm:py-[14px]">
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <p>Cargando datos...</p>
+            <p>{tTables("loading")}</p>
           </div>
         ) : items.length === 0 ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <p>No hay datos disponibles</p>
+            <p>{tTables("noData")}</p>
           </div>
         ) : (
           <>
@@ -129,19 +136,19 @@ export default function DashboardBackorderTable() {
                 <thead>
                   <tr className="border-b border-cp-line bg-cp-surface">
                     <th className="text-left py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Producto
+                      {t("columns.product")}
                     </th>
                     <th className="hidden md:table-cell text-left py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      SKU
+                      {t("columns.sku")}
                     </th>
                     <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Pedidos
+                      {tPromo("columns.orders")}
                     </th>
                     <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Unidades
+                      {tPromo("columns.units")}
                     </th>
                     <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Monto
+                      {tPromo("columns.amount")}
                     </th>
                   </tr>
                 </thead>
@@ -159,7 +166,11 @@ export default function DashboardBackorderTable() {
                             <button
                               type="button"
                               aria-expanded={isOpen}
-                              aria-label={`${isOpen ? "Ocultar" : "Ver"} el detalle por cliente de ${item.product_name}`}
+                              aria-label={
+                                isOpen
+                                  ? t("hideClientDetail", { product: item.product_name })
+                                  : t("showClientDetail", { product: item.product_name })
+                              }
                               className="flex items-center gap-1.5 text-left"
                             >
                               <ChevronRight
@@ -216,8 +227,11 @@ export default function DashboardBackorderTable() {
             {total > PAGE_SIZE && (
               <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 px-2 sm:px-0 pt-4 pb-4 sm:pb-0">
                 <p className="text-[13px] sm:text-sm text-muted-foreground">
-                  Mostrando {(page - 1) * PAGE_SIZE + 1} a {Math.min(page * PAGE_SIZE, total)} de{" "}
-                  {total} resultados
+                  {tTables("showingResults", {
+                    from: (page - 1) * PAGE_SIZE + 1,
+                    to: Math.min(page * PAGE_SIZE, total),
+                    total
+                  })}
                 </p>
                 <Pagination
                   current={page}

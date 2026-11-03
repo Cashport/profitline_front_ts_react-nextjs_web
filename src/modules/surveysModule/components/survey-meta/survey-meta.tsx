@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Switch } from "antd";
+import { useTranslations } from "use-intl";
 
 import { fmtReportDate } from "@/modules/reportsModule/utils/reports-format";
 
@@ -13,6 +14,7 @@ interface SurveyMetaProps {
 
 /** Nombre, descripción y datos de la encuesta; en edición, también si está activa. */
 export default function SurveyMeta({ editor, isEdit }: SurveyMetaProps) {
+  const t = useTranslations("surveys.meta");
   const { draft, form } = editor;
   const required = draft.questions.filter((q) => q.required).length;
 
@@ -24,14 +26,14 @@ export default function SurveyMeta({ editor, isEdit }: SurveyMetaProps) {
             size="large"
             value={draft.name}
             maxLength={255}
-            placeholder="Nombre de la encuesta"
+            placeholder={t("namePlaceholder")}
             onChange={(e) => editor.setField("name", e.target.value)}
             className="!text-xl !font-semibold"
           />
           <Input.TextArea
             value={draft.description ?? ""}
             autoSize={{ minRows: 2, maxRows: 5 }}
-            placeholder="Descripción que verá el asesor al abrir la encuesta"
+            placeholder={t("descriptionPlaceholder")}
             onChange={(e) => editor.setField("description", e.target.value || null)}
           />
         </>
@@ -46,16 +48,22 @@ export default function SurveyMeta({ editor, isEdit }: SurveyMetaProps) {
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted-foreground">
         <span>
-          <b className="font-semibold text-foreground">{draft.questions.length}</b> preguntas
+          {t.rich("questions", {
+            count: draft.questions.length,
+            b: (chunks) => <b className="font-semibold text-foreground">{chunks}</b>
+          })}
         </span>
         <span>
-          <b className="font-semibold text-foreground">{required}</b> obligatorias
+          {t.rich("required", {
+            count: required,
+            b: (chunks) => <b className="font-semibold text-foreground">{chunks}</b>
+          })}
         </span>
         {form && (
           <>
-            <span>Versión {form.version}</span>
-            <span>Creada por {form.created_by_name ?? "—"}</span>
-            <span>Actualizada {fmtReportDate(form.updated_at)}</span>
+            <span>{t("version", { version: form.version })}</span>
+            <span>{t("createdBy", { name: form.created_by_name ?? "—" })}</span>
+            <span>{t("updatedAt", { date: fmtReportDate(form.updated_at) })}</span>
           </>
         )}
         {isEdit && (
@@ -65,7 +73,7 @@ export default function SurveyMeta({ editor, isEdit }: SurveyMetaProps) {
               checked={draft.status === "ACTIVE"}
               onChange={(on) => editor.setField("status", on ? "ACTIVE" : "INACTIVE")}
             />
-            Activa
+            {t("active")}
           </label>
         )}
       </div>

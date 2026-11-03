@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 
@@ -21,6 +22,7 @@ import type { ChannelType } from "../../components/MassCommunicationSections/Cha
 import type { WhatsappTemplate } from "../../lib/mockData";
 
 export default function MassCommunicationsView() {
+  const t = useTranslations("massCommunications");
   const router = useRouter();
 
   // Channel
@@ -39,13 +41,13 @@ export default function MassCommunicationsView() {
   const fetchEmailTemplates = useCallback(async () => {
     try {
       const data = await getMassiveCommunicationTemplates();
-      const mapped: EmailTemplate[] = data.map((t) => ({
-        id: t.id.toString(),
-        name: t.name,
-        description: t.description,
-        subject: t.subject,
-        body: t.message,
-        attachments: t.attachments.map((att) => {
+      const mapped: EmailTemplate[] = data.map((tpl) => ({
+        id: tpl.id.toString(),
+        name: tpl.name,
+        description: tpl.description,
+        subject: tpl.subject,
+        body: tpl.message,
+        attachments: tpl.attachments.map((att) => {
           const fileName = typeof att === "string" ? att : att.name;
           const parts = fileName.split(".");
           const ext = parts.length > 1 ? parts.pop()!.toUpperCase() : "FILE";
@@ -146,7 +148,7 @@ export default function MassCommunicationsView() {
 
   return (
     <div className="cp-page">
-      <Header title="Comunicaciones masivas" />
+      <Header title={t("title")} />
       <ChannelSection channel={channel} onChannelChange={setChannel} />
 
       <RecipientsSection onValidatedCountChange={setValidatedCount} />

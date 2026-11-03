@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { Segmented } from "antd";
+import { useTranslations } from "use-intl";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import { cn } from "@/utils/utils";
@@ -52,6 +53,7 @@ interface ChartProps {
  * Port del gráfico SVG del prototipo.
  */
 function Chart({ data, reference, width, line }: ChartProps) {
+  const tc = useTranslations("collections.dailyChart");
   const gradientId = `recaudo-area-${useId().replace(/:/g, "")}`;
   const { daily, period, summary } = data;
   const collected = summary.series.collected.color;
@@ -116,16 +118,16 @@ function Chart({ data, reference, width, line }: ChartProps) {
           label: unapplied.label,
           value: money(p.unapplied ?? 0)
         },
-        { key: "acu", color: collected, label: "Acumulado", value: money(p.cumulative ?? 0) }
+        { key: "acu", color: collected, label: tc("cumulative"), value: money(p.cumulative ?? 0) }
       );
-      total = { label: "Recaudo del día", value: money(dayTotal(t)) };
+      total = { label: tc("dayTotal"), value: money(dayTotal(t)) };
     } else if (open) {
       const e = expected.get(t);
       if (e !== undefined) {
         rows.push({
           key: "esp",
           color: withAlpha(FORECAST, 0.16),
-          label: "Esperado del día",
+          label: tc("expectedDay"),
           value: money(e)
         });
       }
@@ -133,17 +135,27 @@ function Chart({ data, reference, width, line }: ChartProps) {
         rows.push({
           key: "proy",
           color: FORECAST,
-          label: "Acumulado proyectado",
+          label: tc("projectedCumulative"),
           value: money(p.projected)
         });
       }
     }
     if (showPrev)
-      rows.push({ key: "prev", color: PREVIOUS, label: "Mes anterior", value: money(prevAt(t)) });
+      rows.push({
+        key: "prev",
+        color: PREVIOUS,
+        label: tc("previousMonth"),
+        value: money(prevAt(t))
+      });
     if (showMedian) {
-      rows.push({ key: "med", color: MUTED, label: "Mediana 6M", value: money(p.median6m ?? 0) });
+      rows.push({
+        key: "med",
+        color: MUTED,
+        label: tc("median6Short"),
+        value: money(p.median6m ?? 0)
+      });
     }
-    rows.push({ key: "meta", color: FOREGROUND, label: "Meta", value: money(summary.goal) });
+    rows.push({ key: "meta", color: FOREGROUND, label: tc("target"), value: money(summary.goal) });
     return { title: diaLabel(p.date), rows, total };
   };
 
@@ -153,7 +165,7 @@ function Chart({ data, reference, width, line }: ChartProps) {
       height={H}
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Recaudo acumulado y recaudo diario del mes"
+      aria-label={tc("aria")}
       className="block select-none"
     >
       <defs>
@@ -178,10 +190,10 @@ function Chart({ data, reference, width, line }: ChartProps) {
         );
       })}
       <text x="4" y="14" className={PANEL_TITLE}>
-        ACUMULADO
+        {tc("axisCumulative")}
       </text>
       <text x={M.l + iw + 8} y="14" className={PANEL_TITLE}>
-        POR DÍA
+        {tc("axisDaily")}
       </text>
 
       {/* Una marca por semana, los lunes. */}
@@ -366,6 +378,7 @@ function Chart({ data, reference, width, line }: ChartProps) {
 
 /** "Recaudo por día": acumulado contra la meta y recaudo de cada día. */
 export default function DailyCollectionChart({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections");
   const [reference, setReference] = useState<CurveReference>("median");
   const [ref, { width }] = useContainerSize<HTMLDivElement>();
   const { resolvedTheme } = useWalletTheme();
@@ -377,38 +390,47 @@ export default function DailyCollectionChart({ data }: { data: ICollectionTower 
 
   return (
     <PanelCard
-      title="Recaudo por día"
-      subtitle={`${period.label} · acumulado y recaudo de cada día`}
+      title={tc("dailyChart.title")}
+      subtitle={tc("dailyChart.subtitle", { period: period.label })}
       flush
       actions={
         <Segmented
           size="small"
-          aria-label="Referencia"
+          aria-label={tc("dailyChart.referenceAria")}
           value={reference}
-          options={CURVE_REFERENCES}
+          options={CURVE_REFERENCES.map((value) => ({
+            value,
+            label: tc(`curveReferences.${value}`)
+          }))}
           onChange={(value) => setReference(value as CurveReference)}
         />
       }
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-3 text-[13px] text-foreground/80">
-        <LegendItem mark={<LineSwatch color={line} width={2.6} />} label="Acumulado" />
+        <LegendItem
+          mark={<LineSwatch color={line} width={2.6} />}
+          label={tc("dailyChart.cumulative")}
+        />
         {period.open && (
-          <LegendItem mark={<LineSwatch color={FORECAST} dash="4 3" />} label="Proyección" />
+          <LegendItem
+            mark={<LineSwatch color={FORECAST} dash="4 3" />}
+            label={tc("dailyChart.projection")}
+          />
         )}
         <LegendItem
           mark={<LineSwatch className="stroke-foreground" dash="5 3" width={1.4} />}
-          label="Meta"
+          label={tc("dailyChart.target")}
         />
         {reference !== "median" && hasPrev && (
           <LegendItem
             mark={<LineSwatch className="stroke-muted-foreground/60" width={1.6} />}
-            label="Mes anterior"
+            label={tc("dailyChart.previousMonth")}
           />
         )}
         {reference !== "previous" && hasMedian && (
           <LegendItem
             mark={<LineSwatch className="stroke-muted-foreground" dash="1.5 3" width={1.6} />}
-            label="Mediana 6 meses"
+            label={tc("curveReferences.median")}
           />
         )}
         <LegendItem mark={<Swatch color={applied.color} />} label={applied.label} />
@@ -419,7 +441,7 @@ export default function DailyCollectionChart({ data }: { data: ICollectionTower 
         {period.open && (
           <LegendItem
             mark={<Swatch color={FORECAST} outline fill={withAlpha(FORECAST, 0.16)} />}
-            label="Esperado"
+            label={tc("dailyChart.expected")}
           />
         )}
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Bell, CaretDown, Robot } from "@phosphor-icons/react";
 import { Dropdown, MenuProps, Pagination } from "antd";
+import { useTranslations } from "use-intl";
 import { cn, formatChatDate } from "@/utils/utils";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
@@ -21,6 +22,7 @@ import { ticketToConversation } from "@/modules/chat/lib/ticketToConversation";
 import { sendTemplate, updateTicketEscalation } from "@/services/chat/chat";
 import SearchField from "@/components/ui/search-field/search-field";
 
+// Motivos que se envían al backend: no se traducen.
 const ESCALATE_REASON = "El cliente pidió hablar con un humano";
 const DE_ESCALATE_REASON = "El cliente ya no necesita hablar con un humano";
 
@@ -35,6 +37,9 @@ export default function AllChats({
   onConversationSelect,
   onNewChat
 }: AllChatsProps) {
+  const t = useTranslations("chat.allChats");
+  const tShared = useTranslations("chat.shared");
+  const tCommon = useTranslations("common");
   const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [addClientInitial, setAddClientInitial] = useState<{ name?: string; phone?: string }>({});
   const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
@@ -153,9 +158,9 @@ export default function AllChats({
           destinationNumber: [templateTarget.destinationNumber]
         });
         setTemplateTarget(null);
-        toast({ title: "Plantilla enviada exitosamente" });
+        toast({ title: tShared("templateSent") });
       } catch {
-        toast({ title: "Error al enviar la plantilla", variant: "destructive" });
+        toast({ title: tShared("templateSendError"), variant: "destructive" });
       } finally {
         setTemplateLoading(false);
       }
@@ -186,9 +191,9 @@ export default function AllChats({
         isEscalated ? DE_ESCALATE_REASON : ESCALATE_REASON
       );
       await mutateTickets();
-      toast({ title: isEscalated ? "Bot activado" : "Bot inactivado" });
+      toast({ title: isEscalated ? t("botEnabled") : t("botDisabled") });
     } catch {
-      toast({ title: "No se pudo actualizar el estado del chat", variant: "destructive" });
+      toast({ title: t("escalationError"), variant: "destructive" });
     } finally {
       setEscalatingId(null);
     }
@@ -196,13 +201,13 @@ export default function AllChats({
 
   const buildMenuItems = (conversation: Conversation): MenuProps["items"] => [
     {
-      label: <p>Marcar como no leido</p>,
+      label: <p>{t("markUnread")}</p>,
       key: "mark-unread"
     },
     ...(conversation.status === "OPEN"
       ? [
           {
-            label: <p>{conversation.escalated ? "Activar bot" : "Inactivar bot"}</p>,
+            label: <p>{conversation.escalated ? t("enableBot") : t("disableBot")}</p>,
             key: "toggle-escalation",
             disabled: escalatingId === conversation.id
           }
@@ -213,7 +218,7 @@ export default function AllChats({
   const handleAddClient = () => {
     if (selectedIds.length > 1) {
       toast({
-        title: "Seleccione uno a la vez para esta acción",
+        title: t("selectOneAtATime"),
         variant: "destructive"
       });
       return;
@@ -243,15 +248,15 @@ export default function AllChats({
         <div className="self-end">
           <ChatActions
             items={[
-              { key: "send-batch", label: "Enviar masivo", onClick: onNewChat },
+              { key: "send-batch", label: t("sendBulk"), onClick: onNewChat },
               {
                 key: "add-client",
-                label: "Agregar cliente",
+                label: tShared("addClient"),
                 onClick: handleAddClient
               },
               {
                 key: "new-chat",
-                label: "Nuevo chat",
+                label: tShared("newChat"),
                 onClick: () => setTemplateTarget({ mode: "newChat" })
               }
             ]}
@@ -263,7 +268,7 @@ export default function AllChats({
         <SearchField
           value={query}
           onChange={setQuery}
-          placeholder="Buscar cliente, telefono o mensaje..."
+          placeholder={tShared("searchPlaceholder")}
           autoComplete="off"
         />
       </div>
@@ -274,9 +279,9 @@ export default function AllChats({
         className="w-full px-3 pt-2"
       >
         <TabsList className="grid w-full grid-cols-4 bg-[#F7F7F7] [&>button]:px-1 [&>button]:text-[13px]">
-          <TabsTrigger value="abiertos">Abiertos</TabsTrigger>
-          <TabsTrigger value="no-leidos">No leídos</TabsTrigger>
-          <TabsTrigger value="todos">Todos</TabsTrigger>
+          <TabsTrigger value="abiertos">{t("tabs.open")}</TabsTrigger>
+          <TabsTrigger value="no-leidos">{t("tabs.unread")}</TabsTrigger>
+          <TabsTrigger value="todos">{tCommon("status.all")}</TabsTrigger>
           <TabsTrigger value="bot">Bot</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -287,11 +292,11 @@ export default function AllChats({
         <ul className="pl-2">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="text-sm text-muted-foreground">Cargando tickets...</div>
+              <div className="text-sm text-muted-foreground">{t("loading")}</div>
             </div>
           ) : conversations.length === 0 ? (
             <div className="flex items-center justify-center py-8">
-              <div className="text-sm text-muted-foreground">No se encontraron tickets</div>
+              <div className="text-sm text-muted-foreground">{t("empty")}</div>
             </div>
           ) : (
             conversations.map((c) => {
@@ -310,7 +315,7 @@ export default function AllChats({
                     className="absolute left-2 top-1/2 -translate-y-1/2"
                     checked={isSelected}
                     onCheckedChange={() => toggleSelect(c.id)}
-                    aria-label={"Seleccionar chat de " + c.customer}
+                    aria-label={t("selectChat", { customer: c.customer })}
                   />
                   <div className="ml-6 min-w-0 flex-1">
                     <div className="flex w-full items-baseline justify-between gap-2">
@@ -319,13 +324,13 @@ export default function AllChats({
                           className={`min-w-0 flex-1 truncate text-sm font-semibold ${c.status === "CLOSED" ? "text-[#72737f]" : ""}`}
                         >
                           {c.status === "CLOSED"
-                            ? `${c.client_name || ""} - Cerrado ⚠️ `
+                            ? t("closedName", { name: c.client_name || "" })
                             : `${c.client_name || ""}`}
                         </p>
 
                         {c.escalated && (
                           <span
-                            title="Escalado"
+                            title={t("escalated")}
                             className="inline-flex items-center justify-center rounded-full bg-black p-1 shrink-0"
                           >
                             <Bell size={14} weight="fill" className="text-cashport-orange" />
@@ -334,7 +339,7 @@ export default function AllChats({
 
                         {c.agent && (
                           <span
-                            title="Agente asignado"
+                            title={t("agentAssigned")}
                             className="inline-flex items-center justify-center rounded-full p-1 shrink-0"
                           >
                             <Robot size={19} weight="fill" color="#8a8a8a" />

@@ -1,0 +1,282 @@
+{
+  "shared": {
+    "addClient": "Agregar cliente",
+    "accountStatement": "Estado de cuenta",
+    "newChat": "Nuevo chat",
+    "searchPlaceholder": "Buscar cliente, teléfono o mensaje...",
+    "templateSent": "Plantilla enviada exitosamente",
+    "templateSendError": "Error al enviar la plantilla"
+  },
+  "format": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "am": "a. m.",
+    "pm": "p. m."
+  },
+  "accountStatement": {
+    "title": "Envío de estado de cuenta",
+    "recipientsRequired": "Se requiere seleccionar destinatarios",
+    "loadError": "Error al cargar la información",
+    "noClientSelected": "No se ha seleccionado un cliente",
+    "noClientSelectedHint": "No se ha seleccionado un cliente. Por favor, seleccione una conversación primero.",
+    "sentByEmail": "Estado de cuenta enviado por correo correctamente",
+    "sentByWhatsapp": "Estado de cuenta enviado por WhatsApp correctamente",
+    "downloaded": "Archivos del estado de cuenta descargados correctamente",
+    "downloadFailed": "No se pudieron descargar los archivos",
+    "invalidMethod": "Método de envío no válido",
+    "errors": {
+      "email": "Error al enviar el estado de cuenta por correo",
+      "whatsapp": "Error al enviar el estado de cuenta por WhatsApp",
+      "download": "Error al descargar los archivos del estado de cuenta",
+      "generic": "Error al procesar el estado de cuenta"
+    },
+    "tabs": {
+      "email": "Correo"
+    },
+    "to": "Para",
+    "recipientsPlaceholder": "Seleccione o escriba destinatarios",
+    "files": "Archivos",
+    "filesPlaceholder": "Seleccione archivos"
+  },
+  "tagsSelect": {
+    "required": "{field} es obligatorio *"
+  },
+  "inboxHeader": {
+    "title": "Conversaciones"
+  },
+  "audio": {
+    "pause": "Pausar audio",
+    "play": "Reproducir audio"
+  },
+  "allChats": {
+    "botEnabled": "Bot activado",
+    "botDisabled": "Bot inactivado",
+    "escalationError": "No se pudo actualizar el estado del chat",
+    "markUnread": "Marcar como no leído",
+    "enableBot": "Activar bot",
+    "disableBot": "Inactivar bot",
+    "selectOneAtATime": "Seleccione uno a la vez para esta acción",
+    "sendBulk": "Enviar masivo",
+    "tabs": {
+      "open": "Abiertos",
+      "unread": "No leídos"
+    },
+    "loading": "Cargando tickets...",
+    "empty": "No se encontraron tickets",
+    "selectChat": "Seleccionar chat de {customer}",
+    "closedName": "{name} - Cerrado ⚠️",
+    "escalated": "Escalado",
+    "agentAssigned": "Agente asignado"
+  },
+  "bubble": {
+    "quoted": {
+      "unavailable": "mensaje no disponible",
+      "image": "imagen",
+      "sticker": "sticker",
+      "audio": "audio",
+      "document": "documento",
+      "contact": "contacto",
+      "template": "plantilla",
+      "message": "mensaje"
+    },
+    "reacted": "Reaccionó <emoji></emoji> a:",
+    "contactNoData": "Contacto sin datos",
+    "noPhone": "Sin teléfono",
+    "viewImage": "Ver imagen",
+    "sentImage": "Imagen enviada",
+    "openDocument": "Abrir documento",
+    "loadingTemplate": "Cargando plantilla...",
+    "templateNotFound": "Plantilla \"{name}\" no encontrada",
+    "document": "Documento",
+    "clickToOpen": "Haz clic para abrir",
+    "noName": "Sin nombre"
+  },
+  "footer": {
+    "noNumberTitle": "No hay número",
+    "noNumberDescription": "Este contacto no tiene teléfono válido.",
+    "messageSentTitle": "Mensaje enviado",
+    "messageSentDescription": "WhatsApp Cloud aceptó el mensaje.",
+    "sendErrorTitle": "Error al enviar",
+    "sendErrorDescription": "No se pudo enviar por WhatsApp Cloud.",
+    "fileSent": "Archivo enviado correctamente",
+    "fileSendError": "Error al enviar el archivo",
+    "templates": "Plantillas",
+    "attachFile": "Adjuntar archivo",
+    "attachFiles": "Adjuntar archivos",
+    "messagePlaceholder": "Escribe un mensaje...",
+    "sendMessage": "Enviar mensaje",
+    "emailSubjectPlaceholder": "Asunto del correo",
+    "emailBodyPlaceholder": "Escribe el cuerpo del correo...",
+    "attachmentAlt": "Adjunto {name}",
+    "removeImage": "Quitar imagen {name}",
+    "removeAttachment": "Quitar adjunto {name}",
+    "sendEmail": "Enviar correo",
+    "dropHint": "Suelta archivos o imágenes para adjuntar"
+  },
+  "addClient": {
+    "title": "Agregar cliente",
+    "subtitle": "Ingresa la información del nuevo cliente.",
+    "success": "Cliente agregado exitosamente",
+    "error": "Error al agregar el cliente",
+    "firstName": "Nombres",
+    "lastName": "Apellidos",
+    "jobTitle": "Cargo",
+    "role": "Rol",
+    "countryCode": "Indicativo",
+    "phoneTenDigits": "El teléfono debe tener 10 dígitos",
+    "phoneDigitsRange": "El teléfono debe tener entre 7 y 12 dígitos",
+    "selectClient": "Seleccione cliente",
+    "clientRequired": "El cliente es obligatorio *"
+  },
+  "massMessage": {
+    "title": "Envío masivo por WhatsApp",
+    "selected": "Seleccionados:",
+    "message": "Mensaje",
+    "placeholder": "Hola {name}, tienes {days} días de atraso...",
+    "variablesHint": "Soporta variables simples como {name} y {days}.",
+    "linkPreview": "Vista previa de enlaces",
+    "linkPreviewHint": "Enviar con vista previa enriquecida",
+    "sendTo": "Enviar a {count}"
+  },
+  "paymentLink": {
+    "title": "Generar link de pago",
+    "subtitle": "Completa la información para generar el link.",
+    "validation": {
+      "invalidDate": "Debe ser una fecha válida",
+      "expirationDateRequired": "La fecha de expiración es requerida",
+      "invalidTime": "Debe ser una hora válida",
+      "expirationTimeRequired": "La hora de expiración es requerida",
+      "selectInvoice": "Selecciona al menos una factura",
+      "invalidNumber": "Debe ser un número válido",
+      "amountPositive": "El monto debe ser mayor a 0",
+      "amountRequired": "El monto es requerido",
+      "descriptionRequired": "La descripción es requerida"
+    },
+    "generated": "Link de pago generado exitosamente",
+    "generateError": "Error al generar el link",
+    "copied": "Link copiado al portapapeles",
+    "copyError": "Error al copiar el link",
+    "templateSendError": "Error al enviar la plantilla por WhatsApp",
+    "datePlaceholder": "MM/DD/AAAA",
+    "dueTime": "Hora de vencimiento",
+    "amountToPay": "Monto a pagar",
+    "selectInvoicesPlaceholder": "Selecciona facturas",
+    "descriptionPlaceholder": "Ingresa una descripción",
+    "generate": "Generar link",
+    "successTitle": "Link generado exitosamente",
+    "sendTemplate": "Enviar plantilla",
+    "details": "Detalles de la transacción",
+    "createdAt": "Fecha creación",
+    "expiresAt": "Fecha expiración"
+  },
+  "selectInvoices": {
+    "title": "Facturas a cancelar",
+    "overdueBy": "Vencida hace {days}d",
+    "dueIn": "Vence en {days}d",
+    "noInvoices": "Sin facturas",
+    "searchById": "Buscar por ID",
+    "selectedCount": "{count, plural, one {# factura seleccionada} other {# facturas seleccionadas}}",
+    "placeholder": "Selecciona facturas"
+  },
+  "selectClient": {
+    "title": "Seleccionar cliente",
+    "sendErrorTitle": "Error enviando",
+    "sendErrorDescription": "No se pudo enviar el mensaje de WhatsApp.",
+    "loadingContacts": "Cargando contactos...",
+    "contact": "Contacto",
+    "sendWhatsapp": "Enviar WhatsApp"
+  },
+  "templates": {
+    "title": "{channel, select, whatsapp {Plantillas de WhatsApp} other {Plantillas de correo}}",
+    "tabs": {
+      "use": "Usar"
+    },
+    "textBadge": "Texto",
+    "emailBadge": "Correo",
+    "subject": "Asunto",
+    "body": "Cuerpo",
+    "insert": "Insertar",
+    "namePlaceholder": "Nombre de la plantilla",
+    "contentPlaceholder": "Contenido con variables: Hola {name}, ...",
+    "waTip": "Tip: Usa variables entre llaves, por ejemplo {name}.",
+    "insertInMessage": "Insertar en el mensaje",
+    "subjectPlaceholder": "Asunto del correo",
+    "bodyPlaceholder": "Cuerpo del correo con variables: Estimado {name}, ...",
+    "emailTip": "Tip: Puedes usar variables como {name} y {period}.",
+    "insertInEmail": "Insertar en el correo",
+    "email": {
+      "accountSummary": {
+        "name": "Resumen de cuenta",
+        "subject": "Resumen de tu estado de cuenta",
+        "body": "Hola {name},\n\nAdjuntamos tu estado de cuenta correspondiente a {period}. Si ya realizaste el pago, por favor ignora este mensaje.\n\nSaludos,\nEquipo Cashport"
+      },
+      "formalReminder": {
+        "name": "Recordatorio de pago formal",
+        "subject": "Recordatorio de pago - {dueDate}",
+        "body": "Estimado/a {name},\n\nTe recordamos que tu obligación con vencimiento el {dueDate} presenta {daysPastDue} días de atraso. Monto pendiente: {amount}.\n\nPuedes regularizar aquí: {paymentLink}\n\nAtentamente,\nEquipo Cashport"
+      }
+    }
+  },
+  "details": {
+    "contactDeactivated": "Contacto inactivado exitosamente",
+    "contactDeactivateError": "Error al inactivar el contacto",
+    "hideClientInfo": "Ocultar información del cliente",
+    "generatePaymentLink": "Generar link de pago",
+    "deactivateContact": "Inactivar contacto",
+    "closeChat": "Cerrar chat",
+    "clientInfo": "Información del cliente",
+    "copyTaxId": "Copiar NIT",
+    "taxIdCopied": "NIT copiado",
+    "copyFailed": "No se pudo copiar",
+    "copyPhone": "Copiar teléfono",
+    "phoneCopied": "Teléfono copiado",
+    "codes": "Código(s)",
+    "copyCode": "Copiar código",
+    "codeCopied": "Código copiado",
+    "collector": "Ejecutivo",
+    "channel": "Canal",
+    "copyEmail": "Copiar correo",
+    "emailCopied": "Correo copiado",
+    "segment": "Segmento",
+    "receivablesSummary": "Resumen de cartera",
+    "totalReceivables": "Cartera total",
+    "pastDue": "Cartera vencida",
+    "unappliedPayments": "Pagos no aplicados",
+    "lastPayment": "Último pago",
+    "deactivateConfirm": "¿Está seguro de inactivar este contacto?",
+    "deactivate": "Inactivar"
+  },
+  "thread": {
+    "ticketOpen": "Ticket \"{subject}\" - Abierto",
+    "ticketClosed": "Ticket \"{subject}\" - Cerrado{hasBy, select, yes { por {closedBy}} other {}}{hasDate, select, yes { {closedAt}} other {}}",
+    "missingDataTitle": "Datos insuficientes",
+    "missingDataDescription": "No se pudo enviar la plantilla porque faltan datos del cliente.",
+    "templateSentTitle": "Plantilla enviada",
+    "templateSentDescription": "La plantilla de WhatsApp fue enviada exitosamente.",
+    "sendErrorTitle": "Error al enviar",
+    "sendErrorDescription": "No se pudo enviar la plantilla de WhatsApp.",
+    "noEmail": "sin correo",
+    "emailTab": "Correo",
+    "showClientInfo": "Mostrar información del cliente",
+    "loadingOlder": "Cargando mensajes anteriores..."
+  },
+  "ui": {
+    "close": "Cerrar",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "previousPage": "Ir a la página anterior",
+    "nextPage": "Ir a la página siguiente",
+    "morePages": "Más páginas",
+    "more": "Más",
+    "previousSlide": "Diapositiva anterior",
+    "nextSlide": "Diapositiva siguiente",
+    "sidebar": "Barra lateral",
+    "sidebarDescription": "Muestra la barra lateral en móvil.",
+    "toggleSidebar": "Mostrar u ocultar barra lateral",
+    "commandPalette": "Paleta de comandos",
+    "commandPaletteDescription": "Busca un comando para ejecutar..."
+  },
+  "view": {
+    "selectChat": "Selecciona un chat para ver la conversación"
+  }
+}

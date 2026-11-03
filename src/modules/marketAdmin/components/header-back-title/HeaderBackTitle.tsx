@@ -1,6 +1,7 @@
 "use client";
 
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 interface Props {
   title: string;
@@ -14,12 +15,14 @@ interface Props {
  * Replica las medidas de `back` y `title` del Header (docs/DESIGN.md §4).
  */
 export default function HeaderBackTitle({ title, onBack }: Props) {
+  const tCommon = useTranslations("common.actions");
   return (
     <div className="flex min-w-0 items-center gap-3">
       <button
         type="button"
         onClick={onBack}
-        title="Volver"
+        title={tCommon("back")}
+        aria-label={tCommon("back")}
         className="-ml-1 flex h-[var(--control-h)] flex-shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent px-0.5 text-inherit"
       >
         <CaretLeft size={21} weight="bold" />

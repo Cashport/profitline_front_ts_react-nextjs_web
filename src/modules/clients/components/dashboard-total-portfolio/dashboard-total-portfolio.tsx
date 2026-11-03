@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import DashboardGenericItem from "../dashboard-generic-item";
 import DashboardColorBar from "../dashboard-color-bar";
 
@@ -23,6 +24,7 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
   countCreditNotes = 0,
   countBalances = 0
 }) => {
+  const t = useTranslations("clients.dashboard.totalPortfolio");
   const parseValue = (value: string): number => {
     if (!value) return 0;
 
@@ -51,12 +53,12 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
 
   return (
     <div className={`${className}`}>
-      <DashboardGenericItem name="Total cartera neta" value={totalWallet} unit="M" />
+      <DashboardGenericItem name={t("title")} value={totalWallet} unit="M" />
 
       <DashboardColorBar values={colorBarValues} />
 
       <DashboardGenericItem
-        name="Facturas"
+        name={t("invoices")}
         value={totalInvoices}
         unit="M"
         quantity={countInvoices}
@@ -64,7 +66,7 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
       />
 
       <DashboardGenericItem
-        name="Notas crédito"
+        name={t("creditMemos")}
         value={`-${totalCreditNotes}`}
         unit="M"
         quantity={countCreditNotes}
@@ -72,7 +74,7 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
       />
 
       <DashboardGenericItem
-        name="Saldos"
+        name={t("balances")}
         value={totalBalances}
         unit="M"
         quantity={countBalances}

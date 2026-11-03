@@ -2,18 +2,21 @@
 
 import Link from "next/link";
 import { ChevronRight, Store } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { useAppStore } from "@/lib/store/store";
 import type { IBlockingAlertDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 
 import { BLOCKING_ALERTS_PATH, STATUS_META } from "../../constants";
-import { byUrgency, plural, statusLabel } from "../../utils/blocking-alerts";
+import { byUrgency, statusLabel } from "../../utils/blocking-alerts";
 
 const TOP = 3;
 
 /** Puntos de venta del cliente por estado, los más urgentes y el acceso a todos. */
 export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDetail }) {
+  const t = useTranslations("blockingAlerts");
+  const tp = useTranslations("blockingAlerts.pointsOfSaleCard");
   const formatMoney = useAppStore((s) => s.formatMoney);
   const pos = detail.points_of_sale_count;
   if (!pos) return null;
@@ -21,9 +24,9 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
   const allHref = `${BLOCKING_ALERTS_PATH}/${detail.client_id}/points-of-sale`;
   const atRisk = detail.points_of_sale.filter((s) => s.status !== "ok").sort(byUrgency);
   const legend = [
-    { key: "blocked", n: pos.blocked, label: pos.blocked === 1 ? "Bloqueado" : "Bloqueados" },
-    { key: "warning", n: pos.warning, label: "Por bloquear" },
-    { key: "ok", n: pos.total - pos.blocked - pos.warning, label: "Al día" }
+    { key: "blocked", n: pos.blocked, label: tp("blocked", { count: pos.blocked }) },
+    { key: "warning", n: pos.warning, label: t("status.warning") },
+    { key: "ok", n: pos.total - pos.blocked - pos.warning, label: t("status.ok") }
   ] as const;
 
   return (
@@ -32,14 +35,14 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
         <span className="flex min-w-0 items-center gap-2">
           <Store className="h-4 w-4 shrink-0 text-cp-ink-3" />
           <span className="truncate text-[15px] font-semibold text-cp-ink">
-            {plural(pos.total, "punto de venta", "puntos de venta")}
+            {t("count.pointsOfSale", { count: pos.total })}
           </span>
         </span>
         <Link
           href={allHref}
           className="flex shrink-0 items-center gap-0.5 text-[13px] font-semibold text-cp-blue hover:underline"
         >
-          Ver todos
+          {tp("viewAll")}
           <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -64,7 +67,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
 
       {atRisk.length === 0 ? (
         <p className="m-0 border-t border-cp-line pt-2.5 text-[13px] text-cp-ink-3">
-          Todos sus puntos de venta están al día.
+          {tp("allCurrent")}
         </p>
       ) : (
         <div className="flex flex-col">
@@ -95,7 +98,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
                   >
                     {formatMoney(s.past_due, { hideDecimals: true })}
                   </span>
-                  <span className="block text-[13px] text-cp-ink-4">pago vencido</span>
+                  <span className="block text-[13px] text-cp-ink-4">{tp("pastDue")}</span>
                 </span>
               </Link>
             );
@@ -107,7 +110,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertDet
         href={allHref}
         className="flex h-9 items-center justify-center rounded-[10px] border border-cp-line-2 text-[13px] font-semibold text-cp-ink hover:border-cp-ink"
       >
-        Ver los {plural(pos.total, "punto de venta", "puntos de venta")}
+        {tp("viewAllCount", { items: t("count.pointsOfSale", { count: pos.total }) })}
       </Link>
     </section>
   );

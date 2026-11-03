@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 import instance, { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
@@ -207,9 +208,7 @@ export const editIntake = async (
 
 // GET /data/client-archive-monthly/:id/variable-history: auditoria de cambios
 // (quien/cuando/que) de las variables de configuracion (credenciales) de una ingesta.
-export const getVariableHistory = async (
-  archiveId: number
-): Promise<IVariableHistoryEntry[]> => {
+export const getVariableHistory = async (archiveId: number): Promise<IVariableHistoryEntry[]> => {
   try {
     const response: GenericResponse<IVariableHistoryEntry[]> = await API.get(
       `${config.API_HOST}/data/client-archive-monthly/${archiveId}/variable-history`
@@ -395,7 +394,7 @@ export const downloadCSV = async (id_archives_client_data: number): Promise<Blob
     if (error?.response?.data instanceof Blob) {
       const text = await error.response.data.text();
       const parsed = JSON.parse(text);
-      throw new Error(parsed.message || "Error al descargar el archivo");
+      throw new Error(parsed.message || getTranslator("shared")("services.downloadFileError"));
     }
     throw error;
   }
@@ -412,7 +411,7 @@ export const downloadExcel = async (id_archives_client_data: number) => {
     if (error?.response?.data instanceof Blob) {
       const text = await error.response.data.text();
       const parsed = JSON.parse(text);
-      throw new Error(parsed.message || "Error al descargar el archivo");
+      throw new Error(parsed.message || getTranslator("shared")("services.downloadFileError"));
     }
     throw error;
   }
@@ -533,11 +532,7 @@ export const downloadUnifiedCatalogFile = async ({
  * Descarga: mismo patrón que el catálogo general (URL de S3).
  * Carga: upsert por Cod_Iqvia; devuelve el resumen y los errores por fila.
  */
-export const downloadIqviaAuxCatalog = async ({
-  countryId
-}: {
-  countryId?: number | string;
-}) => {
+export const downloadIqviaAuxCatalog = async ({ countryId }: { countryId?: number | string }) => {
   const queryString = countryId ? `?id_country=${countryId}` : "";
   try {
     const response: GenericResponse<{
@@ -952,18 +947,14 @@ export const uploadAuxiliaryUpload = async ({
   return response.data;
 };
 
-export const getAuxiliaryUploadBatch = async (
-  batchId: string
-): Promise<IAuxiliaryUploadBatch> => {
+export const getAuxiliaryUploadBatch = async (batchId: string): Promise<IAuxiliaryUploadBatch> => {
   const response: GenericResponse<IAuxiliaryUploadBatch> = await API.get(
     `${config.API_HOST}/data/auxiliary-upload-batches/${batchId}`
   );
   return response.data;
 };
 
-export const retryAuxiliaryUpload = async (
-  uploadId: number
-): Promise<{ batchId: string }> => {
+export const retryAuxiliaryUpload = async (uploadId: number): Promise<{ batchId: string }> => {
   const response: GenericResponse<{ batchId: string }> = await API.post(
     `${config.API_HOST}/data/auxiliary-uploads/${uploadId}/retry`
   );

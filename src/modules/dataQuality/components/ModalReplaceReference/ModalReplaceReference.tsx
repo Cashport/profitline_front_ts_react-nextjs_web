@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Modal, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import { Button } from "@/modules/chat/ui/button";
@@ -27,6 +28,9 @@ export function ModalReplaceReference({
   ownerLabel,
   onSubmit
 }: ModalReplaceReferenceProps) {
+  const t = useTranslations("dataQuality.references.replace");
+  const tForm = useTranslations("dataQuality.references.form");
+  const tCommon = useTranslations("common");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -44,7 +48,7 @@ export function ModalReplaceReference({
   const handleFile = (selected: File) => {
     if (!isAllowedReferenceFile(selected)) {
       setFile(null);
-      setError(`Formato no permitido. Usa ${REFERENCE_ALLOWED_EXTENSIONS.join(", ")}.`);
+      setError(tForm("formatNotAllowed", { extensions: REFERENCE_ALLOWED_EXTENSIONS.join(", ") }));
       return;
     }
     setFile(selected);
@@ -56,11 +60,11 @@ export function ModalReplaceReference({
     setSubmitting(true);
     try {
       await onSubmit(file);
-      message.success("Archivo reemplazado exitosamente.");
+      message.success(t("replaced"));
       onClose();
     } catch (err) {
       // El conflicto de concurrencia (409) se informa y NO se reintenta solo.
-      message.error(err instanceof Error ? err.message : "No se pudo reemplazar el archivo.");
+      message.error(err instanceof Error ? err.message : t("replaceError"));
     } finally {
       setSubmitting(false);
     }
@@ -70,7 +74,7 @@ export function ModalReplaceReference({
     <Modal
       open={isOpen}
       onCancel={submitting ? undefined : onClose}
-      title="Reemplazar archivo de referencia"
+      title={t("title")}
       footer={null}
       destroyOnClose
       maskClosable={!submitting}
@@ -78,13 +82,13 @@ export function ModalReplaceReference({
       <div className="space-y-3">
         <div className="rounded-lg bg-[#F5F5F4] p-3 text-sm text-[#141414]">
           <p>
-            <span className="font-medium">Tipo:</span> {reference?.reference_type ?? "-"}
+            <span className="font-medium">{t("type")}</span> {reference?.reference_type ?? "-"}
           </p>
           <p>
-            <span className="font-medium">Ámbito:</span> {ownerLabel}
+            <span className="font-medium">{t("scope")}</span> {ownerLabel}
           </p>
           <p>
-            <span className="font-medium">Versión actual:</span> {reference?.version ?? "-"}
+            <span className="font-medium">{t("currentVersion")}</span> {reference?.version ?? "-"}
           </p>
         </div>
 
@@ -93,13 +97,13 @@ export function ModalReplaceReference({
             <UploadDropZone
               onFileUpload={handleFile}
               allowedExtensions={[...REFERENCE_ALLOWED_EXTENSIONS]}
-              title="Arrastra el nuevo archivo Excel aquí"
+              title={t("dropTitle")}
             />
             {file && <p className="text-sm text-[#141414]">{file.name}</p>}
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="flex justify-end gap-2 pt-1">
               <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
-                Cancelar
+                {tCommon("actions.cancel")}
               </Button>
               <Button
                 type="button"
@@ -107,17 +111,18 @@ export function ModalReplaceReference({
                 disabled={!file || submitting}
                 onClick={() => setConfirming(true)}
               >
-                Continuar
+                {tCommon("actions.continue")}
               </Button>
             </div>
           </>
         ) : (
           <>
             <p className="text-sm text-[#141414]">
-              Se reemplazará el archivo y la versión pasará de{" "}
-              <span className="font-medium">{reference?.version ?? "-"}</span> a{" "}
-              <span className="font-medium">{(reference?.version ?? 0) + 1}</span>. ¿Confirmas el
-              reemplazo?
+              {t.rich("confirmText", {
+                from: reference?.version ?? "-",
+                to: (reference?.version ?? 0) + 1,
+                b: (chunks) => <span className="font-medium">{chunks}</span>
+              })}
             </p>
             <div className="flex justify-end gap-2 pt-1">
               <Button
@@ -126,7 +131,7 @@ export function ModalReplaceReference({
                 onClick={() => setConfirming(false)}
                 disabled={submitting}
               >
-                Volver
+                {tCommon("actions.back")}
               </Button>
               <Button
                 type="button"
@@ -134,7 +139,7 @@ export function ModalReplaceReference({
                 disabled={submitting}
                 onClick={handleConfirm}
               >
-                {submitting ? "Reemplazando..." : "Confirmar reemplazo"}
+                {submitting ? t("replacing") : t("confirm")}
               </Button>
             </div>
           </>

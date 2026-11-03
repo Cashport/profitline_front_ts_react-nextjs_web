@@ -1,6 +1,8 @@
+import { getTranslator } from "@/i18n/translator";
+
+// El texto visible ("+ Nueva dirección") se traduce en cada componente: commerce.checkout.newAddressOption.
 export const NEW_ADDRESS_OPTION = {
-  value: "new_address",
-  label: "+ Nueva dirección"
+  value: "new_address"
 };
 
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -36,7 +38,7 @@ const CHANNELS_REQUIRING_PURCHASE_ORDER = ["institucional", "trade"];
 export const requiresPurchaseOrder = (businessUnit?: string): boolean =>
   CHANNELS_REQUIRING_PURCHASE_ORDER.includes(businessUnit?.trim().toLowerCase() ?? "");
 
-export const phoneErrorMessage = (indicativo: string) =>
-  indicativo === "+57"
-    ? "Teléfono debe tener 10 dígitos"
-    : "Teléfono debe tener entre 10 y 12 dígitos";
+export const phoneErrorMessage = (indicativo: string) => {
+  const t = getTranslator("commerce");
+  return indicativo === "+57" ? t("checkout.phoneDigits") : t("checkout.phoneDigitsRange");
+};

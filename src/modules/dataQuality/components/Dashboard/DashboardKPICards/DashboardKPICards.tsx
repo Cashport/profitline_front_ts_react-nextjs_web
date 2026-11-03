@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { Card } from "@/modules/chat/ui/card";
 import { IDashboardSummaryKpis } from "@/types/dataQuality/IDataQuality";
@@ -12,6 +13,7 @@ interface DashboardKPICardsProps {
 type ViewMode = "tipo" | "pais";
 
 export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
+  const t = useTranslations("dataQuality.dashboard.kpis");
   const [view, setView] = useState<ViewMode>("pais");
 
   const rows = view === "tipo" ? kpis?.byTypeArchive ?? [] : kpis?.byRegion ?? [];
@@ -22,7 +24,7 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
     <Card className="cp-card rounded-[var(--card-radius)] border-0 bg-cp-surface shadow-none flex flex-col overflow-hidden px-[18px] py-[14px]">
       <div className="flex items-center mb-5">
         <h3 className="text-sm font-semibold flex-1" style={{ color: "#000000" }}>
-          Estado de archivos
+          {t("title")}
         </h3>
 
         <div className="flex items-center rounded-lg p-0.5" style={{ backgroundColor: "#F3F4F6" }}>
@@ -37,14 +39,14 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
                 boxShadow: view === v ? "0 1px 3px rgba(0,0,0,0.08)" : "none"
               }}
             >
-              {v === "tipo" ? "Por tipo" : "Por país"}
+              {v === "tipo" ? t("byType") : t("byCountry")}
             </button>
           ))}
         </div>
 
         <div className="flex items-center gap-2 flex-1 justify-end">
           <span className="text-[13px]" style={{ color: "#9CA3AF" }}>
-            Estado general
+            {t("overallStatus")}
           </span>
           <div
             className="h-1 w-14 rounded-full overflow-hidden"
@@ -64,35 +66,23 @@ export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
       <table className="w-full">
         <thead>
           <tr className="border-b border-cp-line bg-cp-surface">
-            <th
-              className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
-            >
-              {view === "tipo" ? "Tipo" : "País"}
+            <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+              {view === "tipo" ? t("type") : t("country")}
             </th>
-            <th
-              className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink w-40"
-            >
-              Estado
+            <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink w-40">
+              {t("status")}
             </th>
-            <th
-              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
-            >
-              Esperados
+            <th className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+              {t("expected")}
             </th>
-            <th
-              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
-            >
-              Transformados
+            <th className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+              {t("transformed")}
             </th>
-            <th
-              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
-            >
-              Novedades
+            <th className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+              {t("issues")}
             </th>
-            <th
-              className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink"
-            >
-              Pendientes
+            <th className="text-center px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+              {t("pending")}
             </th>
           </tr>
         </thead>

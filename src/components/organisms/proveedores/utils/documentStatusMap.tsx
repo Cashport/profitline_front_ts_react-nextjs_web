@@ -10,9 +10,21 @@ export type DocumentStatusId =
   | "c02b3475-f59a-4222-bb28-9dbb51cf02c1"
   | "dcf4e68b-11cb-4352-8ea7-f6356fa98db9";
 
+// Clave en suppliers.documentStatus; el texto se traduce al renderizar (BadgeDocumentStatus).
+export type DocumentStatusLabelKey =
+  | "unclassified"
+  | "inReview"
+  | "rejected"
+  | "aiApproved"
+  | "aiRejected"
+  | "pending"
+  | "approved";
+
 // 1. Interfaz modificada: 'icon' ahora es una función factoría
 export interface StatusDetailsConfig {
-  text: string | ReactNode;
+  labelKey?: DocumentStatusLabelKey;
+  /** Nombre que llega del backend cuando el estado no está en el mapa. */
+  text?: string;
   color: string;
   backgroundColor: string;
   // La función recibe 'size' y devuelve el elemento icono
@@ -23,7 +35,9 @@ export interface StatusDetailsConfig {
 }
 
 export interface StatusDetails {
-  text: string | ReactNode;
+  labelKey?: DocumentStatusLabelKey;
+  /** Nombre que llega del backend cuando el estado no está en el mapa. */
+  text?: string;
   color: string;
   backgroundColor: string;
   icon: ReactElement;
@@ -33,43 +47,43 @@ export interface StatusDetails {
 
 export const STATUS_MAP: Record<DocumentStatusId, StatusDetails> = {
   "a88b6d87-42f2-45f1-b45b-562ef43a3d19": {
-    text: "No clasificado",
+    labelKey: "unclassified",
     color: "#92400e",
     icon: <Clock size={16} />,
     backgroundColor: "#fef2ca"
   },
   "532d6b7f-03da-4d22-9c28-2ef69590608f": {
-    text: "En revisión",
+    labelKey: "inReview",
     color: "#2143b0",
     icon: <MagnifyingGlass size={16} />,
     backgroundColor: "#e2ecfe"
   },
   "5081de05-745d-449c-aff5-086e0d8b47a0": {
-    text: "Rechazado",
+    labelKey: "rejected",
     color: "#e7092b",
     icon: <XCircle size={16} />,
     backgroundColor: "#fce6e9"
   },
   "ca007d5c-6102-4de2-87b1-7150fb5d31a7": {
-    text: <span className="cashportIATextGradient">Aprobado IA</span>,
+    labelKey: "aiApproved",
     color: "#6f25b6",
     icon: <Sparkle size={14} weight="fill" />,
     backgroundColor: "#f0eafb"
   },
   "cdc3af46-5ba3-416b-bc76-0aa825efb1aa": {
-    text: "Rechazado IA",
+    labelKey: "aiRejected",
     color: "#1e5d90",
     icon: <Sparkle size={14} weight="fill" />,
     backgroundColor: "#dfe5ea"
   },
   "c02b3475-f59a-4222-bb28-9dbb51cf02c1": {
-    text: "Pendiente",
+    labelKey: "pending",
     color: "#92400e",
     icon: <Clock size={16} />,
     backgroundColor: "#fef2ca"
   },
   "dcf4e68b-11cb-4352-8ea7-f6356fa98db9": {
-    text: "Aprobado",
+    labelKey: "approved",
     color: "#065f46",
     icon: <CheckCircle size={16} />,
     backgroundColor: "#d9f4e8"
@@ -78,25 +92,25 @@ export const STATUS_MAP: Record<DocumentStatusId, StatusDetails> = {
 
 export const STATUS_CONFIG_MAP: Record<DocumentStatusId, StatusDetailsConfig> = {
   "a88b6d87-42f2-45f1-b45b-562ef43a3d19": {
-    text: "No clasificado",
+    labelKey: "unclassified",
     color: "#92400e",
     iconFactory: (size) => <Clock size={size} />, // Función que crea el icono
     backgroundColor: "#fef2ca"
   },
   "532d6b7f-03da-4d22-9c28-2ef69590608f": {
-    text: "En revisión",
+    labelKey: "inReview",
     color: "#2143b0",
     iconFactory: (size) => <MagnifyingGlass size={size} />,
     backgroundColor: "#e2ecfe"
   },
   "5081de05-745d-449c-aff5-086e0d8b47a0": {
-    text: "Rechazado",
+    labelKey: "rejected",
     color: "#e7092b",
     iconFactory: (size) => <XCircle size={size} />,
     backgroundColor: "#fce6e9"
   },
   "ca007d5c-6102-4de2-87b1-7150fb5d31a7": {
-    text: <span className="cashportIATextGradient">Aprobado IA</span>,
+    labelKey: "aiApproved",
     color: "#6f25b6",
     // Mantenemos props fijas como 'weight' dentro de la función
     iconFactory: (size) => <Sparkle size={size - 2} weight="fill" />,
@@ -104,19 +118,19 @@ export const STATUS_CONFIG_MAP: Record<DocumentStatusId, StatusDetailsConfig> = 
     textWrapper: (text) => <span className="cashportIATextGradient">{text}</span> // Función opcional para envolver el texto
   },
   "cdc3af46-5ba3-416b-bc76-0aa825efb1aa": {
-    text: "Rechazado IA",
+    labelKey: "aiRejected",
     color: "#1e5d90",
     iconFactory: (size) => <Sparkle size={size - 2} weight="fill" />,
     backgroundColor: "#dfe5ea"
   },
   "c02b3475-f59a-4222-bb28-9dbb51cf02c1": {
-    text: "Pendiente",
+    labelKey: "pending",
     color: "#92400e",
     iconFactory: (size) => <Clock size={size} />,
     backgroundColor: "#fef2ca"
   },
   "dcf4e68b-11cb-4352-8ea7-f6356fa98db9": {
-    text: "Aprobado",
+    labelKey: "approved",
     color: "#065f46",
     iconFactory: (size) => <CheckCircle size={size} />,
     backgroundColor: "#d9f4e8"
@@ -124,8 +138,8 @@ export const STATUS_CONFIG_MAP: Record<DocumentStatusId, StatusDetailsConfig> = 
 };
 
 // Configuración por defecto para usar en el fallback
+// Sin labelKey ni text, BadgeDocumentStatus muestra suppliers.documentStatus.unknown.
 const defaultStatusConfig: StatusDetailsConfig = {
-  text: "Estado desconocido",
   color: "#000",
   backgroundColor: "#f0f0f0",
   iconFactory: (size) => <Clock size={size} />
@@ -149,7 +163,7 @@ export const getStatusDetails = (
   if (!baseConfig) {
     console.warn(`Status ID desconocido: ${id}. Usando fallback.`);
     baseConfig = {
-      text: fallbackName ?? defaultStatusConfig.text,
+      text: fallbackName,
       color: fallbackColor ?? defaultStatusConfig.color,
       backgroundColor: fallbackBackgroundColor ?? defaultStatusConfig.backgroundColor,
       iconFactory: defaultStatusConfig.iconFactory
@@ -160,6 +174,7 @@ export const getStatusDetails = (
   const finalIcon = baseConfig.iconFactory(iconSize);
 
   return {
+    labelKey: baseConfig.labelKey,
     text: baseConfig.text,
     color: baseConfig.color,
     backgroundColor: baseConfig.backgroundColor,

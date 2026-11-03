@@ -1,5 +1,6 @@
 import { FC, Fragment } from "react";
 import { Checkbox } from "antd";
+import { useTranslations } from "use-intl";
 import { CaretLeft, FileArrowUp, Plus } from "phosphor-react";
 import UiTabs from "@/components/ui/ui-tabs";
 import styles from "./generate-debit-note.module.scss";
@@ -9,6 +10,8 @@ import { useGenerateDebitNote } from "@/modules/clients/hooks/invoice-actions/ge
 interface GenerateDebitNoteProps {}
 
 const GenerateDebitNote: FC<GenerateDebitNoteProps> = () => {
+  const t = useTranslations("clients.invoiceActions.debitNote");
+  const tCommon = useTranslations("common");
   const { currentStep, file, setFile, handleSelectNotesContinue, handleDefineAmountContinue } =
     useGenerateDebitNote();
 
@@ -43,18 +46,18 @@ const GenerateDebitNote: FC<GenerateDebitNoteProps> = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <CaretLeft /> Aplicar nota débito
+        <CaretLeft /> {t("title")}
       </div>
       {currentStep === GenerateDebitNoteStep.SelectNotes && (
         <div className={styles.content}>
-          <div className={styles.title}>Selecciona la(s) nota(s) crédito a aplicar</div>
+          <div className={styles.title}>{t("selectNotes")}</div>
           <div className={styles.notesList}>
             {[1, 1, 1, 1].map(() => (
               <div key={Math.random()} className={styles.noteItem}>
                 <Checkbox />
                 <div className={styles.texts}>
-                  <div className={styles.name}>Nota débito 12345</div>
-                  <div className={styles.description}>Volumen</div>
+                  <div className={styles.name}>{t("noteName", { id: "12345" })}</div>
+                  <div className={styles.description}>{t("volume")}</div>
                 </div>
                 <div className={styles.values}>
                   <div className={styles.value}>$12.000.000</div>
@@ -64,22 +67,22 @@ const GenerateDebitNote: FC<GenerateDebitNoteProps> = () => {
             ))}
           </div>
           <div className={styles.create}>
-            <Plus /> Crear nota débito
+            <Plus /> {t("create")}
           </div>
           <div className={styles.buttons}>
-            <div className={styles.button}>Cancelar</div>
+            <div className={styles.button}>{tCommon("actions.cancel")}</div>
             <div
               className={`${styles.button} ${styles.primary}`}
               onClick={handleSelectNotesContinue}
             >
-              Continuar
+              {tCommon("actions.continue")}
             </div>
           </div>
         </div>
       )}
       {currentStep === GenerateDebitNoteStep.DefineAmount && (
         <div className={styles.content}>
-          <div className={styles.title}>Define el monto a aplicar a cada factura</div>
+          <div className={styles.title}>{t("defineAmount")}</div>
           <UiTabs
             className={styles.tabs}
             tabs={["12345", "23456", "34556"]}
@@ -87,8 +90,8 @@ const GenerateDebitNote: FC<GenerateDebitNoteProps> = () => {
           />
           <div key={Math.random()} className={styles.noteItem}>
             <div className={styles.texts}>
-              <div className={styles.name}>Nota débito 12345</div>
-              <div className={styles.description}>Volumen</div>
+              <div className={styles.name}>{t("noteName", { id: "12345" })}</div>
+              <div className={styles.description}>{t("volume")}</div>
             </div>
             <div className={styles.values}>
               <div className={styles.value}>$12.000.000</div>
@@ -96,41 +99,43 @@ const GenerateDebitNote: FC<GenerateDebitNoteProps> = () => {
             </div>
           </div>
           <div className={styles.table}>
-            <div className={styles.cellHeader}>ID Factura</div>
-            <div className={styles.cellHeader}>Pendiente</div>
-            <div className={styles.cellHeader}>Saldo nuevo</div>
-            <div className={styles.cellHeader}>Valor a aplicar</div>
+            <div className={styles.cellHeader}>{t("columns.invoiceId")}</div>
+            <div className={styles.cellHeader}>{t("columns.pending")}</div>
+            <div className={styles.cellHeader}>{t("columns.newBalance")}</div>
+            <div className={styles.cellHeader}>{t("columns.amountToApply")}</div>
             {defineAmountItems.map((item, index) => (
               <Fragment key={`${item.id}-${index}`}>
                 <div className={`${styles.cell} ${styles.id}`}>{item.id}</div>
                 <div className={styles.cell}>{item.pending}</div>
                 <div className={styles.cell}>{item.newBalance}</div>
                 <div className={styles.cell}>
-                  <input type="text" className={styles.toApplyInput} placeholder="Ingresar valor" />
+                  <input
+                    type="text"
+                    className={styles.toApplyInput}
+                    placeholder={t("enterAmount")}
+                  />
                 </div>
               </Fragment>
             ))}
           </div>
           <div className={styles.buttons}>
-            <div className={styles.button}>Cancelar</div>
+            <div className={styles.button}>{tCommon("actions.cancel")}</div>
             <div
               className={`${styles.button} ${styles.primary}`}
               onClick={handleDefineAmountContinue}
             >
-              Continuar
+              {tCommon("actions.continue")}
             </div>
           </div>
         </div>
       )}
       {currentStep === GenerateDebitNoteStep.Evidence && (
         <div className={styles.content}>
-          <div className={styles.title}>
-            Si deseas, adjunta un documento y/o ingresa un comentario
-          </div>
+          <div className={styles.title}>{t("evidenceHint")}</div>
           <div className={styles.evidenceSection}>
             <div className={styles.texts}>
-              <div className={styles.name}>Evidencia</div>
-              <div className={styles.description}>*Obligatorio</div>
+              <div className={styles.name}>{t("evidence")}</div>
+              <div className={styles.description}>{t("required")}</div>
             </div>
             <label htmlFor="upload-photo" className={styles.inputFileBox}>
               <FileArrowUp className={`${styles.icon} ${!!file ? styles.active : ""}`} />
@@ -143,8 +148,8 @@ const GenerateDebitNote: FC<GenerateDebitNoteProps> = () => {
                 </div>
               ) : (
                 <div className={styles.texts}>
-                  <div className={styles.name}>Selecciona un archivo</div>
-                  <div className={styles.description}>PDF, Word, PNG. (Tamaño max 30MB)</div>
+                  <div className={styles.name}>{t("selectFile")}</div>
+                  <div className={styles.description}>{t("fileHint")}</div>
                 </div>
               )}
               <input
@@ -157,14 +162,16 @@ const GenerateDebitNote: FC<GenerateDebitNoteProps> = () => {
           </div>
           <div className={styles.evidenceSection}>
             <div className={styles.texts}>
-              <div className={styles.name}>Evidencia</div>
-              <div className={styles.description}>*Obligatorio</div>
+              <div className={styles.name}>{t("evidence")}</div>
+              <div className={styles.description}>{t("required")}</div>
             </div>
-            <textarea name="comment" id="comment" placeholder="Ingresar comentario" />
+            <textarea name="comment" id="comment" placeholder={t("enterComment")} />
           </div>
           <div className={styles.buttons}>
-            <div className={styles.button}>Cancelar</div>
-            <div className={`${styles.button} ${styles.primary}`}>Continuar</div>
+            <div className={styles.button}>{tCommon("actions.cancel")}</div>
+            <div className={`${styles.button} ${styles.primary}`}>
+              {tCommon("actions.continue")}
+            </div>
           </div>
         </div>
       )}

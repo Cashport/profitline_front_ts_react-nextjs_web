@@ -1,5 +1,6 @@
 import { FC, useState } from "react";
 import { CaretDoubleRight, CaretDown } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import styles from "./accounting-adjustments-modal.module.scss";
 import AccountingAdjustmentsModalItem from "../../components/accounting-adjustments-item";
 import UiSearchInput from "@/components/ui/search-input";
@@ -11,6 +12,8 @@ interface AccountingAdjustmentsModalProps {
 }
 
 const AccountingAdjustmentsModal: FC<AccountingAdjustmentsModalProps> = ({ show, onClose }) => {
+  const t = useTranslations("clients.adjustments.modal");
+  const tCommon = useTranslations("common");
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>();
 
   return (
@@ -19,22 +22,22 @@ const AccountingAdjustmentsModal: FC<AccountingAdjustmentsModalProps> = ({ show,
         <div className={styles.back} onClick={onClose}>
           <CaretDoubleRight />
         </div>
-        <div className={styles.title}>Ajustes contables</div>
+        <div className={styles.title}>{t("title")}</div>
       </div>
       <div className={styles.modalContent}>
         <UiTabs
           className={styles.tabs}
-          tabs={["Disponibles", "Gestionados"]}
+          tabs={[t("tabs.available"), t("tabs.managed")]}
           onTabClick={(index) => console.log(index)}
         />
         <div className={styles.searcher}>
           <UiSearchInput
             id="accounting-adjustments-search"
-            placeholder="Buscar"
+            placeholder={tCommon("placeholders.search")}
             onChange={() => {}}
           />
           <div className={styles.filterButton}>
-            Filtrar
+            {tCommon("actions.filter")}
             <CaretDown className={styles.icon} />
           </div>
         </div>

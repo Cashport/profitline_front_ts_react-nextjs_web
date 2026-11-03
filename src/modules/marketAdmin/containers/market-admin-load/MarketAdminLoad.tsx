@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useSWRConfig } from "swr";
+import { useTranslations } from "use-intl";
 import { Download, Plus, Upload } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -40,6 +41,8 @@ const PAGE_SIZE = 20;
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export default function MarketAdminLoad() {
+  const t = useTranslations("marketAdmin.load");
+  const tCommon = useTranslations("common.fields");
   const { loaders, isLoading, mutate } = useProfitLoaders();
   const { mutate: globalMutate } = useSWRConfig();
   const [page, setPage] = useState(1);
@@ -83,7 +86,7 @@ export default function MarketAdminLoad() {
     if (!validationsModal) return;
     await saveLoaderValidations(validationsModal.loaderId, config);
     if (validationsModal.mode === "edit") {
-      showMessage("success", "Validaciones guardadas.");
+      showMessage("success", t("feedback.validationsSaved"));
     }
     closeValidations(true);
   };
@@ -92,10 +95,7 @@ export default function MarketAdminLoad() {
     try {
       const data = await getLoaderValidations(loader.id);
       if (!data.has_template) {
-        showMessage(
-          "info",
-          "Este ETL todavía no tiene template: carga un archivo para crearlo y definir sus validaciones."
-        );
+        showMessage("info", t("feedback.noTemplateYet"));
         return;
       }
       setValidationsModal({
@@ -119,7 +119,7 @@ export default function MarketAdminLoad() {
     } catch (error) {
       showMessage(
         "error",
-        error instanceof Error ? error.message : "No se pudieron leer las validaciones."
+        error instanceof Error ? error.message : t("feedback.validationsLoadError")
       );
     }
   };
@@ -129,7 +129,7 @@ export default function MarketAdminLoad() {
   // No existe endpoint para crear ETLs todavía: el modal queda pero sin efecto en la lista.
   const handleCreateEtl = (_values: NuevoEtlFormValues) => {
     setShowCreate(false);
-    showMessage("info", "La creación de ETLs aún no está disponible.");
+    showMessage("info", t("feedback.createUnavailable"));
   };
 
   const triggerUpload = (id: number) => {
@@ -154,13 +154,10 @@ export default function MarketAdminLoad() {
       if (!uploaded) return;
       // La carga es asincrona: el loader valida el contenido y procesa despues;
       // el resultado aparece en el historial de cargues.
-      showMessage(
-        "success",
-        `Archivo "${file.name}" recibido. Se está validando y procesando; revisa el resultado en el historial.`
-      );
+      showMessage("success", t("feedback.fileReceived", { fileName: file.name }));
       await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
     } catch (error) {
-      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
+      showMessage("error", t("feedback.uploadError"));
     } finally {
       setUploadingId(null);
     }
@@ -168,7 +165,7 @@ export default function MarketAdminLoad() {
 
   const descargarTemplate = (loader: IProfitLoader) => {
     if (!loader.url_s3_template) {
-      showMessage("error", "No hay plantilla disponible para este ETL.");
+      showMessage("error", t("feedback.noTemplate"));
       return;
     }
     window.open(loader.url_s3_template, "_blank", "noopener,noreferrer");
@@ -176,7 +173,7 @@ export default function MarketAdminLoad() {
 
   const columns: ColumnsType<IProfitLoader> = [
     {
-      title: "Nombre",
+      title: tCommon("name"),
       dataIndex: "display_name",
       key: "display_name",
       sorter: (a, b) => a.display_name.localeCompare(b.display_name),
@@ -189,12 +186,12 @@ export default function MarketAdminLoad() {
       )
     },
     {
-      title: "Último archivo cargado",
+      title: t("columns.lastFile"),
       key: "ultimoArchivo",
       onHeaderCell: headerCell,
       render: (_, loader) => {
         if (!loader.file_name) {
-          return <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>;
+          return <span className="text-sm text-[#BBBBBB]">{t("noUploadsYet")}</span>;
         }
         if (!loader.s3_url) {
           return <span className="text-sm text-[#141414]">{loader.file_name}</span>;
@@ -212,7 +209,7 @@ export default function MarketAdminLoad() {
       }
     },
     {
-      title: "Último cargue",
+      title: t("columns.lastUpload"),
       key: "ultimoCargue",
       width: 170,
       onHeaderCell: headerCell,
@@ -235,19 +232,19 @@ export default function MarketAdminLoad() {
           <button
             type="button"
             onClick={() => descargarTemplate(loader)}
-            title="Descargar template"
+            title={t("downloadTemplate")}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
-            <Download size={13} /> Template
+            <Download size={13} /> {t("template")}
           </button>
           <button
             type="button"
             onClick={() => triggerUpload(loader.id)}
             disabled={uploadingId === loader.id}
-            title="Cargar archivo"
+            title={t("uploadFile")}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload size={13} /> {uploadingId === loader.id ? "Cargando..." : "Cargar"}
+            <Upload size={13} /> {uploadingId === loader.id ? t("uploading") : t("upload")}
           </button>
           <GenericEyeButton onClick={() => setDetailId(loader.id)} />
         </div>
@@ -257,7 +254,7 @@ export default function MarketAdminLoad() {
 
   return (
     <div className="cp-page min-h-full">
-      <Header title="Cargue de información" back="/market-admin" />
+      <Header title={t("title")} back="/market-admin" />
 
       <input
         ref={fileInputRef}
@@ -270,9 +267,7 @@ export default function MarketAdminLoad() {
       <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
-          <p className="text-sm text-[#999999] flex-1">
-            ETLs manuales para alimentar el app cuando la sincronización automática falla.
-          </p>
+          <p className="text-sm text-[#999999] flex-1">{t("subtitle")}</p>
 
           {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
           {/* <div className="h-10 flex-shrink-0">
@@ -289,13 +284,13 @@ export default function MarketAdminLoad() {
           rowKey="id"
           loading={isLoading}
           showSorterTooltip={false}
-          locale={{ emptyText: "No hay ETLs configurados." }}
+          locale={{ emptyText: t("empty") }}
           pagination={{
             current: page,
             pageSize: PAGE_SIZE,
             showSizeChanger: false,
             position: ["bottomRight"],
-            showTotal: (total, range) => `Mostrando ${range[0]}–${range[1]} de ${total} ETLs`
+            showTotal: (total, range) => t("total", { from: range[0], to: range[1], total })
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);

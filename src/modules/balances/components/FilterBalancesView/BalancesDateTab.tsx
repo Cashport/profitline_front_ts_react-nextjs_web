@@ -1,15 +1,17 @@
 import React from "react";
 import { Calendar } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 export type DateDraft = { from_date: string | null; to_date: string | null };
 
+/** `name` es la clave en `balances.dateTab.presets`. */
 const DATE_PRESETS = [
-  { id: "mes_actual", name: "Mes actual" },
-  { id: "ultimo_mes", name: "Último mes" },
-  { id: "ultimo_trimestre", name: "Último trimestre" },
-  { id: "ytd", name: "YTD" },
-  { id: "ultimos_12_meses", name: "Últimos 12 meses" }
-];
+  { id: "mes_actual", name: "currentMonth" },
+  { id: "ultimo_mes", name: "lastMonth" },
+  { id: "ultimo_trimestre", name: "lastQuarter" },
+  { id: "ytd", name: "ytd" },
+  { id: "ultimos_12_meses", name: "last12Months" }
+] as const;
 
 const toISODate = (date: Date | null) => (date ? date.toISOString().split("T")[0] : null);
 
@@ -44,10 +46,11 @@ interface BalancesDateTabProps {
 }
 
 export default function BalancesDateTab({ value, onChange }: BalancesDateTabProps) {
+  const t = useTranslations("balances.dateTab");
   return (
     <div className="space-y-4">
       <div className="mb-4">
-        <p className="text-[13px] font-bold text-foreground mb-3">Periodos Predefinidos</p>
+        <p className="text-[13px] font-bold text-foreground mb-3">{t("presetsTitle")}</p>
         <div className="grid grid-cols-2 gap-2">
           {DATE_PRESETS.map((preset) => (
             <button
@@ -56,7 +59,7 @@ export default function BalancesDateTab({ value, onChange }: BalancesDateTabProp
               onClick={() => onChange(presetRange(preset.id))}
               className="px-3 py-2 text-sm bg-secondary/50 hover:bg-secondary border border-border rounded-lg transition-colors text-left"
             >
-              {preset.name}
+              {t(`presets.${preset.name}`)}
             </button>
           ))}
         </div>
@@ -65,11 +68,11 @@ export default function BalancesDateTab({ value, onChange }: BalancesDateTabProp
       <div className="border-t border-border pt-4">
         <p className="text-[13px] font-bold text-foreground mb-3 flex items-center gap-2">
           <Calendar className="w-3 h-3" />
-          Rango Personalizado
+          {t("customRange")}
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[13px] text-muted-foreground mb-1 block">Desde</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">{t("from")}</label>
             <input
               type="date"
               value={value.from_date || ""}
@@ -78,7 +81,7 @@ export default function BalancesDateTab({ value, onChange }: BalancesDateTabProp
             />
           </div>
           <div>
-            <label className="text-[13px] text-muted-foreground mb-1 block">Hasta</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">{t("to")}</label>
             <input
               type="date"
               value={value.to_date || ""}

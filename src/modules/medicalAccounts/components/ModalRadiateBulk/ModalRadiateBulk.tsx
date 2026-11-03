@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Flex, Modal, Typography } from "antd";
 import { FileText, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -21,6 +22,7 @@ interface ModalRadiateBulkProps {
 const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
 export function ModalRadiateBulk({ isOpen, ids, onClose, onSuccess }: ModalRadiateBulkProps) {
+  const t = useTranslations("medicalAccounts");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
@@ -28,7 +30,7 @@ export function ModalRadiateBulk({ isOpen, ids, onClose, onSuccess }: ModalRadia
   const handleFileUpload = (file: File) => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      showMessage("error", "Solo se permiten archivos PDF.");
+      showMessage("error", t("upload.onlyPdf"));
       return;
     }
     setPdfFile(file);
@@ -40,14 +42,11 @@ export function ModalRadiateBulk({ isOpen, ids, onClose, onSuccess }: ModalRadia
     setIsLoading(true);
     try {
       await radicateBulkMedicalAccounts(ids, pdfFile);
-      showMessage("success", `${ids.length} cuenta(s) radicada(s) correctamente.`);
+      showMessage("success", t("bulkSubmitModal.success", { count: ids.length }));
       onSuccess();
       onClose();
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error en la radicación masiva."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("bulkSubmitModal.error"));
     } finally {
       setIsLoading(false);
     }
@@ -66,10 +65,10 @@ export function ModalRadiateBulk({ isOpen, ids, onClose, onSuccess }: ModalRadia
       open={isOpen}
       width={520}
       onCancel={handleClose}
-      title={<Title level={4}>Radicación masiva</Title>}
+      title={<Title level={4}>{t("bulkSubmitModal.title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Radicar"
+          titleConfirm={t("bulkSubmitModal.confirm")}
           showLeftButton={false}
           isConfirmDisabled={!pdfFile || ids.length === 0}
           isConfirmLoading={isLoading}
@@ -81,13 +80,15 @@ export function ModalRadiateBulk({ isOpen, ids, onClose, onSuccess }: ModalRadia
     >
       <Flex vertical gap="1.25rem">
         <p className="-mt-2 text-sm text-gray-500">
-          Se radicarán <span className="font-semibold text-cashport-black">{ids.length}</span>{" "}
-          cuenta(s) seleccionada(s) en estado Facturado. Adjunta el PDF de evidencia.
+          {t.rich("bulkSubmitModal.description", {
+            count: ids.length,
+            b: (chunks) => <span className="font-semibold text-cashport-black">{chunks}</span>
+          })}
         </p>
 
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            Evidencia PDF <span className="text-red-500">*</span>
+            {t("bulkSubmitModal.evidence")} <span className="text-red-500">*</span>
           </p>
 
           {pdfFile ? (
@@ -101,7 +102,7 @@ export function ModalRadiateBulk({ isOpen, ids, onClose, onSuccess }: ModalRadia
                 type="button"
                 onClick={() => setPdfFile(null)}
                 className="shrink-0 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                aria-label="Quitar archivo"
+                aria-label={t("upload.removeFile")}
               >
                 <X size={18} />
               </button>
@@ -110,8 +111,8 @@ export function ModalRadiateBulk({ isOpen, ids, onClose, onSuccess }: ModalRadia
             <UploadDropZone
               onFileUpload={handleFileUpload}
               allowedExtensions={[".pdf"]}
-              title="Arrastra el PDF aquí"
-              subtitle="o haz clic para seleccionarlo"
+              title={t("upload.dropTitle")}
+              subtitle={t("upload.dropSubtitle")}
             />
           )}
         </div>

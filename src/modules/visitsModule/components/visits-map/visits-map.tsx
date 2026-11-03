@@ -10,8 +10,10 @@ import mapboxgl, {
   type Popup
 } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslations } from "use-intl";
 
 import config from "@/config";
+import { getTranslator } from "@/i18n/translator";
 
 import { ACTIVE_STATUSES, MAP_CENTER, MAP_STYLES, MAP_ZOOM, MISSING } from "../../constants";
 import type {
@@ -149,6 +151,7 @@ export default function VisitsMap(props: VisitsMapProps) {
     topRight,
     onToggleLayer
   } = props;
+  const tv = useTranslations("visits");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
@@ -322,8 +325,8 @@ export default function VisitsMap(props: VisitsMapProps) {
           phase === "done"
             ? `${fmtClock(run.start)}–${fmtClock(run.end ?? run.start)} · ${MISSING}`
             : phase === "now"
-              ? `En curso desde ${fmtClock(run.start)}`
-              : `Desde ${fmtClock(run.start)}`;
+              ? getTranslator("visits")("map.inProgressSince", { time: fmtClock(run.start) })
+              : getTranslator("visits")("map.since", { time: fmtClock(run.start) });
         showTooltip(run.position, MISSING, detail, 14);
       });
       root.addEventListener("mouseleave", hideTooltip);
@@ -341,7 +344,12 @@ export default function VisitsMap(props: VisitsMapProps) {
         latest.current.onFlyTo(at);
       });
       root.addEventListener("mouseenter", () =>
-        showTooltip(at, next.clientName, `ETA ${fmtClock(next.start)}`, 14)
+        showTooltip(
+          at,
+          next.clientName,
+          getTranslator("visits")("map.eta", { time: fmtClock(next.start) }),
+          14
+        )
       );
       root.addEventListener("mouseleave", hideTooltip);
       addMarker(root, at);
@@ -351,7 +359,7 @@ export default function VisitsMap(props: VisitsMapProps) {
     const start = focused.track[0].position;
     const startEl = createStartMarkerElement();
     startEl.addEventListener("mouseenter", () =>
-      showTooltip(start, "Punto de inicio", undefined, 10)
+      showTooltip(start, getTranslator("visits")("map.startPoint"), undefined, 10)
     );
     startEl.addEventListener("mouseleave", hideTooltip);
     addMarker(startEl, start);
@@ -490,7 +498,7 @@ export default function VisitsMap(props: VisitsMapProps) {
     }
   }, [ready, camera.id]);
 
-  const mapNotice = MAPBOX_TOKEN ? notice : "Mapa no disponible: falta el token de Mapbox";
+  const mapNotice = MAPBOX_TOKEN ? notice : tv("map.noToken");
 
   return (
     <div className="visits-map relative h-full min-h-0 w-full overflow-hidden rounded-[var(--card-radius)] bg-secondary">

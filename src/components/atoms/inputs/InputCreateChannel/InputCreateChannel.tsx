@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { Button, message } from "antd";
 import { useForm } from "react-hook-form";
 
@@ -14,6 +15,8 @@ interface Props {
   isEditAvailable: boolean;
 }
 export const InputCreateChannel = ({ isEditAvailable = false }: Props) => {
+  const t = useTranslations("components.inputCreate");
+  const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
   const { addChannel } = useStructureBR();
   const [messageApi, contextHolder] = message.useMessage();
@@ -35,7 +38,7 @@ export const InputCreateChannel = ({ isEditAvailable = false }: Props) => {
   return (
     <>
       <form className="inputcreatezone" onSubmit={handleSubmit(onSubmit)}>
-      {contextHolder}
+        {contextHolder}
         <InputForm
           titleInput=""
           control={control}
@@ -46,10 +49,10 @@ export const InputCreateChannel = ({ isEditAvailable = false }: Props) => {
             backgroundColor: "transparent !important",
             borderRadius: ".8rem"
           }}
-          placeholder="Ingresar nombre del canal"
+          placeholder={t("channelPlaceholder")}
         />
         <Button htmlType="submit" loading={isLoading} className="createButtonZone">
-          Crear{" "}
+          {tCommon("actions.create")}{" "}
         </Button>
       </form>
     </>

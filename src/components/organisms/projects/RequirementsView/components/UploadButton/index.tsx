@@ -1,6 +1,7 @@
 import React from "react";
 import { Upload, Button, Typography, Flex, Card } from "antd";
 import { FileArrowUp, Trash } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import "./index.scss";
 const { Text, Title } = Typography;
 
@@ -17,8 +18,9 @@ const UploadButton: React.FC<UploadButtonProps> = ({
   handleRemoveFile,
   file,
   accept = ".pdf,.docx,.xlsx",
-  buttonText = "Cargar plantilla"
+  buttonText
 }) => {
+  const t = useTranslations("projects.requirements.uploadButton");
   return (
     <div style={{ width: "100%" }}>
       <Upload
@@ -55,6 +57,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({
               icon={<Trash size={16} />}
               style={{ position: "absolute", top: 4, right: 4 }}
               onClick={handleRemoveFile}
+              aria-label={t("removeFile")}
             />
           </Card>
         ) : (
@@ -69,7 +72,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({
             }}
             icon={<FileArrowUp size={16} />}
           >
-            {file ? "Cambiar archivo" : buttonText}
+            {file ? t("changeFile") : buttonText ?? t("uploadTemplate")}
           </Button>
         )}
       </Upload>

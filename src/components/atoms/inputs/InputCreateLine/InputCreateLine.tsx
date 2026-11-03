@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { Button, message } from "antd";
 import { useForm } from "react-hook-form";
 
@@ -15,6 +16,8 @@ interface Props {
   idChannel: string;
 }
 export const InputCreateLine = ({ isEditAvailable = false, idChannel }: Props) => {
+  const t = useTranslations("components.inputCreate");
+  const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
   const { addLine } = useStructureBR();
   const [messageApi, contextHolder] = message.useMessage();
@@ -36,7 +39,7 @@ export const InputCreateLine = ({ isEditAvailable = false, idChannel }: Props) =
   return (
     <>
       <form className="inputcreateline" onSubmit={handleSubmit(onSubmit)}>
-      {contextHolder}
+        {contextHolder}
         <InputForm
           titleInput=""
           control={control}
@@ -48,10 +51,10 @@ export const InputCreateLine = ({ isEditAvailable = false, idChannel }: Props) =
             border: "1px solid white",
             borderRadius: ".8rem"
           }}
-          placeholder="Ingresar nombre de la linea"
+          placeholder={t("linePlaceholder")}
         />
         <Button htmlType="submit" loading={isLoading} className="createButtonZone">
-          Crear{" "}
+          {tCommon("actions.create")}{" "}
         </Button>
       </form>
     </>

@@ -1,11 +1,8 @@
-import { Metadata } from "next";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import SelfServiceShell from "./SelfServiceShell";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Auto gestión",
-  description: "Auto gestión"
-};
+export const generateMetadata = () => pageMetadata("selfService");
 
 export default function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <ViewWrapper headerTitle="Auto gestión">{children}</ViewWrapper>;
+  return <SelfServiceShell>{children}</SelfServiceShell>;
 }
