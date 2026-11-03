@@ -42,7 +42,7 @@ export default function GroupModalHeader({
             style={{ boxShadow: "inset 0 0 0 1px var(--wallet-seg-edge)" }}
           />
           {nov && (
-            <span className="font-mono text-[12.5px] tracking-[0.02em] text-muted-foreground">
+            <span className="font-mono text-[13px] tracking-[0.02em] text-muted-foreground">
               {nov.id}
             </span>
           )}

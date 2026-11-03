@@ -28,8 +28,8 @@ export function MedicalAccountsDateFilter({
       )}
     >
       <Button
-        icon={<Calendar size={16} />}
-        style={{ height: 38 }}
+        icon={<Calendar size={18} />}
+        style={{ height: "var(--control-h)" }}
         className={isActive ? "!border-cashport-black !text-cashport-black" : ""}
       >
         Rango de fechas

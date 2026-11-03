@@ -22,7 +22,7 @@ interface GroupTicketsSectionProps {
 }
 
 const Count = ({ children }: { children: React.ReactNode }) => (
-  <span className="rounded-full bg-muted px-1.5 text-[10.5px] font-bold leading-[17px] tabular-nums text-muted-foreground">
+  <span className="rounded-full bg-muted px-1.5 text-[13px] font-bold leading-[17px] tabular-nums text-muted-foreground">
     {children}
   </span>
 );
@@ -59,12 +59,12 @@ export default function GroupTicketsSection({
     <>
       <div className="border-t border-border px-[18px] pb-4 pt-3.5">
         <div className="mb-[11px] flex w-full items-center gap-2">
-          <h4 className="text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+          <h4 className="text-[13px] font-semibold text-muted-foreground">
             Acciones abiertas
           </h4>
           <Count>{abiertas.length}</Count>
           {vencidas > 0 && (
-            <span className="text-[11px] text-rose-600 dark:text-rose-400">
+            <span className="text-[13px] text-rose-600 dark:text-rose-400">
               {vencidas} vencida{vencidas === 1 ? "" : "s"}
             </span>
           )}
@@ -72,7 +72,7 @@ export default function GroupTicketsSection({
             <button
               type="button"
               onClick={onNew}
-              className="ml-auto inline-flex items-center gap-1 text-[11.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+              className="ml-auto inline-flex items-center gap-1 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
               <Plus className="h-3.5 w-3.5" />
               Nuevo
@@ -81,7 +81,7 @@ export default function GroupTicketsSection({
         </div>
 
         {error ? (
-          <p className="text-[12.5px] leading-relaxed text-destructive">{error}</p>
+          <p className="text-[13px] leading-relaxed text-destructive">{error}</p>
         ) : abiertas.length ? (
           <div className="flex flex-col gap-2">
             {abiertas.map((t) => (
@@ -89,9 +89,9 @@ export default function GroupTicketsSection({
             ))}
           </div>
         ) : loading ? (
-          <p className="text-[11.5px] leading-relaxed text-muted-foreground">Cargando acciones…</p>
+          <p className="text-[13px] leading-relaxed text-muted-foreground">Cargando acciones…</p>
         ) : (
-          <div className="rounded-lg border border-dashed border-border px-[13px] py-3 text-[12.5px] leading-relaxed text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border px-[13px] py-3 text-[13px] leading-relaxed text-muted-foreground">
             No hay acciones abiertas. Crea un ticket para fijar la próxima.
           </div>
         )}
@@ -105,12 +105,12 @@ export default function GroupTicketsSection({
             onClick={() => setVerCerradas((v) => !v)}
             className="mb-[11px] flex w-full items-center gap-2 text-left"
           >
-            <h4 className="text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+            <h4 className="text-[13px] font-semibold text-muted-foreground">
               Acciones cerradas
             </h4>
             <Count>{cerradas.length}</Count>
             {tarde > 0 && (
-              <span className="text-[11px] text-rose-600 dark:text-rose-400">
+              <span className="text-[13px] text-rose-600 dark:text-rose-400">
                 {tarde} fuera de fecha
               </span>
             )}

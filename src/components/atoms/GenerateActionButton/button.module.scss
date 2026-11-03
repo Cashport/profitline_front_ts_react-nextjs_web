@@ -1,17 +1,18 @@
 @import "@styles/variables.scss";
 
 .buttonGenerateAction {
-    padding: 0.75rem 1rem;
+    // Barra de acciones (DESIGN.md §8): mismo alto que el buscador y Filtrar.
+    padding: 0 14px;
     background-color: $background;
     border: solid 1px transparent;
     border-radius: 8px;
     display: flex;
     gap: 8px;
     align-items: center;
-    height: 3rem;
+    height: var(--control-h);
     font-family: inherit;
-    font-size: 16px;
-    line-height: 24px;
+    font-size: 14px;
+    line-height: 1;
     font-weight: 600;
     cursor: pointer;
     &:hover {

@@ -25,10 +25,8 @@ type StatementMode = "download" | "email";
 /** El estado de cuenta lo genera el servicio de comunicaciones, en ambos formatos. */
 const FILE_OF: Record<StatementFormat, RegExp> = { pdf: /\.pdf$/i, xlsx: /\.xlsx?$/i };
 
-const FIELD_LABEL =
-  "w-12 shrink-0 text-[12px] font-medium text-cp-ink-4 max-md:w-11 max-md:text-[11px]";
-const SECTION_LABEL =
-  "text-[11px] font-semibold uppercase tracking-[.12em] text-cp-ink-4 max-md:text-[10px]";
+const FIELD_LABEL = "w-12 shrink-0 text-[13px] font-medium text-cp-ink-4 max-md:w-11";
+const SECTION_LABEL = "text-[13px] font-semibold text-cp-ink-4";
 
 interface AccountStatementModalProps {
   detail: IBlockingAlertsDetail;
@@ -196,10 +194,8 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
               <Icon className="h-4 w-4 max-md:h-3.5 max-md:w-3.5" />
             </span>
             <span>
-              <span className="block text-[13px] font-semibold max-md:text-[12.5px]">{label}</span>
-              <span className="block text-[11.5px] leading-snug text-cp-ink-3 max-md:text-[10.5px]">
-                {sub}
-              </span>
+              <span className="block text-[13px] font-semibold">{label}</span>
+              <span className="block text-[13px] leading-snug text-cp-ink-3">{sub}</span>
             </span>
           </button>
         ))}
@@ -236,13 +232,13 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
             </div>
           </div>
           <div className="flex items-center gap-2 rounded-[11px] bg-cp-muted px-3 py-2.5 max-md:py-2">
-            <span className="shrink-0 text-[10px] font-bold text-cp-orange">
+            <span className="shrink-0 text-[13px] font-bold text-cp-orange">
               {format === "pdf" ? "PDF" : "XLS"}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-cp-ink max-md:text-[11.5px]">
+            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-cp-ink">
               {fileName}
             </span>
-            <span className="shrink-0 text-[11px] text-cp-ink-4">Adjunto</span>
+            <span className="shrink-0 text-[13px] text-cp-ink-4">Adjunto</span>
           </div>
         </div>
       )}

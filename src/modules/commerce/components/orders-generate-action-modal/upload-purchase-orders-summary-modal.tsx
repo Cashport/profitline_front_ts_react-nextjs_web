@@ -11,10 +11,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { formatCurrencyMoney } from "@/utils/utils";
-import {
-  IUploadedPurchaseOrder,
-  IUploadPurchaseOrdersData
-} from "@/services/commerce/commerce";
+import { IUploadedPurchaseOrder, IUploadPurchaseOrdersData } from "@/services/commerce/commerce";
 
 import "./upload-purchase-orders-summary-modal.scss";
 
@@ -60,14 +57,18 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
         dataIndex: "orderId",
         key: "orderId",
         width: 110,
-        render: (value: number) => <span className="uploadPurchaseOrdersSummaryModal__mono">{value}</span>
+        render: (value: number) => (
+          <span className="uploadPurchaseOrdersSummaryModal__mono">{value}</span>
+        )
       },
       {
         title: "Código Iscala",
         dataIndex: "codigoIscala",
         key: "codigoIscala",
         width: 150,
-        render: (value: string) => <span className="uploadPurchaseOrdersSummaryModal__mono">{value}</span>
+        render: (value: string) => (
+          <span className="uploadPurchaseOrdersSummaryModal__mono">{value}</span>
+        )
       },
       {
         title: "Dirección",
@@ -119,7 +120,11 @@ export const UploadPurchaseOrdersSummaryModal = ({ isOpen, data, onClose }: Prop
       destroyOnClose
       title={
         <Flex align="center" gap="0.6rem">
-          <CheckCircle size={26} weight="fill" className="uploadPurchaseOrdersSummaryModal__titleIcon" />
+          <CheckCircle
+            size={26}
+            weight="fill"
+            className="uploadPurchaseOrdersSummaryModal__titleIcon"
+          />
           <Title level={4} style={{ margin: 0 }}>
             Órdenes de compra procesadas
           </Title>

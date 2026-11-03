@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dropdown as AntDropdown, message } from "antd";
 import {
-  ArrowLeft,
   Edit,
   MoreHorizontal,
   Save,
@@ -105,9 +104,7 @@ export function PurchaseOrderDetailHeader({
       message.success("TXT ERP generado correctamente");
       mutate?.();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al generar el TXT ERP"
-      );
+      message.error(error instanceof Error ? error.message : "Error al generar el TXT ERP");
     } finally {
       hideLoading();
       setIsTxtErpLoading(false);
@@ -123,9 +120,7 @@ export function PurchaseOrderDetailHeader({
       message.success("TXT EAN generado correctamente");
       mutate?.();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al generar el TXT EAN"
-      );
+      message.error(error instanceof Error ? error.message : "Error al generar el TXT EAN");
     } finally {
       hideLoading();
       setIsTxtEanLoading(false);
@@ -136,17 +131,8 @@ export function PurchaseOrderDetailHeader({
     const activeFile = files?.[activeFileIndex];
     return (
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/purchase-orders")}
-            className="text-cashport-black hover:bg-gray-50"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Button>
-        </div>
+        {/* El "‹" volver vive en el header compartido (DESIGN.md §4). */}
+        <div className="flex items-center gap-2" />
         <div className="flex items-center gap-2">
           {files && files.length > 1 && (
             <AntDropdown
@@ -165,14 +151,14 @@ export function PurchaseOrderDetailHeader({
                       >
                         <FileText className="h-4 w-4 text-cashport-green flex-shrink-0" />
                         <span className="text-sm font-medium truncate flex-1">{file.name}</span>
-                        <span className="text-xs text-gray-400 flex-shrink-0">
+                        <span className="text-[13px] text-gray-400 flex-shrink-0">
                           {formatFileSize(file.size)}
                         </span>
                       </div>
                     ))}
                   </div>
                   <div className="border-t border-gray-200 px-4 py-2.5">
-                    <span className="text-xs text-gray-500">{files.length} archivos</span>
+                    <span className="text-[13px] text-gray-500">{files.length} archivos</span>
                   </div>
                 </div>
               )}
@@ -273,9 +259,7 @@ export function PurchaseOrderDetailHeader({
       label: "Marcar como Backorder",
       icon: <Boxes className="h-4 w-4" />,
       onClick: () => onOpenModal?.(8),
-      disabled:
-        !allowedStatesForBackOrder.includes(data?.status_name ?? "") ||
-        txtErpLocked
+      disabled: !allowedStatesForBackOrder.includes(data?.status_name ?? "") || txtErpLocked
     },
     {
       key: "rebilling",
@@ -323,9 +307,7 @@ export function PurchaseOrderDetailHeader({
       label: "Descargar plano",
       icon: <FileOutput className="h-4 w-4" />,
       onClick: onDownloadCSV,
-      disabled:
-        !allowedStatesForDownload.includes(data?.status_name ?? "") ||
-        txtErpLocked
+      disabled: !allowedStatesForDownload.includes(data?.status_name ?? "") || txtErpLocked
     }
   ];
 
@@ -333,15 +315,7 @@ export function PurchaseOrderDetailHeader({
     <>
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => (onNavigate ?? router.push)("/purchase-orders")}
-            className="text-cashport-black hover:bg-gray-50"
-          >
-            <ArrowLeft className="h-4 w-4 " />
-            Volver
-          </Button>
+          {/* El "‹" volver vive en el header compartido (DESIGN.md §4). */}
           <GeneralDropdown items={actionItems} align="start" customDropdownClass="m-0">
             <ButtonGenerateAction
               icon={<MoreHorizontal className="h-4 w-4" />}
@@ -377,14 +351,11 @@ export function PurchaseOrderDetailHeader({
               )}
             </Button>
           )}
-          {data?.project_id === 204 &&
-            (data?.region || data?.delivery_destination_code) && (
-            <span className="ml-2 text-xs text-gray-500">
+          {data?.project_id === 204 && (data?.region || data?.delivery_destination_code) && (
+            <span className="ml-2 text-[13px] text-gray-500">
               {data?.region ? `Región: ${data.region}` : ""}
               {data?.region && data?.delivery_destination_code ? " · " : ""}
-              {data?.delivery_destination_code
-                ? `Destino: ${data.delivery_destination_code}`
-                : ""}
+              {data?.delivery_destination_code ? `Destino: ${data.delivery_destination_code}` : ""}
             </span>
           )}
         </div>
@@ -417,10 +388,10 @@ export function PurchaseOrderDetailHeader({
                         }`}
                       >
                         <Badge
-                          className="text-white text-xs font-medium border-transparent flex-shrink-0"
+                          className="text-white text-[13px] font-medium border-transparent flex-shrink-0"
                           style={{
                             backgroundColor: sibling.statusColor || "#B0BEC5",
-                            fontSize: "11px",
+                            fontSize: "13px",
                             padding: "2px 8px",
                             borderRadius: "6px"
                           }}
@@ -430,14 +401,14 @@ export function PurchaseOrderDetailHeader({
                         <span className="text-sm font-medium truncate flex-1">
                           {sibling.orderNumber}
                         </span>
-                        <span className="text-xs text-gray-400 flex-shrink-0">
+                        <span className="text-[13px] text-gray-400 flex-shrink-0">
                           {formatMoney(sibling.totalAmount)}
                         </span>
                       </div>
                     ))}
                   </div>
                   <div className="border-t border-gray-200 px-4 py-2.5 flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-[13px] text-gray-500">
                       {data?.package.totalOrders} ordenes
                     </span>
                     <span className="text-sm font-bold">
@@ -451,7 +422,7 @@ export function PurchaseOrderDetailHeader({
                 <span className="text-sm font-medium">
                   {currentSiblingOrder?.orderNumber ?? data?.purchase_order_number}
                 </span>
-                <span className="text-xs text-gray-400">
+                <span className="text-[13px] text-gray-400">
                   {formatMoney(currentSiblingOrder?.totalAmount ?? 0)}
                 </span>
                 <ChevronDown className="h-3.5 w-3.5 text-gray-400" />

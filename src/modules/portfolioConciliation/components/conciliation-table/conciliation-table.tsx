@@ -2,6 +2,7 @@
 
 import { Pagination } from "antd";
 
+import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { useAppStore } from "@/lib/store/store";
 import { cn, formatNumber } from "@/utils/utils";
 import {
@@ -27,7 +28,7 @@ interface Props {
 
 const COLUMNS: { col: ConciliationSortField; label: string; align?: "right" }[] = [
   { col: "file_row", label: "Fila", align: "right" },
-  { col: "document_id", label: "Id documento" },
+  { col: "document_id", label: "ID documento" },
   { col: "document_type", label: "Tipo" },
   { col: "client_amount", label: "Monto cliente", align: "right" },
   { col: "current_amount_cashport", label: "Valor Cashport", align: "right" },
@@ -63,7 +64,7 @@ const ConciliationTable = ({
         )}
         <table
           className={cn(
-            "w-full border-collapse text-[12.5px] transition-opacity duration-150",
+            "w-full border-collapse text-[13px] transition-opacity duration-150",
             isStale && "opacity-50"
           )}
         >
@@ -77,14 +78,18 @@ const ConciliationTable = ({
                     scope="col"
                     onClick={() => onSort(col)}
                     className={cn(
-                      "cursor-pointer select-none whitespace-nowrap border-b border-[#ececec] bg-[#fafafa] px-3 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] transition-colors",
-                      align === "right" ? "text-right" : "text-left",
-                      active ? "text-foreground" : "text-[#8a8a8a] hover:text-foreground"
+                      "cursor-pointer select-none whitespace-nowrap border-b border-cp-line bg-cp-surface px-3 py-3 text-[13.5px] font-semibold text-cp-ink",
+                      align === "right" ? "text-right" : "text-left"
                     )}
                   >
-                    {label}
-                    <span className={cn("ml-1 text-[8px]", !active && "opacity-35")}>
-                      {active ? (sortDir === "asc" ? "▲" : "▼") : "↕"}
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1",
+                        align === "right" && "flex-row-reverse"
+                      )}
+                    >
+                      {label}
+                      <SortArrows dir={active ? sortDir : null} />
                     </span>
                   </th>
                 );
@@ -99,7 +104,7 @@ const ConciliationTable = ({
                   <td className="px-3 py-2 text-right tabular-nums text-[#8a8a8a]">
                     {formatNumber(row.file_row)}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">{row.document_id}</td>
+                  <td className="px-3 py-2 font-mono text-[13px]">{row.document_id}</td>
                   <td className="whitespace-nowrap px-3 py-2">
                     {DOCUMENT_TYPE_LABEL[row.document_type]}
                   </td>
@@ -121,7 +126,7 @@ const ConciliationTable = ({
                   </td>
                   <td className="px-3 py-2">
                     <span
-                      className="inline-flex items-center whitespace-nowrap rounded-[10px] px-2 py-0.5 text-[11.5px] font-medium"
+                      className="inline-flex items-center whitespace-nowrap rounded-[10px] px-2 py-0.5 text-[13px] font-medium"
                       style={{ backgroundColor: meta.bg, color: meta.color }}
                     >
                       {meta.label}
@@ -142,7 +147,7 @@ const ConciliationTable = ({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-[12px] text-[#8a8a8a]">
+        <span className="text-[13px] text-[#8a8a8a]">
           {total
             ? `Mostrando ${formatNumber(from)}–${formatNumber(to)} de ${formatNumber(total)} documentos${isStale ? " · actualizando…" : ""}`
             : ""}

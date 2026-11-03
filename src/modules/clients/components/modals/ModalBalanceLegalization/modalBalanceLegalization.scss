@@ -31,7 +31,7 @@
             text-decoration: underline;
         }
         &__comment {
-            font-size: 0.75rem;
+            font-size: 13px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -50,10 +50,10 @@
     }
 
     &__selectDropText {
-        font-size: 0.75rem;
+        font-size: 13px;
 
         &.-small {
-            font-size: 0.625rem;
+            font-size: 13px;
             color: #505962;
         }
     }

@@ -17,7 +17,11 @@ import dayjs from "dayjs";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
-import { IParameterData, IClientDetailDataArchive, IPeriodicity } from "@/types/dataQuality/IDataQuality";
+import {
+  IParameterData,
+  IClientDetailDataArchive,
+  IPeriodicity
+} from "@/types/dataQuality/IDataQuality";
 import { transformParameterDataToFormData } from "../../utils/transformParameterData";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { Edit, History } from "lucide-react";
@@ -79,9 +83,7 @@ const editValidationSchema: yup.ObjectSchema<any> = yup.object({
     .defined()
 });
 
-const convertPeriodicityToFormData = (
-  periodicity: IPeriodicity
-): IPeriodicityModalForm => {
+const convertPeriodicityToFormData = (periodicity: IPeriodicity): IPeriodicityModalForm => {
   const isWeekly = periodicity.repeat.frequency?.toLowerCase() === "semanal";
 
   return {
@@ -446,7 +448,7 @@ export function ModalDataIntake({
             </Select>
           )}
         />
-        {errors.fileType && <p className="text-xs text-red-600">{errors.fileType.message}</p>}
+        {errors.fileType && <p className="text-[13px] text-red-600">{errors.fileType.message}</p>}
       </div>
 
       {/* Periodicidad */}
@@ -465,7 +467,7 @@ export function ModalDataIntake({
           placeholder="Seleccionar frecuencia"
         />
         {periodicityError && (
-          <p className="text-xs text-red-600">La periodicidad es obligatoria *</p>
+          <p className="text-[13px] text-red-600">La periodicidad es obligatoria *</p>
         )}
       </div>
 
@@ -491,7 +493,7 @@ export function ModalDataIntake({
           )}
         />
         {errors.ingestaSource && (
-          <p className="text-xs text-red-600">{errors.ingestaSource.message}</p>
+          <p className="text-[13px] text-red-600">{errors.ingestaSource.message}</p>
         )}
       </div>
 
@@ -531,7 +533,9 @@ export function ModalDataIntake({
                   </Button>
                 </div>
               )}
-              {(mode === "create" || isExistingFileDeleted || !formInitialData?.existingFileName) && (
+              {(mode === "create" ||
+                isExistingFileDeleted ||
+                !formInitialData?.existingFileName) && (
                 <div className="flex items-center gap-2">
                   <Input
                     {...field}
@@ -557,13 +561,13 @@ export function ModalDataIntake({
                 </div>
               )}
               {attachedFileValue && (
-                <p className="text-xs text-gray-600">Nuevo archivo: {attachedFileValue.name}</p>
+                <p className="text-[13px] text-gray-600">Nuevo archivo: {attachedFileValue.name}</p>
               )}
             </div>
           )}
         />
         {errors.attachedFile && (
-          <p className="text-xs text-red-600">{errors.attachedFile.message}</p>
+          <p className="text-[13px] text-red-600">{errors.attachedFile.message}</p>
         )}
       </div>
 
@@ -588,7 +592,7 @@ export function ModalDataIntake({
             variant="outline"
             size="sm"
             onClick={() => append({ key: "", value: "" })}
-            className="text-xs bg-transparent"
+            className="text-[13px] bg-transparent"
           >
             + Agregar variable
           </Button>
@@ -643,7 +647,7 @@ export function ModalDataIntake({
             );
           })}
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-[13px] text-gray-500">
           Agregue variables como EMAIL, API_URL, PASSWORD, etc.
         </p>
       </div>
@@ -729,10 +733,10 @@ export function ModalDataIntake({
             ?.filter((v) => v.key && v.value)
             .map((variable, index) => (
               <div key={index} className="flex items-center gap-1 rounded px-2 py-1">
-                <span className="text-xs font-mono font-semibold text-gray-700">
+                <span className="text-[13px] font-mono font-semibold text-gray-700">
                   {variable.key}:
                 </span>
-                <span className="text-xs text-gray-600">{variable.value}</span>
+                <span className="text-[13px] text-gray-600">{variable.value}</span>
               </div>
             ))}
           {(!formInitialData.ingestaVariables ||
@@ -804,7 +808,13 @@ export function ModalDataIntake({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!isValid || isSubmitting || !selectedPeriodicity || !hasChanges || (isExistingFileDeleted && !attachedFileValue)}
+                    disabled={
+                      !isValid ||
+                      isSubmitting ||
+                      !selectedPeriodicity ||
+                      !hasChanges ||
+                      (isExistingFileDeleted && !attachedFileValue)
+                    }
                     className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
                   >
                     {isSubmitting ? "Guardando..." : "Guardar"}

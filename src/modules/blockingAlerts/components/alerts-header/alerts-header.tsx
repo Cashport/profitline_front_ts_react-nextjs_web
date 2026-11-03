@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import Header from "@/components/organisms/header";
-import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
 import { cn } from "@/utils/utils";
 
 export interface AlertsCrumb {
@@ -19,17 +18,15 @@ interface AlertsHeaderProps {
   crumbs: AlertsCrumb[];
   /** Escritorio: a la derecha del título. Móvil: bajo el título de la pantalla principal. */
   info?: React.ReactNode;
-  /** Toggle de tema: solo en el listado general. */
-  themeToggle?: boolean;
   /** Escritorio sin sangría izquierda: en el detalle lo de abajo arranca en el borde. */
   flush?: boolean;
 }
 
 /**
  * Escritorio: header compartido de Cashport (docs/DESIGN.md §4) con las migas del módulo.
- * Móvil: título (o migas) y el tema en pequeño, sin avatar, como el prototipo.
+ * Móvil: título (o migas), sin avatar, como el prototipo. El tema va en el menú del avatar.
  */
-export default function AlertsHeader({ crumbs, info, themeToggle, flush }: AlertsHeaderProps) {
+export default function AlertsHeader({ crumbs, info, flush }: AlertsHeaderProps) {
   const current = crumbs[crumbs.length - 1];
 
   return (
@@ -61,7 +58,6 @@ export default function AlertsHeader({ crumbs, info, themeToggle, flush }: Alert
           ) : undefined
         }
         titleExtra={info}
-        actionsExtra={themeToggle && <WalletThemeToggle />}
       />
 
       {/* En móvil el contenedor con scroll tiene 1rem de padding arriba y el sticky lo respeta:
@@ -71,7 +67,7 @@ export default function AlertsHeader({ crumbs, info, themeToggle, flush }: Alert
           {crumbs.length > 1 ? (
             <nav
               aria-label="Ruta"
-              className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[12.5px]"
+              className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[13px]"
             >
               {crumbs.map((crumb, i) => (
                 <Fragment key={crumb.label + i}>
@@ -96,15 +92,10 @@ export default function AlertsHeader({ crumbs, info, themeToggle, flush }: Alert
               <h1 className="m-0 text-[18px] font-bold leading-tight text-cp-ink">
                 {current.label}
               </h1>
-              {info && <div className="mt-0.5 text-[12px] font-medium text-cp-ink-3">{info}</div>}
+              {info && <div className="mt-0.5 text-[13px] font-medium text-cp-ink-3">{info}</div>}
             </>
           )}
         </div>
-        {themeToggle && (
-          <div className="shrink-0 [--control-h:36px]">
-            <WalletThemeToggle />
-          </div>
-        )}
       </header>
     </>
   );

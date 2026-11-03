@@ -35,7 +35,7 @@ const STATUS_TABS: AlertsStatusFilter[] = ["all", "blocked", "to_be_blocked", "u
 
 /** Toggle Clientes / Puntos de venta: en móvil, letra e íconos más pequeños para que quepa. */
 const VIEW_LABEL =
-  "flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold max-md:gap-1 max-md:text-[11.5px]";
+  "flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold max-md:gap-1 max-md:text-[13px]";
 const VIEW_ICON = "h-3.5 w-3.5 shrink-0 max-md:h-3 max-md:w-3";
 
 interface BlockingAlertsViewProps {
@@ -217,7 +217,6 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
             </span>
           )
         }
-        themeToggle={!clientId}
       />
 
       {loadError && (

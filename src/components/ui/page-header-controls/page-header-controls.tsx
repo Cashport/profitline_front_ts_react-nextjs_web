@@ -1,5 +1,6 @@
 "use client";
 
+import SearchField from "@/components/ui/search-field/search-field";
 import { cn } from "@/utils/utils";
 
 /* Controles del header de página (docs/DESIGN.md §4 y §8). Medidas en px CSS,
@@ -12,7 +13,7 @@ interface HeaderSearchProps {
   className?: string;
 }
 
-/** Buscador fijo del header: su posición nunca cambia y no se repite en las tarjetas. */
+/** Buscador fijo del header: el buscador único sobre el fondo gris (relleno blanco). */
 export function HeaderSearch({
   value,
   onChange,
@@ -20,32 +21,13 @@ export function HeaderSearch({
   className
 }: HeaderSearchProps) {
   return (
-    <label
-      className={cn(
-        "box-border flex h-[var(--control-h)] w-[var(--search-w)] min-w-0 shrink cursor-text items-center gap-2.5 rounded-[11px] bg-cp-surface px-3.5",
-        className
-      )}
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        className="shrink-0 text-cp-ink-3"
-      >
-        <circle cx="11" cy="11" r="7" />
-        <path d="m20 20-3.5-3.5" />
-      </svg>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="min-w-0 flex-1 border-0 bg-transparent text-[16px] text-cp-ink outline-none placeholder:text-cp-ink-4"
-      />
-    </label>
+    <SearchField
+      surface="page"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={cn("w-[var(--search-w)] shrink", className)}
+    />
   );
 }
 
@@ -57,7 +39,8 @@ interface FilterButtonProps {
   disabled?: boolean;
 }
 
-/** Botón "Filtrar ▾" que abre el modal Filtros Avanzados. */
+/** Botón "Filtrar ▾" que abre el modal Filtros Avanzados. Sin borde: relleno blanco sobre el gris
+    de la página y gris dentro de tarjetas blancas (`cp-control-fill`). */
 export function FilterButton({
   onClick,
   count = 0,
@@ -69,7 +52,7 @@ export function FilterButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="box-border flex h-[var(--control-h)] shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-[11px] border border-cp-line-2 bg-cp-surface px-4 text-[16px] font-medium text-cp-ink-4 hover:border-cp-ink disabled:cursor-default disabled:opacity-50 disabled:hover:border-cp-line-2"
+      className="box-border flex h-[var(--control-h)] shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap cp-control-fill rounded-lg border-0 px-3.5 text-[13px] font-medium text-cp-ink-4 transition-colors hover:text-cp-ink disabled:cursor-default disabled:opacity-50 disabled:hover:text-cp-ink-4"
     >
       {label}
       {count > 0 && (
@@ -78,12 +61,14 @@ export function FilterButton({
         </span>
       )}
       <svg
-        width="15"
-        height="15"
+        width="12"
+        height="12"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
         strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
         <path d="m6 9 6 6 6-6" />
       </svg>

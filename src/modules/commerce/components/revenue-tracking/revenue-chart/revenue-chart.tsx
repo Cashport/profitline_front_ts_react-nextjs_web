@@ -70,10 +70,10 @@ const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: n
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-        <XAxis dataKey="label" stroke="#a1a1aa" fontSize={10} tickLine={false} axisLine={false} />
+        <XAxis dataKey="label" stroke="#a1a1aa" fontSize={13} tickLine={false} axisLine={false} />
         <YAxis
           stroke="#a1a1aa"
-          fontSize={10}
+          fontSize={13}
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) =>
@@ -88,17 +88,15 @@ const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: n
             border: "1px solid rgb(39, 39, 42)",
             boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.5)"
           }}
-          itemStyle={{ fontSize: "12px", fontWeight: "600" }}
+          itemStyle={{ fontSize: "13px", fontWeight: "600" }}
           labelStyle={{
             color: "#a1a1aa",
             marginBottom: "8px",
-            fontSize: "10px",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em"
+            fontSize: "13px"
           }}
           formatter={(value: any, name: string) => {
             if (name === "cumulative") return [`$ ${value.toLocaleString()}`, "Acumulado"];
-            if (name === "revenue") return [`$ ${value.toLocaleString()}`, "Venta Periodo"];
+            if (name === "revenue") return [`$ ${value.toLocaleString()}`, "Venta periodo"];
             return [`$ ${value.toLocaleString()}`, name];
           }}
         />
@@ -113,7 +111,7 @@ const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: n
               position: "top",
               value: `META: $${(targetGoal / 1000000).toFixed(1)}M`,
               fill: "#22c55e",
-              fontSize: 10,
+              fontSize: 13,
               fontWeight: "bold",
               className: "tracking-wider"
             }}
@@ -229,7 +227,7 @@ export default function RevenueChart() {
 
   return (
     <Dialog.Root open={isFullscreen} onOpenChange={setIsFullscreen}>
-      <div className="bg-card border border-border rounded-2xl p-6 flex flex-col h-full text-foreground shadow-sm">
+      <div className="cp-card px-[18px] py-[14px] flex flex-col h-full text-foreground">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8 shrink-0">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -238,13 +236,13 @@ export default function RevenueChart() {
               </div>
               <h3 className="text-lg font-bold tracking-tight">Evolución de ingresos</h3>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               {subtext} • <span className="text-foreground font-medium">{dateRange}</span>
             </p>
           </div>
 
           <div className="flex items-center gap-3 ml-auto sm:ml-0">
-            <div className="flex items-center gap-1 bg-secondary/50 rounded-xl border border-border p-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-1 bg-secondary/50 rounded-xl border border-border p-1 text-[13px] font-bold text-muted-foreground">
               {FREQUENCY_OPTIONS.map(({ short, option }) => (
                 <button
                   key={option.id}

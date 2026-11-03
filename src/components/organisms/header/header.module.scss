@@ -31,7 +31,7 @@
     .titleBlock {
         display: flex;
         align-items: center;
-        gap: 36px;
+        gap: 20px;
         min-width: 0;
     }
 
@@ -40,18 +40,19 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 23px;
+        // 18px CSS (13.5 visibles a zoom 0.75): el título orienta, no compite con los KPIs.
+        font-size: 18px;
         font-weight: 600;
-        line-height: 1.15;
+        line-height: 1.2;
     }
 
     .meta {
         display: flex;
         align-items: center;
-        gap: 36px;
+        gap: 10px;
         min-width: 0;
         white-space: nowrap;
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.2;
         color: rgb(var(--cp-ink-3));
     }
@@ -64,6 +65,12 @@
         gap: 8px;
         min-width: 0;
     }
+}
+
+// Dentro de .cp-page el header no suma el gap de la vista: el contenido arranca justo
+// debajo, igual que en Clientes (donde ViewWrapper pinta el header sin gap).
+:global(.cp-page) > .wrapper {
+    margin-bottom: calc(-1 * var(--section-gap));
 }
 
 @media (max-width: 768px) {

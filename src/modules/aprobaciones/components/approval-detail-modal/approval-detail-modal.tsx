@@ -24,10 +24,7 @@ import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
 
-import {
-  IApprovalDetail,
-  ApprovalDecision
-} from "@/types/approvals/IApprovals";
+import { IApprovalDetail, ApprovalDecision } from "@/types/approvals/IApprovals";
 import { APPROVAL_TYPE_LABELS, ApprovalStepStatus, ApprovalType } from "@/constants/approvalTypes";
 
 interface ApprovalDetailModalProps {
@@ -105,7 +102,7 @@ export default function ApprovalDetailModal({
   };
 
   const getStatusClassName = (detail?: IApprovalDetail) => {
-    const baseClasses = "flex-shrink-0 px-2 py-0.5 rounded-lg text-xs font-medium";
+    const baseClasses = "flex-shrink-0 px-2 py-0.5 rounded-lg text-[13px] font-medium";
     if (detail?.status) {
       return `${baseClasses} border ${detail.status.color} bg-${detail.status.backgroundColor}`;
     }
@@ -171,7 +168,7 @@ export default function ApprovalDetailModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Solicitado por */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <User className="h-3.5 w-3.5" />
                   <span>Solicitado por</span>
                 </div>
@@ -180,7 +177,7 @@ export default function ApprovalDetailModal({
 
               {/* Fecha de solicitud */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>Fecha de solicitud</span>
                 </div>
@@ -198,7 +195,7 @@ export default function ApprovalDetailModal({
             {/* Comment */}
             {approvalDetail?.observation && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <MessageSquare className="h-4 w-4" />
                   <span>Comentario</span>
                 </div>
@@ -209,7 +206,7 @@ export default function ApprovalDetailModal({
             {/* Attachments */}
             {approvalDetail?.attachments && approvalDetail.attachments.length > 0 && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <Paperclip className="h-4 w-4" />
                   <span>Adjuntos ({approvalDetail.attachments.length})</span>
                 </div>

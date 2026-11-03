@@ -114,7 +114,7 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
           </span>
           <div>
             <h2 className="text-base font-bold text-[#141414]">Nueva promoción</h2>
-            <p className="text-xs font-normal text-[#999999]">
+            <p className="text-[13px] font-normal text-[#999999]">
               Descuento negociado para este cliente
             </p>
           </div>
@@ -123,7 +123,7 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
       styles={{ body: { maxHeight: "calc(65 * var(--vh))", overflowY: "auto" } }}
       footer={
         <div className="flex items-center justify-between">
-          <span className="text-xs text-[#999999]">
+          <span className="text-[13px] text-[#999999]">
             {pluralize(groups.length, "grupo")} · {pluralize(totalProducts, "producto")}
           </span>
           <div className="flex items-center gap-3">
@@ -147,7 +147,7 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
       <div className="flex flex-col gap-6 py-2">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-[#141414] block mb-1.5">Vigencia</label>
+            <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Vigencia</label>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <input
@@ -159,7 +159,7 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
                   max={endDate || undefined}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
-                <span className="text-[11px] text-[#999999] block mt-1">Inicio</span>
+                <span className="text-[13px] text-[#999999] block mt-1">Inicio</span>
               </div>
               <div>
                 <input
@@ -170,12 +170,12 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
                   min={startDate || today}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
-                <span className="text-[11px] text-[#999999] block mt-1">Fin</span>
+                <span className="text-[13px] text-[#999999] block mt-1">Fin</span>
               </div>
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[#141414] block mb-1.5">
+            <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
               Adjunto (contrato / acuerdo)
             </label>
             <input
@@ -239,7 +239,7 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
               type="button"
               onClick={handleAddGroup}
               disabled={hasNoProducts}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#141414] border border-[#DDDDDD] px-3.5 py-2 rounded-lg hover:border-[#141414] hover:bg-[#FAFAFA] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 text-[13px] font-semibold text-[#141414] border border-[#DDDDDD] px-3.5 py-2 rounded-lg hover:border-[#141414] hover:bg-[#FAFAFA] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plus size={12} /> Agregar grupo de descuento
             </button>

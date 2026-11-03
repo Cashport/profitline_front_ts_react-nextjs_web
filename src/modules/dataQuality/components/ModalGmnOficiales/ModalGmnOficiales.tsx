@@ -57,7 +57,7 @@ const errorMessageOf = (error: unknown): string =>
 
 const StatChip: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
   <div className="rounded-lg bg-[#F5F5F4] px-3 py-2">
-    <p className="text-[11px] text-[#6B7280]">{label}</p>
+    <p className="text-[13px] text-[#6B7280]">{label}</p>
     <p className="text-sm font-semibold text-[#141414]">{value}</p>
   </div>
 );
@@ -141,7 +141,7 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
     };
     if (!details.missing && !details.ambiguous) return null;
     return (
-      <div className="mt-2 space-y-1 text-xs text-[#7F1D1D]">
+      <div className="mt-2 space-y-1 text-[13px] text-[#7F1D1D]">
         {details.missing && details.missing.length > 0 && (
           <p>
             <span className="font-semibold">Países no reconocidos:</span>{" "}
@@ -159,41 +159,43 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
   };
 
   const renderLastLoad = () => {
-    if (isStatusLoading) return <p className="text-xs text-gray-400">Consultando última carga...</p>;
-    if (!status) return <p className="text-xs text-gray-500">Aún no se ha cargado el catálogo oficial.</p>;
+    if (isStatusLoading)
+      return <p className="text-[13px] text-gray-400">Consultando última carga...</p>;
+    if (!status)
+      return <p className="text-[13px] text-gray-500">Aún no se ha cargado el catálogo oficial.</p>;
     return (
       <div className="rounded-lg border border-[#EEEEEE] p-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-semibold text-[#141414]">Última carga</p>
+          <p className="text-[13px] font-semibold text-[#141414]">Última carga</p>
           <Tag color={status.status === "COMPLETED" ? "green" : "red"}>{status.status}</Tag>
         </div>
-        <p className="mt-1 text-xs text-[#6B7280]">
+        <p className="mt-1 text-[13px] text-[#6B7280]">
           {status.file_name} · {fmtDate(status.created_at)}
         </p>
-        <p className="text-xs text-[#6B7280]">
+        <p className="text-[13px] text-[#6B7280]">
           Insertadas: {fmt(status.rows_inserted)} · Actualizadas: {fmt(status.rows_updated)} ·
           Conflictos: {fmt(status.rows_conflict)} · Omitidas: {fmt(status.rows_skipped)}
         </p>
-        <p className="text-[11px] text-gray-400">ID de carga: {status.id}</p>
+        <p className="text-[13px] text-gray-400">ID de carga: {status.id}</p>
         {status.error_message && (
-          <p className="mt-1 text-[11px] text-[#DC2626]">{status.error_message}</p>
+          <p className="mt-1 text-[13px] text-[#DC2626]">{status.error_message}</p>
         )}
       </div>
     );
   };
 
   const renderFormat = () => (
-    <div className="rounded-lg bg-[#FAFAF9] p-3 text-xs text-[#4B5563]">
+    <div className="rounded-lg bg-[#FAFAF9] p-3 text-[13px] text-[#4B5563]">
       <p className="font-semibold text-[#141414]">Formato esperado</p>
       <p className="mt-1">
         Excel con hoja <span className="font-mono">{GMN_OFICIALES_SHEET_NAME}</span>. Obligatorias:{" "}
-        <span className="font-mono">{GMN_OFICIALES_REQUIRED_COLUMNS.join(", ")}</span>. Tamaño máximo{" "}
-        {GMN_OFICIALES_MAX_FILE_SIZE_MB} MB.
+        <span className="font-mono">{GMN_OFICIALES_REQUIRED_COLUMNS.join(", ")}</span>. Tamaño
+        máximo {GMN_OFICIALES_MAX_FILE_SIZE_MB} MB.
       </p>
-      <p className="mt-1 text-[11px] text-gray-500">
+      <p className="mt-1 text-[13px] text-gray-500">
         Columnas: <span className="font-mono">{GMN_OFICIALES_EXPECTED_COLUMNS.join(", ")}</span>
       </p>
-      <p className="mt-1 text-[11px] text-gray-500">
+      <p className="mt-1 text-[13px] text-gray-500">
         El GMN oficial es <span className="font-mono">Material_Num</span> (se conserva como texto).
         Los registros <span className="font-mono">INACTIVE</span> también cuentan como oficiales.
       </p>
@@ -213,8 +215,8 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
     >
       <div className="flex flex-col gap-4">
         <p className="text-sm text-[#4B5563]">
-          Carga el catálogo oficial de GMN usado para calcular el campo <b>MATCH</b>. La operación es
-          idempotente: actualiza e inserta por (país, GMN); no elimina los registros ausentes del
+          Carga el catálogo oficial de GMN usado para calcular el campo <b>MATCH</b>. La operación
+          es idempotente: actualiza e inserta por (país, GMN); no elimina los registros ausentes del
           archivo.
         </p>
 
@@ -242,7 +244,7 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
               <WarningCircle size={18} className="mt-0.5 text-[#DC2626]" />
               <div>
                 <p className="text-sm font-medium text-[#7F1D1D]">No se puede cargar el archivo</p>
-                <p className="text-xs text-[#7F1D1D]">{errorMsg}</p>
+                <p className="text-[13px] text-[#7F1D1D]">{errorMsg}</p>
                 {renderDetails()}
               </div>
             </div>
@@ -259,7 +261,7 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
           <>
             <div className="rounded-lg border border-[#EEEEEE] p-3">
               <p className="text-sm font-semibold text-[#141414]">{file?.name}</p>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-[13px] text-[#6B7280]">
                 {formatBytesToMB(file?.size)} · Hoja {report.sheetName}
               </p>
             </div>
@@ -274,16 +276,16 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
             </div>
 
             {(report.duplicateGmnKeys ?? 0) > 0 && (
-              <p className="text-xs text-[#B45309]">
+              <p className="text-[13px] text-[#B45309]">
                 {report.duplicateGmnKeys} clave(s) país+GMN con varias filas distintas: se conservan
                 todas (no se colapsan).
               </p>
             )}
 
-            <div className="rounded-lg bg-[#F0FDF4] p-3 text-xs text-[#166534]">
+            <div className="rounded-lg bg-[#F0FDF4] p-3 text-[13px] text-[#166534]">
               Actualizará el catálogo oficial utilizado para calcular MATCH. Las filas idénticas se
-              deduplican; las distintas con el mismo país+GMN se conservan. Los registros que dejen de
-              aparecer en el archivo quedarán <b>inhabilitados</b>.
+              deduplican; las distintas con el mismo país+GMN se conservan. Los registros que dejen
+              de aparecer en el archivo quedarán <b>inhabilitados</b>.
             </div>
 
             <div className="flex justify-end gap-2">
@@ -306,8 +308,10 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
             <div className="flex items-center gap-2 rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] p-3">
               <CheckCircle size={18} className="text-[#16A34A]" />
               <div>
-                <p className="text-sm font-medium text-[#166534]">Catálogo de GMN oficiales actualizado</p>
-                <p className="text-xs text-[#166534]">ID de carga: {result.loadId}</p>
+                <p className="text-sm font-medium text-[#166534]">
+                  Catálogo de GMN oficiales actualizado
+                </p>
+                <p className="text-[13px] text-[#166534]">ID de carga: {result.loadId}</p>
               </div>
             </div>
 
@@ -324,7 +328,7 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
             </div>
 
             {(result.duplicateGmnKeys ?? 0) > 0 && (
-              <p className="text-xs text-[#B45309]">
+              <p className="text-[13px] text-[#B45309]">
                 Se conservaron todas las filas de {result.duplicateGmnKeys} clave(s) país+GMN con
                 diferencias.
               </p>

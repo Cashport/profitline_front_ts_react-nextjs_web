@@ -8,6 +8,7 @@ import type {
 } from "@/types/clients/IClientsHome";
 import { DUE_PERIODS, type DuePeriod } from "../../../constants/clients-home";
 import { duePeriodRange, executivesForCoordinators } from "../../../utils/clients-home-format";
+import SearchField from "@/components/ui/search-field/search-field";
 
 export interface ClientsHomeFilterDraft {
   due: { from: string; to: string; period: DuePeriod | null };
@@ -129,7 +130,9 @@ export default function ClientsHomeFilterModal({
           </div>
           <div className="flex-1">
             <div className="text-[17px] font-semibold">Filtros Avanzados</div>
-            <div className="text-xs text-[#6b6b6b]">Encuentra y selecciona múltiples opciones</div>
+            <div className="text-[13px] text-[#6b6b6b]">
+              Encuentra y selecciona múltiples opciones
+            </div>
           </div>
           <button
             type="button"
@@ -164,7 +167,7 @@ export default function ClientsHomeFilterModal({
                     style={{ background: on ? "#cbe71e" : "transparent" }}
                   />
                   <span className="flex-1">{c.label}</span>
-                  <span className="mr-2 text-[11px] text-[#8a8a8a]">{n || ""}</span>
+                  <span className="mr-2 text-[13px] text-[#8a8a8a]">{n || ""}</span>
                   <span style={{ color: on ? "#141414" : "transparent" }}>&gt;</span>
                 </div>
               );
@@ -174,7 +177,7 @@ export default function ClientsHomeFilterModal({
           <div className="min-w-0 flex-1 overflow-auto px-[22px] py-[18px]">
             {cat === "fecha" ? (
               <>
-                <div className="mb-3.5 rounded-lg bg-[#f7f7f7] px-3 py-2 text-[10.5px] font-semibold tracking-[.6px] text-[#4a4a4a]">
+                <div className="mb-3.5 rounded-lg bg-[#f7f7f7] px-3 py-2 text-[13px] font-semibold tracking-[.6px] text-[#4a4a4a]">
                   SELECCIONA UN PERIODO
                 </div>
                 <div className="mb-2.5 text-[13px] font-semibold">Periodos Predefinidos</div>
@@ -215,7 +218,7 @@ export default function ClientsHomeFilterModal({
                 </div>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
                   {(["from", "to"] as const).map((field) => (
-                    <label key={field} className="flex flex-col gap-1 text-xs text-[#6b6b6b]">
+                    <label key={field} className="flex flex-col gap-1 text-[13px] text-[#6b6b6b]">
                       {field === "from" ? "Desde" : "Hasta"}
                       <input
                         type="date"
@@ -231,33 +234,20 @@ export default function ClientsHomeFilterModal({
               </>
             ) : (
               <>
-                <div className="mb-3 flex h-10 items-center gap-2.5 rounded-[10px] border border-[#e3e3e3] bg-[#fafafa] px-3">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#8a8a8a"
-                    strokeWidth="2"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="m20 20-3.5-3.5" />
-                  </svg>
-                  <input
-                    value={optQuery}
-                    onChange={(e) => setOptQuery(e.target.value)}
-                    placeholder={`Buscar en ${LIST_LABELS[cat].search}...`}
-                    className="flex-1 border-0 bg-transparent text-[13px] outline-none"
-                  />
-                </div>
+                <SearchField
+                  value={optQuery}
+                  onChange={setOptQuery}
+                  placeholder={`Buscar en ${LIST_LABELS[cat].search}...`}
+                  className="mb-3"
+                />
                 <div className="mb-2.5 flex items-center justify-between rounded-lg bg-[#f7f7f7] px-3 py-2">
-                  <span className="text-[10.5px] font-semibold tracking-[.6px] text-[#4a4a4a]">
+                  <span className="text-[13px] font-semibold tracking-[.6px] text-[#4a4a4a]">
                     {optList.length} RESULTADOS
                   </span>
                   <button
                     type="button"
                     onClick={selectAll}
-                    className="cursor-pointer border-0 bg-transparent text-xs font-semibold text-[#8aa30f]"
+                    className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-[#8aa30f]"
                   >
                     Seleccionar todos
                   </button>

@@ -4,17 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Popconfirm } from "antd";
 import { mutate as globalMutate } from "swr";
-import {
-  ArrowLeft,
-  Check,
-  FileCheck2,
-  FileUp,
-  Pencil,
-  Send,
-  ShieldCheck,
-  Trash,
-  X
-} from "lucide-react";
+import { Check, FileCheck2, FileUp, Pencil, Send, ShieldCheck, Trash, X } from "lucide-react";
 
 import { useMedicalAccountDetail } from "../../hooks/useMedicalAccountDetail";
 import { MedicalAccountStatusTag } from "../../components/MedicalAccountStatusTag/MedicalAccountStatusTag";
@@ -108,11 +98,6 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<IMedicalAccountEditForm>(EMPTY_FORM);
 
-  const handleGoBack = () => {
-    if (window.history.length > 1) router.back();
-    else router.push("/cuentas-medicas");
-  };
-
   const handleDelete = useCallback(async () => {
     if (!account) return;
     setIsDeleting(true);
@@ -132,10 +117,7 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
   const handleDetailUpdate = useCallback(
     (updated: IMedicalAccountUploadData) => {
       mutate(
-        (prev) =>
-          prev
-            ? { ...prev, data: updated }
-            : { status: 200, message: "", data: updated },
+        (prev) => (prev ? { ...prev, data: updated } : { status: 200, message: "", data: updated }),
         false
       );
     },
@@ -230,12 +212,9 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
 
   const renderMessage = (message: string) => (
     <main>
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
-        <button type="button" onClick={handleGoBack} className={barButton}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Volver
-        </button>
-        <p className="mt-4 text-gray-600">{message}</p>
+      {/* "Volver" lo pone el header compartido (‹) */}
+      <div className="cp-card px-[18px] py-[14px]">
+        <p className="text-gray-600">{message}</p>
       </div>
     </main>
   );
@@ -250,7 +229,12 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
     switch (action?.type) {
       case "SEND_TO_AUDIT":
         return (
-          <button type="button" onClick={handleSendToAudit} disabled={isBusy} className={primaryButton}>
+          <button
+            type="button"
+            onClick={handleSendToAudit}
+            disabled={isBusy}
+            className={primaryButton}
+          >
             <Send className="h-3.5 w-3.5" />
             {isBusy ? "Enviando…" : "Enviar a pendiente auditar"}
           </button>
@@ -287,15 +271,10 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
 
   return (
     <main>
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="cp-card overflow-hidden">
         {/* Top action bar */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={handleGoBack} className={barButton}>
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Volver
-            </button>
-
             {isEditing ? (
               <>
                 <button
@@ -307,7 +286,12 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
                   <Check className="h-3.5 w-3.5" />
                   {isSaving ? "Guardando…" : "Guardar"}
                 </button>
-                <button type="button" onClick={handleCancelEdit} disabled={isSaving} className={barButton}>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                  className={barButton}
+                >
                   <X className="h-3.5 w-3.5" />
                   Cancelar
                 </button>
@@ -377,12 +361,9 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
         {/* Status tracking timeline */}
         <div className="border-b border-gray-100">
           <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/40 px-6 py-3">
-            <span className="text-xs font-semibold text-gray-600">Historial</span>
+            <span className="text-[13px] font-semibold text-gray-600">Historial</span>
           </div>
-          <MedicalAccountTimeline
-            accountId={account.id}
-            currentStatusCode={account.status_code}
-          />
+          <MedicalAccountTimeline accountId={account.id} currentStatusCode={account.status_code} />
         </div>
 
         {/* Classified documents + PDF preview */}

@@ -156,7 +156,9 @@ const OrdersViewTable = ({
         if (prevSelectedDrafts) {
           const filteredSelectedDrafts = newSelectedDrafts.filter(
             (newSelectedRow) =>
-              !prevSelectedDrafts.some((prevSelectedRow) => prevSelectedRow.id === newSelectedRow.id)
+              !prevSelectedDrafts.some(
+                (prevSelectedRow) => prevSelectedRow.id === newSelectedRow.id
+              )
           );
           const unCheckedRows = prevSelectedDrafts.filter(
             (prevSelectedRow) =>

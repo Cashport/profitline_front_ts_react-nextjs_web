@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import dayjs, { type Dayjs } from "dayjs";
 
-import UiSearchInput from "@/components/ui/search-input";
+import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
 
 import AdvisorDayModal from "../../components/advisor-day-modal/advisor-day-modal";
 import AdvisorDetail from "../../components/advisor-detail/advisor-detail";
@@ -16,6 +16,8 @@ import StatusChips from "../../components/status-chips/status-chips";
 import VisitsFilterModal from "../../components/visits-filter-modal/visits-filter-modal";
 import VisitsHeader from "../../components/visits-header/visits-header";
 import VisitsTimeline from "../../components/visits-timeline/visits-timeline";
+import { GLASS } from "../../components/visits-map/map-overlays";
+import { cn } from "@/utils/utils";
 import {
   DAY_END_MIN,
   DAY_START_MIN,
@@ -56,7 +58,7 @@ import {
 const VisitsMap = dynamic(() => import("../../components/visits-map/visits-map"), {
   ssr: false,
   loading: () => (
-    <div className="h-full w-full animate-pulse rounded-2xl border border-border bg-secondary" />
+    <div className="h-full w-full animate-pulse rounded-[var(--card-radius)] bg-secondary" />
   )
 });
 
@@ -295,46 +297,33 @@ export default function VisitsView() {
   }, []);
 
   return (
-    <div className="wallet-scope flex min-h-0 flex-1 flex-col gap-3 max-[900px]:flex-none">
-      <VisitsHeader day={day} today={today} onDayChange={changeDay} />
+    <div className="wallet-scope cp-page min-h-0 flex-1 max-[900px]:flex-none">
+      <VisitsHeader
+        day={day}
+        today={today}
+        onDayChange={changeDay}
+        tools={
+          <>
+            <VisitsFilterModal
+              inHeader
+              value={filters}
+              onChange={changeFilters}
+              advisors={advisors}
+              // Zonas y clientes aún no llegan del API.
+              zones={[]}
+              clients={[]}
+            />
+            <HeaderSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar asesor o cliente"
+            />
+          </>
+        }
+      />
 
-      <div className="grid min-h-0 flex-1 grid-cols-[360px_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_92px] gap-3 max-[1200px]:grid-cols-[340px_minmax(0,1fr)] max-[900px]:flex-none max-[900px]:grid-cols-1 max-[900px]:grid-rows-[auto_auto_58vh_92px_auto]">
-        <div className="col-start-1 row-start-1 flex min-w-0 items-center">
-          <UiSearchInput
-            id="visits-search"
-            showBorder
-            placeholder="Buscar asesor o cliente"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="!max-w-none"
-          />
-        </div>
-
-        <div className="col-start-2 row-start-1 min-w-0 max-[900px]:col-start-1 max-[900px]:row-start-2">
-          <VisitsFilterModal
-            value={filters}
-            onChange={changeFilters}
-            advisors={advisors}
-            // Zonas y clientes aún no llegan del API.
-            zones={[]}
-            clients={[]}
-            barEnd={
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <StatusChips
-                  counts={view.counts}
-                  selected={filters.status}
-                  onToggle={toggleStatus}
-                  palette={palette}
-                />
-                <div className="ml-auto">
-                  <LiveClock dayMode={dayMode} isLive={isLive} t={t} palette={palette} />
-                </div>
-              </div>
-            }
-          />
-        </div>
-
-        <aside className="col-start-1 row-[2/4] flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card max-[900px]:row-[5/6]">
+      <div className="grid min-h-0 flex-1 grid-cols-[360px_minmax(0,1fr)] grid-rows-[minmax(0,1fr)_92px] gap-[var(--card-gap)] max-[1200px]:grid-cols-[340px_minmax(0,1fr)] max-[900px]:flex-none max-[900px]:grid-cols-1 max-[900px]:grid-rows-[58vh_92px_auto]">
+        <aside className="col-start-1 row-[1/3] cp-card flex min-h-0 flex-col overflow-hidden max-[900px]:row-[3/4]">
           {selected ? (
             detail && selected === detailAdvisor ? (
               <AdvisorDetail
@@ -363,7 +352,7 @@ export default function VisitsView() {
             />
           )}
         </aside>
-        <div className="col-start-2 row-start-2 min-h-0 min-w-0 max-[900px]:col-start-1 max-[900px]:row-start-3">
+        <div className="col-start-2 row-start-1 min-h-0 min-w-0 max-[900px]:col-start-1 max-[900px]:row-start-1">
           <VisitsMap
             advisors={advisors}
             t={t}
@@ -378,6 +367,20 @@ export default function VisitsView() {
             isDark={isDark}
             camera={camera}
             notice={null}
+            // El mapa sube hasta arriba: estados y "En vivo" van en su esquina superior derecha.
+            topRight={
+              <>
+                <StatusChips
+                  counts={view.counts}
+                  selected={filters.status}
+                  onToggle={toggleStatus}
+                  palette={palette}
+                />
+                <div className={cn("flex h-[30px] shrink-0 items-center rounded-full px-3", GLASS)}>
+                  <LiveClock dayMode={dayMode} isLive={isLive} t={t} palette={palette} />
+                </div>
+              </>
+            }
             onSelectAdvisor={selectAdvisor}
             onJumpToRun={jumpToRun}
             onFlyTo={flyTo}
@@ -385,7 +388,7 @@ export default function VisitsView() {
           />
         </div>
 
-        <div className="col-start-2 row-start-3 min-w-0 max-[900px]:col-start-1 max-[900px]:row-start-4">
+        <div className="col-start-2 row-start-2 min-w-0 max-[900px]:col-start-1 max-[900px]:row-start-2">
           <VisitsTimeline
             t={t}
             now={now}

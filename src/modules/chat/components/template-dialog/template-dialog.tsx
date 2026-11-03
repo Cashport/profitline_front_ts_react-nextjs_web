@@ -182,7 +182,7 @@ export default function TemplateDialog({
                   style={{ borderColor: "#DDDDDD" }}
                 />
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-[13px] text-muted-foreground">
                     Tip: Usa variables entre llaves, por ejemplo {"{nombre}"}.
                   </div>
                   <Button
@@ -215,7 +215,7 @@ export default function TemplateDialog({
                   style={{ borderColor: "#DDDDDD" }}
                 />
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-[13px] text-muted-foreground">
                     Tip: Puedes usar variables como {"{nombre}"} y {"{periodo}"}.
                   </div>
                   <Button

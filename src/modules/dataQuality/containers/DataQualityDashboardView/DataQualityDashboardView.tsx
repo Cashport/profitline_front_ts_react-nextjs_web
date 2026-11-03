@@ -24,11 +24,11 @@ function DashboardContent() {
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="cp-page">
       <DashboardHeader />
       {activeTab === "resumen" ? (
         <>
-          <div className="grid grid-cols-2 gap-6 items-stretch">
+          <div className="grid grid-cols-2 items-stretch gap-[var(--card-gap)]">
             <DashboardKPICards kpis={dashboardSummary?.kpis} />
             <NovedadesChart alerts={dashboardSummary?.alerts} />
           </div>

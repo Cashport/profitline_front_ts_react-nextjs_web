@@ -27,13 +27,13 @@ export default function PanelCard({
   children
 }: PanelCardProps) {
   return (
-    <section className={cn("flex flex-col rounded-xl bg-card shadow-sm", className)}>
+    <section className={cn("cp-card flex flex-col", className)}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border px-4 py-3">
         <h3 className="text-[13.5px] font-semibold text-foreground">{title}</h3>
-        {subtitle && <span className="text-[11.5px] text-muted-foreground">{subtitle}</span>}
+        {subtitle && <span className="text-[13px] text-muted-foreground">{subtitle}</span>}
         {(hint || actions) && (
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            {hint && <span className="text-[11.5px] text-muted-foreground">{hint}</span>}
+            {hint && <span className="text-[13px] text-muted-foreground">{hint}</span>}
             {actions}
           </div>
         )}

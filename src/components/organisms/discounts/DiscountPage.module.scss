@@ -7,13 +7,37 @@
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    background-color: #FFFFFF;
-    padding: 1rem 1rem;
-    margin-top: 0.2rem;
-    border-radius: 8px;
-
+    // Tarjeta (docs/DESIGN.md §3): blanca, radio 14, sin borde ni sombra.
+    background-color: rgb(var(--cp-surface));
+    padding: var(--card-pad);
+    border: 0;
+    border-radius: var(--card-radius);
+    box-shadow: none;
 
     .header {
         height: 48px;
+        align-items: center;
+
+        // Botón de tres puntos (DotsDropdown): mismo alto que el buscador (--control-h).
+        :global(.dotsButton) {
+            width: var(--control-h) !important;
+            height: var(--control-h) !important;
+
+            svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    }
+
+    // CTA "Crear …": mismo alto que el buscador (--control-h), texto 14px.
+    .ctaContainer {
+        justify-content: center;
+
+        :global(.ButtonHeader) {
+            height: var(--control-h) !important;
+            padding-block: 0;
+            font-size: 14px;
+        }
     }
 }

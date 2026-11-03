@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     cookies().delete(COOKIE_NAME || "");
 
     // Determinar la URL de redirección basada en la ruta actual
-    let redirectUrl = "/auth/login";
+    let redirectUrl = "/";
 
     if (currentPath === "/comercio/cetaphil") {
       redirectUrl = "/cetaphil";
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         message: "Logout failed",
-        redirectUrl: "/auth/login"
+        redirectUrl: "/"
       },
       { status: 500 }
     );

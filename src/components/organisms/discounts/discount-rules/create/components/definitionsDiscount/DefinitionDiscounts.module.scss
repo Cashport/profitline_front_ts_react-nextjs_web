@@ -3,12 +3,13 @@
 .HeaderContainer {
     height: auto;
     width: 100%;
-    margin: 0 0 32px 0;
-    background-color: $white;
-    padding: 2rem;
-    padding-left: 2.5rem;
-    border-radius: 1rem;
-    border: 1px solid $dark-gray;
+    margin: 0;
+    // Tarjeta (docs/DESIGN.md §3): blanca, radio 14, sin borde ni sombra.
+    background-color: rgb(var(--cp-surface));
+    padding: var(--card-pad);
+    border-radius: var(--card-radius);
+    border: 0;
+    box-shadow: none;
 
     hr {
         margin: 0;
@@ -36,7 +37,7 @@
         color: #141414;
         border: 1px solid #ddd;
 
-        >span {
+        > span {
             color: $black;
         }
     }

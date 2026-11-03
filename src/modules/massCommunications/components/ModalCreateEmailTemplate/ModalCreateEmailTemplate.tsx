@@ -290,13 +290,13 @@ export default function ModalCreateEmailTemplate({
           <Label className="text-sm text-[#141414] font-medium mb-1.5 block">Vista previa</Label>
           <div className="rounded-lg border border-[#DDDDDD] overflow-hidden flex flex-col flex-1 bg-[#FAFAFA]">
             <div className="bg-[#141414] px-4 py-2.5">
-              <p className="text-[11px] text-gray-400 font-medium tracking-wide uppercase">
+              <p className="text-[13px] text-gray-400 font-medium">
                 Vista previa del correo
               </p>
             </div>
             <div className="p-4 flex flex-col bg-white m-2 rounded-md border border-[#EEEEEE]">
               <div className="border-b border-[#EEEEEE] pb-2.5 mb-3">
-                <p className="text-[10px] text-gray-400 mb-0.5">Para: destinatario@ejemplo.com</p>
+                <p className="text-[13px] text-gray-400 mb-0.5">Para: destinatario@ejemplo.com</p>
                 <p className="text-sm font-semibold text-[#141414] leading-snug">
                   {renderedSubject || "Sin asunto"}
                 </p>
@@ -308,7 +308,7 @@ export default function ModalCreateEmailTemplate({
               </div>
               {selectedAttachments.size > 0 && (
                 <div className="mt-3 pt-2.5 border-t border-[#EEEEEE]">
-                  <p className="text-[10px] text-gray-400 font-medium mb-1.5 uppercase tracking-wide">
+                  <p className="text-[13px] text-gray-400 font-medium mb-1.5">
                     Adjuntos
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -317,7 +317,7 @@ export default function ModalCreateEmailTemplate({
                       .map((att) => (
                         <span
                           key={att.value}
-                          className="inline-flex items-center gap-1 text-[11px] bg-[#F5F5F5] text-gray-600 px-2 py-1 rounded-md border border-[#EEEEEE]"
+                          className="inline-flex items-center gap-1 text-[13px] bg-[#F5F5F5] text-gray-600 px-2 py-1 rounded-md border border-[#EEEEEE]"
                         >
                           <Paperclip className="w-2.5 h-2.5 text-gray-400" />
                           {att.label}
@@ -349,7 +349,7 @@ export default function ModalCreateEmailTemplate({
             fontSize: "14px"
           }}
         />
-        <span className="text-xs text-gray-400">
+        <span className="text-[13px] text-gray-400">
           Se insertara en {activeField === "subject" ? "el asunto" : "el cuerpo"}
         </span>
       </div>
@@ -373,7 +373,7 @@ export default function ModalCreateEmailTemplate({
                     else next.add(role.value);
                     setValue("templateRoles", next, { shouldValidate: true });
                   }}
-                  className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 text-[13px] px-3 py-2 rounded-lg border transition-all cursor-pointer ${
                     isSelected
                       ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
                       : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
@@ -409,7 +409,7 @@ export default function ModalCreateEmailTemplate({
                     else next.add(att.value);
                     setValue("selectedAttachments", next);
                   }}
-                  className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 text-[13px] px-3 py-2 rounded-lg border transition-all cursor-pointer ${
                     isSelected
                       ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
                       : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"

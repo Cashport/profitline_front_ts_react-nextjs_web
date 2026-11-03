@@ -14,7 +14,7 @@ export const UploadProcessingBanner = ({ fileName }: { fileName?: string }) => (
       <span className="truncate text-[13px] font-semibold">
         Procesando {fileName ?? "la cartera"}…
       </span>
-      <span className="text-[12px] text-[#8a8a8a]">
+      <span className="text-[13px] text-[#8a8a8a]">
         Leyendo el archivo y cruzando cada documento contra Cashport. Puedes salir de esta pantalla:
         la carga sigue en el servidor.
       </span>
@@ -40,7 +40,7 @@ export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelPro
           <span className="text-[13px] font-semibold">
             La carga de {upload.file_name} no se aplicó
           </span>
-          <span className="text-[12px] text-[#444]">
+          <span className="text-[13px] text-[#444]">
             {upload.error_message ?? "No se pudo procesar el archivo."} La cartera vigente no
             cambió.
           </span>
@@ -55,12 +55,12 @@ export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelPro
 
       {upload.errors.length > 0 && (
         <div className="max-h-[260px] overflow-auto rounded-md border border-[#ececec]">
-          <table className="w-full border-collapse text-[12px]">
-            <thead className="sticky top-0 bg-[#fafafa]">
-              <tr className="text-left text-[10.5px] uppercase tracking-[0.06em] text-[#8a8a8a]">
-                <th className="w-[70px] px-3 py-2 font-semibold">Fila</th>
-                <th className="w-[130px] px-3 py-2 font-semibold">Columna</th>
-                <th className="px-3 py-2 font-semibold">Qué corregir</th>
+          <table className="w-full border-collapse text-[13px]">
+            <thead className="sticky top-0 bg-cp-surface">
+              <tr className="text-left text-[13.5px] text-cp-ink">
+                <th className="w-[70px] border-b border-cp-line px-3 py-3 font-semibold">Fila</th>
+                <th className="w-[130px] border-b border-cp-line px-3 py-3 font-semibold">Columna</th>
+                <th className="border-b border-cp-line px-3 py-3 font-semibold">Qué corregir</th>
               </tr>
             </thead>
             <tbody>
@@ -81,7 +81,7 @@ export const UploadFailedPanel = ({ upload, onRetry, onDismiss }: FailedPanelPro
         </div>
       )}
       {hiddenErrors > 0 && (
-        <span className="text-[11px] text-[#8a8a8a]">
+        <span className="text-[13px] text-[#8a8a8a]">
           Se muestran los primeros {formatNumber(upload.errors.length)} de{" "}
           {formatNumber(upload.error_count)} errores.
         </span>

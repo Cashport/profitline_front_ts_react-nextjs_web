@@ -62,12 +62,9 @@ export default function StatCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-[var(--card-gap)]">
       {stats.map((stat, i) => (
-        <div
-          key={i}
-          className="bg-card border border-border shadow-sm rounded-xl p-5 flex flex-col hover:bg-card/90 transition-all duration-300 min-h-[160px]"
-        >
+        <div key={i} className="cp-card flex flex-col px-[18px] py-[14px] min-h-[var(--kpi-h)]">
           <div className="flex items-start justify-between mb-auto">
             <h3 className="text-base font-semibold text-muted-foreground pr-2 leading-snug">
               {stat.title}
@@ -76,21 +73,21 @@ export default function StatCards() {
               {stat.icon ? (
                 <stat.icon className="w-7 h-7 text-[#FF6B00]" strokeWidth={1.5} />
               ) : stat.badge ? (
-                <div className="bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/20 text-xs font-bold px-2 py-1 rounded-md leading-none flex items-center shadow-sm">
+                <div className="bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/20 text-[13px] font-bold px-2 py-1 rounded-md leading-none flex items-center shadow-sm">
                   {stat.badge}
                 </div>
               ) : null}
             </div>
           </div>
 
-          <div className="flex flex-col items-start text-left mt-6">
+          <div className="flex flex-col items-start text-left mt-3">
             <span className="text-2xl font-bold tracking-tight text-foreground leading-none mb-3">
               {stat.value}
             </span>
             <div className="flex items-center gap-2">
               {stat.trend && (
                 <div
-                  className={`flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                  className={`flex items-center gap-0.5 text-[13px] font-bold px-1.5 py-0.5 rounded ${
                     stat.isAlert
                       ? "bg-[#FF6B00]/20 text-[#FF6B00] dark:text-[#FF6B00]"
                       : stat.isPositive

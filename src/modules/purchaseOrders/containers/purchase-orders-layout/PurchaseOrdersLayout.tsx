@@ -28,8 +28,17 @@ function PurchaseOrdersChrome({ children }: PurchaseOrdersLayoutProps) {
     return () => document.body.classList.remove(cls);
   }, [isDark]);
 
+  // Detalle (/purchase-orders/[id]) y creación son de segundo nivel: "‹" volver al listado.
+  const isList = pathname.replace(/\/$/, "") === "/purchase-orders";
+
   const content = (
-    <ViewWrapper headerTitle="Ordenes de compra" className={isDark ? "dark" : ""}>
+    <ViewWrapper
+      headerTitle="Ordenes de compra"
+      headerBack={isList || isDashboard ? undefined : "/purchase-orders"}
+      // El dashboard pinta su propio Header (sus filtros viven en su contexto).
+      hideHeader={isDashboard}
+      className={isDark ? "dark" : ""}
+    >
       {children}
     </ViewWrapper>
   );

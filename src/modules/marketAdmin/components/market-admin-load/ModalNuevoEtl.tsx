@@ -22,7 +22,7 @@ const BLANK_ETL: NuevoEtlFormValues = {
 
 const inputClass =
   "w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors";
-const labelClass = "text-xs font-bold text-[#141414] block mb-1.5";
+const labelClass = "text-[13px] font-bold text-[#141414] block mb-1.5";
 
 export default function ModalNuevoEtl({ open, onClose, onSend }: Props) {
   const [form, setForm] = useState<NuevoEtlFormValues>(BLANK_ETL);

@@ -1,0 +1,22 @@
+# Profitline
+
+> Profitline es una empresa colombiana de outsourcing de procesos de negocio (BPO), fundada en 2004 en Bogotá, con tecnología propia. Opera procesos críticos de empresas multinacionales y se mide por resultados con ANS. Cashport es su plataforma tecnológica propia, no una empresa independiente.
+
+## Servicios
+- Order to Cash: órdenes de compra, facturación y gestión de cartera
+- Logística Inversa: recolección, certificación y legalización de devoluciones
+- Hub Logístico: transporte de carga doméstica con TMS (Transport Management System)
+- Insights de Sell-out: consolidación de sell-out e insights comerciales
+- Hub de Ventas: monitoreo de fuerzas de ventas en campo
+
+## Datos
+- Sectores: farmacéutico, consumo masivo, oil & gas, servicios financieros
+- Presencia: Colombia, México, Brasil, Perú, Ecuador, Chile, Panamá, Centroamérica, Estados Unidos y España
+- Modelo: resultados como servicio, medidos con ANS e indicadores del cliente
+
+## Enlaces
+- [Landing en español](https://cashport.ai/)
+- [Landing en inglés](https://cashport.ai/en)
+- [Sitio corporativo](https://profitline.co)
+- [Contacto](https://profitline.co/contactanos/)
+- [LinkedIn](https://www.linkedin.com/company/profitline-bop/)

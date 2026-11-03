@@ -27,7 +27,7 @@ export default function ReportDetailView({ reportId }: ReportDetailViewProps) {
   const goTo = (i: number) => router.replace(`/reports/${visibleReports[i].id}`);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 pb-6">
+    <div className="cp-page min-h-0 flex-1">
       <ReportDetailHeader
         report={report}
         position={index >= 0 ? { index, total: visibleReports.length } : null}

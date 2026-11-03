@@ -5,6 +5,8 @@ import { ColumnsType } from "antd/es/table";
 import Link from "next/link";
 import { Eye, Trash } from "phosphor-react";
 import { Discount, DiscountPackage } from "@/types/discount/DiscountPackage";
+import ApprovalStatusPill from "@/components/ui/approval-status-pill";
+import { getApprovalEntityStatusLabel } from "@/constants/approvalEntityStatus";
 
 type Props = {
   // eslint-disable-next-line no-unused-vars
@@ -80,6 +82,16 @@ const discountsColumns: (_: Props) => ColumnsType<DiscountBasics & { checked: bo
       return new Date(a.end_date) > new Date(b.end_date) ? 1 : -1; // Ordena normalmente por fecha
     },
     render: (text) => (text ? new Date(text).toLocaleDateString() : "")
+  },
+  {
+    title: "Aprobación",
+    dataIndex: "approval_entity_status_id",
+    key: "ApprovalDiscount",
+    sorter: (a, b) =>
+      getApprovalEntityStatusLabel(a.approval_entity_status_id).localeCompare(
+        getApprovalEntityStatusLabel(b.approval_entity_status_id)
+      ),
+    render: (statusId) => <ApprovalStatusPill statusId={statusId} />
   },
   {
     title: "Estado",
@@ -162,6 +174,16 @@ const discountPackagesColumns: (
       return new Date(a.endDate) > new Date(b.endDate) ? 1 : -1; // Ordena normalmente por fecha
     },
     render: (text) => (text ? new Date(text).toLocaleDateString() : "")
+  },
+  {
+    title: "Aprobación",
+    dataIndex: "approvalEntityStatusId",
+    key: "ApprovalDiscount",
+    sorter: (a, b) =>
+      getApprovalEntityStatusLabel(a.approvalEntityStatusId).localeCompare(
+        getApprovalEntityStatusLabel(b.approvalEntityStatusId)
+      ),
+    render: (statusId) => <ApprovalStatusPill statusId={statusId} />
   },
   {
     title: "Estado",

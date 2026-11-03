@@ -15,11 +15,11 @@ import {
   CLIENTS_HOME_QUERY_KEY,
   FORECAST_STATUS
 } from "../../../constants/clients-home";
-import { fmtCutoff, fmtCutoffShort, fmtIsoDate } from "../../../utils/clients-home-format";
+import { fmtIsoDate } from "../../../utils/clients-home-format";
+import HeaderCutoff from "@/components/ui/header-cutoff/header-cutoff";
 import {
   FilterButton,
   FilterChips,
-  MiniSwitch,
   type FilterChipItem
 } from "@/components/ui/page-header-controls/page-header-controls";
 import ClientsHomeFilterModal from "../clients-home-filter-modal/clients-home-filter-modal";
@@ -56,55 +56,17 @@ const HeaderExtra = () => {
   const { refresh, refreshing } = usePortfolioClientsRefresh(canRegenerate, reload);
   const busy = refreshing || isFetching;
 
-  const corte = refreshing
-    ? "Actualizando…"
-    : pending
-      ? "Generando información…"
-      : summary
-        ? `Corte ${fmtCutoffShort(summary.cutoffAt)}`
-        : "Corte —";
-
-  // A la derecha del título, en una línea: el corte con recargar y luego "Proyectar a cierre".
+  // Corte, recargar y "Proyectar a cierre": el componente común de los módulos con foto.
   return (
-    <>
-      <span
-        className="flex items-center gap-1.5"
-        title={summary ? `Corte ${fmtCutoff(summary.cutoffAt)}` : undefined}
-      >
-        <span
-          className="h-2 w-2 shrink-0 rounded-full"
-          style={{ background: refreshing || pending ? "#f5b700" : "#9bb514" }}
-        />
-        {corte}
-        <button
-          type="button"
-          title={canRegenerate ? "Actualizar ahora" : "Recargar"}
-          disabled={busy}
-          onClick={canRegenerate ? refresh : reload}
-          className="-my-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-cp-ink hover:bg-cp-line disabled:cursor-default disabled:opacity-50"
-        >
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            className={busy ? "animate-spin" : undefined}
-          >
-            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
-            <path d="M21 3v6h-6" />
-          </svg>
-        </button>
-      </span>
-      <MiniSwitch
-        checked={proj}
-        onChange={setProj}
-        label="Proyectar a cierre"
-        title="Proyecta las edades de la cartera al cierre del mes"
-      />
-    </>
+    <HeaderCutoff
+      cutoffAt={summary?.cutoffAt}
+      placeholder={pending ? "Generando información…" : "Corte —"}
+      busy={busy || pending}
+      busyLabel={refreshing ? "Actualizando…" : pending ? "Generando información…" : undefined}
+      onRefresh={canRegenerate ? refresh : reload}
+      refreshLabel={canRegenerate ? "Reprocesar" : "Recargar"}
+      projection={{ checked: proj, onChange: setProj }}
+    />
   );
 };
 

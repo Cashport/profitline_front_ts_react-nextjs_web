@@ -38,7 +38,7 @@ export default function FilterTrigger({
         {showChevron && <ChevronDown className="w-4 h-4" />}
       </button>
       {count > 0 && (
-        <span className="absolute -top-2 -right-2 w-[22px] h-[22px] bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+        <span className="absolute -top-2.5 -right-2.5 min-w-[24px] h-[24px] px-1 bg-primary text-primary-foreground text-[13px] font-bold rounded-full flex items-center justify-center shadow-md">
           {count}
         </span>
       )}

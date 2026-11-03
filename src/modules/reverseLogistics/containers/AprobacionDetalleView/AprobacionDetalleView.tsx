@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import useSWR, { useSWRConfig } from "swr";
 import dayjs from "dayjs";
 import { message, Modal, Table } from "antd";
-import { ArrowLeft, AlertTriangle, TrendingUp } from "lucide-react";
-import { Button } from "@/modules/chat/ui/button";
+import { AlertTriangle, TrendingUp } from "lucide-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import {
@@ -32,7 +31,7 @@ interface AprobacionDetalleViewProps {
 // Backend name for the estado we set when approving. Resolved at runtime from
 // the filters context so the modal keeps working if the backend ever rotates
 // the GUID behind that name.
-const APROBADO_ESTADO_NOMBRE = ["Aprobado","Aprobacion Realizada"];
+const APROBADO_ESTADO_NOMBRE = ["Aprobado", "Aprobacion Realizada"];
 
 // Maps the Profit360 hex color (e.g. "#7ED961") to one of the three badge
 // palettes used by the products table.
@@ -195,20 +194,6 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Top bar */}
-      <div className="flex flex-col gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/logistica-inversa/aprobaciones")}
-          className="text-gray-700 hover:text-gray-900 w-fit"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Volver
-        </Button>
-        <h2 className="text-base font-bold text-gray-900">Aprobación de Lotes</h2>
-      </div>
-
       {/* Client info grid — same labels as the original */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm text-gray-700">
         <div>
@@ -226,7 +211,7 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
         <div className="flex items-center gap-2">
           <span className="font-semibold">Causal Devolución:</span>
           <span
-            className="inline-block px-2 py-0.5 rounded text-xs font-semibold text-white"
+            className="inline-block px-2 py-0.5 rounded text-[13px] font-semibold text-white"
             style={{ backgroundColor: "#9333ea" }}
           >
             {causalLabel}
@@ -243,11 +228,11 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
       {/* Regla 5% — 3 cards */}
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
-          <span className="text-xs font-medium text-gray-500">
+          <span className="text-[13px] font-medium text-gray-500">
             {regla?.reglaDescripcion ?? "Regla devoluciones / venta mensual — límite 5,00%"}
           </span>
           {excede && (
-            <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 rounded-full px-2 py-0.5">
+            <span className="flex items-center gap-1 text-[13px] font-medium text-red-600 bg-red-50 rounded-full px-2 py-0.5">
               <AlertTriangle className="h-3 w-3" />
               Supera el límite permitido
             </span>
@@ -256,25 +241,25 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
 
         <div className="grid grid-cols-3 divide-x divide-gray-100">
           <div className="flex flex-col gap-0.5 px-5 py-3.5">
-            <span className="text-xs text-gray-500 font-medium">Máximo permitido</span>
+            <span className="text-[13px] text-gray-500 font-medium">Máximo permitido</span>
             <span className="text-lg font-semibold tabular-nums text-gray-800">
               {fmtCop(Math.round(ventaMensual * limitePct))}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-[13px] text-gray-400">
               {fmtPct(limitePct)} de {fmtCop(ventaMensual)} en ventas
             </span>
           </div>
 
           <div className="flex flex-col gap-0.5 px-5 py-3.5">
-            <span className="text-xs text-gray-500 font-medium">Devoluciones este mes</span>
+            <span className="text-[13px] text-gray-500 font-medium">Devoluciones este mes</span>
             <span className="text-lg font-semibold tabular-nums text-amber-500">
               {fmtPct(devolucionesMes / ventaMensual)}
             </span>
-            <span className="text-xs text-gray-400">{fmtCop(devolucionesMes)} acumulado</span>
+            <span className="text-[13px] text-gray-400">{fmtCop(devolucionesMes)} acumulado</span>
           </div>
 
           <div className="flex flex-col gap-0.5 px-5 py-3.5">
-            <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
+            <span className="text-[13px] text-gray-500 font-medium flex items-center gap-1">
               <TrendingUp className="h-3.5 w-3.5" />
               Con esta aprobación
             </span>
@@ -285,7 +270,7 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
             >
               {fmtPct(pctTotal)}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-[13px] text-gray-400">
               {excede
                 ? `Supera en ${fmtPct(pctTotal - limitePct)}`
                 : `Quedan ${fmtPct(limitePct - pctTotal)} disponibles`}

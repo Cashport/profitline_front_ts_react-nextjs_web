@@ -9,7 +9,7 @@
 
     .ant-popover-inner {
         border-radius: 8px;
-        background-color: #FFFFFF !important;
+        background-color: #ffffff !important;
     }
 
     .ant-popover-inner-content {
@@ -37,7 +37,7 @@
         max-height: calc(90 * var(--vh) - 80px);
         overflow-y: auto;
         scrollbar-width: thin;
-        background-color: #FFFFFF;
+        background-color: #ffffff;
         padding: 16px;
 
         .ant-list-item-meta-avatar {
@@ -50,7 +50,7 @@
             align-items: center;
             padding: 4px;
             border-radius: 4px;
-            background-color: #DDDDDD;
+            background-color: #dddddd;
             cursor: pointer;
         }
 
@@ -70,7 +70,7 @@
             font-size: 14px;
             font-weight: 400;
             line-height: 24px;
-            color: #0085FF;
+            color: #0085ff;
         }
     }
 
@@ -78,13 +78,12 @@
         border-radius: 50%;
         width: 15px;
         height: 15px;
-        background-color: #CBE71E;
+        background-color: #cbe71e;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 1px;
     }
-
 }
 
 .notificationsWrapper {
@@ -100,10 +99,10 @@
         border-radius: 50%;
         align-items: center;
         justify-content: center;
-        background-color: #FFFFFF;
+        background-color: #ffffff;
 
         &.notifications_active {
-            background-color: #CBE71E;
+            background-color: #cbe71e;
         }
 
         .notificationsLength {
@@ -112,7 +111,7 @@
             right: -4px;
             background-color: black;
             color: white;
-            font-size: 1px;
+            font-size: 13px;
             font-weight: bold;
             border-radius: 50%;
             padding: 2px 6px;

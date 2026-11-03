@@ -230,9 +230,9 @@ export function DetailPurchaseOrder() {
   };
 
   return (
-    <div className="min-h-screen bg-cashport-gray-lighter">
-      <Card className="bg-cashport-white border-0 shadow-sm pt-0">
-        <CardContent className="px-6 pb-6 pt-6">
+    <div className="cp-page">
+      <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
+        <CardContent className="px-[18px] py-[14px]">
           <PurchaseOrderDetailHeader
             data={data}
             orderId={orderId!}
@@ -301,7 +301,7 @@ export function DetailPurchaseOrder() {
             className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black rounded-l-lg rounded-r-none px-3 py-8 shadow-lg flex flex-col items-center justify-center"
           >
             <FileText className="h-5 w-5 mb-1" />
-            <span className="text-xs font-medium">PDF</span>
+            <span className="text-[13px] font-medium">PDF</span>
           </Button>
         </div>
       )}

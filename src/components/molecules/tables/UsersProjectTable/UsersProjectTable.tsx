@@ -268,7 +268,7 @@ export const UsersProjectTable: React.FC = () => {
   return (
     <>
       <main className="mainUsersProjectTable">
-        <Flex justify="space-between" className="mainUsersProjectTable_header">
+        <Flex justify="space-between" align="center" className="mainUsersProjectTable_header">
           <Flex gap={"0.625rem"} align="center">
             <UiSearchInput
               placeholder="Buscar usuarios"
@@ -282,7 +282,7 @@ export const UsersProjectTable: React.FC = () => {
             className="buttonNewProject"
             size="large"
             onClick={handleCreateUser}
-            icon={<Plus weight="bold" size={15} />}
+            icon={<Plus weight="bold" size={18} />}
           >
             Nuevo Usuario
           </Button>

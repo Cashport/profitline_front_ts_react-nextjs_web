@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { AutoComplete, Input, Select } from "antd";
-import { Percent, Plus, Search, Trash2, X } from "lucide-react";
+import { Percent, Plus, Trash2, X } from "lucide-react";
 import { IDiscountGroup, IDiscountGroupProduct } from "@/types/marketAdmin/IMarketAdmin";
+import { SearchFieldIcon, searchFieldAntdClass } from "@/components/ui/search-field/search-field";
 
 type Props = {
   group: IDiscountGroup;
@@ -63,12 +64,12 @@ export default function DiscountGroupCard({
     <div className="border border-[#EEEEEE] rounded-2xl bg-white">
       <div className="px-5 py-4 bg-[#FAFAFA] border-b border-[#EEEEEE] rounded-t-2xl">
         <div className="flex items-center gap-4 mb-1.5 pl-10">
-          <span className="w-24 text-xs font-medium text-[#666666]">Descuento</span>
-          <span className="w-28 text-xs font-medium text-[#666666]">Cantidad mínima</span>
-          <span className="w-44 text-xs font-medium text-[#666666]">Línea</span>
+          <span className="w-24 text-[13px] font-medium text-[#666666]">Descuento</span>
+          <span className="w-28 text-[13px] font-medium text-[#666666]">Cantidad mínima</span>
+          <span className="w-44 text-[13px] font-medium text-[#666666]">Línea</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="w-6 h-6 rounded-full bg-[#141414] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+          <span className="w-6 h-6 rounded-full bg-[#141414] text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">
             {index + 1}
           </span>
           <div className="relative w-24">
@@ -134,14 +135,14 @@ export default function DiscountGroupCard({
                 <div className="flex items-center justify-between gap-2 py-1">
                   <div>
                     <p className="text-sm text-[#141414]">{p.description}</p>
-                    <p className="text-xs text-[#999999]">{p.lineName}</p>
+                    <p className="text-[13px] text-[#999999]">{p.lineName}</p>
                   </div>
                   <Plus size={14} className="text-[#141414] flex-shrink-0" />
                 </div>
               )
             }))}
             notFoundContent={
-              <span className="text-xs text-[#999999]">
+              <span className="text-[13px] text-[#999999]">
                 {search.trim()
                   ? "Sin resultados disponibles."
                   : "No hay más productos disponibles."}
@@ -150,18 +151,18 @@ export default function DiscountGroupCard({
             className="flex-1"
           >
             <Input
-              prefix={<Search size={14} className="text-[#AAAAAA] mr-1.5" />}
+              prefix={<SearchFieldIcon />}
               placeholder={
                 lineName ? `Buscar producto de ${lineName}` : "Buscar producto para agregar..."
               }
-              className="!rounded-lg !border-[#DDDDDD]"
+              className={searchFieldAntdClass()}
             />
           </AutoComplete>
           {availableInLine.length > 0 && (
             <button
               type="button"
               onClick={handleAddAll}
-              className="text-xs font-semibold text-[#141414] underline decoration-[#DDDDDD] hover:decoration-[#141414] transition-colors whitespace-nowrap flex-shrink-0"
+              className="text-[13px] font-semibold text-[#141414] underline decoration-[#DDDDDD] hover:decoration-[#141414] transition-colors whitespace-nowrap flex-shrink-0"
             >
               Agregar todos
             </button>
@@ -169,7 +170,7 @@ export default function DiscountGroupCard({
         </div>
 
         {group.products.length === 0 ? (
-          <p className="text-xs text-[#BBBBBB] px-1 py-1">
+          <p className="text-[13px] text-[#BBBBBB] px-1 py-1">
             Busca y agrega los productos a los que aplica este descuento.
           </p>
         ) : (
@@ -177,7 +178,7 @@ export default function DiscountGroupCard({
             {group.products.map((p) => (
               <span
                 key={p.id}
-                className="flex items-center gap-2 text-xs font-medium bg-[#F5F5F5] text-[#141414] pl-3 pr-2 py-1.5 rounded-full"
+                className="flex items-center gap-2 text-[13px] font-medium bg-[#F5F5F5] text-[#141414] pl-3 pr-2 py-1.5 rounded-full"
               >
                 {p.description}
                 <button

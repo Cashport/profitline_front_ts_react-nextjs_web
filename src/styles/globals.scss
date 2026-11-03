@@ -267,3 +267,60 @@ body.dashboard-dark {
 [data-slot="sheet-content"][data-state="closed"] {
     animation: sheetSlideOut 0.3s ease-in-out forwards;
 }
+
+// Encabezado de TODAS las tablas antd = el de Clientes (docs/DESIGN.md §7): fondo de la
+// tarjeta (blanco), 13.5px/600 #141414, línea #ececec abajo, sin separadores verticales y
+// el orden con dos triángulos gris #c4c4c4 / activo #141414. Con !important porque varios
+// módulos fijaban su propio tamaño y fondo.
+.ant-table-wrapper .ant-table-thead > tr > th,
+.ant-table-wrapper .ant-table-thead > tr > td {
+    background: rgb(var(--cp-surface)) !important;
+    color: rgb(var(--cp-ink)) !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid rgb(var(--cp-line)) !important;
+
+    &::before {
+        display: none !important;
+    }
+
+    .ant-table-column-title {
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+    }
+
+    &.ant-table-column-has-sorters:hover {
+        background: rgb(var(--cp-surface)) !important;
+    }
+}
+
+.ant-table-wrapper .ant-table-column-sorters {
+    justify-content: flex-start;
+    gap: 4px;
+
+    .ant-table-column-title {
+        flex: 0 1 auto;
+    }
+}
+
+.ant-table-wrapper .ant-table-column-sorter {
+    color: #c4c4c4;
+
+    .ant-table-column-sorter-inner {
+        gap: 1px;
+    }
+
+    .ant-table-column-sorter-up,
+    .ant-table-column-sorter-down {
+        font-size: 8px;
+
+        &.active {
+            color: rgb(var(--cp-ink));
+        }
+    }
+}
+
+// La columna ordenada no se sombrea: igual que Clientes.
+.ant-table-wrapper td.ant-table-column-sort {
+    background: transparent;
+}

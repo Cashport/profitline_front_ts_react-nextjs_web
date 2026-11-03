@@ -4,13 +4,16 @@ interface FilterModalFooterProps {
   onClearAll: () => void;
   onCancel: () => void;
   onApply: () => void;
+  /** Texto junto a "Limpiar todo" (p. ej. cuántos registros coinciden con el borrador). */
+  summary?: React.ReactNode;
 }
 
 /** Pie del modal (docs/DESIGN.md §6): "Limpiar todo" a la izquierda; Cancelar y "Aplicar Filtros" lima. */
 export default function FilterModalFooter({
   onClearAll,
   onCancel,
-  onApply
+  onApply,
+  summary
 }: FilterModalFooterProps) {
   return (
     <div className="flex items-center gap-2 border-t border-cp-line px-[22px] py-3.5">
@@ -21,6 +24,7 @@ export default function FilterModalFooter({
       >
         Limpiar todo
       </button>
+      {summary && <span className="text-[13px] text-cp-ink-3">{summary}</span>}
       <div className="flex-1" />
       <button
         type="button"

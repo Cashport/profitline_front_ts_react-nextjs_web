@@ -100,7 +100,7 @@ function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
           forecast={{ from: shown, to: Math.min(forecast, scale), color: FORECAST }}
           goal={{ value: goal }}
         />
-        <div className="flex justify-between text-[10.5px] tabular-nums text-muted-foreground">
+        <div className="flex justify-between text-[13px] tabular-nums text-muted-foreground">
           <b className={cn("font-bold", TONE_TEXT[tone])}>{pct(c, 0)}</b>
           <span>
             → <b className={cn("font-bold", TONE_TEXT[sem(f)])}>{pct(f, 0)}</b>

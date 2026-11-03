@@ -49,14 +49,14 @@ export default function CountriesClientsTable({
       key: "archives",
       render: (archives: IClientDataArchive[]) => {
         if (!archives || archives.length === 0) {
-          return <span className="text-xs text-gray-500">Sin archivos</span>;
+          return <span className="text-[13px] text-gray-500">Sin archivos</span>;
         }
         return (
           <div className="flex gap-1">
             {archives.map((archive) => (
               <div
                 key={archive.id}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-white"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-semibold text-white"
                 style={{ backgroundColor: archive.color }}
                 title={archive.description}
               >
@@ -72,7 +72,7 @@ export default function CountriesClientsTable({
       dataIndex: "updated_at",
       key: "updated_at",
       render: (updatedAt: string | null) => {
-        if (!updatedAt) return <span className="text-xs">-</span>;
+        if (!updatedAt) return <span className="text-[13px]">-</span>;
 
         const date = new Date(updatedAt);
         const formattedDate = date.toLocaleDateString("es-ES", {
@@ -106,8 +106,8 @@ export default function CountriesClientsTable({
           <span
             className={
               count > 0
-                ? "inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-xs font-semibold bg-red-100 text-red-600"
-                : "text-xs text-gray-400"
+                ? "inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-[13px] font-semibold bg-red-100 text-red-600"
+                : "text-[13px] text-gray-400"
             }
           >
             {count > 0 ? count : "-"}
@@ -122,7 +122,7 @@ export default function CountriesClientsTable({
       key: "status",
       dataIndex: "status",
       render: (status) => (
-        <Badge variant="outline" className="text-xs">
+        <Badge variant="outline" className="text-[13px]">
           {status || "desconocido"}
         </Badge>
       )

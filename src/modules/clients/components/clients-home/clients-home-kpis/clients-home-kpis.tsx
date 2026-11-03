@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { KpiAside, KpiCard, KpiValue } from "@/components/ui/kpi-card/kpi-card";
@@ -49,7 +50,7 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
         <KpiAside
           label="Vencida"
           pill={
-            <StatusBadge bg={pill.bg} color={pill.color} className="text-[11.5px]">
+            <StatusBadge bg={pill.bg} color={pill.color} className="text-[13px]">
               {pct1(totals.pastDuePct)}
             </StatusBadge>
           }
@@ -67,31 +68,44 @@ const PortfolioCard = ({ totals }: { totals: IClientsHomeTotals }) => {
             tip: `${b.label}: ${fmt(totals.aging[b.key])} M`
           }))}
         />
-        {/* Clic en un tramo: la tabla muestra solo la cartera de esa edad. Si no cabe, pasa a dos líneas. */}
-        <div className="flex flex-wrap justify-between gap-x-2.5 gap-y-0.5">
-          {AGING_BUCKETS.map((b) => {
-            const active = aging === b.key;
-            return (
-              <div
-                key={b.key}
-                onClick={() => toggle(b.key)}
-                title={`${b.label}: ${fmt(totals.aging[b.key])} M`}
-                className="-mx-1 flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-[5px] px-1 text-[11px] leading-tight text-cp-ink-3 hover:!bg-cp-muted"
-                style={{
-                  opacity: aging === null || active ? 1 : 0.35,
-                  background: active ? "#f7f7f7" : "transparent",
-                  boxShadow: active ? `inset 0 0 0 1px ${b.color}` : "none"
-                }}
-              >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-sm" style={{ background: b.color }} />
-                {b.short}
-                <span className="font-semibold text-cp-ink">
-                  {fmtHeroShort(totals.aging[b.key])}
-                </span>
-              </div>
-            );
+        {/* Clic en un tramo: la tabla muestra solo la cartera de esa edad. Una sola línea:
+            los tramos que no caben se resumen en "+N" (también se filtran desde la barra). */}
+        <OneLineLegend
+          more={(hidden) => ({
+            label: `+${hidden.length}`,
+            title: `Más tramos: ${hidden
+              .map((b) => `${b.label} ${fmt(totals.aging[b.key])} M`)
+              .join(" · ")}`
           })}
-        </div>
+          items={AGING_BUCKETS.map((b) => {
+            const active = aging === b.key;
+            return {
+              ...b,
+              node: (
+                <div
+                  key={b.key}
+                  onClick={() => toggle(b.key)}
+                  title={`${b.label}: ${fmt(totals.aging[b.key])} M`}
+                  className="-mx-1 flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-[5px] px-1 text-[13px] leading-tight text-cp-ink-3 hover:!bg-cp-muted"
+                  style={{
+                    opacity: aging === null || active ? 1 : 0.35,
+                    background: active ? "#f7f7f7" : "transparent",
+                    boxShadow: active ? `inset 0 0 0 1px ${b.color}` : "none"
+                  }}
+                >
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-sm"
+                    style={{ background: b.color }}
+                  />
+                  {b.short}
+                  <span className="font-semibold text-cp-ink">
+                    {fmtHeroShort(totals.aging[b.key])}
+                  </span>
+                </div>
+              )
+            };
+          })}
+        />
       </div>
     </>
   );
@@ -137,7 +151,7 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
           label="Meta"
           pill={
             c.goal !== null && (
-              <StatusBadge bg="#cbe71e" color="#141414" className="text-[11.5px]">
+              <StatusBadge bg="#cbe71e" color="#141414" className="text-[13px]">
                 {pct1(c.collectedPct)}
               </StatusBadge>
             )
@@ -172,17 +186,26 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
             }
           ]}
         />
-        {/* Sin espacio, el forecast baja a su propia línea, siempre a la derecha. */}
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-0.5 whitespace-nowrap text-[11px] leading-tight text-cp-ink-3">
-          <span className="flex shrink-0 items-center gap-x-2">
-            <LegendItem color={COLLECTION_COLORS.agreementsActive} label="Acuerdos">
-              {fmt(c.agreementsActive)} M
-            </LegendItem>
-            <LegendItem color={COLLECTION_COLORS.agreementsBroken} label="Incumplidos">
-              {fmt(c.agreementsBroken)} M
-            </LegendItem>
+        {/* Una sola línea (DESIGN.md §5): sin espacio, cada parte se corta con "…" y el title la muestra completa. */}
+        <div className="flex min-w-0 flex-nowrap items-center justify-between gap-x-2 overflow-hidden whitespace-nowrap text-[13px] leading-tight text-cp-ink-3">
+          <span className="flex min-w-0 items-center gap-x-2">
+            <LegendItem
+              color={COLLECTION_COLORS.agreementsActive}
+              label="Acuerdos"
+              value={`${fmt(c.agreementsActive)} M`}
+            />
+            <LegendItem
+              color={COLLECTION_COLORS.agreementsBroken}
+              label="Incumplidos"
+              value={`${fmt(c.agreementsBroken)} M`}
+            />
           </span>
-          <span className="ml-auto">
+          <span
+            className="ml-auto min-w-0 truncate"
+            title={`Forecast ${fmt(c.forecast)} M${
+              c.forecastPct !== null ? ` · ${pct1(c.forecastPct)}` : ""
+            }`}
+          >
             Forecast <b className="font-semibold text-cp-ink">{fmt(c.forecast)} M</b>
             {c.forecastPct !== null && ` · ${pct1(c.forecastPct)}`}
           </span>
@@ -192,17 +215,83 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
   );
 };
 
-const LegendItem = ({
-  color,
-  label,
-  children
-}: {
-  color: string;
-  label: string;
-  children: React.ReactNode;
-}) => (
-  <span className="flex items-center gap-[5px]">
+const LegendItem = ({ color, label, value }: { color: string; label: string; value: string }) => (
+  <span className="flex min-w-0 items-center gap-[5px]" title={`${label} ${value}`}>
     <span className="h-1.5 w-1.5 shrink-0 rounded-sm" style={{ background: color }} />
-    {label} <b className="font-semibold text-cp-ink">{children}</b>
+    <span className="min-w-0 truncate">
+      {label} <b className="font-semibold text-cp-ink">{value}</b>
+    </span>
   </span>
 );
+
+interface LegendEntry {
+  key: string;
+  node: React.ReactNode;
+}
+
+/** Leyenda en una sola línea (DESIGN.md §5): muestra los ítems que caben y resume el resto
+    en un "+N" con el detalle en el title. Mide los anchos en una copia invisible. */
+function OneLineLegend<T extends LegendEntry>({
+  items,
+  more
+}: {
+  items: T[];
+  more: (hidden: T[]) => { label: string; title: string };
+}) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState(items.length);
+
+  useEffect(() => {
+    const box = boxRef.current;
+    const measure = measureRef.current;
+    if (!box || !measure) return;
+    const GAP = 10;
+    const calc = () => {
+      const widths = Array.from(measure.children).map((el) => (el as HTMLElement).offsetWidth);
+      const moreWidth = widths.pop() ?? 0;
+      const avail = box.clientWidth;
+      const all = widths.reduce((a, w) => a + w, 0) + GAP * (widths.length - 1);
+      if (all <= avail) return setFit(widths.length);
+      let used = moreWidth;
+      let n = 0;
+      while (n < widths.length && used + widths[n] + GAP <= avail) used += widths[n++] + GAP;
+      setFit(n);
+    };
+    const ro = new ResizeObserver(calc);
+    ro.observe(box);
+    ro.observe(measure);
+    calc();
+    return () => ro.disconnect();
+  }, [items.length]);
+
+  const hidden = items.slice(fit);
+  const extra = hidden.length > 0 ? more(hidden) : null;
+  const moreChip = (label: string, title?: string) => (
+    <span
+      title={title}
+      className="shrink-0 cursor-default whitespace-nowrap text-[13px] font-semibold leading-tight text-cp-ink-3"
+    >
+      {label}
+    </span>
+  );
+
+  return (
+    <div ref={boxRef} className="relative flex min-w-0 justify-between gap-x-2.5 overflow-hidden">
+      {items.slice(0, fit).map((it) => it.node)}
+      {extra && moreChip(extra.label, extra.title)}
+      <div
+        ref={measureRef}
+        aria-hidden
+        className="pointer-events-none invisible absolute left-0 top-0 flex w-max gap-x-2.5"
+      >
+        {items.map((it) => (
+          <span key={it.key} className="flex">
+            {it.node}
+          </span>
+        ))}
+        {moreChip(`+${items.length}`)}
+      </div>
+    </div>
+  );
+}

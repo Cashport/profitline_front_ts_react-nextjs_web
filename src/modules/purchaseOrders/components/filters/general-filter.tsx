@@ -58,7 +58,7 @@ export function GeneralFilter({
         {/* Estados Filter Section */}
         {showStatusFilter && (
           <div>
-            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+            <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
               <Filter className="h-3 w-3 inline mr-1" />
               Estados
             </label>
@@ -102,7 +102,7 @@ export function GeneralFilter({
         {/* Cliente Filter Section */}
         {showCompradorFilter && (
           <div>
-            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+            <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
               <Building className="h-3 w-3 inline mr-1" />
               {clienteFilterLabel || "Cliente"}
             </label>
@@ -140,7 +140,7 @@ export function GeneralFilter({
         {/* Vendedor Filter Section */}
         {showVendedorFilter && (
           <div>
-            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+            <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
               <User className="h-3 w-3 inline mr-1" />
               Vendedor
             </label>
@@ -208,7 +208,7 @@ export function GeneralFilter({
       <Button
         variant="outline"
         size="sm"
-        className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-semibold text-base"
+        className="h-[var(--control-h)] border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-semibold text-[14px]"
       >
         <Filter className={iconOnly ? "h-4 w-4" : "h-4 w-4 mr-2"} />
         {!iconOnly && (

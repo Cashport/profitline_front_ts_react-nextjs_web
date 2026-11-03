@@ -2,10 +2,9 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { AlertTriangle, ArrowUpRight } from "lucide-react";
 
 import { Card } from "@/modules/chat/ui/card";
-import { Input } from "@/modules/chat/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +25,7 @@ import { buildLastSixMonths } from "@/modules/dataQuality/utils/months";
 import { formatNumber } from "@/utils/utils";
 import { formatThousandNum } from "@/modules/dataQuality/utils/utils";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
+import SearchField from "@/components/ui/search-field/search-field";
 
 const DAYS_IN_MONTH = 31;
 const TOTAL_COLUMNS = 35;
@@ -104,10 +104,7 @@ export function DataExplorationCard() {
   }, [selectedPeriod]);
 
   return (
-    <Card
-      className="bg-white overflow-hidden border-0 shadow-none"
-      style={{ border: "none", boxShadow: "none", textShadow: "none" }}
-    >
+    <Card className="cp-card rounded-[var(--card-radius)] border-0 bg-cp-surface shadow-none overflow-hidden">
       <div
         className="px-6 py-4 flex items-center justify-between"
         style={{ borderColor: "#E5E7EB" }}
@@ -117,40 +114,40 @@ export function DataExplorationCard() {
             <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>
               Exploración de Datos
             </h3>
-            <p className="text-xs mt-0.5" style={{ color: "#6B7280" }}>
+            <p className="text-[13px] mt-0.5" style={{ color: "#6B7280" }}>
               {unitType === "units_haleon"
                 ? "Unidades recibidas por día del mes"
                 : "Volumen reportado por día del mes"}
             </p>
           </div>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-[150px] h-8 text-xs" style={{ borderColor: "#E5E7EB" }}>
+            <SelectTrigger className="w-[150px] h-8 text-[13px]" style={{ borderColor: "#E5E7EB" }}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {months.map((m) => (
-                <SelectItem key={m.id} value={m.id} className="text-xs">
+                <SelectItem key={m.id} value={m.id} className="text-[13px]">
                   {m.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={unitType} onValueChange={(v: UnitType) => setUnitType(v)}>
-            <SelectTrigger className="w-[160px] h-8 text-xs" style={{ borderColor: "#E5E7EB" }}>
+            <SelectTrigger className="w-[160px] h-8 text-[13px]" style={{ borderColor: "#E5E7EB" }}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="units_haleon" className="text-xs">
+              <SelectItem value="units_haleon" className="text-[13px]">
                 Unidades (Haleon)
               </SelectItem>
-              <SelectItem value="vol_reported" className="text-xs">
+              <SelectItem value="vol_reported" className="text-[13px]">
                 Volumen reportado
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-4 text-xs" style={{ color: "#6B7280" }}>
+          <div className="flex items-center gap-4 text-[13px]" style={{ color: "#6B7280" }}>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "#D1FAE5" }} />
               <span>Recibido</span>
@@ -178,34 +175,30 @@ export function DataExplorationCard() {
               <span>No esperado</span>
             </div>
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Buscar cliente..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 w-48 text-sm rounded-lg"
-              style={{ borderColor: "#E5E7EB" }}
-            />
-          </div>
+          <SearchField
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar cliente..."
+            className="w-48"
+          />
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ fontSize: "10px" }}>
+        <table className="w-full" style={{ fontSize: "13px" }}>
           <thead>
-            <tr className="border-b" style={{ borderColor: "#E5E7EB", backgroundColor: "#F9FAFB" }}>
+            <tr className="border-b border-cp-line bg-cp-surface">
               <th
-                className="text-left px-2 py-1.5 font-medium sticky left-0 bg-[#F9FAFB] z-10"
-                style={{ color: "#374151", minWidth: "90px" }}
+                className="text-left px-2 py-3 text-[13.5px] font-semibold text-cp-ink sticky left-0 bg-cp-surface z-10"
+                style={{ minWidth: "90px" }}
               >
                 Cliente
               </th>
               {/* TODO: re-enable Periodicidad column once API exposes per-client periodicity */}
               {/*
               <th
-                className="text-left px-2 py-1.5 font-medium sticky left-[90px] bg-[#F9FAFB] z-10"
-                style={{ color: "#374151", minWidth: "65px" }}
+                className="text-left px-2 py-3 text-[13.5px] font-semibold text-cp-ink sticky left-[90px] bg-cp-surface z-10"
+                style={{ minWidth: "65px" }}
               >
                 Periodicidad
               </th>
@@ -213,27 +206,27 @@ export function DataExplorationCard() {
               {dayNumbers.map((d) => (
                 <th
                   key={d}
-                  className="text-center py-1.5 font-medium"
-                  style={{ color: "#374151", minWidth: "28px", width: "28px" }}
+                  className="text-center py-3 text-[13.5px] font-semibold text-cp-ink"
+                  style={{ minWidth: "28px", width: "28px" }}
                 >
                   {d}
                 </th>
               ))}
               <th
-                className="text-right px-2 py-1.5 font-semibold"
-                style={{ color: "#374151", minWidth: "50px" }}
+                className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
+                style={{ minWidth: "50px" }}
               >
                 Total
               </th>
               <th
-                className="text-right px-2 py-1.5 font-semibold"
-                style={{ color: "#374151", minWidth: "55px" }}
+                className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
+                style={{ minWidth: "55px" }}
               >
                 Novedades
               </th>
               <th
-                className="text-right px-2 py-1.5 font-semibold"
-                style={{ color: "#374151", minWidth: "70px" }}
+                className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
+                style={{ minWidth: "70px" }}
               >
                 Total mes ant.
               </th>
@@ -244,7 +237,7 @@ export function DataExplorationCard() {
               <tr>
                 <td
                   colSpan={TOTAL_COLUMNS}
-                  className="text-center py-8 text-xs"
+                  className="text-center py-8 text-[13px]"
                   style={{ color: "#6B7280" }}
                 >
                   Cargando…
@@ -254,7 +247,7 @@ export function DataExplorationCard() {
               <tr>
                 <td
                   colSpan={TOTAL_COLUMNS}
-                  className="text-center py-8 text-xs"
+                  className="text-center py-8 text-[13px]"
                   style={{ color: "#991B1B" }}
                 >
                   Error al cargar los datos.
@@ -264,7 +257,7 @@ export function DataExplorationCard() {
               <tr>
                 <td
                   colSpan={TOTAL_COLUMNS}
-                  className="text-center py-8 text-xs"
+                  className="text-center py-8 text-[13px]"
                   style={{ color: "#6B7280" }}
                 >
                   No se encontraron datos con los filtros actuales.
@@ -297,7 +290,7 @@ export function DataExplorationCard() {
                         >
                           {row.client_name}
                         </Link>
-                        <span className="block" style={{ color: "#9CA3AF", fontSize: "9px" }}>
+                        <span className="block" style={{ color: "#9CA3AF", fontSize: "13px" }}>
                           {row.country}
                           {row.periodicity ? ` (${row.periodicity})` : ""}
                         </span>
@@ -363,7 +356,7 @@ export function DataExplorationCard() {
                               <TooltipTrigger asChild>{cellContent}</TooltipTrigger>
                               <TooltipContent
                                 side="top"
-                                className="text-xs px-2 py-1.5"
+                                className="text-[13px] px-2 py-1.5"
                                 style={{ backgroundColor: "#1F2937", color: "#fff" }}
                               >
                                 <div className="flex items-center gap-1.5">
@@ -443,7 +436,7 @@ export function DataExplorationCard() {
                             {formatNumber(row.totalNovedades)}
                           </span>
                           <span
-                            className="text-[9px] px-1 py-0.5 rounded"
+                            className="text-[13px] px-1 py-0.5 rounded"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
                             {novedadesPct}%
@@ -501,7 +494,7 @@ export function DataExplorationCard() {
                               <TooltipTrigger asChild>{cellContent}</TooltipTrigger>
                               <TooltipContent
                                 side="top"
-                                className="text-xs px-2 py-1.5"
+                                className="text-[13px] px-2 py-1.5"
                                 style={{ backgroundColor: "#1F2937", color: "#fff" }}
                               >
                                 <div className="flex items-center gap-1.5">

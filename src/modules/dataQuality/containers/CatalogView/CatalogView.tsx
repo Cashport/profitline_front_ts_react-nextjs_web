@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
@@ -8,34 +8,17 @@ import { CatalogsTable } from "../../components/CatalogsTable";
 import { CatalogPacksTable } from "../../components/CatalogPacksTable";
 import { PointsOfSaleTable } from "../../components/PointsOfSaleTable";
 
-import { Button } from "@/modules/chat/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Card } from "@/modules/chat/ui/card";
-
 export default function CatalogView() {
-  const router = useRouter();
+  const { clientId } = useParams<{ clientId: string }>();
   const searchParams = useSearchParams();
   const clientName = searchParams.get("clientName");
   const countryName = searchParams.get("countryName");
 
-  const handleGoBack = () => {
-    router.back();
-  };
-
   return (
-    <div className="flex flex-col gap-4">
-      <Header title={`${countryName} - ${clientName}`} />
+    <div className="cp-page">
+      <Header title={`${countryName} - ${clientName}`} back={`/data-quality/client/${clientId}`} />
       {/* Main Content */}
-      <Card className="border-none gap-2 p-6">
-        <Button
-          onClick={handleGoBack}
-          variant="ghost"
-          size="sm"
-          className="text-gray-700 hover:text-gray-900 w-fit"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Volver al cliente
-        </Button>
+      <div className="cp-card flex flex-col gap-2 px-[18px] py-[14px]">
         <UiTab
           tabs={[
             {
@@ -55,7 +38,7 @@ export default function CatalogView() {
             }
           ]}
         />
-      </Card>
+      </div>
     </div>
   );
 }

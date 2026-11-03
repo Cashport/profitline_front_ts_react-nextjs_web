@@ -1,34 +1,49 @@
 "use client";
 
-import UiSearchInput from "@/components/ui/search-input";
-import WalletThemeToggle from "@/modules/walletModule/components/wallet-theme-toggle/wallet-theme-toggle";
+import { useState } from "react";
+
+import Header from "@/components/organisms/header";
+import {
+  FilterButton,
+  HeaderSearch
+} from "@/components/ui/page-header-controls/page-header-controls";
 import { FECHA_CORTE } from "@/modules/walletModule/constants";
 
 interface TorreHeaderProps {
   onSearchChange: (value: string) => void;
 }
 
-/** Barra superior de la torre: título, fecha de corte, búsqueda y tema. */
+/**
+ * Header compartido (docs/DESIGN.md §4): título y fecha de corte; a la derecha
+ * filtrar, buscador, tema y avatar (cerrar sesión).
+ */
 export default function TorreHeader({ onSearchChange }: TorreHeaderProps) {
+  const [search, setSearch] = useState("");
+
   return (
-    <header className="flex flex-wrap items-center gap-3.5 border-b border-border pb-3">
-      <h1 className="text-base font-semibold text-foreground">Torre de control</h1>
-
-      <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        {FECHA_CORTE}
-      </span>
-
-      {/* UiSearchInput es flex:1, así que el ml-auto va en el grupo, no en él. */}
-      <div className="ml-auto flex items-center gap-3">
-        <UiSearchInput
-          id="torre-global-search"
-          showBorder
-          placeholder="Cliente, factura o novedad…"
-          onChange={(e) => onSearchChange(e.target.value)}
-        />
-        <WalletThemeToggle />
-      </div>
-    </header>
+    <Header
+      title="Torre de control"
+      titleExtra={
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 shrink-0 rounded-full bg-[#9bb514]" />
+          {FECHA_CORTE}
+        </span>
+      }
+      actionsExtra={
+        <>
+          {/* TODO: abrir el modal Filtros Avanzados con TORRE_FILTERS (coordinador, ejecutivo,
+              KAM, tipo de novedad y tramo) cuando exista el endpoint de filtros. */}
+          <FilterButton onClick={() => undefined} disabled />
+          <HeaderSearch
+            value={search}
+            onChange={(value) => {
+              setSearch(value);
+              onSearchChange(value);
+            }}
+            placeholder="Cliente, factura o novedad…"
+          />
+        </>
+      }
+    />
   );
 }

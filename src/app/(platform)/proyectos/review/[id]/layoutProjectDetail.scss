@@ -1,0 +1,16 @@
+@import "@styles/variables.scss";
+
+// Tarjeta con las pestañas del proyecto; el marco y el header los pone ViewWrapper.
+.containerTabsAndContent {
+    width: 100%;
+
+    .tabContent {
+        width: 100%;
+        min-height: 150px;
+    }
+}
+
+.tabsContainer {
+    width: 100%;
+    scrollbar-width: none;
+}

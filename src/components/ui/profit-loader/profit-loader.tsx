@@ -8,11 +8,7 @@ interface ProfitLoaderProps {
   className?: string;
 }
 
-const ProfitLoader: FC<ProfitLoaderProps> = ({
-  size = "medium",
-  message,
-  className
-}) => {
+const ProfitLoader: FC<ProfitLoaderProps> = ({ size = "medium", message, className }) => {
   const sizeMap = {
     small: 80,
     medium: 120,

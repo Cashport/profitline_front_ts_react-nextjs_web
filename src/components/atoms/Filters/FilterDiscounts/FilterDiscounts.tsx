@@ -1,5 +1,8 @@
-import { Cascader } from "antd";
+import { Cascader, ConfigProvider } from "antd";
 import "../filterCascader.scss";
+
+/** Mismo alto que el buscador de la barra de herramientas (--control-h). */
+const TOOLBAR_THEME = { token: { controlHeight: 36 } };
 
 type Props = {
   handleChangeActive?: (
@@ -13,19 +16,20 @@ type Props = {
 
 export default function FilterDiscounts({ handleChangeActive }: Props) {
   return (
-    <Cascader
-      style={{ width: "130px", height: "100%" }}
-      size="large"
-      multiple={false}
-      removeIcon
-      maxTagCount="responsive"
-      placeholder="Filtrar"
-      placement="bottomRight"
-      options={[
-        { label: "Activo", value: 1 },
-        { label: "Inactivo", value: 0 }
-      ]}
-      onChange={(_, filter) => handleChangeActive?.(filter)}
-    />
+    <ConfigProvider theme={TOOLBAR_THEME}>
+      <Cascader
+        style={{ width: "130px" }}
+        multiple={false}
+        removeIcon
+        maxTagCount="responsive"
+        placeholder="Filtrar"
+        placement="bottomRight"
+        options={[
+          { label: "Activo", value: 1 },
+          { label: "Inactivo", value: 0 }
+        ]}
+        onChange={(_, filter) => handleChangeActive?.(filter)}
+      />
+    </ConfigProvider>
   );
 }

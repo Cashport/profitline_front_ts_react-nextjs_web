@@ -339,7 +339,9 @@ export default function ChatFooter({
                   <div key={idx} className="flex items-center gap-2 text-sm">
                     <FileArrowDown className="h-4 w-4" />
                     <span className="truncate">{f.name}</span>
-                    <span className="text-xs text-muted-foreground">· {formatBytes(f.size)}</span>
+                    <span className="text-[13px] text-muted-foreground">
+                      · {formatBytes(f.size)}
+                    </span>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -395,7 +397,7 @@ export default function ChatFooter({
         </div>
 
         {isDragging && (
-          <div className="pointer-events-none -mt-2 rounded-md border border-dashed border-[#CBE71E] p-3 text-center text-xs text-muted-foreground">
+          <div className="pointer-events-none -mt-2 rounded-md border border-dashed border-[#CBE71E] p-3 text-center text-[13px] text-muted-foreground">
             Suelta archivos o imágenes para adjuntar
           </div>
         )}

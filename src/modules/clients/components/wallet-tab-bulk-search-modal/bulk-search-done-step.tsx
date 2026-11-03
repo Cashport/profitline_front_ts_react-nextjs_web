@@ -19,7 +19,7 @@ const BulkSearchDoneStep = ({ action, message, onAnotherAction, onClose }: Props
         <Check size={22} weight="bold" />
       </span>
       <span className="text-[17px] font-semibold">{action.label} completado</span>
-      <span className="text-xs text-muted-foreground">{message}</span>
+      <span className="text-[13px] text-muted-foreground">{message}</span>
 
       <div className="mt-2 flex flex-wrap justify-center gap-2">
         <Button size="large" onClick={onAnotherAction}>

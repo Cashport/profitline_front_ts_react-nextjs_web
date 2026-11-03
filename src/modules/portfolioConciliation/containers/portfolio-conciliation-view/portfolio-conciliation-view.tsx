@@ -172,13 +172,13 @@ const PortfolioConciliationView = () => {
           <div className="min-w-0">
             <h2 className="text-lg font-semibold">Conciliación masiva de cartera</h2>
             {portfolio?.client && (
-              <p className="truncate text-xs text-muted-foreground">
+              <p className="truncate text-[13px] text-muted-foreground">
                 {portfolio.client.name ?? "Cliente"} · NIT {portfolio.client.nit}
               </p>
             )}
           </div>
         </div>
-        <Typography.Link href={TEMPLATE_URL} download underline className="!text-[12px]">
+        <Typography.Link href={TEMPLATE_URL} download underline className="!text-[13px]">
           Descargar plantilla
         </Typography.Link>
         <PrincipalButton
@@ -228,7 +228,7 @@ const PortfolioConciliationView = () => {
       {portfolio && hasPortfolio && (
         <>
           {currentUpload && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-[#8a8a8a]">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-[#8a8a8a]">
               <span>
                 Cartera vigente: <b className="text-foreground">{currentUpload.file_name}</b> ·
                 cargada el {formatDateTime(currentUpload.finished_at ?? currentUpload.created_at)}
@@ -256,7 +256,7 @@ const PortfolioConciliationView = () => {
           <div className="flex flex-wrap items-center gap-2">
             <UiSearchInput
               id="portfolio-conciliation-search"
-              placeholder="Buscar por Id documento"
+              placeholder="Buscar por ID documento"
               value={searchText}
               onChange={(event) => changeSearch(event.target.value)}
               showBorder

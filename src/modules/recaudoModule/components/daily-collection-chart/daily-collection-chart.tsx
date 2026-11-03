@@ -99,7 +99,7 @@ function Chart({ data, reference, width, line }: ChartProps) {
   const YB = (v: number) => y1 - (v / (stepRight * ticks)) * ih;
 
   const barW = Math.max(2, bw * 0.62);
-  const every = bw >= 15 ? 1 : 2;
+  const every = bw >= 18 ? 1 : 2;
   const actual = range(D).map((t): [number, number] => [X(t), Y(at(t).cumulative ?? 0)]);
   const prevAt = (t: number) => at(t).previousMonth ?? 0;
 
@@ -390,7 +390,7 @@ export default function DailyCollectionChart({ data }: { data: ICollectionTower 
         />
       }
     >
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-3 text-[10.5px] text-foreground/80">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-3 text-[13px] text-foreground/80">
         <LegendItem mark={<LineSwatch color={line} width={2.6} />} label="Acumulado" />
         {period.open && (
           <LegendItem mark={<LineSwatch color={FORECAST} dash="4 3" />} label="Proyección" />

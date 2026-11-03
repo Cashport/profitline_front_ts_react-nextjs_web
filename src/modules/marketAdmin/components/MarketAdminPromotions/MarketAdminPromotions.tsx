@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Plus, Gift, ArrowLeft, Save } from "lucide-react";
+import { Plus, Gift, Save } from "lucide-react";
+import Header from "@/components/organisms/header";
+import HeaderBackTitle from "../header-back-title/HeaderBackTitle";
 import { useAppStore } from "@/lib/store/store";
 import { getProductsByProject } from "@/services/products/products";
-import {
-  createBonification,
-  getProjectBusinessUnits
-} from "@/services/marketAdmin/marketAdmin";
+import { createBonification, getProjectBusinessUnits } from "@/services/marketAdmin/marketAdmin";
 import { useMessageApi } from "@/context/MessageContext";
 import { IPromocion } from "@/types/marketAdmin/IMarketAdmin";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -28,9 +27,8 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
   );
   const products = productsResponse?.data ?? [];
 
-  const { data: businessUnitsResponse } = useSWR(
-    ID ? ["ma-business-units", ID] : null,
-    () => getProjectBusinessUnits(ID)
+  const { data: businessUnitsResponse } = useSWR(ID ? ["ma-business-units", ID] : null, () =>
+    getProjectBusinessUnits(ID)
   );
   const businessUnits = businessUnitsResponse?.data ?? [];
 
@@ -89,34 +87,29 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="bg-white rounded-lg overflow-hidden">
-        {/* Page header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEEEEE]">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 px-2 h-8 rounded-lg text-sm text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
+    <div className="cp-page min-h-full">
+      {/* Header compartido (docs/DESIGN.md §4): volver a la vista anterior + acción principal */}
+      <Header
+        title="Promociones automáticas"
+        titleNode={<HeaderBackTitle title="Promociones automáticas" onBack={onBack} />}
+        titleExtra="Define condiciones y productos bonificados por escalones"
+        actionsExtra={
+          // PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo
+          <div className="h-[var(--control-h)] flex-shrink-0">
+            <PrincipalButton
+              onClick={addPromocion}
+              icon={<Plus size={18} />}
+              customStyles={{ fontSize: 14 }}
             >
-              <ArrowLeft size={16} />
-            </button>
-            <div>
-              <h1 className="text-base font-bold text-[#141414]">Promociones automáticas</h1>
-              <p className="text-xs text-[#999999]">
-                Define condiciones y productos bonificados por escalones
-              </p>
-            </div>
-          </div>
-          {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
-          <div className="h-10 flex-shrink-0">
-            <PrincipalButton onClick={addPromocion} icon={<Plus size={15} />}>
               Nueva promoción
             </PrincipalButton>
           </div>
-        </div>
+        }
+      />
 
+      <div className="cp-card overflow-hidden">
         {/* Content */}
-        <div className="p-6">
+        <div className="px-[18px] py-[14px]">
           {promociones.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 gap-3">
               <Gift size={32} className="text-[#DDDDDD]" />

@@ -28,11 +28,15 @@ function ComercioChrome({ children }: ComercioLayoutClientProps) {
     return () => document.body.classList.remove(cls);
   }, [isDark]);
 
+  // Pantallas de segundo nivel: llevan "‹" volver a Mis pedidos (DESIGN.md §4).
   let headerTitle = "Mis pedidos";
-  if (pathname.startsWith("/comercio/pedido")) {
+  let headerBack: string | undefined;
+  if (pathname.startsWith("/comercio/pedidoConfirmado")) {
+    headerTitle = "Pedido confirmado";
+    headerBack = "/comercio";
+  } else if (pathname.startsWith("/comercio/pedido")) {
     headerTitle = "Crear orden";
-  } else if (isDashboard) {
-    headerTitle = "Dashboard";
+    headerBack = "/comercio";
   }
 
   return (
@@ -59,7 +63,9 @@ function ComercioChrome({ children }: ComercioLayoutClientProps) {
       <MessageProvider>
         <ViewWrapper
           headerTitle={headerTitle}
-          hideHeader={pathname.startsWith("/comercio/pedido")}
+          headerBack={headerBack}
+          // El dashboard pinta su propio Header: sus filtros viven en su estado.
+          hideHeader={isDashboard}
           className={isDark ? "dark" : ""}
         >
           {children}

@@ -23,7 +23,7 @@ export default function StatusChip({ sev = "idle", color, children, className }:
     <span
       style={color ? { backgroundColor: `${color}1A`, color } : undefined}
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[13px] font-semibold",
         !color && SEV_CLASS[sev],
         className
       )}

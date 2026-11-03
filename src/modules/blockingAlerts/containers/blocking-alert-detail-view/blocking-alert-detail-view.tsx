@@ -264,10 +264,7 @@ export default function BlockingAlertDetailView({
             {detail.name}
           </p>
           <p
-            className={cn(
-              "m-0 mt-0.5 truncate text-[12.5px] font-medium md:text-[13px]",
-              isOk && "text-cp-ink-3"
-            )}
+            className={cn("m-0 mt-0.5 truncate text-[13px] font-medium", isOk && "text-cp-ink-3")}
             style={isOk ? undefined : { color: meta.color }}
           >
             {detail.statusLabel}
@@ -330,7 +327,7 @@ export default function BlockingAlertDetailView({
           {showPay && (
             <section className="flex items-center justify-between gap-3 rounded-[14px] bg-cp-surface px-[18px] py-[14px]">
               <span className="min-w-0">
-                <span className="block text-[12px] font-medium text-cp-ink-3">Pago vencido</span>
+                <span className="block text-[13px] font-medium text-cp-ink-3">Pago vencido</span>
                 <span className="block truncate text-[18px] font-semibold tabular-nums text-cp-ink md:text-[20px]">
                   {money(detail.pastDue)}
                 </span>

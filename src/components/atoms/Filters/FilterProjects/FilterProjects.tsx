@@ -75,7 +75,6 @@ export const FilterProjects = ({ setSelecetedProjects }: Props) => {
       className="filterCascader"
       style={{ width: "130px" }}
       multiple
-      size="large"
       removeIcon
       maxTagCount="responsive"
       placeholder="Filtrar"

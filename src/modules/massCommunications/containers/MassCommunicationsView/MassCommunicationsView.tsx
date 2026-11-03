@@ -1,7 +1,8 @@
 "use client";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Flex, Typography } from "antd";
+
+import Header from "@/components/organisms/header";
 
 import ChannelSection from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import RecipientsSection from "../../components/MassCommunicationSections/RecipientsSection/RecipientsSection";
@@ -18,8 +19,6 @@ import { getWhatsAppTemplates } from "@/services/chat/chat";
 import type { EmailTemplate } from "../../components/MassCommunicationSections/MessageSection/EmailTemplateCard";
 import type { ChannelType } from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import type { WhatsappTemplate } from "../../lib/mockData";
-
-const { Title } = Typography;
 
 export default function MassCommunicationsView() {
   const router = useRouter();
@@ -146,49 +145,39 @@ export default function MassCommunicationsView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F7F7]">
-      <div className="max-w-[1400px] mx-auto">
-        {/* Header */}
-        <Flex align="center" gap={16} className="mb-6">
-          <Title level={3} className="!m-0">
-            Comunicaciones Masivas
-          </Title>
-        </Flex>
+    <div className="cp-page">
+      <Header title="Comunicaciones masivas" />
+      <ChannelSection channel={channel} onChannelChange={setChannel} />
 
-        <Flex vertical gap={24}>
-          <ChannelSection channel={channel} onChannelChange={setChannel} />
+      <RecipientsSection onValidatedCountChange={setValidatedCount} />
 
-          <RecipientsSection onValidatedCountChange={setValidatedCount} />
+      <MessageSection
+        channel={channel}
+        emailTemplates={emailTemplates}
+        selectedEmailTemplate={selectedEmailTemplate}
+        onSelectEmailTemplate={(id, subject, body) => {
+          setSelectedEmailTemplate(id);
+          setEmailSubject(subject);
+          setEmailBody(body);
+        }}
+        emailSubject={emailSubject}
+        emailBody={emailBody}
+        emailTags={emailTags}
+        selectedEmailAttachments={selectedEmailAttachments}
+        waTemplates={waTemplates}
+        waTemplatesLoading={waTemplatesLoading}
+        selectedTemplate={selectedTemplate}
+        onSelectTemplate={setSelectedTemplate}
+        currentTemplate={currentTemplate}
+        onCreateTemplate={() => setCreateTemplateOpen(true)}
+      />
 
-          <MessageSection
-            channel={channel}
-            emailTemplates={emailTemplates}
-            selectedEmailTemplate={selectedEmailTemplate}
-            onSelectEmailTemplate={(id, subject, body) => {
-              setSelectedEmailTemplate(id);
-              setEmailSubject(subject);
-              setEmailBody(body);
-            }}
-            emailSubject={emailSubject}
-            emailBody={emailBody}
-            emailTags={emailTags}
-            selectedEmailAttachments={selectedEmailAttachments}
-            waTemplates={waTemplates}
-            waTemplatesLoading={waTemplatesLoading}
-            selectedTemplate={selectedTemplate}
-            onSelectTemplate={setSelectedTemplate}
-            currentTemplate={currentTemplate}
-            onCreateTemplate={() => setCreateTemplateOpen(true)}
-          />
-
-          <ActionsBar
-            recipientCount={validatedCount}
-            channel={channel}
-            canOpenPreview={canOpenPreview}
-            onPreviewAndSend={handlePreviewAndSend}
-          />
-        </Flex>
-      </div>
+      <ActionsBar
+        recipientCount={validatedCount}
+        channel={channel}
+        canOpenPreview={canOpenPreview}
+        onPreviewAndSend={handlePreviewAndSend}
+      />
 
       <ModalCreateEmailTemplate
         isOpen={createTemplateOpen}

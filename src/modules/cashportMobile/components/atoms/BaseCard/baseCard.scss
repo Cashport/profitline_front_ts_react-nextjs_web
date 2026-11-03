@@ -28,7 +28,7 @@
     }
 
     &__title {
-        font-size: 0.75rem;
+        font-size: 13px;
         font-weight: 400;
         color: $cashportMobileBlue;
         margin: 0;
@@ -36,7 +36,7 @@
     }
 
     &__subtitle {
-        font-size: 0.75rem;
+        font-size: 13px;
         font-weight: 300;
         color: $cashportMobileBlue;
         margin: 0;
@@ -54,7 +54,7 @@
     }
 
     &__original-amount {
-        font-size: 0.75rem;
+        font-size: 13px;
         color: $cashportMobileGray;
         text-decoration: line-through;
         margin: 0;
@@ -64,7 +64,7 @@
     }
 
     &__currency {
-        font-size: 0.75rem;
+        font-size: 13px;
         font-weight: 300;
         color: $cashportMobileGray;
     }

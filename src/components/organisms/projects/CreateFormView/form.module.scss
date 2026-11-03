@@ -3,15 +3,18 @@
 .container {
     width: 100%;
     height: calc(100 * var(--vh));
-    padding: 1.5rem;
-    background-color: $white;
-    border-radius: 0.5rem;
+    // Tarjeta de contenido (docs/DESIGN.md §3): blanca, radio 14, sin borde ni sombra.
+    padding: var(--card-pad);
+    background-color: rgb(var(--cp-surface));
+    border: 0;
+    border-radius: var(--card-radius);
+    box-shadow: none;
     overflow-y: auto;
     position: relative;
 }
 .selectTitle {
     color: #909090;
-    font-size: 12px;
+    font-size: 13px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;

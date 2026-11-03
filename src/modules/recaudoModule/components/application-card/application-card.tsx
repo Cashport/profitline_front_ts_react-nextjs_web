@@ -32,7 +32,7 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
         <div className="flex items-start justify-between gap-3">
           <div className={KPI_VALUE}>
             {pct(applied / total, 0)}
-            <small className="text-[12px] font-medium tracking-normal text-muted-foreground">
+            <small className="text-[13px] font-medium tracking-normal text-muted-foreground">
               {" "}
               aplicado
             </small>
@@ -53,12 +53,12 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
             <div className="text-right">
               <div className={KPI_VALUE}>
                 {lt === null ? "—" : fmt(lt, 1)}
-                <small className="text-[12px] font-medium tracking-normal text-muted-foreground">
+                <small className="text-[13px] font-medium tracking-normal text-muted-foreground">
                   {" "}
                   días
                 </small>
               </div>
-              <div className="mt-1 text-[10.5px] text-muted-foreground">
+              <div className="mt-1 text-[13px] text-muted-foreground">
                 lead time de aplicación
                 {isFinite(delta) && Math.abs(delta) >= 0.05 && (
                   <>
@@ -101,7 +101,7 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
         }}
       />
 
-      <div className="flex flex-wrap items-center gap-3 self-start text-[10.5px] text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-3 self-start text-[13px] text-muted-foreground">
         <LegendItem mark={<Swatch color={as.color} />} label={as.label} value={money(applied)} />
         <LegendItem mark={<Swatch color={us.color} />} label={us.label} value={money(unapplied)} />
         {aged.length > 0 && (

@@ -136,18 +136,18 @@ export default function CondicionObjetivo({
   return (
     <div className="p-4 flex flex-col gap-3">
       <div className="flex items-center gap-2 mb-1">
-        <span className="w-5 h-5 rounded-full bg-[#F0F0F0] flex items-center justify-center text-[10px] font-bold text-[#666666]">
+        <span className="w-5 h-5 rounded-full bg-[#F0F0F0] flex items-center justify-center text-[13px] font-bold text-[#666666]">
           1
         </span>
-        <p className="text-xs font-semibold text-[#141414]">Objetivo</p>
+        <p className="text-[13px] font-semibold text-[#141414]">Objetivo</p>
       </div>
 
       {tipo === "monto" ? (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] text-[#999999]">Rango de compra</p>
+          <p className="text-[13px] text-[#999999]">Rango de compra</p>
           <div className="flex items-center gap-2">
             <div className="flex items-center border border-[#DDDDDD] rounded-lg overflow-hidden">
-              <span className="px-2.5 py-2 text-xs text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
+              <span className="px-2.5 py-2 text-[13px] text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
                 $
               </span>
               <input
@@ -160,9 +160,9 @@ export default function CondicionObjetivo({
                 placeholder="2.000.000"
               />
             </div>
-            <span className="text-xs text-[#999999]">a</span>
+            <span className="text-[13px] text-[#999999]">a</span>
             <div className="flex items-center border border-[#DDDDDD] rounded-lg overflow-hidden">
-              <span className="px-2.5 py-2 text-xs text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
+              <span className="px-2.5 py-2 text-[13px] text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
                 $
               </span>
               <input
@@ -182,7 +182,7 @@ export default function CondicionObjetivo({
           {/* Productos individuales */}
           {productosCondicion.length > 0 && (
             <div className="flex flex-col gap-2">
-              <p className="text-[11px] text-[#999999]">Productos individuales</p>
+              <p className="text-[13px] text-[#999999]">Productos individuales</p>
               {productosCondicion.map((pc) => (
                 <div key={pc.id} className="flex items-center gap-2">
                   <ProductSelect
@@ -195,7 +195,7 @@ export default function CondicionObjetivo({
                     className="[&_.ant-select-selector]:!bg-[#F7F7F7]"
                   />
                   <div className="flex items-stretch h-8 border border-[#DDDDDD] rounded-lg overflow-hidden w-20 flex-shrink-0">
-                    <span className="flex items-center px-2 text-xs text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
+                    <span className="flex items-center px-2 text-[13px] text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
                       x
                     </span>
                     <input
@@ -224,7 +224,7 @@ export default function CondicionObjetivo({
             <div key={pak.id} className="border border-[#DDDDDD] rounded-lg overflow-hidden">
               {/* Header del paquete */}
               <div className="flex items-center justify-between px-3 py-2 bg-[#F7F7F7] border-b border-[#EEEEEE]">
-                <span className="text-[11px] font-semibold text-[#141414]">
+                <span className="text-[13px] font-semibold text-[#141414]">
                   Paquete de productos
                 </span>
                 <button
@@ -239,7 +239,7 @@ export default function CondicionObjetivo({
                 {/* Unidades + min productos */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] text-[#999999]">Pide</span>
+                    <span className="text-[13px] text-[#999999]">Pide</span>
                     <input
                       type="number"
                       min={1}
@@ -249,9 +249,9 @@ export default function CondicionObjetivo({
                       }
                       className="w-14 px-2 py-1.5 text-sm text-center font-semibold text-[#141414] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] bg-white"
                     />
-                    <span className="text-[11px] text-[#999999]">unidades</span>
+                    <span className="text-[13px] text-[#999999]">unidades</span>
                   </div>
-                  <span className="text-[11px] text-[#CCCCCC]">entre</span>
+                  <span className="text-[13px] text-[#CCCCCC]">entre</span>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="number"
@@ -266,14 +266,14 @@ export default function CondicionObjetivo({
                       }
                       className="w-14 px-2 py-1.5 text-sm text-center font-semibold text-[#141414] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] bg-white"
                     />
-                    <span className="text-[11px] text-[#999999]">productos diferentes</span>
+                    <span className="text-[13px] text-[#999999]">productos diferentes</span>
                   </div>
                 </div>
 
                 {/* Productos elegibles */}
                 {pak.productos.length > 0 && (
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-[10px] text-[#AAAAAA] font-semibold uppercase tracking-wide">
+                    <p className="text-[13px] text-[#AAAAAA] font-semibold">
                       Productos elegibles
                     </p>
                     {pak.productos.map((pp) => (
@@ -288,7 +288,7 @@ export default function CondicionObjetivo({
                           onChange={(productId) =>
                             updateProductoInPaquete(pak.id, pp.id, productId)
                           }
-                          className="[&_.ant-select-selector]:!bg-[#F7F7F7] [&_.ant-select-selector]:!text-xs"
+                          className="[&_.ant-select-selector]:!bg-[#F7F7F7] [&_.ant-select-selector]:!text-[13px]"
                         />
                         <button
                           onClick={() => removeProductoFromPaquete(pak.id, pp.id)}
@@ -304,7 +304,7 @@ export default function CondicionObjetivo({
                 <button
                   onClick={() => addProductoToPaquete(pak.id)}
                   disabled={pak.productos.length >= products.length}
-                  className="flex items-center gap-1 text-[11px] text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+                  className="flex items-center gap-1 text-[13px] text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                 >
                   <Plus size={10} /> Agregar producto elegible
                 </button>
@@ -317,14 +317,14 @@ export default function CondicionObjetivo({
             <button
               onClick={addProductoCondicion}
               disabled={sinProductosDisponibles}
-              className="flex items-center gap-1.5 text-xs text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+              className="flex items-center gap-1.5 text-[13px] text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
             >
               <Plus size={11} /> Agregar producto
             </button>
-            <span className="text-[#DDDDDD] text-xs">|</span>
+            <span className="text-[#DDDDDD] text-[13px]">|</span>
             <button
               onClick={addPaqueteCondicion}
-              className="flex items-center gap-1.5 text-xs text-[#0067B1] hover:underline w-fit"
+              className="flex items-center gap-1.5 text-[13px] text-[#0067B1] hover:underline w-fit"
             >
               <Plus size={11} /> Agregar paquete de productos
             </button>

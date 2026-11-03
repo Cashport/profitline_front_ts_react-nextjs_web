@@ -52,8 +52,7 @@ export default function DataQualityView() {
         if (
           axios.isAxiosError<{ message?: string }>(err) &&
           err.response?.status === 403 &&
-          err.response.data?.message ===
-            "No tienes alcance de datos asignado para este proyecto"
+          err.response.data?.message === "No tienes alcance de datos asignado para este proyecto"
         ) {
           setNoCountryAccess(true);
           return;
@@ -79,18 +78,20 @@ export default function DataQualityView() {
   // y no exponer navegación a países/clientes.
   if (!canReadData) {
     return (
-      <div className="flex flex-col gap-4">
-        <Header title="Data Quality" />
-        <div className="flex items-center justify-end">
-          {canManageAux && (
-            <Link href="/data-quality/auxiliary-catalogs">
-              <Button variant="outline" className="text-[#141414]">
-                Auxiliares
-              </Button>
-            </Link>
-          )}
-        </div>
-        <div className="bg-white rounded-lg p-12 text-center">
+      <div className="cp-page">
+        <Header
+          title="Data Quality"
+          actionsExtra={
+            canManageAux && (
+              <Link href="/data-quality/auxiliary-catalogs">
+                <Button variant="outline" className="text-[#141414]">
+                  Auxiliares
+                </Button>
+              </Link>
+            )
+          }
+        />
+        <div className="cp-card p-12 text-center">
           <p className="text-gray-500 text-lg">
             No tienes acceso a la vista general de Data Quality.
           </p>
@@ -101,7 +102,7 @@ export default function DataQualityView() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="cp-page">
         <Header title="Data Quality" />
         <div className="flex justify-center items-center min-h-[400px]">
           <Spin size="large" />
@@ -112,9 +113,9 @@ export default function DataQualityView() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="cp-page">
         <Header title="Data Quality" />
-        <div className="bg-white rounded-lg p-6 text-center">
+        <div className="cp-card px-[18px] py-[14px] text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button
             onClick={() => window.location.reload()}
@@ -129,10 +130,9 @@ export default function DataQualityView() {
 
   if (noCountryAccess) {
     return (
-      <div className="flex flex-col gap-4">
-        <Header title="Data Quality" />
-        <h2 className="text-xl font-semibold text-[#141414] mb-6">Países y Distribuidores</h2>
-        <div className="bg-white rounded-lg p-12 text-center">
+      <div className="cp-page">
+        <Header title="Data Quality" titleExtra="Países y Distribuidores" />
+        <div className="cp-card p-12 text-center">
           <p className="text-gray-500 text-lg">No tienes países asignados</p>
         </div>
       </div>
@@ -141,10 +141,9 @@ export default function DataQualityView() {
 
   if (countries.length === 0) {
     return (
-      <div className="flex flex-col gap-4">
-        <Header title="Data Quality" />
-        <h2 className="text-xl font-semibold text-[#141414] mb-6">Países y Distribuidores</h2>
-        <div className="bg-white rounded-lg p-12 text-center">
+      <div className="cp-page">
+        <Header title="Data Quality" titleExtra="Países y Distribuidores" />
+        <div className="cp-card p-12 text-center">
           <p className="text-gray-500 text-lg">
             No hay información disponible para los países asignados.
           </p>
@@ -154,46 +153,53 @@ export default function DataQualityView() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Header title="Data Quality" />
-      <div className="flex items-center justify-between ">
-        <div className="flex items-center space-x-4 mb-6">
-          <h2 className="text-xl font-semibold text-[#141414]">Países y Distribuidores</h2>
-          <BadgeUI variant="secondary" className="text-sm">
-            {totalCountries} países activos
-          </BadgeUI>
-        </div>
-
-        <div className="flex gap-2">
-          {(hasDataQualityManagementPermission(selectedProject) || canManageAux) && (
-            <Link href="/data-quality/auxiliary-catalogs">
-              <Button variant="outline" className="text-[#141414]">
-                Auxiliares
-              </Button>
-            </Link>
-          )}
-          {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
-            <Link href="/data-quality/alerts">
-              <Badge count={totalAlerts} color="#E53935">
-                <Button variant="outline">
-                  <BellSimpleRinging size={18} />
-                  Alertas
+    <div className="cp-page">
+      <Header
+        title="Data Quality"
+        titleExtra={
+          <span className="flex items-center gap-3">
+            Países y Distribuidores
+            <BadgeUI variant="secondary" className="text-sm">
+              {totalCountries} países activos
+            </BadgeUI>
+          </span>
+        }
+        actionsExtra={
+          <>
+            {(hasDataQualityManagementPermission(selectedProject) || canManageAux) && (
+              <Link href="/data-quality/auxiliary-catalogs">
+                <Button variant="outline" className="text-[#141414]">
+                  Auxiliares
                 </Button>
-              </Badge>
-            </Link>
-          )}
-          {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-dashboard") && (
-            <Link href={`/data-quality/dashboard`}>
-              <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
-                Dashboard
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
+              </Link>
+            )}
+            {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+              <Link href="/data-quality/alerts">
+                <Badge count={totalAlerts} color="#E53935">
+                  <Button variant="outline">
+                    <BellSimpleRinging size={18} />
+                    Alertas
+                  </Button>
+                </Badge>
+              </Link>
+            )}
+            {checkUserComponentPermission(
+              selectedProject,
+              "DataQuality",
+              "data-view-dashboard"
+            ) && (
+              <Link href={`/data-quality/dashboard`}>
+                <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
+                  Dashboard
+                </Button>
+              </Link>
+            )}
+          </>
+        }
+      />
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[var(--card-gap)]">
         {countries.map((country) => {
           const { automation, missing, catalog } = country.alerts_by_category;
           const pendingClients = country.pending_clients.length;
@@ -212,12 +218,12 @@ export default function DataQualityView() {
           return (
             <div
               key={country.id_country}
-              className="hover:shadow-md transition-shadow cursor-pointer bg-white border border-[#DDDDDD] rounded-xl p-3.5 space-y-3"
+              className="cp-card cursor-pointer px-[18px] py-[14px] space-y-3"
             >
               {/* Header: país + pills de estado */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white bg-[#141414] shrink-0">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold text-white bg-[#141414] shrink-0">
                     {country.country_name.slice(0, 2).toUpperCase()}
                   </div>
                   <h3 className="text-sm font-medium text-[#141414]">{country.country_name}</h3>
@@ -225,21 +231,21 @@ export default function DataQualityView() {
                 <div className="flex items-center gap-1">
                   <span
                     title="Archivos pendientes"
-                    className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[11px] font-medium text-[#6B7280]"
+                    className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[13px] font-medium text-[#6B7280]"
                   >
                     <FileText className="w-3 h-3" />
                     {missing}
                   </span>
                   <span
                     title="Alertas de catálogo"
-                    className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[11px] font-medium text-[#6B7280]"
+                    className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[13px] font-medium text-[#6B7280]"
                   >
                     <Tag className="w-3 h-3" />
                     {catalog}
                   </span>
                   <span
                     title="Otras novedades"
-                    className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[11px] font-medium text-[#6B7280]"
+                    className="flex items-center gap-1 rounded-full bg-[#F5F5F4] px-1.5 py-0.5 text-[13px] font-medium text-[#6B7280]"
                   >
                     <Bell className="w-3 h-3" />
                     {otherAlerts}
@@ -247,7 +253,7 @@ export default function DataQualityView() {
                   {country.automation_failures.length > 0 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="flex items-center gap-1 rounded-full bg-[#FEE2E2] px-1.5 py-0.5 text-[11px] font-medium text-[#DC2626]">
+                        <span className="flex items-center gap-1 rounded-full bg-[#FEE2E2] px-1.5 py-0.5 text-[13px] font-medium text-[#DC2626]">
                           <Bot className="w-3 h-3" />
                           {country.automation_failures.length}
                         </span>
@@ -260,12 +266,12 @@ export default function DataQualityView() {
                         )}
                         arrowClassName={DARK_TOOLTIP_ARROW}
                       >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
+                        <p className="text-[13px] font-semibold opacity-70">
                           Automatizaciones fallidas
                         </p>
                         <ul className="space-y-1">
                           {visibleAutomationFailures.map((failure, i) => (
-                            <li key={i} className="text-xs">
+                            <li key={i} className="text-[13px]">
                               <span className="font-medium">{failure.name}</span>
                               <br />
                               <span className="opacity-70">{failure.reason}</span>
@@ -273,7 +279,7 @@ export default function DataQualityView() {
                           ))}
                         </ul>
                         {remainingAutomationFailures > 0 && (
-                          <p className="text-xs opacity-70 pt-0.5">
+                          <p className="text-[13px] opacity-70 pt-0.5">
                             +{remainingAutomationFailures} más
                           </p>
                         )}
@@ -286,7 +292,7 @@ export default function DataQualityView() {
               {/* Ingesta del mes */}
               <div className="rounded-xl bg-[#F5F5F4] p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#6B7280]">Ingesta del mes</span>
+                  <span className="text-[13px] text-[#6B7280]">Ingesta del mes</span>
                   <span className="text-lg font-bold text-[#4D7C0F]">
                     {country.monthly_ingestion_percentage}%
                   </span>
@@ -305,7 +311,7 @@ export default function DataQualityView() {
                   <TooltipTrigger asChild>
                     <div className="rounded-xl bg-[#F5F5F4] p-3 space-y-1.5 text-left">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-[11px] text-[#6B7280]">
+                        <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <Users className="w-3 h-3" />
                           Clientes
                         </div>
@@ -314,7 +320,7 @@ export default function DataQualityView() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-[11px] text-[#6B7280]">
+                        <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <UserX className="w-3 h-3" />
                           Pendientes
                         </div>
@@ -332,12 +338,12 @@ export default function DataQualityView() {
                       className={cn(DARK_TOOLTIP_CONTENT, "w-56 space-y-1 rounded-lg px-3 py-2.5")}
                       arrowClassName={DARK_TOOLTIP_ARROW}
                     >
-                      <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
+                      <p className="text-[13px] font-semibold opacity-70">
                         Clientes con archivos pendientes
                       </p>
                       <ul className="space-y-0.5">
                         {visiblePendingClients.map((c, i) => (
-                          <li key={i} className="text-xs">
+                          <li key={i} className="text-[13px]">
                             {c.client}{" "}
                             <span className="opacity-70">
                               ({c.count} archivo{c.count > 1 ? "s" : ""})
@@ -353,7 +359,7 @@ export default function DataQualityView() {
                   <TooltipTrigger asChild>
                     <div className="rounded-xl bg-[#F5F5F4] p-3 space-y-1.5 text-left">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-[11px] text-[#6B7280]">
+                        <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <FileText className="w-3 h-3" />
                           Archivos
                         </div>
@@ -362,7 +368,7 @@ export default function DataQualityView() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-[11px] text-[#6B7280]">
+                        <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <FileX className="w-3 h-3" />
                           Pendientes
                         </div>
@@ -380,19 +386,19 @@ export default function DataQualityView() {
                       className={cn(DARK_TOOLTIP_CONTENT, "w-64 space-y-1 rounded-lg px-3 py-2.5")}
                       arrowClassName={DARK_TOOLTIP_ARROW}
                     >
-                      <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
+                      <p className="text-[13px] font-semibold opacity-70">
                         Archivos pendientes por cliente
                       </p>
                       <ul className="space-y-0.5">
                         {visiblePendingClients.map((entry, i) => (
-                          <li key={i} className="text-xs">
+                          <li key={i} className="text-[13px]">
                             <span className="opacity-70">{entry.client}:</span> {entry.process_type}
                             {entry.count > 1 && ` (×${entry.count})`}
                           </li>
                         ))}
                       </ul>
                       {remainingFileCount > 0 && (
-                        <p className="text-xs opacity-70 pt-0.5">
+                        <p className="text-[13px] opacity-70 pt-0.5">
                           +{remainingFileCount} archivos más
                         </p>
                       )}
@@ -402,7 +408,7 @@ export default function DataQualityView() {
               </div>
 
               <Link href={`/data-quality/country/${country.id_country}`} className="block">
-                <Button className="w-full text-xs font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none rounded-full h-8">
+                <Button className="w-full text-[13px] font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none rounded-full h-8">
                   Ver Clientes
                 </Button>
               </Link>

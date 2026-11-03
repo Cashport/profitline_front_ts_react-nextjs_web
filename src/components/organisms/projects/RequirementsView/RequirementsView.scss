@@ -3,13 +3,15 @@
 .requirementsView {
         .button {
             &__actions {
-                padding: 0.75rem 1rem;
+                padding: 0 1rem;
                 background-color: $background;
                 border: solid 1px transparent;
                 font-weight: 600;
+                font-size: 14px;
                 display: flex;
                 align-items: center;
-                height: 3rem;
+                // Mismo alto que el buscador (--control-h).
+                height: var(--control-h);
 
                 &:hover {
                     border: solid 1px $dark-gray;

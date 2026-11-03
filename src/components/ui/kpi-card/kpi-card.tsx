@@ -17,7 +17,7 @@ export function KpiCard({ children, loading, className }: KpiCardProps) {
   return (
     <section
       className={cn(
-        "box-border flex min-w-0 flex-[1_1_300px] flex-col justify-between gap-2 rounded-[14px] bg-cp-surface px-[18px] py-[14px] text-cp-ink",
+        "cp-card box-border flex min-w-0 flex-[1_1_300px] flex-col justify-between gap-2 px-[18px] py-[14px] text-cp-ink",
         className
       )}
     >
@@ -63,17 +63,10 @@ export function KpiValue({
       >
         <span className="min-w-0 truncate">{value}</span>
         {unit && (
-          <span
-            className={cn(
-              "ml-[3px] shrink-0 font-medium text-cp-ink-3",
-              size === "lg" ? "text-xs" : "text-[11px]"
-            )}
-          >
-            {unit}
-          </span>
+          <span className="ml-[3px] shrink-0 text-[13px] font-medium text-cp-ink-3">{unit}</span>
         )}
       </div>
-      {caption && <span className="truncate text-[11.5px] text-cp-ink-3">{caption}</span>}
+      {caption && <span className="truncate text-[13px] text-cp-ink-3">{caption}</span>}
     </div>
   );
 }

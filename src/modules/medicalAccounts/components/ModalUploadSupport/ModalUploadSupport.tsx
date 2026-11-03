@@ -87,12 +87,10 @@ export function ModalUploadSupport({
       destroyOnClose
     >
       <Flex vertical gap="1.25rem">
-        <p className="-mt-2 text-sm text-gray-500">
-          Adjunta el PDF e indica el tipo de documento.
-        </p>
+        <p className="-mt-2 text-sm text-gray-500">Adjunta el PDF e indica el tipo de documento.</p>
 
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
             Tipo de documento <span className="text-red-500">*</span>
           </p>
           <Input
@@ -103,7 +101,7 @@ export function ModalUploadSupport({
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-2 text-[13px] font-semibold text-gray-500">
             PDF <span className="text-red-500">*</span>
           </p>
 
@@ -112,7 +110,7 @@ export function ModalUploadSupport({
               <FileText size={24} className="shrink-0 text-red-400" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-cashport-black">{pdfFile.name}</p>
-                <p className="text-xs text-gray-500">{formatFileSize(pdfFile.size)}</p>
+                <p className="text-[13px] text-gray-500">{formatFileSize(pdfFile.size)}</p>
               </div>
               <button
                 type="button"

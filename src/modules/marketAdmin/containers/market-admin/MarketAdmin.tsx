@@ -2,8 +2,18 @@
 
 import Link from "next/link";
 import { ComponentType } from "react";
-import { Users, User, Package, Tag, UploadCloud, Settings, ChevronRight } from "lucide-react";
+import {
+  Users,
+  User,
+  Package,
+  Boxes,
+  Tag,
+  UploadCloud,
+  Settings,
+  ChevronRight
+} from "lucide-react";
 import { Chats } from "@phosphor-icons/react";
+import Header from "@/components/organisms/header";
 
 type Section = {
   href: string;
@@ -33,6 +43,12 @@ const sections: Section[] = [
     description: "Revisa el catálogo: líneas, canales, SKUs, lotes, precios e imágenes."
   },
   {
+    href: "/market-admin/packs",
+    icon: Boxes,
+    label: "Packs de productos",
+    description: "Arma packs con productos del catálogo: SKU propio, imagen y cantidades."
+  },
+  {
     href: "/market-admin/bonusAndDiscounts",
     icon: Tag,
     label: "Descuentos y bonificados",
@@ -60,12 +76,11 @@ const sections: Section[] = [
 
 export default function MarketAdmin() {
   return (
-    <div className="min-h-screen">
-      {/* Title outside the card */}
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Administración</h1>
+    <div className="cp-page min-h-full">
+      <Header title="Administración" />
 
       {/* Single white card — full width, sized to its content */}
-      <div className="bg-white rounded-lg overflow-hidden">
+      <div className="cp-card overflow-hidden">
         <div className="grid grid-cols-2">
           {sections.map(({ href, icon: Icon, label, description, disabled }) => {
             const inner = (
@@ -93,7 +108,7 @@ export default function MarketAdmin() {
                 {/* Text */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[#141414]">{label}</p>
-                  <p className="text-xs text-[#999999] mt-0.5 leading-relaxed">{description}</p>
+                  <p className="text-[13px] text-[#999999] mt-0.5 leading-relaxed">{description}</p>
                 </div>
 
                 {/* Arrow */}

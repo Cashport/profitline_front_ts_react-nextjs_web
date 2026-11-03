@@ -41,6 +41,8 @@ interface VisitsFilterModalProps {
   clients: IVisitsClient[];
   /** Contenido al final de la barra del botón y sus etiquetas (chips de estado, reloj). */
   barEnd?: ReactNode;
+  /** En el header compartido: chips a la izquierda de "Filtrar" (ver FilterModal). */
+  inHeader?: boolean;
 }
 
 /** Selección de una categoría multi a partir de los ids confirmados. */
@@ -67,7 +69,8 @@ export default function VisitsFilterModal({
   advisors,
   zones,
   clients,
-  barEnd
+  barEnd,
+  inHeader
 }: VisitsFilterModalProps) {
   const proyectoOptions: FilterOptionItem[] = PROJECT_ORDER.map((p) => ({
     id: p,
@@ -140,6 +143,7 @@ export default function VisitsFilterModal({
       onValueChange={(sel) => onChange(selectionToDomain(sel))}
       onClearAll={() => onChange(EMPTY_VISITS_FILTERS)}
       barEnd={barEnd}
+      inHeader={inHeader}
     />
   );
 }

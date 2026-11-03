@@ -68,10 +68,7 @@ export function MedicalAccountTimeline({
 
   const statusNameByCode = new Map(statuses.map((s) => [s.code, s.name]));
 
-  const stageInfo: Record<
-    string,
-    { actor: string; when: string; from: string | null }
-  > = {};
+  const stageInfo: Record<string, { actor: string; when: string; from: string | null }> = {};
   history.forEach((item) => {
     stageInfo[item.to_status_code] = {
       actor: getActor(item),
@@ -91,9 +88,7 @@ export function MedicalAccountTimeline({
             const name = statusNameByCode.get(code) ?? code;
             // Para el primer nodo también se muestran los eventos de NOVEDAD.
             const info =
-              code === "CARGUE"
-                ? stageInfo["CARGUE"] ?? stageInfo["NOVEDAD"]
-                : stageInfo[code];
+              code === "CARGUE" ? stageInfo["CARGUE"] ?? stageInfo["NOVEDAD"] : stageInfo[code];
             const isCompleted = currentIndex !== -1 && index < currentIndex;
             const isCurrent = index === currentIndex;
 
@@ -111,13 +106,13 @@ export function MedicalAccountTimeline({
                       >
                         <StageIcon className="h-6 w-6" />
                       </div>
-                      <span className="text-xs mt-2 text-center max-w-[110px] text-cashport-black font-medium">
+                      <span className="text-[13px] mt-2 text-center max-w-[110px] text-cashport-black font-medium">
                         {name}
                       </span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="bg-cashport-black text-white">
-                    <div className="text-xs space-y-1">
+                    <div className="text-[13px] space-y-1">
                       <p className="font-semibold mb-1">{name}</p>
                       {info ? (
                         <>

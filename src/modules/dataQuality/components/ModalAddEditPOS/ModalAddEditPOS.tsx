@@ -287,7 +287,7 @@ export default function ModalAddEditPOS({
               )}
             />
             {errors.pos_id && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.pos_id.message}</span>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>{errors.pos_id.message}</span>
             )}
           </div>
 
@@ -308,7 +308,7 @@ export default function ModalAddEditPOS({
               )}
             />
             {errors.pos_name && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.pos_name.message}</span>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>{errors.pos_name.message}</span>
             )}
           </div>
 
@@ -374,7 +374,7 @@ export default function ModalAddEditPOS({
               )}
             />
             {errors.id_country && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+              <span style={{ color: "#ff4d4f", fontSize: "13px" }}>
                 {errors.id_country.message}
               </span>
             )}

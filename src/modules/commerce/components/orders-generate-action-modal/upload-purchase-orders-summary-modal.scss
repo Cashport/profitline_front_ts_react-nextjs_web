@@ -91,9 +91,7 @@
     }
 
     &__tileLabel {
-        font-size: 0.7rem !important;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
+        font-size: 13px !important;
         color: $gray !important;
         line-height: 1.2;
     }
@@ -124,7 +122,7 @@
     }
 
     &__tableHint {
-        font-size: 0.8rem;
+        font-size: 13px;
     }
 
     &__mono {

@@ -8,6 +8,13 @@ import ActiveFilterTags from "./components/ActiveFilterTags";
 import FilterSidebar from "./components/FilterSidebar";
 import FilterOptionsList from "./components/FilterOptionsList";
 import FilterModalFooter from "./components/FilterModalFooter";
+import {
+  FilterChips,
+  type FilterChipItem
+} from "@/components/ui/page-header-controls/page-header-controls";
+
+const defaultTagValue = (_cat: unknown, items: FilterOptionItem[]) =>
+  items.length === 1 ? items[0].name : `${items.length} seleccionados`;
 
 const emptyOptionSelection = (categories: FilterModalProps["categories"]): FilterSelection => {
   const empty: FilterSelection = {};
@@ -36,7 +43,9 @@ export default function FilterModal({
   trigger,
   barEnd,
   hideTags,
-  onDraftChange
+  inHeader,
+  onDraftChange,
+  footerSummary
 }: FilterModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(categories[0]?.key ?? "");
@@ -116,31 +125,66 @@ export default function FilterModal({
     else onValueChange(emptyOptionSelection(categories));
   };
 
+  const triggerNode = (
+    <FilterTrigger
+      count={activeFiltersCount}
+      onClick={openModal}
+      disabled={isLoading}
+      label={trigger?.label}
+      className={trigger?.className}
+      showChevron={trigger?.showChevron}
+    />
+  );
+
+  const headerChips: FilterChipItem[] = categories.flatMap((cat) => {
+    const items = cat.kind === "custom" ? [] : value[cat.key] || [];
+    if (!items.length) return [];
+    return [
+      {
+        key: cat.key,
+        label: cat.label,
+        value: (formatTagValue ?? defaultTagValue)(cat, items),
+        onRemove: () => clearCategoryCommitted(cat.key)
+      }
+    ];
+  });
+
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <FilterTrigger
-          count={activeFiltersCount}
-          onClick={openModal}
-          disabled={isLoading}
-          label={trigger?.label}
-          className={trigger?.className}
-          showChevron={trigger?.showChevron}
-        />
+      {inHeader ? (
+        <>
+          {/* Las categorías custom (p. ej. Fecha) traen su propio chip: va antes que los demás. */}
+          {!hideTags &&
+            categories.map((cat) => {
+              const node = cat.kind === "custom" ? cat.renderTag?.() : null;
+              return node ? (
+                <span key={cat.key} className="flex shrink-0 items-center">
+                  {node}
+                </span>
+              ) : null;
+            })}
+          {!hideTags && <FilterChips chips={headerChips} />}
+          {triggerNode}
+          {barEnd}
+        </>
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          {triggerNode}
 
-        {!hideTags && (
-          <ActiveFilterTags
-            categories={categories}
-            value={value}
-            activeCount={activeFiltersCount}
-            onClearCategory={clearCategoryCommitted}
-            onClearAll={clearAllCommitted}
-            formatTagValue={formatTagValue}
-          />
-        )}
+          {!hideTags && (
+            <ActiveFilterTags
+              categories={categories}
+              value={value}
+              activeCount={activeFiltersCount}
+              onClearCategory={clearCategoryCommitted}
+              onClearAll={clearAllCommitted}
+              formatTagValue={formatTagValue}
+            />
+          )}
 
-        {barEnd}
-      </div>
+          {barEnd}
+        </div>
+      )}
 
       {isOpen && activeCategory && (
         <div
@@ -167,7 +211,7 @@ export default function FilterModal({
               </div>
               <div className="flex-1">
                 <div className="text-[17px] font-semibold">Filtros Avanzados</div>
-                <div className="text-xs text-cp-ink-3">
+                <div className="text-[13px] text-cp-ink-3">
                   Encuentra y selecciona múltiples opciones
                 </div>
               </div>
@@ -204,6 +248,7 @@ export default function FilterModal({
               onClearAll={clearDraft}
               onCancel={() => setIsOpen(false)}
               onApply={applyFilters}
+              summary={footerSummary}
             />
           </div>
         </div>

@@ -39,29 +39,29 @@ export function ArchiveTypeCollapseLabel({
         >
           <Badge
             variant="secondary"
-            className="text-xs text-white"
+            className="text-[13px] text-white"
             style={{ backgroundColor: group.data_type?.color ?? GRAY }}
           >
             {group.tipo_archivo}
           </Badge>
-          <span className="text-xs pr-3 font-medium" style={{ color: "#141414", opacity: 0.5 }}>
+          <span className="text-[13px] pr-3 font-medium" style={{ color: "#141414", opacity: 0.5 }}>
             {group.pending_archives} Pendientes
           </span>
         </div>
         {intake && (
           <>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-[13px]">
               {intake.periodicity}
             </Badge>
-            <p className="text-xs" style={{ color: "#141414" }}>
+            <p className="text-[13px]" style={{ color: "#141414" }}>
               Se produce {intake.periodicity_json?.repeat?.frequency}{" "}
               {intake.periodicity_json?.repeat?.interval} veces iniciando el{" "}
               {intake.periodicity_json?.start_date}
             </p>
-            <span className="text-xs font-semibold" style={{ color: "#141414" }}>
+            <span className="text-[13px] font-semibold" style={{ color: "#141414" }}>
               Fuente:
             </span>
-            <span className="text-xs" style={{ color: "#141414" }}>
+            <span className="text-[13px]" style={{ color: "#141414" }}>
               {intake.intake_type?.description || "-"}
             </span>
           </>

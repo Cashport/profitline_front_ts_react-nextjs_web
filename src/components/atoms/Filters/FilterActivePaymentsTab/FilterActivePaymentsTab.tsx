@@ -249,9 +249,8 @@ export const FilterActivePaymentsTab = ({
       }}
       className="filterCascader"
       popupClassName="filterActivePaymentsTab"
-      style={{ width: "16.5rem", height: "48px" }}
+      style={{ width: "16.5rem" }}
       multiple
-      size="large"
       removeIcon
       maxTagCount="responsive"
       placeholder="Filtrar"

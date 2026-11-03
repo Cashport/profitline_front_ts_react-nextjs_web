@@ -16,7 +16,8 @@ interface ClientsLayoutProps {
 /**
  * Marco de /clientes (Home y detalle). En el Home la página no tiene scroll
  * propio —los KPIs se esconden y la tabla desplaza sus filas—, así que va sin
- * barra de scroll ni espacio extra bajo el encabezado.
+ * barra de scroll ni espacio extra bajo el encabezado. El detalle pinta su propio
+ * header compartido (nombre del cliente, "‹" y filtros), por eso aquí se oculta.
  */
 export default function ClientsLayout({ children }: ClientsLayoutProps) {
   const isHome = usePathname() === CLIENTS_HOME_PATH;
@@ -26,7 +27,7 @@ export default function ClientsLayout({ children }: ClientsLayoutProps) {
       headerTitle="Clientes"
       headerTitleExtra={<ClientsHomeHeaderExtra />}
       headerActions={<ClientsHomeHeaderActions />}
-      headerBack={isHome ? undefined : CLIENTS_HOME_PATH}
+      hideHeader={!isHome}
       contentClassName={isHome ? "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : undefined}
     >
       {children}

@@ -51,7 +51,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
         {legend.map((l) => (
           <span key={l.key} className="flex min-w-0 flex-col">
             <b className="text-[17px] font-semibold leading-tight text-cp-ink">{l.n}</b>
-            <span className="flex items-center gap-1 truncate text-[11.5px] text-cp-ink-3">
+            <span className="flex items-center gap-1 truncate text-[13px] text-cp-ink-3">
               <span
                 className="h-1.5 w-1.5 shrink-0 rounded-[2px]"
                 style={{ background: STATUS_META[l.key].color }}
@@ -63,7 +63,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
       </div>
 
       {atRisk.length === 0 ? (
-        <p className="m-0 border-t border-cp-line pt-2.5 text-[12px] text-cp-ink-3">
+        <p className="m-0 border-t border-cp-line pt-2.5 text-[13px] text-cp-ink-3">
           Todos sus puntos de venta están al día.
         </p>
       ) : (
@@ -84,7 +84,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
                     )}
                   </span>
                   <span
-                    className="flex items-center gap-1 text-[11.5px] font-medium"
+                    className="flex items-center gap-1 text-[13px] font-medium"
                     style={{ color: meta.color }}
                   >
                     <meta.Icon className="h-3 w-3 shrink-0" strokeWidth={2.6} />
@@ -98,7 +98,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
                   >
                     {formatMoney(s.amount, { hideDecimals: true })}
                   </span>
-                  <span className="block text-[11px] text-cp-ink-4">pago vencido</span>
+                  <span className="block text-[13px] text-cp-ink-4">pago vencido</span>
                 </span>
               </Link>
             );

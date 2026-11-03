@@ -42,7 +42,7 @@ export default function FilterSidebar({
               )}
             />
             <span className="flex-1 truncate">{cat.label}</span>
-            <span className="mr-2 text-[11px] font-normal text-cp-ink-4">
+            <span className="mr-2 text-[13px] font-normal text-cp-ink-4">
               {selectedCount || ""}
             </span>
             <span className={isActive ? "text-cp-ink" : "text-transparent"}>&gt;</span>

@@ -44,7 +44,7 @@ export default function AlertCard({ row, href, showClient }: AlertCardProps) {
           {formatMoney(row.amount, { hideDecimals: true })}
         </span>
       </span>
-      <span className="flex items-center justify-between gap-2.5 text-[12px]">
+      <span className="flex items-center justify-between gap-2.5 text-[13px]">
         <span
           className="flex min-w-0 items-center gap-1 truncate font-medium text-cp-ink-3"
           style={isOk ? undefined : { color: meta.color }}
@@ -52,7 +52,7 @@ export default function AlertCard({ row, href, showClient }: AlertCardProps) {
           <meta.Icon className="h-3 w-3 shrink-0" strokeWidth={2.6} />
           {row.statusLabel}
         </span>
-        <span className="shrink-0 text-[11px] text-cp-ink-4">
+        <span className="shrink-0 text-[13px] text-cp-ink-4">
           {isOk ? "cartera al día" : "pago vencido"}
         </span>
       </span>

@@ -1,7 +1,11 @@
 @import "@/styles/variables.scss";
 
+// Tarjeta de la vista (docs/DESIGN.md §3): blanca, radio 14, sin borde ni sombra.
 .banksView {
-    background-color: $white;
+    background-color: rgb(var(--cp-surface));
+    border: 0;
     border-radius: var(--card-radius);
+    box-shadow: none;
+    // Mismo aire que Saldos: la tabla por estados no va pegada al borde.
     padding: 1.5rem;
 }

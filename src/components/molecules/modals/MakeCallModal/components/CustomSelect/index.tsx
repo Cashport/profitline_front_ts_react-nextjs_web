@@ -49,7 +49,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 backgroundColor: "transparent"
               }}
               closeIcon={<X />}
-               onClose={handleRemove}
+              onClose={handleRemove}
             >
               {opt.name}
             </Tag>
@@ -67,7 +67,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               <Text style={{ fontSize: 14 }}>
                 {selectedOption ? selectedOption.name : option.data.value}
               </Text>
-              <Text style={{ fontSize: 10, color: "#14141452" }}>
+              <Text style={{ fontSize: 13, color: "#14141452" }}>
                 {selectedOption ? selectedOption.companyPosition : "Correo personalizado"}
               </Text>
             </Flex>

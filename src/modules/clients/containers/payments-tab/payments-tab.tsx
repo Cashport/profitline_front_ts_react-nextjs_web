@@ -168,8 +168,12 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
         />
       )}
       <div className="paymentsTab">
-        <Flex justify="space-between" className="paymentsTab__header clientStickyHeader">
-          <Flex gap={"0.5rem"}>
+        <Flex
+          justify="space-between"
+          align="center"
+          className="paymentsTab__header clientStickyHeader"
+        >
+          <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar"
@@ -178,7 +182,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
             <Button
               className="button__actions"
               size="large"
-              icon={<DotsThree size={"1.5rem"} />}
+              icon={<DotsThree size={18} />}
               disabled={false}
               onClick={() => setIsModalActionPaymentOpen(true)}
             >
@@ -188,7 +192,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
 
           <Button type="primary" className="identifiyPayment" onClick={handleOpenIdentifyPayment}>
             Identificar pago
-            <MagnifyingGlassPlus size={16} style={{ marginLeft: "0.5rem" }} />
+            <MagnifyingGlassPlus size={18} style={{ marginLeft: "0.5rem" }} />
           </Button>
         </Flex>
 

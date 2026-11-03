@@ -20,7 +20,7 @@ interface ReportViewerProps {
  */
 export default function ReportViewer({ title, html, isLoading, error }: ReportViewerProps) {
   return (
-    <div className="flex min-h-[calc(60*var(--vh))] flex-1 overflow-hidden rounded-2xl bg-card shadow-sm">
+    <div className="cp-card flex min-h-[calc(60*var(--vh))] flex-1 overflow-hidden">
       {html !== undefined ? (
         <iframe
           title={title}

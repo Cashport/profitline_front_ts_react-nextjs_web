@@ -65,7 +65,7 @@ function StateChip({ status }: { status?: ITowerSeries }) {
   if (!status) return null;
   return (
     <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded px-[7px] py-px text-[10.5px] font-semibold text-foreground"
+      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded px-[7px] py-px text-[13px] font-semibold text-foreground"
       style={{ background: withAlpha(status.color, 0.18) }}
     >
       <i className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: status.color }} />
@@ -93,7 +93,7 @@ function DaysCell({ a }: { a: ITowerAgreement }) {
       </StatusChip>
     );
   }
-  return <span className="text-[10.5px] text-muted-foreground">a tiempo</span>;
+  return <span className="text-[13px] text-muted-foreground">a tiempo</span>;
 }
 
 // El saldo va en rojo si ya venció sin pagarse completo.

@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Bot } from "lucide-react";
+import { Bot } from "lucide-react";
 import { Select as AntSelect } from "antd";
 
 import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
 import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
 
 import Header from "@/components/organisms/header";
-import { Card, CardContent } from "@/modules/chat/ui/card";
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 
@@ -28,14 +27,6 @@ export default function NoveltyAlertsView() {
   const searchParams = useSearchParams();
   const countryIdParam = searchParams.get("countryId");
   const clientIdParam = searchParams.get("clientId");
-
-  const handleGoBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/data-quality");
-    }
-  };
 
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
@@ -102,7 +93,11 @@ export default function NoveltyAlertsView() {
     setClientFilter("all");
   };
 
-  const { data: alertsResponse, isLoading, error } = useDataQualityAlerts(
+  const {
+    data: alertsResponse,
+    isLoading,
+    error
+  } = useDataQualityAlerts(
     currentPage,
     10,
     searchTerm || undefined,
@@ -119,136 +114,129 @@ export default function NoveltyAlertsView() {
   }, [searchTerm, typeFilter, countryFilter, clientFilter]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <Header title="Alertas y Novedades" />
+    <div className="cp-page">
+      <Header
+        title="Alertas y Novedades"
+        back="/data-quality"
+        actionsExtra={
+          <Button
+            variant="outline"
+            onClick={() => router.push("/data-quality/automations")}
+            className="whitespace-nowrap"
+          >
+            <Bot className="h-4 w-4 mr-1" />
+            Automatizaciones
+          </Button>
+        }
+      />
 
-      <Card className="p-0 border-none">
-        <CardContent className="pt-6">
-          {/* Compact Filters */}
-          <div className="mb-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-700 hover:text-gray-900"
-                onClick={handleGoBack}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Atrás
-              </Button>
-              {/* Search Input */}
-              <div className="flex-1 min-w-64">
-                <UiSearchInput
-                  placeholder="Buscar alertas..."
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              {/* Country Filter */}
-              <AntSelect
-                showSearch
-                optionFilterProp="label"
-                value={countryFilter}
-                onChange={handleCountryChange}
-                placeholder="Todos los países"
-                className="w-48"
-                style={{ minWidth: "12rem", height: "48px" }}
-                options={[
-                  { label: "Todos los países", value: "all" },
-                  ...filtersData.countries.map((country) => ({
-                    label: country.country_name,
-                    value: String(country.id)
-                  }))
-                ]}
+      <div className="cp-card px-[18px] py-[14px]">
+        {/* Compact Filters */}
+        <div className="mb-6">
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Search Input */}
+            <div className="flex-1 min-w-64">
+              <UiSearchInput
+                placeholder="Buscar alertas..."
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
+            </div>
 
-              {/* Client Filter */}
-              <AntSelect
-                showSearch
-                optionFilterProp="label"
-                value={clientFilter}
-                onChange={setClientFilter}
-                placeholder="Todos los clientes"
-                className="w-48"
-                style={{ minWidth: "12rem", height: "48px" }}
-                options={[
-                  { label: "Todos los clientes", value: "all" },
-                  ...visibleClients.map((client) => ({
-                    label: client.client_name,
-                    value: String(client.client_id)
-                  }))
-                ]}
-              />
+            {/* Country Filter */}
+            <AntSelect
+              showSearch
+              optionFilterProp="label"
+              value={countryFilter}
+              onChange={handleCountryChange}
+              placeholder="Todos los países"
+              className="w-48"
+              style={{ minWidth: "12rem", height: "var(--control-h)" }}
+              options={[
+                { label: "Todos los países", value: "all" },
+                ...filtersData.countries.map((country) => ({
+                  label: country.country_name,
+                  value: String(country.id)
+                }))
+              ]}
+            />
 
-              {/* Type Filter */}
-              <AntSelect
-                mode="multiple"
-                allowClear
-                value={typeFilter}
-                onChange={setTypeFilter}
-                placeholder="Todos los tipos"
-                className="w-48"
-                style={{ minWidth: "12rem", height: "48px" }}
-                options={filtersData.types.map((type) => ({ label: type, value: type }))}
-                maxTagCount="responsive"
-              />
+            {/* Client Filter */}
+            <AntSelect
+              showSearch
+              optionFilterProp="label"
+              value={clientFilter}
+              onChange={setClientFilter}
+              placeholder="Todos los clientes"
+              className="w-48"
+              style={{ minWidth: "12rem", height: "var(--control-h)" }}
+              options={[
+                { label: "Todos los clientes", value: "all" },
+                ...visibleClients.map((client) => ({
+                  label: client.client_name,
+                  value: String(client.client_id)
+                }))
+              ]}
+            />
 
-              {/* Clear Filters Button */}
-              {hasActiveFilters && (
-                <Button
-                  variant="outline"
-                  onClick={handleClearFilters}
-                  className="whitespace-nowrap h-12"
-                >
-                  Limpiar filtros
-                </Button>
-              )}
+            {/* Type Filter */}
+            <AntSelect
+              mode="multiple"
+              allowClear
+              value={typeFilter}
+              onChange={setTypeFilter}
+              placeholder="Todos los tipos"
+              className="w-48"
+              style={{ minWidth: "12rem", height: "var(--control-h)" }}
+              options={filtersData.types.map((type) => ({ label: type, value: type }))}
+              maxTagCount="responsive"
+            />
 
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
               <Button
                 variant="outline"
-                onClick={() => router.push("/data-quality/automations")}
-                className="ml-auto whitespace-nowrap h-12"
+                onClick={handleClearFilters}
+                className="whitespace-nowrap h-[var(--control-h)]"
               >
-                <Bot className="h-4 w-4 mr-1" />
-                Automatizaciones
+                Limpiar filtros
               </Button>
-            </div>
-          </div>
-
-          <AlertCategoryCards
-            categories={filtersData.categories}
-            activeKeys={activeKeys}
-            onCategoryClick={handleCategoryClick}
-          />
-
-          {/* Alerts Table */}
-          <div className="pt-6">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
-              Lista de Alertas y Novedades
-            </h3>
-            {error ? (
-              <div className="bg-white rounded-lg p-6 text-center">
-                <p className="text-red-600">
-                  {error instanceof Error
-                    ? error.message
-                    : "No se pudo cargar la información de alertas."}
-                </p>
-              </div>
-            ) : (
-              <AlertsTable
-                alerts={alerts}
-                isLoading={isLoading}
-                pagination={{
-                  current: currentPage,
-                  total: alertsData?.total ?? 0,
-                  pageSize: alertsData?.limit ?? 10
-                }}
-                onPageChange={setCurrentPage}
-              />
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <AlertCategoryCards
+          categories={filtersData.categories}
+          activeKeys={activeKeys}
+          onCategoryClick={handleCategoryClick}
+        />
+
+        {/* Alerts Table */}
+        <div className="pt-6">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
+            Lista de Alertas y Novedades
+          </h3>
+          {error ? (
+            <div className="bg-white rounded-lg p-6 text-center">
+              <p className="text-red-600">
+                {error instanceof Error
+                  ? error.message
+                  : "No se pudo cargar la información de alertas."}
+              </p>
+            </div>
+          ) : (
+            <AlertsTable
+              alerts={alerts}
+              isLoading={isLoading}
+              pagination={{
+                current: currentPage,
+                total: alertsData?.total ?? 0,
+                pageSize: alertsData?.limit ?? 10
+              }}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

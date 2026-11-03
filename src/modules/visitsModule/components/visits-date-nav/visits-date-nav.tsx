@@ -29,7 +29,7 @@ const fromPicker = (value: { valueOf(): number }) => dayjs(value.valueOf()).star
  */
 export default function VisitsDateNav({ day, today, onChange }: VisitsDateNavProps) {
   return (
-    <div className="flex h-12 items-stretch overflow-hidden rounded-lg border border-border bg-card">
+    <div className="flex h-[var(--control-h)] items-stretch overflow-hidden rounded-lg border border-border bg-card">
       <button
         type="button"
         aria-label="Día anterior"
@@ -51,7 +51,7 @@ export default function VisitsDateNav({ day, today, onChange }: VisitsDateNavPro
           variant="borderless"
           suffixIcon={null}
           aria-label="Elegir día"
-          className="w-[156px] [&_input]:!cursor-pointer [&_input]:!text-[12.5px] [&_input]:!font-medium"
+          className="w-[156px] [&_input]:!cursor-pointer [&_input]:!text-[13px] [&_input]:!font-medium"
         />
       </div>
 

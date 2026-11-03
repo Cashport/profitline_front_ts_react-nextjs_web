@@ -60,15 +60,19 @@ const ContactsTab = () => {
         </Flex>
       ) : (
         <div className="contactsTab">
-          <Flex justify="space-between" className="contactsTab__header">
-            <Flex gap={"0.5rem"}>
+          <Flex justify="space-between" align="center" className="contactsTab__header">
+            <Flex gap={"0.5rem"} align="center">
               <UiSearchInput className="standardSearch" placeholder="Buscar" />
-              <DotsDropdown items={items} />
+              <DotsDropdown
+                items={items}
+                dotsSize="18px"
+                customButtonStyle={{ height: "var(--control-h)", width: "var(--control-h)" }}
+              />
             </Flex>
 
             <Button type="primary" className="newContactButton" onClick={handleCreateNewContact}>
               Nuevo Contacto
-              <Plus size={16} style={{ marginLeft: "0.5rem" }} />
+              <Plus size={18} style={{ marginLeft: "0.5rem" }} />
             </Button>
           </Flex>
 

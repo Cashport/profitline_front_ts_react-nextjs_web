@@ -48,7 +48,7 @@ export default function ReportsTable({
             />
             <th
               scope="col"
-              className="border-b border-border bg-muted/40 px-3 py-2.5 text-right text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
+              className="border-b border-cp-line bg-cp-surface px-3 py-3 text-right text-[13.5px] font-semibold text-cp-ink"
             >
               Acciones
             </th>

@@ -13,7 +13,7 @@ const renderStatusBadge = (status: string, statusColor: string, _noveltyTypes: s
       className="text-white font-medium border-transparent"
       style={{
         backgroundColor: statusColor || "#B0BEC5",
-        fontSize: "12px",
+        fontSize: "13px",
         padding: "4px 12px",
         borderRadius: "8px"
       }}
@@ -145,13 +145,13 @@ export function ModalUploadInvoicesPurchaseOrders({
         <div className="overflow-auto max-h-[calc(65*var(--vh))]">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b-2 border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 w-44">OC</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">Cliente</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 w-36">Estado</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-700 w-36">Monto</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">No. Factura</th>
-                <th className="px-3 py-3 w-12 text-center font-semibold text-gray-700">PDF</th>
+              <tr className="border-b border-cp-line bg-cp-surface">
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-44">OC</th>
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">Cliente</th>
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-36">Estado</th>
+                <th className="text-right px-4 py-3 text-[13.5px] font-semibold text-cp-ink w-36">Monto</th>
+                <th className="text-left px-4 py-3 text-[13.5px] font-semibold text-cp-ink">No. Factura</th>
+                <th className="px-3 py-3 w-12 text-center text-[13.5px] font-semibold text-cp-ink">PDF</th>
                 <th className="px-3 py-3 w-10"></th>
               </tr>
             </thead>
@@ -176,8 +176,8 @@ export function ModalUploadInvoicesPurchaseOrders({
                       {rowIdx === 0
                         ? (() => {
                             const customerName =
-                              packages.find((p) => p.packageId === order.packageId)
-                                ?.customerName || "";
+                              packages.find((p) => p.packageId === order.packageId)?.customerName ||
+                              "";
                             return (
                               <div className="flex flex-col">
                                 <span className="truncate" title={customerName}>
@@ -185,7 +185,7 @@ export function ModalUploadInvoicesPurchaseOrders({
                                 </span>
                                 {order.deliveryAddress && (
                                   <span
-                                    className="text-xs text-gray-500 truncate"
+                                    className="text-[13px] text-gray-500 truncate"
                                     title={order.deliveryAddress}
                                   >
                                     {order.deliveryAddress}

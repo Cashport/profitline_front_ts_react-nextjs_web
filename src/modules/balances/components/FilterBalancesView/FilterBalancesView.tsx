@@ -107,7 +107,7 @@ export function FilterBalancesView({
       renderPanel: () => <BalancesDateTab value={dateDraft} onChange={setDateDraft} />,
       renderTag: () =>
         hasCommittedDate ? (
-          <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-xs">
+          <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-[13px]">
             <span className="text-muted-foreground font-medium">Fecha:</span>
             <span className="font-bold text-foreground">{dateTagValue}</span>
             <button

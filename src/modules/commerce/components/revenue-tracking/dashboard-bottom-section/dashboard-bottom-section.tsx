@@ -34,7 +34,7 @@ export function DashboardBottomSection() {
   const activeTabLabel = tabs.find((t) => t.id === activeTab)?.label;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-[var(--section-gap)]">
       <div className="flex justify-start">
         {isMobile ? (
           <div className="relative w-full">
@@ -81,7 +81,7 @@ export function DashboardBottomSection() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`px-6 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all relative tracking-wider ${
+                className={`px-6 py-2.5 text-[13px] sm:text-sm font-bold rounded-lg transition-all relative tracking-wider ${
                   activeTab === tab.id
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground/80"
@@ -99,7 +99,7 @@ export function DashboardBottomSection() {
 
       <div key={activeTab} className="animate-in fade-in duration-200">
         {activeTab === "gross-to-net" && (
-          <div className="bg-card border border-border rounded-2xl p-8 min-h-[400px] flex items-center justify-center text-muted-foreground">
+          <div className="cp-card px-[18px] py-[14px] min-h-[400px] flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <p className="text-xl font-medium mb-2">Gross to Net Analysis</p>
               <p className="text-sm">

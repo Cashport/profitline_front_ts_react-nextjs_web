@@ -2,7 +2,6 @@
 
 import { memo } from "react";
 import { Alert, Empty } from "antd";
-import { RotateCw } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
@@ -11,7 +10,7 @@ import { useCollectionTowerRefresh } from "@/hooks/useCollectionTowerRefresh";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { FOOT_NOTE } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
-import { fmtCutoff, fmtCutoffShort } from "../../utils/format";
+import HeaderCutoff from "@/components/ui/header-cutoff/header-cutoff";
 import AgingCard from "../aging-card/aging-card";
 import AgreementsChart from "../agreements-chart/agreements-chart";
 import AgreementsTable from "../agreements-table/agreements-table";
@@ -28,7 +27,7 @@ import UnappliedTable from "../unapplied-table/unapplied-table";
 
 /** Gráfico a la izquierda y su tabla a la derecha; una columna en pantallas angostas. */
 const PAIR =
-  "grid grid-cols-1 items-stretch gap-3.5 min-[1180px]:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]";
+  "grid grid-cols-1 items-stretch gap-[var(--card-gap)] min-[1180px]:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]";
 
 /**
  * Corte de la foto. Viene del API (mes cerrado: el último día a las 11:59 p. m.):
@@ -55,33 +54,16 @@ function Cutoff({
 }) {
   if (noProject) return null;
   const busy = refreshing || updating;
-  const label = canRegenerate ? "Actualizar ahora" : "Recargar";
+  // Recaudo no proyecta: solo corte y recargar (componente común con Clientes y Cartera).
   return (
-    // Igual que el corte del Home de Clientes: "● Corte 26/10 · 13:17 ↻" (fecha completa en el title).
-    <span
-      className="flex items-center gap-1.5"
-      title={cutoffAt ? `Corte ${fmtCutoff(cutoffAt)}` : undefined}
-    >
-      <span
-        className={cn("h-2 w-2 shrink-0 rounded-full", busy && "animate-pulse")}
-        style={{ background: busy ? "#f5b700" : "#9bb514" }}
-      />
-      {updating
-        ? "Actualizando…"
-        : cutoffAt
-          ? `Corte ${fmtCutoffShort(cutoffAt)}`
-          : "Cargando corte…"}
-      <button
-        type="button"
-        title={label}
-        aria-label={label}
-        disabled={busy}
-        onClick={onRefresh}
-        className="-my-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-cp-ink hover:bg-cp-line disabled:cursor-default disabled:opacity-50"
-      >
-        <RotateCw className={cn("h-[15px] w-[15px]", busy && "animate-spin")} />
-      </button>
-    </span>
+    <HeaderCutoff
+      cutoffAt={cutoffAt}
+      placeholder="Cargando corte…"
+      busy={busy}
+      busyLabel={updating ? "Actualizando…" : undefined}
+      onRefresh={onRefresh}
+      refreshLabel={canRegenerate ? "Reprocesar" : "Recargar"}
+    />
   );
 }
 
@@ -94,7 +76,7 @@ const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTow
     <>
       {/* Tres filas compartidas (encabezado, barra, leyenda): aplicación y tramos son
           subgrid y la tarjeta de recaudo las ocupa enteras; su sobrante va a la última. */}
-      <section className="grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)] min-[1180px]:grid-rows-[auto_auto_1fr]">
+      <section className="grid grid-cols-1 items-stretch gap-[var(--card-gap)] sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)] min-[1180px]:grid-rows-[auto_auto_1fr]">
         <GoalCard data={data} className="row-span-3 sm:col-span-2 min-[1180px]:col-span-1" />
         <ApplicationCard data={data} />
         <AgingCard data={data} />
@@ -109,7 +91,7 @@ const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTow
       </section>
       <ExecutivesTable data={data} />
       <UnappliedTable data={data} />
-      <p className="m-0 max-w-[120ch] text-[11px] leading-relaxed text-muted-foreground">
+      <p className="m-0 max-w-[120ch] text-[13px] leading-relaxed text-muted-foreground">
         {FOOT_NOTE}
       </p>
     </>
@@ -176,13 +158,18 @@ export default function TorreBoard() {
 
       {noProject && (
         <Empty
-          className="rounded-xl bg-card p-10 shadow-sm"
+          className="cp-card p-10"
           description="Elige un proyecto para ver la torre de control de recaudo."
         />
       )}
 
       {data ? (
-        <div className={cn("flex flex-col gap-3.5 transition-opacity", refreshing && "opacity-70")}>
+        <div
+          className={cn(
+            "flex flex-col gap-[var(--section-gap)] transition-opacity",
+            refreshing && "opacity-70"
+          )}
+        >
           <TorreContent data={data} />
         </div>
       ) : (

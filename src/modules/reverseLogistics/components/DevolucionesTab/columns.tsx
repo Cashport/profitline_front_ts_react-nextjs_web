@@ -46,7 +46,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     width: 160,
     render: (_: unknown, record) =>
       record.isGroup ? (
-        <span className="text-xs text-gray-400 font-normal whitespace-nowrap">
+        <span className="text-[13px] text-gray-400 font-normal whitespace-nowrap">
           {record.devCount} devs.
         </span>
       ) : (
@@ -62,7 +62,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
       return (
         <div>
           <div className="text-gray-700 text-sm">{date}</div>
-          {!record.isGroup && time && <div className="text-gray-400 text-xs">{time}</div>}
+          {!record.isGroup && time && <div className="text-gray-400 text-[13px]">{time}</div>}
         </div>
       );
     }
@@ -82,7 +82,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
             {record.cliente}
           </div>
           {ubicacion && (
-            <div className="text-xs text-gray-400 mt-0.5" title={ubicacion}>
+            <div className="text-[13px] text-gray-400 mt-0.5" title={ubicacion}>
               {ubicacion}
             </div>
           )}
@@ -126,7 +126,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
       const label = cs?.label;
       return cs ? (
         <span
-          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs whitespace-nowrap"
+          className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] whitespace-nowrap"
           style={{ backgroundColor: palette!.bg, color: palette!.text }}
         >
           {label}

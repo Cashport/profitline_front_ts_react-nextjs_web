@@ -53,7 +53,8 @@ const Header: FC<HeaderProps> = ({
         {titleNode ?? <h1 className={styles.title}>{title}</h1>}
         {titleExtra && <div className={styles.meta}>{titleExtra}</div>}
       </div>
-      <div className={styles.actions}>
+      {/* cp-on-page: los controles del header van sobre el gris (Filtrar, buscador → blancos). */}
+      <div className={`cp-on-page ${styles.actions}`}>
         {actionsExtra}
         <UserMenu />
       </div>

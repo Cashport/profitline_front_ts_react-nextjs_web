@@ -31,11 +31,11 @@ export default function BoardSelector() {
         key: b.id,
         label: (
           <span className="grid grid-cols-[1fr_16px] items-center gap-x-2.5 py-0.5">
-            <b className="text-[12.5px] font-semibold">{b.name}</b>
+            <b className="text-[13px] font-semibold">{b.name}</b>
             <Check
               className={cn("row-span-2 h-4 w-4 text-primary", b.id !== active.id && "invisible")}
             />
-            <small className="text-[11px] text-muted-foreground">{b.description}</small>
+            <small className="text-[13px] text-muted-foreground">{b.description}</small>
           </span>
         )
       }))
@@ -60,7 +60,7 @@ export default function BoardSelector() {
         <button
           type="button"
           aria-haspopup="menu"
-          className="-ml-1.5 flex cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-1.5 py-0 text-[23px] font-semibold leading-[1.15] text-cp-ink hover:bg-cp-muted"
+          className="-ml-1.5 flex cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-1.5 py-0 text-[18px] font-semibold leading-[1.2] text-cp-ink hover:bg-cp-muted"
         >
           {active.name}
           <ChevronDown className="h-5 w-5 text-cp-ink-3" />

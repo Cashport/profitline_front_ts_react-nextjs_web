@@ -3,7 +3,7 @@
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-[#999999]">{label}</span>
+      <span className="text-[13px] text-[#999999]">{label}</span>
       <span className="text-sm font-bold text-[#141414]">{value}</span>
     </div>
   );
@@ -44,7 +44,7 @@ export default function ProductInfoSection({
           <Field label="Precio base" value={precioBase} />
           <Field label="Lotes" value={String(lotesCount)} />
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-[#999999]">Visible en Marketplace</span>
+            <span className="text-[13px] text-[#999999]">Visible en Marketplace</span>
             <button
               onClick={onToggleActivo}
               className={`w-10 h-5 rounded-full transition-colors relative mt-0.5 ${

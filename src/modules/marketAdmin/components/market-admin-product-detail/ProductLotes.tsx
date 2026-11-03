@@ -27,7 +27,7 @@ export default function ProductLotes({ lotes, loading = false }: Props) {
       <div className="flex items-center justify-between mb-3">
         <p className="text-base font-bold text-[#141414]">Lotes</p>
         {!loading && (
-          <span className="text-xs text-[#999999]">
+          <span className="text-[13px] text-[#999999]">
             {lotes.length} lote{lotes.length !== 1 ? "s" : ""}
           </span>
         )}
@@ -40,10 +40,10 @@ export default function ProductLotes({ lotes, loading = false }: Props) {
       ) : (
         <div>
           <div className={`${gridCols} pb-2`}>
-            <span className="text-xs font-bold text-[#141414]">Lote</span>
-            <span className="text-xs font-bold text-[#141414]">Bodega</span>
-            <span className="text-xs font-bold text-[#141414]">Vence</span>
-            <span className="text-xs font-bold text-[#141414] text-right">Unidades</span>
+            <span className="text-[13px] font-bold text-[#141414]">Lote</span>
+            <span className="text-[13px] font-bold text-[#141414]">Bodega</span>
+            <span className="text-[13px] font-bold text-[#141414]">Vence</span>
+            <span className="text-[13px] font-bold text-[#141414] text-right">Unidades</span>
           </div>
           {lotes.map((lote) => (
             <div

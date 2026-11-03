@@ -99,10 +99,10 @@ export default function PremiosEditor({
           <span className="w-5 h-5 rounded-full bg-[#E8F5C0] flex items-center justify-center">
             <Gift size={10} className="text-[#6AB000]" />
           </span>
-          <p className="text-xs font-semibold text-[#141414]">Regalos</p>
+          <p className="text-[13px] font-semibold text-[#141414]">Regalos</p>
         </div>
         {nivel.premios.length > 1 && (
-          <span className="text-[10px] text-[#999999] bg-[#F0F0F0] px-2 py-0.5 rounded-full">
+          <span className="text-[13px] text-[#999999] bg-[#F0F0F0] px-2 py-0.5 rounded-full">
             El cliente elige una opción
           </span>
         )}
@@ -115,11 +115,11 @@ export default function PremiosEditor({
             <div className="flex items-center justify-between px-3 py-2 bg-[#F7FDE8] border-b border-[#E8F5C0]">
               <div className="flex items-center gap-2">
                 {nivel.premios.length > 1 && (
-                  <span className="w-5 h-5 rounded bg-[#CBE71E] flex items-center justify-center text-[10px] font-bold text-[#141414]">
+                  <span className="w-5 h-5 rounded bg-[#CBE71E] flex items-center justify-center text-[13px] font-bold text-[#141414]">
                     {getLetra(prIdx)}
                   </span>
                 )}
-                <span className="text-[11px] font-medium text-[#141414]">
+                <span className="text-[13px] font-medium text-[#141414]">
                   {nivel.premios.length > 1 ? `Opción ${getLetra(prIdx)}` : "Regalo"}
                 </span>
               </div>
@@ -150,14 +150,14 @@ export default function PremiosEditor({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => addGrupoToPremio(pr.id, "fijo")}
-                  className="flex items-center gap-1 text-[10px] text-[#666666] hover:text-[#141414] hover:underline"
+                  className="flex items-center gap-1 text-[13px] text-[#666666] hover:text-[#141414] hover:underline"
                 >
                   <Plus size={9} /> Agregar grupo fijo
                 </button>
                 <span className="text-[#DDDDDD]">|</span>
                 <button
                   onClick={() => addGrupoToPremio(pr.id, "pool")}
-                  className="flex items-center gap-1 text-[10px] text-[#92400E] hover:underline"
+                  className="flex items-center gap-1 text-[13px] text-[#92400E] hover:underline"
                 >
                   <Plus size={9} /> Agregar grupo a elegir
                 </button>
@@ -167,7 +167,7 @@ export default function PremiosEditor({
         ))}
         <button
           onClick={addPremio}
-          className="flex items-center gap-1.5 text-xs text-[#6AB000] hover:underline w-fit"
+          className="flex items-center gap-1.5 text-[13px] text-[#6AB000] hover:underline w-fit"
         >
           <Plus size={11} /> Agregar opción de regalo
         </button>

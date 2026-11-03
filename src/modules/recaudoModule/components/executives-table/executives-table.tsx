@@ -181,7 +181,7 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
                 }
                 goal={{ value: r.goal }}
               />
-              <div className="flex justify-between text-[10.5px] font-normal tabular-nums text-muted-foreground">
+              <div className="flex justify-between text-[13px] font-normal tabular-nums text-muted-foreground">
                 <b className="font-bold">{pct(compliance, 0)} cumplido</b>
                 <span>
                   →{" "}
@@ -234,7 +234,7 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
       </td>
       <td className={cn(td, "text-right")}>
         {!isFinite(agreementsCompliance) ? (
-          <span className="text-[10.5px] font-normal text-muted-foreground">—</span>
+          <span className="text-[13px] font-normal text-muted-foreground">—</span>
         ) : isTotal ? (
           chip
         ) : (
@@ -311,7 +311,7 @@ export default function ExecutivesTable({ data }: { data: ICollectionTower }) {
         </>
       }
     >
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[10.5px] text-foreground/80">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px] text-foreground/80">
         <LegendItem mark={<Swatch color={collected.color} />} label="Recaudado" />
         <LegendItem mark={<Swatch color={pendingAgreements.color} />} label="Acuerdos vigentes" />
         <LegendItem mark={<Swatch color={FORECAST} outline />} label="Forecast" />

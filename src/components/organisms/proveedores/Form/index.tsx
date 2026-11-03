@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import { useForm } from "react-hook-form";
-import { Table, Flex, Button, Typography } from "antd";
-import { CaretLeft } from "phosphor-react";
+import { Table, Flex } from "antd";
 import { FieldError } from "react-hook-form";
 
 import { fetcher } from "@/utils/api/api";
@@ -12,9 +11,9 @@ import { extractSingleParam } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
 
 import DrawerComponent from "../components/DrawerComponent/DrawerComponent";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { columns } from "./columns";
-import Container from "@/components/atoms/Container/Container";
+import Header from "@/components/organisms/header";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ModalGenerateAction } from "../components/ModalGenerateAction";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -27,8 +26,6 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import { Document, FormField, Props, ApiResponse, IOption, UserType } from "./types";
 
 import "./form.scss";
-
-const { Text } = Typography;
 
 const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const {
@@ -44,7 +41,6 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const { showMessage } = useMessageApi();
 
   const params = useParams();
-  const router = useRouter();
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDocumentRows, setSelectedDocumentRows] = useState<Document[]>();
@@ -66,7 +62,6 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     setIsModalOpen({
       selected: modalNumber
     });
-  const handleGoBack = () => router.back();
 
   const supplierId = extractSingleParam(params?.id);
 
@@ -178,30 +173,19 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
 
   const tableColumns = columns({ handleOpenDrawer, setSelectedDocument });
 
-  const getHeaderTitle = () => {
+  // Header compartido (docs/DESIGN.md §4) con "‹" de detalle. En auto gestión (cliente) el
+  // header lo pone el layout de la ruta.
+  const getHeader = () => {
+    const actions = <GenerateActionButton onClick={() => handleOpenModal(1)} />;
     switch (userType) {
       case UserType.ADMIN:
-        return (
-          <Flex justify="space-between" align="center">
-            <Button type="text" onClick={handleGoBack} icon={<CaretLeft size={"1.3rem"} />}>
-              <Text strong>{`Ver Proveedores`}</Text>
-            </Button>
-            <GenerateActionButton onClick={() => handleOpenModal(1)} />
-          </Flex>
-        );
+        return <Header title="Proveedor" back="/proveedores" actionsExtra={actions} />;
       case UserType.CLIENT:
-        return <></>;
+        return null;
       case UserType.APPROVER:
-        return (
-          <Flex justify="space-between" align="center">
-            <Button type="text" onClick={handleGoBack} icon={<CaretLeft size={"1.3rem"} />}>
-              <Text strong>Nuevo proveedor</Text>
-            </Button>
-            <GenerateActionButton onClick={() => handleOpenModal(1)} />
-          </Flex>
-        );
+        return <Header title="Nuevo proveedor" back="/proveedores" actionsExtra={actions} />;
       default:
-        return "Nuevo proveedor";
+        return <Header title="Nuevo proveedor" />;
     }
   };
 
@@ -233,9 +217,10 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   };
 
   return (
-    <div>
-      <Container style={{ gap: 24 }}>
-        {getHeaderTitle()}
+    <div className="cp-page">
+      {getHeader()}
+      {/* Tarjeta compartida (docs/DESIGN.md §3). */}
+      <div className="cp-card flex flex-col gap-6 px-[18px] py-[14px]">
         <Flex vertical gap={16}>
           <h3>Información General</h3>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -253,7 +238,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
             rowSelection={rowSelection}
           />
         </Flex>
-      </Container>
+      </div>
       <DrawerComponent
         visible={drawerVisible}
         onClose={handleCloseDrawer}
