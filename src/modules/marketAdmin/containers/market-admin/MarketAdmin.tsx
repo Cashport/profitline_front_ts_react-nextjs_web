@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Chats } from "@phosphor-icons/react";
 import Header from "@/components/organisms/header";
+import { useAppStore } from "@/lib/store/store";
 
 type Section = {
   href: string;
@@ -81,7 +82,19 @@ const sections: Section[] = [
   }
 ];
 
+const superAdminSections: Section[] = [
+  {
+    href: "/plataforma/roles",
+    icon: ShieldCheck,
+    label: "Roles y permisos",
+    description: "Solo Profitline: roles por proyecto, qué puede hacer cada rol y su catálogo."
+  }
+];
+
 export default function MarketAdmin() {
+  const isSuperAdmin = useAppStore((s) => Boolean(s.selectedProject?.isSuperAdmin));
+  const visibleSections = isSuperAdmin ? [...sections, ...superAdminSections] : sections;
+
   return (
     <div className="cp-page min-h-full">
       <Header title="Administración" />
