@@ -13,13 +13,30 @@ import PanelDetalleCargue from "@/modules/marketAdmin/components/market-admin-lo
 import ModalNuevoEtl, {
   NuevoEtlFormValues
 } from "@/modules/marketAdmin/components/market-admin-load/ModalNuevoEtl";
+import ModalValidacionCargue from "@/modules/marketAdmin/components/market-admin-load/ModalValidacionCargue";
+import ModalErroresCargue from "@/modules/marketAdmin/components/market-admin-load/ModalErroresCargue";
 import {
   getProfitLoaderTimelineKey,
   useProfitLoaders
 } from "@/modules/marketAdmin/hooks/useProfitLoaders";
-import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
+import {
+  getLoaderValidations,
+  saveLoaderValidations,
+  uploadProfitLoaderFile
+} from "@/services/marketAdmin/marketAdmin";
+import { ModalLoaderValidations } from "@/components/molecules/modals/ModalIntakeStructure/ModalLoaderValidations";
+import {
+  IColumnProfile,
+  ILoaderValidationConfig,
+  IValidationsRequired
+} from "@/types/dataQuality/IIntakeStructure";
+import { useIntakeStructureUpload } from "@/components/molecules/modals/ModalIntakeStructure/useIntakeStructureUpload";
 import { useMessageApi } from "@/context/MessageContext";
-import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+import {
+  IProfitLoader,
+  IProfitLoaderTimelineItem,
+  IProfitLoaderUploadResult
+} from "@/types/marketAdmin/IMarketAdmin";
 import Header from "@/components/organisms/header";
 
 dayjs.extend(utc);
@@ -35,8 +52,93 @@ export default function MarketAdminLoad() {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [analysisModal, setAnalysisModal] = useState<{
+    loaderId: number;
+    analysisId: number;
+    loaderName: string | null;
+    templateUrl?: string;
+  } | null>(null);
+  const [errorsModal, setErrorsModal] = useState<{
+    loaderId: number;
+    item: IProfitLoaderTimelineItem;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<number | null>(null);
+  const { runUpload, structureModals } = useIntakeStructureUpload();
+  const [validationsModal, setValidationsModal] = useState<{
+    loaderId: number;
+    loaderName: string | null;
+    fileName: string | null;
+    initial: ILoaderValidationConfig;
+    profiles?: IColumnProfile[];
+    mode: "upload" | "edit";
+    // eslint-disable-next-line no-unused-vars
+    resolve?: (saved: boolean) => void;
+  } | null>(null);
+
+  // 409 VALIDATIONS_REQUIRED: abre el asistente y espera a que se guarde.
+  const askValidations = (loaderId: number, fileName: string) => (data: IValidationsRequired) =>
+    new Promise<boolean>((resolve) => {
+      setValidationsModal({
+        loaderId,
+        loaderName: data.loader_name,
+        fileName,
+        initial: data.suggestion,
+        profiles: data.columns,
+        mode: "upload",
+        resolve
+      });
+    });
+
+  const closeValidations = (saved: boolean) => {
+    validationsModal?.resolve?.(saved);
+    setValidationsModal(null);
+  };
+
+  const handleSaveValidations = async (config: ILoaderValidationConfig) => {
+    if (!validationsModal) return;
+    await saveLoaderValidations(validationsModal.loaderId, config);
+    if (validationsModal.mode === "edit") {
+      showMessage("success", "Validaciones guardadas.");
+    }
+    closeValidations(true);
+  };
+
+  const openValidationsEditor = async (loader: IProfitLoader) => {
+    try {
+      const data = await getLoaderValidations(loader.id);
+      if (!data.has_template) {
+        showMessage(
+          "info",
+          "Este ETL todavía no tiene template: carga un archivo para crearlo y definir sus validaciones."
+        );
+        return;
+      }
+      setValidationsModal({
+        loaderId: loader.id,
+        loaderName: loader.display_name,
+        fileName: null,
+        mode: "edit",
+        initial: data.config ?? {
+          window: 6,
+          row_count: { tolerance_pct: 10, severity: "warning" },
+          columns: data.template_columns.map((name) => ({
+            name,
+            type: "any",
+            required: false,
+            calc: "none",
+            tolerance_pct: 5,
+            severity: "warning"
+          }))
+        }
+      });
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "No se pudieron leer las validaciones."
+      );
+    }
+  };
 
   const { showMessage } = useMessageApi();
 
@@ -51,6 +153,42 @@ export default function MarketAdminLoad() {
     fileInputRef.current?.click();
   };
 
+  const uploadFile = async (targetId: number, file: File) => {
+    setUploadingId(targetId);
+    try {
+      let result: IProfitLoaderUploadResult | undefined;
+      const uploaded = await runUpload(
+        async (useAsTemplate) => {
+          result = await uploadProfitLoaderFile(targetId, file, useAsTemplate);
+        },
+        { onValidationsRequired: askValidations(targetId, file.name) }
+      );
+      if (!uploaded) return;
+      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
+      // Cartera: validar -> justificar -> confirmar antes de aplicar el archivo.
+      if (result?.requires_analysis && result.analysis_id) {
+        const loader = loaders?.find((l) => l.id === targetId);
+        setAnalysisModal({
+          loaderId: targetId,
+          analysisId: result.analysis_id,
+          loaderName: loader?.display_name ?? null,
+          templateUrl: loader?.url_s3_template
+        });
+        return;
+      }
+      // La carga es asincrona: el loader valida el contenido y procesa despues;
+      // el resultado aparece en el historial de cargues.
+      showMessage(
+        "success",
+        `Archivo "${file.name}" recibido. Se está validando y procesando; revisa el resultado en el historial.`
+      );
+    } catch (error) {
+      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const targetId = uploadTargetRef.current;
@@ -58,17 +196,37 @@ export default function MarketAdminLoad() {
     e.target.value = "";
     uploadTargetRef.current = null;
     if (!file || !targetId) return;
+    await uploadFile(targetId, file);
+  };
 
-    setUploadingId(targetId);
-    try {
-      await uploadProfitLoaderFile(targetId, file);
-      showMessage("success", `Archivo "${file.name}" cargado correctamente.`);
-      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
-    } catch (error) {
-      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
-    } finally {
-      setUploadingId(null);
+  const closeAnalysis = () => {
+    const loaderId = analysisModal?.loaderId;
+    setAnalysisModal(null);
+    if (loaderId) {
+      mutate();
+      globalMutate(getProfitLoaderTimelineKey(loaderId));
     }
+  };
+
+  const openLoadDetail = (loader: IProfitLoader, item: IProfitLoaderTimelineItem) => {
+    if (item.analysis_id) {
+      setAnalysisModal({
+        loaderId: loader.id,
+        analysisId: item.analysis_id,
+        loaderName: loader.display_name,
+        templateUrl: loader.url_s3_template
+      });
+      return;
+    }
+    setErrorsModal({ loaderId: loader.id, item });
+  };
+
+  const uploadCorrected = (file?: File) => {
+    const loaderId = analysisModal?.loaderId;
+    closeAnalysis();
+    if (!loaderId) return;
+    if (file) uploadFile(loaderId, file);
+    else triggerUpload(loaderId);
   };
 
   const descargarTemplate = (loader: IProfitLoader) => {
@@ -215,12 +373,44 @@ export default function MarketAdminLoad() {
         onClose={() => setDetailId(null)}
         onUpload={triggerUpload}
         onDownloadTemplate={descargarTemplate}
+        onEditValidations={openValidationsEditor}
+        onOpenDetail={openLoadDetail}
+      />
+
+      <ModalErroresCargue
+        open={!!errorsModal}
+        loaderId={errorsModal?.loaderId ?? null}
+        item={errorsModal?.item ?? null}
+        onClose={() => setErrorsModal(null)}
+      />
+
+      <ModalValidacionCargue
+        open={!!analysisModal}
+        loaderId={analysisModal?.loaderId ?? null}
+        analysisId={analysisModal?.analysisId ?? null}
+        loaderName={analysisModal?.loaderName ?? null}
+        templateUrl={analysisModal?.templateUrl}
+        onClose={closeAnalysis}
+        onUploadCorrected={uploadCorrected}
       />
 
       <ModalNuevoEtl
         open={showCreate}
         onClose={() => setShowCreate(false)}
         onSend={handleCreateEtl}
+      />
+
+      {structureModals}
+
+      <ModalLoaderValidations
+        open={!!validationsModal}
+        loaderName={validationsModal?.loaderName}
+        fileName={validationsModal?.fileName}
+        initial={validationsModal?.initial ?? null}
+        profiles={validationsModal?.profiles}
+        mode={validationsModal?.mode ?? "upload"}
+        onSave={handleSaveValidations}
+        onCancel={() => closeValidations(false)}
       />
     </div>
   );

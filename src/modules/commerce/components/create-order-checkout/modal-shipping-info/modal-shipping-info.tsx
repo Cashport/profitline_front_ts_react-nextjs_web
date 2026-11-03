@@ -18,7 +18,7 @@ import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import CitiesSelect from "@/modules/commerce/components/cities-select";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
-import { useCityWarehouse } from "@/app/comercio/pedido/hooks/useCityWarehouses";
+import { useCityWarehouse } from "@/app/(platform)/comercio/pedido/hooks/useCityWarehouses";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";

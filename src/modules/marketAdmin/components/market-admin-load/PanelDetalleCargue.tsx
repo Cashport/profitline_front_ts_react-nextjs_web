@@ -2,13 +2,21 @@
 
 import { useEffect } from "react";
 import { Spin } from "antd";
-import { ChevronsRight, Download, FileSpreadsheet, Info, Upload } from "lucide-react";
+import {
+  ChevronsRight,
+  Download,
+  FileSearch,
+  FileSpreadsheet,
+  Info,
+  ShieldCheck,
+  Upload
+} from "lucide-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import {
   useProfitLoader,
   useProfitLoaderTimeline
 } from "@/modules/marketAdmin/hooks/useProfitLoaders";
-import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+import { IProfitLoader, IProfitLoaderTimelineItem } from "@/types/marketAdmin/IMarketAdmin";
 import { EstadoPill, formatDateTime, statusColorClasses } from "./dataLoadUtils";
 
 type Props = {
@@ -18,7 +26,17 @@ type Props = {
   onClose: () => void;
   onUpload: (id: number) => void;
   onDownloadTemplate: (loader: IProfitLoader) => void;
+  /** Abre el asistente de validaciones de contenido del ETL. */
+  onEditValidations?: (loader: IProfitLoader) => void;
+  /** Detalle de un cargue: su validación de cartera o sus errores. */
+  onOpenDetail?: (loader: IProfitLoader, item: IProfitLoaderTimelineItem) => void;
 };
+
+const hasDetail = (item: IProfitLoaderTimelineItem) =>
+  !!item.analysis_id ||
+  item.error_count > 0 ||
+  item.status === "ERROR" ||
+  item.status === "PARTIAL_SUCCESS";
 
 const sectionLabelClass = "text-[13px] font-semibold text-[#999999] mb-1";
 const iconButtonClass =
@@ -30,7 +48,9 @@ export default function PanelDetalleCargue({
   isUploading,
   onClose,
   onUpload,
-  onDownloadTemplate
+  onDownloadTemplate,
+  onEditValidations,
+  onOpenDetail
 }: Props) {
   const { loader, isLoading: loadingLoader } = useProfitLoader(open ? loaderId : null);
   const { timeline, isLoading: loadingTimeline } = useProfitLoaderTimeline(open ? loaderId : null);
@@ -132,6 +152,15 @@ export default function PanelDetalleCargue({
                 >
                   <Download size={14} /> Template
                 </button>
+                {onEditValidations && (
+                  <button
+                    type="button"
+                    onClick={() => onEditValidations(loader)}
+                    className="flex items-center justify-center gap-1.5 flex-1 px-4 py-2 rounded-lg text-sm font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
+                  >
+                    <ShieldCheck size={14} /> Validaciones
+                  </button>
+                )}
                 {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
                 <div className="h-10 flex-1">
                   <PrincipalButton
@@ -175,6 +204,18 @@ export default function PanelDetalleCargue({
                           </span>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             <EstadoPill label={item.label} color={item.color} />
+                            {onOpenDetail && hasDetail(item) && (
+                              <button
+                                type="button"
+                                onClick={() => onOpenDetail(loader, item)}
+                                title={
+                                  item.analysis_id ? "Ver validación del cargue" : "Ver errores"
+                                }
+                                className={iconButtonClass}
+                              >
+                                <FileSearch size={13} />
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => window.open(item.s3_url, "_blank")}
