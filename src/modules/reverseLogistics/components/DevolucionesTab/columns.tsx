@@ -8,9 +8,14 @@ import { CausalBadge } from "../CausalBadge/CausalBadge";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 import Link from "next/link";
 
+// Estado "Finalizado" de Pharma360 (logistica.Estados). Solo las finalizadas
+// tienen acta, y el detalle (ConsultarDevolucionesPdf) falla para el resto.
+const ESTADO_FINALIZADO = "7664364A-7228-4C88-87EC-676CAD88871D";
+
 // Per-row action buttons. `record.idDevolucion` is the GUID the devolución
 // detail (/logistica-inversa/devoluciones/:id) is loaded with.
 function ActionsCell({ record }: { record: ReturnRow }) {
+  const finalizada = record.IdEstado?.toUpperCase() === ESTADO_FINALIZADO;
   return (
     <div className="flex items-center gap-1">
       {record.pdfUrl ? (
@@ -23,7 +28,7 @@ function ActionsCell({ record }: { record: ReturnRow }) {
           <FileText className="h-3.5 w-3.5" />
         </button>
       ) : null}
-      {record.idDevolucion ? (
+      {record.idDevolucion && finalizada ? (
         <Link
           href={`/logistica-inversa/devoluciones/${record.idDevolucion}`}
           type="button"
