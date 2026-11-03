@@ -42,3 +42,20 @@ export const createComponent = async (
   );
   return response.data;
 };
+
+export const UNREGISTERED_ROUTES_KEY = "/role/admin/unregistered";
+
+export const registerEndpoint = async (input: {
+  route: string;
+  method: string;
+  path: string;
+  component_id: number;
+}): Promise<{ endpoint_id: number; route: string; method: string; path: string }> => {
+  const response: GenericResponse<{
+    endpoint_id: number;
+    route: string;
+    method: string;
+    path: string;
+  }> = await API.post(`${config.API_HOST}/role/admin/endpoints`, input);
+  return response.data;
+};
