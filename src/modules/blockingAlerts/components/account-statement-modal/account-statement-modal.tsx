@@ -8,17 +8,22 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import UiTab from "@/components/ui/ui-tab";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
+import { sendDigitalRecord } from "@/services/accountingAdjustment/accountingAdjustment";
+import { downloadDigitalRecordFiles } from "@/services/chat/clients";
 import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 import { cn } from "@/utils/utils";
 
 import { MOBILE_TABS } from "../../constants";
+import { useStatementContacts } from "../../hooks/use-blocking-alert-contacts";
 import { fmtDay, plural } from "../../utils/blocking-alerts";
 import AlertModal from "../alert-modal/alert-modal";
+import RecipientsField, { useRecipients } from "../recipients-field/recipients-field";
 
 type StatementFormat = "pdf" | "xlsx";
 type StatementMode = "download" | "email";
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** El estado de cuenta lo genera el servicio de comunicaciones, en ambos formatos. */
+const FILE_OF: Record<StatementFormat, RegExp> = { pdf: /\.pdf$/i, xlsx: /\.xlsx?$/i };
 
 const FIELD_LABEL =
   "w-12 shrink-0 text-[12px] font-medium text-cp-ink-4 max-md:w-11 max-md:text-[11px]";
@@ -30,15 +35,18 @@ interface AccountStatementModalProps {
   onClose: () => void;
 }
 
-/** Estado de cuenta: qué incluir, formato y si se descarga o se envía por correo. */
+/**
+ * Estado de cuenta del cliente (también desde un punto de venta): se descarga en el
+ * formato elegido o se envía por correo. Las secciones aún no filtran el documento.
+ */
 export default function AccountStatementModal({ detail, onClose }: AccountStatementModalProps) {
   const formatMoney = useAppStore((s) => s.formatMoney);
   const { showMessage } = useMessageApi();
-  const [excluded, setExcluded] = useState<string[]>([]);
   const [format, setFormat] = useState<StatementFormat>("pdf");
   const [mode, setMode] = useState<StatementMode>("download");
-  const [to, setTo] = useState("");
-  const [cc, setCc] = useState("");
+  const [sending, setSending] = useState(false);
+  const contacts = useStatementContacts(detail.client.clientUuid);
+  const [to, setTo] = useRecipients(contacts.emails);
 
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
   const { all, past_due: pastDue, balances, credit_notes: creditNotes } = detail.tabs;
@@ -66,10 +74,11 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
     }
   ];
 
-  const included = sections.length - excluded.length;
   const ext = format === "pdf" ? "PDF" : "Excel";
-  const badEmail = mode === "email" && to.trim() !== "" && !EMAIL.test(to.trim());
-  const ready = included > 0 && (mode === "download" || EMAIL.test(to.trim()));
+  const ready = mode === "download" || to.length > 0;
+  const subject =
+    contacts.subject ||
+    `Estado de cuenta · ${detail.name} · corte ${fmtDay(detail.cutoffAt, true)}`;
   // "estado_cuenta_oxxo_colombia.xlsx": nombre sin tildes ni símbolos.
   const fileName = `estado_cuenta_${detail.name
     .normalize("NFD")
@@ -78,14 +87,37 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "")}.${format}`;
 
-  const submit = () => {
-    showMessage(
-      "success",
-      mode === "download"
-        ? `Descargando el estado de cuenta de ${detail.name} (${ext})`
-        : `Estado de cuenta enviado a ${to.trim()}`
-    );
-    onClose();
+  const submit = async () => {
+    const { clientUuid } = detail.client;
+    setSending(true);
+    try {
+      if (mode === "download") {
+        const files = await downloadDigitalRecordFiles(clientUuid);
+        const file = files?.find((f) => FILE_OF[format].test(f.fileName));
+        if (!file) {
+          showMessage("warning", `No hay estado de cuenta en ${ext} para descargar`);
+          return;
+        }
+        window.open(file.url, "_blank");
+        showMessage("success", `Descargando el estado de cuenta de ${detail.client.name} (${ext})`);
+      } else {
+        await sendDigitalRecord(clientUuid, {
+          forward_to: to.map((email) => ({ label: email, value: email })),
+          subject
+        });
+        showMessage("success", `Estado de cuenta enviado a ${to.join(", ")}`);
+      }
+      onClose();
+    } catch {
+      showMessage(
+        "error",
+        mode === "download"
+          ? "No se pudo descargar el estado de cuenta"
+          : "No se pudo enviar el estado de cuenta"
+      );
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -93,35 +125,28 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
       <div className="flex flex-col gap-2">
         <span className={SECTION_LABEL}>Incluir en el estado de cuenta</span>
         <div className="flex flex-col gap-2">
-          {sections.map((s) => {
-            const on = !excluded.includes(s.key);
-            return (
-              <label
-                key={s.key}
-                className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-[10px] border px-3 py-2 max-md:py-1.5",
-                  on ? "border-cp-lime-dark" : "border-cp-line-2"
-                )}
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-semibold max-md:text-[12.5px]">
-                    {s.label}
-                  </span>
-                  <span className="block truncate text-[12px] text-cp-ink-3 max-md:text-[11px]">
-                    {s.meta}
-                  </span>
+          {sections.map((s) => (
+            <label
+              key={s.key}
+              className="flex items-center gap-3 rounded-[10px] border border-cp-lime-dark px-3 py-2 max-md:py-1.5"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-[13px] font-semibold max-md:text-[12.5px]">
+                  {s.label}
                 </span>
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 shrink-0 cursor-pointer accent-cp-lime"
-                  checked={on}
-                  onChange={() =>
-                    setExcluded(on ? [...excluded, s.key] : excluded.filter((k) => k !== s.key))
-                  }
-                />
-              </label>
-            );
-          })}
+                <span className="block truncate text-[12px] text-cp-ink-3 max-md:text-[11px]">
+                  {s.meta}
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                className="h-4 w-4 shrink-0 accent-cp-lime"
+                checked
+                disabled
+                readOnly
+              />
+            </label>
+          ))}
         </div>
       </div>
 
@@ -183,31 +208,30 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
       {mode === "email" && (
         <div className="flex flex-col gap-2">
           <div className="rounded-[14px] border border-cp-line bg-cp-bg px-3 py-1">
-            {[
-              { label: "Para", value: to, onChange: setTo, placeholder: "correo@cliente.com" },
-              { label: "CC", value: cc, onChange: setCc, placeholder: "Opcional" }
-            ].map((field) => (
-              <label
-                key={field.label}
-                className="flex min-h-[44px] items-center gap-2.5 border-b border-cp-line max-md:min-h-[38px]"
-              >
-                <span className={FIELD_LABEL}>{field.label}</span>
-                <Input
-                  type="email"
-                  variant="borderless"
-                  aria-label={field.label}
-                  placeholder={field.placeholder}
-                  status={field.label === "Para" && badEmail ? "error" : undefined}
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  className="!px-0 !text-[13px] max-md:!text-[12.5px]"
-                />
-              </label>
-            ))}
+            <RecipientsField
+              kind="email"
+              manual
+              options={contacts.emails}
+              value={to}
+              onChange={setTo}
+              loading={contacts.isLoading}
+              placeholder="correo@cliente.com"
+              className="border-b border-cp-line"
+            />
+            <label className="flex min-h-[44px] items-center gap-2.5 border-b border-cp-line max-md:min-h-[38px]">
+              <span className={FIELD_LABEL}>CC</span>
+              <Input
+                disabled
+                variant="borderless"
+                aria-label="CC"
+                placeholder="Opcional"
+                className="!px-0 !text-[13px] max-md:!text-[12.5px]"
+              />
+            </label>
             <div className="flex items-start gap-2.5 py-3 max-md:py-2">
               <span className={FIELD_LABEL}>Asunto</span>
               <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-cp-ink max-md:text-[12px]">
-                Estado de cuenta · {detail.name} · corte {fmtDay(detail.cutoffAt, true)}
+                {subject}
               </span>
             </div>
           </div>
@@ -220,25 +244,17 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
             </span>
             <span className="shrink-0 text-[11px] text-cp-ink-4">Adjunto</span>
           </div>
-          {badEmail && (
-            <span className="text-[12px] text-cp-red max-md:text-[11.5px]">
-              Escribe un correo válido para enviar.
-            </span>
-          )}
         </div>
       )}
 
       <PrincipalButton
         fullWidth
         disabled={!ready}
+        loading={sending}
         icon={mode === "download" ? <Download className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
         onClick={submit}
       >
-        {!included
-          ? "Elige qué incluir"
-          : mode === "download"
-            ? `Descargar estado de cuenta · ${ext}`
-            : "Enviar estado de cuenta"}
+        {mode === "download" ? `Descargar estado de cuenta · ${ext}` : "Enviar estado de cuenta"}
       </PrincipalButton>
     </AlertModal>
   );

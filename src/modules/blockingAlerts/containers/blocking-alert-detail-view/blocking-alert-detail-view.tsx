@@ -36,6 +36,7 @@ import {
   HEADER_BUTTON,
   MOBILE_TABS,
   PAGE_SIZE,
+  SEND_ACTIONS_PROJECT_ID,
   STATUS_META
 } from "../../constants";
 import { useBlockingAlertDetail, useBlockingAlertDocuments } from "../../hooks/use-blocking-alerts";
@@ -120,6 +121,7 @@ export default function BlockingAlertDetailView({
 }: BlockingAlertDetailViewProps) {
   const { detail, error } = useBlockingAlertDetail(clientId, shipToCode);
   const formatMoney = useAppStore((s) => s.formatMoney);
+  const sendActions = useAppStore((s) => s.selectedProject?.ID === SEND_ACTIONS_PROJECT_ID);
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
   const [tab, setTab] = useState<DetailTab>("past_due");
   const [pages, setPages] = useState<Partial<Record<DetailTab, number>>>({});
@@ -280,15 +282,17 @@ export default function BlockingAlertDetailView({
         >
           <Download className="h-4 w-4" />
         </button>
-        <button
-          type="button"
-          aria-label="Enviar al cliente"
-          title="Enviar al cliente"
-          className={ROUND_BUTTON}
-          onClick={() => setModal("send")}
-        >
-          <Send className="h-4 w-4" />
-        </button>
+        {sendActions && (
+          <button
+            type="button"
+            aria-label="Enviar al cliente"
+            title="Enviar al cliente"
+            className={ROUND_BUTTON}
+            onClick={() => setModal("send")}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {detail.pointOfSale && (
@@ -331,12 +335,14 @@ export default function BlockingAlertDetailView({
                   {money(detail.pastDue)}
                 </span>
               </span>
-              <PrincipalButton
-                icon={<Link2 className="h-4 w-4" />}
-                onClick={() => setModal("payment")}
-              >
-                Link de pago
-              </PrincipalButton>
+              {sendActions && (
+                <PrincipalButton
+                  icon={<Link2 className="h-4 w-4" />}
+                  onClick={() => setModal("payment")}
+                >
+                  Link de pago
+                </PrincipalButton>
+              )}
             </section>
           )}
 

@@ -10,6 +10,9 @@ export const BLOCKING_ALERTS_PATH = "/blockingAlerts";
 
 export const PAGE_SIZE = 30;
 
+/** Temporal: el link de pago y "Enviar al cliente" solo se muestran en este proyecto. */
+export const SEND_ACTIONS_PROJECT_ID = 177;
+
 export const blockingRulesNote = ({ blockDays, warningDays }: IBlockingAlertsSummary["rules"]) =>
   `Bloqueo: facturas de +${blockDays} días o cupo superado · Alerta desde ${warningDays} días`;
 

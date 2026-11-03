@@ -76,18 +76,15 @@ export default function PaymentLinkModal({
           {[
             { label: "WhatsApp", Icon: MessageCircle, onClick: () => share("WhatsApp") },
             { label: "Correo", Icon: Mail, onClick: () => share("correo") },
-            {
-              label: "QR en tienda",
-              Icon: QrCode,
-              onClick: () =>
-                showMessage("info", "El QR estará disponible al conectar el servicio de pagos")
-            }
-          ].map(({ label, Icon, onClick }) => (
+            // Sin servicio de QR todavía.
+            { label: "QR en tienda", Icon: QrCode, disabled: true }
+          ].map(({ label, Icon, onClick, disabled }) => (
             <button
               key={label}
               type="button"
+              disabled={disabled}
               onClick={onClick}
-              className="flex h-[62px] cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] border border-cp-line-2 bg-cp-surface text-[12px] font-semibold text-cp-ink hover:border-cp-ink"
+              className="flex h-[62px] cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] border border-cp-line-2 bg-cp-surface text-[12px] font-semibold text-cp-ink hover:border-cp-ink disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-cp-line-2"
             >
               <Icon className="h-[18px] w-[18px]" />
               {label}
