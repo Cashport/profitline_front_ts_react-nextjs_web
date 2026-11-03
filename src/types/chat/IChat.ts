@@ -226,5 +226,5 @@ export interface IDigitalRecordFile {
 export interface ITemplateRequest {
   templateId: string;
   clientUuid?: string;
-  destinationNumber: [string];
+  destinationNumber: string[];
 }

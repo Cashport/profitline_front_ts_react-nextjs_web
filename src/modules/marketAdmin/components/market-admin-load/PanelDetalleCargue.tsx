@@ -2,13 +2,21 @@
 
 import { useEffect } from "react";
 import { Spin } from "antd";
-import { ChevronsRight, Download, FileSpreadsheet, Info, ShieldCheck, Upload } from "lucide-react";
+import {
+  ChevronsRight,
+  Download,
+  FileSearch,
+  FileSpreadsheet,
+  Info,
+  ShieldCheck,
+  Upload
+} from "lucide-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import {
   useProfitLoader,
   useProfitLoaderTimeline
 } from "@/modules/marketAdmin/hooks/useProfitLoaders";
-import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+import { IProfitLoader, IProfitLoaderTimelineItem } from "@/types/marketAdmin/IMarketAdmin";
 import { EstadoPill, formatDateTime, statusColorClasses } from "./dataLoadUtils";
 
 type Props = {
@@ -20,7 +28,15 @@ type Props = {
   onDownloadTemplate: (loader: IProfitLoader) => void;
   /** Abre el asistente de validaciones de contenido del ETL. */
   onEditValidations?: (loader: IProfitLoader) => void;
+  /** Detalle de un cargue: su validación de cartera o sus errores. */
+  onOpenDetail?: (loader: IProfitLoader, item: IProfitLoaderTimelineItem) => void;
 };
+
+const hasDetail = (item: IProfitLoaderTimelineItem) =>
+  !!item.analysis_id ||
+  item.error_count > 0 ||
+  item.status === "ERROR" ||
+  item.status === "PARTIAL_SUCCESS";
 
 const sectionLabelClass = "text-[13px] font-semibold text-[#999999] mb-1";
 const iconButtonClass =
@@ -33,7 +49,8 @@ export default function PanelDetalleCargue({
   onClose,
   onUpload,
   onDownloadTemplate,
-  onEditValidations
+  onEditValidations,
+  onOpenDetail
 }: Props) {
   const { loader, isLoading: loadingLoader } = useProfitLoader(open ? loaderId : null);
   const { timeline, isLoading: loadingTimeline } = useProfitLoaderTimeline(open ? loaderId : null);
@@ -187,6 +204,18 @@ export default function PanelDetalleCargue({
                           </span>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             <EstadoPill label={item.label} color={item.color} />
+                            {onOpenDetail && hasDetail(item) && (
+                              <button
+                                type="button"
+                                onClick={() => onOpenDetail(loader, item)}
+                                title={
+                                  item.analysis_id ? "Ver validación del cargue" : "Ver errores"
+                                }
+                                className={iconButtonClass}
+                              >
+                                <FileSearch size={13} />
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => window.open(item.s3_url, "_blank")}
