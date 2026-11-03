@@ -8,11 +8,13 @@ import type { IBranchUser } from "@/types/branches/IBranches";
 interface RemoveUserModalProps {
   user: IBranchUser;
   branchName: string;
+  /** "No": cierra sin cambios. */
   onClose: () => void;
+  /** "Sí": desvincula; si falla (lanza), el modal sigue abierto. */
   onConfirm: () => Promise<void>;
 }
 
-/** Confirmación antes de quitar un usuario de la sucursal (mismo diseño que "¿Cerrar sesión?"). */
+/** "¿Está seguro de que quiere eliminar…?" con Sí / No (mismo diseño que "¿Cerrar sesión?"). */
 export default function RemoveUserModal({
   user,
   branchName,
@@ -21,17 +23,19 @@ export default function RemoveUserModal({
 }: RemoveUserModalProps) {
   const [saving, setSaving] = useState(false);
 
-  // Esc cancela, como en los demás modales.
+  // Esc equivale a "No".
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !saving && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, saving]);
 
   const handleConfirm = async () => {
     setSaving(true);
     try {
       await onConfirm();
+    } catch {
+      // El error ya se avisó; el modal sigue abierto para reintentar o cancelar.
     } finally {
       setSaving(false);
     }
@@ -39,7 +43,7 @@ export default function RemoveUserModal({
 
   return (
     <div
-      onClick={onClose}
+      onClick={() => !saving && onClose()}
       className="fixed inset-0 z-[1100] flex items-center justify-center bg-[rgba(20,20,20,.35)] p-6"
     >
       <div
@@ -58,8 +62,9 @@ export default function RemoveUserModal({
             ¿Eliminar usuario?
           </span>
           <span id="remove-user-text" className="text-[13px] leading-normal text-cp-ink-2">
-            {user.name} ({user.email}) dejará de tener acceso a {branchName}. Esta acción no se
-            puede deshacer.
+            ¿Está seguro de que quiere eliminar a{" "}
+            <b className="font-semibold text-cp-ink">{user.name}</b> de la sucursal{" "}
+            <b className="font-semibold text-cp-ink">{branchName}</b>?
           </span>
         </div>
         <div className="flex justify-end gap-2">
@@ -67,9 +72,10 @@ export default function RemoveUserModal({
             type="button"
             autoFocus
             onClick={onClose}
-            className="h-10 cursor-pointer rounded-[10px] border-0 bg-transparent px-4 text-[13.5px] font-semibold text-cp-ink hover:bg-cp-bg"
+            disabled={saving}
+            className="h-10 cursor-pointer rounded-[10px] border-0 bg-transparent px-4 text-[13.5px] font-semibold text-cp-ink hover:bg-cp-bg disabled:cursor-default disabled:opacity-50"
           >
-            Cancelar
+            No
           </button>
           <button
             type="button"
@@ -77,7 +83,7 @@ export default function RemoveUserModal({
             disabled={saving}
             className="h-10 cursor-pointer rounded-[10px] border-0 bg-cp-red px-[18px] text-[13.5px] font-semibold text-white hover:bg-[#c81e23] disabled:cursor-default disabled:opacity-60"
           >
-            Eliminar
+            {saving ? "Eliminando…" : "Sí"}
           </button>
         </div>
       </div>

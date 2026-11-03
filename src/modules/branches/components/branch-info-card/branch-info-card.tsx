@@ -3,9 +3,8 @@ import type { ReactNode } from "react";
 import type { IBranch } from "@/types/branches/IBranches";
 import { cn } from "@/utils/utils";
 
-import { formatPrice } from "../../utils/branches";
 import BranchStatusBadge from "../branch-status-badge/branch-status-badge";
-import PriceListBadge from "../price-list-badge/price-list-badge";
+import { PriceLimitStack, PriceListStack } from "../price-limit-stack/price-limit-stack";
 
 function Field({
   label,
@@ -50,11 +49,11 @@ export default function BranchInfoCard({ branch }: { branch: IBranch }) {
         <Field label="Dirección" className="sm:col-span-2 lg:col-span-3">
           {branch.address}
         </Field>
-        <Field label="Lista de precios">
-          <PriceListBadge priceList={branch.price_list} />
+        <Field label={branch.price_limits.length > 1 ? "Listas de precios" : "Lista de precios"}>
+          <PriceListStack limits={branch.price_limits} />
         </Field>
-        <Field label="Precio base">
-          <span className="font-semibold tabular-nums">{formatPrice(branch.base_price)}</span>
+        <Field label="Monto máximo por factura">
+          <PriceLimitStack limits={branch.price_limits} align="left" />
         </Field>
       </dl>
     </section>

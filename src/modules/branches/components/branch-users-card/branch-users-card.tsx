@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreVertical, Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 import GeneralDropdown from "@/components/ui/dropdown/dropdown";
 import type { IBranchUser } from "@/types/branches/IBranches";
@@ -11,7 +11,7 @@ interface BranchUsersCardProps {
   users: IBranchUser[];
   /** Sin acción no se muestra "Agregar Nuevo Usuario". */
   onAdd?: () => void;
-  /** Sin acción no se muestra el menú ⋮ de cada usuario. */
+  /** Sin acción no se muestra el botón de basura de cada usuario. */
   onRemove?: (user: IBranchUser) => void;
 }
 
@@ -67,10 +67,11 @@ export default function BranchUsersCard({ users, onAdd, onRemove }: BranchUsersC
                 >
                   <button
                     type="button"
-                    aria-label={`Opciones de ${user.name}`}
-                    className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-cp-ink hover:bg-cp-bg"
+                    aria-label={`Eliminar a ${user.name}`}
+                    title="Eliminar usuario"
+                    className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-cp-ink-3 hover:bg-[rgb(var(--cp-red)/0.1)] hover:text-cp-red"
                   >
-                    <MoreVertical className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </GeneralDropdown>
               )}

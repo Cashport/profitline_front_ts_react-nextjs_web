@@ -21,7 +21,7 @@ export const PRICE_LIST_PALETTE = [
   "#6b0033"
 ];
 
-export type BranchesSortKey = "client" | "branch" | "city" | "priceList" | "price" | "status";
+export type BranchesSortKey = "client" | "branch" | "city" | "price" | "status";
 
 /** Texto cuando la sucursal no tiene dirección en la base. */
 export const NO_ADDRESS = "Dirección no registrada";
@@ -34,8 +34,8 @@ export const SORT_LABEL: Record<BranchesSortKey, string> = {
   client: "Cliente",
   branch: "Sucursal",
   city: "Municipio",
-  priceList: "Lista de precios",
-  price: "Precio base",
+  // Tope por documento (factura) de devolución, como lo compara SuperaMontoLimite; en dos renglones.
+  price: "Monto máximo\npor factura",
   status: "Estado"
 };
 

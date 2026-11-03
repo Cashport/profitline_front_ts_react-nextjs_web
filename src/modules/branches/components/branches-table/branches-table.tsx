@@ -7,9 +7,8 @@ import { cn } from "@/utils/utils";
 
 import { BRANCHES_PATH, NO_ADDRESS, SORT_LABEL, type BranchesSortKey } from "../../constants";
 import { useBranchesStore } from "../../stores/branches-store";
-import { formatPrice } from "../../utils/branches";
 import BranchStatusBadge from "../branch-status-badge/branch-status-badge";
-import PriceListBadge from "../price-list-badge/price-list-badge";
+import { PriceLimitStack, PriceListStack } from "../price-limit-stack/price-limit-stack";
 
 /** Encabezado sin orden, con el mismo estilo que `SortableTh` (el de Clientes). */
 const PLAIN_TH =
@@ -34,6 +33,8 @@ export default function BranchesTable({ branches, onClearAll }: BranchesTablePro
       align={align}
       sort={sortState}
       onSort={(col) => toggleSort(col as BranchesSortKey)}
+      // Respeta el salto de línea de títulos largos como el del monto máximo.
+      className="whitespace-pre-line leading-tight"
     />
   );
 
@@ -57,7 +58,9 @@ export default function BranchesTable({ branches, onClearAll }: BranchesTablePro
           <th scope="col" className={PLAIN_TH}>
             Dirección
           </th>
-          {sortable("priceList")}
+          <th scope="col" className={PLAIN_TH}>
+            Lista de precios
+          </th>
           {sortable("price", "right")}
           {sortable("status")}
           <th scope="col" className={PLAIN_TH}>
@@ -89,10 +92,10 @@ export default function BranchesTable({ branches, onClearAll }: BranchesTablePro
                 {b.address}
               </td>
               <td className={TD}>
-                <PriceListBadge priceList={b.price_list} />
+                <PriceListStack limits={b.price_limits} />
               </td>
-              <td className={cn(TD, "whitespace-nowrap text-right font-semibold tabular-nums")}>
-                {formatPrice(b.base_price)}
+              <td className={TD}>
+                <PriceLimitStack limits={b.price_limits} />
               </td>
               <td className={TD}>
                 <BranchStatusBadge isActive={b.is_active} />

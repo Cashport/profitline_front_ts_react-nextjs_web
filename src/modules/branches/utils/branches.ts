@@ -56,8 +56,13 @@ export const toBranch = (row: IBranchApiRow): IBranch => ({
   name: row.NombreSucursal,
   city: row.NombreMunicipio ?? "—",
   address: row.Direccion?.trim() || NO_ADDRESS,
-  price_list: row.NombreListaPrecios ?? "Sin lista",
   base_price: Number(row.MontoMaximo ?? 0),
+  price_limits: row.MontosPorLista?.length
+    ? row.MontosPorLista.map((m) => ({
+        list: m.ListaPrecios ?? "Sin lista",
+        amount: Number(m.MontoMaximo ?? 0)
+      }))
+    : [{ list: "Sin lista", amount: Number(row.MontoMaximo ?? 0) }],
   is_active: row.Estado === "Activo"
 });
 

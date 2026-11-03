@@ -15,9 +15,10 @@ export interface IBranch {
   name: string;
   city: string;
   address: string;
-  /** Nombre de la lista de precios (tabla logistica.ListasDePrecios). */
-  price_list: string;
+  /** Monto máximo por factura (documento) de devolución: el mayor entre sus listas. */
   base_price: number;
+  /** Listas de precios de la sucursal física (A–Z), cada una con su monto máximo por factura. */
+  price_limits: { list: string; amount: number }[];
   is_active: boolean;
 }
 
@@ -32,7 +33,10 @@ export interface IBranchApiRow {
   NombreSucursal: string;
   NombreMunicipio: string | null;
   Direccion: string | null;
-  NombreListaPrecios: string | null;
+  /** La sucursal física agrupa un registro por lista de precios: aquí van todas. */
+  ListasPrecios: string[] | null;
+  /** Cada lista guarda su propio monto máximo por factura. */
+  MontosPorLista?: { ListaPrecios: string | null; MontoMaximo: number | null }[];
   MontoMaximo: number | null;
   Estado: "Activo" | "Inactivo";
 }
@@ -61,7 +65,7 @@ export interface IBranchesQuery {
   municipios?: string;
   listas?: string;
   estados?: string;
-  sortField?: "client" | "branch" | "city" | "priceList" | "price" | "status";
+  sortField?: "client" | "branch" | "city" | "price" | "status";
   sortOrder?: "ASC" | "DESC";
 }
 
@@ -76,6 +80,35 @@ export interface IBranchUser {
   email: string;
   /** Cargo; los ejecutivos del API aún no lo traen. */
   role?: string;
+}
+
+/** Fila de GET /integration/profit360/branches/AllUsers: usuario que se puede asignar. */
+export interface IBranchAssignableUserApi {
+  IdUsuario: string;
+  NombreUsuario: string;
+  CorreoUsuario: string | null;
+}
+
+/** Respuesta de POST /integration/profit360/branches/AddUsers. */
+export interface IBranchAddUsersResult {
+  NombreSucursal: string;
+  /** Insertados o reactivados. */
+  added: { IdUsuario: string; NombreUsuario: string }[];
+  /** Ya estaban activos en la sucursal: no se tocaron. */
+  alreadyAssigned: { IdUsuario: string; NombreUsuario: string }[];
+  /** Ids que no existen en manager.Usuarios. */
+  notFound: string[];
+}
+
+/** Respuesta de PUT /integration/profit360/branches/RemoveUsers. */
+export interface IBranchRemoveUsersResult {
+  NombreSucursal: string;
+  /** Desvinculados (quedan inactivos, no se borran). */
+  removed: { IdUsuario: string; NombreUsuario: string }[];
+  /** No estaban vinculados a la sucursal: no se tocaron. */
+  notAssigned: { IdUsuario: string; NombreUsuario: string }[];
+  /** Ids que no existen en manager.Usuarios. */
+  notFound: string[];
 }
 
 /** Respuesta de GET /integration/profit360/branches/registeredUsers?id=<IdSucursalDevolucion>. */

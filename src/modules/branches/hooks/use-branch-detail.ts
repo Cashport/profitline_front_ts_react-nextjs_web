@@ -1,10 +1,14 @@
 import useSWR from "swr";
 
-import { getBranchRegisteredUsers } from "@/services/branches/branches";
-import type { IBranchDetail } from "@/types/branches/IBranches";
+import {
+  addBranchUsers,
+  getBranchesAllUsers,
+  getBranchRegisteredUsers,
+  removeBranchUsers
+} from "@/services/branches/branches";
+import type { IBranchDetail, IBranchUser } from "@/types/branches/IBranches";
 import { ApiError } from "@/utils/api/api";
 
-import { getUsersMock } from "../mocked-data";
 import { toBranch } from "../utils/branches";
 
 const SWR_OPTIONS = { revalidateOnFocus: false };
@@ -12,10 +16,9 @@ const SWR_OPTIONS = { revalidateOnFocus: false };
 /**
  * Información de la sucursal y sus ejecutivos registrados
  * (GET /integration/profit360/branches/registeredUsers). `null` si la sucursal no existe.
- * Por ahora es solo lectura: agregar y eliminar usuarios llegan con sus endpoints.
  */
 export const useBranchDetail = (branchId: string) => {
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     ["/integration/profit360/branches/registeredUsers", branchId],
     async (): Promise<IBranchDetail | null> => {
       try {
@@ -37,14 +40,42 @@ export const useBranchDetail = (branchId: string) => {
     SWR_OPTIONS
   );
 
-  return { detail: data, error: error as Error | undefined, isLoading };
+  /** Asigna usuarios a la sucursal (POST AddUsers) y vuelve a leer la lista real. */
+  const addUsers = async (users: IBranchUser[]) => {
+    const res = await addBranchUsers(
+      branchId,
+      users.map((u) => u.id)
+    );
+    await mutate();
+    return res.data;
+  };
+
+  /** Desvincula un usuario de la sucursal (PUT RemoveUsers) y vuelve a leer la lista real. */
+  const removeUser = async (user: IBranchUser) => {
+    const res = await removeBranchUsers(branchId, [user.id]);
+    await mutate();
+    return res.data;
+  };
+
+  return { detail: data, error: error as Error | undefined, isLoading, addUsers, removeUser };
 };
 
 /**
- * Usuarios que se pueden asignar a una sucursal (modal "Agregar usuarios").
- * SIMULADO: el modal aún no se muestra; se conecta cuando exista el endpoint.
+ * Usuarios que se pueden asignar a una sucursal (modal "Agregar usuarios"):
+ * GET /integration/profit360/branches/AllUsers. Solo nombre y correo.
  */
 export const useAssignableUsers = (enabled: boolean) => {
-  const { data, isLoading } = useSWR(enabled ? "/users" : null, getUsersMock, SWR_OPTIONS);
-  return { users: data ?? [], isLoading };
+  const { data, error, isLoading } = useSWR(
+    enabled ? "/integration/profit360/branches/AllUsers" : null,
+    async (): Promise<IBranchUser[]> => {
+      const res = await getBranchesAllUsers();
+      return res.data.map((u) => ({
+        id: u.IdUsuario,
+        name: u.NombreUsuario || u.CorreoUsuario || "Sin nombre",
+        email: u.CorreoUsuario ?? ""
+      }));
+    },
+    SWR_OPTIONS
+  );
+  return { users: data ?? [], error: error as Error | undefined, isLoading };
 };

@@ -14,7 +14,7 @@ import { plural } from "../../utils/branches";
 
 /**
  * Sucursales de devolución (/branches): las sucursales de los clientes con su lista de
- * precios, precio base y estado, de a 20 por página. El ojo de cada fila abre su detalle.
+ * precios, monto máximo y estado, de a 20 por página. El ojo de cada fila abre su detalle.
  */
 export default function BranchesView() {
   const { branches, total, totalClients, page, error, isLoading, isValidating } = useBranchesPage();
