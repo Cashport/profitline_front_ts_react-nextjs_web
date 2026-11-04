@@ -104,6 +104,9 @@ export interface ITicketLog {
   performed_by: number;
   performed_by_name: string | null;
   created_at: string;
+  /** Nombre de `old_value`/`new_value` cuando son referencias (responsable, cliente). */
+  old_label?: string | null;
+  new_label?: string | null;
 }
 
 /** Opción de un campo (proceso, catálogo, país, responsable…). Valores siempre string. */

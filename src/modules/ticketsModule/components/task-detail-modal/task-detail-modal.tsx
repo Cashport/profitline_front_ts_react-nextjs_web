@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, Input, Modal, Select } from "antd";
 import { X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
@@ -20,10 +20,11 @@ import type {
 import { useTaskDetail, useTaskHistory } from "../../hooks/useTaskDetail";
 import { useTicketsView } from "../../stores/tickets-view-store";
 import { formatAge, formatTaskDate, statusMeta } from "../../utils/task-format";
+import { taskErrorMessage } from "../../utils/task-errors";
 import { optionLabel, ticketValue, type TaskFormValues } from "../../utils/task-values";
 import { StatusLabel, TaskCell } from "../task-cells/task-cells";
 import { toBody } from "../task-create-modal/task-create-modal";
-import TaskFieldInput from "../task-field-input/task-field-input";
+import TaskFormField, { type TaskFieldChange } from "../task-form-field/task-form-field";
 
 /** Campos que van en la cuadrícula del detalle (título, estado, responsable y descripción van aparte). */
 const OWN_PLACE: TaskFieldKey[] = ["title", "status", "assignee", "description", "created_at"];
@@ -41,9 +42,7 @@ const EVENT_LABEL: Record<string, string> = {
 };
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-0.5 text-[13px] font-semibold text-cp-ink-3">
-    {children}
-  </div>
+  <div className="mb-0.5 text-[13px] font-semibold text-cp-ink-3">{children}</div>
 );
 
 /** Acción para pasar al estado `to` (texto del botón). */
@@ -108,13 +107,27 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
   const [editing, setEditing] = useState(false);
   const [values, setValues] = useState<TaskFormValues>({});
   const [target, setTarget] = useState<TicketStatus | null>(null);
-  const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
 
   const editable = config.fields.filter((f) => f.editable && f.body_key);
   const gridFields = config.fields.filter((f) => !OWN_PLACE.includes(f.key));
   const assigneeField = config.fields.find((f) => f.key === "assignee");
-  const transitions = config.transitions[t.status] ?? [];
+  const assigneeOptions = config.assignees.map((u) => ({ value: String(u.id), label: u.name }));
+  // El responsable actual puede no estar entre los asignables (inactivo o de otro rol).
+  if (!config.assignees.some((u) => u.id === t.assigned_to_user_id)) {
+    assigneeOptions.unshift({
+      value: String(t.assigned_to_user_id),
+      label: t.assigned_to_name ?? String(t.assigned_to_user_id)
+    });
+  }
+  // Orden fijo (el del flujo) para que los botones no cambien de lugar bajo el cursor;
+  // "Cancelar tarea" va aparte, a la derecha.
+  const statusOrder = (s: TicketStatus) => config.statuses.find((m) => m.key === s)?.order ?? 99;
+  const transitions = [...(config.transitions[t.status] ?? [])].sort(
+    (a, b) => statusOrder(a) - statusOrder(b)
+  );
+  const forward = transitions.filter((to) => to !== "CANCELLED");
+  const canCancel = transitions.includes("CANCELLED");
 
   useEffect(() => {
     setValues(Object.fromEntries(editable.map((f) => [f.key, ticketValue(t, f.key)])));
@@ -130,28 +143,31 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
       refresh();
       return true;
     } catch (error) {
-      showMessage("error", (error as Error).message || "No se pudo guardar");
+      showMessage("error", taskErrorMessage(error, config, "No se pudo guardar"));
       return false;
     } finally {
       setBusy(false);
     }
   };
 
-  const changeStatus = async (to: TicketStatus) => {
+  // Resolver o cancelar piden comentario primero (`CloseConfirm`); llega aquí con él.
+  const changeStatus = async (to: TicketStatus, comment?: string) => {
     const closing = to === "COMPLETED" || to === "CANCELLED";
-    if (closing && target !== to) {
+    if (closing && comment === undefined) {
       setTarget(to);
       return;
     }
     const done = await run(
-      () => updateTaskStatus(t.id, to, closing ? comment : null),
+      () => updateTaskStatus(t.id, to, closing ? comment ?? null : null),
       `Estado: ${statusMeta(config, to)?.label ?? to}`
     );
-    if (done) {
-      setTarget(null);
-      setComment("");
-    }
+    if (done) setTarget(null);
   };
+
+  const setFieldValue = useCallback<TaskFieldChange>(
+    (key, value) => setValues((prev) => ({ ...prev, [key]: value })),
+    []
+  );
 
   const saveEdit = async () => {
     const changed = editable.filter((f) => (values[f.key] ?? null) !== ticketValue(t, f.key));
@@ -180,7 +196,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
       </div>
 
       {editing ? (
-        <EditForm fields={editable} ticket={t} values={values} onChange={setValues} />
+        <EditForm fields={editable} ticket={t} values={values} onFieldChange={setFieldValue} />
       ) : (
         <>
           <h3 className="mt-2 text-[16px] font-semibold leading-snug">{t.title}</h3>
@@ -203,7 +219,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
                   optionFilterProp="label"
                   disabled={busy}
                   value={String(t.assigned_to_user_id)}
-                  options={config.assignees.map((u) => ({ value: String(u.id), label: u.name }))}
+                  options={assigneeOptions}
                   onChange={(v: string) =>
                     run(() => updateTaskAssignee(t.id, Number(v)), "Responsable actualizado")
                   }
@@ -238,7 +254,7 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
           </>
         ) : (
           <>
-            {transitions.map((to) => (
+            {forward.map((to) => (
               <Button
                 key={to}
                 disabled={busy}
@@ -249,40 +265,35 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
                 {actionLabel(config, to)}
               </Button>
             ))}
-            {editable.length > 0 && (
-              <Button type="text" className="ml-auto" onClick={() => setEditing(true)}>
-                Editar
-              </Button>
-            )}
+            <div className="ml-auto flex items-center gap-1">
+              {canCancel && (
+                <Button
+                  type="text"
+                  danger
+                  disabled={busy}
+                  onClick={() => changeStatus("CANCELLED")}
+                >
+                  {actionLabel(config, "CANCELLED")}
+                </Button>
+              )}
+              {editable.length > 0 && (
+                <Button type="text" onClick={() => setEditing(true)}>
+                  Editar
+                </Button>
+              )}
+            </div>
           </>
         )}
       </div>
 
       {target && !editing && (
-        <div className="mt-3 flex flex-col gap-2 rounded-lg bg-cp-subtle p-3">
-          <span className="text-[13px] font-semibold text-cp-ink-2">
-            {target === "COMPLETED" ? "¿Cómo se resolvió?" : "¿Por qué se cancela?"} (opcional)
-          </span>
-          <Input.TextArea
-            rows={2}
-            maxLength={500}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-          <div className="flex gap-2">
-            <Button
-              type="primary"
-              loading={busy}
-              className="!text-[#141414]"
-              onClick={() => changeStatus(target)}
-            >
-              {target === "COMPLETED" ? "Confirmar resolución" : "Confirmar cancelación"}
-            </Button>
-            <Button onClick={() => setTarget(null)} disabled={busy}>
-              Volver
-            </Button>
-          </div>
-        </div>
+        <CloseConfirm
+          key={target}
+          target={target}
+          busy={busy}
+          onConfirm={(comment) => changeStatus(target, comment)}
+          onBack={() => setTarget(null)}
+        />
       )}
 
       <History ticketId={t.id} config={config} />
@@ -290,41 +301,70 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
   );
 }
 
+/** Comentario opcional al resolver o cancelar. Con estado propio: escribir no re-renderiza el detalle. */
+function CloseConfirm({
+  target,
+  busy,
+  onConfirm,
+  onBack
+}: {
+  target: TicketStatus;
+  busy: boolean;
+  onConfirm: (comment: string) => void;
+  onBack: () => void;
+}) {
+  const [comment, setComment] = useState("");
+  return (
+    <div className="mt-3 flex flex-col gap-2 rounded-lg bg-cp-subtle p-3">
+      <span className="text-[13px] font-semibold text-cp-ink-2">
+        {target === "COMPLETED" ? "¿Cómo se resolvió?" : "¿Por qué se cancela?"} (opcional)
+      </span>
+      <Input.TextArea
+        rows={2}
+        maxLength={500}
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+      />
+      <div className="flex gap-2">
+        <Button
+          type="primary"
+          loading={busy}
+          className="!text-[#141414]"
+          onClick={() => onConfirm(comment)}
+        >
+          {target === "COMPLETED" ? "Confirmar resolución" : "Confirmar cancelación"}
+        </Button>
+        <Button onClick={onBack} disabled={busy}>
+          Volver
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function EditForm({
   fields,
   ticket,
   values,
-  onChange
+  onFieldChange
 }: {
   fields: ITaskFieldConfig[];
   ticket: ITicket;
   values: TaskFormValues;
-  onChange: (next: TaskFormValues) => void;
+  onFieldChange: TaskFieldChange;
 }) {
   const initialLabel = (key: TaskFieldKey) =>
     key === "client" ? ticket.client_name : key === "data_client" ? ticket.client_data_name : null;
   return (
     <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
       {fields.map((f) => (
-        <label
+        <TaskFormField
           key={f.key}
-          className={
-            f.type === "text" || f.type === "longtext"
-              ? "flex flex-col gap-1 sm:col-span-2"
-              : "flex flex-col gap-1"
-          }
-        >
-          <span className="text-[13px] font-semibold text-cp-ink-2">
-            {f.label}
-            {f.required && <span className="text-cp-magenta"> *</span>}
-          </span>
-          <TaskFieldInput
-            field={f}
-            value={values[f.key]}
-            initialLabel={initialLabel(f.key)}
-            onChange={(v) => onChange({ ...values, [f.key]: v })}
-          />
-        </label>
+          field={f}
+          value={values[f.key]}
+          initialLabel={initialLabel(f.key)}
+          onFieldChange={onFieldChange}
+        />
       ))}
     </div>
   );
@@ -348,8 +388,14 @@ const FIELD_BY_COLUMN: Record<string, TaskFieldKey> = {
   assigned_to_user_id: "assignee"
 };
 
-function logValue(config: ITaskConfig, log: ITicketLog, value: string | null) {
+function logValue(
+  config: ITaskConfig,
+  log: ITicketLog,
+  value: string | null,
+  label?: string | null
+) {
   if (value === null) return "—";
+  if (label) return label;
   if (log.field_changed === "status")
     return statusMeta(config, value as TicketStatus)?.label ?? value;
   const key = log.field_changed ? FIELD_BY_COLUMN[log.field_changed] : undefined;
@@ -362,7 +408,14 @@ function fieldLabel(config: ITaskConfig, column: string) {
 }
 
 function History({ ticketId, config }: { ticketId: number; config: ITaskConfig }) {
-  const { history, isLoading } = useTaskHistory(ticketId);
+  const { history, isLoading, error } = useTaskHistory(ticketId);
+  if (error && !history.length) {
+    return (
+      <p className="mt-5 border-t border-cp-line pt-3.5 text-[13px] text-cp-ink-3">
+        No se pudo cargar el historial.
+      </p>
+    );
+  }
   if (isLoading && !history.length) return null;
   if (!history.length) return null;
 
@@ -383,7 +436,8 @@ function History({ ticketId, config }: { ticketId: number; config: ITaskConfig }
               {changed && (
                 <span className="text-cp-ink-3">
                   {" "}
-                  {logValue(config, log, log.old_value)} → {logValue(config, log, log.new_value)}
+                  {logValue(config, log, log.old_value, log.old_label)} →{" "}
+                  {logValue(config, log, log.new_value, log.new_label)}
                 </span>
               )}
               <span className="text-cp-ink-4"> · {formatTaskDate(log.created_at)}</span>

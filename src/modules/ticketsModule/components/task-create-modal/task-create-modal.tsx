@@ -1,22 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Modal } from "antd";
 import { useShallow } from "zustand/react/shallow";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { useWalletTheme } from "@/modules/walletModule/contexts/wallet-theme-context";
 import { createTask, type TaskBody } from "@/services/tickets/tickets";
-import type {
-  ITaskConfig,
-  ITaskFieldConfig,
-  ITaskOptionItem,
-  TaskFieldKey
-} from "@/types/tickets/ITickets";
-import { cn } from "@/utils/utils";
+import type { ITaskConfig, ITaskFieldConfig } from "@/types/tickets/ITickets";
+import { useTaskOptions } from "../../hooks/useTaskDetail";
 import { useTicketsView } from "../../stores/tickets-view-store";
+import type { TaskCreateDraft } from "../../types";
+import { taskErrorMessage } from "../../utils/task-errors";
 import { initialCreateValues, toDueAt, type TaskFormValues } from "../../utils/task-values";
-import TaskFieldInput from "../task-field-input/task-field-input";
+import TaskFormField, { type TaskFieldChange } from "../task-form-field/task-form-field";
 
 /** Campos del formulario: los que el proyecto deja crear; título primero, descripción al final. */
 const creatableFields = (config: ITaskConfig) =>
@@ -27,8 +24,6 @@ const creatableFields = (config: ITaskConfig) =>
         f.key === "title" ? -1 : f.key === "description" ? 1 : 0;
       return rank(a) - rank(b) || a.order - b.order;
     });
-
-const isWide = (f: ITaskFieldConfig) => f.type === "text" || f.type === "longtext";
 
 export function toBody(fields: ITaskFieldConfig[], values: TaskFormValues): TaskBody {
   const body: TaskBody = {};
@@ -43,65 +38,23 @@ export function toBody(fields: ITaskFieldConfig[], values: TaskFormValues): Task
 /**
  * "Nueva tarea": formulario armado con los campos activos del proyecto. Se
  * abre con valores iniciales (proceso elegido, "+" de un grupo). El back
- * vuelve a validar todo contra la config.
+ * vuelve a validar todo contra la config. El estado vive en `TaskCreateForm`
+ * para que escribir no re-renderice el Modal (ver `TaskFormField`).
  */
 export default function TaskCreateModal({ config }: { config: ITaskConfig }) {
-  const { draft, closeCreate, refresh, openDetail } = useTicketsView(
-    useShallow((s) => ({
-      draft: s.createDraft,
-      closeCreate: s.closeCreate,
-      refresh: s.refresh,
-      openDetail: s.openDetail
-    }))
+  const { draft, closeCreate } = useTicketsView(
+    useShallow((s) => ({ draft: s.createDraft, closeCreate: s.closeCreate }))
   );
-  const { showMessage } = useMessageApi();
   const { resolvedTheme } = useWalletTheme();
-  const [values, setValues] = useState<TaskFormValues>({});
+  const formRef = useRef<TaskCreateFormHandle>(null);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (draft) setValues(initialCreateValues(config, draft));
-  }, [draft, config]);
-
-  const fields = creatableFields(config);
-  const hasCountry = fields.some((f) => f.key === "country");
-
-  const setValue = (key: TaskFieldKey, value: string | null, extra?: ITaskOptionItem["extra"]) =>
-    setValues((prev) => {
-      const next = { ...prev, [key]: value };
-      // Cliente de ingesta: su país queda puesto si no se eligió otro.
-      if (key === "data_client" && hasCountry && !prev.country && extra?.country_id) {
-        next.country = String(extra.country_id);
-      }
-      return next;
-    });
-
-  const submit = async () => {
-    const missing = fields.filter((f) => f.required && !values[f.key]?.trim());
-    if (missing.length) {
-      showMessage("warning", `Falta: ${missing.map((f) => f.label).join(", ")}`);
-      return;
-    }
-    setSaving(true);
-    try {
-      const created = await createTask(toBody(fields, values));
-      showMessage("success", `Tarea ${created.ticket_code} creada`);
-      refresh();
-      closeCreate();
-      openDetail(created.id);
-    } catch (error) {
-      showMessage("error", (error as Error).message || "No se pudo crear la tarea");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <Modal
       open={draft !== null}
       title="Nueva tarea"
       onCancel={closeCreate}
-      onOk={submit}
+      onOk={() => formRef.current?.submit()}
       okText="Crear tarea"
       cancelText="Cancelar"
       confirmLoading={saving}
@@ -112,24 +65,98 @@ export default function TaskCreateModal({ config }: { config: ITaskConfig }) {
       rootClassName={resolvedTheme === "dark" ? "dark" : undefined}
       okButtonProps={{ className: "!text-[#141414]" }}
     >
-      <div className="wallet-scope grid grid-cols-1 gap-x-4 gap-y-3 pt-2 sm:grid-cols-2">
-        {fields.map((f) => (
-          <label
-            key={f.key}
-            className={cn("flex min-w-0 flex-col gap-1", isWide(f) && "sm:col-span-2")}
-          >
-            <span className="text-[13px] font-semibold text-cp-ink-2">
-              {f.label}
-              {f.required && <span className="text-cp-magenta"> *</span>}
-            </span>
-            <TaskFieldInput
-              field={f}
-              value={values[f.key]}
-              onChange={(v, extra) => setValue(f.key, v, extra)}
-            />
-          </label>
-        ))}
-      </div>
+      <TaskCreateForm ref={formRef} config={config} draft={draft} onSavingChange={setSaving} />
     </Modal>
   );
 }
+
+interface TaskCreateFormHandle {
+  submit: () => Promise<void>;
+}
+
+interface TaskCreateFormProps {
+  config: ITaskConfig;
+  draft: TaskCreateDraft | null;
+  onSavingChange: (saving: boolean) => void;
+}
+
+const TaskCreateForm = forwardRef<TaskCreateFormHandle, TaskCreateFormProps>(
+  function TaskCreateForm({ config, draft, onSavingChange }, ref) {
+    const { closeCreate, refresh, openDetail } = useTicketsView(
+      useShallow((s) => ({
+        closeCreate: s.closeCreate,
+        refresh: s.refresh,
+        openDetail: s.openDetail
+      }))
+    );
+    const { showMessage } = useMessageApi();
+    const [values, setValues] = useState<TaskFormValues>({});
+
+    useEffect(() => {
+      if (draft) setValues(initialCreateValues(config, draft));
+    }, [draft, config]);
+
+    const fields = creatableFields(config);
+    const hasCountry = fields.some((f) => f.key === "country");
+
+    // "+" de un grupo por cliente: llega solo el id; el país se completa como al elegirlo a mano.
+    const draftClient = draft?.data_client ?? null;
+    const draftClientOptions = useTaskOptions(
+      draftClient && hasCountry ? "data_client" : null,
+      "",
+      draftClient ? [draftClient] : []
+    ).options;
+    useEffect(() => {
+      const countryId = draftClientOptions.find((o) => o.id === draftClient)?.extra?.country_id;
+      if (!countryId) return;
+      setValues((prev) =>
+        prev.country || prev.data_client !== draftClient
+          ? prev
+          : { ...prev, country: String(countryId) }
+      );
+    }, [draftClientOptions, draftClient]);
+
+    const setValue = useCallback<TaskFieldChange>(
+      (key, value, extra) =>
+        setValues((prev) => {
+          const next = { ...prev, [key]: value };
+          // Cliente de ingesta: su país queda puesto si no se eligió otro.
+          if (key === "data_client" && hasCountry && !prev.country && extra?.country_id) {
+            next.country = String(extra.country_id);
+          }
+          return next;
+        }),
+      [hasCountry]
+    );
+
+    const submit = async () => {
+      const missing = fields.filter((f) => f.required && !values[f.key]?.trim());
+      if (missing.length) {
+        showMessage("warning", `Falta: ${missing.map((f) => f.label).join(", ")}`);
+        return;
+      }
+      onSavingChange(true);
+      try {
+        const created = await createTask(toBody(fields, values));
+        showMessage("success", `Tarea ${created.ticket_code} creada`);
+        refresh();
+        closeCreate();
+        openDetail(created.id);
+      } catch (error) {
+        showMessage("error", taskErrorMessage(error, config, "No se pudo crear la tarea"));
+      } finally {
+        onSavingChange(false);
+      }
+    };
+
+    useImperativeHandle(ref, () => ({ submit }));
+
+    return (
+      <div className="wallet-scope grid grid-cols-1 gap-x-4 gap-y-3 pt-2 sm:grid-cols-2">
+        {fields.map((f) => (
+          <TaskFormField key={f.key} field={f} value={values[f.key]} onFieldChange={setValue} />
+        ))}
+      </div>
+    );
+  }
+);

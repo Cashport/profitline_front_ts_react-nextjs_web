@@ -48,10 +48,17 @@ export default function TasksToolbar({ config }: { config: ITaskConfig }) {
   const sortField = fieldOf(config, view.sortBy);
 
   const groupItems: MenuProps["items"] = [
-    { key: NO_GROUP, label: checkLabel("Sin agrupar", !groupField) },
-    ...config.fields
-      .filter((f) => f.groupable)
-      .map((f) => ({ key: f.key, label: checkLabel(f.label, f.key === groupField?.key) }))
+    {
+      type: "group",
+      key: "group-title",
+      label: "Agrupar tareas por",
+      children: [
+        { key: NO_GROUP, label: checkLabel("Sin agrupar", !groupField) },
+        ...config.fields
+          .filter((f) => f.groupable)
+          .map((f) => ({ key: f.key, label: checkLabel(f.label, f.key === groupField?.key) }))
+      ]
+    }
   ];
   const sortItems: MenuProps["items"] = config.fields
     .filter((f) => f.sortable)
