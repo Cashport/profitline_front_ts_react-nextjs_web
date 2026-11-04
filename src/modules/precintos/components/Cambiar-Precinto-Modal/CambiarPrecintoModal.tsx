@@ -15,6 +15,8 @@ interface CambiarPrecintoModalProps {
 interface Ejecutivo {
   Id: string;
   UserName: string;
+  /** Nombre en manager.Usuarios; si no hay, el back manda el correo. */
+  Nombre?: string;
 }
 
 export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
@@ -134,7 +136,7 @@ export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
                       disabled={esElActual}
                       className={esElActual ? 'text-gray-300 bg-gray-100' : ''}
                     >
-                      {exec.UserName} {esElActual ? '(Actual)' : ''}
+                      {exec.Nombre || exec.UserName} {esElActual ? '(Actual)' : ''}
                     </option>
                   );
                 })}

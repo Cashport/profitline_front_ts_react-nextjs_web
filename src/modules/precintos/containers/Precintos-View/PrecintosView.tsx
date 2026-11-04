@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IPrecintoEstadoSummary } from '../../types/precintos_types';
 import { FiltersModal, IAppliedFilters } from '../../components/FiltersModal/FiltersModal';
 import { ActionModal } from '../../components/ActionModal/ActionModal';
@@ -24,6 +24,7 @@ import Collapse from '@/components/ui/collapse';
 import LabelCollapse from '@/components/ui/label-collapse';
 import Pagination from '@/components/ui/pagination';
 import { GenerateActionButton } from '@/components/atoms/GenerateActionButton';
+import { useAppStore } from '@/lib/store/store';
 
 const PAGE_SIZE = 20;
 
@@ -41,6 +42,8 @@ const TableFooter = ({ currentPage, total, onPageChange }: { currentPage: number
 };
 
 export const PrecintosView: React.FC = () => {
+  // El proyecto va en el header de cada request; al cambiarlo se recarga todo.
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [activeTab, setActiveTab] = useState<'precintos' | 'ejecutivos'>('precintos');
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,7 +96,12 @@ export const PrecintosView: React.FC = () => {
     return () => clearTimeout(delayDebounceFn); 
   }, [searchTerm]);
 
+  // Contador de consultas: solo se pinta la respuesta de la última (ver fetchData).
+  const lastDataRequest = useRef(0);
+  const lastSummaryRequest = useRef(0);
+
   const fetchSummaryCounts = async () => {
+    const requestId = ++lastSummaryRequest.current;
     try {
       const execFiltro = appliedFilters.selectedExecs.length > 0 ? appliedFilters.selectedExecs.join(',') : undefined;
       const clientesFiltro = appliedFilters.selectedClients.length > 0 ? appliedFilters.selectedClients.join(',') : undefined;
@@ -105,6 +113,7 @@ export const PrecintosView: React.FC = () => {
         getPrecintos(1, 1, 'Usado', execFiltro, clientesFiltro, appliedFilters.fromDate, appliedFilters.toDate, searchQuery, 1, motivosFiltro, undefined, undefined),
         getPrecintos(1, 1, 'Anulado', execFiltro, clientesFiltro, appliedFilters.fromDate, appliedFilters.toDate, searchQuery, 1, motivosFiltro, undefined, undefined),
       ]);
+      if (requestId !== lastSummaryRequest.current) return;
 
       setSummary((prev) =>
         prev.map((item) => {
@@ -121,8 +130,11 @@ export const PrecintosView: React.FC = () => {
   };
 
   const fetchData = async (precintoDestacado?: string) => {
+    // Si el usuario cambia de estado antes de que llegue esta respuesta, se descarta:
+    // sin esto, la de "Usados" podía llegar tarde y pintarse en "En bodega".
+    const requestId = ++lastDataRequest.current;
     try {
-      setSeleccionados([]); 
+      setSeleccionados([]);
       
       let estadoFiltro = undefined;
       if (expandedState === 'BODEGA') estadoFiltro = 'No Asignado'; 
@@ -137,9 +149,10 @@ export const PrecintosView: React.FC = () => {
       const response = await getPrecintos(
         currentPage, 20, estadoFiltro, execFiltro, clientesFiltro,
         appliedFilters.fromDate, appliedFilters.toDate, searchQuery, groupBy, motivosFiltro,
-        sortField, sortOrder 
+        sortField, sortOrder
       );
-      
+      if (requestId !== lastDataRequest.current) return;
+
       let nuevosDatos: any[] = [];
       let totalRegistrosBackend = 0;
       if (response && response.data && Array.isArray(response.data)) {
@@ -166,7 +179,8 @@ export const PrecintosView: React.FC = () => {
     } catch (error) {
       console.error("Error al cargar precintos", error);
     } finally {
-      setIsLoading(false);
+      // Solo la última consulta quita el "cargando".
+      if (requestId === lastDataRequest.current) setIsLoading(false);
     }
   };
 
@@ -196,11 +210,12 @@ export const PrecintosView: React.FC = () => {
     }
   };
 
-  useEffect(() => { 
-    fetchData(); 
-    fetchSummaryCounts(); 
+  useEffect(() => {
+    if (!projectId) return;
+    fetchData();
   }, [
-    expandedState, 
+    projectId,
+    expandedState,
     currentPage, 
     appliedFilters.selectedExecs, 
     appliedFilters.selectedClients, 
@@ -211,13 +226,32 @@ export const PrecintosView: React.FC = () => {
     groupBy,
     sortField,
     sortOrder
-  ]); 
+  ]);
+
+  // Los contadores no cambian al paginar, ordenar, agrupar ni abrir otro estado.
+  useEffect(() => {
+    if (!projectId) return;
+    fetchSummaryCounts();
+  }, [
+    projectId,
+    appliedFilters.selectedExecs,
+    appliedFilters.selectedClients,
+    appliedFilters.fromDate,
+    appliedFilters.toDate,
+    appliedFilters.selectedReasons,
+    searchQuery
+  ]);
+
+  // Otro proyecto: vuelve a la primera página.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [projectId]);
 
   useEffect(() => {
     if (activeTab === 'ejecutivos') {
       fetchEjecutivos();
     }
-  }, [activeTab, sortField, sortOrder]);
+  }, [activeTab, sortField, sortOrder, projectId]);
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -535,7 +569,7 @@ export const PrecintosView: React.FC = () => {
           onDownloadSelected={handleDownloadSelected} 
         />
         
-        <IngresarBodegaModal isOpen={isIngresarOpen} onClose={() => setIsIngresarOpen(false)} onSuccess={() => { setIsIngresarOpen(false); fetchData(); }} />
+        <IngresarBodegaModal isOpen={isIngresarOpen} onClose={() => setIsIngresarOpen(false)} onSuccess={() => { setIsIngresarOpen(false); fetchData(); fetchSummaryCounts(); }} />
         
         <AsignarEjecutivoModal 
           isOpen={isAsignarOpen} 
@@ -546,7 +580,8 @@ export const PrecintosView: React.FC = () => {
           onSuccess={() => { 
             setIsAsignarOpen(false); 
             setCodigosParaAsignar([]); 
-            fetchData(codigosParaAsignar[0]); 
+            fetchData(codigosParaAsignar[0]);
+            fetchSummaryCounts();
           }} 
           codigosIniciales={codigosParaAsignar} 
         />
@@ -562,7 +597,8 @@ export const PrecintosView: React.FC = () => {
             setIsCambiarOpen(false); 
             setPrecintosParaAccion([]); 
             setEjecutivoActualId(null);
-            fetchData(precintosParaAccion[0]); 
+            fetchData(precintosParaAccion[0]);
+            fetchSummaryCounts();
           }} 
           precintosSeleccionados={precintosParaAccion} 
           ejecutivoActualId={ejecutivoActualId} 
@@ -577,7 +613,8 @@ export const PrecintosView: React.FC = () => {
           onSuccess={() => { 
             setIsDevolverOpen(false); 
             setPrecintosParaAccion([]); 
-            fetchData(precintosParaAccion[0]); 
+            fetchData(precintosParaAccion[0]);
+            fetchSummaryCounts();
           }} 
           precintosSeleccionados={precintosParaAccion} 
         />
@@ -591,7 +628,8 @@ export const PrecintosView: React.FC = () => {
           onSuccess={() => { 
             setIsAnularOpen(false); 
             setPrecintosParaAnular([]); 
-            fetchData(precintosParaAnular[0]); 
+            fetchData(precintosParaAnular[0]);
+            fetchSummaryCounts();
             fetchEjecutivos();
           }} 
           precintosSeleccionados={precintosParaAnular} 
@@ -606,8 +644,9 @@ export const PrecintosView: React.FC = () => {
           onSuccess={() => { 
             setIsMoverOpen(false); 
             setPrecintosParaMover([]); 
-            fetchData(); 
-            fetchEjecutivos(); 
+            fetchData();
+            fetchSummaryCounts();
+            fetchEjecutivos();
           }} 
           precintosSeleccionados={precintosParaMover} 
           ejecutivosList={ejecutivosData} 

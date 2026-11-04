@@ -13,7 +13,7 @@ export const ExecutiveFilter: React.FC<ExecutiveFilterProps> = ({
   setSelectedExecs,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [ejecutivos, setEjecutivos] = useState<{ Id: string; UserName: string }[]>([]); // 👈 Estado para los ejecutivos
+  const [ejecutivos, setEjecutivos] = useState<{ Id: string; UserName: string; Nombre?: string }[]>([]); // 👈 Estado para los ejecutivos
 
   // 👇 Traemos los ejecutivos reales al cargar el componente
   useEffect(() => {
@@ -29,7 +29,7 @@ export const ExecutiveFilter: React.FC<ExecutiveFilterProps> = ({
   }, []);
 
   const filteredExecs = ejecutivos.filter((exec) =>
-    exec.UserName.toLowerCase().includes(searchTerm.toLowerCase())
+    `${exec.Nombre ?? ""} ${exec.UserName}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const toggleSelect = (name: string) => {
@@ -42,7 +42,7 @@ export const ExecutiveFilter: React.FC<ExecutiveFilterProps> = ({
     if (selectedExecs.length === filteredExecs.length) {
       setSelectedExecs([]);
     } else {
-      setSelectedExecs(filteredExecs.map((e) => e.UserName));
+      setSelectedExecs(filteredExecs.map((e) => e.Nombre || e.UserName));
     }
   };
 
@@ -80,12 +80,12 @@ export const ExecutiveFilter: React.FC<ExecutiveFilterProps> = ({
 
       <div className="grid grid-cols-3 gap-y-4 gap-x-3 max-h-[380px] overflow-y-auto pr-1">
         {filteredExecs.map((exec) => {
-          const isChecked = selectedExecs.includes(exec.UserName);
+          const isChecked = selectedExecs.includes(exec.Nombre || exec.UserName);
 
           return (
             <label
               key={exec.Id}
-              onClick={() => toggleSelect(exec.UserName)}
+              onClick={() => toggleSelect(exec.Nombre || exec.UserName)}
               className="flex items-center gap-2.5 cursor-pointer group select-none py-0.5"
             >
               <div
@@ -101,7 +101,7 @@ export const ExecutiveFilter: React.FC<ExecutiveFilterProps> = ({
                 className="text-sm text-gray-700 font-medium truncate"
                 title={exec.UserName}
               >
-                {exec.UserName}
+                {exec.Nombre || exec.UserName}
               </span>
             </label>
           );
