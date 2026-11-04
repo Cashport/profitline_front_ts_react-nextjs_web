@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Info, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 import GeneralDropdown from "@/components/ui/dropdown/dropdown";
 import SearchField from "@/components/ui/search-field/search-field";
@@ -19,17 +19,10 @@ interface BranchUsersCardProps {
   onAdd?: () => void;
   /** Sin acción no se muestra el botón de basura de cada usuario. */
   onRemove?: (user: IBranchUser) => void;
-  /** Aviso cuando la pantalla no permite agregar ni eliminar (proyecto de solo lectura). */
-  readOnlyNote?: string;
 }
 
 /** Usuarios asignados a la sucursal; agregar y eliminar aparecen solo si la pantalla los habilita. */
-export default function BranchUsersCard({
-  users,
-  onAdd,
-  onRemove,
-  readOnlyNote
-}: BranchUsersCardProps) {
+export default function BranchUsersCard({ users, onAdd, onRemove }: BranchUsersCardProps) {
   const [query, setQuery] = useState("");
 
   const visible = useMemo(() => {
@@ -68,13 +61,6 @@ export default function BranchUsersCard({
           )}
         </div>
       </div>
-
-      {readOnlyNote && (
-        <p className="m-0 mt-2 flex items-center gap-1.5 rounded-lg bg-cp-bg px-3 py-2 text-[13px] text-cp-ink-3">
-          <Info className="h-4 w-4 shrink-0" />
-          {readOnlyNote}
-        </p>
-      )}
 
       <ul className="m-0 list-none p-0">
         {visible.length ? (

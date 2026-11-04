@@ -31,7 +31,6 @@ export const useBranchDetail = (branchId: string) => {
         const res = await getBranchRegisteredUsers(branchKey as string);
         return {
           branch: toBranch(res.data.branch),
-          canEdit: res.data.PuedeEditar === true,
           users: res.data.users.map((u) => ({
             id: u.IdUsuario,
             name: u.NombreEjecutivo || u.CorreoEjecutivo || "Sin nombre",
