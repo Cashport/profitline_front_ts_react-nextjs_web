@@ -14,6 +14,8 @@ interface AsignarEjecutivoModalProps {
 interface Ejecutivo {
   Id: string;
   UserName: string;
+  /** Nombre en manager.Usuarios; si no hay, el back manda el correo. */
+  Nombre?: string;
 }
 
 export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
@@ -177,7 +179,7 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
               <select value={ejecutivo} onChange={(e) => setEjecutivo(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-black appearance-none cursor-pointer">
                 <option value="" disabled>Selecciona un ejecutivo</option>
                 {ejecutivosList.map((exec) => (
-                  <option key={exec.Id} value={exec.Id}>{exec.UserName}</option>
+                  <option key={exec.Id} value={exec.Id}>{exec.Nombre || exec.UserName}</option>
                 ))}
               </select>
               <span className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 text-[13px]">▼</span>
