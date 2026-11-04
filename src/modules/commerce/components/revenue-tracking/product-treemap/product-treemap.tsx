@@ -270,7 +270,12 @@ export default function ProductTreemap() {
   const [activeDim1, setActiveDim1] = useState<DimensionKey>("linea");
   const [activeDim2, setActiveDim2] = useState<DimensionKey>("producto");
 
-  const { data, isLoading } = useDashboardSalesTreemap(activeDim1, activeDim2, filters, includeIva);
+  const { data, isLoading, error, mutate } = useDashboardSalesTreemap(
+    activeDim1,
+    activeDim2,
+    filters,
+    includeIva
+  );
 
   const chartData = useMemo(
     () => ({
@@ -298,6 +303,20 @@ export default function ProductTreemap() {
   }, [chartData]);
 
   const renderChart = () => {
+    if (error && !data) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 h-full text-sm text-muted-foreground">
+          <span>No se pudo cargar el análisis cruzado.</span>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Reintentar
+          </button>
+        </div>
+      );
+    }
     if (isLoading && !data) {
       return (
         <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
