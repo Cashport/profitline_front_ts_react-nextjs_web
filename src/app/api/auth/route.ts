@@ -5,6 +5,7 @@ import { customInitApp } from "../../../../firebase-admin-config";
 import { COOKIE_NAME } from "@/utils/constants/globalConstants";
 import { customGetAuth } from "../../../../firebase";
 import { getPermissions } from "@/utils/permissions/getPermissions";
+import { compactTokenPermissions } from "@/utils/permissions/tokenPermissions";
 import { deflateSync } from "zlib";
 import { Buffer } from "buffer";
 
@@ -34,7 +35,11 @@ export async function POST() {
         isMarketplaceGuest: permissions.isMarketplaceGuest
       };
     }
-    const buffer = Buffer.from(JSON.stringify(permissions)) as any;
+    // Un super admin no necesita el árbol de views_permissions dentro del
+    // token: el backend lo autoriza contra la base de datos. Sin esto el JWT
+    // supera el límite de headers de App Runner/Envoy (HTTP 431).
+    const tokenPermissions = compactTokenPermissions(permissions);
+    const buffer = Buffer.from(JSON.stringify(tokenPermissions)) as any;
     const compressedClaims = deflateSync(buffer).toString("base64");
     const idCustomToken = await auth().createCustomToken(decodedToken.uid, {
       ...extraPermissions,

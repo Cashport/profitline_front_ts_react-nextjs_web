@@ -2,10 +2,10 @@
 
 import { Eye, EyeOff, Pencil, Table2 } from "lucide-react";
 
+import Header from "@/components/organisms/header";
 import type { IVisitFormStatus } from "@/types/surveys/ISurveys";
 
 import ActionButton from "../shared/action-button";
-import SurveyPageHeader from "../survey-page-header/survey-page-header";
 import SurveyStatus from "../survey-status/survey-status";
 
 interface SurveyEditorHeaderProps {
@@ -89,13 +89,11 @@ export default function SurveyEditorHeader({
     );
 
   return (
-    <SurveyPageHeader
-      backHref="/surveys"
-      backLabel="Encuestas"
-      onBack={onBack}
+    <Header
       title={title}
+      onBack={onBack}
       titleExtra={!isNew && isReady ? <SurveyStatus status={status} /> : null}
-      actions={actions}
+      actionsExtra={actions}
     />
   );
 }
