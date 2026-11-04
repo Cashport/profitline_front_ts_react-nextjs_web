@@ -57,6 +57,22 @@
         color: rgb(var(--cp-ink-3));
     }
 
+    .back {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: -0.75rem;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.6;
+        }
+    }
+
     .actions {
         display: flex;
         flex: 1 1 auto;

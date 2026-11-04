@@ -20,13 +20,32 @@ const categoryLabels: Record<CategoryKey, { name: string; unit: string }> = {
 export default function TopSales() {
   const [category, setCategory] = useState<CategoryKey>("producto");
   const { filters, includeIva } = useRevenueTracking();
-  const { data, isLoading } = useDashboardSalesRanking(category, filters, 10, includeIva);
+  const { data, isLoading, error, mutate } = useDashboardSalesRanking(
+    category,
+    filters,
+    10,
+    includeIva
+  );
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const labels = categoryLabels[category];
   const items = data?.items ?? [];
 
   const renderRows = () => {
+    if (error && !data) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+          <span>No se pudo cargar el top de ventas.</span>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Reintentar
+          </button>
+        </div>
+      );
+    }
     if (isLoading && !data) {
       return (
         <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">

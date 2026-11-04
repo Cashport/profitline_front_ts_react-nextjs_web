@@ -27,8 +27,12 @@ export const usePermissionRedirect = () => {
       return;
     }
 
-    // Si estamos en /land y hay proyecto con permisos, redirigir al primer view permitido
-    if (pathname === "/land" && selectedProject?.views_permissions?.length) {
+    // Si estamos en /land y hay proyecto con permisos (o es super admin, que
+    // ya no trae views_permissions en el token), redirigir al primer view permitido
+    if (
+      pathname === "/land" &&
+      (selectedProject?.isSuperAdmin || selectedProject?.views_permissions?.length)
+    ) {
       const firstRoute = getFirstPermittedRoute(selectedProject);
       if (firstRoute !== "/land") {
         isRedirecting.current = true;

@@ -61,7 +61,7 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
     if (!isNew && editor.isLoading) return <ProfitLoader size="small" />;
     if (!isReady) {
       return (
-        <div className="flex flex-col items-center gap-2 rounded-xl bg-card p-9 text-center shadow-sm">
+        <div className="cp-card flex flex-col items-center gap-2 p-9 text-center">
           <p className="text-sm text-destructive">
             {editor.error?.message || "No se encontró la encuesta."}
           </p>
@@ -82,11 +82,11 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
     return (
       <div
         className={cn(
-          "grid items-start gap-4",
+          "grid items-start gap-[var(--section-gap)]",
           showPreview && "lg:grid-cols-[minmax(0,1fr)_360px]"
         )}
       >
-        <section className="flex min-w-0 flex-col gap-3">
+        <section className="flex min-w-0 flex-col gap-[var(--card-gap)]">
           {editor.errors.length > 0 && (
             <Alert
               type="error"
@@ -131,7 +131,7 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
         </section>
 
         {showPreview && (
-          <aside className="sticky top-4 hidden lg:block">
+          <aside className="sticky top-[var(--header-h)] hidden lg:block">
             <SurveyPreview draft={draft} selectedId={editor.selectedId} onSelect={editor.select} />
           </aside>
         )}
@@ -140,7 +140,7 @@ export default function SurveyEditorView({ formId, startInEdit = false }: Survey
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 pb-6">
+    <div className="cp-page min-h-0 flex-1 pb-6">
       <SurveyEditorHeader
         mode={mode}
         isNew={isNew}

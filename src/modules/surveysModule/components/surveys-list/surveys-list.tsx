@@ -84,11 +84,11 @@ export default function SurveysList({
   };
 
   return (
-    <section className="rounded-xl bg-card p-4 shadow-sm">
-      <div className="flex flex-wrap items-baseline justify-between gap-2.5 px-1 pb-3">
-        <h2 className="text-sm font-semibold text-foreground">Encuestas</h2>
+    <section className="cp-card px-[18px] pb-[14px]">
+      <div className="flex h-[var(--table-title-h)] items-center justify-between gap-2.5">
+        <h2 className="text-[18px] font-semibold text-cp-ink">Encuestas</h2>
         {!isLoading && !error && (
-          <span className="text-[13px] text-muted-foreground">{fmtCount(forms.length, total)}</span>
+          <span className="text-[14px] text-cp-ink-4">{fmtCount(forms.length, total)}</span>
         )}
       </div>
       {renderContent()}
