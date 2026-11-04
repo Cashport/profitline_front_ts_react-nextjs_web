@@ -40,7 +40,9 @@ const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
   "/cuentas-medicas": "MedicalAccounts",
   "/visits": "Visits",
   "/reports": "Reports",
-  "/blockingAlerts": "BlockingAlerts"
+  "/blockingAlerts": "BlockingAlerts",
+  // Sucursales vive en Administración: entra quien puede entrar a Configuración.
+  "/branches": "MarketAdmin"
 };
 
 export const getFirstPermittedRoute = (selectedProject: ISelectedProject | undefined): string => {
