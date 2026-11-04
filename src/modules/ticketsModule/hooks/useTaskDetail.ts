@@ -10,21 +10,28 @@ export const useTaskDetail = (ticketId: number | null) => {
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<ITicket>>(
     key(ticketId ? `/tickets/${ticketId}` : null),
     taskFetcher,
-    { revalidateOnFocus: false }
+    // Tras un cambio (refreshToken) se sigue viendo la tarea mientras recarga; nunca otra tarea.
+    { revalidateOnFocus: false, keepPreviousData: true }
   );
-  return { ticket: data?.data, isLoading, error, mutate };
+  const ticket = data?.data?.id === ticketId ? data?.data : undefined;
+  return { ticket, isLoading, error, mutate };
 };
 
 /** Historial de cambios (GET /tickets/:id/history), en orden cronológico. */
 export const useTaskHistory = (ticketId: number | null) => {
   const key = useTaskKey();
-  const { data, isLoading } = useSWR<GenericResponse<ITicketLog[]>>(
+  const { data, error, isLoading } = useSWR<GenericResponse<ITicketLog[]>>(
     key(ticketId ? `/tickets/${ticketId}/history` : null),
     taskFetcher,
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false, keepPreviousData: true }
   );
-  return { history: data?.data ?? [], isLoading };
+  const logs = data?.data ?? [];
+  const history = logs.length && logs[0].ticket_id !== ticketId ? [] : logs;
+  return { history, isLoading, error };
 };
+
+/** Referencia estable para "sin opciones" (evita efectos que corren en cada render). */
+const NO_OPTIONS: ITaskOptionItem[] = [];
 
 /**
  * Clientes del proyecto para crear/editar (GET /tickets/options/:field):
@@ -46,5 +53,5 @@ export const useTaskOptions = (
   const { data, isLoading } = useSWR<GenericResponse<ITaskOptionItem[]>>(key(path), taskFetcher, {
     keepPreviousData: true
   });
-  return { options: data?.data ?? [], isLoading };
+  return { options: data?.data ?? NO_OPTIONS, isLoading };
 };

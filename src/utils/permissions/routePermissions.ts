@@ -19,7 +19,8 @@ export const PERMISSION_ROUTE_MAP: Record<string, string> = {
   MedicalAccounts: "/cuentas-medicas",
   Visits: "/visits",
   Reports: "/reports",
-  BlockingAlerts: "/blockingAlerts"
+  BlockingAlerts: "/blockingAlerts",
+  Tickets: "/tickets"
 };
 
 const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
@@ -40,7 +41,8 @@ const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
   "/cuentas-medicas": "MedicalAccounts",
   "/visits": "Visits",
   "/reports": "Reports",
-  "/blockingAlerts": "BlockingAlerts"
+  "/blockingAlerts": "BlockingAlerts",
+  "/tickets": "Tickets"
 };
 
 export const getFirstPermittedRoute = (selectedProject: ISelectedProject | undefined): string => {

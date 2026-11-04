@@ -107,13 +107,15 @@ function RemoteClientSelect({
 }: Omit<TaskFieldInputProps, "field"> & { field: ITaskFieldConfig }) {
   const [term, setTerm] = useState("");
   const debounced = useDebounce(term, 300);
-  const { options, isLoading } = useTaskOptions(
-    field.key === "data_client" ? "data_client" : "client",
-    debounced
-  );
+  const fieldKey = field.key === "data_client" ? "data_client" : "client";
+  const { options, isLoading } = useTaskOptions(fieldKey, debounced);
+  // Valor que llegó solo con el id (p. ej. el "+" de un grupo): su nombre se pide al back.
+  const unresolved = Boolean(value && !initialLabel && !options.some((o) => o.id === value));
+  const byId = useTaskOptions(unresolved ? fieldKey : null, "", value ? [value] : []).options;
   const items = options.map((o) => ({ value: o.id, label: o.label, extra: o.extra }));
   if (value && !items.some((o) => o.value === value)) {
-    items.unshift({ value, label: initialLabel ?? value, extra: undefined });
+    const known = byId.find((o) => o.id === value);
+    items.unshift({ value, label: initialLabel ?? known?.label ?? value, extra: known?.extra });
   }
 
   return (

@@ -9,9 +9,6 @@ import type {
   FilterOptionItem,
   FilterSelection
 } from "@/components/ui/filter-modal";
-import TaskDateTab, {
-  type DateDraft
-} from "@/modules/taskManager/components/FilterTasksModal/TaskDateTab";
 import type {
   ITaskConfig,
   ITaskFacets,
@@ -21,6 +18,7 @@ import type {
 import { useTaskFacets } from "../../hooks/useTaskData";
 import { useTicketsView } from "../../stores/tickets-view-store";
 import type { TaskViewState } from "../../types";
+import TasksDateTab, { type DateDraft } from "../tasks-date-tab/tasks-date-tab";
 
 /** Orden de las categorías del modal (el del prototipo); el resto va al final. */
 const FILTER_ORDER: TaskFieldKey[] = [
@@ -109,9 +107,9 @@ export default function TasksFilterModal({ config }: { config: ITaskConfig }) {
       key: "fecha",
       label: "Fecha",
       kind: "custom",
-      metaLabel: "Fecha de creación",
+      metaLabel: "Selecciona un periodo",
       draftCount: dateDraft.from_date || dateDraft.to_date ? 1 : 0,
-      renderPanel: () => <TaskDateTab value={dateDraft} onChange={setDateDraft} />,
+      renderPanel: () => <TasksDateTab value={dateDraft} onChange={setDateDraft} />,
       // Con hideTags solo cuenta para el badge de "Filtrar".
       renderTag: () => (hasDate ? <span /> : null)
     },
@@ -143,9 +141,12 @@ export default function TasksFilterModal({ config }: { config: ITaskConfig }) {
       value={value}
       hideTags
       footerSummary={
-        facets
-          ? `${facets.total} ${facets.total === 1 ? "tarea coincide" : "tareas coinciden"}`
-          : null
+        // Mientras llega el conteo del borrador no se muestra el anterior (parecería no cambiar).
+        isLoading
+          ? "Calculando…"
+          : facets
+            ? `${facets.total} ${facets.total === 1 ? "tarea coincide" : "tareas coinciden"}`
+            : null
       }
       onOpen={() => {
         setOpenedOnce(true);
