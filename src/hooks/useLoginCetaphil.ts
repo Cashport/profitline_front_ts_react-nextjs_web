@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { loginCetaphil } from "@/services/cetaphil/authService";
 import { STORAGE_TOKEN } from "@/utils/constants/globalConstants";
 import { useMessageApi } from "@/context/MessageContext";
+import { getTranslator } from "@/i18n/translator";
 
 export function useLoginCetaphil(urlToken: string | null) {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +32,7 @@ export function useLoginCetaphil(urlToken: string | null) {
         if (urlDecoded?.exp && Date.now() >= urlDecoded.exp * 1000) {
           // Token expirado, redirigir a la página de inicio de sesión
           setIsLoading(false);
-          showMessage("error", "Su sesión expirada. Por favor, solicite un nuevo acceso.");
+          showMessage("error", getTranslator("shared")("session.expiredRequestAccess"));
           router.push("/cetaphil");
           return;
         }
@@ -40,7 +41,7 @@ export function useLoginCetaphil(urlToken: string | null) {
             setIsLoading(false);
             console.log("Cetaphil login response:", response);
             localStorage.setItem(STORAGE_TOKEN, response.data.data.token);
-            router.push("/comercio/cetaphil");
+            router.push("/commerce/cetaphil");
           })
           .catch((error) => {
             setIsLoading(false);
@@ -50,7 +51,7 @@ export function useLoginCetaphil(urlToken: string | null) {
         if (urlDecoded?.exp && Date.now() >= urlDecoded.exp * 1000) {
           // Token expirado, redirigir a la página de inicio de sesión
           setIsLoading(false);
-          showMessage("error", "Su sesión expirada. Por favor, solicite un nuevo acceso.");
+          showMessage("error", getTranslator("shared")("session.expiredRequestAccess"));
           router.push("/cetaphil");
         }
         setIsLoading(false);
@@ -67,12 +68,12 @@ export function useLoginCetaphil(urlToken: string | null) {
           // Token expirado, redirigir a la página de inicio de sesión
           localStorage.removeItem(STORAGE_TOKEN);
           setIsLoading(false);
-          showMessage("error", "Sesión expirada. Por favor, inicia sesión de nuevo.");
+          showMessage("error", getTranslator("shared")("session.expiredSignIn"));
           router.push("/cetaphil");
         } else {
           // Token válido, redirigir al dashboard
           setIsLoading(false);
-          router.push("/comercio/cetaphil");
+          router.push("/commerce/cetaphil");
         }
       }
     }

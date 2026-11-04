@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
 import { LINEAS_CATALOGO } from "@/modules/marketAdmin/mocks/clientDetail";
@@ -18,9 +19,20 @@ type GrupoProductos = {
   productos: { key: string; nombre: string }[];
 };
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+function Toggle({
+  checked,
+  onChange,
+  label
+}: {
+  checked: boolean;
+  onChange: () => void;
+  label: string;
+}) {
   return (
     <button
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
       onClick={onChange}
       className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${checked ? "bg-cashport-green" : "bg-[#DDDDDD]"}`}
     >
@@ -32,6 +44,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
 }
 
 export default function ProductosTab({ categorias, isLoading }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.products");
   const [showLineaPicker, setShowLineaPicker] = useState(false);
   // Estado efímero: el endpoint no expone activación por producto ni alta de líneas.
   const [inactivos, setInactivos] = useState<Set<string>>(new Set());
@@ -77,19 +90,19 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
     <div className="cp-list-scroll">
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-[#666666]">
-          {totalProductos} productos en {grupos.length} categorías
+          {t("summary", { products: totalProductos, categories: grupos.length })}
         </p>
         <div className="relative">
           <button
             onClick={() => setShowLineaPicker((v) => !v)}
             className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
           >
-            <Plus size={18} /> Agregar línea
+            <Plus size={18} /> {t("addLine")}
           </button>
           {showLineaPicker && (
             <div className="absolute right-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-20 min-w-[200px] py-1">
               {lineasDisponibles.length === 0 ? (
-                <p className="text-sm text-[#999999] px-4 py-2">No hay más líneas disponibles</p>
+                <p className="text-sm text-[#999999] px-4 py-2">{t("noMoreLines")}</p>
               ) : (
                 lineasDisponibles.map((l) => {
                   const c = LINEA_COLORS[l] ?? { bg: "#AAAAAA", text: "#fff" };
@@ -119,9 +132,7 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
       </div>
 
       {grupos.length === 0 && (
-        <p className="text-sm text-[#999999] py-8 text-center">
-          Este cliente no tiene productos disponibles.
-        </p>
+        <p className="text-sm text-[#999999] py-8 text-center">{t("empty")}</p>
       )}
 
       {grupos.map((grupo) => {
@@ -137,12 +148,12 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
               </span>
               <span className="text-sm font-bold text-[#141414]">{grupo.nombre}</span>
               <span className="text-[13px] text-[#999999] ml-auto">
-                {grupo.productos.length} productos
+                {t("productCount", { count: grupo.productos.length })}
               </span>
             </div>
             <div className="grid grid-cols-[1fr_80px] gap-4 px-4 py-2 border-b border-[#F5F5F5]">
-              <span className="text-[13px] font-bold text-[#141414]">Producto</span>
-              <span className="text-[13px] font-bold text-[#141414]">Activo</span>
+              <span className="text-[13px] font-bold text-[#141414]">{t("product")}</span>
+              <span className="text-[13px] font-bold text-[#141414]">{t("active")}</span>
             </div>
             {grupo.productos.map((p) => {
               const activo = !inactivos.has(p.key);
@@ -156,7 +167,11 @@ export default function ProductosTab({ categorias, isLoading }: Props) {
                   >
                     {p.nombre}
                   </span>
-                  <Toggle checked={activo} onChange={() => toggleProducto(p.key)} />
+                  <Toggle
+                    checked={activo}
+                    onChange={() => toggleProducto(p.key)}
+                    label={p.nombre}
+                  />
                 </div>
               );
             })}

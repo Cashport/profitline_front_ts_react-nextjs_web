@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import DetailTooltip, { estadoRows } from "@/modules/walletModule/components/shared/detail-tooltip";
 import StatusLegend from "@/modules/walletModule/components/shared/status-legend";
@@ -28,19 +30,22 @@ const HATCH = {
     "repeating-linear-gradient(135deg, transparent 0 6px, rgb(var(--foreground) / 0.07) 6px 12px)"
 };
 
+const bold = (chunks: React.ReactNode) => (
+  <b className="ml-1 font-semibold tabular-nums text-foreground">{chunks}</b>
+);
+
 /** Cartera por tramo de mora. Cada columna filtra el resto de la torre. */
 export default function AgingPanel({ porTramo, resumen, seleccion, onToggle }: AgingPanelProps) {
+  const t = useTranslations("controlTower.aging");
   const max = Math.max(1, ...porTramo.map((g) => g.total));
   const { segments, tramos } = resumen;
   const masDe60 = tramos[3] + tramos[4] + tramos[5];
 
   const hint =
-    seleccion.length === 0
-      ? "clic en un tramo para filtrar el tablero"
-      : `${seleccion.length} ${seleccion.length === 1 ? "tramo filtrando" : "tramos filtrando"} el tablero`;
+    seleccion.length === 0 ? t("hintIdle") : t("hintActive", { count: seleccion.length });
 
   return (
-    <PanelCard title="Cartera por tramo de mora" hint={hint}>
+    <PanelCard title={t("title")} hint={hint}>
       <div className="mb-3">
         <StatusLegend />
       </div>
@@ -120,28 +125,16 @@ export default function AgingPanel({ porTramo, resumen, seleccion, onToggle }: A
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-[18px] gap-y-1 border-t border-border pt-3 text-[13px] text-muted-foreground">
+        <span>{t.rich("current", { amount: fmtM(tramos[0]), b: bold })}</span>
         <span>
-          Corriente{" "}
-          <b className="ml-1 font-semibold tabular-nums text-foreground">{fmtM(tramos[0])}</b>
-        </span>
-        <span>
-          Vencido{" "}
-          <b className="ml-1 font-semibold tabular-nums text-foreground">
-            {fmtM(segments.vencido)}
-          </b>
+          {t.rich("pastDue", { amount: fmtM(segments.vencido), b: bold })}
           <small className="ml-1.5">
             {segments.total ? `${pct(segments.vencido, segments.total).toFixed(1)}%` : "—"}
           </small>
         </span>
+        <span>{t.rich("over60", { amount: fmtM(masDe60), b: bold })}</span>
         <span>
-          Más de 60 días{" "}
-          <b className="ml-1 font-semibold tabular-nums text-foreground">{fmtM(masDe60)}</b>
-        </span>
-        <span>
-          Sin conciliar{" "}
-          <b className="ml-1 font-semibold tabular-nums text-foreground">
-            {fmtM(resumen.vencidos.sin_conciliar)}
-          </b>
+          {t.rich("unreconciled", { amount: fmtM(resumen.vencidos.sin_conciliar), b: bold })}
         </span>
       </div>
     </PanelCard>

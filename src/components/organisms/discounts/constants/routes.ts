@@ -1,5 +1,5 @@
-export const DISCOUNTS_BASE = "/descuentos";
-export const MARKET_ADMIN_DISCOUNTS_BASE = "/market-admin/bonusAndDiscounts";
+export const DISCOUNTS_BASE = "/discounts";
+export const MARKET_ADMIN_DISCOUNTS_BASE = "/market-admin/bonuses-and-discounts";
 
 // Keys of the tabs rendered by MarketAdminBonusAndDiscounts
 export const MARKET_ADMIN_DISCOUNTS_TABS = {

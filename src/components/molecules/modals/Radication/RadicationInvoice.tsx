@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import { Flex, Modal } from "antd";
 import { CaretLeft } from "@phosphor-icons/react";
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
@@ -25,12 +26,12 @@ interface IFormRadicationInvoice {
   radication_date: Date;
 }
 
-const schema = yup.object().shape({
-  radication_date: yup
-    .date()
-    .typeError("Debe ser una fecha válida")
-    .required("La fecha de radicación es requerida")
-});
+type RadicationT = ReturnType<typeof useTranslations<"modals.radication">>;
+
+const buildSchema = (t: RadicationT) =>
+  yup.object().shape({
+    radication_date: yup.date().typeError(t("invalidDate")).required(t("dateRequired"))
+  });
 
 const RadicationInvoice = ({
   isOpen,
@@ -39,6 +40,9 @@ const RadicationInvoice = ({
   invoiceSelected,
   messageShow
 }: RadicationInvoiceProps) => {
+  const t = useTranslations("modals.radication");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const {
     control,
     handleSubmit,
@@ -75,14 +79,14 @@ const RadicationInvoice = ({
       };
 
       await radicateInvoice(radicationData, selectedEvidence, clientId);
-      messageShow.success("Factura radicada con éxito");
+      messageShow.success(t("success"));
       reset();
       setSelectedEvidence([]);
       setCommentary("");
       onClose();
     } catch (error) {
       console.error("Error al radicar la factura:", error);
-      messageShow.error("Error al radicar la factura");
+      messageShow.error(t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -99,11 +103,9 @@ const RadicationInvoice = ({
     <Modal className="contentRegisterNews" width="50%" footer={null} open={isOpen} closable={false}>
       <button className="contentRegisterNews__header" onClick={handleClose}>
         <CaretLeft size="1.25rem" />
-        <h4>Radicación</h4>
+        <h4>{t("title")}</h4>
       </button>
-      <p className="contentRegisterNews__description">
-        Adjunta la evidencia e ingresa un comentario
-      </p>
+      <p className="contentRegisterNews__description">{t("description")}</p>
       <form onSubmit={handleSubmit(onSubmit)} className="contentRegisterNews__form">
         <div className="contentRegisterNews__select">
           <Flex vertical>
@@ -113,11 +115,11 @@ const RadicationInvoice = ({
               nameInput={""}
               control={control}
               error={undefined}
-              titleInput="Tipo de radicación"
+              titleInput={t("type")}
             />
           </Flex>
           <InputDateForm
-            titleInput="Fecha de radicación"
+            titleInput={t("date")}
             nameInput="radication_date"
             control={control}
             error={errors.radication_date}
@@ -132,10 +134,10 @@ const RadicationInvoice = ({
           isOpen={true}
           handleCancel={handleClose}
           customTexts={{
-            title: "Radicación",
-            description: "Adjunta la evidencia e ingresa un comentario",
-            cancelButtonText: "Cancelar",
-            acceptButtonText: isSubmitting ? "Enviando..." : "Guardar"
+            title: t("title"),
+            description: t("description"),
+            cancelButtonText: tCommon("actions.cancel"),
+            acceptButtonText: isSubmitting ? tCommon("status.sending") : tCommon("actions.save")
           }}
           noTitle
           noDescription

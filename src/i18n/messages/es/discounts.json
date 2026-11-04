@@ -1,0 +1,139 @@
+{
+  "title": "Configuración de descuentos",
+  "tabs": {
+    "packages": "Paquete de descuentos",
+    "rules": "Reglas de descuentos"
+  },
+  "list": {
+    "createPackage": "Crear paquete de descuentos",
+    "createDiscount": "Crear descuento",
+    "packageActivated": "Paquete de descuentos activado con éxito",
+    "packageDeactivated": "Paquete de descuentos desactivado con éxito",
+    "discountActivated": "Descuento activado con éxito",
+    "discountDeactivated": "Descuento desactivado con éxito"
+  },
+  "columns": {
+    "discountType": "Tipo descuentos",
+    "definitions": "Definiciones",
+    "startDate": "Fecha inicio",
+    "endDate": "Fecha fin",
+    "approval": "Aprobación",
+    "viewDetail": "Ver detalle",
+    "remove": "Quitar descuento"
+  },
+  "categories": {
+    "byOrder": "Por orden",
+    "byClient": "Por cliente",
+    "annual": "Plan anual"
+  },
+  "types": {
+    "quantity": "Cantidad",
+    "amount": "Monto",
+    "crossSelling": "Cross-Selling",
+    "crossFiller": "Cross-Filler",
+    "firstPurchase": "Primera compra",
+    "allPurchases": "Todas las compras",
+    "annualPlan": "Plan Anual"
+  },
+  "form": {
+    "selectType": "Selecciona el tipo de descuento",
+    "backToList": "Volver a la lista",
+    "saveDiscount": "Guardar Descuento",
+    "createDiscount": "Crear Descuento",
+    "editDiscount": "Editar Descuento",
+    "cancelEdit": "Cancelar edición",
+    "definitions": "Definiciones",
+    "discountType": "Tipo de descuento",
+    "description": "Descripción",
+    "dates": "Fechas",
+    "noEndDate": "No tiene fin",
+    "start": "Inicio",
+    "end": "Fin",
+    "features": "Características del descuento",
+    "createSuccess": "Descuento creado exitosamente",
+    "createError": "Error al crear el descuento",
+    "updateSuccess": "Descuento actualizado exitosamente",
+    "updateError": "Error al actualizar el descuento"
+  },
+  "byOrder": {
+    "minOrderQuantity": "Cantidad mínima de orden",
+    "percentage": "Descuento aplicable en porcentaje",
+    "fixedAmount": "Descuento aplicable en valor fijo",
+    "discountToApply": "Descuento a aplicar",
+    "addRange": "Agregar rango",
+    "range": "Rango {number}",
+    "removeRange": "Eliminar rango",
+    "labels": {
+      "minQuantity": "Cantidad mínima",
+      "maxQuantity": "Cantidad máxima",
+      "minAmount": "Monto mínimo",
+      "maxAmount": "Monto máximo",
+      "minBrands": "Mínimo de marcas",
+      "minUnitsPerBrand": "Mínimo de unidades por marca",
+      "minSkus": "Mínimo de SKU",
+      "minUnitsPerSku": "Mínimo de unidades por SKU"
+    }
+  },
+  "byClient": {
+    "applicableDiscount": "Descuento aplicable",
+    "selectCustomerGroup": "Selecciona un grupo de clientes"
+  },
+  "products": {
+    "title": "Productos a aplicar",
+    "empty": "No hay productos para aplicar"
+  },
+  "annual": {
+    "selectCustomer": "Selecciona cliente",
+    "attachContract": "Adjuntar contrato",
+    "viewContract": "Ver contrato",
+    "contract": "Contrato",
+    "noProducts": "No hay productos para este cliente",
+    "line": "Línea",
+    "selectLine": "Selecciona una línea",
+    "product": "Producto",
+    "selectProduct": "Selecciona producto",
+    "units": "Unidades",
+    "discount": "Descuento",
+    "addDiscount": "Agregar descuento",
+    "removeRow": "Eliminar fila"
+  },
+  "package": {
+    "discount": "Descuento",
+    "addRule": "Agregar regla de descuento",
+    "additionalDiscount": "Descuento adicional",
+    "create": "Crear paquete de descuentos"
+  },
+  "validation": {
+    "nameMin": "El nombre debe tener al menos 3 caracteres",
+    "nameRequired": "El nombre es requerido",
+    "descriptionMin": "La descripción debe tener al menos 3 caracteres",
+    "descriptionRequired": "La descripción es requerida",
+    "typeRequired": "El tipo de descuento es requerido",
+    "startDateRequired": "La fecha de inicio es requerida",
+    "startDateMin": "La fecha de inicio debe ser mayor o igual a hoy",
+    "endDateMin": "La fecha de fin debe ser mayor a la fecha de inicio",
+    "endDateRequired": "La fecha de fin es requerida",
+    "productsRequired": "Productos a aplicar son requeridos",
+    "invalidType": "Tipo de dato inválido",
+    "minValueRequired": "El valor mínimo es requerido",
+    "minValuePositive": "El valor mínimo debe ser mayor a 0",
+    "computationRequired": "El tipo de cálculo es requerido",
+    "idRequired": "El id es requerido",
+    "minUnitsRequired": "El mínimo de unidades es requerido",
+    "maxUnitsRequired": "El máximo de unidades es requerido",
+    "valuePositive": "El valor debe ser mayor a 0",
+    "discountRequired": "El descuento es requerido",
+    "discountPositive": "El descuento debe ser mayor a 0",
+    "discountPositivePercent": "El descuento debe ser mayor a 0%",
+    "discountMax": "El descuento debe ser menor a 100%",
+    "rulesMin": "Debe haber al menos una regla de descuento",
+    "rangeAboveMax": "Debe ser superior al máximo del rango {range}",
+    "rangeAboveMin": "Debe ser superior al mínimo del rango {range}",
+    "customerGroupsRequired": "Grupos de clientes a aplicar son requeridos",
+    "customerRequired": "El cliente es requerido",
+    "lineRequired": "La línea es requerida",
+    "productRequired": "El producto es requerido",
+    "primaryMin": "Debe haber al menos un descuento primario",
+    "customerGroupsMin": "Debe haber al menos un grupo de clientes"
+  }
+}

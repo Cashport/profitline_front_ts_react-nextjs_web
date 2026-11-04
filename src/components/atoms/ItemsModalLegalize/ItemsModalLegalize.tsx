@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import { Radio } from "antd";
 
 import { useAppStore } from "@/lib/store/store";
@@ -26,6 +27,7 @@ const ItemsModalLegalize: FC<ItemsModalLegalizeProps> = ({
   type,
   selectedItemId
 }) => {
+  const t = useTranslations("components.itemsModal");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   return (
@@ -36,11 +38,11 @@ const ItemsModalLegalize: FC<ItemsModalLegalizeProps> = ({
         <div className={"texts"}>
           <div className={"mainText"}>
             <strong className={"name"}>
-              {titleMap[type]}
+              {titleMap[type] ? t(titleMap[type]) : null}
               <span>{item.id}</span>
             </strong>
           </div>
-          <div className={"label"}>{item.motive_name ?? "Volumen"}</div>
+          <div className={"label"}>{item.motive_name ?? t("volume")}</div>
         </div>
         <div className={"mainValues"}>
           <div className={"value"}>{formatMoney(item.current_value.toString())}</div>
@@ -55,10 +57,10 @@ const ItemsModalLegalize: FC<ItemsModalLegalizeProps> = ({
   );
 };
 
-const titleMap: Record<number, string> = {
-  1: "Nota débito",
-  2: "Nota crédito",
-  3: "Descuento"
+const titleMap: Record<number, "debitMemo" | "creditMemo" | "discount"> = {
+  1: "debitMemo",
+  2: "creditMemo",
+  3: "discount"
 };
 
 export default ItemsModalLegalize;

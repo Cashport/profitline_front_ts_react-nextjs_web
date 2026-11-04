@@ -14,6 +14,7 @@ import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDo
 import style from "./AnnualDiscountDefinition.module.scss";
 import { fetcher } from "@/utils/api/api";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 
 const { Title, Text } = Typography;
 
@@ -35,6 +36,8 @@ export default function AnnualDiscountDefinition({
   loadingMain,
   handleUpdateContract
 }: Readonly<Props>) {
+  const t = useTranslations("discounts");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((project) => project.selectedProject);
 
   interface IResponseClients {
@@ -78,7 +81,7 @@ export default function AnnualDiscountDefinition({
   return (
     <Flex className={style.HeaderContainer} vertical gap={20}>
       <Flex gap={20} justify="space-between">
-        <Title level={4}>Selecciona cliente</Title>
+        <Title level={4}>{t("annual.selectCustomer")}</Title>
         {statusForm !== "create" && (
           <Button
             className={style.buttonEdit}
@@ -89,7 +92,7 @@ export default function AnnualDiscountDefinition({
               handleChangeStatusForm(statusForm === "review" ? "edit" : "review");
             }}
           >
-            {statusForm === "review" ? "Editar Descuento" : "Cancelar Edicion"}
+            {statusForm === "review" ? t("form.editDiscount") : t("form.cancelEdit")}
             <Pencil size={"1.2rem"} />
           </Button>
         )}
@@ -104,7 +107,7 @@ export default function AnnualDiscountDefinition({
                 {...field}
                 showSearch
                 optionFilterProp="label"
-                placeholder="Selecciona cliente"
+                placeholder={t("annual.selectCustomer")}
                 className={`${style.selectInput} translate`}
                 loading={isLoading}
                 variant="borderless"
@@ -130,10 +133,12 @@ export default function AnnualDiscountDefinition({
           )}
         />
       </Flex>
-      <Title level={4}>{statusForm === "create" ? "Adjuntar contrato" : "Ver contrato"}</Title>
+      <Title level={4}>
+        {statusForm === "create" ? t("annual.attachContract") : t("annual.viewContract")}
+      </Title>
       <Flex gap={20}>
         <UploadDocumentButton
-          title="Contrato"
+          title={t("annual.contract")}
           isMandatory={true}
           setFiles={setFiles}
           containerClassName={style.uploadDocumentButton}
@@ -150,24 +155,24 @@ export default function AnnualDiscountDefinition({
           )}
         </UploadDocumentButton>
       </Flex>
-      <Title level={4}>Descripción</Title>
+      <Title level={4}>{t("form.description")}</Title>
       <Flex gap={20}>
         <InputForm
           control={control}
           error={errors.name}
           nameInput="name"
-          titleInput="Nombre"
+          titleInput={tCommon("fields.name")}
           className={style.input}
         />
         <InputForm
           control={control}
           error={errors.description}
           nameInput="description"
-          titleInput="Descripción"
+          titleInput={tCommon("fields.description")}
           className={style.inputDesc}
         />
       </Flex>
-      <Title level={4}>Fechas</Title>
+      <Title level={4}>{t("form.dates")}</Title>
       <Flex gap={20}>
         <Flex vertical>
           <Controller
@@ -176,10 +181,10 @@ export default function AnnualDiscountDefinition({
             render={({ field }) => {
               return (
                 <>
-                  <Text type="secondary">Inicio</Text>
+                  <Text type="secondary">{t("form.start")}</Text>
                   <DatePicker
                     className={style.inputDatePicker}
-                    placeholder="Inicio"
+                    placeholder={t("form.start")}
                     type="secondary"
                     {...field}
                   />
@@ -198,10 +203,10 @@ export default function AnnualDiscountDefinition({
             render={({ field }) => {
               return (
                 <>
-                  <Text type="secondary">Fin</Text>
+                  <Text type="secondary">{t("form.end")}</Text>
                   <DatePicker
                     className={style.inputDatePicker}
-                    placeholder="Fin"
+                    placeholder={t("form.end")}
                     type="secondary"
                     {...field}
                   />
@@ -215,8 +220,8 @@ export default function AnnualDiscountDefinition({
         </Flex>
       </Flex>
       <hr></hr>
-      <Title level={4}>Características del descuento</Title>
-      <Title level={5}>Productos a aplicar</Title>
+      <Title level={4}>{t("form.features")}</Title>
+      <Title level={5}>{t("products.title")}</Title>
       <AnnualFeatures
         form={form}
         fields={fields}

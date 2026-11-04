@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Modal, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import { Button } from "@/modules/chat/ui/button";
 import { IReferenceFile } from "@/types/dataQuality/IDataQuality";
@@ -21,6 +22,8 @@ export function ModalToggleReferenceStatus({
   ownerLabel,
   onConfirm
 }: ModalToggleReferenceStatusProps) {
+  const t = useTranslations("dataQuality.references.toggle");
+  const tCommon = useTranslations("common");
   const [submitting, setSubmitting] = useState(false);
   const willDeactivate = reference?.is_active === 1;
 
@@ -33,10 +36,10 @@ export function ModalToggleReferenceStatus({
     setSubmitting(true);
     try {
       await onConfirm();
-      message.success(willDeactivate ? "Referencia desactivada." : "Referencia activada.");
+      message.success(willDeactivate ? t("deactivated") : t("activated"));
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "No se pudo cambiar el estado.");
+      message.error(error instanceof Error ? error.message : t("error"));
     } finally {
       setSubmitting(false);
     }
@@ -46,31 +49,29 @@ export function ModalToggleReferenceStatus({
     <Modal
       open={isOpen}
       onCancel={submitting ? undefined : onClose}
-      title={willDeactivate ? "Desactivar referencia" : "Activar referencia"}
+      title={willDeactivate ? t("deactivateTitle") : t("activateTitle")}
       footer={null}
       destroyOnClose
       maskClosable={!submitting}
     >
       <div className="space-y-4">
         <p className="text-sm text-[#141414]">
-          {willDeactivate
-            ? "La referencia dejará de utilizarse en la resolución, pero no se elimina su archivo ni su historial."
-            : "La referencia volverá a estar disponible para la resolución."}
+          {willDeactivate ? t("deactivateDescription") : t("activateDescription")}
         </p>
         <div className="rounded-lg bg-[#F5F5F4] p-3 text-sm text-[#141414]">
           <p>
-            <span className="font-medium">Tipo:</span> {reference?.reference_type ?? "-"}
+            <span className="font-medium">{t("type")}</span> {reference?.reference_type ?? "-"}
           </p>
           <p>
-            <span className="font-medium">Ámbito:</span> {ownerLabel}
+            <span className="font-medium">{t("scope")}</span> {ownerLabel}
           </p>
           <p>
-            <span className="font-medium">Versión:</span> {reference?.version ?? "-"}
+            <span className="font-medium">{t("version")}</span> {reference?.version ?? "-"}
           </p>
         </div>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="button"
@@ -78,7 +79,11 @@ export function ModalToggleReferenceStatus({
             disabled={submitting}
             onClick={handleConfirm}
           >
-            {submitting ? "Procesando..." : willDeactivate ? "Desactivar" : "Activar"}
+            {submitting
+              ? tCommon("status.processing")
+              : willDeactivate
+                ? t("deactivate")
+                : t("activate")}
           </Button>
         </div>
       </div>

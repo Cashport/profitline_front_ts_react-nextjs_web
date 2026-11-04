@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import {
   DropdownMenu,
@@ -26,11 +27,12 @@ export default function ChatActions({
   triggerClassName = "h-8 p-0 font-semibold italic",
   align = "end"
 }: ChatActionsProps) {
+  const tCommon = useTranslations("common");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className={triggerClassName}>
-          Acciones
+          {tCommon("fields.actions")}
           <ArrowUpRight size={16} />
         </Button>
       </DropdownMenuTrigger>

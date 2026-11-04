@@ -5,6 +5,7 @@ import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-reac
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { cn } from "@/utils/utils";
+import { UiText } from "@/modules/chat/ui/ui-text";
 import { Button } from "@/modules/chat/ui/button";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -185,7 +186,9 @@ function CarouselPrevious({
       {...props}
     >
       <ArrowLeft />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">
+        <UiText k="previousSlide" />
+      </span>
     </Button>
   );
 }
@@ -215,7 +218,9 @@ function CarouselNext({
       {...props}
     >
       <ArrowRight />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">
+        <UiText k="nextSlide" />
+      </span>
     </Button>
   );
 }

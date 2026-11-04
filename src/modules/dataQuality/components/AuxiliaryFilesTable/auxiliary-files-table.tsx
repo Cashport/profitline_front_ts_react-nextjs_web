@@ -2,6 +2,7 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import { Calendar, MoreHorizontal } from "lucide-react";
 import { Dropdown, Spin, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import { uploadAuxiliaryFile } from "@/services/dataQuality/dataQuality";
 import { useAuxiliaryFiles } from "../../hooks/useAuxiliaryFiles";
@@ -32,30 +33,35 @@ const formatDate = (isoDateString: string | null): string => {
  * Estado del ultimo cargue asincrono. Los estados intermedios se muestran como
  * "En proceso" para no confundir "recibido" con "entregado al SFTP".
  */
+type AuxFilesT = ReturnType<typeof useTranslations<"dataQuality.auxiliaryFiles">>;
+
 const batchStatusView = (
-  batch: IAuxiliaryUploadBatchSummary | null | undefined
+  batch: IAuxiliaryUploadBatchSummary | null | undefined,
+  t: AuxFilesT
 ): { label: string; color: string } | null => {
   if (!batch) return null;
   switch (batch.status) {
     case "completed":
-      return { label: "Exitoso", color: "#12B76A" };
+      return { label: t("batchStatus.completed"), color: "#12B76A" };
     case "completed_with_errors":
       return {
-        label: `Con errores (${batch.failed_count})`,
+        label: t("batchStatus.completedWithErrors", { count: batch.failed_count }),
         color: "#B42318"
       };
     case "incomplete":
-      return { label: "Incompleto", color: "#B54708" };
+      return { label: t("batchStatus.incomplete"), color: "#B54708" };
     case "processing":
     case "queued":
     case "uploading":
-      return { label: "En proceso", color: "#175CD3" };
+      return { label: t("batchStatus.processing"), color: "#175CD3" };
     default:
       return null;
   }
 };
 
 export function AuxiliaryFilesTable() {
+  const t = useTranslations("dataQuality.auxiliaryFiles");
+  const tCommon = useTranslations("common");
   const { auxiliaryFiles, isLoading, isValidating, mutate } = useAuxiliaryFiles();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadTarget, setUploadTarget] = useState<IAuxiliaryFile | null>(null);
@@ -71,17 +77,13 @@ export function AuxiliaryFilesTable() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         setIsUploading(true);
-        const hide = message.open({ type: "loading", content: "Cargando archivo...", duration: 0 });
+        const hide = message.open({ type: "loading", content: t("uploading"), duration: 0 });
         try {
           await uploadAuxiliaryFile(id, file);
-          message.success("Archivo cargado exitosamente.");
+          message.success(t("uploaded"));
           mutate();
         } catch (error) {
-          message.error(
-            error instanceof Error
-              ? error.message
-              : "Error al cargar el archivo. Por favor, inténtalo de nuevo."
-          );
+          message.error(error instanceof Error ? error.message : t("uploadError"));
         } finally {
           hide();
           setIsUploading(false);
@@ -94,9 +96,7 @@ export function AuxiliaryFilesTable() {
 
   const handleUpload = (file: IAuxiliaryFile) => {
     if (file.has_route === false) {
-      message.error(
-        `El auxiliar ${file.file_type} no tiene ruta SFTP activa configurada. Contacta a soporte de datos.`
-      );
+      message.error(t("noSftpRoute", { fileType: file.file_type }));
       return;
     }
     if (file.async_upload) {
@@ -117,10 +117,10 @@ export function AuxiliaryFilesTable() {
 
   const handleDownload = async (file: IAuxiliaryFile) => {
     if (!file.file_url) {
-      message.error("No hay archivo disponible para descargar.");
+      message.error(t("noFileToDownload"));
       return;
     }
-    const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
+    const hide = message.open({ type: "loading", content: t("downloading"), duration: 0 });
     try {
       const response = await fetch(file.file_url);
       const blob = await response.blob();
@@ -133,11 +133,7 @@ export function AuxiliaryFilesTable() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al descargar el archivo. Por favor, inténtalo de nuevo."
-      );
+      message.error(error instanceof Error ? error.message : t("downloadError"));
     } finally {
       hide();
     }
@@ -148,24 +144,26 @@ export function AuxiliaryFilesTable() {
       <Table className="table-fixed">
         <TableHeader>
           <TableRow style={{ borderColor: "#DDDDDD" }}>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-            <TableHead className="w-[124px]" style={{ color: "#141414", fontWeight: 600 }}>
-              Fecha archivo
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+              {t("columns.fileType")}
             </TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
             <TableHead className="w-[124px]" style={{ color: "#141414", fontWeight: 600 }}>
-              Fecha cargue
+              {t("columns.fileDate")}
+            </TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>{t("columns.name")}</TableHead>
+            <TableHead className="w-[124px]" style={{ color: "#141414", fontWeight: 600 }}>
+              {t("columns.uploadDate")}
             </TableHead>
             <TableHead className="w-24" style={{ color: "#141414", fontWeight: 600 }}>
-              Tamaño
+              {t("columns.size")}
             </TableHead>
             {showStatus && (
               <TableHead className="w-[150px]" style={{ color: "#141414", fontWeight: 600 }}>
-                Estado
+                {t("columns.status")}
               </TableHead>
             )}
             <TableHead className="w-20" style={{ color: "#141414", fontWeight: 600 }}>
-              Acciones
+              {t("columns.actions")}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -173,12 +171,12 @@ export function AuxiliaryFilesTable() {
           {!isLoading && !auxiliaryFiles?.length ? (
             <TableRow style={{ borderColor: "#DDDDDD" }}>
               <TableCell colSpan={showStatus ? 7 : 6} className="py-10 text-center text-gray-500">
-                No hay archivos auxiliares
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : (
             auxiliaryFiles?.map((file) => {
-              const statusView = batchStatusView(file.last_batch);
+              const statusView = batchStatusView(file.last_batch, t);
 
               return (
                 <TableRow
@@ -243,19 +241,19 @@ export function AuxiliaryFilesTable() {
                           items: [
                             {
                               key: "upload",
-                              label: "Cargar",
+                              label: tCommon("actions.upload"),
                               onClick: () => handleUpload(file),
                               disabled: isUploading
                             },
                             {
                               key: "view",
-                              label: "Ver archivos",
+                              label: t("viewFiles"),
                               onClick: () => handleViewBatch(file),
                               disabled: !file.last_batch
                             },
                             {
                               key: "download",
-                              label: "Descargar",
+                              label: tCommon("actions.download"),
                               onClick: () => handleDownload(file),
                               disabled: !file.file_url
                             }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, Tooltip } from "antd";
 import { Download } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -26,6 +27,7 @@ interface ExcelButtonProps {
  * arma el backend; mientras la torre lee datos de ejemplo queda deshabilitado.
  */
 export default function ExcelButton({ table, state, name, periodLabel }: ExcelButtonProps) {
+  const tc = useTranslations("collections.excel");
   const projectId = useAppStore((s) => s.selectedProject?.ID);
   const { filters } = useTowerFilters();
   const { showMessage, messageApi } = useMessageApi();
@@ -33,7 +35,7 @@ export default function ExcelButton({ table, state, name, periodLabel }: ExcelBu
 
   const download = async () => {
     if (!projectId || downloading) return;
-    const hide = messageApi.open({ type: "loading", content: "Descargando Excel…", duration: 0 });
+    const hide = messageApi.open({ type: "loading", content: tc("downloading"), duration: 0 });
     try {
       setDownloading(true);
       await downloadCollectionTowerExcel(
@@ -44,10 +46,7 @@ export default function ExcelButton({ table, state, name, periodLabel }: ExcelBu
         `${name} ${periodLabel.toLowerCase()}.xlsx`
       );
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "No se pudo descargar el Excel."
-      );
+      showMessage("error", error instanceof Error ? error.message : tc("error"));
     } finally {
       hide();
       setDownloading(false);
@@ -55,11 +54,11 @@ export default function ExcelButton({ table, state, name, periodLabel }: ExcelBu
   };
 
   return (
-    <Tooltip title={USE_TOWER_MOCK ? "Disponible al conectar el API" : "Descargar en Excel"}>
+    <Tooltip title={USE_TOWER_MOCK ? tc("unavailable") : tc("download")}>
       <Button
         type="text"
         size="small"
-        aria-label="Descargar en Excel"
+        aria-label={tc("download")}
         icon={<Download className="h-[15px] w-[15px]" />}
         disabled={USE_TOWER_MOCK || !projectId}
         loading={downloading}

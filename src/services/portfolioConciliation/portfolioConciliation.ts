@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import axios from "axios";
 
 import { API, default as instance } from "@/utils/api/api";
@@ -56,6 +57,6 @@ export const downloadConciliationUploadFile = async (
         // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
       }
     }
-    throw new Error(message || "No se pudo descargar el archivo de la carga.");
+    throw new Error(message || getTranslator("shared")("services.downloadUploadFileError"));
   }
 };

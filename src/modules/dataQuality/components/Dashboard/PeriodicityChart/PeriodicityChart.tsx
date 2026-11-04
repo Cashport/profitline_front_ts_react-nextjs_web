@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { Card } from "@/modules/chat/ui/card";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
 import { useFileTypes } from "@/modules/dataQuality/hooks/useFileTypes";
@@ -17,13 +19,14 @@ const COLORS = {
 };
 
 export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
+  const t = useTranslations("dataQuality.dashboard.periodicity");
   const { selectedFileType } = useDataQualityDashboardContext();
   const { data: fileTypesData } = useFileTypes();
   const data = periodicity ?? [];
 
   const selectedFileTypeLabel =
     selectedFileType && selectedFileType !== "all"
-      ? fileTypesData?.find((t) => String(t.id) === selectedFileType)?.description
+      ? fileTypesData?.find((type) => String(type.id) === selectedFileType)?.description
       : undefined;
 
   const totals = {
@@ -38,7 +41,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>
-            Archivos por periodicidad
+            {t("title")}
           </h3>
           {selectedFileTypeLabel && (
             <span
@@ -52,19 +55,19 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
         <div className="flex items-center gap-3 text-[13px]">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.processado }} />
-            <span style={{ color: "#6B7280" }}>Processado</span>
+            <span style={{ color: "#6B7280" }}>{t("processado")}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.novedad }} />
-            <span style={{ color: "#6B7280" }}>Novedad</span>
+            <span style={{ color: "#6B7280" }}>{t("novedad")}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.retraso }} />
-            <span style={{ color: "#6B7280" }}>Retraso</span>
+            <span style={{ color: "#6B7280" }}>{t("retraso")}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.pendiente }} />
-            <span style={{ color: "#6B7280" }}>Pendiente</span>
+            <span style={{ color: "#6B7280" }}>{t("pendiente")}</span>
           </div>
         </div>
       </div>
@@ -84,7 +87,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
                   {item.periodicity}
                 </div>
                 <div className="text-[13px]" style={{ color: "#9CA3AF" }}>
-                  {item.total_archivos} arch.
+                  {t("filesShort", { count: item.total_archivos })}
                 </div>
               </div>
 
@@ -135,7 +138,7 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
                   className="text-[13px] text-right"
                   style={{ color: "#9CA3AF", minWidth: "60px" }}
                 >
-                  {item.total_archivos - item.procesados} pend.
+                  {t("pendingShort", { count: item.total_archivos - item.procesados })}
                 </div>
               </div>
             </div>
@@ -150,25 +153,41 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.processado }} />
           <span style={{ color: "#6B7280" }}>
-            Processado: <strong style={{ color: "#111827" }}>{totals.processado}</strong>
+            {t.rich("legendTotal", {
+              label: t("processado"),
+              value: totals.processado,
+              strong: (chunks) => <strong style={{ color: "#111827" }}>{chunks}</strong>
+            })}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.novedad }} />
           <span style={{ color: "#6B7280" }}>
-            Novedad: <strong style={{ color: "#111827" }}>{totals.novedad}</strong>
+            {t.rich("legendTotal", {
+              label: t("novedad"),
+              value: totals.novedad,
+              strong: (chunks) => <strong style={{ color: "#111827" }}>{chunks}</strong>
+            })}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.retraso }} />
           <span style={{ color: "#6B7280" }}>
-            Retraso: <strong style={{ color: "#111827" }}>{totals.retraso}</strong>
+            {t.rich("legendTotal", {
+              label: t("retraso"),
+              value: totals.retraso,
+              strong: (chunks) => <strong style={{ color: "#111827" }}>{chunks}</strong>
+            })}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.pendiente }} />
           <span style={{ color: "#6B7280" }}>
-            Pendiente: <strong style={{ color: "#111827" }}>{totals.pendiente}</strong>
+            {t.rich("legendTotal", {
+              label: t("pendiente"),
+              value: totals.pendiente,
+              strong: (chunks) => <strong style={{ color: "#111827" }}>{chunks}</strong>
+            })}
           </span>
         </div>
       </div>

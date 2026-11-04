@@ -1,0 +1,85 @@
+{
+  "title": "Task Manager",
+  "configError": "Couldn't load the task settings.",
+  "age": {
+    "minutes": "{count} min",
+    "hours": "{count} h",
+    "days": "{count, plural, one {# day} other {# days}}"
+  },
+  "noProcess": "No process",
+  "noAssignee": "Unassigned",
+  "noTasks": "No tasks",
+  "noTasksForFilters": "No tasks match these filters.",
+  "emptyValue": "No {field}",
+  "searchPlaceholder": "Search task or customer",
+  "showMoreOf": "Show {count} more of {remaining}",
+  "criticalCount": "{count} critical",
+  "newTaskIn": "New task in {group}",
+  "sortBy": "Sort by {field}",
+  "countOfTotal": "{count} of {total} tasks",
+  "loadMore": "Load more",
+  "processBar": {
+    "ariaLabel": "Processes"
+  },
+  "cells": {
+    "dispute": "Dispute #{id}"
+  },
+  "create": {
+    "title": "New task",
+    "submit": "Create task",
+    "missing": "Missing: {fields}",
+    "created": "Task {code} created",
+    "error": "Couldn't create the task"
+  },
+  "detail": {
+    "loadError": "Couldn't load the task.",
+    "saveError": "Couldn't save",
+    "statusChanged": "Status: {status}",
+    "updated": "Task updated",
+    "assigneeUpdated": "Assignee updated",
+    "meta": "· Open for {age} · Created {date} by {author}",
+    "closingComment": "Closing comment",
+    "howResolved": "How was it resolved? (optional)",
+    "whyCanceled": "Why is it being canceled? (optional)",
+    "confirmResolution": "Confirm resolution",
+    "confirmCancellation": "Confirm cancellation",
+    "history": "History",
+    "actions": {
+      "resolve": "Resolve",
+      "cancelTask": "Cancel task",
+      "moveTo": "Move to {status}"
+    },
+    "events": {
+      "CREATED": "created the task",
+      "ASSIGNED": "assigned",
+      "REASSIGNED": "reassigned",
+      "STATUS_CHANGED": "changed the status",
+      "COMPLETED": "resolved the task",
+      "CANCELLED": "canceled the task",
+      "DUE_DATE_CHANGED": "changed the due date",
+      "AMOUNT_CHANGED": "changed the amount",
+      "FIELD_CHANGED": "changed {field}"
+    }
+  },
+  "fieldInput": {
+    "meDefault": "Me (default)",
+    "searchClient": "Search customer…",
+    "searching": "Searching…"
+  },
+  "filters": {
+    "date": "Date",
+    "createdDate": "Created date",
+    "matching": "{count, plural, one {# task matches} other {# tasks match}}"
+  },
+  "toolbar": {
+    "noGrouping": "No grouping",
+    "hideClosed": "Hide closed",
+    "showClosed": "Show closed",
+    "layouts": {
+      "list": "List",
+      "board": "Board"
+    },
+    "groupBy": "Group:",
+    "sortBy": "Sort:"
+  }
+}

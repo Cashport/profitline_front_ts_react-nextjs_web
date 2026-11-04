@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 
 import {
   useWalletMatrix,
@@ -61,6 +62,7 @@ const TEXTUAL_COLS: WalletMatrixSortBy[] = ["client_name"];
 const REFRESH_TIMEOUT_MS = 3 * 60 * 1000;
 
 export default function WalletView() {
+  const t = useTranslations("wallet.view");
   const { showMessage, messageApi } = useMessageApi();
   const { refreshedAt, isRefreshing: socketRefreshing } = useWalletMatrixSocket();
 
@@ -231,14 +233,11 @@ export default function WalletView() {
     const id = setTimeout(() => {
       stopRefreshing();
       reloadSnapshot();
-      showMessage(
-        "warning",
-        "La actualización está tardando más de lo esperado. Se muestra la última foto disponible."
-      );
+      showMessage("warning", t("refreshTimeout"));
     }, REFRESH_TIMEOUT_MS);
 
     return () => clearTimeout(id);
-  }, [refreshing, reloadSnapshot, showMessage, stopRefreshing]);
+  }, [refreshing, reloadSnapshot, showMessage, stopRefreshing, t]);
 
   const handleRefresh = async () => {
     // Guarda de reentrada: aunque el botón ya no se renderiza mientras corre,
@@ -250,7 +249,7 @@ export default function WalletView() {
       setBaselineReady(false);
 
       const response = await refreshWalletMatrix();
-      showMessage("info", response.message || "Actualización de matriz iniciada");
+      showMessage("info", response.message || t("refreshStarted"));
 
       // Referencia tomada del servidor, no de la caché, y sólo después de
       // haber disparado la corrida.
@@ -263,14 +262,14 @@ export default function WalletView() {
       // sí está pasando, sólo que la disparó alguien más.
       const isConflict = (error as { status?: number })?.status === 409;
       if (isConflict) {
-        showMessage("info", "Ya hay una actualización en curso");
+        showMessage("info", t("refreshInProgress"));
         const fresh = await mutateStatus();
         setBaselineRunId(fresh?.data?.current?.runId ?? null);
         setBaselineReady(true);
         return;
       }
       stopRefreshing();
-      showMessage("error", "No se pudo iniciar la actualización");
+      showMessage("error", t("refreshError"));
     }
   };
 
@@ -280,15 +279,12 @@ export default function WalletView() {
   const handleDownloadExcel = async () => {
     if (downloadingExcel) return;
 
-    const hide = messageApi.open({ type: "loading", content: "Descargando Excel…", duration: 0 });
+    const hide = messageApi.open({ type: "loading", content: t("downloadingExcel"), duration: 0 });
     try {
       setDownloadingExcel(true);
       await downloadWalletMatrixExcel(filters);
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "No se pudo descargar el Excel de la cartera."
-      );
+      showMessage("error", error instanceof Error ? error.message : t("downloadWalletError"));
     } finally {
       hide();
       setDownloadingExcel(false);
@@ -300,16 +296,13 @@ export default function WalletView() {
   const handleDownloadNovelties = async () => {
     if (downloadingNovelties) return;
 
-    const hide = messageApi.open({ type: "loading", content: "Descargando Excel…", duration: 0 });
+    const hide = messageApi.open({ type: "loading", content: t("downloadingExcel"), duration: 0 });
     try {
       setDownloadingNovelties(true);
       const filename = await downloadNoveltiesExcel(filters);
-      showMessage("success", `Archivo descargado: ${filename}`);
+      showMessage("success", t("fileDownloaded", { filename }));
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "No se pudo descargar el Excel de novedades."
-      );
+      showMessage("error", error instanceof Error ? error.message : t("downloadNoveltiesError"));
     } finally {
       hide();
       setDownloadingNovelties(false);
@@ -421,7 +414,7 @@ export default function WalletView() {
         // común es no tener grupos de clientes asignados en el proyecto, que
         // no es lo mismo que un proyecto sin cartera.
         <p className="py-10 text-center text-sm text-rose-600 dark:text-rose-400">
-          {(error as Error)?.message || "No se pudo cargar la cartera."}
+          {(error as Error)?.message || t("loadError")}
         </p>
       ) : (
         // La tabla se renderiza siempre, incluso sin resultados: su buscador
@@ -439,7 +432,7 @@ export default function WalletView() {
           pageSize={PAGE_SIZE}
           onPageChange={handlePageChange}
           loading={loading}
-          emptyMessage="No hay cartera para los filtros actuales."
+          emptyMessage={t("empty")}
           drilldown={drilldown}
           onSelect={handleSelect}
           legendEstados={legendEstados}

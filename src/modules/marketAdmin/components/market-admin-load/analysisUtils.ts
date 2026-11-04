@@ -1,3 +1,4 @@
+import { getActiveLocale, getTranslator } from "@/i18n/translator";
 import { ILoadAnalysisMeasure } from "@/types/marketAdmin/IMarketAdmin";
 
 export const COLORS = {
@@ -17,8 +18,9 @@ export const COLORS = {
   limeSoft: "#EEF6C2"
 };
 
-const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-const WEEKDAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+// Nombres de día y mes según el idioma activo ("lun" / "Mon", "2 sept" / "Sep 2").
+const formatUtc = (date: Date, options: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat(getActiveLocale(), { ...options, timeZone: "UTC" }).format(date);
 
 const intFormat = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 });
 
@@ -39,7 +41,9 @@ export const formatSigma = (z: number | null) =>
 export const formatDelta = (delta: number | null) =>
   delta === null
     ? ""
-    : `${delta >= 0 ? "+" : "−"}${Math.abs(delta).toFixed(1).replace(".", ",")}% vs media`;
+    : getTranslator("marketAdmin")("load.validation.chart.deltaVsMean", {
+        delta: `${delta >= 0 ? "+" : "−"}${Math.abs(delta).toFixed(1).replace(".", ",")}%`
+      });
 
 const parseDay = (day: string) => {
   const [y, m, d] = day.slice(0, 10).split("-").map(Number);
@@ -50,12 +54,19 @@ export const formatDayLong = (day: string) => {
   const d = parseDay(day);
   const dd = String(d.getUTCDate()).padStart(2, "0");
   const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  return `${WEEKDAYS[d.getUTCDay()]} ${dd}/${mm}/${d.getUTCFullYear()}`;
+  return `${formatUtc(d, { weekday: "short" })} ${dd}/${mm}/${d.getUTCFullYear()}`;
 };
 
-export const formatDayShort = (day: string) => {
+export const formatDayShort = (day: string) =>
+  formatUtc(parseDay(day), { day: "numeric", month: "short" });
+
+// Primer día del mes de `day` ("1 sept" / "Sep 1"): marca de inicio de mes en el eje.
+export const formatMonthStartShort = (day: string) => {
   const d = parseDay(day);
-  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
+  return formatUtc(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)), {
+    day: "numeric",
+    month: "short"
+  });
 };
 
 export const isMonthStart = (day: string, previous?: string) =>

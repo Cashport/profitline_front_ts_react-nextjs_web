@@ -5,6 +5,7 @@ import { Flex } from "antd";
 import { Invoice } from "@phosphor-icons/react";
 import "./pendingInvoiceCard.scss";
 import BaseCard from "../atoms/BaseCard/BaseCard";
+import { useTranslations } from "use-intl";
 
 export type InvoiceStatus = "Overdue" | "Due soon" | "Current";
 
@@ -29,15 +30,16 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
   rightColumnNode,
   isInteractive = true
 }) => {
+  const t = useTranslations("publicPortals.mobile.invoiceStatus");
   const getStatusConfig = () => {
     if (invoice.isPastDue || invoice.status === "Overdue") {
-      return { color: "#ff6b6b", text: "Vencidas" };
+      return { color: "#ff6b6b", text: t("pastDue") };
     }
     if (invoice.status === "Due soon") {
-      return { color: "#ff9f43", text: "Vence pronto" };
+      return { color: "#ff9f43", text: t("dueSoon") };
     }
     if (invoice.status === "Current") {
-      return { color: "#feca57", text: "Vigente" };
+      return { color: "#feca57", text: t("current") };
     }
     return null;
   };

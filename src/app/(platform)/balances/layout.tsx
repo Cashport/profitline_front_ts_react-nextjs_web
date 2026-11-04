@@ -1,11 +1,8 @@
-import { Metadata } from "next";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { BalancesLayout } from "@/modules/balances/containers/BalancesLayout/BalancesLayout";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Saldos",
-  description: "Saldos"
-};
+export const generateMetadata = () => pageMetadata("balances");
 const SaldosLayout = ({ children }: { children: React.ReactNode }) => {
-  return <ViewWrapper headerTitle="Saldos">{children}</ViewWrapper>;
+  return <BalancesLayout>{children}</BalancesLayout>;
 };
 export default SaldosLayout;

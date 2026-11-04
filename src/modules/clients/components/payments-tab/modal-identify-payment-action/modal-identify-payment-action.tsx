@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { Checkbox, Flex, Modal } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
@@ -45,6 +46,9 @@ interface ISelect {
 }
 
 const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }) => {
+  const t = useTranslations("clients.payments.identifyPayment");
+  const tAttachment = useTranslations("clients.payments.attachment");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [accounts, setAccounts] = useState<ISelect[]>([]);
   const [paymentTypes, setPaymentTypes] = useState<ISelect[]>([]);
@@ -123,7 +127,7 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
 
       // Open identified payments modal or not Identify modal
       if (res === 0) {
-        showMessage("info", "No se identificó ningún pago");
+        showMessage("info", t("noPaymentFound"));
         setViewInfo({ current: "not_identified", paymentInfo: data });
       } else {
         if (res && Array.isArray(res.data)) {
@@ -132,7 +136,7 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
         setViewInfo({ current: "identified", paymentInfo: data });
       }
     } catch (error) {
-      showMessage("error", "Error al identificar pago");
+      showMessage("error", t("identifyError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -150,10 +154,7 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        showMessage(
-          "error",
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
+        showMessage("error", tAttachment("fileTooLarge", { maxMb: 30 }));
         return;
       }
       setValue("evidence", rawFile);
@@ -175,12 +176,10 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
         <>
           <button className="identifyPaymentModal__goBackBtn" onClick={() => onClose(true)}>
             <CaretLeft size="1.25rem" />
-            Identificar pago
+            {t("title")}
           </button>
 
-          <p className="identifyPaymentModal__subTitle">
-            Ingresa la información para crear identificar el pago
-          </p>
+          <p className="identifyPaymentModal__subTitle">{t("subtitle")}</p>
 
           <div className="identifyPaymentModal__inputsContainer">
             <Controller
@@ -190,52 +189,52 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
               render={({ field }) => (
                 <GeneralSelect
                   field={field}
-                  title="Cuenta"
-                  placeholder="Seleccionar cuenta"
+                  title={t("account")}
+                  placeholder={t("accountPlaceholder")}
                   options={accounts}
                 />
               )}
             />
 
             <InputDateForm
-              titleInput="Fecha"
+              titleInput={tCommon("fields.date")}
               hiddenIcon
               nameInput="date"
-              placeholder="Seleccionar fecha"
+              placeholder={tCommon("placeholders.selectDate")}
               control={control}
               error={errors.date}
               validationRules={{
-                required: "Fecha es obligatoria",
+                required: t("dateRequired"),
                 validate: {
                   notFutureDate: (value) => {
                     const selectedDate = new Date(value);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0); // Set time to midnight to compare only dates
-                    return selectedDate <= today || "La fecha no puede ser futura";
+                    return selectedDate <= today || t("futureDate");
                   }
                 }
               }}
             />
 
             <InputFormMoney
-              titleInput="Monto"
+              titleInput={tCommon("fields.amount")}
               nameInput={`amount`}
               control={control}
               error={errors?.amount}
-              placeholder="Ingresar monto"
+              placeholder={t("amountPlaceholder")}
               customStyle={{ width: "100%" }}
               validationRules={{
-                required: "Valor es obligatorio",
-                min: { value: 1, message: "El valor debe ser mayor a 0" }
+                required: t("amountRequired"),
+                min: { value: 1, message: t("amountMin") }
               }}
             />
 
             <InputForm
               validationRules={{ required: false }}
-              titleInput="Referencia"
+              titleInput={tCommon("fields.reference")}
               control={control}
               nameInput="reference"
-              placeholder="Ingresar No. de referencia"
+              placeholder={t("referencePlaceholder")}
               error={errors.reference}
             />
 
@@ -246,8 +245,8 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
               render={({ field }) => (
                 <GeneralSelect
                   field={field}
-                  title="Tipo de pago"
-                  placeholder="Seleccionar tipo"
+                  title={t("paymentType")}
+                  placeholder={t("paymentTypePlaceholder")}
                   options={paymentTypes}
                 />
               )}
@@ -258,23 +257,23 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
               control={control}
               render={({ field }) => (
                 <Checkbox className="identifyPaymentModal__checkbox" {...field}>
-                  Marcar pago como anticipo
+                  {t("markAsAdvance")}
                 </Checkbox>
               )}
             />
           </div>
 
-          <p className="identifyPaymentModal__subTitle">Adjunta la evidencia</p>
+          <p className="identifyPaymentModal__subTitle">{t("attachEvidence")}</p>
 
           <div className="identifyPaymentModal__file">
             <Flex vertical>
-              <p>Evidencia</p>
-              <em>*Obligatorio</em>
+              <p>{tAttachment("evidence")}</p>
+              <em>{tAttachment("required")}</em>
             </Flex>
             <Controller
               name="evidence"
               control={control}
-              rules={{ required: "Evidencia es obligatoria" }}
+              rules={{ required: tAttachment("evidenceRequired") }}
               render={() => (
                 <DocumentButton
                   key={evidence?.name || "default-key"}
@@ -289,10 +288,12 @@ const ModalIdentifyPayment: FC<ModalIdentifyPaymentProps> = ({ isOpen, onClose }
           </div>
 
           <div className="identifyPaymentModal__footer">
-            <SecondaryButton onClick={() => onClose(true)}>Cancelar</SecondaryButton>
+            <SecondaryButton onClick={() => onClose(true)}>
+              {tCommon("actions.cancel")}
+            </SecondaryButton>
 
             <PrincipalButton onClick={handleSubmit(onSubmit)} disabled={!isValid || isSubmitting}>
-              {isSubmitting ? "...enviando" : "Buscar"}
+              {isSubmitting ? tCommon("status.sending") : tCommon("actions.search")}
             </PrincipalButton>
           </div>
         </>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, Modal } from "antd";
 import { CaretDown, Clipboard } from "phosphor-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
@@ -14,6 +15,7 @@ interface Props {
   onClose: () => void;
 }
 export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
+  const t = useTranslations("shell.projectSelector");
   const path = usePathname();
   const router = useRouter();
   const selectedProject = useAppStore((state) => state.selectedProject);
@@ -58,9 +60,9 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
     setSelectedProject(projectInfo);
     // set session storage for selectedProjectId, used in the useNotificationStore
     sessionStorage.setItem("projectId", project.ID.toString());
-    if (path.startsWith("/proyectos/review")) {
-      router.push(`/proyectos/review/${project.ID}/detail`);
-    } else if (path.startsWith("/clientes/all")) {
+    if (path.startsWith("/projects/review")) {
+      router.push(`/projects/review/${project.ID}/detail`);
+    } else if (path.startsWith("/clients/all")) {
       if (!checkUserViewPermissions(projectInfo, "Clientes")) {
         router.push(getFirstPermittedRoute(projectInfo));
       }
@@ -81,7 +83,7 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
         footer={false}
         width={"60%"}
       >
-        <h2 className="modalProjectSelector__title">Elegir proyecto</h2>
+        <h2 className="modalProjectSelector__title">{t("title")}</h2>
         <div className="modalProjectSelector__body">
           <div ref={setListRef} onScroll={updateHasMore} className="modalProjectSelector__projects">
             {projects?.map((project) => (
@@ -92,7 +94,7 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
               >
                 {project.LOGO ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img className="project__image" src={project.LOGO} alt="Project image" />
+                  <img className="project__image" src={project.LOGO} alt={t("projectImage")} />
                 ) : (
                   <Avatar
                     shape="square"
@@ -112,7 +114,7 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
           </div>
           {hasMoreBelow && (
             <button type="button" className="modalProjectSelector__more" onClick={scrollDown}>
-              Ver más proyectos
+              {t("showMore")}
               <CaretDown size={14} weight="bold" />
             </button>
           )}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import { Flex, Spin } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
@@ -27,6 +28,8 @@ import { useSaldos } from "@/modules/balances/context/saldos-context";
 import { useSelectedBalances } from "@/modules/balances/hooks/useSelectedBalances";
 
 export function ClientBalancesView() {
+  const t = useTranslations("clients.balances.view");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
 
@@ -83,7 +86,7 @@ export function ClientBalancesView() {
       {selectedBalances.length > 0 && (
         <DraggableTotalModal
           totalAmount={totalPending}
-          itemName="Saldos"
+          itemName={t("itemName")}
           count={selectedBalances.length}
         />
       )}
@@ -92,15 +95,15 @@ export function ClientBalancesView() {
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
-              placeholder="Buscar"
+              placeholder={tCommon("placeholders.search")}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
 
-                <GenerateActionButton
-                  onClick={() => {
-                    setIsActionsOpen(true);
-                  }}
-                />
+            <GenerateActionButton
+              onClick={() => {
+                setIsActionsOpen(true);
+              }}
+            />
 
             {/* Saldos Filters Dropdown (Tipo + Fechas) */}
             <FilterBalances

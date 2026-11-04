@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import {
@@ -18,11 +19,12 @@ interface TorreHeaderProps {
  * filtrar, buscador, tema y avatar (cerrar sesión).
  */
 export default function TorreHeader({ onSearchChange }: TorreHeaderProps) {
+  const t = useTranslations("controlTower.header");
   const [search, setSearch] = useState("");
 
   return (
     <Header
-      title="Torre de control"
+      title={t("title")}
       titleExtra={
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 shrink-0 rounded-full bg-[#9bb514]" />
@@ -40,7 +42,7 @@ export default function TorreHeader({ onSearchChange }: TorreHeaderProps) {
               setSearch(value);
               onSearchChange(value);
             }}
-            placeholder="Cliente, factura o novedad…"
+            placeholder={t("searchPlaceholder")}
           />
         </>
       }

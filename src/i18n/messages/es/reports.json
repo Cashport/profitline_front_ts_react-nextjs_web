@@ -1,0 +1,63 @@
+{
+  "header": {
+    "title": "Informes",
+    "publish": "Publicar informe",
+    "searchPlaceholder": "Buscar informe"
+  },
+  "filters": {
+    "type": "Tipo de informe",
+    "publishedAt": "Fecha de publicación",
+    "period": "Periodo: {value}",
+    "selectPeriod": "Selecciona un periodo",
+    "dateTag": "Fecha"
+  },
+  "list": {
+    "columns": {
+      "name": "Nombre del informe",
+      "type": "Tipo de informe",
+      "publishedAt": "Fecha de publicación"
+    },
+    "viewReport": "Ver informe",
+    "newBadge": "Nuevo",
+    "loadError": "No se pudieron cargar los informes.",
+    "empty": "Aún no hay informes publicados.",
+    "noMatch": "No hay informes con esos criterios",
+    "clearCriteria": "Limpiar búsqueda y filtros",
+    "count": "{total, plural, one {# informe} other {# informes}}",
+    "countFiltered": "{shown} de {total, plural, one {# informe} other {# informes}}"
+  },
+  "detail": {
+    "fallbackTitle": "Informe",
+    "publishedOn": "Publicado {date}",
+    "previous": "Informe anterior",
+    "next": "Informe siguiente",
+    "position": "{index} de {total}",
+    "loadError": "No se pudo cargar el informe."
+  },
+  "createModal": {
+    "title": "Publicar informe",
+    "subtitle": "Quedará disponible para el equipo en el listado de informes.",
+    "typeLabel": "Tipo de informe",
+    "createType": "+ Crear tipo",
+    "typePlaceholder": "Selecciona un tipo",
+    "nameLabel": "Nombre del informe",
+    "namePlaceholder": "Ej. Informe cierre julio",
+    "fileLabel": "Archivo HTML",
+    "dropTitle": "Arrastra el archivo HTML aquí",
+    "dropSubtitle": "Archivo .html generado en Claude · máx. {maxMb} MB",
+    "readyToPublish": "{size} · Listo para publicar",
+    "published": "Informe publicado",
+    "errors": {
+      "notHtml": "El archivo debe ser .html",
+      "tooLarge": "El archivo supera {maxMb} MB",
+      "publish": "No se pudo publicar el informe."
+    }
+  },
+  "typeModal": {
+    "title": "Crear tipo de informe",
+    "nameLabel": "Nombre del tipo de informe",
+    "namePlaceholder": "Ej. Informe de cartera",
+    "created": "Tipo de informe creado",
+    "createError": "No se pudo crear el tipo de informe."
+  }
+}

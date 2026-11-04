@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Hourglass } from "phosphor-react";
 import { Typography, Avatar, Steps, Button } from "antd";
+import { useTranslations } from "use-intl";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import rehypeRaw from "rehype-raw";
@@ -35,6 +36,8 @@ export const EventSection: React.FC<EventSectionProps> = ({
   mutate,
   messageApi
 }) => {
+  const t = useTranslations("modals.noveltyDetail.events");
+  const tCommon = useTranslations("common");
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,29 +47,29 @@ export const EventSection: React.FC<EventSectionProps> = ({
   };
 
   const getEventUser = (event: Event) => {
-    return event.created_by || event.approved_by || event.rejected_by || "Unknown User";
+    return event.created_by || event.approved_by || event.rejected_by || t("unknownUser");
   };
 
   const getEventAction = (event: Event) => {
-    if (event.approved_by) return "Aprobado";
-    if (event.rejected_by) return "Rechazado";
-    return "Acción desconocida";
+    if (event.approved_by) return tCommon("status.approved");
+    if (event.rejected_by) return tCommon("status.rejected");
+    return t("unknownAction");
   };
 
   const handleCommentSubmit = async () => {
     if (!comment.trim()) {
-      messageApi.error("Por favor, ingrese un comentario");
+      messageApi.error(t("commentRequired"));
       return;
     }
 
     setIsSubmitting(true);
     try {
       await addIncidentComment(incidentId || "1", { comments: comment });
-      messageApi.success("Comentario agregado exitosamente");
+      messageApi.success(t("commentAdded"));
       setComment("");
       mutate();
     } catch (error) {
-      messageApi.error("Error al agregar el comentario");
+      messageApi.error(t("commentError"));
       console.error("Error adding comment:", error);
     } finally {
       setIsSubmitting(false);
@@ -76,7 +79,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
   return (
     <div className="event-section">
       <div className="event-header">
-        <IconLabel icon={<Hourglass size={20} />} text={`Eventos`} />
+        <IconLabel icon={<Hourglass size={20} />} text={t("title")} />
       </div>
       <Steps direction="vertical" size="small" className="event-steps">
         {events.map((event, index) => (
@@ -88,10 +91,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
                 <Text strong>{getEventUser(event)}</Text>
                 {event.comments ? (
                   <div className="event-comment-markdown">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkBreaks]}
-                      rehypePlugins={[rehypeRaw]}
-                    >
+                    <ReactMarkdown remarkPlugins={[remarkBreaks]} rehypePlugins={[rehypeRaw]}>
                       {event.comments}
                     </ReactMarkdown>
                   </div>
@@ -114,7 +114,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
               <input
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Agrega un comentario"
+                placeholder={t("commentPlaceholder")}
                 className="add-comment"
                 type="text"
               />
@@ -124,7 +124,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
                 loading={isSubmitting}
                 disabled={!comment.trim()}
               >
-                Enviar
+                {tCommon("actions.send")}
               </Button>
             </div>
           }

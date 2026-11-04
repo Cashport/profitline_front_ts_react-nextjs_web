@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Paperclip } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import AttachmentList from "../shared/attachment-list";
 
@@ -12,6 +13,7 @@ interface GroupComposerProps {
 
 /** Caja de comentario del seguimiento, con adjuntos opcionales. */
 export default function GroupComposer({ onSubmit }: GroupComposerProps) {
+  const t = useTranslations("wallet.composer");
   const [comment, setComment] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isSending, setIsSending] = useState(false);
@@ -62,7 +64,7 @@ export default function GroupComposer({ onSubmit }: GroupComposerProps) {
             type="text"
             autoComplete="off"
             value={comment}
-            placeholder="Escribe un comentario…"
+            placeholder={t("placeholder")}
             disabled={isSending}
             onChange={(e) => setComment(e.target.value)}
             className="w-full rounded-md border border-border bg-card py-2 pl-3 pr-10 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground/30 disabled:opacity-60"
@@ -70,8 +72,8 @@ export default function GroupComposer({ onSubmit }: GroupComposerProps) {
           <input type="file" ref={fileRef} multiple className="hidden" onChange={handleAddFiles} />
           <button
             type="button"
-            aria-label="Adjuntar archivo"
-            title="Adjuntar archivo"
+            aria-label={t("attach")}
+            title={t("attach")}
             disabled={isSending}
             onClick={() => fileRef.current?.click()}
             className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-60"
@@ -85,7 +87,7 @@ export default function GroupComposer({ onSubmit }: GroupComposerProps) {
           disabled={isSending || !comment.trim()}
           className="flex-none rounded-md bg-cashport-green px-4 py-2 text-[13px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {isSending ? "Registrando…" : "Registrar"}
+          {isSending ? t("submitting") : t("submit")}
         </button>
       </div>
     </form>

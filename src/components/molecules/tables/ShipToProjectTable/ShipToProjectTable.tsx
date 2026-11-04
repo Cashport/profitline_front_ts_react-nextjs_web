@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useState } from "react";
 import { Button, Flex, Popconfirm, Spin, Table, TableProps, Typography, message } from "antd";
 import { Eye, Plus, Trash } from "phosphor-react";
@@ -22,6 +23,8 @@ interface Props {
 }
 
 export const ShipToProjectTable = ({ clientId, getClientValues, clientBillingPeriod }: Props) => {
+  const t = useTranslations("shared.tables.shipToTable");
+  const tCommon = useTranslations("common");
   const [isShipToModalOpen, setIsShipToModalOpen] = useState<{
     open: boolean;
     accounting_code: string | undefined;
@@ -57,46 +60,46 @@ export const ShipToProjectTable = ({ clientId, getClientValues, clientBillingPer
   const columns: TableProps<any>["columns"] = [
     {
       width: 110,
-      title: "ID Ship To",
+      title: t("columns.shipToId"),
       dataIndex: "accounting_code",
       key: "accounting_code",
       render: (text) => <Link underline>{text}</Link>
     },
     {
-      title: "Ciudad",
+      title: t("columns.city"),
       dataIndex: "city",
       key: "city",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Canal",
+      title: t("columns.channel"),
       key: "channels",
       dataIndex: "channels",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Linea",
+      title: t("columns.line"),
       key: "lines_info",
       dataIndex: "lines_info",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Sublinea",
+      title: t("columns.subline"),
       key: "sub_lines",
       dataIndex: "sub_lines",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Zona",
+      title: t("columns.zone"),
       key: "zones",
       dataIndex: "zones",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Hereda parámetros",
+      title: t("columns.inheritsSettings"),
       key: "dependecy_client",
       dataIndex: "dependecy_client",
-      render: (text) => <Text>{Boolean(text) ? "Sí" : "No"}</Text>
+      render: (text) => <Text>{Boolean(text) ? tCommon("status.yes") : tCommon("status.no")}</Text>
     },
     {
       title: "",
@@ -107,8 +110,8 @@ export const ShipToProjectTable = ({ clientId, getClientValues, clientBillingPer
         <Flex gap={"0.5rem"}>
           <Popconfirm
             placement="topRight"
-            title="¿Eliminar Ship To?"
-            description="Esta acción no se puede deshacer."
+            title={t("deleteConfirmTitle")}
+            description={t("cannotUndo")}
             onConfirm={() => deleteShipTo(accounting_code, messageApi)}
           >
             <Button icon={<Trash size={"1.25rem"} />} />
@@ -127,7 +130,7 @@ export const ShipToProjectTable = ({ clientId, getClientValues, clientBillingPer
       {contextHolder}
       <div className="ShipToProjectTable">
         <Flex justify="space-between" className="ShipToProjectTable__header">
-          <Title level={4}>Ship To</Title>
+          <Title level={4}>{t("title")}</Title>
           <Flex gap={"1rem"}>
             <Button
               type="primary"
@@ -135,7 +138,7 @@ export const ShipToProjectTable = ({ clientId, getClientValues, clientBillingPer
               size="large"
               icon={<Plus weight="bold" size={15} />}
             >
-              Descargar plantilla
+              {t("downloadTemplate")}
             </Button>
             <Button
               type="primary"
@@ -143,7 +146,7 @@ export const ShipToProjectTable = ({ clientId, getClientValues, clientBillingPer
               size="large"
               icon={<Plus weight="bold" size={15} />}
             >
-              Cargar excel
+              {t("uploadExcel")}
             </Button>
           </Flex>
         </Flex>
@@ -175,7 +178,7 @@ export const ShipToProjectTable = ({ clientId, getClientValues, clientBillingPer
               }}
               icon={<Plus weight="bold" size={15} />}
             >
-              Crear Ship To
+              {t("create")}
             </Button>
           </>
         )}

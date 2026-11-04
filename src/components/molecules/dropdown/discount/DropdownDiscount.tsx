@@ -1,5 +1,6 @@
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import { Button, MenuProps } from "antd";
+import { useTranslations } from "use-intl";
 
 type Props = {
   handleDeleteDiscount: () => void;
@@ -7,12 +8,13 @@ type Props = {
 };
 
 export default function DropdownDiscount({ handleDeleteDiscount, disableDelete }: Props) {
+  const tCommon = useTranslations("common");
   const items: MenuProps["items"] = [
     {
       key: "discount-option-1",
       label: (
         <Button className="buttonOutlined" disabled={disableDelete} onClick={handleDeleteDiscount}>
-          Eliminar
+          {tCommon("actions.delete")}
         </Button>
       )
     }

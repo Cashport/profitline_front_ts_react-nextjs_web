@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Flex } from "antd";
 import { PlusCircle, CaretDown, CaretUp } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import CreditBalanceCard from "@/modules/cashportMobile/components/CreditBalanceCard/CreditBalanceCard";
 import { CreditBalanceFormated } from "@/types/clients/IClients";
@@ -14,6 +15,8 @@ export interface CreditBalancesTabProps {
 
 const CreditBalancesTab: React.FC<CreditBalancesTabProps> = ({ creditBalances }) => {
   const [showAll, setShowAll] = useState(false);
+  const t = useTranslations("publicPortals.mobile.creditBalances");
+  const tCommon = useTranslations("common");
   const INITIAL_COUNT = 5;
 
   const visibleCredits = showAll ? creditBalances : creditBalances.slice(0, INITIAL_COUNT);
@@ -34,18 +37,18 @@ const CreditBalancesTab: React.FC<CreditBalancesTabProps> = ({ creditBalances })
               className="creditBalancesTab__seeMoreButton"
               onClick={() => setShowAll(!showAll)}
             >
-              {showAll ? "Ver menos" : "Ver más"}
+              {showAll ? tCommon("actions.showLess") : tCommon("actions.showMore")}
               {showAll ? <CaretUp size={14} /> : <CaretDown size={14} />}
             </button>
           )}
 
           <button className="creditBalancesTab__reportButton">
-            Reportar novedad
+            {t("reportDispute")}
             <PlusCircle size={14} />
           </button>
         </Flex>
       ) : (
-        <p>No hay saldos a favor.</p>
+        <p>{t("empty")}</p>
       )}
     </Flex>
   );

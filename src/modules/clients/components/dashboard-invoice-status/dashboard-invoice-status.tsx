@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import DashboardGenericItem from "../dashboard-generic-item";
 import styles from "./dashboard-invoice-status.module.scss";
 
@@ -21,24 +22,25 @@ const DashboardInvoiceStatus: FC<DashboardInvoiceStatusProps> = ({
   sinRadicarCount,
   className
 }) => {
+  const t = useTranslations("clients.dashboard.invoiceStatus");
   return (
     <div className={`${styles.wrapper} ${className}`}>
-      <div className={styles.name}>Estatus de facturas</div>
+      <div className={styles.name}>{t("title")}</div>
       <div className={styles.list}>
         <DashboardGenericItem
-          name="Sin conciliar"
+          name={t("unreconciled")}
           value={totalUnreconciled}
           unit="M"
           quantity={totalUnreconciledCount}
         />
         <DashboardGenericItem
-          name="Conciliadas"
+          name={t("reconciled")}
           value={totalReconciled}
           unit="M"
           quantity={totalReconciledCount}
         />
         <DashboardGenericItem
-          name="Sin radicar"
+          name={t("notSubmitted")}
           value={sinRadicarValue}
           unit="M"
           quantity={sinRadicarCount}

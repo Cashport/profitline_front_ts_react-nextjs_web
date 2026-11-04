@@ -1,36 +1,42 @@
 import { EmailOption, ITemplateEmailData, ITemplateName } from "@/types/sendEmail";
 import { MenuProps } from "antd";
 
+// Etiquetas del menú en modals.sendEmail.templates.
+type TemplateLabelKey = "statement" | "disputes" | "paymentPlan" | "preLegal" | "legal";
+
 interface ICustomButtonProps {
   handleTemplateSelect: (value: ITemplateName) => void;
+  // eslint-disable-next-line no-unused-vars
+  label: (key: TemplateLabelKey) => string;
 }
 
 export const selectTemplateItems = ({
-  handleTemplateSelect
+  handleTemplateSelect,
+  label
 }: ICustomButtonProps): MenuProps["items"] => [
   {
     key: "1",
-    label: "Estado de cuenta",
+    label: label("statement"),
     onClick: () => handleTemplateSelect(ITemplateName["Estado de cuenta"])
   },
   {
     key: "2",
-    label: "Envío de novedades",
+    label: label("disputes"),
     onClick: () => handleTemplateSelect(ITemplateName["Envio de novedades"])
   },
   {
     key: "3",
-    label: "Envío de acuerdo de pago",
+    label: label("paymentPlan"),
     onClick: () => handleTemplateSelect(ITemplateName["Envio de acuerdo de pago"])
   },
   {
     key: "4",
-    label: "Cobro prejurídico",
+    label: label("preLegal"),
     onClick: () => handleTemplateSelect(ITemplateName["Cobro prejuridico"])
   },
   {
     key: "5",
-    label: "Cobro jurídico",
+    label: label("legal"),
     onClick: () => handleTemplateSelect(ITemplateName["Cobro juridico"])
   }
 ];

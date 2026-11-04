@@ -1,0 +1,40 @@
+{
+  "status": {
+    "operational": "Operational",
+    "failing": "Failing",
+    "running": "Running",
+    "inReview": "In review",
+    "noStatus": "No status"
+  },
+  "summary": {
+    "total": "Total bots"
+  },
+  "fields": {
+    "bot": "Bot",
+    "customer": "Customer",
+    "country": "Country",
+    "fileType": "File type",
+    "frequency": "Frequency",
+    "lastRun": "Last run",
+    "runCount": "Number of runs",
+    "errorMessage": "Error message",
+    "category": "Category",
+    "errorCode": "Error code",
+    "failedStep": "Failed step",
+    "requiredAction": "Action required"
+  },
+  "notAvailable": "Not available",
+  "searchPlaceholder": "Search bot or customer",
+  "drawer": {
+    "evidence": "Evidence",
+    "evidenceAlt": "Error evidence",
+    "noEvidence": "No evidence available",
+    "runBot": "Run bot",
+    "goToCustomerSettings": "Go to customer settings"
+  },
+  "actions": {
+    "run": "Run bot",
+    "viewDetail": "View details"
+  },
+  "headerTitle": "Automation Health"
+}

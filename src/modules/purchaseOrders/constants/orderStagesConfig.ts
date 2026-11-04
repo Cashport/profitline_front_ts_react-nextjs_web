@@ -4,18 +4,19 @@ import type { OrderStage } from "../components/purchase-order-process/purchase-o
 /**
  * Static configuration for purchase order stages
  * Icons and order are fixed, completion data will be populated from API tracking
+ * `name` is the i18n key under purchaseOrders.stages
  */
 export const ORDER_STAGES_CONFIG: OrderStage[] = [
   {
     id: 1,
-    name: "Orden de compra",
+    name: "purchaseOrder",
     icon: ClipboardList,
     completedBy: null,
     completedAt: null
   },
   {
     id: 2,
-    name: "Validaciones",
+    name: "validations",
     icon: CheckCircle,
     completedBy: null,
     completedAt: null
@@ -24,21 +25,21 @@ export const ORDER_STAGES_CONFIG: OrderStage[] = [
   },
   {
     id: 3,
-    name: "Facturado",
+    name: "invoiced",
     icon: Receipt,
     completedBy: null,
     completedAt: null
   },
   {
     id: 4,
-    name: "En despacho",
+    name: "inDispatch",
     icon: Truck,
     completedBy: null,
     completedAt: null
   },
   {
     id: 5,
-    name: "Entregado",
+    name: "delivered",
     icon: Package,
     completedBy: null,
     completedAt: null

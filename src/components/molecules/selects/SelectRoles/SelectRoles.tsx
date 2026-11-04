@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import useSWR from "swr";
 
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const SelectRoles = ({ errors, field }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useSWR<IRoles>("/role", fetcher, {});
   // doesn't show super admin role
   const filteredOptions = data?.data.filter((rol) => rol.ID !== 1);
@@ -30,7 +32,7 @@ export const SelectRoles = ({ errors, field }: Props) => {
   return (
     <>
       <Select
-        placeholder="Selecciona los roles"
+        placeholder={t("selectRoles")}
         className={errors ? "selectInputRolesError" : "selectInputRoles"}
         loading={isLoading}
         variant="borderless"
@@ -39,7 +41,7 @@ export const SelectRoles = ({ errors, field }: Props) => {
         options={options}
         labelInValue
       />
-      {errors && <Typography.Text className="textError">Rol es obligatorio *</Typography.Text>}
+      {errors && <Typography.Text className="textError">{t("roleRequired")}</Typography.Text>}
     </>
   );
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { useApprovals } from "@/hooks/useApprovals";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -14,6 +15,7 @@ import ApprovalsTable from "../components/approvals-table/Approvals-table";
 import { getApprovalStatuses, getApprovalTypes } from "@/services/approvals/approvals";
 
 export default function ApprovalsView() {
+  const tCommon = useTranslations("common");
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 500);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -54,7 +56,10 @@ export default function ApprovalsView() {
           <div className="space-y-4">
             {/* Responsive flex-col on mobile, flex-row on md+ */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <OptimizedSearchComponent onSearch={setSearchQuery} title="Buscar" />
+              <OptimizedSearchComponent
+                onSearch={setSearchQuery}
+                title={tCommon("actions.search")}
+              />
 
               <div className="hidden md:flex items-center gap-2">
                 <ApprovalsStateDropdown

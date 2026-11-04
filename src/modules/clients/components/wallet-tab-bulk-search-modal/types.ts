@@ -59,10 +59,15 @@ export interface IBulkActionConfig {
   recipients: string[];
 }
 
+/** Clave de cada acción en clients.bulkSearch.actions (etiqueta, descripción y botón). */
+export type BulkActionI18nKey =
+  | "changeStatus"
+  | "applyPayment"
+  | "registerDispute"
+  | "submitInvoices"
+  | "sendStatement";
+
 export interface IBulkAction {
   key: BulkActionKey;
-  label: string;
-  description: string;
-  /** Inicio del texto del botón: "Cambiar estado de 120 facturas". */
-  verb: string;
+  i18nKey: BulkActionI18nKey;
 }

@@ -4,6 +4,7 @@ import type { ColumnsType } from "antd/es/table";
 import { Input, InputNumber } from "antd";
 import dayjs from "dayjs";
 import { X } from "lucide-react";
+import type { useTranslations } from "use-intl";
 import { IProfit360DevolucionProducto } from "@/types/reverseLogistics/IReverseLogistics";
 import { fmtCop, fmtNumber } from "../../utils/format";
 
@@ -14,6 +15,7 @@ interface LineasColumnsParams {
   canRemove: boolean;
   onChange: (idProductoxDocumento: string, cambios: Partial<IProfit360DevolucionProducto>) => void;
   onRemove: (idProductoxDocumento: string) => void;
+  t: ReturnType<typeof useTranslations<"reverseLogistics.returnDetail.lines">>;
 }
 
 // Productos de un documento. En edición cantidad, valor unitario y observación
@@ -23,23 +25,24 @@ export const getLineasColumns = ({
   editing,
   canRemove,
   onChange,
-  onRemove
+  onRemove,
+  t
 }: LineasColumnsParams): ColumnsType<IProfit360DevolucionProducto> => [
   {
-    title: "Producto",
+    title: t("product"),
     dataIndex: "nombreProducto",
     render: (nombre: string) => <span className="text-sm text-gray-900">{nombre}</span>
   },
-  { title: "Código", dataIndex: "codigo", width: 100 },
-  { title: "Lote", dataIndex: "lote", width: 110 },
+  { title: t("code"), dataIndex: "codigo", width: 100 },
+  { title: t("lot"), dataIndex: "lote", width: 110 },
   {
-    title: "Vencimiento",
+    title: t("expiration"),
     dataIndex: "fechaVencimiento",
     width: 120,
     render: (fecha: string) => dayjs(fecha).format("DD/MM/YYYY")
   },
   {
-    title: "Cant.",
+    title: t("quantity"),
     dataIndex: "cantidadProdXDoc",
     width: 100,
     align: "right",
@@ -60,7 +63,7 @@ export const getLineasColumns = ({
       )
   },
   {
-    title: "Valor unitario",
+    title: t("unitPrice"),
     dataIndex: "precioUnitario",
     width: 140,
     align: "right",
@@ -80,14 +83,14 @@ export const getLineasColumns = ({
       )
   },
   {
-    title: "Valor total",
+    title: t("totalValue"),
     dataIndex: "valorTotal",
     width: 130,
     align: "right",
     render: (valor: number) => <span className="font-semibold">{fmtCop(valor)}</span>
   },
   {
-    title: "Observación",
+    title: t("observation"),
     dataIndex: "observacionProducto",
     render: (observacion: string, record) =>
       editing ? (
@@ -112,12 +115,8 @@ export const getLineasColumns = ({
           render: (_: unknown, record: IProfit360DevolucionProducto) => (
             <button
               type="button"
-              aria-label="Eliminar producto"
-              title={
-                canRemove
-                  ? "Eliminar producto"
-                  : "El documento debe conservar al menos un producto"
-              }
+              aria-label={t("removeProduct")}
+              title={canRemove ? t("removeProduct") : t("keepOneProduct")}
               disabled={!canRemove}
               onClick={() => onRemove(record.idProductoxDocumento)}
               className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition-colors enabled:hover:bg-[#fde8ef] enabled:hover:text-[#e0007a] disabled:cursor-not-allowed disabled:opacity-40"

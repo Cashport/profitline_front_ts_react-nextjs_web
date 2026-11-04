@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 
-import { RESULT_LABELS, RESULT_ORDER } from "../../constants";
+import { RESULT_ORDER } from "../../constants";
 import type { IVisitsLayers, IVisitsPalette } from "../../types";
 
 interface MapOverlaysProps {
@@ -19,31 +21,32 @@ export const GLASS = "border border-border bg-card/95 backdrop-blur-sm";
 interface LayerChip {
   key: keyof IVisitsLayers;
   label: string;
-  /** Se oculta en pantallas angostas. */
-  suffix?: string;
+  /** Etiqueta completa en pantallas anchas; en las angostas se ve sólo `label`. */
+  fullLabel?: string;
   swatch: React.ReactNode;
 }
 
 /** Interruptores de capas (arriba a la izquierda) y leyenda (abajo a la izquierda). */
 export default function MapOverlays({ layers, onToggleLayer, focused, palette }: MapOverlaysProps) {
+  const tv = useTranslations("visits");
   const chips: LayerChip[] = [
     {
       key: "track",
-      label: "Recorrido",
-      suffix: " hecho",
+      label: tv("layers.track"),
+      fullLabel: tv("layers.trackFull"),
       swatch: <span className="w-3 border-t-2" style={{ borderColor: palette.bone }} />
     },
     {
       key: "plan",
-      label: "Plan",
-      suffix: " pendiente",
+      label: tv("layers.plan"),
+      fullLabel: tv("layers.planFull"),
       swatch: (
         <span className="w-3 border-t-2 border-dashed" style={{ borderColor: palette.ink2 }} />
       )
     },
     {
       key: "clients",
-      label: "Clientes",
+      label: tv("layers.clients"),
       swatch: (
         <span className="h-2 w-2 rounded-full" style={{ background: palette.status.IN_VISIT }} />
       )
@@ -54,17 +57,17 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
     <span className="h-[9px] w-[9px] rounded-full" style={{ background: color }} />
   );
   const results = RESULT_ORDER.map((r) => ({
-    label: RESULT_LABELS[r],
+    label: tv(`result.${r}`),
     mark: dot(palette.result[r])
   }));
   const legend = focused
     ? [
         {
-          label: "Recorrido real",
+          label: tv("legend.actualRoute"),
           mark: <span className="w-3.5 border-t-[3px]" style={{ borderColor: palette.accent }} />
         },
         {
-          label: "Por visitar",
+          label: tv("legend.toVisit"),
           mark: (
             <span
               className="w-3.5 border-t-2 border-dashed"
@@ -76,9 +79,9 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
       ]
     : [
         ...results,
-        { label: "En visita", mark: dot(palette.accent) },
+        { label: tv("legend.inVisit"), mark: dot(palette.accent) },
         {
-          label: "Pendiente",
+          label: tv("legend.pending"),
           mark: (
             <span
               className="h-[9px] w-[9px] rounded-full border-[1.5px]"
@@ -109,8 +112,14 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
               )}
             >
               {c.swatch}
-              {c.label}
-              {c.suffix && <span className="max-[1200px]:hidden">{c.suffix}</span>}
+              {c.fullLabel ? (
+                <>
+                  <span className="max-[1200px]:hidden">{c.fullLabel}</span>
+                  <span className="min-[1201px]:hidden">{c.label}</span>
+                </>
+              ) : (
+                c.label
+              )}
             </button>
           ))}
         </div>

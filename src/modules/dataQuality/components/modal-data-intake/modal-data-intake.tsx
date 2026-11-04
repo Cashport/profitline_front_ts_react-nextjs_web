@@ -13,6 +13,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import dayjs from "dayjs";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
@@ -47,41 +48,45 @@ export interface DataIntakeFormData {
   existingFileName?: string;
 }
 
-// Schema de validación Yup
-const validationSchema: yup.ObjectSchema<any> = yup.object({
-  clientName: yup.string().required("El nombre del cliente es requerido"),
-  fileType: yup.string().required("El tipo de archivo es requerido"),
-  ingestaSource: yup.string().required("La fuente de ingesta es requerida"),
-  attachedFile: yup
-    .mixed<File>()
-    .required("El archivo adjunto es requerido")
-    .test("is-file", "El archivo adjunto es requerido", (value) => value instanceof File),
-  ingestaVariables: yup
-    .array()
-    .of(
-      yup.object({
-        key: yup.string().defined(),
-        value: yup.string().defined()
-      })
-    )
-    .defined()
-});
+type IntakeT = ReturnType<typeof useTranslations<"dataQuality.intakeModal">>;
 
-const editValidationSchema: yup.ObjectSchema<any> = yup.object({
-  clientName: yup.string().required("El nombre del cliente es requerido"),
-  fileType: yup.string().required("El tipo de archivo es requerido"),
-  ingestaSource: yup.string().defined(),
-  attachedFile: yup.mixed<File>().nullable().notRequired(),
-  ingestaVariables: yup
-    .array()
-    .of(
-      yup.object({
-        key: yup.string().defined(),
-        value: yup.string().defined()
-      })
-    )
-    .defined()
-});
+// Schema de validación Yup
+const buildValidationSchema = (t: IntakeT): yup.ObjectSchema<any> =>
+  yup.object({
+    clientName: yup.string().required(t("validation.clientName")),
+    fileType: yup.string().required(t("validation.fileType")),
+    ingestaSource: yup.string().required(t("validation.source")),
+    attachedFile: yup
+      .mixed<File>()
+      .required(t("validation.attachment"))
+      .test("is-file", t("validation.attachment"), (value) => value instanceof File),
+    ingestaVariables: yup
+      .array()
+      .of(
+        yup.object({
+          key: yup.string().defined(),
+          value: yup.string().defined()
+        })
+      )
+      .defined()
+  });
+
+const buildEditValidationSchema = (t: IntakeT): yup.ObjectSchema<any> =>
+  yup.object({
+    clientName: yup.string().required(t("validation.clientName")),
+    fileType: yup.string().required(t("validation.fileType")),
+    ingestaSource: yup.string().defined(),
+    attachedFile: yup.mixed<File>().nullable().notRequired(),
+    ingestaVariables: yup
+      .array()
+      .of(
+        yup.object({
+          key: yup.string().defined(),
+          value: yup.string().defined()
+        })
+      )
+      .defined()
+  });
 
 const convertPeriodicityToFormData = (periodicity: IPeriodicity): IPeriodicityModalForm => {
   const isWeekly = periodicity.repeat.frequency?.toLowerCase() === "semanal";
@@ -132,6 +137,8 @@ export function ModalDataIntake({
   intakeData,
   onSuccess
 }: IModalDataIntakeProps) {
+  const t = useTranslations("dataQuality.intakeModal");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [isEditing, setIsEditing] = useState(false);
   const [isPeriodicityModalOpen, setIsPeriodicityModalOpen] = useState(false);
@@ -186,8 +193,8 @@ export function ModalDataIntake({
 
   // Select validation schema based on mode
   const activeValidationSchema = useMemo(() => {
-    return mode === "view" ? editValidationSchema : validationSchema;
-  }, [mode]);
+    return mode === "view" ? buildEditValidationSchema(t) : buildValidationSchema(t);
+  }, [mode, t]);
 
   // Setup react-hook-form
   const {
@@ -240,7 +247,7 @@ export function ModalDataIntake({
   // Handle fetch errors
   useEffect(() => {
     if (fetchError) {
-      message.error("Error al cargar los datos del cliente");
+      message.error(t("loadError"));
     }
   }, [fetchError]);
 
@@ -311,11 +318,11 @@ export function ModalDataIntake({
             .map((v) => ({ variable_key: v.key, variable_value: v.value }))
         };
         await createIntake(modelData);
-        message.success("Ingesta creada correctamente");
+        message.success(t("created"));
         onSuccess();
         handleClose();
       } catch (error) {
-        message.error("Error al crear la ingesta");
+        message.error(t("createError"));
       }
     } else if (mode === "view" && isEditing) {
       const jsonFreq = {
@@ -346,11 +353,11 @@ export function ModalDataIntake({
 
         await editIntake(intakeData!.id, modelData as any);
 
-        message.success("Ingesta actualizada correctamente");
+        message.success(t("updated"));
         onSuccess();
         handleClose();
       } catch (error) {
-        message.error("Error al actualizar la ingesta");
+        message.error(t("updateError"));
       }
     }
   };
@@ -388,10 +395,10 @@ export function ModalDataIntake({
 
   const fileTypeOptions = useMemo(() => {
     if (parameterData?.catalogs?.archive_types) {
-      return parameterData.catalogs.archive_types.map((t) => ({
-        id: t.id,
-        value: String(t.id),
-        label: t.description
+      return parameterData.catalogs.archive_types.map((type) => ({
+        id: type.id,
+        value: String(type.id),
+        label: type.description
       }));
     }
   }, [parameterData]);
@@ -417,7 +424,7 @@ export function ModalDataIntake({
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">Cargando datos...</p>
+            <p className="text-gray-600">{t("loading")}</p>
           </div>
         </div>
       </Modal>
@@ -429,14 +436,14 @@ export function ModalDataIntake({
     <div className="grid gap-6 py-4 max-h-[calc(60*var(--vh))] overflow-y-auto">
       {/* Tipo de Archivo Dropdown */}
       <div className="grid gap-2">
-        <Label>Tipo de Archivo</Label>
+        <Label>{t("fileType")}</Label>
         <Controller
           name="fileType"
           control={control}
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger className="w-full border-[#DDDDDD]">
-                <SelectValue placeholder="Seleccionar tipo de archivo" />
+                <SelectValue placeholder={t("fileTypePlaceholder")} />
               </SelectTrigger>
               <SelectContent className="!z-[10000]">
                 {fileTypeOptions?.map((tipo) => (
@@ -453,34 +460,38 @@ export function ModalDataIntake({
 
       {/* Periodicidad */}
       <div className="grid gap-2">
-        <Label>Periodicidad *</Label>
+        <Label>{t("frequencyRequired")}</Label>
         <InputClickableStyled
           onClick={() => setIsPeriodicityModalOpen(true)}
           value={
             selectedPeriodicity
               ? selectedPeriodicity.frequency.value === "Mensual"
-                ? `${selectedPeriodicity.frequency.value}, ${selectedPeriodicity.frequency_number} veces`
-                : `Cada ${formatDaysArray(selectedPeriodicity.days)}, ${selectedPeriodicity.frequency.value}`
+                ? t("periodicityTimes", {
+                    frequency: selectedPeriodicity.frequency.value,
+                    count: selectedPeriodicity.frequency_number ?? 0
+                  })
+                : t("periodicityEvery", {
+                    days: formatDaysArray(selectedPeriodicity.days),
+                    frequency: selectedPeriodicity.frequency.value
+                  })
               : ""
           }
           error={periodicityError}
-          placeholder="Seleccionar frecuencia"
+          placeholder={t("frequencyPlaceholder")}
         />
-        {periodicityError && (
-          <p className="text-[13px] text-red-600">La periodicidad es obligatoria *</p>
-        )}
+        {periodicityError && <p className="text-[13px] text-red-600">{t("frequencyError")}</p>}
       </div>
 
       {/* Fuente de Ingesta */}
       <div className="grid gap-2">
-        <Label>Fuente de Ingesta</Label>
+        <Label>{t("source")}</Label>
         <Controller
           name="ingestaSource"
           control={control}
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger className="w-full border-[#DDDDDD]">
-                <SelectValue placeholder="Seleccionar fuente de ingesta" />
+                <SelectValue placeholder={t("sourcePlaceholder")} />
               </SelectTrigger>
               <SelectContent className="!z-[10000]">
                 {ingestaOptions.map((ingesta) => (
@@ -499,7 +510,7 @@ export function ModalDataIntake({
 
       {/* Adjunto */}
       <div className="grid gap-2">
-        <Label>Adjunto *</Label>
+        <Label>{t("attachmentRequired")}</Label>
         <Controller
           name="attachedFile"
           control={control}
@@ -508,7 +519,7 @@ export function ModalDataIntake({
               {mode === "view" && formInitialData?.existingFileName && !isExistingFileDeleted && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>
-                    Archivo actual:{" "}
+                    {t("currentFile")}{" "}
                     <a
                       href={formInitialData.existingFileName}
                       target="_blank"
@@ -529,7 +540,7 @@ export function ModalDataIntake({
                     }}
                     className="text-red-600 h-6 px-2"
                   >
-                    Eliminar
+                    {tCommon("actions.delete")}
                   </Button>
                 </div>
               )}
@@ -555,13 +566,15 @@ export function ModalDataIntake({
                       onClick={() => onChange(null)}
                       className="text-red-600"
                     >
-                      Eliminar
+                      {tCommon("actions.delete")}
                     </Button>
                   )}
                 </div>
               )}
               {attachedFileValue && (
-                <p className="text-[13px] text-gray-600">Nuevo archivo: {attachedFileValue.name}</p>
+                <p className="text-[13px] text-gray-600">
+                  {t("newFile", { name: attachedFileValue.name })}
+                </p>
               )}
             </div>
           )}
@@ -575,11 +588,11 @@ export function ModalDataIntake({
       <div className="grid gap-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Label>Variables de configuración</Label>
+            <Label>{t("variables")}</Label>
             {mode === "view" && intakeData?.id && (
               <button
                 type="button"
-                title="Historial de variables de configuración"
+                title={t("variablesHistory")}
                 onClick={() => setIsVariableHistoryOpen(true)}
                 className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-gray-100"
               >
@@ -594,7 +607,7 @@ export function ModalDataIntake({
             onClick={() => append({ key: "", value: "" })}
             className="text-[13px] bg-transparent"
           >
-            + Agregar variable
+            {t("addVariable")}
           </Button>
         </div>
         <div className="space-y-2 max-h-[200px] overflow-y-auto">
@@ -619,7 +632,7 @@ export function ModalDataIntake({
                     render={({ field }) => (
                       <Input
                         {...field}
-                        placeholder="Nombre (ej: EMAIL, API_URL)"
+                        placeholder={t("variableNamePlaceholder")}
                         className="border-[#DDDDDD] flex-1 font-mono text-sm"
                       />
                     )}
@@ -629,7 +642,11 @@ export function ModalDataIntake({
                   name={`ingestaVariables.${index}.value`}
                   control={control}
                   render={({ field }) => (
-                    <Input {...field} placeholder="Valor" className="border-[#DDDDDD] flex-1" />
+                    <Input
+                      {...field}
+                      placeholder={t("variableValuePlaceholder")}
+                      className="border-[#DDDDDD] flex-1"
+                    />
                   )}
                 />
                 {fields.length > 1 && !isLockedKey && (
@@ -647,9 +664,7 @@ export function ModalDataIntake({
             );
           })}
         </div>
-        <p className="text-[13px] text-gray-500">
-          Agregue variables como EMAIL, API_URL, PASSWORD, etc.
-        </p>
+        <p className="text-[13px] text-gray-500">{t("variablesHint")}</p>
       </div>
     </div>
   );
@@ -659,44 +674,48 @@ export function ModalDataIntake({
     <div className="grid gap-6 py-4 max-h-[calc(60*var(--vh))] overflow-y-auto">
       {/* Tipo de Archivo */}
       <div className="grid gap-2">
-        <Label>Tipo de Archivo</Label>
+        <Label>{t("fileType")}</Label>
         <Badge variant="outline" className="w-fit">
-          {intakeData?.tipo_archivo || "Sin tipo"}
+          {intakeData?.tipo_archivo || t("noType")}
         </Badge>
       </div>
 
       {/* Periodicidad */}
       <div className="grid gap-2">
-        <Label>Periodicidad</Label>
+        <Label>{t("frequency")}</Label>
         <Badge variant="outline" className="w-fit">
-          {intakeData?.periodicity || "Sin periodicidad"}
+          {intakeData?.periodicity || t("noFrequency")}
         </Badge>
       </div>
       {/* Detalle de Periodicidad */}
       <div className="grid gap-2">
-        <Label>Detalle de Periodicidad</Label>
+        <Label>{t("frequencyDetail")}</Label>
         <p className="text-sm" style={{ color: "#141414" }}>
           {intakeData?.periodicity_json
-            ? `${intakeData.periodicity_json.repeat.frequency}${
-                intakeData.periodicity_json.repeat.frequency?.toLowerCase() === "semanal"
-                  ? `, ${intakeData.periodicity_json.repeat.day.join(", ")}`
-                  : ""
-              }, ${intakeData.periodicity_json.repeat.interval} veces, iniciando el ${intakeData.periodicity_json.start_date}`
-            : "Sin detalle"}
+            ? t("frequencyDetailValue", {
+                frequency: `${intakeData.periodicity_json.repeat.frequency}${
+                  intakeData.periodicity_json.repeat.frequency?.toLowerCase() === "semanal"
+                    ? `, ${intakeData.periodicity_json.repeat.day.join(", ")}`
+                    : ""
+                }`,
+                count: Number(intakeData.periodicity_json.repeat.interval) || 0,
+                startDate: intakeData.periodicity_json.start_date ?? ""
+              })
+            : t("noDetail")}
         </p>
       </div>
 
       {/* Fuente de Ingesta */}
       <div className="grid gap-2">
-        <Label>Fuente de Ingesta</Label>
+        <Label>{t("source")}</Label>
         <p className="text-sm" style={{ color: "#141414" }}>
-          {intakeData?.intake_type?.description || "Sin fuente"}
+          {intakeData?.intake_type?.description || t("noSource")}
         </p>
       </div>
 
       {/* Adjunto */}
       <div className="grid gap-2">
-        <Label>Adjunto</Label>
+        <Label>{t("attachment")}</Label>
         {formInitialData.existingFileName ? (
           <a
             href={formInitialData.existingFileName}
@@ -708,7 +727,7 @@ export function ModalDataIntake({
           </a>
         ) : (
           <p className="text-sm" style={{ color: "#141414" }}>
-            Sin archivo adjunto
+            {t("noAttachment")}
           </p>
         )}
       </div>
@@ -716,11 +735,11 @@ export function ModalDataIntake({
       {/* Variables de configuración */}
       <div className="grid gap-2">
         <div className="flex items-center gap-1.5">
-          <Label>Variables de configuración</Label>
+          <Label>{t("variables")}</Label>
           {intakeData?.id && (
             <button
               type="button"
-              title="Historial de variables de configuración"
+              title={t("variablesHistory")}
               onClick={() => setIsVariableHistoryOpen(true)}
               className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-gray-100"
             >
@@ -741,7 +760,7 @@ export function ModalDataIntake({
             ))}
           {(!formInitialData.ingestaVariables ||
             formInitialData.ingestaVariables.filter((v) => v.key && v.value).length === 0) && (
-            <p className="text-sm text-gray-500">Sin variables configuradas</p>
+            <p className="text-sm text-gray-500">{t("noVariables")}</p>
           )}
         </div>
       </div>
@@ -756,20 +775,14 @@ export function ModalDataIntake({
         footer={null}
         width={600}
         destroyOnClose
-        title={
-          mode === "create"
-            ? "Crear Nueva Ingesta"
-            : isEditing
-              ? "Editar Ingesta"
-              : "Detalle de Ingesta"
-        }
+        title={mode === "create" ? t("createTitle") : isEditing ? t("editTitle") : t("detailTitle")}
       >
         <p className="text-sm text-gray-500 mb-4">
           {mode === "create"
-            ? "Configure los detalles de la nueva ingesta"
+            ? t("createDescription")
             : isEditing
-              ? "Modifica los detalles de la ingesta"
-              : `Información de la ingesta de ${intakeData?.tipo_archivo || clientName}`}
+              ? t("editDescription")
+              : t("detailDescription", { name: intakeData?.tipo_archivo || clientName })}
         </p>
 
         {showForm ? (
@@ -786,14 +799,14 @@ export function ModalDataIntake({
                     disabled={isSubmitting}
                     className="bg-transparent"
                   >
-                    Cancelar
+                    {tCommon("actions.cancel")}
                   </Button>
                   <Button
                     type="submit"
                     disabled={!isValid || isSubmitting || !selectedPeriodicity}
                     className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
                   >
-                    {isSubmitting ? "Creando..." : "Crear Ingesta"}
+                    {isSubmitting ? t("creating") : t("createButton")}
                   </Button>
                 </>
               ) : (
@@ -804,7 +817,7 @@ export function ModalDataIntake({
                     onClick={handleCancelEdit}
                     className="bg-transparent"
                   >
-                    Cancelar
+                    {tCommon("actions.cancel")}
                   </Button>
                   <Button
                     type="submit"
@@ -817,7 +830,7 @@ export function ModalDataIntake({
                     }
                     className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
                   >
-                    {isSubmitting ? "Guardando..." : "Guardar"}
+                    {isSubmitting ? tCommon("status.saving") : tCommon("actions.save")}
                   </Button>
                 </>
               )}
@@ -829,7 +842,7 @@ export function ModalDataIntake({
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={handleClose} className="bg-transparent">
-                Cerrar
+                {tCommon("actions.close")}
               </Button>
               <Button
                 onClick={() => {
@@ -844,7 +857,7 @@ export function ModalDataIntake({
                 className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
               >
                 <Edit className="w-4 h-4 mr-2" />
-                Editar
+                {tCommon("actions.edit")}
               </Button>
             </div>
           </>

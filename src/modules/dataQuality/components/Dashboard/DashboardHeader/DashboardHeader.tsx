@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import useSWR from "swr";
+import { useLocale, useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 
@@ -21,6 +22,9 @@ import {
 import { buildLastSixMonths } from "@/modules/dataQuality/utils/months";
 
 export function DashboardHeader() {
+  const t = useTranslations("dataQuality.dashboard.header");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const {
     activeTab,
     setActiveTab,
@@ -46,18 +50,18 @@ export function DashboardHeader() {
 
   const fileTypes = useMemo(
     () =>
-      (fileTypesData ?? []).map((t) => ({
-        id: String(t.id),
-        name: t.description
+      (fileTypesData ?? []).map((type) => ({
+        id: String(type.id),
+        name: type.description
       })),
     [fileTypesData]
   );
 
-  const periods = useMemo(buildLastSixMonths, []);
+  const periods = useMemo(() => buildLastSixMonths(locale), [locale]);
 
   return (
     <Header
-      title="Dashboard de Ingesta"
+      title={t("title")}
       back="/data-quality"
       titleExtra={
         /* Tabs */
@@ -76,7 +80,7 @@ export function DashboardHeader() {
                 boxShadow: activeTab === tab ? "0 1px 3px rgba(0,0,0,0.08)" : "none"
               }}
             >
-              {tab}
+              {t(`tabs.${tab}`)}
             </button>
           ))}
         </div>
@@ -84,7 +88,7 @@ export function DashboardHeader() {
       actionsExtra={
         <>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Región</span>
+            <span className="text-sm text-gray-500">{t("region")}</span>
             <Select value={selectedRegion} onValueChange={setSelectedRegion}>
               <SelectTrigger
                 className="w-[180px]"
@@ -102,7 +106,7 @@ export function DashboardHeader() {
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Periodo</span>
+            <span className="text-sm text-gray-500">{t("period")}</span>
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger
                 className="w-[140px]"
@@ -120,19 +124,19 @@ export function DashboardHeader() {
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Tipo de archivo</span>
+            <span className="text-sm text-gray-500">{t("fileType")}</span>
             <Select value={selectedFileType} onValueChange={setSelectedFileType}>
               <SelectTrigger
                 className="w-[180px]"
                 style={{ borderColor: "#DDDDDD", color: "#141414" }}
               >
-                <SelectValue placeholder="Todos" />
+                <SelectValue placeholder={tCommon("status.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {fileTypes.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
+                <SelectItem value="all">{tCommon("status.all")}</SelectItem>
+                {fileTypes.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.name}
                   </SelectItem>
                 ))}
               </SelectContent>

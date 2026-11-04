@@ -1,10 +1,7 @@
 import { ChangePass } from "@/components/organisms/auth/changePass/ChangePass";
-import { Metadata } from "next";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Aceptar invitación",
-  description: "Aceptar invitación"
-};
+export const generateMetadata = () => pageMetadata("acceptInvitation");
 
 function AcceptInvitationPage() {
   return <ChangePass mode="accept" />;

@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Flex, Modal } from "antd";
+import { useTranslations } from "use-intl";
 import { IContact, IContactForm } from "@/types/contacts/IContacts";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -46,6 +47,8 @@ const ContactsTabModal = ({
   clientId,
   isActionLoading
 }: PropsInvoicesTable) => {
+  const t = useTranslations("clients.contacts.modal");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const [ableToEdit, setAbleToEdit] = useState(false);
   const [contactDetails, setContactDetails] = useState<IContact>();
@@ -100,40 +103,37 @@ const ContactsTabModal = ({
       <Flex vertical gap={24}>
         <div className="contactModalContainer__header">
           <h2 className="contactModalContainer__header__title">
-            {showContactModal.contactId ? "Datos de contacto" : "Crear nuevo contacto"}
+            {showContactModal.contactId ? t("titleEdit") : t("titleCreate")}
           </h2>
           <p className="contactModalContainer__header__info">
-            Ingresa la información
-            {showContactModal.contactId
-              ? " para editar un contacto existente"
-              : " para crear un nuevo contacto"}
+            {showContactModal.contactId ? t("infoEdit") : t("infoCreate")}
           </p>
         </div>
 
         <div className="contactModalContainer__content">
           <InputForm
-            titleInput="Nombres"
+            titleInput={t("firstNames")}
             control={control}
             nameInput="name"
             error={errors.name}
             readOnly={!ableToEdit}
           />
           <InputForm
-            titleInput="Apellidos"
+            titleInput={t("lastNames")}
             control={control}
             nameInput="lastname"
             error={errors.lastname}
             readOnly={!ableToEdit}
           />
           <InputForm
-            titleInput="Cargo"
+            titleInput={t("position")}
             control={control}
             nameInput="position"
             error={errors.position}
             readOnly={!ableToEdit}
           />
           <div className="inputContainer">
-            <h5 className="inputContainer__title">Rol</h5>
+            <h5 className="inputContainer__title">{t("role")}</h5>
             <Controller
               name="role"
               control={control}
@@ -150,7 +150,7 @@ const ContactsTabModal = ({
             />
           </div>
           <div className="inputContainer">
-            <h5 className="inputContainer__title">Indicativo</h5>
+            <h5 className="inputContainer__title">{t("callingCode")}</h5>
             <Controller
               name="indicative"
               control={control}
@@ -167,7 +167,7 @@ const ContactsTabModal = ({
             />
           </div>
           <InputForm
-            titleInput="Teléfono"
+            titleInput={tCommon("fields.phone")}
             control={control}
             nameInput="phone"
             error={errors.phone}
@@ -178,14 +178,14 @@ const ContactsTabModal = ({
                 const isColombia = formValues.indicative?.value === 1;
 
                 if (isColombia) {
-                  return /^\d{10}$/.test(value) || "El teléfono debe tener 10 dígitos";
+                  return /^\d{10}$/.test(value) || t("phoneExactDigits", { digits: 10 });
                 }
-                return /^\d{7,12}$/.test(value) || "El teléfono debe tener entre 7 y 12 dígitos";
+                return /^\d{7,12}$/.test(value) || t("phoneDigitsRange", { min: 7, max: 12 });
               }
             }}
           />
           <InputForm
-            titleInput="Email"
+            titleInput={t("email")}
             control={control}
             nameInput="email"
             error={errors.email}
@@ -194,7 +194,7 @@ const ContactsTabModal = ({
             validationRules={{
               pattern: {
                 value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: "El email no es válido"
+                message: t("invalidEmail")
               }
             }}
           />
@@ -212,14 +212,14 @@ const ContactsTabModal = ({
                   }
                 }}
               >
-                Cancelar
+                {tCommon("actions.cancel")}
               </SecondaryButton>
               <PrincipalButton
                 disabled={!isValid}
                 onClick={handleSubmit(onSubmitForm)}
                 loading={isActionLoading}
               >
-                {showContactModal.contactId ? "Guardar cambios" : "Crear contacto"}
+                {showContactModal.contactId ? tCommon("actions.saveChanges") : t("createContact")}
               </PrincipalButton>
             </>
           ) : (
@@ -228,9 +228,11 @@ const ContactsTabModal = ({
                 onClick={() => setShowContactModal({ isOpen: false, contactId: 0 })}
                 disabled={isActionLoading}
               >
-                Cancelar
+                {tCommon("actions.cancel")}
               </SecondaryButton>
-              <PrincipalButton onClick={() => setAbleToEdit(true)}>Editar</PrincipalButton>
+              <PrincipalButton onClick={() => setAbleToEdit(true)}>
+                {tCommon("actions.edit")}
+              </PrincipalButton>
             </>
           )}
         </div>

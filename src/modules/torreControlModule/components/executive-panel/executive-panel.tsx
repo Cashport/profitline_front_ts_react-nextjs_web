@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import BarList, { type BarListRow } from "@/components/ui/bar-list/bar-list";
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import DetailTooltip, { estadoRows } from "@/modules/walletModule/components/shared/detail-tooltip";
@@ -15,6 +17,7 @@ interface ExecutivePanelProps {
 
 /** Composición de la cartera por ejecutivo: ancho = cartera, cifra = sin conciliar. */
 export default function ExecutivePanel({ ejecutivos }: ExecutivePanelProps) {
+  const t = useTranslations("controlTower.executives");
   const max = Math.max(1, ...ejecutivos.map((e) => e.segments.total));
   // wrapTrack sólo recibe la fila pintada; por aquí recupera su ejecutivo.
   const porId = new Map(ejecutivos.map((e) => [e.persona.id, e]));
@@ -33,10 +36,7 @@ export default function ExecutivePanel({ ejecutivos }: ExecutivePanelProps) {
   }));
 
   return (
-    <PanelCard
-      title="Composición de la cartera por ejecutivo"
-      hint="ancho = cartera · cifra = vencido sin conciliar"
-    >
+    <PanelCard title={t("title")} hint={t("hint")}>
       <div className="mb-2.5">
         <StatusLegend />
       </div>
@@ -44,14 +44,14 @@ export default function ExecutivePanel({ ejecutivos }: ExecutivePanelProps) {
       <BarList
         rows={rows}
         maxHeight={363}
-        emptyLabel="Ningún ejecutivo tiene cartera con estos filtros."
+        emptyLabel={t("empty")}
         wrapTrack={(track, row) => {
           const e = porId.get(row.id);
           if (!e) return track;
 
           return (
             <DetailTooltip
-              title={`${e.persona.nombre} · cartera`}
+              title={t("tooltipTitle", { name: e.persona.nombre })}
               rows={estadoRows(e.segments)}
               total={{ value: fmtM(e.segments.total) }}
             >

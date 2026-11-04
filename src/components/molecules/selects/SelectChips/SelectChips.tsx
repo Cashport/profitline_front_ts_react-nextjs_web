@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import { Checkbox, Flex, Tag, Typography } from "antd";
 
@@ -24,6 +25,7 @@ export const SelectChips = ({
   setSelectedBusinessRules = () => {},
   disabled
 }: Props) => {
+  const t = useTranslations("shared.selects");
   const {
     channels: selectedChannelsId,
     lines: selectedLinesId,
@@ -190,13 +192,13 @@ export const SelectChips = ({
                     })}
                   </>
                 ) : (
-                  <Text>Sin sublineas actualmente.</Text>
+                  <Text>{t("noSublines")}</Text>
                 )}
               </Flex>
             </Flex>
           ))
         ) : (
-          <Text>Sin Lineas actualmente.</Text>
+          <Text>{t("noLines")}</Text>
         )}
       </Flex>
     </Flex>

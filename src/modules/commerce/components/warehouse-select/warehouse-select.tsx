@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 
 import { IAllWarehouse } from "@/types/commerce/ICommerce";
 import { getAllWarehouses } from "@/services/commerce/commerce";
@@ -28,6 +29,7 @@ export default function WarehouseSelect({
   className,
   status
 }: IWarehouseSelectProps) {
+  const t = useTranslations("commerce.selects");
   const [warehouses, setWarehouses] = useState<IAllWarehouse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -73,7 +75,7 @@ export default function WarehouseSelect({
     <Select
       showSearch
       optionFilterProp="label"
-      placeholder="Seleccione una bodega"
+      placeholder={t("selectWarehouse")}
       value={effectiveValue}
       onChange={(val: number) => onChange(val)}
       disabled={effectiveDisabled}

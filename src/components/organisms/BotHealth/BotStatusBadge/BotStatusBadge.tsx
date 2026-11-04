@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 
 import { Tag } from "@/components/atoms/Tag/Tag";
 import { BotHealthStatus, BotRawStatus } from "@/types/bots/IBotHealth";
@@ -11,7 +12,9 @@ interface BotStatusBadgeProps {
 // Reutiliza el componente Tag existente (src/components/atoms/Tag/Tag.tsx) y el mismo
 // patrón visual de badge de estado usado en ThirdPartiesView (color + backgroundColor + icono).
 export const BotStatusBadge: React.FC<BotStatusBadgeProps> = ({ estado }) => {
-  const { text, color, backgroundColor, icon } = getBotStatusDetails(estado);
+  const t = useTranslations("botHealth.status");
+  const { labelKey, color, backgroundColor, icon } = getBotStatusDetails(estado);
+  const text = t(labelKey);
 
   return (
     <Tag

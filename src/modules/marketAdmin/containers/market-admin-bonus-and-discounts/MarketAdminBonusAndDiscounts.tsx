@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import UiTab from "@/components/ui/ui-tab/ui-tab";
 import MarketAdminPromotions from "@/modules/marketAdmin/components/MarketAdminPromotions/MarketAdminPromotions";
 import CrearNuevoModal from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/CrearNuevoModal";
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export default function MarketAdminBonusAndDiscounts({ initialTab }: Props) {
+  const t = useTranslations("marketAdmin.bonusAndDiscounts");
   const [activeTab, setActiveTab] = useState<string>(
     isKnownTab(initialTab) ? initialTab : MARKET_ADMIN_DISCOUNTS_TABS.packages
   );
@@ -33,17 +35,17 @@ export default function MarketAdminBonusAndDiscounts({ initialTab }: Props) {
   const tabs = [
     {
       key: MARKET_ADMIN_DISCOUNTS_TABS.packages,
-      label: "Paquete de descuentos",
+      label: t("tabs.packages"),
       children: <DiscountPackagesTab onCrearNuevo={openCrearNuevo} />
     },
     {
       key: MARKET_ADMIN_DISCOUNTS_TABS.rules,
-      label: "Reglas de descuentos",
+      label: t("tabs.rules"),
       children: <DiscountRulesTab onCrearNuevo={openCrearNuevo} />
     },
     {
       key: MARKET_ADMIN_DISCOUNTS_TABS.bonuses,
-      label: "Bonificados",
+      label: t("tabs.bonuses"),
       children: <BonificadosTab onCrearNuevo={openCrearNuevo} />
     }
   ];
@@ -62,7 +64,7 @@ export default function MarketAdminBonusAndDiscounts({ initialTab }: Props) {
 
   return (
     <div className="cp-page min-h-full">
-      <Header title="Descuentos y bonificados" back="/market-admin" />
+      <Header title={t("title")} back="/market-admin" />
 
       <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         <UiTab tabs={tabs} activeKey={activeTab} onChangeTab={setActiveTab} />

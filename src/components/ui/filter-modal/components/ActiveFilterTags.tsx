@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 
 import type { FilterCategoryConfig, FilterOptionItem, FilterSelection } from "../FilterModal.types";
 
@@ -11,9 +12,6 @@ interface ActiveFilterTagsProps {
   formatTagValue?: (cat: FilterCategoryConfig, items: FilterOptionItem[]) => string;
 }
 
-const defaultFormat = (_cat: FilterCategoryConfig, items: FilterOptionItem[]) =>
-  items.length === 1 ? items[0].name : `${items.length} seleccionados`;
-
 /** Chips de filtros aplicados, con el mismo estilo que los del header (docs/DESIGN.md §8). */
 export default function ActiveFilterTags({
   categories,
@@ -21,8 +19,12 @@ export default function ActiveFilterTags({
   activeCount,
   onClearCategory,
   onClearAll,
-  formatTagValue = defaultFormat
+  formatTagValue
 }: ActiveFilterTagsProps) {
+  const t = useTranslations("components.filterModal");
+  const tCommon = useTranslations("common");
+  const defaultFormat = (_cat: FilterCategoryConfig, items: FilterOptionItem[]) =>
+    items.length === 1 ? items[0].name : tCommon("count.selected", { count: items.length });
   const tags: React.ReactNode[] = [];
 
   categories.forEach((cat) => {
@@ -34,7 +36,7 @@ export default function ActiveFilterTags({
 
     const items = value[cat.key] || [];
     if (items.length === 0) return;
-    const text = formatTagValue(cat, items);
+    const text = (formatTagValue ?? defaultFormat)(cat, items);
 
     tags.push(
       <span
@@ -47,7 +49,7 @@ export default function ActiveFilterTags({
         <button
           type="button"
           onClick={() => onClearCategory(cat.key)}
-          aria-label={`Quitar ${cat.label}`}
+          aria-label={t("removeFilter", { category: cat.label })}
           className="flex h-full shrink-0 cursor-pointer items-center border-0 bg-transparent px-1.5 text-[18px] leading-none text-cp-ink-4 hover:text-cp-ink"
         >
           ×
@@ -65,7 +67,7 @@ export default function ActiveFilterTags({
           onClick={onClearAll}
           className="cursor-pointer border-0 bg-transparent px-2 text-[14px] font-semibold text-cp-ink-2 hover:underline"
         >
-          Limpiar todos
+          {t("clearAll")}
         </button>
       )}
     </div>

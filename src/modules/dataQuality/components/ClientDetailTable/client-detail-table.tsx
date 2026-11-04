@@ -4,6 +4,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Calendar, MoreHorizontal } from "lucide-react";
 import { Dropdown, Spin, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import {
   deleteFileDateIntake,
@@ -66,6 +67,8 @@ export function ClientDetailTable({
   onMutate,
   loading
 }: IClientDetailTableProps) {
+  const t = useTranslations("dataQuality.clientFilesTable");
+  const tCommon = useTranslations("common");
   const [isUploadingEvidenceLoading, setIsUploadingEvidenceLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -89,19 +92,19 @@ export function ClientDetailTable({
     if (canUpload) {
       cargarChildren.push({
         key: "upload",
-        label: "Archivo cliente",
+        label: t("menu.customerFile"),
         onClick: () => handleUploadIntake(file.id)
       });
       cargarChildren.push({
         key: "upload-generic",
-        label: "Universal",
+        label: t("menu.universal"),
         onClick: () => handleUploadGenericIntake(file.id)
       });
     }
     if (canManage) {
       cargarChildren.push({
         key: "load-evidence",
-        label: "Soporte auditoria",
+        label: t("menu.auditSupport"),
         onClick: () => handleUploadEvidence(file.id),
         disabled: isUploadingEvidenceLoading
       });
@@ -110,7 +113,7 @@ export function ClientDetailTable({
       items.push({
         key: "group-cargar",
         type: "group",
-        label: <span className="font-semibold text-black">Cargar</span>,
+        label: <span className="font-semibold text-black">{t("menu.upload")}</span>,
         children: cargarChildren
       });
     }
@@ -118,21 +121,21 @@ export function ClientDetailTable({
     items.push({
       key: "group-descargas",
       type: "group",
-      label: <span className="font-semibold text-black">Descargas</span>,
+      label: <span className="font-semibold text-black">{t("menu.downloads")}</span>,
       children: [
         {
           key: "download-original",
-          label: "Archivo cliente",
+          label: t("menu.customerFile"),
           onClick: () => handleDownloadOriginal(file)
         },
         {
           key: "download-universal",
-          label: "Universal .csv",
+          label: t("menu.universalCsv"),
           onClick: () => handleProcessedFile(file, "csv")
         },
         {
           key: "download-universal-excel",
-          label: "Universal .xls",
+          label: t("menu.universalXls"),
           onClick: () => handleProcessedFile(file, "excel")
         }
       ]
@@ -142,11 +145,11 @@ export function ClientDetailTable({
       items.push({
         key: "group-eliminar",
         type: "group",
-        label: <span className="font-semibold text-black">Eliminar</span>,
+        label: <span className="font-semibold text-black">{t("menu.delete")}</span>,
         children: [
           {
             key: "delete",
-            label: "Archivo cliente",
+            label: t("menu.customerFile"),
             onClick: () => {
               setActiveFileId(file.id);
               setIsDeleteModalOpen(true);
@@ -155,7 +158,7 @@ export function ClientDetailTable({
           },
           {
             key: "delete-date",
-            label: "Fecha ingesta",
+            label: t("menu.intakeDate"),
             onClick: () => {
               setActiveFileId(file.id);
               setIsDeleteDateModalOpen(true);
@@ -187,7 +190,7 @@ export function ClientDetailTable({
   };
 
   const handleProcessedFile = async (file: IClientDetailArchiveClient, type: "excel" | "csv") => {
-    const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
+    const hide = message.open({ type: "loading", content: t("downloading"), duration: 0 });
     const fileName = `${file.data_type.description}_${clientName}_${file.date_archive ? formatDate(file.date_archive) : ""}`;
     try {
       const res = type === "excel" ? await downloadExcel(file.id) : await downloadCSV(file.id);
@@ -209,12 +212,9 @@ export function ClientDetailTable({
       document.body.appendChild(link);
       link.click();
       link.remove();
-      message.success("Archivo descargado exitosamente.");
+      message.success(t("downloaded"));
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error al descargar el archivo. Por favor, inténtalo de nuevo.";
+      const errorMessage = error?.response?.data?.message || error?.message || t("downloadError");
       message.error(errorMessage);
     } finally {
       hide();
@@ -223,12 +223,12 @@ export function ClientDetailTable({
 
   const handleDownloadOriginal = async (file: IClientDetailArchiveClient) => {
     if (!file.procesed_url) {
-      message.error("No hay URL disponible para descargar el archivo original.");
+      message.error(t("noOriginalUrl"));
       return;
     }
     const hide = message.open({
       type: "loading",
-      content: "Descargando archivo original...",
+      content: t("downloadingOriginal"),
       duration: 0
     });
     try {
@@ -243,11 +243,7 @@ export function ClientDetailTable({
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al descargar el archivo. Por favor, inténtalo de nuevo."
-      );
+      message.error(error instanceof Error ? error.message : t("downloadError"));
     } finally {
       hide();
     }
@@ -257,19 +253,15 @@ export function ClientDetailTable({
     setIsDeleteLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Eliminando archivo...",
+      content: t("deleting"),
       duration: 0
     });
     try {
       await deleteIntakeFile(fileId);
-      message.success("Archivo eliminado exitosamente.");
+      message.success(t("deleted"));
       onMutate?.();
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al eliminar el archivo. Por favor, inténtalo de nuevo."
-      );
+      message.error(error instanceof Error ? error.message : t("deleteError"));
     } finally {
       hide();
       setIsDeleteLoading(false);
@@ -287,19 +279,15 @@ export function ClientDetailTable({
     setIsDeleteDateLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Eliminando fecha de ingesta...",
+      content: t("deletingIntakeDate"),
       duration: 0
     });
     try {
       await deleteFileDateIntake(fileId);
-      message.success("Fecha de ingesta eliminada exitosamente.");
+      message.success(t("intakeDateDeleted"));
       onMutate?.();
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al eliminar la fecha de ingesta. Por favor, inténtalo de nuevo."
-      );
+      message.error(error instanceof Error ? error.message : t("intakeDateDeleteError"));
     } finally {
       hide();
       setIsDeleteDateLoading(false);
@@ -322,19 +310,15 @@ export function ClientDetailTable({
         setIsUploadingEvidenceLoading(true);
         const hide = message.open({
           type: "loading",
-          content: "Subiendo evidencia...",
+          content: t("uploadingEvidence"),
           duration: 0
         });
         try {
           await uploadEvidence(id, file);
-          message.success("Evidencia cargada exitosamente.");
+          message.success(t("evidenceUploaded"));
           onMutate?.();
         } catch (error) {
-          message.error(
-            error instanceof Error
-              ? error.message
-              : "Error al cargar la evidencia. Por favor, inténtalo de nuevo."
-          );
+          message.error(error instanceof Error ? error.message : t("evidenceUploadError"));
         } finally {
           hide();
           setIsUploadingEvidenceLoading(false);
@@ -362,16 +346,16 @@ export function ClientDetailTable({
       if (file) {
         const hide = message.open({
           type: "loading",
-          content: "Subiendo ingesta genérica...",
+          content: t("uploadingGeneric"),
           duration: 0
         });
         try {
           await uploadGenericIntakeFile(id, file);
-          message.success("Carga exitosa.");
+          message.success(t("uploadSuccess"));
           mutateDetail?.();
           onMutate?.();
         } catch (error) {
-          message.error(error instanceof Error ? error.message : "Error al cargar.");
+          message.error(error instanceof Error ? error.message : t("uploadError"));
         } finally {
           hide();
         }
@@ -392,15 +376,29 @@ export function ClientDetailTable({
         <Table>
           <TableHeader>
             <TableRow style={{ borderColor: "#DDDDDD" }}>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Usuario</TableHead>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                {t("columns.fileType")}
+              </TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                {t("columns.fileDate")}
+              </TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                {t("columns.name")}
+              </TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                {t("columns.uploadDate")}
+              </TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                {t("columns.user")}
+              </TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                {t("columns.size")}
+              </TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>
+                {t("columns.status")}
+              </TableHead>
               <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
-                Acciones
+                {t("columns.actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -531,9 +529,9 @@ export function ClientDetailTable({
           setActiveFileId(null);
         }}
         onOk={handleConfirmDelete}
-        title="¿Está seguro de eliminar este archivo?"
-        okText="Eliminar"
-        cancelText="Cancelar"
+        title={t("confirmDeleteFile")}
+        okText={tCommon("actions.delete")}
+        cancelText={tCommon("actions.cancel")}
         okLoading={isDeleteLoading}
       />
       <ModalConfirmAction
@@ -543,15 +541,10 @@ export function ClientDetailTable({
           setActiveFileId(null);
         }}
         onOk={handleConfirmGenericIntake}
-        title="Confirmar carga de ingesta genérica"
-        content={
-          <p>
-            Al usar este método de carga usted es responsable de la exactitud de los datos cargados.
-            ¿Desea continuar?
-          </p>
-        }
-        okText="Continuar"
-        cancelText="Cancelar"
+        title={t("confirmGenericTitle")}
+        content={<p>{t("confirmGenericContent")}</p>}
+        okText={tCommon("actions.continue")}
+        cancelText={tCommon("actions.cancel")}
       />
       <ModalUploadIntakeFiles
         isOpen={isUploadIntakeModalOpen}
@@ -572,15 +565,15 @@ export function ClientDetailTable({
           setActiveFileId(null);
         }}
         onOk={handleConfirmDeleteDate}
-        title="¿Está seguro de eliminar la fecha de ingesta?"
-        okText="Eliminar"
-        cancelText="Cancelar"
+        title={t("confirmDeleteIntakeDate")}
+        okText={tCommon("actions.delete")}
+        cancelText={tCommon("actions.cancel")}
         okLoading={isDeleteDateLoading}
       />
       <InvoiceDownloadModal
         isModalOpen={isModalFileDetailOpen}
         handleCloseModal={setIsModalFileDetailOpen}
-        title="Soporte auditoría"
+        title={t("auditSupportTitle")}
         url={fileURL}
       />
       <ModalFileHistory

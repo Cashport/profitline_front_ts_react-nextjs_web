@@ -7,6 +7,7 @@ import { WhatsappLogo } from "@phosphor-icons/react";
 import { getWhatsappClients, getWhatsappClientContacts } from "@/services/chat/clients";
 import { sendTemplate } from "@/services/chat/chat";
 import { useToast } from "@/modules/chat/hooks/use-toast";
+import { useTranslations } from "use-intl";
 
 type Props = {
   open: boolean;
@@ -24,6 +25,8 @@ type ClientOption = {
 };
 
 export default function SelectClientDialog({ open, templateId, onOpenChange, onSuccess }: Props) {
+  const t = useTranslations("chat.selectClient");
+  const tCommon = useTranslations("common");
   const { toast } = useToast();
   const [clients, setClients] = useState<{ id: string; name: string; acountCodes: string[] }[]>([]);
   const [contacts, setContacts] = useState<
@@ -93,8 +96,8 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
       onSuccess();
     } catch {
       toast({
-        title: "Error enviando",
-        description: "No se pudo enviar el mensaje de WhatsApp.",
+        title: t("sendErrorTitle"),
+        description: t("sendErrorDescription"),
         variant: "destructive"
       });
     } finally {
@@ -116,7 +119,7 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
           <div className="h-12 w-12 rounded-full bg-[#CBE71E] flex items-center justify-center">
             <WhatsappLogo size={24} color="#141414" weight="fill" />
           </div>
-          <h3 className="text-xl font-semibold text-center">Seleccionar cliente</h3>
+          <h3 className="text-xl font-semibold text-center">{t("title")}</h3>
         </div>
 
         {/* Form Content */}
@@ -124,7 +127,7 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
           <div className="space-y-2">
             <Select
               showSearch
-              placeholder="Cliente"
+              placeholder={tCommon("fields.customer")}
               style={{ width: "100%", height: "48px" }}
               options={clients.map<ClientOption>((c) => ({
                 value: c.id,
@@ -142,7 +145,7 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
           <div className="space-y-2">
             <Select
               showSearch
-              placeholder={loadingContacts ? "Cargando contactos..." : "Contacto"}
+              placeholder={loadingContacts ? t("loadingContacts") : t("contact")}
               style={{ width: "100%", height: "48px" }}
               disabled={loadingContacts || !selectedClient}
               loading={loadingContacts}
@@ -166,7 +169,7 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
             className="flex-1 h-12 border-gray-300 text-gray-700 hover:bg-gray-50"
             onClick={() => onOpenChange(false)}
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             className="flex-1 h-12 text-[#141414] font-medium hover:opacity-90"
@@ -174,7 +177,7 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
             onClick={handleConfirm}
             disabled={!selectedClient || !selectedContact || isSending}
           >
-            {isSending ? "Enviando..." : "Enviar Whatsapp"}
+            {isSending ? tCommon("status.sending") : t("sendWhatsapp")}
           </Button>
         </div>
       </div>

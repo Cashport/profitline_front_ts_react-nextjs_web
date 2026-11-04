@@ -1,0 +1,101 @@
+{
+  "title": "Conciliación",
+  "loading": "Cargando cartera",
+  "status": {
+    "CONCILIADA": {
+      "label": "Conciliada",
+      "plural": "Conciliadas",
+      "hint": "Diferencia menor a $1.000"
+    },
+    "NOVEDAD": {
+      "label": "Novedad",
+      "plural": "Novedades",
+      "hint": "El monto no cuadra con Cashport"
+    },
+    "NO_EXISTE": {
+      "label": "No existe",
+      "plural": "No existen",
+      "hint": "No están en la cartera activa"
+    }
+  },
+  "documentType": {
+    "FACTURA": "Factura",
+    "NOTA_CREDITO": "Nota crédito",
+    "NOTA_DEBITO": "Nota débito",
+    "SALDO": "Saldo"
+  },
+  "summary": {
+    "allDocuments": "Todos los documentos",
+    "customerAmount": "Cliente {amount}",
+    "missingFoot": "Cliente {amount} · {hint}",
+    "foot": "Cliente {amount} · Cashport {cashport}"
+  },
+  "uploadStatus": {
+    "processingFile": "Procesando {fileName}…",
+    "processingPortfolio": "Procesando la cartera…",
+    "processingHint": "Leyendo el archivo y cruzando cada documento contra Cashport. Puedes salir de esta pantalla: la carga sigue en el servidor.",
+    "failedTitle": "La carga de {fileName} no se aplicó",
+    "processError": "No se pudo procesar el archivo.",
+    "unchanged": "La cartera vigente no cambió.",
+    "retry": "Cargar archivo corregido",
+    "columns": {
+      "row": "Fila",
+      "column": "Columna",
+      "fix": "Qué corregir"
+    },
+    "file": "Archivo",
+    "hiddenErrors": "Se muestran los primeros {shown} de {total} errores."
+  },
+  "upload": {
+    "onlyXlsx": "Solo se permiten archivos .xlsx (guarda los .xls como .xlsx).",
+    "tooLarge": "El archivo pesa {size}; el máximo es 30 MB.",
+    "uploadError": "No se pudo cargar el archivo.",
+    "title": "Cargar cartera del cliente",
+    "removeFile": "Quitar archivo",
+    "dragHint": "Arrastra el Excel aquí o haz clic para buscarlo",
+    "formatHint": ".xlsx · hasta 30 MB",
+    "requiredColumns": "Columnas obligatorias: <b>Id documento</b>, <b>Tipo</b> (Factura, Nota crédito, Nota débito o Saldo) y <b>Monto cliente</b>. Las demás columnas se ignoran.",
+    "downloadTemplate": "Descargar plantilla",
+    "replaceWarning": "Esta carga reemplaza toda la cartera conciliada del cliente",
+    "currentDocs": "Hoy tiene {count} documentos, cargados el {date}.",
+    "replaceDetail": "Al terminar queda solo lo que traiga este archivo; lo anterior no se puede recuperar desde esta pantalla. Si el archivo tiene errores, no se reemplaza nada.",
+    "confirm": "Entiendo que se reemplaza toda la cartera conciliada de este cliente",
+    "noFile": "Ningún archivo seleccionado",
+    "confirmToContinue": "Confirma que entiendes el reemplazo para continuar",
+    "ready": "Listo para cargar",
+    "submit": "Cargar y conciliar"
+  },
+  "table": {
+    "columns": {
+      "file_row": "Fila",
+      "document_id": "ID documento",
+      "document_type": "Tipo",
+      "client_amount": "Monto cliente",
+      "current_amount_cashport": "Valor Cashport",
+      "difference": "Diferencia",
+      "status_cashport": "Estado"
+    },
+    "empty": "No hay documentos con estos filtros.",
+    "showing": "Mostrando {from}–{to} de {total} documentos",
+    "updating": "actualizando…"
+  },
+  "view": {
+    "done": "Cartera conciliada: {count} documentos",
+    "failed": "La carga no se aplicó; revisa los errores",
+    "downloadError": "No se pudo descargar el archivo",
+    "backToCustomer": "Volver al cliente",
+    "title": "Conciliación masiva de cartera",
+    "customer": "Cliente",
+    "clientLine": "{name} · NIT {taxId}",
+    "downloadTemplate": "Descargar plantilla",
+    "upload": "Cargar cartera",
+    "loadError": "No se pudo cargar la conciliación del cliente.",
+    "emptyTitle": "Este cliente todavía no tiene cartera conciliada",
+    "emptyDescription": "Carga el Excel con Id documento, Tipo y Monto cliente. Cashport cruza cada documento y lo marca como conciliado, con novedad o inexistente.",
+    "currentUpload": "Cartera vigente: <b>{fileName}</b> · cargada el {date} · {count} documentos",
+    "currentUploadBy": "Cartera vigente: <b>{fileName}</b> · cargada el {date} por {user} · {count} documentos",
+    "downloadFile": "Descargar archivo",
+    "searchPlaceholder": "Buscar por ID documento",
+    "allTypes": "Todos los tipos"
+  }
+}

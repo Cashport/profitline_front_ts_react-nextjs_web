@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
@@ -22,6 +23,8 @@ interface Props {
 }
 
 const ModalFilterSelectDates = ({ isOpen, onClose, selectDates }: Props) => {
+  const t = useTranslations("banks.filters");
+  const tCommon = useTranslations("common");
   const {
     control,
     formState: { errors, isValid },
@@ -51,18 +54,18 @@ const ModalFilterSelectDates = ({ isOpen, onClose, selectDates }: Props) => {
       closable={false}
       destroyOnClose
     >
-      <Title level={4}>Seleccionar fechas</Title>
+      <Title level={4}>{t("selectDates")}</Title>
 
       <div className="modalFilterSelectDates__dates">
         <InputDateForm
-          titleInput="Desde"
+          titleInput={t("from")}
           nameInput="start_date"
           control={control}
           error={errors.start_date}
         />
 
         <InputDateForm
-          titleInput="Hasta"
+          titleInput={t("to")}
           nameInput="end_date"
           control={control}
           error={errors.end_date}
@@ -73,7 +76,7 @@ const ModalFilterSelectDates = ({ isOpen, onClose, selectDates }: Props) => {
         onClose={() => onClose()}
         handleOk={handleSubmit(onSubmit)}
         isConfirmDisabled={!isValid}
-        titleConfirm="Filtrar"
+        titleConfirm={tCommon("actions.filter")}
       />
     </Modal>
   );

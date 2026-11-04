@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import {
@@ -20,11 +21,12 @@ interface ClientsLayoutProps {
  * header compartido (nombre del cliente, "‹" y filtros), por eso aquí se oculta.
  */
 export default function ClientsLayout({ children }: ClientsLayoutProps) {
+  const t = useTranslations("clients.home");
   const isHome = usePathname() === CLIENTS_HOME_PATH;
 
   return (
     <ViewWrapper
-      headerTitle="Clientes"
+      headerTitle={t("title")}
       headerTitleExtra={<ClientsHomeHeaderExtra />}
       headerActions={<ClientsHomeHeaderActions />}
       hideHeader={!isHome}

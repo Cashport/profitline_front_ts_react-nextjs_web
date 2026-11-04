@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flex, message, Modal } from "antd";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { uploadNotificationEvidence } from "@/services/notifications/notification";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -18,14 +19,16 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({
   customStyles,
   notificationId
 }) => {
+  const t = useTranslations("commerce.blockedOrderModal");
+  const tCommon = useTranslations("common");
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [view, setView] = useState("blocked");
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const router = useRouter();
 
   const handleSendToApproval = () => {
-    router.push("/comercio");
-    message.success("Pedido enviado para aprobación");
+    router.push("/commerce");
+    message.success(t("sentToApproval"));
   };
 
   const handleClientPaid = () => {
@@ -36,15 +39,15 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({
   const handleAddSupport = async () => {
     setLoadingRequest(true);
     if (selectedEvidence.length === 0) {
-      message.error("Por favor, adjunta el soporte de pago.");
+      message.error(t("attachRemittance"));
       return;
     }
     try {
       await uploadNotificationEvidence(notificationId, selectedEvidence[0]);
-      message.success("Soporte de pago agregado exitosamente");
-      router.push("/comercio");
+      message.success(t("remittanceAdded"));
+      router.push("/commerce");
     } catch (error) {
-      message.error("Error al agregar soporte de pago.");
+      message.error(t("remittanceError"));
     }
     setLoadingRequest(false);
   };
@@ -54,15 +57,13 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({
       case "blocked":
         return (
           <Flex vertical align="center" gap={"1.5rem"} className="blockedView">
-            <h4 className="title">Pedido bloqueado por falta de cupo</h4>
-            <p className="description">
-              El cliente no tiene cupo disponible para realizar el pedido
-            </p>
+            <h4 className="title">{t("title")}</h4>
+            <p className="description">{t("description")}</p>
             <FooterButtons
               handleOk={handleSendToApproval}
               onClose={handleClientPaid}
-              titleConfirm="Enviar a aprobación"
-              titleCancel="Es un pedido de contado"
+              titleConfirm={t("sendToApproval")}
+              titleCancel={t("cashOrder")}
             />
           </Flex>
         );
@@ -76,10 +77,10 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({
               onClick={() => setView("blocked")}
             >
               <CaretLeft size={20} />
-              <h4 className="title">Cargar soporte de pago</h4>
+              <h4 className="title">{t("uploadRemittance")}</h4>
             </Flex>
             <p className="paidView__description" style={{ textAlign: "left" }}>
-              Adjunta la evidencia del pago
+              {t("attachEvidence")}
             </p>
 
             <ModalAttachEvidence
@@ -89,10 +90,10 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({
               isOpen={true}
               handleCancel={() => setView("blocked")}
               customTexts={{
-                title: "Cargar soporte de pago",
-                description: "Adjunta la evidencia del pago",
-                acceptButtonText: "Enviar soporte",
-                cancelButtonText: "Cancelar"
+                title: t("uploadRemittance"),
+                description: t("attachEvidence"),
+                acceptButtonText: t("sendRemittance"),
+                cancelButtonText: tCommon("actions.cancel")
               }}
               multipleFiles={false}
               noComment={true}

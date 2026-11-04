@@ -4,6 +4,7 @@ import { Minus, Plus } from "phosphor-react";
 
 import styles from "./inputExpirationNoticeDays.module.scss";
 import { useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 import { ICommunicationForm } from "@/types/communications/ICommunications";
 
 type InputExpirationNoticeDaysProps = {
@@ -23,14 +24,13 @@ export const InputExpirationNoticeDays = ({
   event_days_before,
   disabled
 }: InputExpirationNoticeDaysProps) => {
-  // eslint-disable-next-line no-unused-vars
-  const [noticeDays, setNoticeDays] = useState<{ days: number; suffix: "días" }>({
-    days: 0,
-    suffix: "días"
+  const t = useTranslations("components.expirationNoticeDays");
+  const [noticeDays, setNoticeDays] = useState<{ days: number }>({
+    days: 0
   });
 
   useEffect(() => {
-    setNoticeDays({ days: event_days_before || 0, suffix: "días" });
+    setNoticeDays({ days: event_days_before || 0 });
   }, []);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export const InputExpirationNoticeDays = ({
   return (
     <div className={styles.noticeDaysContainer}>
       <div className={styles.noticeDays}>
-        <p className={styles.noticeDays__title}>Aviso de vencimiento</p>
+        <p className={styles.noticeDays__title}>{t("title")}</p>
         <Button
           disabled={disabled}
           className={styles.buttonMinus}
@@ -68,7 +68,7 @@ export const InputExpirationNoticeDays = ({
         <input
           readOnly
           className={styles.input}
-          value={`${noticeDays.days} ${noticeDays.suffix}`}
+          value={t("days", { count: noticeDays.days })}
           onChange={field?.onChange}
           onBlur={field?.onBlur}
           ref={field?.ref}
@@ -83,7 +83,7 @@ export const InputExpirationNoticeDays = ({
         </Button>
       </div>
       <p className={styles.noticeDaysContainer__error}>
-        {error ? (error.message ? ` ${error.message}` : `Valor de aviso obligatorio *`) : ""}
+        {error ? (error.message ? ` ${error.message}` : t("required")) : ""}
       </p>
     </div>
   );

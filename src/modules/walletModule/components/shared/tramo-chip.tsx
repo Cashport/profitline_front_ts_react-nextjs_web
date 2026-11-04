@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "use-intl";
+
 import { TRAMOS } from "../../constants";
 import type { TramoIndex } from "../../types";
 
@@ -14,6 +16,7 @@ const TRAMO_CHIP = [
 ];
 
 export default function TramoChip({ tramo }: { tramo: TramoIndex }) {
+  useLocale(); // re-renderiza al cambiar de idioma: el rótulo sale de TRAMOS
   return (
     <span
       className={`inline-block rounded-[5px] px-[7px] py-px text-[13px] font-bold tabular-nums ${TRAMO_CHIP[tramo]}`}

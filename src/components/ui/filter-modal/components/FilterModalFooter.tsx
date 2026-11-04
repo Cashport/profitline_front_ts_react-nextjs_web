@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 
 interface FilterModalFooterProps {
   onClearAll: () => void;
@@ -15,6 +16,8 @@ export default function FilterModalFooter({
   onApply,
   summary
 }: FilterModalFooterProps) {
+  const t = useTranslations("components.filterModal");
+  const tCommon = useTranslations("common");
   return (
     <div className="flex items-center gap-2 border-t border-cp-line px-[22px] py-3.5">
       <button
@@ -22,7 +25,7 @@ export default function FilterModalFooter({
         onClick={onClearAll}
         className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-cp-ink-2"
       >
-        Limpiar todo
+        {t("clearAll")}
       </button>
       {summary && <span className="text-[13px] text-cp-ink-3">{summary}</span>}
       <div className="flex-1" />
@@ -31,14 +34,14 @@ export default function FilterModalFooter({
         onClick={onCancel}
         className="h-10 cursor-pointer border-0 bg-transparent px-3.5 text-[13px] font-semibold text-cp-ink"
       >
-        Cancelar
+        {tCommon("actions.cancel")}
       </button>
       <button
         type="button"
         onClick={onApply}
         className="h-10 cursor-pointer rounded-[10px] border-0 bg-cp-lime px-[18px] text-[13px] font-semibold text-[#141414] hover:bg-[#d8f032]"
       >
-        Aplicar Filtros
+        {t("apply")}
       </button>
     </div>
   );

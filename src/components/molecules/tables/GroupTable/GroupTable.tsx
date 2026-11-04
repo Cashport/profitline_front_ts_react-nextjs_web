@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Table, TableProps, Typography } from "antd";
 
 const { Text } = Typography;
@@ -8,9 +9,10 @@ interface PropsGroupTable {
   dataClients: IClient[] | undefined;
 }
 export const GroupTable = ({ dataClients }: PropsGroupTable) => {
+  const t = useTranslations("shared.groupTable.columns");
   const columns: TableProps<IClient>["columns"] = [
     {
-      title: "Nombre",
+      title: t("name"),
       dataIndex: "client_name",
       key: "client_name",
       render: (text) => <p>{text}</p>,
@@ -18,7 +20,7 @@ export const GroupTable = ({ dataClients }: PropsGroupTable) => {
       showSorterTooltip: false
     },
     {
-      title: "NIT",
+      title: t("taxId"),
       dataIndex: "id",
       key: "id",
       render: (text) => <Text>{text}</Text>,
@@ -26,7 +28,7 @@ export const GroupTable = ({ dataClients }: PropsGroupTable) => {
       showSorterTooltip: false
     },
     {
-      title: "Cartera",
+      title: t("receivables"),
       key: "total_portfolio",
       dataIndex: "total_portfolio",
       render: (text) => <Text>{text}</Text>,
@@ -34,7 +36,7 @@ export const GroupTable = ({ dataClients }: PropsGroupTable) => {
       showSorterTooltip: false
     },
     {
-      title: "Ship To",
+      title: t("shipTo"),
       key: "shipto_count",
       dataIndex: "shipto_count",
       render: (text) => <Text>{text}</Text>,
@@ -42,7 +44,7 @@ export const GroupTable = ({ dataClients }: PropsGroupTable) => {
       showSorterTooltip: false
     },
     {
-      title: "Grupos",
+      title: t("groups"),
       key: "groups_count",
       dataIndex: "groups_count",
       render: (text) => <Text>{text}</Text>,
@@ -50,7 +52,7 @@ export const GroupTable = ({ dataClients }: PropsGroupTable) => {
       showSorterTooltip: false
     },
     {
-      title: "Holding",
+      title: t("holding"),
       key: "holding_name",
       dataIndex: "holding_name",
       render: (text) => <Text>{text}</Text>,
@@ -58,7 +60,7 @@ export const GroupTable = ({ dataClients }: PropsGroupTable) => {
       showSorterTooltip: false
     },
     {
-      title: "Estado",
+      title: t("status"),
       key: "status_name",
       dataIndex: "status_name",
       width: "150px",

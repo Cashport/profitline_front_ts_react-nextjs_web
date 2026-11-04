@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { TimePicker, Flex, Typography, TimePickerProps } from "antd";
 import dayjs from "dayjs";
 import {
@@ -47,6 +48,7 @@ export const InputTimeForm = ({
   format = "HH:mm:ss",
   minuteStep
 }: InputTimeFormProps) => {
+  const tInputs = useTranslations("components.inputs");
   return (
     <Flex vertical className={`timePickerContainer ${className}`} style={customStyleContainer}>
       {!hiddenTitle && <p className="input-time-custom-title">{titleInput}</p>}
@@ -61,7 +63,9 @@ export const InputTimeForm = ({
             value={field.value}
             size="large"
             disabled={disabled}
-            placeholder={placeholder || `Select ${titleInput.toLowerCase()}`}
+            placeholder={
+              placeholder || tInputs("selectPlaceholder", { field: titleInput.toLowerCase() })
+            }
             suffixIcon={
               !hiddenIcon ? <Clock weight="light" className="timeInputForm__icon" /> : false
             }
@@ -73,7 +77,7 @@ export const InputTimeForm = ({
       />
       {error && (
         <Typography.Text className="textError">
-          {error.message || `${titleInput} es obligatorio *`}
+          {error.message || tInputs("requiredField", { field: titleInput })}
         </Typography.Text>
       )}
     </Flex>

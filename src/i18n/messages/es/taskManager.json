@@ -1,0 +1,113 @@
+{
+  "title": "Gestor de tareas",
+  "searchPlaceholder": "Buscar tarea",
+  "newTask": "Nueva tarea",
+  "showingRange": "Mostrando {from} a {to} de {total} resultados",
+  "filters": {
+    "dates": "Fechas",
+    "selectPeriod": "Selecciona un periodo",
+    "dateTag": "Fecha:",
+    "taskType": "Tipo de tarea",
+    "typesCount": "{count} tipos"
+  },
+  "dateTab": {
+    "presets": "Periodos predefinidos",
+    "presetNames": {
+      "ultimos_7_dias": "Últimos 7 días",
+      "ultimos_30_dias": "Últimos 30 días",
+      "este_mes": "Este mes",
+      "este_trimestre": "Este trimestre",
+      "este_ano": "Este año",
+      "trimestre_pasado": "Trimestre pasado"
+    },
+    "customRange": "Rango personalizado",
+    "from": "Desde",
+    "to": "Hasta"
+  },
+  "changeStatus": {
+    "title": "Cambio de estado",
+    "description": "Selecciona el nuevo estado de la tarea",
+    "confirm": "Cambiar de estado",
+    "menuLabel": "Cambiar estado",
+    "success": "El estado de la tarea se actualizó correctamente.",
+    "error": "Ha ocurrido un error al cambiar el estado.",
+    "options": {
+      "completed": "Completado",
+      "spam": "Spam",
+      "dispute": "Novedad"
+    }
+  },
+  "generateAction": {
+    "title": "Selecciona la acción que vas a realizar",
+    "sendEmail": "Enviar correo",
+    "call": "Llamar",
+    "selectTask": "Debes seleccionar al menos una tarea"
+  },
+  "intake": {
+    "title": "Procesar ingesta",
+    "confirmClient": "Confirmar cliente",
+    "country": "País",
+    "loadingCountries": "Cargando países...",
+    "selectCountry": "Seleccionar país",
+    "noCountries": "No hay países disponibles",
+    "loadingClients": "Cargando clientes...",
+    "selectClient": "Seleccionar cliente",
+    "noClients": "No hay clientes disponibles",
+    "selectFileType": "Seleccionar tipo de archivo",
+    "noFiles": "No hay archivos disponibles para este cliente",
+    "fileType": "Tipo de archivo",
+    "fileDate": "Fecha archivo"
+  },
+  "detail": {
+    "loadError": "No se pudieron cargar los detalles de la tarea",
+    "loadingDetails": "Cargando detalles...",
+    "updated": "Tarea actualizada exitosamente",
+    "updateError": "Error al actualizar la tarea",
+    "reprocessing": "Reprocesando adjunto: {name}",
+    "reprocessError": "Error al reprocesar adjunto",
+    "noSubject": "Sin asunto",
+    "from": "De:",
+    "to": "Para:",
+    "date": "Fecha:",
+    "attachments": "Adjuntos ({count})",
+    "reprocess": "Reprocesar",
+    "processIntake": "Procesar ingesta",
+    "customFields": "Campos personalizados",
+    "loadingClients": "Cargando clientes...",
+    "assignClient": "Asignar cliente...",
+    "noClients": "No hay clientes disponibles",
+    "taskType": "Tipo de tarea",
+    "loadingTypes": "Cargando tipos...",
+    "selectType": "Seleccionar tipo...",
+    "assignee": "Responsable",
+    "loadingAssignees": "Cargando responsables...",
+    "assignAssignee": "Asignar responsable...",
+    "addDescription": "Agregar descripción...",
+    "processedByAi": "Procesado por Cashport AI",
+    "originalMessage": "Mensaje original",
+    "noOriginalMessage": "No hay mensaje original disponible"
+  },
+  "table": {
+    "taskType": "Tipo de tarea",
+    "unassigned": "Sin asignar",
+    "noDescription": "Sin descripción",
+    "viewDetails": "Ver detalles"
+  },
+  "legacyTable": {
+    "taskType": "Tipo de tarea",
+    "assignee": "Responsable",
+    "receivables": "Cartera",
+    "order": "Pedido",
+    "actions": {
+      "sendEmail": "Enviar correo",
+      "call": "Llamar",
+      "scheduleVisit": "Agendar visita",
+      "reconcile": "Conciliar",
+      "applyPayment": "Aplicar pago",
+      "submitInvoice": "Radicar",
+      "reportPayment": "Reportar pago",
+      "settleDeduction": "Legalizar saldo",
+      "releaseOrder": "Desbloquear pedido"
+    }
+  }
+}

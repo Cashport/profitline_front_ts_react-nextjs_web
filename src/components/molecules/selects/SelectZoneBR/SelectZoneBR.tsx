@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Button, Flex, Popover, Spin, Typography, message } from "antd";
 import { Plus, X } from "phosphor-react";
 import { InputCreateZone } from "@/components/atoms/inputs/InputCreateZone/InputCreateZone";
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export const SelectZoneBR = ({ isDisabledEdit }: Props) => {
+  const t = useTranslations("shared.selects");
   const [messageApi, contextHolder] = message.useMessage();
 
   const { data, isLoading, removeZone } = useZone();
@@ -18,7 +20,7 @@ export const SelectZoneBR = ({ isDisabledEdit }: Props) => {
     <div className="selectzonebr">
       {contextHolder}
 
-      <Typography.Text className="title">Zonas</Typography.Text>
+      <Typography.Text className="title">{t("zones")}</Typography.Text>
       <Flex vertical className="zones">
         {isLoading ? (
           <Spin />
@@ -43,7 +45,7 @@ export const SelectZoneBR = ({ isDisabledEdit }: Props) => {
         {!isDisabledEdit && (
           <Popover content={<InputCreateZone isEditAvailable />} trigger="click" placement="bottom">
             <Button icon={<Plus size={"16px"} />} className="addButton" type="text">
-              Agregar zona
+              {t("addZone")}
             </Button>
           </Popover>
         )}

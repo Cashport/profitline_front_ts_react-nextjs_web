@@ -1,0 +1,109 @@
+{
+  "title": "Suppliers",
+  "selfServiceTitle": "Self-Service",
+  "list": {
+    "tabs": {
+      "customers": "Customers",
+      "suppliers": "Suppliers"
+    },
+    "searchCustomers": "Search customers",
+    "searchSuppliers": "Search suppliers",
+    "columns": {
+      "createdAt": "Created on"
+    },
+    "moreActions": "More actions",
+    "viewDetail": "View details"
+  },
+  "form": {
+    "supplier": "Supplier",
+    "newSupplier": "New supplier",
+    "generalInfo": "General information",
+    "documents": "Documents",
+    "enterField": "Enter {field}",
+    "selectField": "Select {field}",
+    "select": "Select",
+    "deleteSuccess": "Documents deleted",
+    "deleteError": "We couldn't delete the documents",
+    "confirmDelete": "{count, plural, one {Delete # document?} other {Delete # documents?}}"
+  },
+  "documentsTable": {
+    "uploadDate": "Upload date",
+    "expiration": "Expiration date",
+    "mandatory": "Required",
+    "viewDetail": "View details"
+  },
+  "documentStatus": {
+    "unclassified": "Unclassified",
+    "inReview": "In review",
+    "rejected": "Rejected",
+    "aiApproved": "AI-approved",
+    "aiRejected": "AI-rejected",
+    "pending": "Pending",
+    "approved": "Approved",
+    "unknown": "Unknown status"
+  },
+  "generateAction": {
+    "title": "Take action",
+    "addRequirement": "Add requirement",
+    "auditRequirements": "Audit requirements",
+    "createCustomer": "Create customer",
+    "sendReminder": "Send reminder",
+    "sendInvitation": "Send invitation",
+    "noDocumentsToAudit": "Select at least one document to audit.",
+    "noDocumentsToDelete": "Select at least one document to delete."
+  },
+  "invitation": {
+    "title": "Send invitation",
+    "emailPlaceholder": "Enter email address",
+    "cc": "CC",
+    "subject": "Subject",
+    "subjectPlaceholder": "Enter subject",
+    "message": "Message",
+    "messagePlaceholder": "Enter your message",
+    "submit": "Send invitation"
+  },
+  "audit": {
+    "title": "Audit requirements",
+    "requirementType": "Requirement type",
+    "audit": "Audit",
+    "commentRequired": "A comment is required when rejecting",
+    "commentPlaceholder": "Add a comment",
+    "success": "Requirements audited",
+    "error": "We couldn't audit the requirements",
+    "downloadDocument": "Download document"
+  },
+  "ai": {
+    "analyzeWith": "Analyze with <ai>Cashport AI</ai>"
+  },
+  "drawer": {
+    "approvers": "Approvers",
+    "uploadedBy": "Uploaded by",
+    "uploadDate": "Upload date",
+    "form": "Form",
+    "questionCount": "{count, plural, one {# question} other {# questions}}",
+    "expiration": "Expiration date",
+    "expirationPlaceholder": "Select expiration date",
+    "document": "Document",
+    "selectFile": "Select file",
+    "fileHint": "PDF, Word, PNG (max. 30 MB)",
+    "addDocument": "Add document",
+    "downloadTemplate": "Download template",
+    "deleteDocument": "Delete document",
+    "uploadSuccess": "Document uploaded",
+    "uploadError": "We couldn't upload the document",
+    "deleteSuccess": "Document deleted",
+    "deleteError": "We couldn't delete the document",
+    "confirmDelete": "Delete this document?",
+    "close": "Close"
+  },
+  "events": {
+    "title": "Events",
+    "commentPlaceholder": "Add a comment",
+    "timeAgo": "{time} ago",
+    "unknownUser": "Unknown user",
+    "commentRequired": "Enter a comment",
+    "commentNoIncident": "We couldn't add the comment because it isn't linked to an incident",
+    "commentSuccess": "Comment added",
+    "commentError": "We couldn't add the comment"
+  }
+}

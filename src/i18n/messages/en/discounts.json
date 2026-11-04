@@ -1,0 +1,139 @@
+{
+  "title": "Discount Settings",
+  "tabs": {
+    "packages": "Discount packages",
+    "rules": "Discount rules"
+  },
+  "list": {
+    "createPackage": "Create discount package",
+    "createDiscount": "Create discount",
+    "packageActivated": "Discount package activated",
+    "packageDeactivated": "Discount package deactivated",
+    "discountActivated": "Discount activated",
+    "discountDeactivated": "Discount deactivated"
+  },
+  "columns": {
+    "discountType": "Discount type",
+    "definitions": "Definitions",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "approval": "Approval",
+    "viewDetail": "View details",
+    "remove": "Remove discount"
+  },
+  "categories": {
+    "byOrder": "By order",
+    "byClient": "By customer",
+    "annual": "Annual plan"
+  },
+  "types": {
+    "quantity": "Quantity",
+    "amount": "Amount",
+    "crossSelling": "Cross-selling",
+    "crossFiller": "Cross-filler",
+    "firstPurchase": "First purchase",
+    "allPurchases": "All purchases",
+    "annualPlan": "Annual plan"
+  },
+  "form": {
+    "selectType": "Select the discount type",
+    "backToList": "Back to list",
+    "saveDiscount": "Save discount",
+    "createDiscount": "Create discount",
+    "editDiscount": "Edit discount",
+    "cancelEdit": "Cancel editing",
+    "definitions": "Definitions",
+    "discountType": "Discount type",
+    "description": "Description",
+    "dates": "Dates",
+    "noEndDate": "No end date",
+    "start": "Start",
+    "end": "End",
+    "features": "Discount conditions",
+    "createSuccess": "Discount created",
+    "createError": "We couldn't create the discount",
+    "updateSuccess": "Discount updated",
+    "updateError": "We couldn't update the discount"
+  },
+  "byOrder": {
+    "minOrderQuantity": "Minimum order quantity",
+    "percentage": "Percentage discount",
+    "fixedAmount": "Fixed-amount discount",
+    "discountToApply": "Discount to apply",
+    "addRange": "Add range",
+    "range": "Range {number}",
+    "removeRange": "Delete range",
+    "labels": {
+      "minQuantity": "Minimum quantity",
+      "maxQuantity": "Maximum quantity",
+      "minAmount": "Minimum amount",
+      "maxAmount": "Maximum amount",
+      "minBrands": "Minimum brands",
+      "minUnitsPerBrand": "Minimum units per brand",
+      "minSkus": "Minimum SKUs",
+      "minUnitsPerSku": "Minimum units per SKU"
+    }
+  },
+  "byClient": {
+    "applicableDiscount": "Applicable discount",
+    "selectCustomerGroup": "Select a customer group"
+  },
+  "products": {
+    "title": "Eligible products",
+    "empty": "No products available"
+  },
+  "annual": {
+    "selectCustomer": "Select customer",
+    "attachContract": "Attach contract",
+    "viewContract": "View contract",
+    "contract": "Contract",
+    "noProducts": "There are no products for this customer",
+    "line": "Product line",
+    "selectLine": "Select a product line",
+    "product": "Product",
+    "selectProduct": "Select product",
+    "units": "Units",
+    "discount": "Discount",
+    "addDiscount": "Add discount",
+    "removeRow": "Delete row"
+  },
+  "package": {
+    "discount": "Discount",
+    "addRule": "Add discount rule",
+    "additionalDiscount": "Additional discount",
+    "create": "Create discount package"
+  },
+  "validation": {
+    "nameMin": "Name must be at least 3 characters",
+    "nameRequired": "Name is required",
+    "descriptionMin": "Description must be at least 3 characters",
+    "descriptionRequired": "Description is required",
+    "typeRequired": "Discount type is required",
+    "startDateRequired": "Start date is required",
+    "startDateMin": "Start date must be today or later",
+    "endDateMin": "End date must be after the start date",
+    "endDateRequired": "End date is required",
+    "productsRequired": "Select the products to apply",
+    "invalidType": "Invalid value",
+    "minValueRequired": "Minimum value is required",
+    "minValuePositive": "Minimum value must be greater than 0",
+    "computationRequired": "Calculation type is required",
+    "idRequired": "ID is required",
+    "minUnitsRequired": "Minimum units is required",
+    "maxUnitsRequired": "Maximum units is required",
+    "valuePositive": "Value must be greater than 0",
+    "discountRequired": "Discount is required",
+    "discountPositive": "Discount must be greater than 0",
+    "discountPositivePercent": "Discount must be greater than 0%",
+    "discountMax": "Discount must be less than 100%",
+    "rulesMin": "Add at least one discount rule",
+    "rangeAboveMax": "Must be greater than the maximum of range {range}",
+    "rangeAboveMin": "Must be greater than the minimum of range {range}",
+    "customerGroupsRequired": "Select the customer groups to apply",
+    "customerRequired": "Customer is required",
+    "lineRequired": "Product line is required",
+    "productRequired": "Product is required",
+    "primaryMin": "Add at least one primary discount",
+    "customerGroupsMin": "Add at least one customer group"
+  }
+}

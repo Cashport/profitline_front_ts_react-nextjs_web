@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import useSWR from "swr";
 
@@ -23,6 +24,7 @@ interface Props<T extends FieldValues> {
 }
 
 export const SelectRadicationTypes = <T extends FieldValues>({ errors, field }: Props<T>) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useSWR<IRadicationTypes>("/client/radication-types", fetcher, {});
   const options = data?.data.map((option) => {
     return {
@@ -35,7 +37,7 @@ export const SelectRadicationTypes = <T extends FieldValues>({ errors, field }: 
   return (
     <>
       <Select
-        placeholder="Seleccione el tipo de radicado"
+        placeholder={t("selectSubmissionType")}
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={isLoading}
         variant="borderless"
@@ -46,9 +48,7 @@ export const SelectRadicationTypes = <T extends FieldValues>({ errors, field }: 
         labelInValue
       />
       {errors && (
-        <Typography.Text className="textError">
-          El tipo de radicado es obligatorio *
-        </Typography.Text>
+        <Typography.Text className="textError">{t("submissionTypeRequired")}</Typography.Text>
       )}
     </>
   );

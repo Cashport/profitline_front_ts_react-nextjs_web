@@ -1,0 +1,967 @@
+{
+  "home": {
+    "title": "Administration",
+    "sections": {
+      "clients": {
+        "label": "Customers",
+        "description": "Manage customers, their products, discounts and assigned users."
+      },
+      "users": {
+        "label": "Users",
+        "description": "Manage Marketplace users, roles and linked customers."
+      },
+      "products": {
+        "label": "Products",
+        "description": "Review the catalog: product lines, channels, SKUs, lots, prices and images."
+      },
+      "packs": {
+        "label": "Product Packs",
+        "description": "Build packs from catalog products: own SKU, image and quantities."
+      },
+      "discounts": {
+        "label": "Discounts and Free Goods",
+        "description": "Manage discounts and free goods: rules, dates, status and category."
+      },
+      "load": {
+        "label": "Data Upload",
+        "description": "Feed the app with manual ETLs: inventory, prices, customers and more."
+      },
+      "seals": {
+        "label": "Seals",
+        "description": "Track seal inventory: warehouse, field reps and assignments."
+      },
+      "massCommunications": {
+        "label": "Campaigns",
+        "description": "Send campaigns to your customers in minutes."
+      },
+      "settings": {
+        "label": "Settings",
+        "description": "Project administration."
+      },
+      "roles": {
+        "label": "Roles and Permissions",
+        "description": "Profitline only: roles per project, what each role can do and its catalog."
+      }
+    }
+  },
+  "bonusAndDiscounts": {
+    "title": "Discounts and Free Goods",
+    "tabs": {
+      "packages": "Discount packages",
+      "rules": "Discount rules",
+      "bonuses": "Free goods"
+    }
+  },
+  "bonusHub": {
+    "title": "Free Goods System",
+    "subtitle": "Manage free goods and promotions",
+    "goToModule": "Go to module",
+    "modules": {
+      "automatic": {
+        "title": "Automatic promotions",
+        "description": "Create and manage promotions by amount or product combination with dynamic tiers. Free goods are added to the cart automatically.",
+        "badge": "{count, plural, one {# active} other {# active}}"
+      },
+      "manual": {
+        "title": "Manual free goods by customer",
+        "description": "Assign free-goods units to specific customers. Each assignment goes through an approval flow before it becomes available in the Marketplace.",
+        "badge": "{count, plural, one {# pending} other {# pending}}"
+      }
+    }
+  },
+  "promotionTypes": {
+    "amount": "By amount",
+    "combination": "By combination"
+  },
+  "createNewModal": {
+    "title": "Create new",
+    "discountTypeTitle": "Discount type",
+    "selectType": "Select what you want to create.",
+    "selectDiscountType": "Select the discount type.",
+    "options": {
+      "discount": {
+        "title": "Discount",
+        "description": "Create discount rules by product with validity dates."
+      },
+      "bonus": {
+        "title": "Free goods",
+        "description": "Assign free-goods units to specific customers with an approval flow."
+      },
+      "discountGroup": {
+        "title": "Discount group",
+        "description": "Group multiple discount rules into a single set."
+      },
+      "discountRule": {
+        "title": "Discount rule",
+        "description": "Define a specific discount condition by product, channel or volume."
+      }
+    }
+  },
+  "discountsTable": {
+    "createNew": "Create new",
+    "searchPlaceholder": "Search...",
+    "columns": {
+      "start": "Start",
+      "end": "End",
+      "approval": "Approval",
+      "rules": "Rules",
+      "discountType": "Discount type",
+      "definitions": "Definitions",
+      "levels": "Tiers",
+      "businessUnit": "Business unit"
+    },
+    "bulkActions": {
+      "activate": "Activate",
+      "markExpired": "Mark as expired",
+      "exportSelection": "Export selection",
+      "actionNames": {
+        "activate": "Activate",
+        "expire": "Expire",
+        "export": "Export"
+      },
+      "applied": "\"{action}\" applied to {entity, select, rules {{count, plural, one {# rule} other {# rules}}} other {{count, plural, one {# package} other {# packages}}}}."
+    },
+    "packages": {
+      "empty": "No discount packages found.",
+      "total": "Showing {from}–{to} of {total} packages · {active} active"
+    },
+    "rules": {
+      "empty": "No discount rules found.",
+      "total": "Showing {from}–{to} of {total} rules · {active} active"
+    },
+    "bonuses": {
+      "empty": "No promotions to show.",
+      "allBusinessUnits": "All",
+      "total": "Showing {from}–{to} of {total} promotions · {active} active"
+    }
+  },
+  "promotions": {
+    "title": "Automatic Promotions",
+    "subtitle": "Define conditions and free goods by tier",
+    "newPromotion": "New promotion",
+    "empty": "No promotions created yet",
+    "createFirst": "Create your first promotion",
+    "save": "Save promotion",
+    "level": "Tier {number}",
+    "removeLevel": "Remove tier",
+    "validation": {
+      "incomplete": "Each promotion needs a start date, an end date and at least one tier."
+    },
+    "feedback": {
+      "saved": "Promotions saved.",
+      "saveError": "We couldn't save the promotions. Try again."
+    },
+    "productSelect": {
+      "placeholder": "Select a product",
+      "notFound": "No products available"
+    },
+    "rewards": {
+      "title": "Rewards",
+      "customerPicksOne": "Customer picks one option",
+      "option": "Option {letter}",
+      "single": "Reward",
+      "removeOption": "Remove option",
+      "addFixedGroup": "Add fixed group",
+      "addChoiceGroup": "Add choice group",
+      "addOption": "Add reward option"
+    },
+    "rewardGroup": {
+      "customerPicks": "Customer picks",
+      "unitsFrom": "units from:",
+      "fixed": "Fixed",
+      "removeGroup": "Remove group",
+      "unitsShort": "units",
+      "removeProduct": "Remove product",
+      "addProduct": "Add product"
+    },
+    "target": {
+      "title": "Target",
+      "purchaseRange": "Purchase range",
+      "rangeTo": "to",
+      "individualProducts": "Individual products",
+      "removeProduct": "Remove product",
+      "productBundle": "Product bundle",
+      "removeBundle": "Remove bundle",
+      "orders": "Orders",
+      "units": "units",
+      "across": "across",
+      "differentProducts": "different products",
+      "eligibleProducts": "Eligible products",
+      "addEligibleProduct": "Add eligible product",
+      "addProduct": "Add product",
+      "addBundle": "Add product bundle"
+    },
+    "summary": {
+      "unnamedProduct": "Unnamed product",
+      "anyProductInCategory": "Any product in category {category}",
+      "noLimit": "No limit",
+      "minimumPurchase": "Minimum purchase of <strong>{amount}</strong>",
+      "noConditions": "No conditions",
+      "conditionProduct": "<strong>{qty} units</strong> of {product}",
+      "conditionGroup": "<strong>{qty} units</strong> from {distinct, plural, =0 {} other {at least # different products of: }}{products}",
+      "noRewards": "No rewards",
+      "option": "Option {letter}",
+      "fixedQuantities": "Fixed quantities",
+      "customerPicksFrom": "Customer picks {qty} units from:",
+      "units": "{qty} units",
+      "behavior": {
+        "flex": "Flex promotion",
+        "firstEligibleRange": "Takes the first eligible range",
+        "noCrossSelling": "No cross-selling",
+        "compatible": "Compatible with negotiated prices"
+      },
+      "approval": "Approval",
+      "conditionType": "Condition type",
+      "businessUnit": "Business unit",
+      "allBusinessUnits": "All",
+      "accumulable": "Stackable",
+      "behaviorLabel": "Behavior",
+      "maxUsesPerOrder": "Max. uses per order",
+      "maxUsesPerCustomer": "Max. uses per customer",
+      "maxUsesPerCustomerMonth": "Max. uses per customer/month",
+      "maxGlobalUses": "Max. total uses",
+      "levels": "Tiers",
+      "noLevels": "This promotion has no active tiers.",
+      "level": "Tier {number}",
+      "condition": "Condition",
+      "rewards": "Rewards"
+    },
+    "card": {
+      "infoAbout": "About {label}",
+      "subtitle": "{type, select, amount {By amount} other {By combination}} · {count, plural, one {# tier} other {# tiers}}",
+      "activeToggle": "Active promotion",
+      "byPurchaseAmount": "By purchase amount",
+      "byProductCombination": "By product combination",
+      "validityAndLimits": "Validity and limits",
+      "advancedSettings": "(advanced settings)",
+      "restrictByBusinessUnit": "Restrict by business unit",
+      "noBusinessUnits": "No business units set up in this project",
+      "selectBusinessUnit": "Select a business unit",
+      "isFlex": "Flex promotion",
+      "takeFirstEligibleRange": "Take first eligible range",
+      "allowCrossSelling": "Allow cross-selling",
+      "compatibleWithNegotiations": "Compatible with negotiated prices",
+      "addLevel": "Add tier",
+      "tooltips": {
+        "accumulable": "Reward multiplier. When it is 2 or more and the promotion has a single range, the reward is granted up to ''accumulable'' times depending on how many times the minimum condition is met (e.g., if it is 3 and the minimum condition is 1, the customer can get up to 3 rewards by buying 3 qualifying units).",
+        "maxUsagePerOrder": "Maximum number of times the customer can apply this promotion in a single order. Leave it empty for no limit.",
+        "maxUsagePerClient": "Maximum number of times the customer can use this promotion in total (all time). Leave it empty for no limit.",
+        "maxUsagePerClientPerMonth": "Maximum redemptions per customer in the current month. Empty or 0 = no monthly limit.",
+        "maxGlobalUsage": "Maximum total redemptions across all customers in the project. Leave it empty for no overall limit.",
+        "businessUnit": "Restricts the promotion to a single business unit (e.g., ''Institucional'', ''Retail''). If empty, it applies to all business units in the project. It is only shown to customers whose BU in client_marketplace matches.",
+        "isFlex": "''Flex'' promotion: the customer gets the reward automatically, without choosing among options A/B/C. When off, the customer must pick an option.",
+        "takeFirstEligibleRangeDiscount": "When on, ONLY the first eligible range of the applied discount is used. By default (off), the best available range is applied.",
+        "applyCrossSelling": "When on (default), the promotion allows cross-selling (secondary discounts / order discounts). When off, cross-selling is disabled and the secondary discounts array is sent empty when calculating the package discount.",
+        "isPromotionCompatibleWithAllNegotiations": "Lets this promotion stack with the customer's negotiated prices. When off, the promotion does NOT apply if the customer has active negotiations."
+      }
+    }
+  },
+  "promotionDetail": {
+    "fallbackTitle": "Promotion",
+    "subtitle": "Automatic promotion #{id}",
+    "notFound": "Promotion not found.",
+    "editBlocked": "This promotion has category-based rewards and can't be edited here.",
+    "edit": "Edit promotion",
+    "validation": {
+      "incomplete": "The promotion needs a name, a start date and at least one tier.",
+      "endBeforeStart": "The end date can't be earlier than the start date."
+    },
+    "feedback": {
+      "updated": "Promotion updated.",
+      "updateError": "We couldn't update the promotion. Try again."
+    }
+  },
+  "shared": {
+    "taxIdValue": "Tax ID: {taxId}",
+    "responsibles": {
+      "asigned_user": "Collector",
+      "coordinator": "Coordinator",
+      "kam": "KAM",
+      "kam_lider": "Lead KAM"
+    }
+  },
+  "manualBonus": {
+    "title": "Manual Free Goods",
+    "subtitle": "Customer assignments with an approval flow",
+    "pendingCount": "{count, plural, one {# pending} other {# pending}}",
+    "empty": "No assignments",
+    "searchPlaceholder": "Search customer or product...",
+    "status": {
+      "all": "All",
+      "pendiente": "Pending",
+      "aprobado": "Approved",
+      "rechazado": "Rejected"
+    },
+    "columns": {
+      "freeGoodsProduct": "Free-goods product",
+      "assigned": "Assigned",
+      "available": "Available"
+    },
+    "feedback": {
+      "created": "Free goods created.",
+      "createError": "We couldn't create the free goods. Try again."
+    },
+    "customerSearch": {
+      "placeholder": "Search customer...",
+      "noResults": "No results"
+    },
+    "newAssignment": {
+      "button": "New assignment",
+      "title": "Create free goods",
+      "freeGoods": "Free-goods products",
+      "totalToAssign": "Total to assign: <b>{total}</b> units",
+      "expirationDate": "Expiration date",
+      "endDate": "End date",
+      "comments": "Comments (optional)",
+      "commentsPlaceholder": "Reason for the assignment..."
+    }
+  },
+  "clients": {
+    "title": "Customers",
+    "searchPlaceholder": "Search...",
+    "noMarketplace": "Not in Marketplace",
+    "empty": "No customers found.",
+    "total": "Showing {from}–{to} of {total} customers · {active} active",
+    "columns": {
+      "city": "City",
+      "users": "Users",
+      "lines": "Product lines"
+    },
+    "actions": {
+      "activate": "Activate",
+      "inactivate": "Deactivate",
+      "bulkUpdate": "Bulk update",
+      "export": "Export customers"
+    },
+    "filters": {
+      "line": "Product line"
+    },
+    "feedback": {
+      "statusUpdated": "{count, plural, one {# customer} other {# customers}} {action, select, activate {activated} other {deactivated}}.",
+      "updateError": "We couldn't update the customers. Try again.",
+      "bulkUpdated": "{count, plural, one {# customer updated} other {# customers updated}}.",
+      "taxIdsNotFound": "Tax IDs not found: {list}{more, plural, =0 {} other { and # more}}.",
+      "uploadError": "We couldn't upload the file. Try again.",
+      "exportError": "We couldn't export the customers. Try again."
+    }
+  },
+  "clientDetail": {
+    "loadError": "We couldn't load the customer.",
+    "noMarketplace": "Not in Marketplace",
+    "generalInfo": "General information",
+    "fields": {
+      "city": "City",
+      "channel": "Channel",
+      "businessLines": "Product lines"
+    },
+    "tabs": {
+      "promotions": "Promotions",
+      "addresses": "Addresses ({count})",
+      "users": "Users ({count})",
+      "products": "Products ({count})",
+      "settings": "Settings"
+    },
+    "feedback": {
+      "addressCreated": "Address created.",
+      "addressCreateError": "We couldn't create the address. Try again.",
+      "addressUpdated": "Address updated.",
+      "addressUpdateError": "We couldn't update the address. Try again.",
+      "addressDeleted": "Address deleted.",
+      "addressDeleteError": "We couldn't delete the address. Try again.",
+      "bonusCreated": "Free goods created.",
+      "bonusCreateError": "We couldn't create the free goods. Try again.",
+      "discountCreated": "Discount created.",
+      "discountCreateError": "We couldn't create the discount. Try again.",
+      "discountToggled": "Discount {active, select, true {activated} other {deactivated}}.",
+      "statusError": "We couldn't change the status. Try again.",
+      "configUpdated": "Settings updated.",
+      "configUpdateError": "We couldn't update the settings. Try again."
+    },
+    "promotionsTab": {
+      "attachment": "Attachment",
+      "viewContract": "View contract",
+      "createDiscount": "Create discount",
+      "noDiscounts": "No discounts created yet.",
+      "manualBonuses": "Manual free goods",
+      "bonusTotals": "{assigned} assigned · {available} available · {consumed} used",
+      "createBonus": "Create free goods",
+      "noBonuses": "No manual free goods created yet."
+    },
+    "bonuses": {
+      "status": {
+        "available": "Available"
+      },
+      "subgroup": "Subgroup {number}",
+      "fixed": "Fixed",
+      "pickUpTo": "Pick up to {qty}",
+      "columns": {
+        "products": "Products",
+        "assigned": "Assigned",
+        "available": "Available",
+        "consumed": "Used",
+        "approval": "Approval",
+        "expires": "Expires",
+        "created": "Created",
+        "note": "Note"
+      }
+    },
+    "discountGroup": {
+      "discount": "Discount",
+      "minQuantity": "Minimum quantity",
+      "line": "Product line",
+      "allLines": "All product lines",
+      "removeGroup": "Remove group",
+      "noResults": "No results available.",
+      "noMoreProducts": "No more products available.",
+      "searchInLine": "Search {line} products",
+      "searchToAdd": "Search a product to add...",
+      "addAll": "Add all",
+      "emptyHint": "Search and add the products this discount applies to.",
+      "removeProduct": "Remove product"
+    },
+    "createDiscount": {
+      "title": "New promotion",
+      "subtitle": "Negotiated discount for this customer",
+      "footerSummary": "{groups, plural, one {# group} other {# groups}} · {products, plural, one {# product} other {# products}}",
+      "submitForApproval": "Submit for approval",
+      "validity": "Validity",
+      "startDate": "Start date",
+      "start": "Start",
+      "endDate": "End date",
+      "end": "End",
+      "attachment": "Attachment (contract / agreement)",
+      "noFile": "No file attached",
+      "uploadFile": "Upload file",
+      "viewFile": "View file",
+      "removeFile": "Remove file",
+      "discountGroups": "Discount groups",
+      "productsCount": "({count, plural, one {# product} other {# products}})",
+      "addGroup": "Add discount group",
+      "noProducts": "There are no products for this customer.",
+      "emptyHint": "Add a group to set a discount % and a quantity, then search for the products you want to include."
+    },
+    "codeSelect": {
+      "noCustomers": "No customers available",
+      "searchCustomer": "Search customer",
+      "code": "Code"
+    },
+    "addresses": {
+      "columns": {
+        "address": "Address",
+        "city": "City",
+        "warehouse": "Warehouse"
+      },
+      "main": "Main",
+      "deleteConfirm": {
+        "title": "Delete address",
+        "description": "Delete \"{address}\"?"
+      },
+      "count": "{count, plural, one {# address on file} other {# addresses on file}}",
+      "new": "New address",
+      "edit": "Edit address",
+      "save": "Save address",
+      "empty": "No addresses on file.",
+      "form": {
+        "addressPlaceholder": "E.g., 100 Main St, Suite 20",
+        "cityPlaceholder": "E.g., Bogotá",
+        "addressCode": "Address code",
+        "addressCodePlaceholder": "E.g., 01 — use \"00\" for the main address",
+        "costCenter": "Cost center",
+        "optional": "Optional"
+      }
+    },
+    "users": {
+      "role": "Role",
+      "empty": "No linked users."
+    },
+    "products": {
+      "summary": "{products, plural, one {# product} other {# products}} in {categories, plural, one {# category} other {# categories}}",
+      "addLine": "Add product line",
+      "noMoreLines": "No more product lines available",
+      "empty": "This customer has no products available.",
+      "productCount": "{count, plural, one {# product} other {# products}}",
+      "product": "Product",
+      "active": "Active"
+    },
+    "settings": {
+      "marketsLoadError": "We couldn't load the available markets",
+      "currentUnavailable": "{market} (current — unavailable)",
+      "customerData": "Customer data settings",
+      "selectUser": "Select a user",
+      "noUsers": "No users available",
+      "market": "Market",
+      "marketPlaceholder": "Customer market",
+      "noMarkets": "No markets available",
+      "financialSettings": "Customer financial and operational settings",
+      "paymentTermsPlaceholder": "Payment terms code",
+      "selectPaymentType": "Select a payment type",
+      "priceListPlaceholder": "Price list ID",
+      "notInMarketplace": "This customer isn't in the Marketplace, so its Marketplace options aren't available.",
+      "fields": {
+        "creditLimit": "Credit limit",
+        "earlyPaymentDiscount": "Early payment discount",
+        "paymentTerms": "Payment terms",
+        "paymentType": "Payment type",
+        "defaultWarehouse": "Default warehouse",
+        "priceList": "Price list",
+        "partialLots": "Accepts partial lots",
+        "lotsGreaterThan": "Lots greater than"
+      }
+    }
+  },
+  "products": {
+    "title": "Products",
+    "searchPlaceholder": "Search...",
+    "empty": "No products found.",
+    "total": "Showing {from}–{to} of {total} products",
+    "columns": {
+      "product": "Product",
+      "line": "Product line",
+      "channel": "Channel"
+    },
+    "bulkActions": {
+      "activate": "Activate",
+      "inactivate": "Deactivate",
+      "exportSelection": "Export selection",
+      "actionNames": {
+        "activate": "Activate",
+        "inactivate": "Deactivate",
+        "export": "Export"
+      },
+      "applied": "\"{action}\" applied to {count, plural, one {# product} other {# products}}."
+    },
+    "filters": {
+      "line": "Product line",
+      "category": "Category"
+    }
+  },
+  "productDetail": {
+    "loadError": "We couldn't load the product.",
+    "saved": "Saved",
+    "visibleName": "Display name",
+    "internalName": "Internal name: {sku}",
+    "changeImage": "Change image",
+    "feedback": {
+      "updated": "Product updated.",
+      "updateError": "We couldn't update the product. Try again."
+    },
+    "info": {
+      "title": "Product information",
+      "line": "Product line",
+      "channel": "Channel",
+      "priceAndStatus": "Price and status",
+      "basePrice": "Base price",
+      "lots": "Lots",
+      "visibleInMarketplace": "Visible in Marketplace"
+    },
+    "lots": {
+      "title": "Lots",
+      "count": "{count, plural, one {# lot} other {# lots}}",
+      "loading": "Loading lots…",
+      "empty": "No lots available.",
+      "columns": {
+        "lot": "Lot",
+        "warehouse": "Warehouse",
+        "expires": "Expires",
+        "units": "Units"
+      }
+    },
+    "prices": {
+      "title": "Price lists",
+      "empty": "No price lists assigned.",
+      "priceList": "Price list",
+      "price": "Price"
+    },
+    "skus": {
+      "sku": "SKU"
+    }
+  },
+  "packs": {
+    "title": "Product Packs",
+    "new": "New pack",
+    "listTitle": "Packs",
+    "count": "{count, plural, one {# pack} other {# packs}}",
+    "searchPlaceholder": "Search SKU or name…",
+    "empty": "There are no packs in this project yet.",
+    "createFirst": "Create the first one",
+    "total": "Showing {from}–{to} of {total} packs",
+    "statusFilter": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "pack": "Pack",
+      "line": "Product line",
+      "category": "Category"
+    },
+    "actions": {
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    },
+    "deleteConfirm": {
+      "title": "Delete this pack?",
+      "description": "{name} ({sku}) will no longer be available in the Marketplace."
+    },
+    "feedback": {
+      "activated": "Pack activated.",
+      "deactivated": "Pack deactivated.",
+      "stateError": "We couldn't change the pack status.",
+      "deleted": "Pack deleted.",
+      "deleteError": "We couldn't delete the pack."
+    },
+    "form": {
+      "createTitle": "New product pack",
+      "editTitle": "Edit pack",
+      "subtitle": "Group catalog products under a single SKU. The price is calculated with each customer's price list.",
+      "changeImage": "Change image",
+      "uploadImage": "Upload image",
+      "activeOnCreate": "Active on creation",
+      "sku": "Pack SKU",
+      "skuPlaceholder": "E.g., PACK-ALAS-001",
+      "visibleName": "Display name",
+      "visibleNamePlaceholder": "E.g., Anti-aging routine kit",
+      "line": "Product line",
+      "selectLine": "Select a product line",
+      "category": "Category",
+      "selectCategory": "Select a category",
+      "selectLineFirst": "Select the product line first",
+      "items": "Pack products",
+      "itemsSummary": "{products, plural, one {# product} other {# products}} · {units, plural, one {# unit} other {# units}}",
+      "searchProduct": "Search product by SKU or name…",
+      "noProducts": "No products found",
+      "product": "Product",
+      "decrease": "Decrease",
+      "increase": "Increase",
+      "removeProduct": "Remove product",
+      "create": "Create pack",
+      "validation": {
+        "skuRequired": "SKU is required",
+        "descriptionRequired": "Description is required",
+        "maxLength": "Maximum {max} characters",
+        "itemsRequired": "Add at least one product"
+      },
+      "feedback": {
+        "imageUploadError": "The pack was created, but we couldn't upload the image.",
+        "updated": "Pack updated.",
+        "created": "Pack created.",
+        "saveError": "We couldn't save the pack. Try again."
+      }
+    }
+  },
+  "users": {
+    "title": "Users",
+    "searchPlaceholder": "Search...",
+    "create": "Create user",
+    "empty": "No users found.",
+    "total": "Showing {from}–{to} of {total} users · {active} active",
+    "columns": {
+      "role": "Role",
+      "customers": "Customers",
+      "biller": "Billing specialist"
+    },
+    "bulkActions": {
+      "activate": "Activate",
+      "inactivate": "Deactivate",
+      "changeRole": "Change role",
+      "exportSelection": "Export selection",
+      "actionNames": {
+        "activate": "Activate",
+        "inactivate": "Deactivate",
+        "changeRole": "Change role",
+        "export": "Export"
+      },
+      "applied": "\"{action}\" applied to {count, plural, one {# user} other {# users}}."
+    },
+    "feedback": {
+      "created": "User created.",
+      "createError": "Something went wrong while creating the user.",
+      "emailInUse": "This email is already in use. Try another one."
+    },
+    "createModal": {
+      "title": "Create user",
+      "contactName": "Contact name",
+      "position": "Job title",
+      "role": "Role",
+      "selectRole": "Select the role"
+    }
+  },
+  "userDetail": {
+    "loadError": "We couldn't load the user.",
+    "generalInfo": "General information",
+    "assignments": "Assignments",
+    "assignedCustomers": "Assigned customers",
+    "role": "Role",
+    "tabs": {
+      "customers": "Customers ({count})",
+      "customerGroups": "Customer groups ({count})",
+      "countries": "Countries ({count})",
+      "settings": "Settings"
+    },
+    "feedback": {
+      "groupsLoadError": "We couldn't load the groups.",
+      "userCountriesLoadError": "We couldn't load the user's countries.",
+      "groupsAdded": "{count, plural, one {Group added.} other {# groups added.}}",
+      "groupAddError": "We couldn't add the group.",
+      "groupRemoved": "Group removed.",
+      "groupRemoveError": "We couldn't remove the group.",
+      "countriesAdded": "{count, plural, one {Country added.} other {# countries added.}}",
+      "countrySavedReloadError": "The country was saved, but we couldn't refresh the list.",
+      "countryAddError": "We couldn't add the country.",
+      "countryRemoved": "Country removed.",
+      "countryRemovedReloadError": "The country was removed, but we couldn't refresh the list.",
+      "countryRemoveError": "We couldn't remove the country.",
+      "customersAssigned": "{count, plural, one {Customer assigned.} other {# customers assigned.}}",
+      "customerAssignError": "We couldn't assign the customer. Try again.",
+      "customerRemoved": "Customer removed.",
+      "customerRemoveError": "We couldn't remove the customer. Try again.",
+      "billerRemoved": "Billing specialist removed.",
+      "billerUpdated": "Billing specialist updated.",
+      "billerUpdateError": "We couldn't update the billing specialist. Try again.",
+      "categoriesUpdated": "Product lines and categories updated.",
+      "categoriesUpdateError": "We couldn't update the categories. Try again.",
+      "countryCatalogLoadError": "We couldn't load the country list.",
+      "countriesLoadError": "We couldn't load the countries.",
+      "linesLoadError": "We couldn't load the product lines and categories."
+    },
+    "customersTab": {
+      "add": "Add customers",
+      "noSearchResults": "No customers match that name or tax ID.",
+      "empty": "This user doesn't have any assigned customers yet."
+    },
+    "groupsTab": {
+      "group": "Group",
+      "add": "Add customer group",
+      "noSearchResults": "No groups match that name.",
+      "empty": "This user doesn't have any assigned customer groups yet."
+    },
+    "countriesTab": {
+      "title": "Countries",
+      "country": "Country",
+      "add": "Add countries",
+      "noSearchResults": "No countries match that name.",
+      "empty": "This user doesn't have any assigned countries yet."
+    },
+    "billerTab": {
+      "noBiller": "No billing specialist",
+      "description": "Billing specialist assigned to the sales rep in the current project.",
+      "biller": "Billing specialist"
+    },
+    "addCustomersModal": {
+      "title": "Add customers",
+      "city": "City",
+      "searchPlaceholder": "Search customer...",
+      "empty": "No customers found.",
+      "total": "Showing {from}–{to} of {total} customers",
+      "selected": "{count, plural, one {# customer selected} other {# customers selected}}",
+      "confirm": "Add selected"
+    },
+    "addGroupsModal": {
+      "title": "Add customer group",
+      "group": "Group",
+      "searchPlaceholder": "Search group...",
+      "empty": "All groups are already assigned.",
+      "selected": "{count, plural, one {# group selected} other {# groups selected}}",
+      "confirm": "Add selected"
+    },
+    "addCountriesModal": {
+      "title": "Add countries",
+      "country": "Country",
+      "searchPlaceholder": "Search country...",
+      "empty": "All countries are already assigned.",
+      "selected": "{count, plural, one {# country selected} other {# countries selected}}",
+      "confirm": "Add selected"
+    },
+    "linesCategories": {
+      "title": "Product lines and categories",
+      "description": "Check the categories in each product line whose products this user can see in the Marketplace. {assigned} of {total} categories assigned.",
+      "searchPlaceholder": "Search product line, category or product",
+      "noSearchResults": "No product lines or categories match that search.",
+      "empty": "This project has no product lines with categories set up.",
+      "lineCount": "{assigned}/{total} categories",
+      "discard": "Discard",
+      "productCount": "{count, plural, one {# product} other {# products}}",
+      "sku": "SKU",
+      "product": "Product",
+      "available": "Available",
+      "unavailable": "Unavailable"
+    }
+  },
+  "load": {
+    "title": "Data Upload",
+    "subtitle": "Manual ETLs to feed the app when automatic sync fails.",
+    "empty": "No ETLs set up.",
+    "total": "Showing {from}–{to} of {total} ETLs",
+    "noUploadsYet": "No uploads yet",
+    "template": "Template",
+    "downloadTemplate": "Download template",
+    "uploadFile": "Upload file",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "columns": {
+      "lastFile": "Last uploaded file",
+      "lastUpload": "Last upload"
+    },
+    "feedback": {
+      "validationsSaved": "Validations saved.",
+      "noTemplateYet": "This ETL doesn't have a template yet: upload a file to create it and define its validations.",
+      "validationsLoadError": "We couldn't read the validations.",
+      "createUnavailable": "Creating ETLs isn't available yet.",
+      "fileReceived": "File \"{fileName}\" received. It's being validated and processed; check the result in the history.",
+      "uploadError": "We couldn't upload the file. Try again.",
+      "noTemplate": "There's no template available for this ETL."
+    },
+    "detail": {
+      "whatItDoes": "What does this ETL do?",
+      "lastFile": "Last file",
+      "downloadCurrentFile": "Download current file",
+      "validations": "Validations",
+      "history": "Upload history",
+      "historyEmpty": "No uploads have been recorded for this ETL yet.",
+      "downloadFile": "Download {fileName}",
+      "viewValidation": "View upload validation",
+      "viewErrors": "View errors"
+    },
+    "newEtl": {
+      "title": "New ETL",
+      "namePlaceholder": "E.g., Updated inventory",
+      "notes": "Notes",
+      "optional": "(optional)",
+      "notesPlaceholder": "Describe what this upload does and when to use it...",
+      "create": "Create ETL"
+    },
+    "errors": {
+      "columns": {
+        "row": "Row",
+        "column": "Column",
+        "error": "Error",
+        "type": "Type"
+      },
+      "types": {
+        "blocking": "Blocking",
+        "warning": "Warning"
+      },
+      "levels": {
+        "error": "Error",
+        "warning": "Warning"
+      },
+      "loadError": "We couldn't read the upload details.",
+      "rowsSummary": "{read, plural, one {# row read} other {# rows read}} · {loaded, plural, one {# loaded} other {# loaded}}",
+      "rowErrors": "Errors by row ({count})",
+      "failedValidations": "Failed validations",
+      "processLog": "Process log",
+      "noErrors": "This upload didn't record any errors."
+    },
+    "validation": {
+      "eyebrow": "CASHPORT · UPLOAD VALIDATION",
+      "titleConfirmed": "Upload confirmed",
+      "titleFallback": "Upload",
+      "actionError": "We couldn't complete the action.",
+      "cancelUpload": "Cancel upload",
+      "confirmUpload": "Confirm upload",
+      "cancelConfirm": {
+        "title": "Cancel the upload?",
+        "content": "The file won't be applied in Cashport.",
+        "keep": "Keep upload"
+      },
+      "stages": {
+        "label": "{step} · {name}",
+        "critical": "Critical",
+        "warnings": "Warnings",
+        "confirm": "Confirm"
+      },
+      "fileMeta": {
+        "confirmed": "Confirmed {date}",
+        "justified": "{count, plural, one {# warning justified} other {# warnings justified}}",
+        "uploaded": "uploaded {date}",
+        "withRows": "{count, plural, one {{rows} row} other {{rows} rows}} · {detail}"
+      },
+      "steps": {
+        "reading": "Reading the file",
+        "validating": "Validating columns, data types and duplicates",
+        "matching": "Matching codes against Cashport",
+        "comparing": "Comparing with uploads from the last 60 days"
+      },
+      "loading": {
+        "alt": "Loading",
+        "applyingTitle": "Loading receivables",
+        "analyzingTitle": "Analyzing the file",
+        "applyingText": "We're applying the file in Cashport.",
+        "analyzingText": "{step}. Nothing is applied until you confirm.",
+        "largeFileHint": "Large files can take a few minutes. You can close this window and pick it up again from the upload history."
+      },
+      "critical": {
+        "title": "{count, plural, one {# critical alert} other {# critical alerts}}",
+        "fixOrForce": "Fix the file and upload it again, or upload it anyway and explain why.",
+        "fix": "Fix the file and upload it again.",
+        "dropTitle": "Drag the corrected file here",
+        "dropHint": "It's validated again from stage 1",
+        "selectFile": "Select file",
+        "forceTitle": "Upload with {count, plural, one {# critical alert} other {# critical alerts}}",
+        "forceHint": "Data with errors is loaded exactly as it comes in the file. This is recorded in the audit log with your user and this justification.",
+        "forceAria": "Justification for uploading with critical alerts",
+        "forcePlaceholder": "E.g., the customer confirmed the outstanding amounts are correct; it will be fixed in the next upload.",
+        "forceSubmit": "Upload with alerts",
+        "forceOpen": "Upload anyway",
+        "missingColumns": "Missing columns:",
+        "columns": "{count, plural, one {Column:} other {Columns:}}",
+        "rows": "Rows: {list}",
+        "codes": "Codes: {list}"
+      },
+      "measures": {
+        "normalTitle": "Within normal range",
+        "normalHint": "Open them to see how they behaved over the last {days} days.",
+        "mean": "average {value}",
+        "noBaseline": "Not enough previous uploads to compare",
+        "justified": "Justified",
+        "needsJustification": "Needs justification",
+        "justification": "Justification",
+        "placeholders": {
+          "total_balance": "E.g., the customer applied a bad-debt write-off approved this week.",
+          "active_clients": "E.g., inactive customers were removed from the customer master data.",
+          "documents": "E.g., a large batch of paid invoices was closed."
+        }
+      },
+      "warnings": {
+        "title": "{count, plural, =0 {No warnings} one {# warning to resolve} other {# warnings to resolve}}",
+        "eachNeedsJustification": "Each one needs its own justification before you confirm.",
+        "allNormal": "All measures are within normal range. You can confirm the upload.",
+        "legendNormal": "Normal",
+        "progress": "{done} of {total} justified"
+      },
+      "applied": {
+        "heading": "WHAT WAS LOADED",
+        "available": "Receivables are now available in Cashport.",
+        "columns": {
+          "measure": "MEASURE",
+          "loaded": "LOADED",
+          "mean": "{days}D AVERAGE",
+          "trend": "{days} DAYS"
+        },
+        "confirmedBy": "Confirmed by",
+        "warnings": "Warnings",
+        "justifiedLogged": "{count} justified · recorded in the audit log",
+        "none": "None",
+        "criticalAlerts": "Critical alerts",
+        "criticalOverride": "Loaded with {count} alerts · “{justification}”",
+        "done": "Done"
+      },
+      "cancelled": {
+        "title": "Upload canceled",
+        "text": "The file wasn't applied in Cashport."
+      },
+      "failed": {
+        "title": "We couldn't complete the upload",
+        "text": "Check the upload history for details."
+      },
+      "chart": {
+        "todayValue": "Today · {value}",
+        "todayDate": "TODAY · {date}",
+        "sigmaVsMean": "{sigma} vs. average",
+        "deltaVsMean": "{delta} vs. average",
+        "summary": "Average {mean} · σ {sd} · {count, plural, one {# upload} other {# uploads}} in the last {days} days. Hover over the series to see each upload.",
+        "notEnoughData": "There aren't enough uploads in the last {days} days yet to calculate the average and standard deviation."
+      }
+    }
+  }
+}

@@ -1,11 +1,12 @@
 import type { ColumnsType } from "antd/es/table";
 import { ArrowUpRight } from "lucide-react";
+import type { useTranslations } from "use-intl";
 import { IApproval, TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { fmtCop, fmtNumber, parseFechaApproval } from "../../utils/format";
 
 // AntD columns for the Aprobaciones list. `onSelect` receives the row's real
-// Profit360 GUID so the caller can navigate to /logistica-inversa/aprobaciones/:id.
+// Profit360 GUID so the caller can navigate to /reverse-logistics/approvals/:id.
 // The `guid` field is attached by AprobacionesList when mapping the Profit360
 // payload — it lives alongside the legacy numeric `id` that AntD needs as rowKey.
 export interface IApprovalRow extends IApproval {
@@ -13,10 +14,11 @@ export interface IApprovalRow extends IApproval {
 }
 
 export const getApprovalsColumns = (
-  onSelect: (guid: string, approval: IApprovalRow) => void
+  onSelect: (guid: string, approval: IApprovalRow) => void,
+  t: ReturnType<typeof useTranslations<"reverseLogistics">>
 ): ColumnsType<IApprovalRow> => [
   {
-    title: "Fecha",
+    title: t("approvals.columns.date"),
     dataIndex: "fecha",
     width: 110,
     render: (fecha: string) => {
@@ -30,7 +32,7 @@ export const getApprovalsColumns = (
     }
   },
   {
-    title: "Cliente",
+    title: t("approvals.columns.customer"),
     dataIndex: "cliente",
     sorter: (a, b) => a.cliente.localeCompare(b.cliente),
     render: (_: unknown, record) => (
@@ -45,13 +47,13 @@ export const getApprovalsColumns = (
     )
   },
   {
-    title: "Ciudad",
+    title: t("approvals.columns.city"),
     dataIndex: "ciudad",
     width: 100,
     render: (ciudad: string) => <span className="text-sm text-gray-700">{ciudad}</span>
   },
   {
-    title: "Canal / Línea",
+    title: t("approvals.columns.channelLine"),
     dataIndex: "canal",
     width: 110,
     render: (_: unknown, record) => (
@@ -62,7 +64,7 @@ export const getApprovalsColumns = (
     )
   },
   {
-    title: "Tipo de Aprobación",
+    title: t("approvals.columns.approvalType"),
     dataIndex: "tiposAprobacion",
     width: 220,
     render: (tipos: TipoAprobacion[]) => (
@@ -77,14 +79,14 @@ export const getApprovalsColumns = (
     )
   },
   {
-    title: "Lotes",
+    title: t("approvals.columns.lots"),
     dataIndex: "lotesParaAprobar",
     width: 70,
     align: "center",
     render: (lotes: number) => <span className="text-sm text-gray-700">{lotes}</span>
   },
   {
-    title: "Unid.",
+    title: t("approvals.columns.units"),
     dataIndex: "unidades",
     width: 80,
     align: "right",
@@ -94,7 +96,7 @@ export const getApprovalsColumns = (
     )
   },
   {
-    title: "Monto",
+    title: t("approvals.columns.amount"),
     dataIndex: "monto",
     width: 120,
     align: "right",
@@ -111,7 +113,7 @@ export const getApprovalsColumns = (
         onClick={() => onSelect(record.guid, record)}
         className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline whitespace-nowrap"
       >
-        Ir a Aprobar
+        {t("approvals.goToApprove")}
         <ArrowUpRight className="h-3.5 w-3.5" />
       </button>
     )

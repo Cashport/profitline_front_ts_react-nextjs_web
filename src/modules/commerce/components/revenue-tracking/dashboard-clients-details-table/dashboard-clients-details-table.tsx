@@ -12,6 +12,7 @@ import type { IDashboardSalesClientDetailItem } from "@/types/dashboardSales/IDa
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import SearchField from "@/components/ui/search-field/search-field";
+import { useTranslations } from "use-intl";
 
 const PAGE_SIZE = 25;
 
@@ -52,28 +53,37 @@ const RoiCell = ({ value }: { value: number | null }) => {
   );
 };
 
-const CSV_COLUMNS: { header: string; getValue: (i: IDashboardSalesClientDetailItem) => unknown }[] =
-  [
-    { header: "Cliente", getValue: (i) => i.client_name },
-    { header: "Ventas mes", getValue: (i) => i.ventas_mes },
-    { header: "Meta", getValue: (i) => i.meta },
-    { header: "Meta %", getValue: (i) => i.meta_pct },
-    { header: "Prom. mensual", getValue: (i) => i.prom_mensual },
-    { header: "Prom. mensual %", getValue: (i) => i.prom_mensual_pct },
-    { header: "Mes anterior", getValue: (i) => i.mes_anterior },
-    { header: "Mes anterior %", getValue: (i) => i.mes_anterior_pct },
-    { header: "YTD anterior", getValue: (i) => i.ytd_anterior },
-    { header: "YTD actual", getValue: (i) => i.ytd_actual },
-    { header: "ROI YTD %", getValue: (i) => i.roi_ytd_pct }
-  ];
+// `header` es la clave del texto en commerce.dashboard.clientDetails.csv.<header>.
+const CSV_COLUMNS = [
+  { header: "client", getValue: (i: IDashboardSalesClientDetailItem) => i.client_name },
+  { header: "monthSales", getValue: (i: IDashboardSalesClientDetailItem) => i.ventas_mes },
+  { header: "target", getValue: (i: IDashboardSalesClientDetailItem) => i.meta },
+  { header: "targetPct", getValue: (i: IDashboardSalesClientDetailItem) => i.meta_pct },
+  { header: "monthlyAvg", getValue: (i: IDashboardSalesClientDetailItem) => i.prom_mensual },
+  {
+    header: "monthlyAvgPct",
+    getValue: (i: IDashboardSalesClientDetailItem) => i.prom_mensual_pct
+  },
+  { header: "prevMonth", getValue: (i: IDashboardSalesClientDetailItem) => i.mes_anterior },
+  {
+    header: "prevMonthPct",
+    getValue: (i: IDashboardSalesClientDetailItem) => i.mes_anterior_pct
+  },
+  { header: "prevYtd", getValue: (i: IDashboardSalesClientDetailItem) => i.ytd_anterior },
+  { header: "currentYtd", getValue: (i: IDashboardSalesClientDetailItem) => i.ytd_actual },
+  { header: "roiYtdPct", getValue: (i: IDashboardSalesClientDetailItem) => i.roi_ytd_pct }
+] as const;
 
-const exportToCsv = (items: IDashboardSalesClientDetailItem[]) => {
+const exportToCsv = (
+  items: IDashboardSalesClientDetailItem[],
+  headerLabel: (key: (typeof CSV_COLUMNS)[number]["header"]) => string
+) => {
   const escape = (value: unknown) => {
     const str = value === null || value === undefined ? "" : String(value);
     return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
   };
   const rows = [
-    CSV_COLUMNS.map((c) => c.header).join(","),
+    CSV_COLUMNS.map((c) => headerLabel(c.header)).join(","),
     ...items.map((item) => CSV_COLUMNS.map((c) => escape(c.getValue(item))).join(","))
   ];
   const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -87,6 +97,9 @@ const exportToCsv = (items: IDashboardSalesClientDetailItem[]) => {
 
 export default function DashboardClientsDetailsTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const t = useTranslations("commerce.dashboard.clientDetails");
+  const tTables = useTranslations("commerce.dashboard.tables");
+  const tCommon = useTranslations("common");
   const { filters, includeIva } = useRevenueTracking();
 
   const [page, setPage] = useState(1);
@@ -112,22 +125,22 @@ export default function DashboardClientsDetailsTable() {
     <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
       <CardHeader className="sm:px-[18px] sm:pt-[14px] !pb-0">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <CardTitle className="text-base sm:text-lg font-semibold">Detalle por Cliente</CardTitle>
+          <CardTitle className="text-base sm:text-lg font-semibold">{t("title")}</CardTitle>
           <div className="flex items-center gap-2 sm:ml-auto">
             <SearchField
               value={search}
               onChange={setSearch}
-              placeholder="Buscar..."
+              placeholder={t("searchPlaceholder")}
               className="sm:w-56"
             />
             <button
               type="button"
-              onClick={() => exportToCsv(items)}
+              onClick={() => exportToCsv(items, (key) => t(`csv.${key}`))}
               disabled={items.length === 0}
               className="flex h-[var(--control-h)] items-center gap-2 px-4 text-sm font-medium bg-background border border-border rounded-lg hover:bg-secondary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="h-4 w-4" />
-              Export
+              {tTables("export")}
             </button>
           </div>
         </div>
@@ -135,11 +148,11 @@ export default function DashboardClientsDetailsTable() {
       <CardContent className="p-0 sm:px-[18px] sm:py-[14px]">
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <p>Cargando datos...</p>
+            <p>{tTables("loading")}</p>
           </div>
         ) : items.length === 0 ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <p>No hay datos disponibles</p>
+            <p>{tTables("noData")}</p>
           </div>
         ) : (
           <>
@@ -148,28 +161,28 @@ export default function DashboardClientsDetailsTable() {
                 <thead>
                   <tr className="border-b border-cp-line bg-cp-surface">
                     <th className="text-left py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Cliente
+                      {tCommon("fields.customer")}
                     </th>
                     <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Ventas mes
+                      {t("columns.monthSales")}
                     </th>
                     <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Meta
+                      {t("columns.target")}
                     </th>
                     <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Prom. mens.
+                      {t("columns.monthlyAvg")}
                     </th>
                     <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      Mes ant.
+                      {t("columns.prevMonth")}
                     </th>
                     <th className="hidden lg:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      YTD ant.
+                      {t("columns.prevYtd")}
                     </th>
                     <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      YTD
+                      {t("columns.ytd")}
                     </th>
                     <th className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                      % YTD
+                      {t("columns.ytdPct")}
                     </th>
                   </tr>
                 </thead>
@@ -222,8 +235,11 @@ export default function DashboardClientsDetailsTable() {
             {(data?.total ?? 0) > PAGE_SIZE && (
               <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 px-2 sm:px-0 pt-4 pb-4 sm:pb-0">
                 <p className="text-[13px] sm:text-sm text-muted-foreground">
-                  Mostrando {(page - 1) * PAGE_SIZE + 1} a{" "}
-                  {Math.min(page * PAGE_SIZE, data?.total ?? 0)} de {data?.total ?? 0} resultados
+                  {tTables("showingResults", {
+                    from: (page - 1) * PAGE_SIZE + 1,
+                    to: Math.min(page * PAGE_SIZE, data?.total ?? 0),
+                    total: data?.total ?? 0
+                  })}
                 </p>
                 <Pagination
                   current={page}

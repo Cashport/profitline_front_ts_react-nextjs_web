@@ -1,4 +1,5 @@
 import { Paperclip } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { type WhatsappTemplate, waVariableExamples } from "../../lib/mockData";
 
 interface WhatsAppPreviewProps {
@@ -6,16 +7,15 @@ interface WhatsAppPreviewProps {
 }
 
 export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
+  const t = useTranslations("massCommunications.whatsappPreview");
   if (!template) {
     return (
       <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden">
         <div className="bg-[#075E54] px-4 py-3">
-          <p className="text-[13px] text-white/80 font-medium">Vista previa de WhatsApp</p>
+          <p className="text-[13px] text-white/80 font-medium">{t("title")}</p>
         </div>
         <div className="flex items-center justify-center p-8 bg-[#ECE5DD]">
-          <p className="text-sm text-gray-500 text-center">
-            Selecciona una plantilla para ver la vista previa
-          </p>
+          <p className="text-sm text-gray-500 text-center">{t("empty")}</p>
         </div>
       </div>
     );
@@ -30,7 +30,7 @@ export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
   return (
     <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden">
       <div className="bg-[#075E54] px-4 py-3">
-        <p className="text-[13px] text-white/80 font-medium">Vista previa de WhatsApp</p>
+        <p className="text-[13px] text-white/80 font-medium">{t("title")}</p>
       </div>
       <div className="p-4 bg-[#ECE5DD]">
         <div className="max-w-[280px] bg-white rounded-lg p-3 shadow-sm">
@@ -48,7 +48,7 @@ export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
               ))}
             </div>
           )}
-          <p className="text-[13px] text-gray-400 text-right mt-2">10:30 a.m.</p>
+          <p className="text-[13px] text-gray-400 text-right mt-2">{t("sampleTime")}</p>
         </div>
       </div>
     </div>

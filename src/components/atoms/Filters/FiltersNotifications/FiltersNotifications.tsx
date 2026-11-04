@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 
 import { getNotificationTypes } from "@/services/notifications/notification";
 import { getAllLinesByProject, getSubLinesByProject } from "@/services/line/line";
@@ -7,11 +8,12 @@ import { useAppStore } from "@/lib/store/store";
 
 import { ILine, ISubLine } from "@/types/lines/line";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 
 interface FilterOption {
   value: string | number;
-  label: string;
+  label: ReactNode;
   isLeaf?: boolean;
   children?: FilterOption[];
   line_id?: string | number;
@@ -28,6 +30,7 @@ type Props = {
 };
 
 export default function FiltersNotifications({ setSelectedFilters }: Props) {
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
   const [cascaderOptions, setCascaderOptions] = useState<FilterOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<(string | number)[][]>([]);
@@ -63,17 +66,17 @@ export default function FiltersNotifications({ setSelectedFilters }: Props) {
         setCascaderOptions([
           {
             value: "lines",
-            label: "Líneas",
+            label: filterLabel("lines"),
             children: lines
           },
           {
             value: "sublines",
-            label: "Sublíneas",
+            label: filterLabel("sublines"),
             children: sublines
           },
           {
             value: "notificationType",
-            label: "Tipo de notificación",
+            label: filterLabel("notificationType"),
             children: notificationType
           }
         ]);
@@ -152,7 +155,7 @@ export default function FiltersNotifications({ setSelectedFilters }: Props) {
       style={{ width: "130px" }}
       multiple
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomRight"
       options={cascaderOptions}
       showCheckedStrategy={Cascader.SHOW_CHILD}

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { KpiCard } from "@/components/ui/kpi-card/kpi-card";
 
 import { IBotHealthSummary } from "@/types/bots/IBotHealth";
@@ -10,6 +11,7 @@ interface BotSummaryCardsProps {
 }
 
 interface SummaryItem {
+  key: string;
   label: string;
   value: number | undefined;
   color: string;
@@ -22,22 +24,39 @@ interface SummaryItem {
 // (IBotHealthSummary): no se derivan de los datos de la página actual porque con
 // paginación server-side eso mostraría conteos parciales e incorrectos.
 export const BotSummaryCards: React.FC<BotSummaryCardsProps> = ({ summary, loading }) => {
+  const t = useTranslations("botHealth");
   const items: SummaryItem[] = [
-    { label: "Total de bots", value: summary?.total, color: "#141414" },
-    { label: "Operativo", value: summary?.operativo, color: BOT_STATUS_MAP["Operativo"].color },
-    { label: "Con fallas", value: summary?.con_fallas, color: BOT_STATUS_MAP["Con fallas"].color },
+    { key: "total", label: t("summary.total"), value: summary?.total, color: "#141414" },
     {
-      label: "En revisión",
+      key: "operational",
+      label: t("status.operational"),
+      value: summary?.operativo,
+      color: BOT_STATUS_MAP["Operativo"].color
+    },
+    {
+      key: "failing",
+      label: t("status.failing"),
+      value: summary?.con_fallas,
+      color: BOT_STATUS_MAP["Con fallas"].color
+    },
+    {
+      key: "inReview",
+      label: t("status.inReview"),
       value: summary?.en_revision,
       color: BOT_STATUS_MAP["En revisión"].color
     },
-    { label: "Ejecutando", value: summary?.ejecutando, color: BOT_STATUS_MAP["Ejecutando"].color }
+    {
+      key: "running",
+      label: t("status.running"),
+      value: summary?.ejecutando,
+      color: BOT_STATUS_MAP["Ejecutando"].color
+    }
   ];
 
   return (
     <div className="cp-card-row">
       {items.map((item) => (
-        <KpiCard key={item.label} loading={loading} className="flex-[1_1_180px]">
+        <KpiCard key={item.key} loading={loading} className="flex-[1_1_180px]">
           <div className="flex min-w-0 flex-col gap-1.5">
             <span className="truncate text-[13px] text-cp-ink-3">{item.label}</span>
             <span

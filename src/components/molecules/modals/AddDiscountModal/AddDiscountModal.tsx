@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { FC, useState } from "react";
 import { Modal, Select, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import { X } from "phosphor-react";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 const { Title } = Typography;
@@ -24,6 +25,7 @@ const AddDiscountModal: FC<AddDiscountModalProps> = ({
   options,
   isLoading
 }) => {
+  const t = useTranslations("modals.addDiscount");
   const [selectedDiscountId, setSelectedDiscountId] = useState<number | null>(null);
   return (
     <Modal
@@ -32,7 +34,7 @@ const AddDiscountModal: FC<AddDiscountModalProps> = ({
       width={698}
       onCancel={onClose}
       closeIcon={<X size={20} weight="bold" onClick={onClose} />}
-      title={<Title level={4}>Agregar descuento</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       styles={{
         body: {
           maxHeight: "calc(85 * var(--vh))"
@@ -40,7 +42,7 @@ const AddDiscountModal: FC<AddDiscountModalProps> = ({
       }}
       footer={
         <FooterButtons
-          titleConfirm="Agregar descuento"
+          titleConfirm={t("title")}
           isConfirmDisabled={!selectedDiscountId}
           onClose={onClose}
           handleOk={() => {
@@ -55,7 +57,7 @@ const AddDiscountModal: FC<AddDiscountModalProps> = ({
     >
       <Select
         showSearch
-        placeholder="Seleccione el descuento"
+        placeholder={t("placeholder")}
         style={{ width: "100%", height: "45px" }}
         options={options}
         onSelect={(value) => {

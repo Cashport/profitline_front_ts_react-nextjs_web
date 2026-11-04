@@ -1,0 +1,295 @@
+{
+  "view": {
+    "title": "Returns",
+    "lotApprovalTitle": "Lot Approval",
+    "tabs": {
+      "returns": "Returns",
+      "approvals": "Approvals"
+    }
+  },
+  "table": {
+    "showingTotal": "Showing {from} to {to} of {total} results"
+  },
+  "phases": {
+    "logistics": "Profitline",
+    "transport": "Transport",
+    "warehouse": "Warehouse",
+    "creditMemo": "Credit memo"
+  },
+  "statsBar": {
+    "average": "Avg. {phase}",
+    "totalDays": "Total days",
+    "days": "days",
+    "notAvailable": "N/A"
+  },
+  "returns": {
+    "columns": {
+      "id": "ID",
+      "date": "Date",
+      "customer": "Customer",
+      "channelLine": "Channel / Line",
+      "reason": "Reason",
+      "status": "Status",
+      "units": "Units",
+      "amount": "Amount"
+    },
+    "groupCount": "{count, plural, one {# return} other {# returns}}",
+    "viewPdf": "View PDF"
+  },
+  "approvals": {
+    "columns": {
+      "date": "Date",
+      "customer": "Customer",
+      "city": "City",
+      "channelLine": "Channel / Line",
+      "approvalType": "Approval type",
+      "lots": "Lots",
+      "units": "Units",
+      "amount": "Amount"
+    },
+    "goToApprove": "Go to approval"
+  },
+  "approvalTypes": {
+    "outOfPolicyDate": "Out of policy (date)",
+    "reasonNeedsApproval": "Reason requires approval",
+    "exceedsMaxAmount": "Exceeds maximum amount",
+    "noPickupAuthorization": "No pickup authorization"
+  },
+  "filters": {
+    "customer": "Customer",
+    "status": "Status",
+    "reason": "Reason",
+    "approvalType": "Approval type",
+    "city": "City",
+    "registrationDate": "Registration date",
+    "date": "Date",
+    "period": "Period: {value}",
+    "selectPeriod": "Select a period",
+    "typesCount": "{count} types",
+    "citiesCount": "{count} cities",
+    "pendingApproval": "Pending approval"
+  },
+  "dateFilter": {
+    "tagLabel": "Date",
+    "presetPeriods": "Preset periods",
+    "customRange": "Custom range",
+    "from": "From",
+    "to": "To",
+    "presets": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7Days": "Last 7 days",
+      "last15Days": "Last 15 days",
+      "last30Days": "Last 30 days",
+      "thisMonth": "This month"
+    }
+  },
+  "approveModal": {
+    "title": "Confirm approval?",
+    "reason": "Approval reason",
+    "selectReason": "Select a reason",
+    "observation": "Note",
+    "observationPlaceholder": "Type your note here...",
+    "reject": "Don't approve"
+  },
+  "detail": {
+    "customer": "Customer:",
+    "customerCode": "Customer code:",
+    "businessLine": "Business line:",
+    "documentValue": "Document value:",
+    "returnReason": "Return reason:",
+    "documentUnits": "Document units:",
+    "registeredUnits": "Registered units:",
+    "ruleFallback": "Returns / monthly sales rule — 5.00% limit",
+    "exceedsLimit": "Exceeds the allowed limit",
+    "maxAllowed": "Maximum allowed",
+    "pctOfSales": "{pct} of {sales} in sales",
+    "returnsThisMonth": "Returns this month",
+    "accumulated": "{amount} to date",
+    "withThisApproval": "With this approval",
+    "exceedsBy": "Exceeds by {pct}",
+    "remaining": "{pct} still available",
+    "observations": "Notes:",
+    "observationFallback": "authorized by the lab via email",
+    "viewSupportingDocs": "View supporting documents",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "showingRecords": "Showing 1 to {count} of {count} records",
+    "supportingDocsTitle": "Approval supporting documents",
+    "openInNewTab": "Open in a new tab",
+    "supportingDocAlt": "Approval supporting document",
+    "noSupportingDocs": "No supporting documents attached.",
+    "cannotApprove": "You can't approve this: it exceeds the allowed limit",
+    "approvedSuccess": "Return approved",
+    "columns": {
+      "product": "Product",
+      "lot": "Lot",
+      "expirationDate": "Expiration date",
+      "units": "Units",
+      "value": "Value",
+      "document": "Document",
+      "status": "Status"
+    }
+  },
+  "returnDetail": {
+    "title": "Return",
+    "titleWithId": "Return {id}",
+    "loadError": "We couldn't load the return.",
+    "searchPlaceholder": "Search by product, code, lot, or document",
+    "createdBy": "Prepared by <b>{user}</b>",
+    "docsToFix": "{count, plural, one {# document to fix} other {# documents to fix}}",
+    "moreActions": "More actions",
+    "editMode": "Edit mode",
+    "editModeHint": "You can edit the note, the packaging quantity, and the documents with their products. Customer, contact, seals, and photos can't be edited. Changes are applied when you save.",
+    "observation": "Note",
+    "customerDocuments": "Customer documents",
+    "tabs": {
+      "byDocument": "By document · {count}",
+      "byProduct": "By product · {count}",
+      "history": "Change history"
+    },
+    "tabTotals": "<b>{units}</b> units · <b>{amount}</b>",
+    "total": "Return total · {units} units · {amount}",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "actions": {
+      "resend": "Resend receipt to customer",
+      "void": "Void return"
+    },
+    "messages": {
+      "reviewDocuments": "Review the highlighted documents before saving",
+      "noChanges": "No changes",
+      "saved": "Changes saved · return {id}",
+      "saveError": "We couldn't save the changes",
+      "resent": "Receipt resent to the customer",
+      "resendError": "We couldn't resend the receipt",
+      "voidError": "We couldn't void the return",
+      "voided": "Return {id} voided"
+    },
+    "resendModal": {
+      "title": "Resend receipt to customer",
+      "contentEmail": "The receipt for return {id} will be regenerated and sent again to {email}.",
+      "contentCustomer": "The receipt for return {id} will be regenerated and sent again to the customer.",
+      "ok": "Resend"
+    },
+    "voidModal": {
+      "title": "Void return",
+      "description": "Return {id} will be set to Voided and its receipt will be regenerated.",
+      "label": "Reason for voiding",
+      "placeholder": "Explain why you're voiding this return",
+      "ok": "Void return"
+    },
+    "saveModal": {
+      "title": "Save changes",
+      "summary": "Return {id} · {count, plural, one {# change} other {# changes}}",
+      "label": "Reason for the change",
+      "placeholder": "Explain why you modified this return",
+      "ok": "Save changes"
+    },
+    "changes": {
+      "observationUpdated": "Note updated",
+      "packagingQuantity": "Packaging quantity ({packaging}): {from} → {to}",
+      "document": "Document {number}",
+      "documentField": "{document}: {field} {from} → {to}",
+      "fields": {
+        "number": "number",
+        "date": "date",
+        "units": "units",
+        "value": "amount"
+      },
+      "productRemoved": "{document}: removed {product} (lot {lot})",
+      "productAdded": "{document}: added {product} (lot {lot})",
+      "product": "{document}: {product} (lot {lot})",
+      "quantity": "{product}: quantity {from} → {to}",
+      "unitPrice": "{product}: unit price {from} → {to}",
+      "productObservation": "{product}: note updated"
+    },
+    "validation": {
+      "numberRequired": "Enter the document number",
+      "numberDuplicated": "This document number is duplicated",
+      "quantityRequired": "Enter the quantity for the highlighted products"
+    },
+    "documents": {
+      "title": "Document {number}",
+      "noNumber": "Document without number",
+      "editDocument": "Edit document",
+      "productsCount": "{count, plural, one {# product} other {# products}}",
+      "units": "<b>{units}</b> <muted>units</muted>",
+      "alert": "Alert",
+      "mismatch": "Products add up to {productsAmount} · {productsUnits} units, but the document shows {documentAmount} · {documentUnits} units.",
+      "valueShort": "amount short by {amount}",
+      "valueOver": "amount over by {amount}",
+      "unitsShort": "units short by {units}",
+      "unitsOver": "units over by {units}",
+      "difference": "· Difference: {difference}",
+      "addProduct": "Add product",
+      "noResults": "No results for “{query}”",
+      "empty": "No documents"
+    },
+    "lines": {
+      "product": "Product",
+      "code": "Code",
+      "lot": "Lot",
+      "expiration": "Expiration",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "totalValue": "Total amount",
+      "observation": "Note",
+      "removeProduct": "Remove product",
+      "keepOneProduct": "The document must keep at least one product"
+    },
+    "products": {
+      "product": "Product",
+      "code": "Code",
+      "lots": "Lots",
+      "documents": "Documents",
+      "quantity": "Quantity",
+      "totalValue": "Total amount",
+      "childRow": "↳ Document <b>{number}</b> · Lot {lot} · Expires {date}",
+      "docsCount": "{count, plural, one {# doc} other {# docs}}",
+      "noResults": "No results for “{query}”",
+      "empty": "No products"
+    },
+    "infoCards": {
+      "customerTitle": "Customer",
+      "customer": "Customer",
+      "address": "Address",
+      "soldTo": "Sold To",
+      "shipTo": "Ship To",
+      "contact": "Contact",
+      "packagingTitle": "Packaging and evidence",
+      "packaging": "Packaging",
+      "quantity": "· Quantity",
+      "seals": "Seals",
+      "noSeals": "No seals",
+      "photos": "Photos",
+      "photoGroups": {
+        "packaging": "Packaging",
+        "products": "Products"
+      },
+      "photoCount": "{label} · {count}"
+    },
+    "addProductModal": {
+      "title": "Add product",
+      "product": "Product",
+      "searchProduct": "Search product",
+      "lot": "Lot",
+      "noLots": "No valid lots",
+      "selectLot": "Select the lot",
+      "expiration": "Expiration",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "observation": "Note",
+      "optional": "Optional",
+      "totalValue": "Total amount {amount}"
+    },
+    "editDocumentModal": {
+      "title": "Edit document",
+      "documentNumber": "Document number",
+      "numberPlaceholder": "Number",
+      "date": "Date",
+      "documentValue": "Document amount",
+      "units": "Units",
+      "productsSum": "Products add up to <b>{units} units · {amount}</b>"
+    }
+  }
+}

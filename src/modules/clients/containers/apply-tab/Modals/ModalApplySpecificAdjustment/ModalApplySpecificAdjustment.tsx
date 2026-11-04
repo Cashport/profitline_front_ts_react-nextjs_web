@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import { Modal, Table, InputNumber } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { CaretLeft, CopySimple } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
@@ -45,6 +46,8 @@ const ModalApplySpecificAdjustment = ({
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { showMessage } = useMessageApi();
+  const t = useTranslations("clients.applyModals");
+  const tCommon = useTranslations("common");
   const [selectTab, setSelectTab] = useState(0);
   const [currentInvoices, setCurrentInvoices] = useState<ICurrentInvoice[]>(
     selectedInvoices?.map((invoice) => ({
@@ -151,10 +154,10 @@ const ModalApplySpecificAdjustment = ({
         type: 11
       });
 
-      showMessage("success", "Ajuste aplicado correctamente");
+      showMessage("success", t("applySpecific.applied"));
       onCancel(true);
     } catch (error) {
-      showMessage("error", "Error al aplicar el ajuste");
+      showMessage("error", t("applySpecific.applyError"));
     }
     setLoadingRequest(false);
   };
@@ -190,27 +193,27 @@ const ModalApplySpecificAdjustment = ({
 
   const columns: ColumnsType<ICurrentInvoice> = [
     {
-      title: "ID Factura",
+      title: t("shared.invoiceId"),
       dataIndex: "id_erp",
       key: "id_erp",
       render: (id_erp) => <p className="sectionContainerTable__id">{id_erp}</p>
     },
     {
-      title: "Pendiente",
+      title: t("applySpecific.pending"),
       dataIndex: "current_value",
       key: "current_value",
       align: "right",
       render: (val) => `${formatMoney(val)}`
     },
     {
-      title: "Saldo nuevo",
+      title: t("applySpecific.newBalance"),
       dataIndex: "new_balance",
       key: "new_balance",
       align: "right",
       render: (val) => `${formatMoney(val)}`
     },
     {
-      title: "Valor a aplicar",
+      title: t("applySpecific.amountToApply"),
       key: "applyValue",
       className: "column__apply__value",
       render: (_, record) => (
@@ -233,7 +236,7 @@ const ModalApplySpecificAdjustment = ({
             handleApplyValueChange(isNaN(parsedValue) ? 0 : parsedValue, record);
           }}
           className="button__number__adjustment"
-          placeholder="Ingresar valor"
+          placeholder={t("applySpecific.amountPlaceholder")}
           style={{ textAlign: "right" }}
         />
       )
@@ -250,9 +253,9 @@ const ModalApplySpecificAdjustment = ({
     >
       <div onClick={() => onCancel()} className="header">
         <CaretLeft size={24} onClick={() => onCancel()} />
-        <h2>Aplicar ajuste</h2>
+        <h2>{t("applySpecific.title")}</h2>
       </div>
-      <h2 className="modal-subtitle">Define el monto a aplicar a cada factura</h2>
+      <h2 className="modal-subtitle">{t("applySpecific.subtitle")}</h2>
       {selectedAdjustments.length > 1 && (
         <UiTabs
           tabs={selectedAdjustments.map((row) => row.id.toString())}
@@ -276,17 +279,17 @@ const ModalApplySpecificAdjustment = ({
 
       <div className="excel-button-container" onClick={handlePasteInvoices}>
         <CopySimple size={18} />
-        Pegar desde excel
+        {t("shared.pasteFromExcel")}
       </div>
 
       <Table dataSource={currentInvoices} columns={columns} pagination={false} rowKey="id" />
 
       <div className="modal-footer">
         <SecondaryButton fullWidth onClick={() => onCancel()}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </SecondaryButton>
         <PrincipalButton fullWidth onClick={handleApplyAdjustment} loading={loadingRequest}>
-          Agregar
+          {tCommon("actions.add")}
         </PrincipalButton>
       </div>
     </Modal>

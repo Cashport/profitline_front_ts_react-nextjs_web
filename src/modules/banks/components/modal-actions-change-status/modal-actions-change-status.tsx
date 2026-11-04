@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Flex, Modal, Radio, RadioChangeEvent } from "antd";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -26,6 +27,9 @@ interface infoObject {
 }
 
 const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRows }) => {
+  const t = useTranslations("banks.changeStatus");
+  const tShared = useTranslations("banks.shared");
+  const tCommon = useTranslations("common");
   const [states, setStates] = useState<{ id: number; label: string }[]>();
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
@@ -75,11 +79,11 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
         file: selectedEvidence[0]
       };
       await changePaymentStatus(modelData);
-      showMessage("success", "Estado cambiado con éxito");
+      showMessage("success", t("success"));
       onClose();
       handlegoBackToFirstView();
     } catch (error) {
-      showMessage("error", "Ha ocurrido un error al cambiar el estado del pago");
+      showMessage("error", t("error"));
     }
     setLoading(false);
   };
@@ -89,10 +93,7 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        showMessage(
-          "error",
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
+        showMessage("error", tShared("fileTooLarge", { maxMb: 30 }));
         return;
       }
       setSelectedEvidence([...selectedEvidence, rawFile]);
@@ -122,8 +123,8 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
   // };
 
   const firstViewModal = {
-    title: "Cambio de estado",
-    description: "Selecciona el nuevo estado del pago",
+    title: t("title"),
+    description: t("selectStatus"),
     innerContent: (
       <>
         <div className={styles.content__status}>
@@ -137,14 +138,14 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
         </div>
         <div className={styles.footer}>
           <SecondaryButton fullWidth onClick={onClose}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </SecondaryButton>
           <PrincipalButton
             fullWidth
             disabled={!selectedStatus}
             onClick={() => setIsSecondView(!isSecondView)}
           >
-            Cambiar de estado
+            {t("changeStatus")}
           </PrincipalButton>
         </div>
       </>
@@ -152,14 +153,14 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
   };
 
   const secondViewModal = {
-    title: "Evidencia",
-    description: "Adjunta la evidencia e ingresa un comentario",
+    title: tShared("evidence"),
+    description: t("evidenceDescription"),
     innerContent: (
       <>
         <div className={styles.content__evidence}>
           <Flex vertical>
-            <p>Evidencia</p>
-            <em className="descriptionDocument">*Opcional</em>
+            <p>{tShared("evidence")}</p>
+            <em className="descriptionDocument">{tShared("optional")}</em>
           </Flex>
           <DocumentButton
             key={selectedEvidence[0]?.name}
@@ -198,7 +199,7 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
                 className={styles.addDocument}
                 icon={<Plus size={"1rem"} />}
               >
-                <p>Cargar otro documento</p>
+                <p>{t("uploadAnother")}</p>
               </Button>
               <input
                 type="file"
@@ -210,18 +211,15 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
             </>
           )} */}
 
-          <p>Comentarios</p>
-          <textarea
-            onChange={handleOnChangeTextArea}
-            placeholder="Ingresar un comentario (opcional)"
-          />
+          <p>{tCommon("fields.comments")}</p>
+          <textarea onChange={handleOnChangeTextArea} placeholder={tShared("commentPlaceholder")} />
         </div>
         <div className={styles.footer}>
           <SecondaryButton fullWidth onClick={() => setIsSecondView(false)}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </SecondaryButton>
           <PrincipalButton fullWidth onClick={handleAttachEvidence} loading={loading}>
-            {selectedEvidence.length > 0 ? "Adjuntar evidencia" : "Cambiar sin evidencia"}
+            {selectedEvidence.length > 0 ? t("attachEvidence") : t("changeWithoutEvidence")}
           </PrincipalButton>
         </div>
       </>

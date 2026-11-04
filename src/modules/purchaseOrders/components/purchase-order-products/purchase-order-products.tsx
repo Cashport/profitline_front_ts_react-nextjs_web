@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import "./purchase-order-products.scss";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslations } from "use-intl";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 import { Edit, Check } from "lucide-react";
@@ -58,6 +59,10 @@ export function PurchaseOrderProducts({
   onDirtyChange,
   saveRef
 }: PurchaseOrderProductsProps) {
+  const t = useTranslations("purchaseOrders.products");
+  const tValidation = useTranslations("purchaseOrders.validation");
+  const tCommon = useTranslations("common");
+  const productsSchema = useMemo(() => purchaseOrderProductsSchema(tValidation), [tValidation]);
   const initialProducts = useMemo(() => {
     if (isCreating || !data?.products) return initialProductsData ?? getEmptyProductsFormData();
     return mapApiProductsToForm(data.products);
@@ -79,7 +84,7 @@ export function PurchaseOrderProducts({
     watch,
     setValue
   } = useForm<PurchaseOrderProductsFormData>({
-    resolver: yupResolver<PurchaseOrderProductsFormData>(purchaseOrderProductsSchema),
+    resolver: yupResolver<PurchaseOrderProductsFormData>(productsSchema),
     defaultValues: initialProducts,
     mode: "onChange"
   });
@@ -226,10 +231,10 @@ export function PurchaseOrderProducts({
       }));
       await editPurchaseOrderProducts(orderId!, productsToSend);
       mutate?.();
-      message.success("Productos actualizados correctamente");
+      message.success(t("updateSuccess"));
       setIsEditMode(false);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
+      message.error(error instanceof Error ? error.message : t("updateError"));
       throw error;
     }
     setIsEditMode(false);
@@ -303,12 +308,12 @@ export function PurchaseOrderProducts({
         <div className="mb-4 flex justify-between items-center">
           <span className="flex justify-start items-end gap-2">
             <h3 className="text-lg font-semibold text-cashport-black leading-tight">
-              Detalle de Productos
+              {t("title")}
             </h3>
             {data?.warehouseName && (
               <p className="text-sm font-medium text-cashport-gray">
                 {" "}
-                Almacén: {data.warehouseName}
+                {t("warehouse", { name: data.warehouseName })}
               </p>
             )}
           </span>
@@ -325,7 +330,7 @@ export function PurchaseOrderProducts({
                     setIsEditMode(false);
                   }}
                 >
-                  Cancelar
+                  {tCommon("actions.cancel")}
                 </Button>
               )}
               <Button
@@ -338,12 +343,12 @@ export function PurchaseOrderProducts({
                 {isEditMode ? (
                   <>
                     <Check className="h-4 w-4 mr-2" />
-                    Guardar
+                    {tCommon("actions.save")}
                   </>
                 ) : (
                   <>
                     <Edit className="h-4 w-4 mr-2" />
-                    Editar productos
+                    {t("editProducts")}
                   </>
                 )}
               </Button>
@@ -353,38 +358,38 @@ export function PurchaseOrderProducts({
         <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           {isEditMode && hasDecimals && (
             <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
-              No se pueden pedir decimales en cajas o unidades
+              {t("noDecimals")}
             </div>
           )}
           <table className="w-full">
             <thead className="bg-cp-surface border-b border-cp-line">
               <tr>
                 <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Producto
+                  {t("columns.product")}
                 </th>
                 <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Lote
+                  {t("columns.batch")}
                 </th>
                 <th className="text-left px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Vencimiento lote
+                  {t("columns.batchExpiration")}
                 </th>
                 <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Unidades
+                  {t("columns.units")}
                 </th>
                 <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Cajas
+                  {t("columns.boxes")}
                 </th>
                 <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Stock
+                  {t("columns.stock")}
                 </th>
                 <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Precio unitario
+                  {t("columns.unitPrice")}
                 </th>
                 <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  IVA
+                  {t("columns.vat")}
                 </th>
                 <th className="text-right px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
-                  Precio total
+                  {t("columns.totalPrice")}
                 </th>
                 <th className="px-3 py-3 w-10"></th>
               </tr>
@@ -443,7 +448,7 @@ export function PurchaseOrderProducts({
                                     fetchBatchesForProduct(value);
                                   }
                                 }}
-                                placeholder="Seleccionar producto"
+                                placeholder={t("selectProduct")}
                                 options={internalProducts.map((p) => ({
                                   value: p.id,
                                   label: p.description
@@ -464,7 +469,7 @@ export function PurchaseOrderProducts({
                                 </span>
                                 {field.product_sku && (
                                   <span className="text-[13px] text-blue-600 mt-0.5">
-                                    SKU: {field.product_sku}
+                                    {t("sku", { sku: field.product_sku })}
                                   </span>
                                 )}
                               </div>
@@ -502,14 +507,18 @@ export function PurchaseOrderProducts({
                                   }
                                   value={controllerField.value ?? null}
                                   onChange={controllerField.onChange}
-                                  placeholder="Seleccionar lote"
+                                  placeholder={t("selectBatch")}
                                   status={error ? "error" : undefined}
                                   popupClassName="batch-select-dropdown"
                                   popupMatchSelectWidth={205}
                                   options={productBatches.map((b) => ({
                                     value: b.id,
                                     label: b.batch_expiration_date
-                                      ? `${b.batch} - ${formatDateDMY(b.batch_expiration_date)} - ${monthsUntilExpiration(b.batch_expiration_date)} meses`
+                                      ? t("batchLabel", {
+                                          batch: b.batch,
+                                          date: formatDateDMY(b.batch_expiration_date),
+                                          months: monthsUntilExpiration(b.batch_expiration_date)
+                                        })
                                       : b.batch,
                                     disabled: usedBatchIds.includes(b.id),
                                     batch: b.batch,
@@ -521,12 +530,12 @@ export function PurchaseOrderProducts({
                                       <span className="font-semibold">{option.data.batch}</span>
                                       {option.data.batch_expiration_date && (
                                         <span className="text-[13px] text-gray-500">
-                                          Vence:{" "}
-                                          {dayjs(option.data.batch_expiration_date)
-                                            .utc()
-                                            .format("DD/MM/YY")}
-                                          {"  |  "}
-                                          {option.data.stock_available ?? 0} uds
+                                          {t("batchExpiresStock", {
+                                            date: dayjs(option.data.batch_expiration_date)
+                                              .utc()
+                                              .format("DD/MM/YY"),
+                                            stock: option.data.stock_available ?? 0
+                                          })}
                                         </span>
                                       )}
                                     </div>
@@ -541,7 +550,9 @@ export function PurchaseOrderProducts({
                                   </span>
                                   {field.batch_expiration_date && (
                                     <span className="text-[13px] text-cashport-gray">
-                                      {monthsUntilExpiration(field.batch_expiration_date)} meses
+                                      {t("monthsCount", {
+                                        count: monthsUntilExpiration(field.batch_expiration_date)
+                                      })}
                                     </span>
                                   )}
                                 </div>
@@ -641,12 +652,14 @@ export function PurchaseOrderProducts({
                                 <div className="bg-gray-100 px-3 py-2.5 flex items-center gap-2 rounded-t-lg">
                                   <Eye className="h-3.5 w-3.5 text-gray-500 shrink-0" />
                                   <span className="text-[13px] font-semibold text-gray-900">
-                                    Datos originales del cliente
+                                    {t("original.title")}
                                   </span>
                                 </div>
                                 <div className="text-[13px] px-3 pb-3">
                                   <div className="flex justify-between gap-3 py-2.5">
-                                    <span className="text-gray-500 shrink-0">Producto</span>
+                                    <span className="text-gray-500 shrink-0">
+                                      {t("columns.product")}
+                                    </span>
                                     <span className="text-right font-medium text-cashport-black break-all">
                                       {
                                         watchedProducts[index].purchase_order_original!
@@ -664,13 +677,17 @@ export function PurchaseOrderProducts({
                                       </div>
                                     )}
                                   <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
-                                    <span className="text-gray-500 shrink-0">Unidades</span>
+                                    <span className="text-gray-500 shrink-0">
+                                      {t("columns.units")}
+                                    </span>
                                     <span className="font-medium text-cashport-black">
                                       {watchedProducts[index].purchase_order_original!.po_quantity}
                                     </span>
                                   </div>
                                   <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
-                                    <span className="text-gray-500 shrink-0">Precio unitario</span>
+                                    <span className="text-gray-500 shrink-0">
+                                      {t("columns.unitPrice")}
+                                    </span>
                                     <span className="font-medium text-cashport-black">
                                       {formatMoney(
                                         watchedProducts[index].purchase_order_original!
@@ -680,7 +697,7 @@ export function PurchaseOrderProducts({
                                   </div>
                                   <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
                                     <span className="text-gray-500 font-semibold shrink-0">
-                                      Valor total
+                                      {t("original.totalValue")}
                                     </span>
                                     <span className="font-bold text-cashport-black">
                                       {formatMoney(
@@ -691,7 +708,9 @@ export function PurchaseOrderProducts({
                                   </div>
                                   {watchedProducts[index].purchase_order_original!.novelty && (
                                     <div className="py-2.5 border-t border-gray-100">
-                                      <span className="text-gray-500 block mb-1">Observacion</span>
+                                      <span className="text-gray-500 block mb-1">
+                                        {t("original.observation")}
+                                      </span>
                                       <p className="font-medium text-cashport-black leading-relaxed">
                                         {watchedProducts[index].purchase_order_original!.novelty}
                                       </p>
@@ -703,7 +722,7 @@ export function PurchaseOrderProducts({
                           >
                             <button
                               className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-gray-400 bg-white hover:bg-gray-50 transition-colors"
-                              title="Ver datos originales del PDF"
+                              title={t("original.viewTooltip")}
                             >
                               <span className="text-[13px] font-bold text-gray-500 leading-none">
                                 i
@@ -716,7 +735,7 @@ export function PurchaseOrderProducts({
                             type="button"
                             onClick={() => remove(index)}
                             className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
-                            title="Eliminar producto"
+                            title={t("removeProduct")}
                           >
                             <Trash size={16} className="text-gray-500" />
                           </button>
@@ -729,7 +748,9 @@ export function PurchaseOrderProducts({
             </tbody>
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
-                <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
+                <td className="p-3 text-sm font-semibold text-cashport-black text-right">
+                  {tCommon("fields.total")}
+                </td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
@@ -773,7 +794,7 @@ export function PurchaseOrderProducts({
             className="mt-2 self-end flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
             <Plus size={14} />
-            Agregar producto
+            {t("addProduct")}
           </button>
         )}
       </div>

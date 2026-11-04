@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "use-intl";
+
 /**
  * Bloque gris con pulso, como los skeletons de la cartera. `aria-hidden`: el
  * estado de carga lo comunica el contenedor con `aria-busy`.
@@ -25,11 +29,12 @@ const WideCard = ({ bodyClassName }: { bodyClassName: string }) => (
  * ni se pierda el scroll si el filtro se eligió más abajo.
  */
 export default function TowerSkeleton() {
+  const tc = useTranslations("collections.board");
   return (
     <div
       className="flex flex-col gap-[var(--section-gap)]"
       aria-busy
-      aria-label="Cargando la torre de control"
+      aria-label={tc("loadingAria")}
     >
       <div className="grid grid-cols-1 gap-[var(--card-gap)] sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)]">
         {[0, 1, 2].map((i) => (

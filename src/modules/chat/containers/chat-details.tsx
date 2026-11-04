@@ -5,6 +5,7 @@ import Link from "next/link";
 import dayjs from "dayjs";
 import { Flex, message, Spin } from "antd";
 import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { deleteContact } from "@/services/contacts/contacts";
 import { sendTemplate } from "@/services/chat/chat";
@@ -47,6 +48,9 @@ export default function ChatDetails({
   onAccountStatement,
   mutateTickets
 }: Props) {
+  const t = useTranslations("chat.details");
+  const tShared = useTranslations("chat.shared");
+  const tCommon = useTranslations("common");
   const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [templateTarget, setTemplateTarget] = useState<{
     clientUuid: string;
@@ -99,11 +103,11 @@ export default function ChatDetails({
       const contactId = { contacts_ids: [contactIdValue] };
       const inactivate = true;
       await deleteContact(contactId, inactivate, clientDetails?.client.uuid || "", projectId);
-      message.success("Contacto inactivado exitosamente");
+      message.success(t("contactDeactivated"));
       handleCloseModals();
       mutateTickets();
     } catch (error) {
-      message.error("Error al inactivar el contacto");
+      message.error(t("contactDeactivateError"));
     } finally {
       setIsActionLoading(false);
     }
@@ -125,34 +129,34 @@ export default function ChatDetails({
         ) : (
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <button onClick={onClose} aria-label="Ocultar información del cliente">
+              <button onClick={onClose} aria-label={t("hideClientInfo")}>
                 <CaretDoubleRight size={20} />
               </button>
               <ChatActions
                 items={[
                   {
                     key: "account-statement",
-                    label: "Estado de cuenta",
+                    label: tShared("accountStatement"),
                     onClick: onAccountStatement
                   },
                   {
                     key: "add-client",
-                    label: "Agregar cliente",
+                    label: tShared("addClient"),
                     onClick: () => setShowAddClientModal(true)
                   },
                   {
                     key: "generate-payment-link",
-                    label: "Generar link de pago",
+                    label: t("generatePaymentLink"),
                     onClick: handleOpenGeneratePaymentLink
                   },
                   {
                     key: "deactivate-contact",
-                    label: "Inactivar contacto",
+                    label: t("deactivateContact"),
                     onClick: handleOpenDeactivateContact
                   },
                   {
                     key: "close-chat",
-                    label: "Cerrar chat",
+                    label: t("closeChat"),
                     onClick: handleOpenCloseChat
                   }
                 ]}
@@ -160,18 +164,18 @@ export default function ChatDetails({
             </div>
             <Accordion type="single" collapsible defaultValue="info-cliente">
               <AccordionItem value="info-cliente" className="border-[#DDDDDD]">
-                <AccordionTrigger>Información del cliente</AccordionTrigger>
+                <AccordionTrigger>{t("clientInfo")}</AccordionTrigger>
                 <AccordionContent>
                   <div className="grid grid-cols-[auto_auto] gap-2 text-sm">
-                    <div className="text-muted-foreground">Nombre</div>
+                    <div className="text-muted-foreground">{tCommon("fields.name")}</div>
                     <Link
-                      href={`/clientes/detail/${clientDetails?.client.uuid}/project/${projectId}/dashboard`}
+                      href={`/clients/detail/${clientDetails?.client.uuid}/project/${projectId}/dashboard`}
                       target="_blank"
                       className="font-medium underline"
                     >
                       <div className="font-medium">{clientDetails?.client.business_name}</div>
                     </Link>
-                    <div className="text-muted-foreground">NIT</div>
+                    <div className="text-muted-foreground">{tCommon("fields.taxId")}</div>
                     <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
                       <span className="truncate">{clientDetails?.client.nit}</span>
                       {clientDetails?.client.nit ? (
@@ -179,25 +183,25 @@ export default function ChatDetails({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 shrink-0 text-muted-foreground"
-                          aria-label="Copiar NIT"
+                          aria-label={t("copyTaxId")}
                           onClick={async () => {
                             try {
                               await navigator.clipboard.writeText(clientDetails.client.nit!);
                               toast({
-                                title: "NIT copiado",
+                                title: t("taxIdCopied"),
                                 description: clientDetails.client.nit!
                               });
                             } catch {
-                              toast({ title: "No se pudo copiar", variant: "destructive" });
+                              toast({ title: t("copyFailed"), variant: "destructive" });
                             }
                           }}
                         >
                           <Copy className="h-4 w-4" />
-                          <span className="sr-only">Copiar NIT</span>
+                          <span className="sr-only">{t("copyTaxId")}</span>
                         </Button>
                       ) : null}
                     </div>
-                    <div className="text-muted-foreground">Teléfono</div>
+                    <div className="text-muted-foreground">{tCommon("fields.phone")}</div>
                     <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
                       <span className="truncate">{conversation.phoneNumber}</span>
                       {conversation.phoneNumber ? (
@@ -205,27 +209,27 @@ export default function ChatDetails({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 shrink-0 text-muted-foreground"
-                          aria-label="Copiar teléfono"
+                          aria-label={t("copyPhone")}
                           onClick={async () => {
                             try {
                               await navigator.clipboard.writeText(conversation.phoneNumber);
                               toast({
-                                title: "Teléfono copiado",
+                                title: t("phoneCopied"),
                                 description: conversation.phoneNumber
                               });
                             } catch {
-                              toast({ title: "No se pudo copiar", variant: "destructive" });
+                              toast({ title: t("copyFailed"), variant: "destructive" });
                             }
                           }}
                         >
                           <Copy className="h-4 w-4" />
-                          <span className="sr-only">Copiar teléfono</span>
+                          <span className="sr-only">{t("copyPhone")}</span>
                         </Button>
                       ) : null}
                     </div>
                     {shiptoCodes.length > 0 ? (
                       <>
-                        <div className="text-muted-foreground">Código(s)</div>
+                        <div className="text-muted-foreground">{t("codes")}</div>
                         <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
                           <span className="truncate">
                             {shiptoCodes[0]}
@@ -235,32 +239,32 @@ export default function ChatDetails({
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 shrink-0 text-muted-foreground"
-                            aria-label="Copiar código"
+                            aria-label={t("copyCode")}
                             onClick={async () => {
                               try {
                                 await navigator.clipboard.writeText(shiptoCodes[0]);
                                 toast({
-                                  title: "Código copiado",
+                                  title: t("codeCopied"),
                                   description: shiptoCodes[0]
                                 });
                               } catch {
-                                toast({ title: "No se pudo copiar", variant: "destructive" });
+                                toast({ title: t("copyFailed"), variant: "destructive" });
                               }
                             }}
                           >
                             <Copy className="h-4 w-4" />
-                            <span className="sr-only">Copiar código</span>
+                            <span className="sr-only">{t("copyCode")}</span>
                           </Button>
                         </div>
                       </>
                     ) : null}
-                    <div className="text-muted-foreground">Ejecutivo</div>
+                    <div className="text-muted-foreground">{t("collector")}</div>
                     <div className="font-medium">
                       {clientDetails?.client.related_user?.user_name}
                     </div>
-                    <div className="text-muted-foreground">Canal</div>
+                    <div className="text-muted-foreground">{t("channel")}</div>
                     <div className="font-medium">{clientDetails?.client.channel?.join(", ")}</div>
-                    <div className="text-muted-foreground">Correo</div>
+                    <div className="text-muted-foreground">{tCommon("fields.email")}</div>
                     <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
                       <span className="truncate">{clientDetails?.client.email}</span>
                       {clientDetails?.client.email ? (
@@ -268,25 +272,25 @@ export default function ChatDetails({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 shrink-0 text-muted-foreground"
-                          aria-label="Copiar correo"
+                          aria-label={t("copyEmail")}
                           onClick={async () => {
                             try {
                               await navigator.clipboard.writeText(clientDetails.client.email);
                               toast({
-                                title: "Correo copiado",
+                                title: t("emailCopied"),
                                 description: clientDetails.client.email
                               });
                             } catch {
-                              toast({ title: "No se pudo copiar", variant: "destructive" });
+                              toast({ title: t("copyFailed"), variant: "destructive" });
                             }
                           }}
                         >
                           <Copy className="h-4 w-4" />
-                          <span className="sr-only">Copiar correo</span>
+                          <span className="sr-only">{t("copyEmail")}</span>
                         </Button>
                       ) : null}
                     </div>
-                    <div className="text-muted-foreground">Segmento</div>
+                    <div className="text-muted-foreground">{t("segment")}</div>
                     <div className="font-medium">{clientDetails?.client.segment}</div>
                   </div>
                 </AccordionContent>
@@ -295,22 +299,22 @@ export default function ChatDetails({
 
             <Accordion type="single" collapsible defaultValue="deuda" className="mt-4">
               <AccordionItem value="deuda" className="border-[#DDDDDD]">
-                <AccordionTrigger>Resumen de cartera</AccordionTrigger>
+                <AccordionTrigger>{t("receivablesSummary")}</AccordionTrigger>
                 <AccordionContent>
                   <div className="grid grid-cols-[auto_auto] gap-2 text-sm">
-                    <div className="text-muted-foreground">Cartera total</div>
+                    <div className="text-muted-foreground">{t("totalReceivables")}</div>
                     <p className="font-medium text-right">
                       {formatMoney(clientDetails?.portfolio.total_portfolio || 0)}
                     </p>
-                    <div className="text-muted-foreground">Cartera vencida</div>
+                    <div className="text-muted-foreground">{t("pastDue")}</div>
                     <p className="font-medium text-right">
                       {formatMoney(clientDetails?.portfolio.past_due_amount || 0)}
                     </p>
-                    <div className="text-muted-foreground">Pagos no aplicados</div>
+                    <div className="text-muted-foreground">{t("unappliedPayments")}</div>
                     <p className="font-medium text-right">
                       {formatMoney(clientDetails?.portfolio.unapplied_payments || 0)}
                     </p>
-                    <div className="text-muted-foreground">Último pago</div>
+                    <div className="text-muted-foreground">{t("lastPayment")}</div>
                     <p className="font-medium text-right">
                       {clientDetails?.portfolio.last_payment_date
                         ? dayjs(clientDetails.portfolio.last_payment_date).format("DD/MM/YY")
@@ -341,8 +345,8 @@ export default function ChatDetails({
           isOpen={isModalOpen.selected === 2}
           onClose={() => handleCloseModals()}
           onOk={handleDeactivateContact}
-          title="¿Está seguro de inactivar este contacto?"
-          okText="Inactivar"
+          title={t("deactivateConfirm")}
+          okText={t("deactivate")}
           okLoading={isActionLoading}
         />
 
@@ -352,7 +356,7 @@ export default function ChatDetails({
           clientId={clientDetails?.client.uuid || ""}
           initialValues={{
             contactId: clientDetails?.client.contact_id ?? undefined,
-            managementTypeId: 4, // Gestión de cierre de chat
+            managementTypeId: 4 // Gestión de cierre de chat
           }}
           lockSelects
           extraFields={{
@@ -391,9 +395,9 @@ export default function ChatDetails({
               destinationNumber: [templateTarget.destinationNumber]
             });
             setTemplateTarget(null);
-            toast({ title: "Plantilla enviada exitosamente" });
+            toast({ title: tShared("templateSent") });
           } catch {
-            toast({ title: "Error al enviar la plantilla", variant: "destructive" });
+            toast({ title: tShared("templateSendError"), variant: "destructive" });
           } finally {
             setTemplateLoading(false);
           }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Upload, Button, Typography, Flex, message } from "antd";
+import { useTranslations } from "use-intl";
 import { FileArrowDown, Plus, Trash } from "phosphor-react";
 import { FileArrowUp, Files } from "@phosphor-icons/react";
 
@@ -31,6 +32,8 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
   mutate,
   mutateSupplierInfo
 }) => {
+  const t = useTranslations("suppliers.drawer");
+  const tCommon = useTranslations("common");
   const [docToDelete, setDocToDelete] = useState<{
     openConfirmation: boolean;
     id: number;
@@ -39,11 +42,11 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
   const handleUpload = async (file: File) => {
     try {
       await uploadDocument(subjectId, documentId, file);
-      message.success("Documento subido exitosamente");
+      message.success(t("uploadSuccess"));
       mutate();
       mutateSupplierInfo();
     } catch (error) {
-      message.error("Error al subir el documento");
+      message.error(t("uploadError"));
       console.error("Error uploading document:", error);
     }
     return false;
@@ -65,7 +68,7 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
     }));
     try {
       await deleteDocument(subjectId, documentId, docToDelete?.id || 0);
-      message.success("Documento eliminado exitosamente");
+      message.success(t("deleteSuccess"));
       mutate();
       mutateSupplierInfo();
       setDocToDelete({
@@ -74,7 +77,7 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
         loadingRemove: false
       });
     } catch (error) {
-      message.error("Error al eliminar el documento");
+      message.error(t("deleteError"));
       console.error("Error deleting document:", error);
     }
   };
@@ -89,7 +92,7 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
   return (
     <>
       <ColumnText
-        title="Documento"
+        title={t("document")}
         icon={<Files size={16} color="#7B7B7B" />}
         content={
           <Flex vertical style={{ width: "100%", alignItems: "flex-end" }} gap={12}>
@@ -120,6 +123,7 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
                       type="text"
                       icon={<Trash size={16} />}
                       onClick={() => handleDeleteIcon(doc.id)}
+                      aria-label={t("deleteDocument")}
                       style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
                     />
                   </Flex>
@@ -145,10 +149,8 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
                   >
                     <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
                       <FileArrowUp size={16} />
-                      <p style={{ fontSize: 16, fontWeight: 400 }}>Seleccionar archivo</p>
-                      <p style={{ fontSize: 13, fontWeight: 300 }}>
-                        PDF, Word, PNG. (Tamaño max 30MB)
-                      </p>
+                      <p style={{ fontSize: 16, fontWeight: 400 }}>{t("selectFile")}</p>
+                      <p style={{ fontSize: 13, fontWeight: 300 }}>{t("fileHint")}</p>
                     </Flex>
                   </Flex>
                 </Upload>
@@ -164,14 +166,14 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
                 icon={<Plus size={16} />}
                 style={{ padding: 0, justifyContent: "flex-end" }}
               >
-                Agregar documento
+                {t("addDocument")}
               </Button>
             </Upload>
             {templateUrl && (
               <Link href={templateUrl} target="_blank" style={{ textDecoration: "underline" }}>
                 <Flex align="center" gap={4}>
                   <FileArrowDown size={16} color="#1890FF" />
-                  Descargar plantilla
+                  {t("downloadTemplate")}
                 </Flex>
               </Link>
             )}
@@ -188,8 +190,8 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
           });
         }}
         onOk={handleDelete}
-        title="¿Está seguro de eliminar el documento?"
-        okText="Eliminar"
+        title={t("confirmDelete")}
+        okText={tCommon("actions.delete")}
         okLoading={docToDelete?.loadingRemove || false}
       />
     </>

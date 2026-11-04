@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { useTicketsView } from "../../stores/tickets-view-store";
 import ProfitLoader from "@/components/ui/profit-loader";
 import ProcessBar from "../../components/process-bar/process-bar";
@@ -17,15 +19,14 @@ import { useTaskViewPersistence } from "../../hooks/useTaskViewPersistence";
  * "Filtrar" y el buscador van en el encabezado del layout.
  */
 export default function TasksView() {
+  const t = useTranslations("tickets");
   const { config, error } = useTaskConfig();
   const ready = useTaskViewPersistence(config);
   const layout = useTicketsView((s) => s.view.layout);
 
   if (error) {
     return (
-      <p className="p-9 text-center text-sm text-cp-magenta">
-        {error.message || "No se pudo cargar la configuración de tareas."}
-      </p>
+      <p className="p-9 text-center text-sm text-cp-magenta">{error.message || t("configError")}</p>
     );
   }
   if (!config || !ready) return <ProfitLoader size="small" />;

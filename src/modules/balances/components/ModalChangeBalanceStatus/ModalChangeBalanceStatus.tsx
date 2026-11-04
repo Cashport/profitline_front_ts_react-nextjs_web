@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Radio } from "antd";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { changeBalancesStatus } from "@/services/balances/balances";
 import { useMessageApi } from "@/context/MessageContext";
@@ -15,11 +16,12 @@ interface Props {
   onSuccess: () => void;
 }
 
+/** `label` es la clave en `balances.changeStatus.options`. */
 const BALANCE_STATUS_OPTIONS = [
-  { id: 5, code: "rejected", label: "Novedad" },
-  { id: 2, code: "pending_nc", label: "NC Aprobada - Pendiente creación" },
-  { id: 10, code: "nc_created", label: "NC Creada - Pendiente cruce" }
-];
+  { id: 5, code: "rejected", label: "novelty" },
+  { id: 2, code: "pending_nc", label: "pendingCreditMemo" },
+  { id: 10, code: "nc_created", label: "creditMemoCreated" }
+] as const;
 
 export const ModalChangeBalanceStatus: React.FC<Props> = ({
   isOpen,
@@ -27,6 +29,8 @@ export const ModalChangeBalanceStatus: React.FC<Props> = ({
   balanceIds,
   onSuccess
 }) => {
+  const t = useTranslations("balances.changeStatus");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
 
   const [selectedStatusId, setSelectedStatusId] = useState<number | undefined>();
@@ -43,12 +47,12 @@ export const ModalChangeBalanceStatus: React.FC<Props> = ({
     setLoading(true);
     try {
       await changeBalancesStatus(balanceIds, selectedStatusId);
-      showMessage("success", "El estado de los saldos se actualizó correctamente.");
+      showMessage("success", t("success"));
       onSuccess();
       onClose();
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Ha ocurrido un error al cambiar el estado.";
+        error instanceof Error ? error.message : tCommon("feedback.genericError");
       showMessage("error", errorMessage);
     }
     setLoading(false);
@@ -58,10 +62,10 @@ export const ModalChangeBalanceStatus: React.FC<Props> = ({
     <Modal className={styles.wrapper} width="50%" open={isOpen} footer={null} closable={false}>
       <Button onClick={onClose} className={styles.content__header}>
         <CaretLeft size="1.25rem" />
-        <span>Cambio de estado</span>
+        <span>{t("title")}</span>
       </Button>
       <div className={styles.content}>
-        <p className={styles.content__description}>Selecciona el nuevo estado del saldo</p>
+        <p className={styles.content__description}>{t("description")}</p>
 
         <div className={styles.content__status}>
           <Radio.Group
@@ -70,7 +74,7 @@ export const ModalChangeBalanceStatus: React.FC<Props> = ({
           >
             {BALANCE_STATUS_OPTIONS.map((status) => (
               <Radio className={styles.content__status__item} value={status.id} key={status.id}>
-                {status.label}
+                {t(`options.${status.label}`)}
               </Radio>
             ))}
           </Radio.Group>
@@ -79,7 +83,7 @@ export const ModalChangeBalanceStatus: React.FC<Props> = ({
         <FooterButtons
           handleOk={handleConfirm}
           onClose={onClose}
-          titleConfirm="Cambiar de estado"
+          titleConfirm={t("confirm")}
           isConfirmDisabled={!selectedStatusId}
           isConfirmLoading={loading}
         />

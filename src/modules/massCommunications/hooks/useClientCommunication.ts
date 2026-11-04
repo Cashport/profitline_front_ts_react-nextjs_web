@@ -1,6 +1,7 @@
 import useSWR from "swr";
 
 import instance from "@/utils/api/api";
+import { getTranslator } from "@/i18n/translator";
 import type { GenericResponse } from "@/types/global/IGlobal";
 import type { IGetPreviewClients } from "@/types/communications/ICommunications";
 
@@ -20,7 +21,7 @@ const fetcher40s = (url: string) =>
     })
     .catch((error) => {
       if (error.code === "ECONNABORTED") {
-        throw new Error("La solicitud ha sido cancelada debido a un timeout");
+        throw new Error(getTranslator("common")("feedback.timeoutError"));
       }
       if (error.response?.data) throw new Error(error.response.data.message);
       if (error?.message) throw new Error(error.message);

@@ -1,6 +1,7 @@
 "use client";
 import { Tag, Typography } from "antd";
 import { PaperclipIcon } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -24,6 +25,7 @@ export default function EmailTemplateCard({
   isSelected,
   onSelect
 }: EmailTemplateCardProps) {
+  const t = useTranslations("massCommunications.message");
   return (
     <button
       type="button"
@@ -44,13 +46,13 @@ export default function EmailTemplateCard({
             isSelected ? "!bg-[#CBE71E] !text-black !border-[#CBE71E]" : "!text-[#a5a5a5]"
           }`}
         >
-          {isSelected ? "Seleccionado" : "Template"}
+          {isSelected ? t("selected") : t("templateTag")}
         </Tag>
       </div>
 
       <Text type="secondary" className="text-[13px] block mb-2.5">
         <Text strong className="text-[13px]">
-          Asunto:{" "}
+          {t("subjectLabel")}{" "}
         </Text>
         {template.subject}
       </Text>

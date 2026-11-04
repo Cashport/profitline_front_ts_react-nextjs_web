@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import type { IReport } from "@/types/reports/IReports";
@@ -35,12 +36,13 @@ export default function ReportDetailHeader({
   onPrev,
   onNext
 }: ReportDetailHeaderProps) {
+  const t = useTranslations("reports.detail");
   const hasPrev = !!position && position.index > 0;
   const hasNext = !!position && position.index < position.total - 1;
 
   return (
     <Header
-      title={report?.name ?? "Informe"}
+      title={report?.name ?? t("fallbackTitle")}
       back="/reports"
       titleNode={
         report ? undefined : (
@@ -51,7 +53,7 @@ export default function ReportDetailHeader({
         report && (
           <span className="flex items-center gap-3">
             <span className="font-semibold text-foreground">{report.report_type_name}</span>
-            <span>Publicado {fmtReportDate(report.created_at)}</span>
+            <span>{t("publishedOn", { date: fmtReportDate(report.created_at) })}</span>
           </span>
         )
       }
@@ -59,8 +61,8 @@ export default function ReportDetailHeader({
         <>
           <button
             type="button"
-            title="Informe anterior"
-            aria-label="Informe anterior"
+            title={t("previous")}
+            aria-label={t("previous")}
             disabled={!hasPrev}
             onClick={onPrev}
             className={NAV_BUTTON_CLASS}
@@ -69,8 +71,8 @@ export default function ReportDetailHeader({
           </button>
           <button
             type="button"
-            title="Informe siguiente"
-            aria-label="Informe siguiente"
+            title={t("next")}
+            aria-label={t("next")}
             disabled={!hasNext}
             onClick={onNext}
             className={NAV_BUTTON_CLASS}
@@ -79,7 +81,7 @@ export default function ReportDetailHeader({
           </button>
           {position && (
             <span className="mr-1.5 whitespace-nowrap text-[13px] text-muted-foreground">
-              {position.index + 1} de {position.total}
+              {t("position", { index: position.index + 1, total: position.total })}
             </span>
           )}
         </>

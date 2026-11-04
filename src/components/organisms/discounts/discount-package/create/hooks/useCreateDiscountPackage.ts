@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppStore } from "@/lib/store/store";
 import { useRouter } from "next/navigation";
 import { message } from "antd";
+import { useTranslations } from "use-intl";
 import { DiscountPackageSchema, generalResolver } from "../resolvers/generaResolver";
 import useSWR from "swr";
 import { ApiError, fetcher } from "@/utils/api/api";
@@ -23,6 +24,9 @@ export interface DiscountListData {
 }
 export default function useCreateDiscountPackage({ params }: Props) {
   const discountPackageId = !!Number(params?.id) ? Number(params?.id) : undefined;
+  const t = useTranslations("discounts.form");
+  const tValidation = useTranslations("discounts.validation");
+  const validationSchema = useMemo(() => generalResolver(tValidation), [tValidation]);
   const [messageApi, contextHolder] = message.useMessage();
   const { ID: projectId } = useAppStore((project) => project.selectedProject);
 
@@ -70,7 +74,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
   };
 
   const form = useForm({
-    resolver: yupResolver(generalResolver),
+    resolver: yupResolver(validationSchema),
     defaultValues: discountPackageId ? fetchDiscountPackage : defaultDiscount,
     disabled: statusForm === "review"
   });
@@ -176,8 +180,8 @@ export default function useCreateDiscountPackage({ params }: Props) {
     setLoading(true);
     try {
       const res = await createDiscountPackage({ ...e, project_id: projectId });
-      messageApi.success("Descuento creado exitosamente");
-      router.push(`${basePath}/paquete/${res.id}`);
+      messageApi.success(t("createSuccess"));
+      router.push(`${basePath}/package/${res.id}`);
     } catch (e: any) {
       if (e instanceof ApiError) {
         messageApi.error(e.message);

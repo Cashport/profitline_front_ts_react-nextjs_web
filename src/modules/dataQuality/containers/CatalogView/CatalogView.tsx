@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useSearchParams } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
@@ -9,6 +10,7 @@ import { CatalogPacksTable } from "../../components/CatalogPacksTable";
 import { PointsOfSaleTable } from "../../components/PointsOfSaleTable";
 
 export default function CatalogView() {
+  const t = useTranslations("dataQuality.catalogView");
   const { clientId } = useParams<{ clientId: string }>();
   const searchParams = useSearchParams();
   const clientName = searchParams.get("clientName");
@@ -23,17 +25,17 @@ export default function CatalogView() {
           tabs={[
             {
               key: "materiales",
-              label: "Materiales",
+              label: t("materials"),
               children: <CatalogsTable />
             },
             {
               key: "packs",
-              label: "Packs",
+              label: t("packs"),
               children: <CatalogPacksTable />
             },
             {
               key: "puntos-de-venta",
-              label: "Puntos de venta",
+              label: t("pointsOfSale"),
               children: <PointsOfSaleTable />
             }
           ]}

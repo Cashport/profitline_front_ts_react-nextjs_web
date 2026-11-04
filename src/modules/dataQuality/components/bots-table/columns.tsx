@@ -1,6 +1,7 @@
 "use client";
 
 import { TableProps } from "antd";
+import { useTranslations } from "use-intl";
 import { Eye, Loader2, Play } from "lucide-react";
 
 import { Badge } from "@/modules/chat/ui/badge";
@@ -10,13 +11,13 @@ import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
 import { cn, formatLocalDateTimeParts } from "@/utils/utils";
 
 import {
-  BOT_FREQUENCY_LABELS,
   BOT_MUTED_TEXT_COLOR,
   BOT_STATUS_META,
   DARK_TOOLTIP_ARROW,
   DARK_TOOLTIP_CONTENT,
   getWorstBotStatus
 } from "../../constants";
+import { useBotLabels } from "../../hooks/useBotLabels";
 import { IBotClientGroupRow } from "../../types/automations";
 import { BotStatusBadge } from "./bot-status-badge";
 
@@ -46,6 +47,7 @@ interface RunErrorProps {
 // En la celda va el mensaje legible, o el error crudo si no llegó.
 // El error técnico completo se despliega al pasar el mouse.
 function RunError({ error, readableError, category }: RunErrorProps) {
+  const t = useTranslations("dataQuality.bots");
   const summary = readableError || error;
   if (!summary) return null;
 
@@ -64,7 +66,7 @@ function RunError({ error, readableError, category }: RunErrorProps) {
         arrowClassName={DARK_TOOLTIP_ARROW}
       >
         <p className="text-[13px] font-semibold opacity-70">
-          Detalle del error{category ? ` - ${category}` : ""}
+          {category ? t("errorDetailWithCategory", { category }) : t("errorDetail")}
         </p>
         <p className="overflow-y-auto whitespace-pre-wrap break-words text-[13px]">{error}</p>
       </TooltipContent>
@@ -75,16 +77,28 @@ function RunError({ error, readableError, category }: RunErrorProps) {
 // "Con fallas" a secas si TODOS los bots del cliente fallaron (incluido el caso de
 // un único bot); "N con fallas" solo cuando el grupo está mezclado (algunos ok,
 // otros no), para no perder la señal de cuántos realmente fallaron.
-function getGroupStatusLabel(bots: IBotStatusItem[]): { label: string; color: string } {
+type BotsT = ReturnType<typeof useTranslations<"dataQuality.bots">>;
+type BotLabels = ReturnType<typeof useBotLabels>;
+
+function getGroupStatusLabel(
+  bots: IBotStatusItem[],
+  t: BotsT,
+  botLabels: BotLabels
+): { label: string; color: string } {
   const failedCount = bots.filter((bot) => bot.estado === "FALLIDO").length;
   if (failedCount > 0 && failedCount < bots.length) {
-    return { label: `${failedCount} con fallas`, color: BOT_STATUS_META.FALLIDO.color };
+    return {
+      label: t("failedCount", { count: failedCount }),
+      color: BOT_STATUS_META.FALLIDO.color
+    };
   }
   const worst = getWorstBotStatus(bots);
-  return { label: BOT_STATUS_META[worst].label, color: BOT_STATUS_META[worst].color };
+  return { label: botLabels.status(worst), color: BOT_STATUS_META[worst].color };
 }
 
 interface GetGroupColumnsOptions {
+  t: BotsT;
+  botLabels: BotLabels;
   // eslint-disable-next-line no-unused-vars
   onClientClick: (bot: IBotStatusItem) => void;
 }
@@ -92,10 +106,12 @@ interface GetGroupColumnsOptions {
 // Columnas de la fila por cliente (colapsable): compactas, sin País/Tipo de
 // archivo/Acciones -- esos solo tienen sentido por bot individual, no agregados.
 export const getGroupColumns = ({
-  onClientClick
+  onClientClick,
+  t,
+  botLabels
 }: GetGroupColumnsOptions): TableProps<IBotClientGroupRow>["columns"] => [
   {
-    title: "Cliente",
+    title: t("columns.customer"),
     key: "cliente",
     render: (_, record) => (
       <div>
@@ -111,13 +127,13 @@ export const getGroupColumns = ({
           {record.cliente}
         </button>
         <p className="text-[13px]" style={{ color: BOT_MUTED_TEXT_COLOR }}>
-          {record.bots.length} bots
+          {t("botCount", { count: record.bots.length })}
         </p>
       </div>
     )
   },
   {
-    title: "Bots",
+    title: t("columns.bots"),
     key: "bots",
     render: (_, record) => (
       <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -138,10 +154,10 @@ export const getGroupColumns = ({
     )
   },
   {
-    title: "Estado",
+    title: t("columns.status"),
     key: "estado",
     render: (_, record) => {
-      const { label, color } = getGroupStatusLabel(record.bots);
+      const { label, color } = getGroupStatusLabel(record.bots, t, botLabels);
       return (
         <span className="text-sm font-medium" style={{ color }}>
           {label}
@@ -150,21 +166,21 @@ export const getGroupColumns = ({
     }
   },
   {
-    title: "Periodicidad",
+    title: t("columns.frequency"),
     key: "periodicidad",
     render: (_, record) => (
       <span className="text-sm" style={{ color: "#141414" }}>
         {record.periodicidad.length > 0
-          ? record.periodicidad.map((p) => BOT_FREQUENCY_LABELS[p] ?? p).join(", ")
+          ? record.periodicidad.map(botLabels.frequency).join(", ")
           : "—"}
       </span>
     )
   },
   {
-    title: "Próxima ejecución",
+    title: t("columns.nextRun"),
     key: "proxima_ejecucion",
     render: (_, record) => (
-      <RunTimestamp isoDate={record.proxima_ejecucion} emptyLabel="Sin programar" />
+      <RunTimestamp isoDate={record.proxima_ejecucion} emptyLabel={t("notScheduled")} />
     )
   }
 ];
@@ -175,16 +191,20 @@ interface GetBotColumnsOptions {
   onRun: (bot: IBotStatusItem) => void;
   // eslint-disable-next-line no-unused-vars
   onViewHistory: (bot: IBotStatusItem) => void;
+  t: BotsT;
+  botLabels: BotLabels;
 }
 
 // Columnas de cada bot individual dentro del cliente expandido.
 export const getBotColumns = ({
   executingScheduleId,
   onRun,
-  onViewHistory
+  onViewHistory,
+  t,
+  botLabels
 }: GetBotColumnsOptions): TableProps<IBotStatusItem>["columns"] => [
   {
-    title: "Bot",
+    title: t("columns.bot"),
     dataIndex: "tipo_archivo",
     render: (text: string | null, record: IBotStatusItem) => (
       <span className="text-sm font-medium" style={{ color: "#141414" }}>
@@ -193,25 +213,25 @@ export const getBotColumns = ({
     )
   },
   {
-    title: "País",
+    title: t("columns.country"),
     dataIndex: "pais",
     render: (text: string | null) => (
       <Badge variant="outline" className="text-[13px]">
-        {text || "No disponible"}
+        {text || t("notAvailable")}
       </Badge>
     )
   },
   {
-    title: "Estado",
+    title: t("columns.status"),
     dataIndex: "estado",
     render: (estado: IBotStatusItem["estado"]) => <BotStatusBadge status={estado} />
   },
   {
-    title: "Última ejecución",
+    title: t("columns.lastRun"),
     dataIndex: "ultima_ejecucion",
     render: (_, record: IBotStatusItem) => (
       <>
-        <RunTimestamp isoDate={record.ultima_ejecucion} emptyLabel="Sin registro" />
+        <RunTimestamp isoDate={record.ultima_ejecucion} emptyLabel={t("noRecord")} />
         {record.estado === "FALLIDO" && (
           <RunError
             error={record.error}
@@ -223,18 +243,16 @@ export const getBotColumns = ({
     )
   },
   {
-    title: "Periodicidad",
+    title: t("columns.frequency"),
     dataIndex: "periodicidad",
     render: (periodicidad: IBotStatusItem["periodicidad"]) => (
       <span className="text-sm" style={{ color: "#141414" }}>
-        {periodicidad.length > 0
-          ? periodicidad.map((p) => BOT_FREQUENCY_LABELS[p] ?? p).join(", ")
-          : "—"}
+        {periodicidad.length > 0 ? periodicidad.map(botLabels.frequency).join(", ") : "—"}
       </span>
     )
   },
   {
-    title: "Acciones",
+    title: t("columns.actions"),
     width: 90,
     render: (_, record: IBotStatusItem) => {
       const isRunning =
@@ -245,7 +263,7 @@ export const getBotColumns = ({
           <Button
             variant="ghost"
             size="sm"
-            title="Ejecutar bot a demanda"
+            title={t("runOnDemand")}
             disabled={isRunning}
             onClick={() => onRun(record)}
             className="transition-colors hover:bg-[#F0FDF4] hover:text-[#16A34A]"
@@ -259,7 +277,7 @@ export const getBotColumns = ({
           <Button
             variant="ghost"
             size="sm"
-            title="Ver detalle e historial de ejecuciones"
+            title={t("viewHistory")}
             onClick={() => onViewHistory(record)}
             className="transition-colors hover:bg-[#e2ecfe] hover:text-[#2143b0]"
           >

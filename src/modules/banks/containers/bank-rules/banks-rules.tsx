@@ -1,5 +1,6 @@
 import { Button, Flex, MenuProps, Spin } from "antd";
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { Bank, CaretLeft } from "phosphor-react";
 
 import { useBankRules } from "@/hooks/useBankRules";
@@ -23,6 +24,8 @@ interface PropsBanksRules {
 }
 
 export const BanksRules = ({ onClickBack }: PropsBanksRules) => {
+  const t = useTranslations("banks.rules");
+  const tCommon = useTranslations("common");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showBankRuleModal, setShowBankRuleModal] = useState({
@@ -57,11 +60,11 @@ export const BanksRules = ({ onClickBack }: PropsBanksRules) => {
     setIsDeleting(true);
     try {
       await deleteManyBankRules(selectedRowKeys);
-      showMessage("success", `${selectedRowKeys.length} regla(s) eliminada(s) exitosamente`);
+      showMessage("success", t("deleteSuccess", { count: selectedRowKeys.length }));
       setSelectedRowKeys([]);
       mutate();
     } catch (error) {
-      showMessage("error", "Error al eliminar las reglas");
+      showMessage("error", t("deleteError"));
     } finally {
       setIsDeleting(false);
     }
@@ -84,7 +87,7 @@ export const BanksRules = ({ onClickBack }: PropsBanksRules) => {
           loading={isDeleting}
           disabled={selectedRowKeys.length === 0}
         >
-          Eliminar
+          {tCommon("actions.delete")}
         </Button>
       )
     }
@@ -100,19 +103,22 @@ export const BanksRules = ({ onClickBack }: PropsBanksRules) => {
           onClick={onClickBack}
           icon={<CaretLeft size={"1.45rem"} />}
         >
-          Reglas de bancos
+          {t("title")}
         </Button>
 
         {/* PrincipalButton ocupa el 100% del alto: el wrapper lo limita a --control-h */}
         <div className={styles.ctaWrapper}>
           <PrincipalButton onClick={handleCreateNewRule} customStyles={{ fontSize: 14 }}>
-            Crear nueva regla <Bank size={18} />
+            {t("createRule")} <Bank size={18} />
           </PrincipalButton>
         </div>
       </Flex>
 
       <div className={styles.tableHeaderButtons}>
-        <UiSearchInput placeholder="Buscar" onChange={(e) => handleSearch(e.target.value)} />
+        <UiSearchInput
+          placeholder={tCommon("placeholders.search")}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
         <FilterDiscounts />
         <DotsDropdown
           items={items}

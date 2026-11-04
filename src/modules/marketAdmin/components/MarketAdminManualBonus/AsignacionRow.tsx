@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { AsignacionManual } from "@/types/marketAdmin/IMarketAdmin";
 import { ESTADO_CONFIG } from "./estadoConfig";
 
@@ -15,6 +16,9 @@ export default function AsignacionRow({
   onAprobar: () => void;
   onRechazar: () => void;
 }) {
+  const t = useTranslations("marketAdmin.manualBonus");
+  const tShared = useTranslations("marketAdmin.shared");
+  const tCommon = useTranslations("common.actions");
   const cfg = ESTADO_CONFIG[asignacion.estado];
 
   return (
@@ -25,7 +29,9 @@ export default function AsignacionRow({
         <p className="text-sm font-medium text-[#141414] truncate" title={asignacion.clienteNombre}>
           {asignacion.clienteNombre}
         </p>
-        <p className="text-[13px] text-[#999999]">NIT: {asignacion.clienteNit}</p>
+        <p className="text-[13px] text-[#999999]">
+          {tShared("taxIdValue", { taxId: asignacion.clienteNit })}
+        </p>
       </div>
       <p
         className="text-sm text-[#141414] truncate pr-2"
@@ -43,7 +49,7 @@ export default function AsignacionRow({
       </p>
       <div className="flex justify-center">
         <span className={`px-2 py-1 text-[13px] font-semibold rounded-lg ${cfg.className}`}>
-          {cfg.label}
+          {t(`status.${cfg.labelKey}`)}
         </span>
       </div>
       <div className="flex items-center justify-end gap-1.5">
@@ -53,13 +59,13 @@ export default function AsignacionRow({
               onClick={onAprobar}
               className="flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
             >
-              <Check size={11} /> Aprobar
+              <Check size={11} /> {tCommon("approve")}
             </button>
             <button
               onClick={onRechazar}
               className="flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
             >
-              <X size={11} /> Rechazar
+              <X size={11} /> {tCommon("reject")}
             </button>
           </>
         ) : (

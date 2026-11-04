@@ -1,6 +1,7 @@
 "use client";
 
 import { Upload } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
@@ -30,9 +31,10 @@ export default function ReportsHeader({
   onSearchChange,
   onPublish
 }: ReportsHeaderProps) {
+  const t = useTranslations("reports.header");
   return (
     <Header
-      title="Informes"
+      title={t("title")}
       actionsExtra={
         <>
           <button
@@ -41,10 +43,14 @@ export default function ReportsHeader({
             className="flex h-[var(--control-h)] shrink-0 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Upload className="h-4 w-4" />
-            Publicar informe
+            {t("publish")}
           </button>
           <ReportsFilterModal inHeader value={filters} onChange={onFiltersChange} types={types} />
-          <HeaderSearch value={search} onChange={onSearchChange} placeholder="Buscar informe" />
+          <HeaderSearch
+            value={search}
+            onChange={onSearchChange}
+            placeholder={t("searchPlaceholder")}
+          />
         </>
       }
     />

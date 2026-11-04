@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { cn } from "@/utils/utils";
 import type { ITaskConfig, ITaskFieldConfig, ITicket } from "@/types/tickets/ITickets";
@@ -16,6 +18,7 @@ interface TaskHeaderRowProps {
 
 /** Encabezado sticky (bajo el header de la página); clic en una columna ordenable cambia el orden. */
 export function TaskHeaderRow({ columns, grid, sortBy, sortDir, onSort }: TaskHeaderRowProps) {
+  const t = useTranslations("tickets");
   return (
     <div
       className="sticky top-[var(--header-h)] z-10 grid h-[var(--table-head-h)] items-center gap-3 rounded-t-[var(--card-radius)] border-b border-cp-line bg-cp-surface px-4 text-[13.5px] font-semibold text-cp-ink"
@@ -35,7 +38,7 @@ export function TaskHeaderRow({ columns, grid, sortBy, sortDir, onSort }: TaskHe
           <button
             key={c.key}
             type="button"
-            title={`Ordenar por ${c.label.toLowerCase()}`}
+            title={t("sortBy", { field: c.label.toLowerCase() })}
             onClick={() => onSort(c)}
             className={cn(
               "flex min-w-0 cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-left font-semibold text-cp-ink",

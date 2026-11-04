@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Modal } from "antd";
+import { useTranslations } from "use-intl";
 
 import { IIqviaAuxUploadResult } from "@/types/dataQuality/IDataQuality";
 
@@ -15,12 +16,14 @@ export const IqviaUploadResultModal: React.FC<IqviaUploadResultModalProps> = ({
   result,
   onClose
 }) => {
+  const t = useTranslations("dataQuality.iqviaResult");
+  const tCommon = useTranslations("common");
   return (
     <Modal
       open={result !== null}
       onCancel={onClose}
       title={title}
-      footer={<Button onClick={onClose}>Cerrar</Button>}
+      footer={<Button onClick={onClose}>{tCommon("actions.close")}</Button>}
       width={760}
       centered
     >
@@ -28,34 +31,38 @@ export const IqviaUploadResultModal: React.FC<IqviaUploadResultModalProps> = ({
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-2 text-sm">
             <span>
-              Filas leídas: <b>{result.total_filas}</b>
+              {t("rowsRead")} <b>{result.total_filas}</b>
             </span>
             <span>
-              Insertados: <b>{result.insertados}</b>
+              {t("inserted")} <b>{result.insertados}</b>
             </span>
             <span>
-              Actualizados: <b>{result.actualizados}</b>
+              {t("updated")} <b>{result.actualizados}</b>
             </span>
             <span>
-              Sin cambios: <b>{result.sin_cambios}</b>
+              {t("unchanged")} <b>{result.sin_cambios}</b>
             </span>
             <span className={result.errores.length ? "text-red-600" : ""}>
-              Errores: <b>{result.errores.length}</b>
+              {t("errors")} <b>{result.errores.length}</b>
             </span>
           </div>
 
           {result.errores.length > 0 ? (
             <div>
-              <p className="mb-2 text-sm font-semibold text-red-600">Errores por fila</p>
+              <p className="mb-2 text-sm font-semibold text-red-600">{t("errorsByRow")}</p>
               <div className="max-h-64 overflow-auto rounded border border-gray-200">
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-cp-line bg-cp-surface">
-                      <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Fila</th>
+                      <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+                        {t("row")}
+                      </th>
                       <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
                         Cod_Iqvia
                       </th>
-                      <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">Motivo</th>
+                      <th className="px-3 py-3 text-[13.5px] font-semibold text-cp-ink">
+                        {t("reason")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -71,7 +78,7 @@ export const IqviaUploadResultModal: React.FC<IqviaUploadResultModalProps> = ({
               </div>
             </div>
           ) : (
-            <p className="text-sm text-green-700">El archivo se procesó sin errores.</p>
+            <p className="text-sm text-green-700">{t("noErrors")}</p>
           )}
         </div>
       )}

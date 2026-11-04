@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Modal, Checkbox, Spin, message, Flex, Pagination } from "antd";
 import { CaretLeft, CopySimple, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam, formatDate } from "@/utils/utils";
@@ -42,6 +43,8 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
   onAdd,
   isModalAddToTableOpen
 }) => {
+  const t = useTranslations("clients.applyTab");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
@@ -185,7 +188,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       setSearchQuery(pastedIds.join(", "));
     } catch (err) {
       console.error("Error pasting invoices:", err);
-      message.error("Error al pegar facturas. Por favor, inténtelo de nuevo.");
+      message.error(t("addToTablesModal.pasteError"));
     }
   };
 
@@ -225,14 +228,15 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     setLoadingAddToTable(false);
   };
 
-  const addingLabel =
+  const sectionKey =
     isModalAddToTableOpen.adding === "invoices"
-      ? "facturas"
+      ? "invoices"
       : isModalAddToTableOpen.adding === "credit_notes"
-        ? "notas créditos"
+        ? "creditMemos"
         : isModalAddToTableOpen.adding === "balances"
-          ? "saldos"
-          : "pagos";
+          ? "deductions"
+          : "payments";
+  const addingLabel = t(`sections.${sectionKey}.add`);
 
   const isAllChecked =
     paginatedRows.length > 0 &&
@@ -249,20 +253,20 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     >
       <div onClick={onCancel} className="header">
         <CaretLeft size={24} onClick={onCancel} />
-        <h2>{`Agregar ${addingLabel}`}</h2>
+        <h2>{addingLabel}</h2>
       </div>
       {summary.count > 0 && isModalAddToTableOpen.adding === "invoices" && (
         <div className="summary-section">
           <div className="summary-item">
-            <span>Total ({summary.count})</span>
+            <span>{t("addToTablesModal.totalCount", { count: summary.count })}</span>
             <span>${summary.total.toLocaleString()}</span>
           </div>
           <div className="summary-item">
-            <span>Ajustes</span>
+            <span>{t("addToTablesModal.adjustments")}</span>
             <span>${summary.adjustments.toLocaleString()}</span>
           </div>
           <div className="summary-item pending">
-            <span>Pendiente</span>
+            <span>{tCommon("status.pending")}</span>
             <span>${summary.pending.toLocaleString()}</span>
           </div>
         </div>
@@ -272,31 +276,23 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
         <UiSearchInputLong
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Buscar"
+          placeholder={tCommon("placeholders.search")}
           className={"custom-input"}
         />
       </div>
       {notFoundSearch.length > 0 && (
         <div className="not-found-invoices">
           <Flex justify="space-between">
-            <div>
-              {isModalAddToTableOpen.adding === "invoices"
-                ? "Facturas no encontradas"
-                : isModalAddToTableOpen.adding === "credit_notes"
-                  ? "Notas crédito no encontradas"
-                  : isModalAddToTableOpen.adding === "balances"
-                    ? "Saldos no encontrados"
-                    : "Pagos no encontrados"}
-            </div>
+            <div>{t(`sections.${sectionKey}.notFound`)}</div>
             <div
               className="excel-button-container"
               onClick={() => {
                 navigator.clipboard.writeText(notFoundSearch.join(", "));
-                message.success("Valores copiados");
+                message.success(t("addToTablesModal.valuesCopied"));
               }}
             >
               <CopySimple size={18} />
-              Copiar valores
+              {t("addToTablesModal.copyValues")}
             </div>
           </Flex>
 
@@ -309,7 +305,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
         <div className="container-paste-invoice">
           <div className="excel-button-container" onClick={handlePasteInvoices}>
             <CopySimple size={18} />
-            Pegar desde excel
+            {t("addToTablesModal.pasteFromExcel")}
           </div>
         </div>
       )}
@@ -326,7 +322,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
               onChange={(e) => handleSelectAll(e.target.checked)}
               checked={isAllChecked ? true : undefined}
             >
-              Seleccionar todo
+              {tCommon("actions.selectAll")}
             </Checkbox>
           </div>
           <div className="invoices-list">
@@ -343,13 +339,17 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
                   <Flex style={{ width: "100%" }} justify="space-between">
                     <div>
                       <h4 className="invoices-list__title">
-                        {isModalAddToTableOpen.adding === "invoices"
-                          ? `Factura ${(row as IApplicationInvoice).id_erp}`
-                          : isModalAddToTableOpen.adding === "credit_notes"
-                            ? `Nota crédito ${(row as IFinancialDiscount).erp_id}`
-                            : isModalAddToTableOpen.adding === "balances"
-                              ? `Saldo ${(row as IApplicationBalance).id}`
-                              : `Pago ${(row as IClientPayment).id}`}
+                        {t(`sections.${sectionKey}.itemTitle`, {
+                          id: String(
+                            isModalAddToTableOpen.adding === "invoices"
+                              ? (row as IApplicationInvoice).id_erp
+                              : isModalAddToTableOpen.adding === "credit_notes"
+                                ? (row as IFinancialDiscount).erp_id
+                                : isModalAddToTableOpen.adding === "balances"
+                                  ? (row as IApplicationBalance).id
+                                  : (row as IClientPayment).id
+                          )
+                        })}
                       </h4>
                       <p className="invoices-list__date">
                         {isModalAddToTableOpen.adding === "invoices"
@@ -373,7 +373,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
             total={filteredData.length}
             pageSize={ITEMS_PER_PAGE}
             showSizeChanger={false}
-            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
+            showTotal={(total, range) =>
+              tCommon("pagination.range", { from: range[0], to: range[1], total })
+            }
             style={{ textAlign: "right", margin: ".5rem 0" }}
           />
         </>
@@ -381,7 +383,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
 
       <div className="modal-footer">
         <SecondaryButton fullWidth onClick={onCancel}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </SecondaryButton>
 
         <PrincipalButton
@@ -390,7 +392,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
           onClick={handleAddToTable}
           disabled={!selectedRows.length}
         >
-          {`Agregar ${addingLabel}`}
+          {addingLabel}
         </PrincipalButton>
       </div>
     </Modal>

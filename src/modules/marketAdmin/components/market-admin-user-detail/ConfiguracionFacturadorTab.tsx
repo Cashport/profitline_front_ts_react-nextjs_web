@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 import { IMarketAdminFacturador } from "@/types/marketAdmin/IMarketAdmin";
 
 // Valor centinela para representar "Sin Facturador" en el selector.
@@ -22,6 +23,8 @@ export default function ConfiguracionFacturadorTab({
   isSaving,
   onSave
 }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.billerTab");
+  const tCommon = useTranslations("common");
   const [value, setValue] = useState<number>(currentBillerId ?? NO_BILLER);
 
   useEffect(() => {
@@ -30,10 +33,10 @@ export default function ConfiguracionFacturadorTab({
 
   const options = useMemo(
     () => [
-      { value: NO_BILLER, label: "Sin Facturador" },
+      { value: NO_BILLER, label: t("noBiller") },
       ...facturadores.map((facturador) => ({ value: facturador.id, label: facturador.name }))
     ],
-    [facturadores]
+    [facturadores, t]
   );
 
   const isDirty = value !== (currentBillerId ?? NO_BILLER);
@@ -45,16 +48,14 @@ export default function ConfiguracionFacturadorTab({
 
   return (
     <div className="max-w-lg">
-      <p className="text-sm text-[#999999] mb-6">
-        Facturador asignado al vendedor dentro del proyecto actual.
-      </p>
+      <p className="text-sm text-[#999999] mb-6">{t("description")}</p>
 
       <div className="flex flex-col gap-2">
-        <label className="text-[13px] font-bold text-[#141414]">Facturador</label>
+        <label className="text-[13px] font-bold text-[#141414]">{t("biller")}</label>
         <Select
           showSearch
           size="large"
-          placeholder="Sin Facturador"
+          placeholder={t("noBiller")}
           className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
           popupClassName="[&_.ant-select-item]:!text-sm"
           value={value}
@@ -75,7 +76,7 @@ export default function ConfiguracionFacturadorTab({
           disabled={!isDirty || isSaving || isLoading}
           className="text-sm font-semibold bg-[#141414] text-white px-5 py-2.5 rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {isSaving ? "Guardando..." : "Guardar cambios"}
+          {isSaving ? tCommon("status.saving") : tCommon("actions.saveChanges")}
         </button>
       </div>
     </div>

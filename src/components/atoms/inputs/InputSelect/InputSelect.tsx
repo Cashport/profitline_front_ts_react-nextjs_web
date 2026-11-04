@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { Select, Flex, Typography } from "antd";
 import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
 
@@ -49,6 +50,7 @@ export const InputSelect = ({
   showSearch = false,
   filterOption
 }: InputSelectProps) => {
+  const tInputs = useTranslations("components.inputs");
   return (
     <Flex vertical className={`selectContainer ${className}`}>
       {!hiddenTitle && (
@@ -62,12 +64,14 @@ export const InputSelect = ({
         control={control}
         render={({ field }) => {
           if (isError) {
-            return <Typography.Text type="danger">Error al cargar las opciones</Typography.Text>;
+            return <Typography.Text type="danger">{tInputs("loadOptionsError")}</Typography.Text>;
           }
           return (
             <Select
               {...field}
-              placeholder={placeholder || `Select ${titleInput.toLowerCase()}`}
+              placeholder={
+                placeholder || tInputs("selectPlaceholder", { field: titleInput.toLowerCase() })
+              }
               className={error ? "selectInputError" : "selectInput"}
               loading={loading}
               disabled={disabled}

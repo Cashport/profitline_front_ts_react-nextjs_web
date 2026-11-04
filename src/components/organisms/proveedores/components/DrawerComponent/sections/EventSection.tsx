@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CheckCircle, Cloud, Sparkle, XCircle } from "phosphor-react";
 import { Avatar, Steps, Button, Flex } from "antd";
+import { useTranslations } from "use-intl";
 
 import { formatTimeAgo } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
@@ -25,6 +26,8 @@ export const EventSection: React.FC<EventSectionProps> = ({
   incidentId,
   mutateComments
 }) => {
+  const t = useTranslations("suppliers.events");
+  const tCommon = useTranslations("common");
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showMessage } = useMessageApi();
@@ -33,33 +36,26 @@ export const EventSection: React.FC<EventSectionProps> = ({
     return event.is_ia ? (
       <p className="cashportIATextGradient">CashportIA</p>
     ) : (
-      event.username || "Unknown User"
+      event.username || t("unknownUser")
     );
   };
 
   const handleCommentSubmit = async () => {
     if (!comment.trim()) {
-      showMessage("error", "Por favor, ingrese un comentario");
+      showMessage("error", t("commentRequired"));
       return;
     }
 
     setIsSubmitting(true);
 
-    if (!incidentId)
-      return (
-        showMessage(
-          "error",
-          "No se ha podido agregar el comentario, no está asociado a un incidente"
-        ),
-        setIsSubmitting(false)
-      );
+    if (!incidentId) return showMessage("error", t("commentNoIncident")), setIsSubmitting(false);
     try {
       await createDocumentComment(comment, incidentId);
-      showMessage("success", "Comentario agregado exitosamente");
+      showMessage("success", t("commentSuccess"));
       setComment("");
       mutateComments && mutateComments();
     } catch (error) {
-      showMessage("error", "Error al agregar el comentario");
+      showMessage("error", t("commentError"));
       console.error("Error adding comment:", error);
     } finally {
       setIsSubmitting(false);
@@ -69,7 +65,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
   return (
     <div className="event-section-drawerComponent">
       <div className="event-header">
-        <IconLabel icon={<Cloud size={14} />} text={`Eventos`} />
+        <IconLabel icon={<Cloud size={14} />} text={t("title")} />
       </div>
       <Steps direction="vertical" size="small" className="event-steps">
         <Step
@@ -80,7 +76,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
               <input
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Agrega un comentario"
+                placeholder={t("commentPlaceholder")}
                 className="add-comment"
                 type="text"
               />
@@ -90,7 +86,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
                 loading={isSubmitting}
                 disabled={!comment.trim()}
               >
-                Enviar
+                {tCommon("actions.send")}
               </Button>
             </div>
           }
@@ -106,7 +102,9 @@ export const EventSection: React.FC<EventSectionProps> = ({
                   <Flex gap={8} align="center">
                     <h4 className="username">{getEventUser(event)}</h4>
 
-                    <p className="timeAgoText">Hace {formatTimeAgo(event.createdAt)}</p>
+                    <p className="timeAgoText">
+                      {t("timeAgo", { time: formatTimeAgo(event.createdAt) })}
+                    </p>
                   </Flex>
                   <p className="commentText">{event.comment}</p>
                 </div>

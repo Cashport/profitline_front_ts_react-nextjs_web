@@ -2,6 +2,7 @@
 
 import { Button } from "antd";
 import { BarChart3 } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import { cn } from "@/utils/utils";
@@ -10,7 +11,6 @@ import type {
   ICollectionTower,
   ITowerAgreementSegment
 } from "@/types/collectionTower/ICollectionTower";
-import { STATUS_PLURAL } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { useContainerSize } from "../../hooks/use-container-size";
 import { nice } from "../../utils/chart";
@@ -42,6 +42,7 @@ const GUIDE_STEP = 5e8;
  * Las barras salen sin el filtro de segmentos: las no elegidas se atenúan.
  */
 function Chart({ data, width }: { data: ICollectionTower; width: number }) {
+  const tc = useTranslations("collections");
   const { filters, patch } = useTowerFilters();
   const { period, agreementStatuses } = data;
   const sel = filters.segments;
@@ -110,14 +111,20 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
       .map((s) => ({
         key: s.key,
         color: s.color,
-        label: `${STATUS_PLURAL[s.key]} (${day.values[s.key]?.count ?? 0})`,
+        label: tc("agreementsChart.statusCount", {
+          status: tc(`statusPlural.${s.key}`),
+          count: day.values[s.key]?.count ?? 0
+        }),
         value: money(day.values[s.key]?.amount ?? 0)
       }));
-    if (!rows.length) rows.push({ key: "none", label: "Sin compromisos", value: "—" });
+    if (!rows.length)
+      rows.push({ key: "none", label: tc("agreementsChart.noCommitments"), value: "—" });
     return {
       title: diaLabel(day.date),
       rows,
-      total: day.count ? { label: `Total (${day.count})`, value: money(day.total) } : undefined
+      total: day.count
+        ? { label: tc("agreementsChart.totalCount", { count: day.count }), value: money(day.total) }
+        : undefined
     };
   };
 
@@ -127,11 +134,11 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
       height={H}
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Acuerdos de pago por día de compromiso"
+      aria-label={tc("agreementsChart.aria")}
       className="block select-none"
     >
       <text x="4" y="14" className={PANEL_TITLE}>
-        COMPROMETIDO
+        {tc("agreementsChart.axisCommitted")}
       </text>
       {days.map(
         (day, i) =>
@@ -173,7 +180,7 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
             strokeDasharray="2 3"
           />
           <text x={lineX(iToday)} y={M.t - 9} textAnchor="middle" className={TODAY_LABEL}>
-            Hoy {fechaCorta(days[iToday].date)}
+            {tc("agreementsChart.today", { date: fechaCorta(days[iToday].date) })}
           </text>
         </>
       )}
@@ -263,6 +270,7 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
 
 /** "Acuerdos de pago por día": compromisos del mes por estado, con resumen. */
 export default function AgreementsChart({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections");
   const [ref, { width }] = useContainerSize<HTMLDivElement>();
   const { period, agreements, agreementStatuses } = data;
   const month = period.label.split(" ")[0];
@@ -274,7 +282,7 @@ export default function AgreementsChart({ data }: { data: ICollectionTower }) {
     {
       key: "all",
       color: MUTED,
-      label: `Cargados (${agreements.length})`,
+      label: tc("agreementsChart.loaded", { count: agreements.length }),
       value: money(sumBy(agreements, (a) => a.agreed))
     },
     ...agreementStatuses.map((s) => {
@@ -283,7 +291,10 @@ export default function AgreementsChart({ data }: { data: ICollectionTower }) {
       return {
         key: s.key,
         color: s.color,
-        label: `${STATUS_PLURAL[s.key]}${broken ? " · saldo" : ""} (${group.length})`,
+        label: tc(broken ? "agreementsChart.brokenCount" : "agreementsChart.statusCount", {
+          status: tc(`statusPlural.${s.key}`),
+          count: group.length
+        }),
         value: money(sumBy(group, (a) => (broken ? a.balance : a.agreed)))
       };
     })
@@ -291,21 +302,21 @@ export default function AgreementsChart({ data }: { data: ICollectionTower }) {
 
   return (
     <PanelCard
-      title="Acuerdos de pago por día"
+      title={tc("agreementsChart.title")}
       subtitle={period.label}
-      hint="clic para filtrar · Shift + clic para sumar varios"
+      hint={tc("agreementsChart.hint")}
       flush
       actions={
         <TowerPopover
-          title={`Resumen · ${month}`}
+          title={tc("agreementsChart.summaryTitle", { month })}
           rows={summaryRows}
           total={{
-            label: "Pagado de lo vencido",
+            label: tc("agreementsChart.paidOfDue"),
             value: pct(dueAgreed ? sumBy(due, (a) => a.paid) / dueAgreed : NaN, 0)
           }}
         >
           <Button size="small" icon={<BarChart3 className="h-3.5 w-3.5" />}>
-            Resumen
+            {tc("agreementsChart.summary")}
           </Button>
         </TowerPopover>
       }

@@ -1,0 +1,290 @@
+{
+  "boards": {
+    "torre": {
+      "name": "Torre de control de recaudo",
+      "description": "Meta, forecast, acuerdos de pago y PNA del mes"
+    },
+    "tramo": {
+      "name": "Cartera por cliente y tramo",
+      "description": "Saldo por edad de mora y cliente"
+    },
+    "apl": {
+      "name": "Aplicación de pagos",
+      "description": "Pagos aplicados, PNA y tiempos de aplicación"
+    },
+    "nov": {
+      "name": "Novedades",
+      "description": "Novedades abiertas por responsable y antigüedad"
+    }
+  },
+  "boardSelector": {
+    "group": "Tableros de recaudo"
+  },
+  "pendingBoard": {
+    "inDesign": "Este tablero se diseña en una siguiente iteración.",
+    "back": "Volver a la Torre de control"
+  },
+  "groupings": {
+    "client": {
+      "label": "Por cliente",
+      "singular": "Cliente",
+      "title": "Clientes frente a su meta"
+    },
+    "executive": {
+      "label": "Por ejecutivo",
+      "singular": "Ejecutivo",
+      "title": "Ejecutivos frente a su meta"
+    },
+    "channel": {
+      "label": "Por canal",
+      "singular": "Canal",
+      "title": "Canales frente a su meta"
+    },
+    "coordinator": {
+      "label": "Por coordinador",
+      "singular": "Coordinador",
+      "title": "Coordinadores frente a su meta"
+    }
+  },
+  "agreementViews": {
+    "all": "Todos",
+    "broken": "Incumplidos",
+    "dueSoon": "Vencen en 7 días",
+    "fulfilled": "Cumplidos"
+  },
+  "pnaAges": {
+    "all": "Todos",
+    "over3": "Más de 3 días",
+    "over7": "Más de 7 días"
+  },
+  "curveReferences": {
+    "median": "Mediana 6 meses",
+    "previous": "Mes anterior",
+    "both": "Ambas"
+  },
+  "statusPlural": {
+    "FULFILLED": "Cumplidos",
+    "BROKEN": "Incumplidos",
+    "PENDING": "Pendientes"
+  },
+  "weekdays": {
+    "sun": "dom",
+    "mon": "lun",
+    "tue": "mar",
+    "wed": "mié",
+    "thu": "jue",
+    "fri": "vie",
+    "sat": "sáb"
+  },
+  "toolbar": {
+    "searchAria": "Buscar cliente",
+    "searchPlaceholder": "Buscar cliente o NIT",
+    "period": "Periodo"
+  },
+  "filters": {
+    "management": "Gerencia",
+    "coordinator": "Coordinador",
+    "executive": "Ejecutivo",
+    "channel": "Canal",
+    "customer": "Cliente",
+    "search": "Búsqueda",
+    "aging": "Tramo",
+    "agreements": "Acuerdos",
+    "segments": "{count} segmentos",
+    "remove": "Quitar {label}"
+  },
+  "cutoff": {
+    "loading": "Cargando corte…",
+    "updating": "Actualizando…",
+    "reprocess": "Reprocesar",
+    "reload": "Recargar"
+  },
+  "board": {
+    "loadingAria": "Cargando la torre de control",
+    "loadError": "No se pudo cargar la torre de control",
+    "preparingTitle": "Estamos preparando la foto de recaudo",
+    "preparingDescription": "Es la primera vez que se abre en este proyecto: el tablero aparece solo en unos segundos.",
+    "noProject": "Elige un proyecto para ver la torre de control de recaudo.",
+    "footNote": "Forecast = recaudo a la fecha de corte + saldo de los acuerdos de pago pendientes que vencen antes del cierre del mes. Ritmo a hoy = lo que ya se debería llevar para cumplir la meta si el mes se comporta como uno típico. PNA = pago identificado que todavía no se aplica a facturas."
+  },
+  "excel": {
+    "downloading": "Descargando Excel…",
+    "error": "No se pudo descargar el Excel.",
+    "unavailable": "Disponible al conectar el API",
+    "download": "Descargar en Excel"
+  },
+  "agingCard": {
+    "title": "Recaudo por tramo",
+    "collected": "Recaudado",
+    "share": "Participación"
+  },
+  "applicationCard": {
+    "title": "Aplicación del recaudo",
+    "applied": "aplicado",
+    "leadTimeTitle": "Lead time de aplicación",
+    "thisMonth": "Este mes",
+    "previousMonth": "Mes anterior",
+    "within2Days": "Aplicado en ≤ 2 días",
+    "days": "{value} días",
+    "daysUnit": "días",
+    "leadTimeCaption": "lead time de aplicación",
+    "vsPrevious": "{delta} d vs mes ant.",
+    "value": "Valor",
+    "ofCollected": "Del recaudo",
+    "pendingTitle": "Pendientes de aplicar",
+    "olderThan": "Con más de {days} días",
+    "payments": "Pagos",
+    "agedChip": "{count} con +{days} días"
+  },
+  "goalCard": {
+    "title": "Recaudo",
+    "collected": "Recaudado",
+    "estimatedClose": "Cierre estimado",
+    "vsTarget": "Frente a la meta",
+    "vsAvgTitle": "vs promedio 3 meses",
+    "thisMonthAtDay": "Este mes al día {day}",
+    "avg3": "Promedio 3 meses",
+    "vsAvgShort": "{value} vs prom. 3M",
+    "target": "Meta",
+    "ofTarget": "De la meta",
+    "agreements": "Acuerdos",
+    "pendingBeforeClose": "Pendientes antes del cierre",
+    "overdueBalance": "Saldo vencido",
+    "forecast": "Forecast",
+    "paceTitle": "Ritmo a hoy",
+    "expectedAtDay": "Esperado al día {day}",
+    "difference": "Diferencia",
+    "monthlyTarget": "Meta del mes",
+    "remaining": "Faltan",
+    "paceLegend": "Ritmo a hoy <b>{value}</b>",
+    "forecastLegend": "Forecast <b>{value}</b> · {pct}",
+    "monthClosed": "Mes cerrado · {pct}"
+  },
+  "goalTable": {
+    "columns": {
+      "collected": "Recaudo",
+      "goal": "Meta",
+      "diff": "Dif.",
+      "compliance": "Avance",
+      "forecast": "Forecast"
+    },
+    "noGoal": "Sin meta",
+    "progressTitle": "Avance vs meta",
+    "collected": "Recaudado",
+    "value": "Valor",
+    "toCome": "Por entrar",
+    "vsTarget": "Frente a la meta",
+    "onPace": "{onPace} de {withGoal} con meta van al ritmo",
+    "viewBy": "Ver meta por",
+    "empty": "Sin clientes"
+  },
+  "agreementsTable": {
+    "title": "Detalle de acuerdos",
+    "count": "{count, plural, one {# acuerdo} other {# acuerdos}}",
+    "viewAria": "Ver acuerdos",
+    "columns": {
+      "dueDate": "Fecha",
+      "days": "Atraso",
+      "balance": "Saldo"
+    },
+    "days": "{count, plural, one {# día} other {# días}}",
+    "dueToday": "vence hoy",
+    "dueIn": "vence en {days} d",
+    "onTime": "a tiempo",
+    "loaded": "cargado {date}",
+    "rescheduled": "reprog. ×{count}",
+    "agreementTitle": "Acuerdo",
+    "agreed": "Acordado",
+    "paid": "Pagado",
+    "balance": "Saldo",
+    "ofAgreed": "de {amount}",
+    "empty": "Nada en esta vista para la selección actual"
+  },
+  "agreementsChart": {
+    "title": "Acuerdos de pago por día",
+    "hint": "clic para filtrar · Shift + clic para sumar varios",
+    "summaryTitle": "Resumen · {month}",
+    "summary": "Resumen",
+    "loaded": "Cargados ({count})",
+    "statusCount": "{status} ({count})",
+    "brokenCount": "{status} · saldo ({count})",
+    "paidOfDue": "Pagado de lo vencido",
+    "noCommitments": "Sin compromisos",
+    "totalCount": "Total ({count})",
+    "aria": "Acuerdos de pago por día de compromiso",
+    "axisCommitted": "COMPROMETIDO",
+    "today": "Hoy {date}"
+  },
+  "dailyChart": {
+    "title": "Recaudo por día",
+    "subtitle": "{period} · acumulado y recaudo de cada día",
+    "referenceAria": "Referencia",
+    "cumulative": "Acumulado",
+    "projection": "Proyección",
+    "target": "Meta",
+    "previousMonth": "Mes anterior",
+    "expected": "Esperado",
+    "dayTotal": "Recaudo del día",
+    "expectedDay": "Esperado del día",
+    "projectedCumulative": "Acumulado proyectado",
+    "median6Short": "Mediana 6M",
+    "aria": "Recaudo acumulado y recaudo diario del mes",
+    "axisCumulative": "ACUMULADO",
+    "axisDaily": "POR DÍA"
+  },
+  "executivesTable": {
+    "columns": {
+      "progress": "Avance",
+      "collected": "Recaudo",
+      "goal": "Meta",
+      "diff": "Dif. vs meta",
+      "pending": "Acuerdos",
+      "forecast": "Forecast",
+      "agreementsCompliance": "% Cumpl."
+    },
+    "hint": "clic para filtrar",
+    "viewBy": "Ver por",
+    "collected": "Recaudado",
+    "activeAgreements": "Acuerdos vigentes",
+    "vsTarget": "Frente a la meta",
+    "complianceTitle": "Cumplimiento de acuerdos",
+    "paidOfDue": "Pagado de lo vencido",
+    "overdueAgreements": "Acuerdos vencidos",
+    "empty": "Sin datos para esta selección",
+    "total": "Total",
+    "noGoal": "Sin meta"
+  },
+  "unappliedTable": {
+    "title": "Pagos identificados sin aplicar (PNA)",
+    "columns": {
+      "id": "ID pago",
+      "paidAt": "Fecha de pago",
+      "days": "Tiempo pendiente",
+      "amount": "Monto pendiente"
+    },
+    "today": "Hoy",
+    "openInCashport": "Abrir el pago en Cashport",
+    "viewDetail": "Ver el detalle del pago",
+    "unappliedTitle": "Pago sin aplicar",
+    "amount": "Monto",
+    "payments": "{count, plural, one {# pago} other {# pagos}}",
+    "coordinatorsFiltering": "{count, plural, one {# coordinador filtrando} other {# coordinadores filtrando}}",
+    "previousMonths": "({amount} de meses anteriores)",
+    "filterAria": "Filtrar PNA",
+    "byCoordinatorAria": "Filtrar PNA por coordinador",
+    "excelName": "PNA sin aplicar",
+    "unappliedPayments": "Pagos sin aplicar",
+    "empty": "No hay pagos pendientes de aplicar en esta vista",
+    "avgDays": "{value} días prom."
+  },
+  "rows": {
+    "noExecutive": "Sin ejecutivo",
+    "noChannel": "Sin canal",
+    "unassigned": "Sin asignar",
+    "coordinatorShort": "Coord. {name}",
+    "channel": "Canal",
+    "channelLower": "canal",
+    "customers": "{count, plural, one {# cliente} other {# clientes}}",
+    "total": "Total"
+  }
+}

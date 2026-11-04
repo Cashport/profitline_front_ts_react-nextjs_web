@@ -1,6 +1,7 @@
 import React, { ReactNode, Dispatch, SetStateAction } from "react";
 import { Table, Flex, Dropdown, MenuProps, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import { Tag } from "@/components/atoms/Tag/Tag";
 import { Circle, DotsThree, Users } from "phosphor-react";
 import { Invoice } from "@phosphor-icons/react";
@@ -16,6 +17,7 @@ import {
 } from "@ant-design/icons";
 
 import { useAppStore } from "@/lib/store/store";
+
 import { useModalDetail } from "@/context/ModalContext";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
@@ -28,6 +30,8 @@ const TaskTable: React.FC<{
   modalAction: (() => void)[];
   setSelectedRows: Dispatch<SetStateAction<ITask[] | undefined>>;
 }> = ({ data, modalAction, setSelectedRows }) => {
+  const t = useTranslations("taskManager.legacyTable");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
   const { openModal } = useModalDetail();
@@ -52,13 +56,13 @@ const TaskTable: React.FC<{
       {
         key: "Enviar correo",
         icon: <MailOutlined size={12} />,
-        label: "Enviar correo",
+        label: t("actions.sendEmail"),
         onClick: modalAction[0]
       },
       {
         key: "Llamar",
         icon: <PhoneOutlined size={12} />,
-        label: "Llamar",
+        label: t("actions.call"),
         onClick: modalAction[1]
       },
       {
@@ -69,37 +73,38 @@ const TaskTable: React.FC<{
       {
         key: "Agendar visita",
         icon: <Users size={12} />,
-        label: "Agendar visita"
+        label: t("actions.scheduleVisit")
       },
       {
         key: "Conciliar",
         icon: <CalendarOutlined size={12} />,
-        label: "Conciliar"
+        label: t("actions.reconcile")
       },
       {
         key: "Aplicar pago",
         icon: <CreditCardOutlined size={12} />,
-        label: "Aplicar pago"
+        label: t("actions.applyPayment")
       },
       {
         key: "Radicar",
         icon: <FileTextOutlined size={12} />,
-        label: "Radicar"
+        label: t("actions.submitInvoice")
       },
       {
         key: "Reportar pago",
         icon: <FileDoneOutlined size={12} />,
-        label: "Reportar pago"
+        label: t("actions.reportPayment")
       }
     ];
 
+    // task_type viene del backend: se compara con el valor original.
     if (row.task_type === "Saldo") {
       return [
         ...baseItems,
         {
           key: "Legalizar saldo",
           icon: <Invoice size={12} />,
-          label: "Legalizar saldo",
+          label: t("actions.settleDeduction"),
           onClick: handleOpenBalanceLegalization
         }
       ];
@@ -109,7 +114,7 @@ const TaskTable: React.FC<{
       baseItems.push({
         key: "Desbloquear pedido",
         icon: <UnlockOutlined size={12} />,
-        label: "Desbloquear pedido",
+        label: t("actions.releaseOrder"),
         onClick: () => {
           // openModal("novelty", { noveltyId: row.incident_id });
         }
@@ -125,11 +130,11 @@ const TaskTable: React.FC<{
 
   const columns: ColumnsType<ITask> = [
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "client_name",
       key: "client_name",
       render: (_value, row) => {
-        const url = `/clientes/detail/${row.client_uuid}/project/${row.id_project}`;
+        const url = `/clients/detail/${row.client_uuid}/project/${row.id_project}`;
         return (
           <a
             href={url}
@@ -143,7 +148,7 @@ const TaskTable: React.FC<{
       }
     },
     {
-      title: "Fecha",
+      title: tCommon("fields.date"),
       dataIndex: "created_at",
       key: "created_at",
       render: (value) => {
@@ -155,14 +160,14 @@ const TaskTable: React.FC<{
         });
       }
     },
-    { title: "Tipo de tarea", dataIndex: "task_type", key: "task_type", width: 130 },
+    { title: t("taskType"), dataIndex: "task_type", key: "task_type", width: 130 },
     {
-      title: "Descripción",
+      title: tCommon("fields.description"),
       dataIndex: "description",
       key: "description"
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "status",
       key: "status",
       render: (status: ITask["status"]) => (
@@ -177,9 +182,9 @@ const TaskTable: React.FC<{
         </Flex>
       )
     },
-    { title: "Responsable", dataIndex: "user_name", key: "user_name" },
+    { title: t("assignee"), dataIndex: "user_name", key: "user_name" },
     {
-      title: "Cartera",
+      title: t("receivables"),
       dataIndex: "total_portfolio",
       key: "total_portfolio",
       align: "right",
@@ -192,7 +197,7 @@ const TaskTable: React.FC<{
       showSorterTooltip: false
     },
     {
-      title: "Pedido",
+      title: t("order"),
       dataIndex: "order_amount",
       key: "order_amount",
       align: "right",

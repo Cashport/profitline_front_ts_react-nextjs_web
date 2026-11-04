@@ -9,9 +9,9 @@ import type {
   ITowerCoordinator,
   ITowerExecutive
 } from "@/types/collectionTower/ICollectionTower";
-import { STATUS_PLURAL } from "../constants";
 import type { Grouping, TowerFilters } from "../types";
-import { WEEKDAYS, fechaCorta, weekdayOf } from "./format";
+import { getTranslator } from "@/i18n/translator";
+import { fechaCorta, weekdayOf, weekdayShort } from "./format";
 
 export interface CatalogIndex {
   managements: Map<string, ITowerCatalogItem>;
@@ -172,13 +172,14 @@ export interface FilterChip {
 
 /** Chips de los filtros activos, con nombres de los catálogos (o el id mientras llegan). */
 export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChip[] => {
+  const t = getTranslator("collections");
   const ix = data ? indexCatalogs(data.catalogs) : null;
   const name = (map: keyof CatalogIndex, id: string) => ix?.[map].get(id)?.name ?? id;
   const chips: FilterChip[] = [];
   if (f.management) {
     chips.push({
       key: "management",
-      label: "Gerencia",
+      label: t("filters.management"),
       value: name("managements", f.management),
       remove: { management: null }
     });
@@ -186,7 +187,7 @@ export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChi
   if (f.coordinator) {
     chips.push({
       key: "coordinator",
-      label: "Coordinador",
+      label: t("filters.coordinator"),
       value: name("coordinators", f.coordinator),
       remove: { coordinator: null }
     });
@@ -194,7 +195,7 @@ export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChi
   if (f.executive) {
     chips.push({
       key: "executive",
-      label: "Ejecutivo",
+      label: t("filters.executive"),
       value: name("executives", f.executive),
       remove: { executive: null }
     });
@@ -202,7 +203,7 @@ export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChi
   if (f.channel) {
     chips.push({
       key: "channel",
-      label: "Canal",
+      label: t("filters.channel"),
       value: name("channels", f.channel),
       remove: { channel: null }
     });
@@ -210,31 +211,36 @@ export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChi
   if (f.client) {
     chips.push({
       key: "client",
-      label: "Cliente",
+      label: t("filters.customer"),
       value: name("clients", f.client),
       remove: { client: null }
     });
   }
   if (f.search)
-    chips.push({ key: "search", label: "Búsqueda", value: f.search, remove: { search: "" } });
+    chips.push({
+      key: "search",
+      label: t("filters.search"),
+      value: f.search,
+      remove: { search: "" }
+    });
   if (f.aging !== null) {
     chips.push({
       key: "aging",
-      label: "Tramo",
+      label: t("filters.aging"),
       value: data?.agingBuckets.find((b) => b.key === f.aging)?.label ?? f.aging,
       remove: { aging: null }
     });
   }
   if (f.segments.length) {
     const [s] = f.segments;
-    const status = s.status ? STATUS_PLURAL[s.status] : null;
+    const status = s.status ? t(`statusPlural.${s.status}`) : null;
     chips.push({
       key: "segments",
-      label: "Acuerdos",
+      label: t("filters.agreements"),
       value:
         f.segments.length === 1
-          ? `${status ? `${status} · ` : ""}${WEEKDAYS[weekdayOf(s.date)]} ${fechaCorta(s.date)}`
-          : `${f.segments.length} segmentos`,
+          ? `${status ? `${status} · ` : ""}${weekdayShort(weekdayOf(s.date))} ${fechaCorta(s.date)}`
+          : t("filters.segments", { count: f.segments.length }),
       remove: { segments: [] }
     });
   }

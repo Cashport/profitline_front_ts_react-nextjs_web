@@ -2,42 +2,20 @@
 
 import { useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 import { Plus, Trash2, ChevronDown, ChevronUp, Gift, Info } from "lucide-react";
 import { Product } from "@/types/products/products";
 import { INivel, IPromocion } from "@/types/marketAdmin/IMarketAdmin";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import NivelRow from "./NivelRow";
 
+// [clave de etiqueta en marketAdmin.promotions.summary, campo del formulario, clave del tooltip]
 const MAX_USAGE_FIELDS = [
-  ["Máx. usos por pedido", "maxUsagePerOrder", "maxUsagePerOrder"],
-  ["Máx. usos por cliente", "maxUsagePerClient", "maxUsagePerClient"],
-  ["Máx. usos por cliente/mes", "maxUsagePerClientPerMonth", "maxUsagePerClientPerMonth"],
-  ["Máx. usos global", "maxGlobalUsage", "maxGlobalUsage"]
+  ["maxUsesPerOrder", "maxUsagePerOrder", "maxUsagePerOrder"],
+  ["maxUsesPerCustomer", "maxUsagePerClient", "maxUsagePerClient"],
+  ["maxUsesPerCustomerMonth", "maxUsagePerClientPerMonth", "maxUsagePerClientPerMonth"],
+  ["maxGlobalUses", "maxGlobalUsage", "maxGlobalUsage"]
 ] as const;
-
-// ── Textos de tooltips (español, hardcoded según convención del proyecto) ──
-const TOOLTIPS = {
-  accumulable:
-    "Multiplicador del regalo. Cuando vale ≥ 2 y la promoción tiene un solo rango, el regalo se entrega hasta 'accumulable' veces según cuántas veces se cumpla la condición mínima (ej. si vale 3 y la condición mínima es 1, el cliente puede llevarse hasta 3 regalos si compra 3 unidades que cumplen el mínimo).",
-  maxUsagePerOrder:
-    "Número máximo de veces que el cliente puede aplicar esta promoción en un solo pedido. Déjalo vacío para sin límite.",
-  maxUsagePerClient:
-    "Número máximo de veces que el cliente puede usar esta promoción en total (histórico). Déjalo vacío para sin límite.",
-  maxUsagePerClientPerMonth:
-    "Máximo de redenciones por cliente en el mes en curso. Vacío o 0 = sin restricción mensual.",
-  maxGlobalUsage:
-    "Máximo de redenciones totales entre todos los clientes del proyecto. Déjalo vacío para sin límite global.",
-  businessUnit:
-    "Restringe la promoción a una sola unidad de negocio (ej. 'Institucional', 'Retail'). Si queda vacío, aplica a todas las unidades del proyecto. Solo se mostrará a clientes cuya BU en client_marketplace coincida.",
-  isFlex:
-    "Promoción 'flex': el cliente recibe el regalo automáticamente, sin tener que elegir entre las opciones A/B/C. Si está apagada, el cliente debe elegir una opción.",
-  takeFirstEligibleRangeDiscount:
-    "Si está activo, se aplica SOLO el primer rango elegible del descuento que esté aplicando. Por defecto (apagado), se aplica el mejor rango disponible.",
-  applyCrossSelling:
-    "Si está activo (default), la promoción permite aplicar cross-selling (descuentos secundarios / descuentos de la orden). Si está apagado, se deshabilita el cross-selling y el array de descuentos secundarios llega vacío al calcular el descuento del paquete.",
-  isPromotionCompatibleWithAllNegotiations:
-    "Permite que esta promoción se acumule con los precios negociados del cliente. Si está apagada, la promoción NO se aplica cuando el cliente tiene negociaciones activas."
-} as const;
 
 // Etiqueta con icono de info y tooltip Radix.
 function TooltipLabel({
@@ -49,6 +27,7 @@ function TooltipLabel({
   text: string;
   tooltip: string;
 }) {
+  const t = useTranslations("marketAdmin.promotions.card");
   return (
     <span className="inline-flex items-center gap-1">
       <span>{text}</span>
@@ -57,7 +36,7 @@ function TooltipLabel({
           <Info
             size={12}
             className="text-[#999999] cursor-help hover:text-[#666666] transition-colors"
-            aria-label={`Información sobre ${text}`}
+            aria-label={t("infoAbout", { label: text })}
           />
         </TooltipTrigger>
         <TooltipContent
@@ -114,6 +93,9 @@ export default function PromocionCard({
   onChange: (p: IPromocion) => void;
   onDelete?: () => void;
 }) {
+  const t = useTranslations("marketAdmin.promotions.card");
+  const tPromotions = useTranslations("marketAdmin.promotions");
+  const tCommon = useTranslations("common");
   const [expanded, setExpanded] = useState(true);
   const [showBehavior, setShowBehavior] = useState(false);
 
@@ -172,8 +154,10 @@ export default function PromocionCard({
             className="text-sm font-semibold text-[#141414] outline-none bg-transparent w-full hover:bg-[#F7F7F7] focus:bg-[#F7F7F7] px-1.5 py-0.5 rounded transition-colors"
           />
           <p className="text-[13px] text-[#999999] px-1.5">
-            {promo.tipoCondicion === "monto" ? "Por monto" : "Por combinación"} ·{" "}
-            {promo.niveles.length} nivel(es)
+            {t("subtitle", {
+              type: promo.tipoCondicion === "monto" ? "amount" : "combination",
+              count: promo.niveles.length
+            })}
           </p>
         </div>
 
@@ -181,12 +165,13 @@ export default function PromocionCard({
         <Toggle
           value={promo.activa}
           onChange={(v) => onChange({ ...promo, activa: v })}
-          label="Promoción activa"
+          label={t("activeToggle")}
         />
 
         {onDelete && (
           <button
             onClick={onDelete}
+            aria-label={tCommon("actions.delete")}
             className="w-7 h-7 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
           >
             <Trash2 size={14} />
@@ -195,6 +180,7 @@ export default function PromocionCard({
 
         <button
           onClick={() => setExpanded(!expanded)}
+          aria-label={expanded ? tCommon("actions.showLess") : tCommon("actions.showMore")}
           className="w-7 h-7 rounded flex items-center justify-center text-[#999999] hover:bg-[#F7F7F7] transition-colors flex-shrink-0"
         >
           {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -206,7 +192,9 @@ export default function PromocionCard({
         <div className="border-t border-[#EEEEEE] px-5 py-4 flex flex-col gap-4 bg-[#FAFAFA]">
           {/* Tipo de condición como radio buttons */}
           <div className="flex flex-col gap-2">
-            <label className="text-[13px] font-medium text-[#666666]">Tipo de condición</label>
+            <label className="text-[13px] font-medium text-[#666666]">
+              {tPromotions("summary.conditionType")}
+            </label>
             <div className="flex gap-3">
               <label
                 className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border cursor-pointer transition-all ${
@@ -232,7 +220,7 @@ export default function PromocionCard({
                     <span className="w-2 h-2 rounded-full bg-[#141414]" />
                   )}
                 </span>
-                <span className="text-sm text-[#141414]">Por monto de compra</span>
+                <span className="text-sm text-[#141414]">{t("byPurchaseAmount")}</span>
               </label>
               <label
                 className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border cursor-pointer transition-all ${
@@ -258,17 +246,19 @@ export default function PromocionCard({
                     <span className="w-2 h-2 rounded-full bg-[#141414]" />
                   )}
                 </span>
-                <span className="text-sm text-[#141414]">Por combinación de productos</span>
+                <span className="text-sm text-[#141414]">{t("byProductCombination")}</span>
               </label>
             </div>
           </div>
 
           {/* Vigencia y límites */}
           <div className="flex flex-col gap-3">
-            <label className="text-[13px] font-medium text-[#666666]">Vigencia y límites</label>
+            <label className="text-[13px] font-medium text-[#666666]">
+              {t("validityAndLimits")}
+            </label>
             <div className="flex flex-wrap items-end gap-3">
               <label className="flex flex-col gap-1">
-                <span className="text-[13px] text-[#999999]">Fecha inicio</span>
+                <span className="text-[13px] text-[#999999]">{tCommon("fields.startDate")}</span>
                 <input
                   type="date"
                   value={promo.fechaInicio ?? ""}
@@ -277,7 +267,7 @@ export default function PromocionCard({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[13px] text-[#999999]">Fecha fin</span>
+                <span className="text-[13px] text-[#999999]">{tCommon("fields.endDate")}</span>
                 <input
                   type="date"
                   value={promo.fechaFin ?? ""}
@@ -287,7 +277,10 @@ export default function PromocionCard({
               </label>
               <label className="flex flex-col gap-1 w-28">
                 <span className="text-[13px] text-[#999999]">
-                  <TooltipLabel text="Acumulable" tooltip={TOOLTIPS.accumulable} />
+                  <TooltipLabel
+                    text={tPromotions("summary.accumulable")}
+                    tooltip={t("tooltips.accumulable")}
+                  />
                 </span>
                 <input
                   type="number"
@@ -305,7 +298,10 @@ export default function PromocionCard({
               {MAX_USAGE_FIELDS.map(([label, key, tooltipKey]) => (
                 <label key={key} className="flex flex-col gap-1">
                   <span className="text-[13px] text-[#999999]">
-                    <TooltipLabel text={label} tooltip={TOOLTIPS[tooltipKey]} />
+                    <TooltipLabel
+                      text={tPromotions(`summary.${label}`)}
+                      tooltip={t(`tooltips.${tooltipKey}`)}
+                    />
                   </span>
                   <input
                     type="number"
@@ -323,7 +319,7 @@ export default function PromocionCard({
                         [key]: Number.isNaN(next as number) ? undefined : next
                       });
                     }}
-                    placeholder="Sin límite"
+                    placeholder={tPromotions("summary.noLimit")}
                     className="px-3 py-2 text-sm text-[#141414] bg-white border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors"
                   />
                 </label>
@@ -339,9 +335,9 @@ export default function PromocionCard({
               className="flex items-center gap-2 self-start text-[13px] font-medium text-[#666666] hover:text-[#141414] transition-colors"
             >
               {showBehavior ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              Comportamiento
+              {tPromotions("summary.behaviorLabel")}
               <span className="text-[13px] text-[#AAAAAA] font-normal">
-                (configuración avanzada)
+                {t("advancedSettings")}
               </span>
             </button>
 
@@ -351,7 +347,7 @@ export default function PromocionCard({
                 <div className="flex flex-wrap items-center gap-3">
                   <Toggle
                     value={businessUnitEnabled}
-                    label="Restringir por unidad de negocio"
+                    label={t("restrictByBusinessUnit")}
                     onChange={(v) => {
                       // Al desactivar, vaciamos businessUnit para que no se envíe al backend.
                       if (!v) {
@@ -361,14 +357,15 @@ export default function PromocionCard({
                       }
                     }}
                   />
-                  <TooltipLabel text="Unidad de negocio" tooltip={TOOLTIPS.businessUnit} />
+                  <TooltipLabel
+                    text={tPromotions("summary.businessUnit")}
+                    tooltip={t("tooltips.businessUnit")}
+                  />
                   <Select
                     disabled={!businessUnitEnabled}
                     value={promo.businessUnit}
                     placeholder={
-                      businessUnits.length === 0
-                        ? "Sin BUs configuradas en el proyecto"
-                        : "Selecciona una unidad de negocio"
+                      businessUnits.length === 0 ? t("noBusinessUnits") : t("selectBusinessUnit")
                     }
                     options={businessUnits.map((bu) => ({ value: bu, label: bu }))}
                     onChange={(value) => onChange({ ...promo, businessUnit: value })}
@@ -382,22 +379,22 @@ export default function PromocionCard({
                 <div className="flex items-center gap-3">
                   <Toggle
                     value={Boolean(promo.isFlex)}
-                    label="Es promoción flex"
+                    label={t("isFlex")}
                     onChange={(v) => onChange({ ...promo, isFlex: v })}
                   />
-                  <TooltipLabel text="Es promoción flex" tooltip={TOOLTIPS.isFlex} />
+                  <TooltipLabel text={t("isFlex")} tooltip={t("tooltips.isFlex")} />
                 </div>
 
                 {/* Fila 3 — takeFirstEligibleRangeDiscount */}
                 <div className="flex items-center gap-3">
                   <Toggle
                     value={Boolean(promo.takeFirstEligibleRangeDiscount)}
-                    label="Tomar primer rango elegible"
+                    label={t("takeFirstEligibleRange")}
                     onChange={(v) => onChange({ ...promo, takeFirstEligibleRangeDiscount: v })}
                   />
                   <TooltipLabel
-                    text="Tomar primer rango elegible"
-                    tooltip={TOOLTIPS.takeFirstEligibleRangeDiscount}
+                    text={t("takeFirstEligibleRange")}
+                    tooltip={t("tooltips.takeFirstEligibleRangeDiscount")}
                   />
                 </div>
 
@@ -406,12 +403,12 @@ export default function PromocionCard({
                 <div className="flex items-center gap-3">
                   <Toggle
                     value={promo.applyCrossSelling !== false}
-                    label="Permitir cross-selling"
+                    label={t("allowCrossSelling")}
                     onChange={(v) => onChange({ ...promo, applyCrossSelling: v })}
                   />
                   <TooltipLabel
-                    text="Permitir cross-selling"
-                    tooltip={TOOLTIPS.applyCrossSelling}
+                    text={t("allowCrossSelling")}
+                    tooltip={t("tooltips.applyCrossSelling")}
                   />
                 </div>
 
@@ -419,7 +416,7 @@ export default function PromocionCard({
                 <div className="flex items-center gap-3">
                   <Toggle
                     value={Boolean(promo.isPromotionCompatibleWithAllNegotiations)}
-                    label="Compatible con negociaciones"
+                    label={t("compatibleWithNegotiations")}
                     onChange={(v) =>
                       onChange({
                         ...promo,
@@ -428,8 +425,8 @@ export default function PromocionCard({
                     }
                   />
                   <TooltipLabel
-                    text="Compatible con negociaciones"
-                    tooltip={TOOLTIPS.isPromotionCompatibleWithAllNegotiations}
+                    text={t("compatibleWithNegotiations")}
+                    tooltip={t("tooltips.isPromotionCompatibleWithAllNegotiations")}
                   />
                 </div>
               </div>
@@ -438,7 +435,9 @@ export default function PromocionCard({
 
           {/* Niveles */}
           <div className="flex flex-col gap-3">
-            <p className="text-[13px] font-medium text-[#666666]">Niveles / escalones</p>
+            <p className="text-[13px] font-medium text-[#666666]">
+              {tPromotions("summary.levels")}
+            </p>
             {promo.niveles.map((nivel, idx) => (
               <NivelRow
                 key={nivel.id}
@@ -454,7 +453,7 @@ export default function PromocionCard({
               onClick={addNivel}
               className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-[13px] text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors"
             >
-              <Plus size={12} /> Agregar nivel
+              <Plus size={12} /> {t("addLevel")}
             </button>
           </div>
         </div>

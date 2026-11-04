@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useTranslations } from "use-intl";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { ICatalogComponent, ICatalogModule } from "@/types/roles/IRolesAdmin";
@@ -63,29 +64,24 @@ export const filterCatalog = (catalog: ICatalogModule[], includeOther: boolean) 
           }))
         }));
 
-export const INCLUDE_OTHER_HINT =
-  "Muestra las páginas TMS y las rutas del catálogo que este backend no atiende";
-
 export const endpointStats = (component: ICatalogComponent) => {
   const reads = component.endpoints.filter((e) => e.method === "GET").length;
   return { reads, writes: component.endpoints.length - reads };
 };
 
 export function EndpointStats({ component }: { component: ICatalogComponent }) {
+  const t = useTranslations("platform.shared");
   if (component.endpoints.length === 0) {
     return (
-      <span
-        className="whitespace-nowrap text-[13px] text-cp-ink-3"
-        title="No tiene endpoints: solo controla si la pantalla o el botón se muestran"
-      >
-        Solo visual
+      <span className="whitespace-nowrap text-[13px] text-cp-ink-3" title={t("displayOnlyHint")}>
+        {t("displayOnly")}
       </span>
     );
   }
   const { reads, writes } = endpointStats(component);
   return (
     <span className="whitespace-nowrap text-[13px] text-cp-ink-3">
-      {reads} lectura{reads === 1 ? "" : "s"} · {writes} escritura{writes === 1 ? "" : "s"}
+      {t("endpointStats", { reads, writes })}
     </span>
   );
 }
@@ -129,12 +125,13 @@ export function PaneItem({
 }
 
 export function SystemBadge() {
+  const t = useTranslations("platform.shared");
   return (
     <span
       className="shrink-0 rounded-[5px] bg-cp-muted px-1.5 py-px text-[13px] font-semibold text-cp-ink-2"
-      title="El código usa este rol por su id o su nombre: no se puede renombrar"
+      title={t("systemBadgeHint")}
     >
-      Sistema
+      {t("systemBadge")}
     </span>
   );
 }

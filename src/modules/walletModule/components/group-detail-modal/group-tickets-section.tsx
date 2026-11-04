@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { HOY, diasEntre } from "../../utils/format";
 import { resueltoTarde } from "../../utils/group-detail";
@@ -39,6 +40,7 @@ export default function GroupTicketsSection({
   onNew,
   onResolve
 }: GroupTicketsSectionProps) {
+  const t = useTranslations("wallet.tickets");
   const [verCerradas, setVerCerradas] = useState(false);
 
   const abiertas = tickets
@@ -59,13 +61,11 @@ export default function GroupTicketsSection({
     <>
       <div className="border-t border-border px-[18px] pb-4 pt-3.5">
         <div className="mb-[11px] flex w-full items-center gap-2">
-          <h4 className="text-[13px] font-semibold text-muted-foreground">
-            Acciones abiertas
-          </h4>
+          <h4 className="text-[13px] font-semibold text-muted-foreground">{t("open")}</h4>
           <Count>{abiertas.length}</Count>
           {vencidas > 0 && (
             <span className="text-[13px] text-rose-600 dark:text-rose-400">
-              {vencidas} vencida{vencidas === 1 ? "" : "s"}
+              {t("overdue", { count: vencidas })}
             </span>
           )}
           {!creando && (
@@ -75,7 +75,7 @@ export default function GroupTicketsSection({
               className="ml-auto inline-flex items-center gap-1 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
               <Plus className="h-3.5 w-3.5" />
-              Nuevo
+              {t("new")}
             </button>
           )}
         </div>
@@ -89,10 +89,10 @@ export default function GroupTicketsSection({
             ))}
           </div>
         ) : loading ? (
-          <p className="text-[13px] leading-relaxed text-muted-foreground">Cargando acciones…</p>
+          <p className="text-[13px] leading-relaxed text-muted-foreground">{t("loading")}</p>
         ) : (
           <div className="rounded-lg border border-dashed border-border px-[13px] py-3 text-[13px] leading-relaxed text-muted-foreground">
-            No hay acciones abiertas. Crea un ticket para fijar la próxima.
+            {t("empty")}
           </div>
         )}
       </div>
@@ -105,13 +105,11 @@ export default function GroupTicketsSection({
             onClick={() => setVerCerradas((v) => !v)}
             className="mb-[11px] flex w-full items-center gap-2 text-left"
           >
-            <h4 className="text-[13px] font-semibold text-muted-foreground">
-              Acciones cerradas
-            </h4>
+            <h4 className="text-[13px] font-semibold text-muted-foreground">{t("closed")}</h4>
             <Count>{cerradas.length}</Count>
             {tarde > 0 && (
               <span className="text-[13px] text-rose-600 dark:text-rose-400">
-                {tarde} fuera de fecha
+                {t("late", { count: tarde })}
               </span>
             )}
             <span className="ml-auto text-muted-foreground">

@@ -1,4 +1,5 @@
 import { Tabs, TabsProps, message } from "antd";
+import { useTranslations } from "use-intl";
 
 // components
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
@@ -13,6 +14,7 @@ import "./createproject.scss";
 import { IFormProject } from "@/types/projects/IFormProject";
 
 export const CreateProjectView = () => {
+  const t = useTranslations("projects");
   const { push } = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const onCreateProject = async (data: IFormProject) => {
@@ -22,56 +24,56 @@ export const CreateProjectView = () => {
       if (response.status === CREATED) {
         messageApi.open({
           type: "success",
-          content: "El proyecto fue creado exitosamente."
+          content: t("create.success")
         });
         push("/settings");
       }
     } catch (error) {
       messageApi.open({
         type: "error",
-        content: "Oops, hubo un error por favor intenta mas tarde."
+        content: t("create.error")
       });
     }
   };
   const items: TabsProps["items"] = [
     {
       key: "1",
-      label: "Crear Proyecto",
+      label: t("tabs.createProject"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     },
     {
       key: "2",
-      label: "Reglas de negocio",
+      label: t("tabs.businessRules"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     },
     {
       key: "3",
-      label: "Clientes",
+      label: t("tabs.clients"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     },
     {
       key: "4",
-      label: "Usuarios",
+      label: t("tabs.users"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     },
     {
       key: "5",
-      label: "Cuentas",
+      label: t("tabs.accounts"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     },
     {
       key: "6",
-      label: "Grupos de clientes",
+      label: t("tabs.clientGroups"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     },
     {
       key: "7",
-      label: "Aprobaciones",
+      label: t("tabs.approvals"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     },
     {
       key: "8",
-      label: "Comunicaciones",
+      label: t("tabs.communications"),
       children: <ProjectFormTab statusForm="create" onSubmitForm={onCreateProject} />
     }
   ];
@@ -80,7 +82,7 @@ export const CreateProjectView = () => {
     <>
       {contextHolder}
       {/* Header compartido con "‹" al listado de proyectos (docs/DESIGN.md §4) */}
-      <ViewWrapper headerTitle="Crear proyecto" headerBack="/settings">
+      <ViewWrapper headerTitle={t("create.headerTitle")} headerBack="/settings">
         {/* ------------Main Info Project-------------- */}
         <div className="cp-card createProjectCard px-[18px] py-[14px]">
           <Tabs

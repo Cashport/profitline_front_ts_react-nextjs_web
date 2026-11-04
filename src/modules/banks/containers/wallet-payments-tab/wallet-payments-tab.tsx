@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { Flex, Spin } from "antd";
 import { DotsThree } from "phosphor-react";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
@@ -40,6 +41,7 @@ interface WalletPaymentsTabProps {
 }
 
 export const WalletPaymentsTab: FC<WalletPaymentsTabProps> = ({ isActive }) => {
+  const tShared = useTranslations("banks.shared");
   const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
   const [clearSelected, setClearSelected] = useState(false);
@@ -116,7 +118,7 @@ export const WalletPaymentsTab: FC<WalletPaymentsTabProps> = ({ isActive }) => {
         <BanksSlot to="header" active={isActive}>
           <BanksFilterModal setSelectedFilters={setSelectedFilters} />
           <OptimizedSearchComponent
-            title="Buscar referencia, valor…"
+            title={tShared("searchPlaceholder")}
             onSearch={handleSearch}
             surface="page"
             className="!w-[220px] !flex-none"
@@ -125,8 +127,8 @@ export const WalletPaymentsTab: FC<WalletPaymentsTabProps> = ({ isActive }) => {
         <BanksSlot to="tabs" active={isActive}>
           <button
             type="button"
-            title="Generar acción"
-            aria-label="Generar acción"
+            title={tShared("generateAction")}
+            aria-label={tShared("generateAction")}
             onClick={() => {
               setisGenerateActionOpen(true);
             }}

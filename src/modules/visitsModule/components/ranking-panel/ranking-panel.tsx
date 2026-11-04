@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { MISSING } from "../../constants";
 import type { ILiveAdvisor, ILiveState, IVisitsPalette, DayMode } from "../../types";
 import { fmtNumber } from "../../utils/visits-format";
@@ -34,29 +36,40 @@ export default function RankingPanel({
   onSelect,
   onHover
 }: RankingPanelProps) {
+  const tv = useTranslations("visits.ranking");
   const counter = !kpis
     ? MISSING
     : rows.length === totalAdvisors
-      ? `${totalAdvisors} en campo${dayMode === "today" ? " hoy" : ""}`
-      : `${rows.length} de ${totalAdvisors}`;
+      ? dayMode === "today"
+        ? tv("counterToday", { total: totalAdvisors })
+        : tv("counter", { total: totalAdvisors })
+      : tv("counterFiltered", { shown: rows.length, total: totalAdvisors });
 
   const tiles = [
-    { label: "Activos", value: kpis?.active ?? MISSING, suffix: `/${kpis?.total ?? MISSING}` },
     {
-      label: "Visitas",
+      label: tv("tiles.active"),
+      value: kpis?.active ?? MISSING,
+      suffix: `/${kpis?.total ?? MISSING}`
+    },
+    {
+      label: tv("tiles.visits"),
       value: kpis?.visitsDone ?? MISSING,
       suffix: `/${kpis?.visitsPlanned ?? MISSING}`
     },
-    { label: "Efect.", value: kpis ? fmtNumber(kpis.effectivenessPct) : MISSING, suffix: "%" },
+    {
+      label: tv("tiles.effectiveness"),
+      value: kpis ? fmtNumber(kpis.effectivenessPct) : MISSING,
+      suffix: "%"
+    },
     // Las actividades aún no llegan del backend.
-    { label: "Actividades", value: kpis ? fmtNumber(kpis.total) : MISSING }
+    { label: tv("tiles.activities"), value: kpis ? fmtNumber(kpis.total) : MISSING }
   ];
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-3.5 pt-4">
       <div className="mb-2.5 flex items-baseline justify-between gap-2">
         <h2 className="min-w-0 truncate text-[15px] font-semibold text-foreground">
-          Ranking · Actividades
+          {tv("title")}
         </h2>
         <span className="whitespace-nowrap text-[13px] text-muted-foreground">{counter}</span>
       </div>

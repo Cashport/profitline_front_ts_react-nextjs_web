@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import dayjs from "dayjs";
 import { message, Modal, Spin } from "antd";
+import { useTranslations } from "use-intl";
 import { CaretLeft, PiggyBank, X, Copy, ArrowUpRight } from "@phosphor-icons/react";
 
 import { generatePaymentLink } from "@/services/commerce/commerce";
@@ -45,33 +46,39 @@ interface IFormGenerateLink {
   description: string;
 }
 
-const schema = yup.object().shape({
-  expirationDate: yup
-    .date()
-    .typeError("Debe ser una fecha válida")
-    .required("La fecha de expiración es requerida"),
-  expirationTime: yup
-    .date()
-    .typeError("Debe ser una hora válida")
-    .required("La hora de expiración es requerida"),
-  invoices_id: yup
-    .array()
-    .of(yup.number().required())
-    .min(1, "Selecciona al menos una factura")
-    .required("Selecciona al menos una factura"),
-  amount: yup
-    .number()
-    .typeError("Debe ser un número válido")
-    .moreThan(0, "El monto debe ser mayor a 0")
-    .required("El monto es requerido"),
-  description: yup.string().required("La descripción es requerida")
-});
+type PaymentLinkT = ReturnType<typeof useTranslations<"chat.paymentLink">>;
+
+const buildSchema = (t: PaymentLinkT) =>
+  yup.object().shape({
+    expirationDate: yup
+      .date()
+      .typeError(t("validation.invalidDate"))
+      .required(t("validation.expirationDateRequired")),
+    expirationTime: yup
+      .date()
+      .typeError(t("validation.invalidTime"))
+      .required(t("validation.expirationTimeRequired")),
+    invoices_id: yup
+      .array()
+      .of(yup.number().required())
+      .min(1, t("validation.selectInvoice"))
+      .required(t("validation.selectInvoice")),
+    amount: yup
+      .number()
+      .typeError(t("validation.invalidNumber"))
+      .moreThan(0, t("validation.amountPositive"))
+      .required(t("validation.amountRequired")),
+    description: yup.string().required(t("validation.descriptionRequired"))
+  });
 
 const ModalGeneratePaymentLink = ({
   isOpen,
   onClose,
   ticketInfo
 }: ModalGeneratePaymentLinkProps) => {
+  const t = useTranslations("chat.paymentLink");
+  const tCommon = useTranslations("common");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const {
     control,
     handleSubmit,
@@ -144,10 +151,10 @@ const ModalGeneratePaymentLink = ({
       setFormDescription(data.description);
       setCreatedAt(dayjs().format("YYYY-MM-DD HH:mm:ss"));
       setSuccessData(res);
-      message.success("Link de pago generado exitosamente");
+      message.success(t("generated"));
       reset();
     } catch (error) {
-      message.error("Error al generar el link");
+      message.error(t("generateError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -165,9 +172,9 @@ const ModalGeneratePaymentLink = ({
     if (!successData) return;
     try {
       await navigator.clipboard.writeText(successData.link);
-      message.success("Link copiado al portapapeles");
+      message.success(t("copied"));
     } catch {
-      message.error("Error al copiar el link");
+      message.error(t("copyError"));
     }
   };
 
@@ -202,7 +209,7 @@ const ModalGeneratePaymentLink = ({
     try {
       await sendWhatsAppTemplate(payload);
     } catch (error) {
-      message.error("Error al enviar la plantilla por WhatsApp");
+      message.error(t("templateSendError"));
     } finally {
       setIsSendingTemplate(false);
     }
@@ -220,11 +227,9 @@ const ModalGeneratePaymentLink = ({
         <>
           <button className="modalGeneratePaymentLink__header" onClick={handleClose}>
             <CaretLeft size="1.25rem" />
-            <h4>Generar link de pago</h4>
+            <h4>{t("title")}</h4>
           </button>
-          <p className="modalGeneratePaymentLink__description">
-            Completa la información para generar el link.
-          </p>
+          <p className="modalGeneratePaymentLink__description">{t("subtitle")}</p>
           <form onSubmit={handleSubmit(onSubmit)} className="modalGeneratePaymentLink__form">
             <div className="modalGeneratePaymentLink__form--fullWidth">
               <InputForm
@@ -233,18 +238,18 @@ const ModalGeneratePaymentLink = ({
                 defaultValue={ticketInfo.clientName}
                 control={control}
                 error={undefined}
-                titleInput="Cliente"
+                titleInput={tCommon("fields.customer")}
               />
             </div>
             <InputDateForm
-              titleInput="Fecha de vencimiento"
+              titleInput={tCommon("fields.dueDate")}
               nameInput="expirationDate"
               control={control}
               error={errors.expirationDate}
-              placeholder="MM/DD/AAAA"
+              placeholder={t("datePlaceholder")}
             />
             <InputTimeForm
-              titleInput="Hora de vencimiento"
+              titleInput={t("dueTime")}
               nameInput="expirationTime"
               control={control}
               error={errors.expirationTime}
@@ -276,21 +281,21 @@ const ModalGeneratePaymentLink = ({
             </div>
             <InputFormMoney
               readOnly
-              titleInput="Monto a pagar"
+              titleInput={t("amountToPay")}
               nameInput="amount"
               control={control}
               error={errors.amount}
-              placeholder="Selecciona facturas"
+              placeholder={t("selectInvoicesPlaceholder")}
               typeInput="number"
             />
 
             <div className="modalGeneratePaymentLink__form--fullWidth">
               <InputForm
-                titleInput="Descripción"
+                titleInput={tCommon("fields.description")}
                 nameInput="description"
                 control={control}
                 error={errors.description}
-                placeholder="Ingresa una descripción"
+                placeholder={t("descriptionPlaceholder")}
               />
             </div>
           </form>
@@ -298,7 +303,7 @@ const ModalGeneratePaymentLink = ({
           <FooterButtons
             handleOk={() => handleSubmit(onSubmit)()}
             onClose={handleClose}
-            titleConfirm="Generar link"
+            titleConfirm={t("generate")}
             isConfirmLoading={isSubmitting}
             isConfirmDisabled={!isValid}
           />
@@ -306,7 +311,7 @@ const ModalGeneratePaymentLink = ({
       ) : (
         <div className="modalGeneratePaymentLink__success">
           <div className="modalGeneratePaymentLink__success-header">
-            <h2>Link Generado Exitosamente</h2>
+            <h2>{t("successTitle")}</h2>
             <button className="modalGeneratePaymentLink__success-close" onClick={handleClose}>
               <X size={24} weight="bold" />
             </button>
@@ -317,7 +322,9 @@ const ModalGeneratePaymentLink = ({
               <PiggyBank size={35} />
             </div>
             <div className="modalGeneratePaymentLink__success-amount-info">
-              <span className="modalGeneratePaymentLink__success-amount-label">Monto</span>
+              <span className="modalGeneratePaymentLink__success-amount-label">
+                {tCommon("fields.amount")}
+              </span>
               <span className="modalGeneratePaymentLink__success-amount-value">
                 {formatCurrency(successData.amount)}
               </span>
@@ -339,7 +346,7 @@ const ModalGeneratePaymentLink = ({
               onClick={handleSendTemplate}
               disabled={isSendingTemplate}
             >
-              Enviar plantilla
+              {t("sendTemplate")}
               {isSendingTemplate ? <Spin size="small" /> : <ArrowUpRight size={16} />}
             </button>
           </div>
@@ -347,19 +354,21 @@ const ModalGeneratePaymentLink = ({
           <div className="modalGeneratePaymentLink__success-divider" />
 
           <div className="modalGeneratePaymentLink__success-details">
-            <h3 className="modalGeneratePaymentLink__success-details-title">
-              Detalles de la transacción
-            </h3>
+            <h3 className="modalGeneratePaymentLink__success-details-title">{t("details")}</h3>
 
             <div className="modalGeneratePaymentLink__success-details-row">
-              <span className="modalGeneratePaymentLink__success-details-label">Status</span>
+              <span className="modalGeneratePaymentLink__success-details-label">
+                {tCommon("fields.status")}
+              </span>
               <div className="modalGeneratePaymentLink__success-details-status">
                 {successData.status}
               </div>
             </div>
 
             <div className="modalGeneratePaymentLink__success-details-row">
-              <span className="modalGeneratePaymentLink__success-details-label">Cliente</span>
+              <span className="modalGeneratePaymentLink__success-details-label">
+                {tCommon("fields.customer")}
+              </span>
               <span className="modalGeneratePaymentLink__success-details-value">
                 {successData.client}
               </span>
@@ -367,7 +376,7 @@ const ModalGeneratePaymentLink = ({
 
             <div className="modalGeneratePaymentLink__success-details-row">
               <span className="modalGeneratePaymentLink__success-details-label">
-                Fecha creación
+                {t("createdAt")}
               </span>
               <span className="modalGeneratePaymentLink__success-details-value">
                 {dayjs(createdAt).format("DD/MM/YYYY HH:mm")}
@@ -376,7 +385,7 @@ const ModalGeneratePaymentLink = ({
 
             <div className="modalGeneratePaymentLink__success-details-row">
               <span className="modalGeneratePaymentLink__success-details-label">
-                Fecha expiración
+                {t("expiresAt")}
               </span>
               <span className="modalGeneratePaymentLink__success-details-value">
                 {dayjs(successData.expiration).format("DD/MM/YYYY HH:mm")}
@@ -384,7 +393,9 @@ const ModalGeneratePaymentLink = ({
             </div>
 
             <div className="modalGeneratePaymentLink__success-details-row">
-              <span className="modalGeneratePaymentLink__success-details-label">Descripción</span>
+              <span className="modalGeneratePaymentLink__success-details-label">
+                {tCommon("fields.description")}
+              </span>
               <span className="modalGeneratePaymentLink__success-details-value">
                 {formDescription}
               </span>
@@ -393,7 +404,7 @@ const ModalGeneratePaymentLink = ({
 
           <div className="modalGeneratePaymentLink__success-footer">
             <PrincipalButton customStyles={{ gridColumn: "2 / 3" }} fullWidth onClick={handleClose}>
-              Finalizar
+              {tCommon("actions.finish")}
             </PrincipalButton>
           </div>
         </div>

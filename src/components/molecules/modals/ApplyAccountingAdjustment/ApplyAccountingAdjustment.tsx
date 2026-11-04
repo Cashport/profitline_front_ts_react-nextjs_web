@@ -6,6 +6,7 @@ import UiTabs from "@/components/ui/ui-tabs";
 import ItemApplyModal from "@/components/atoms/ItemsApplyModal/ItemsApplyModal";
 import Table, { ColumnsType } from "antd/es/table";
 import { InputNumber, Modal } from "antd";
+import { useTranslations } from "use-intl";
 import EvidenceModal from "@/modules/clients/components/wallet-tab-evidence-modal/wallet-tab-evidence-modal";
 import { applyAccountingAdjustment } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useParams } from "next/navigation";
@@ -49,6 +50,8 @@ export const ApplyAccountingAdjustment = ({
   onClosePrincipalModal,
   invoiceSelected = []
 }: Props) => {
+  const t = useTranslations("modals.applyAdjustment");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
@@ -152,7 +155,7 @@ export const ApplyAccountingAdjustment = ({
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        alert("El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.");
+        alert(t("fileTooLarge"));
         return;
       }
       setSelectedEvidence(selectedEvidence ? [...selectedEvidence, rawFile] : [rawFile]);
@@ -170,7 +173,7 @@ export const ApplyAccountingAdjustment = ({
       const file = files[0];
       const fileSizeInMB = file.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        alert("El archivo es demasiado grande. Por favor, sube un archivo dse menos de 30 MB.");
+        alert(t("fileTooLarge"));
         return;
       }
       setSelectedEvidence(selectedEvidence ? [...selectedEvidence, file] : [file]);
@@ -207,7 +210,7 @@ export const ApplyAccountingAdjustment = ({
       if (response.status === 200) {
         messageApi.open({
           type: "success",
-          content: "Ajuste contable aplicado correctamente"
+          content: t("success")
         });
         setOpenEvidenceModal(false);
         onClosePrincipalModal && onClosePrincipalModal();
@@ -215,7 +218,7 @@ export const ApplyAccountingAdjustment = ({
     } catch (error) {
       messageApi.open({
         type: "error",
-        content: "Error al aplicar el ajuste contable"
+        content: t("error")
       });
       console.error("Error applying accounting adjustment:", error);
     } finally {
@@ -225,25 +228,25 @@ export const ApplyAccountingAdjustment = ({
 
   const columns: ColumnsType<IcurrentInvoices> = [
     {
-      title: "ID Factura",
+      title: t("columns.invoiceId"),
       dataIndex: "id",
       key: "id",
       render: (text, record) => <a target="_blank">{record.id_erp}</a>
     },
     {
-      title: "Pendiente",
+      title: t("columns.outstanding"),
       dataIndex: "current_value",
       key: "current_value",
       render: (text) => `$${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
     },
     {
-      title: "Saldo nuevo",
+      title: t("columns.newBalance"),
       dataIndex: "newBalance",
       key: "newBalance",
       render: (text) => `$${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
     },
     {
-      title: "Valor a aplicar",
+      title: t("columns.amountToApply"),
       key: "applyValue",
       className: "column__apply__value",
       render: (_, record) => (
@@ -270,7 +273,7 @@ export const ApplyAccountingAdjustment = ({
 
   return (
     <div className="modalContentApply">
-      <p className="subTitleModalApply">Define el monto a aplicar a cada factura</p>
+      <p className="subTitleModalApply">{t("subtitle")}</p>
       {selectedNotes.length > 1 && (
         <UiTabs
           tabs={selectedNotes.map((row) => row.id.toString())}
@@ -290,7 +293,7 @@ export const ApplyAccountingAdjustment = ({
         handleOk={() => setOpenEvidenceModal(true)}
         onClose={() => setCurrentView("select")}
         isConfirmDisabled={!selectedNotes.length}
-        titleConfirm="Continuar"
+        titleConfirm={tCommon("actions.continue")}
       />
 
       <Modal

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { DISCOUNTS_BASE } from "../constants/routes";
@@ -14,13 +15,11 @@ interface DiscountsLayoutProps {
  * de segundo nivel el header muestra "‹" para volver al listado (docs/DESIGN.md §4).
  */
 export default function DiscountsLayout({ children }: DiscountsLayoutProps) {
+  const t = useTranslations("discounts");
   const isList = usePathname() === DISCOUNTS_BASE;
 
   return (
-    <ViewWrapper
-      headerTitle="Configuración de descuentos"
-      headerBack={isList ? undefined : DISCOUNTS_BASE}
-    >
+    <ViewWrapper headerTitle={t("title")} headerBack={isList ? undefined : DISCOUNTS_BASE}>
       {children}
     </ViewWrapper>
   );

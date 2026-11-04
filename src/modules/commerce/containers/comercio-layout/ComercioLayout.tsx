@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ConfigProvider, theme as antdTheme } from "antd";
+import { useTranslations } from "use-intl";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { MessageProvider } from "@/context/MessageContext";
@@ -15,8 +16,9 @@ interface ComercioLayoutClientProps {
 
 function ComercioChrome({ children }: ComercioLayoutClientProps) {
   const pathname = usePathname();
+  const t = useTranslations("commerce.layout");
   const { resolvedTheme } = useTheme();
-  const isDashboard = pathname.startsWith("/comercio/dashboard");
+  const isDashboard = pathname.startsWith("/commerce/dashboard");
   // Dark mode is scoped to the dashboard only; every other comercio route stays light.
   const isDark = isDashboard && resolvedTheme === "dark";
 
@@ -29,14 +31,14 @@ function ComercioChrome({ children }: ComercioLayoutClientProps) {
   }, [isDark]);
 
   // Pantallas de segundo nivel: llevan "‹" volver a Mis pedidos (DESIGN.md §4).
-  let headerTitle = "Mis pedidos";
+  let headerTitle = t("myOrders");
   let headerBack: string | undefined;
-  if (pathname.startsWith("/comercio/pedidoConfirmado")) {
-    headerTitle = "Pedido confirmado";
-    headerBack = "/comercio";
-  } else if (pathname.startsWith("/comercio/pedido")) {
-    headerTitle = "Crear orden";
-    headerBack = "/comercio";
+  if (pathname.startsWith("/commerce/order-confirmed")) {
+    headerTitle = t("orderConfirmed");
+    headerBack = "/commerce";
+  } else if (pathname.startsWith("/commerce/order")) {
+    headerTitle = t("createOrder");
+    headerBack = "/commerce";
   }
 
   return (

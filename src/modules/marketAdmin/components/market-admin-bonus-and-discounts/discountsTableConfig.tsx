@@ -1,25 +1,27 @@
-const ESTADO_STYLES: Record<string, string> = {
-  Activo: "bg-[#E8F9E8] text-[#1A7A1A]",
-  Inactivo: "bg-[#F0F0F0] text-[#999999]"
-};
+import { useTranslations } from "use-intl";
+import { getActiveLocale } from "@/i18n/translator";
+
+const ACTIVE_STYLE = "bg-[#E8F9E8] text-[#1A7A1A]";
+const INACTIVE_STYLE = "bg-[#F0F0F0] text-[#999999]";
 
 const TIPO_STYLES: Record<string, string> = {
   Flex: "bg-[#141414] text-white",
   "Promos Mes": "bg-[#F5F0FF] text-[#7C4DFF]"
 };
 
-const MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-
 export const PAGE_SIZE = 20;
 
 // El backend recibe `active` como 1/0; "todos" significa no enviar el parámetro.
 export const ESTADO_FILTER_ALL = "todos";
 
-export const ESTADO_FILTER_OPTIONS = [
-  { value: ESTADO_FILTER_ALL, label: "Todos" },
-  { value: "1", label: "Activo" },
-  { value: "0", label: "Inactivo" }
-];
+export const useEstadoFilterOptions = () => {
+  const tCommon = useTranslations("common.status");
+  return [
+    { value: ESTADO_FILTER_ALL, label: tCommon("all") },
+    { value: "1", label: tCommon("active") },
+    { value: "0", label: tCommon("inactive") }
+  ];
+};
 
 // Mismo alto que el buscador (--control-h); el line-height descuenta los 2px de borde.
 export const ESTADO_SELECT_CLASSNAME = [
@@ -36,18 +38,21 @@ export const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } 
 export const formatDate = (iso: string) => {
   const date = new Date(iso);
   if (isNaN(date.getTime())) return iso;
-  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  return new Intl.DateTimeFormat(getActiveLocale(), {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(date);
 };
 
-export const getStatusLabel = (active: number) => (active === 1 ? "Activo" : "Inactivo");
-
 export const StatusPill = ({ active }: { active: number }) => {
-  const label = getStatusLabel(active);
+  const tCommon = useTranslations("common.status");
+  const isActive = active === 1;
   return (
     <span
-      className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${ESTADO_STYLES[label] ?? ""}`}
+      className={`text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit ${isActive ? ACTIVE_STYLE : INACTIVE_STYLE}`}
     >
-      {label}
+      {isActive ? tCommon("active") : tCommon("inactive")}
     </span>
   );
 };

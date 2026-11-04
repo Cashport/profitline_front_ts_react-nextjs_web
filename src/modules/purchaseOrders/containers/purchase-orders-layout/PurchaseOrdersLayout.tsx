@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ConfigProvider, theme as antdTheme } from "antd";
+import { useTranslations } from "use-intl";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { MessageProvider } from "@/context/MessageContext";
@@ -14,6 +15,7 @@ interface PurchaseOrdersLayoutProps {
 }
 
 function PurchaseOrdersChrome({ children }: PurchaseOrdersLayoutProps) {
+  const t = useTranslations("purchaseOrders.layout");
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
   const isDashboard = pathname.startsWith("/purchase-orders/dashboard");
@@ -33,7 +35,7 @@ function PurchaseOrdersChrome({ children }: PurchaseOrdersLayoutProps) {
 
   const content = (
     <ViewWrapper
-      headerTitle="Ordenes de compra"
+      headerTitle={t("title")}
       headerBack={isList || isDashboard ? undefined : "/purchase-orders"}
       // El dashboard pinta su propio Header (sus filtros viven en su contexto).
       hideHeader={isDashboard}

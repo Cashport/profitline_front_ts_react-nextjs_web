@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 import { MessageInstance } from "antd/es/message/interface";
 import { API } from "@/utils/api/api";
@@ -41,12 +42,12 @@ export const addChannelBR = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `El canal fue creado exitosamente.`
+        content: getTranslator("shared")("services.channelCreated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
     return response;
@@ -71,12 +72,12 @@ export const addLineBR = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `La Linea fue creada exitosamente.`
+        content: getTranslator("shared")("services.lineCreated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
     return response;
@@ -101,12 +102,12 @@ export const addSublineBR = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `La Sublinea fue creada exitosamente.`
+        content: getTranslator("shared")("services.sublineCreated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
     return response;
@@ -126,12 +127,12 @@ export const removeChannelBR = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `El canal fue eliminado exitosamente.`
+        content: getTranslator("shared")("services.channelDeleted")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
     return response;
@@ -152,12 +153,12 @@ export const removeLineBR = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `La linea fue eliminada exitosamente.`
+        content: getTranslator("shared")("services.lineDeleted")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
     return response;
@@ -178,12 +179,12 @@ export const removeSublineBR = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `La sublinea fue eliminada exitosamente.`
+        content: getTranslator("shared")("services.sublineDeleted")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
     return response;

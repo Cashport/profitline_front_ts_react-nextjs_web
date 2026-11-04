@@ -1,5 +1,7 @@
 import dayjs from "dayjs";
 
+import { getTranslator } from "@/i18n/translator";
+
 import type { IClientsHomeExecutiveCatalogItem } from "@/types/clients/IClientsHome";
 import type { DuePeriod } from "../constants/clients-home";
 
@@ -61,31 +63,32 @@ export const fmtIsoDate = (iso: string | null): string => {
   return `${d}/${m}/${y}`;
 };
 
-export const clientsLabel = (n: number) => `${n} ${n === 1 ? "cliente" : "clientes"}`;
+/** "12 clientes" / "12 customers". */
+export const clientsLabel = (n: number) => getTranslator("common")("count.customers", { count: n });
 
 /** Rango de vencimientos de un periodo predefinido. */
 export const duePeriodRange = (period: DuePeriod): { from: string; to: string } => {
   const today = dayjs();
   const f = (d: dayjs.Dayjs) => d.format("YYYY-MM-DD");
   switch (period) {
-    case "Hoy":
+    case "today":
       return { from: f(today), to: f(today) };
-    case "Esta semana": {
+    case "thisWeek": {
       // Semana de lunes a domingo.
       const monday = today.subtract((today.day() + 6) % 7, "day");
       return { from: f(monday), to: f(monday.add(6, "day")) };
     }
-    case "Mes actual":
+    case "currentMonth":
       return { from: f(today.startOf("month")), to: f(today.endOf("month")) };
-    case "Último mes": {
+    case "lastMonth": {
       const prev = today.subtract(1, "month");
       return { from: f(prev.startOf("month")), to: f(prev.endOf("month")) };
     }
-    case "Último trimestre":
+    case "lastQuarter":
       return { from: f(today.subtract(3, "month")), to: f(today) };
-    case "YTD":
+    case "ytd":
       return { from: f(today.startOf("year")), to: f(today) };
-    case "Últimos 12 meses":
+    case "last12Months":
       return { from: f(today.subtract(12, "month")), to: f(today) };
     default:
       return { from: f(today), to: f(today) };

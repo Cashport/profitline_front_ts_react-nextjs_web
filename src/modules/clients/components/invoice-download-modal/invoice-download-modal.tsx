@@ -1,8 +1,8 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAdaptiveImageModalWidth } from "@/components/molecules/modals/FileDownloadModal/useAdaptiveImageModalWidth";
-
 
 interface InvoiceDownloadModalProps {
   isModalOpen: boolean;
@@ -17,6 +17,8 @@ const InvoiceDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
   handleCloseModal,
   title
 }) => {
+  const t = useTranslations("clients.invoiceDownload");
+  const tCommon = useTranslations("common");
   const { modalWidth, imgRef, onImgLoad } = useAdaptiveImageModalWidth(url, isModalOpen);
 
   return (
@@ -25,7 +27,7 @@ const InvoiceDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
         title ? (
           <div className="title_modal_file_download">{title}</div>
         ) : (
-          <div className="title_modal_file_download">factura</div>
+          <div className="title_modal_file_download">{t("defaultTitle")}</div>
         )
       }
       className="file-download-modal"
@@ -41,10 +43,10 @@ const InvoiceDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
             target="_blank"
             rel="noopener noreferrer"
           >
-            Descargar
+            {tCommon("actions.download")}
           </a>
           <button type="button" className="button-check" onClick={() => handleCloseModal(false)}>
-            Entendido
+            {t("gotIt")}
           </button>
         </div>
       }
@@ -55,7 +57,7 @@ const InvoiceDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
           <img
             ref={imgRef}
             src={url}
-            alt="Document"
+            alt={t("imageAlt")}
             onLoad={onImgLoad}
             style={{ visibility: modalWidth ? "visible" : "hidden" }}
           />

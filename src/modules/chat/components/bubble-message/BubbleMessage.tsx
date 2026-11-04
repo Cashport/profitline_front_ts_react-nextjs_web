@@ -13,6 +13,9 @@ import { IMessage, IWhatsAppTemplate } from "@/types/chat/IChat";
 import { TypeContactMessage } from "@/types/chat/messages";
 import { formatTime, formatWhatsAppText } from "@/modules/chat/utils/format";
 import AudioMessage from "@/modules/chat/components/audio-message/AudioMessage";
+import { useTranslations } from "use-intl";
+
+type BubbleT = ReturnType<typeof useTranslations<"chat.bubble">>;
 
 interface BubbleMessageProps {
   message: IMessage;
@@ -23,23 +26,23 @@ interface BubbleMessageProps {
   onMediaLoad: () => void;
 }
 
-function quotedPreviewFor(referenced: IMessage | undefined): string {
-  if (!referenced) return "mensaje no disponible";
+function quotedPreviewFor(referenced: IMessage | undefined, t: BubbleT): string {
+  if (!referenced) return t("quoted.unavailable");
   switch (referenced.type) {
     case "IMAGE":
-      return "imagen";
+      return t("quoted.image");
     case "STICKER":
-      return "sticker";
+      return t("quoted.sticker");
     case "AUDIO":
-      return "audio";
+      return t("quoted.audio");
     case "DOCUMENT":
-      return referenced.content || "documento";
+      return referenced.content || t("quoted.document");
     case "CONTACTS":
-      return "contacto";
+      return t("quoted.contact");
     case "TEMPLATE":
-      return "plantilla";
+      return t("quoted.template");
     default:
-      return referenced.content || "mensaje";
+      return referenced.content || t("quoted.message");
   }
 }
 
@@ -140,6 +143,8 @@ export default function BubbleMessage({
   onPreviewImage,
   onMediaLoad
 }: BubbleMessageProps) {
+  const t = useTranslations("chat.bubble");
+  const tCommon = useTranslations("common");
   const mine = m.direction === "OUTBOUND";
   const footer = (
     <Footer timestamp={m.timestamp} mine={mine} status={m.status} authorType={m.authorType} />
@@ -148,14 +153,16 @@ export default function BubbleMessage({
   const aditionals = m.metadata?.aditionals;
   if (aditionals?.type === "reaction" && aditionals?.reaction?.emoji) {
     const referenced = messagesByWaId.get(aditionals.reaction.message_id);
-    const quoted = quotedPreviewFor(referenced);
+    const quoted = quotedPreviewFor(referenced, t);
     const truncated = quoted.length > 80 ? `${quoted.slice(0, 80)}…` : quoted;
     const quoteIsMissing = !referenced;
 
     return (
       <BubbleWrapper mine={mine} customerName={customerName} padding="px-3 py-2">
         <div className="text-[13px] opacity-80">
-          Reaccionó <span className="text-base align-middle">{aditionals.reaction.emoji}</span> a:
+          {t.rich("reacted", {
+            emoji: () => <span className="text-base align-middle">{aditionals.reaction.emoji}</span>
+          })}
         </div>
         <div
           className={`mt-1 border-l-2 pl-2 text-[13px] ${mine ? "border-white/40" : "border-black/30"} opacity-80 ${quoteIsMissing ? "italic" : ""}`}
@@ -172,7 +179,7 @@ export default function BubbleMessage({
     if (contacts.length === 0) {
       return (
         <BubbleWrapper mine={mine} customerName={customerName} padding="p-2">
-          Contacto sin datos
+          {t("contactNoData")}
           {footer}
         </BubbleWrapper>
       );
@@ -182,10 +189,10 @@ export default function BubbleMessage({
         <div className="space-y-2">
           {contacts.map((contact, index) => (
             <div key={index} className={contacts.length > 1 ? "border rounded-lg p-2" : ""}>
-              <div className="font-semibold">{contact.name.formatted_name || "Sin nombre"}</div>
+              <div className="font-semibold">{contact.name.formatted_name || t("noName")}</div>
               <div className="text-sm text-muted-foreground">
                 {contact.phones.map((phone) => phone.wa_id || phone.phone).join(", ") ||
-                  "Sin teléfono"}
+                  t("noPhone")}
               </div>
             </div>
           ))}
@@ -201,11 +208,11 @@ export default function BubbleMessage({
         <button
           onClick={() => onPreviewImage(m.mediaUrl!)}
           className="group relative block overflow-hidden rounded-lg"
-          aria-label="Ver imagen"
+          aria-label={t("viewImage")}
         >
           <img
             src={m.mediaUrl ?? "/placeholder.svg"}
-            alt="Imagen enviada"
+            alt={t("sentImage")}
             className="rounded-lg object-cover max-h-72 w-full"
             onLoad={onMediaLoad}
           />
@@ -224,14 +231,14 @@ export default function BubbleMessage({
         <button
           onClick={() => window.open(m.mediaUrl!, "_blank")}
           className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
-          aria-label="Abrir documento"
+          aria-label={t("openDocument")}
         >
           <div className="rounded-lg bg-[#011822] p-3 border border-white/20">
             <FileArrowDown className="h-6 w-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
-            <div className="text-[13px] text-muted-foreground">Haz clic para abrir</div>
+            <div className="text-sm font-medium truncate">{m.content || t("document")}</div>
+            <div className="text-[13px] text-muted-foreground">{t("clickToOpen")}</div>
           </div>
         </button>
         {footer}
@@ -257,14 +264,14 @@ export default function BubbleMessage({
     }
 
     if (templateMap.size === 0) {
-      return <div className="text-gray-500">Cargando plantilla...</div>;
+      return <div className="text-gray-500">{t("loadingTemplate")}</div>;
     }
 
     const template = templateMap.get(m.templateName!);
 
     if (!template) {
       return (
-        <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
+        <div className="text-red-500">{t("templateNotFound", { name: m.templateName ?? "" })}</div>
       );
     }
 
@@ -301,7 +308,7 @@ export default function BubbleMessage({
             rel="noopener noreferrer"
             className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-[13px] font-semibold text-[#141414] hover:opacity-90"
           >
-            Ver detalle
+            {tCommon("actions.viewDetail")}
           </a>
         )}
         {footer}

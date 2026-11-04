@@ -1,0 +1,290 @@
+{
+  "boards": {
+    "torre": {
+      "name": "Collections Control Tower",
+      "description": "Target, forecast, payment plans and unapplied payments for the month"
+    },
+    "tramo": {
+      "name": "Receivables by Customer and Aging",
+      "description": "Outstanding amount by aging bucket and customer"
+    },
+    "apl": {
+      "name": "Cash Application",
+      "description": "Applied payments, unapplied payments and time to apply"
+    },
+    "nov": {
+      "name": "Disputes",
+      "description": "Open disputes by owner and age"
+    }
+  },
+  "boardSelector": {
+    "group": "Collections boards"
+  },
+  "pendingBoard": {
+    "inDesign": "This board is coming in a future iteration.",
+    "back": "Back to the Control Tower"
+  },
+  "groupings": {
+    "client": {
+      "label": "By customer",
+      "singular": "Customer",
+      "title": "Customers vs. target"
+    },
+    "executive": {
+      "label": "By collector",
+      "singular": "Collector",
+      "title": "Collectors vs. target"
+    },
+    "channel": {
+      "label": "By channel",
+      "singular": "Channel",
+      "title": "Channels vs. target"
+    },
+    "coordinator": {
+      "label": "By coordinator",
+      "singular": "Coordinator",
+      "title": "Coordinators vs. target"
+    }
+  },
+  "agreementViews": {
+    "all": "All",
+    "broken": "Broken",
+    "dueSoon": "Due in 7 days",
+    "fulfilled": "Fulfilled"
+  },
+  "pnaAges": {
+    "all": "All",
+    "over3": "Over 3 days",
+    "over7": "Over 7 days"
+  },
+  "curveReferences": {
+    "median": "6-month median",
+    "previous": "Previous month",
+    "both": "Both"
+  },
+  "statusPlural": {
+    "FULFILLED": "Fulfilled",
+    "BROKEN": "Broken",
+    "PENDING": "Pending"
+  },
+  "weekdays": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
+  },
+  "toolbar": {
+    "searchAria": "Search customer",
+    "searchPlaceholder": "Search customer or tax ID",
+    "period": "Period"
+  },
+  "filters": {
+    "management": "Division",
+    "coordinator": "Coordinator",
+    "executive": "Collector",
+    "channel": "Channel",
+    "customer": "Customer",
+    "search": "Search",
+    "aging": "Aging bucket",
+    "agreements": "Payment plans",
+    "segments": "{count} segments",
+    "remove": "Remove {label}"
+  },
+  "cutoff": {
+    "loading": "Loading cutoff…",
+    "updating": "Updating…",
+    "reprocess": "Reprocess",
+    "reload": "Reload"
+  },
+  "board": {
+    "loadingAria": "Loading the control tower",
+    "loadError": "We couldn't load the control tower",
+    "preparingTitle": "We're preparing the cash collected snapshot",
+    "preparingDescription": "This is the first time it's opened in this project: the board will appear on its own in a few seconds.",
+    "noProject": "Select a project to view the Collections Control Tower.",
+    "footNote": "Forecast = collected through the cutoff date + outstanding amount on pending payment plans due before month-end. Pace to date = what you should already have collected to hit the target if the month behaves like a typical one. Unapplied payment (PNA) = an identified payment not yet applied to invoices."
+  },
+  "excel": {
+    "downloading": "Downloading Excel…",
+    "error": "We couldn't download the Excel file.",
+    "unavailable": "Available once the API is connected",
+    "download": "Download to Excel"
+  },
+  "agingCard": {
+    "title": "Collected by aging bucket",
+    "collected": "Collected",
+    "share": "Share"
+  },
+  "applicationCard": {
+    "title": "Cash application",
+    "applied": "applied",
+    "leadTimeTitle": "Time to apply",
+    "thisMonth": "This month",
+    "previousMonth": "Previous month",
+    "within2Days": "Applied within 2 days",
+    "days": "{value} days",
+    "daysUnit": "days",
+    "leadTimeCaption": "time to apply",
+    "vsPrevious": "{delta} d vs prev. month",
+    "value": "Amount",
+    "ofCollected": "Of cash collected",
+    "pendingTitle": "Pending application",
+    "olderThan": "Older than {days} days",
+    "payments": "Payments",
+    "agedChip": "{count} over {days} days"
+  },
+  "goalCard": {
+    "title": "Collected",
+    "collected": "Collected",
+    "estimatedClose": "Estimated month-end",
+    "vsTarget": "Vs. target",
+    "vsAvgTitle": "vs. 3-month average",
+    "thisMonthAtDay": "This month through day {day}",
+    "avg3": "3-month average",
+    "vsAvgShort": "{value} vs. 3M avg.",
+    "target": "Target",
+    "ofTarget": "Of target",
+    "agreements": "Payment plans",
+    "pendingBeforeClose": "Pending before month-end",
+    "overdueBalance": "Past-due amount",
+    "forecast": "Forecast",
+    "paceTitle": "Pace to date",
+    "expectedAtDay": "Expected by day {day}",
+    "difference": "Difference",
+    "monthlyTarget": "Monthly target",
+    "remaining": "Remaining",
+    "paceLegend": "Pace to date <b>{value}</b>",
+    "forecastLegend": "Forecast <b>{value}</b> · {pct}",
+    "monthClosed": "Month closed · {pct}"
+  },
+  "goalTable": {
+    "columns": {
+      "collected": "Collected",
+      "goal": "Target",
+      "diff": "Diff.",
+      "compliance": "Progress",
+      "forecast": "Forecast"
+    },
+    "noGoal": "No target",
+    "progressTitle": "Progress vs. target",
+    "collected": "Collected",
+    "value": "Amount",
+    "toCome": "Still to come",
+    "vsTarget": "Vs. target",
+    "onPace": "{onPace} of {withGoal} with a target are on pace",
+    "viewBy": "View target by",
+    "empty": "No customers"
+  },
+  "agreementsTable": {
+    "title": "Payment plan detail",
+    "count": "{count, plural, one {# payment plan} other {# payment plans}}",
+    "viewAria": "View payment plans",
+    "columns": {
+      "dueDate": "Date",
+      "days": "Days late",
+      "balance": "Outstanding"
+    },
+    "days": "{count, plural, one {# day} other {# days}}",
+    "dueToday": "due today",
+    "dueIn": "due in {days} d",
+    "onTime": "on time",
+    "loaded": "loaded {date}",
+    "rescheduled": "resched. ×{count}",
+    "agreementTitle": "Payment plan",
+    "agreed": "Agreed",
+    "paid": "Paid",
+    "balance": "Outstanding",
+    "ofAgreed": "of {amount}",
+    "empty": "Nothing in this view for the current selection"
+  },
+  "agreementsChart": {
+    "title": "Payment plans by day",
+    "hint": "click to filter · Shift + click to add more",
+    "summaryTitle": "Summary · {month}",
+    "summary": "Summary",
+    "loaded": "Loaded ({count})",
+    "statusCount": "{status} ({count})",
+    "brokenCount": "{status} · outstanding ({count})",
+    "paidOfDue": "Paid of amount due",
+    "noCommitments": "No commitments",
+    "totalCount": "Total ({count})",
+    "aria": "Payment plans by commitment date",
+    "axisCommitted": "COMMITTED",
+    "today": "Today {date}"
+  },
+  "dailyChart": {
+    "title": "Cash collected by day",
+    "subtitle": "{period} · cumulative and daily cash collected",
+    "referenceAria": "Reference",
+    "cumulative": "Cumulative",
+    "projection": "Projection",
+    "target": "Target",
+    "previousMonth": "Previous month",
+    "expected": "Expected",
+    "dayTotal": "Collected this day",
+    "expectedDay": "Expected this day",
+    "projectedCumulative": "Projected cumulative",
+    "median6Short": "6M median",
+    "aria": "Cumulative and daily cash collected for the month",
+    "axisCumulative": "CUMULATIVE",
+    "axisDaily": "PER DAY"
+  },
+  "executivesTable": {
+    "columns": {
+      "progress": "Progress",
+      "collected": "Collected",
+      "goal": "Target",
+      "diff": "Diff. vs. target",
+      "pending": "Payment plans",
+      "forecast": "Forecast",
+      "agreementsCompliance": "% kept"
+    },
+    "hint": "click to filter",
+    "viewBy": "View by",
+    "collected": "Collected",
+    "activeAgreements": "Active payment plans",
+    "vsTarget": "Vs. target",
+    "complianceTitle": "Payment plan compliance",
+    "paidOfDue": "Paid of amount due",
+    "overdueAgreements": "Past-due payment plans",
+    "empty": "No data for this selection",
+    "total": "Total",
+    "noGoal": "No target"
+  },
+  "unappliedTable": {
+    "title": "Identified unapplied payments",
+    "columns": {
+      "id": "Payment ID",
+      "paidAt": "Payment date",
+      "days": "Time pending",
+      "amount": "Amount pending"
+    },
+    "today": "Today",
+    "openInCashport": "Open the payment in Cashport",
+    "viewDetail": "View payment details",
+    "unappliedTitle": "Unapplied payment",
+    "amount": "Amount",
+    "payments": "{count, plural, one {# payment} other {# payments}}",
+    "coordinatorsFiltering": "{count, plural, one {# coordinator filtering} other {# coordinators filtering}}",
+    "previousMonths": "({amount} from prior months)",
+    "filterAria": "Filter unapplied payments",
+    "byCoordinatorAria": "Filter unapplied payments by coordinator",
+    "excelName": "Unapplied payments",
+    "unappliedPayments": "Unapplied payments",
+    "empty": "No payments pending application in this view",
+    "avgDays": "{value} avg. days"
+  },
+  "rows": {
+    "noExecutive": "No collector",
+    "noChannel": "No channel",
+    "unassigned": "Unassigned",
+    "coordinatorShort": "Coord. {name}",
+    "channel": "Channel",
+    "channelLower": "channel",
+    "customers": "{count, plural, one {# customer} other {# customers}}",
+    "total": "Total"
+  }
+}

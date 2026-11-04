@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import { Flex, Modal, Table } from "antd";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { CaretLeft, CopySimple, Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -55,6 +56,8 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
   const clientId = extractSingleParam(params.clientId) || "";
   const height = useScreenHeight();
   const { showMessage } = useMessageApi();
+  const t = useTranslations("clients.applyModals");
+  const tCommon = useTranslations("common");
   const { mutate } = useAcountingAdjustment(clientId.toString(), projectId.toString(), 2);
   const { data: motives } = useFinancialDiscountMotives();
 
@@ -110,14 +113,14 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
 
     setColumns([
       {
-        title: "ID Factura",
+        title: t("shared.invoiceId"),
         dataIndex: "invoice",
         key: "invoice",
         className: "invoiceId"
       },
       ...dynamicColumns
     ]);
-  }, [adjustments, updateFlag]);
+  }, [adjustments, updateFlag, t]);
 
   useEffect(() => {
     if (isOpen) {
@@ -157,11 +160,11 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
           clientId,
           finalAdjustments.filter((adjustment) => adjustment !== null)
         );
-        showMessage("success", "Ajuste(s) creado correctamente");
+        showMessage("success", t("shared.created", { count: finalAdjustments.length }));
         mutate();
         onCancel(true);
       } catch (error) {
-        showMessage("error", "Error al crear el ajuste(s)");
+        showMessage("error", t("shared.createError"));
       }
       return setLoadingCreate(false);
     }
@@ -184,7 +187,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
       setProcessedData(proccessedData);
       setProcessed(true);
     } catch (error) {
-      showMessage("error", "Error al crear el ajuste(s)");
+      showMessage("error", t("shared.createError"));
     }
     setLoadingCreate(false);
   };
@@ -207,7 +210,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
       setDataSource(data);
     } catch (err) {
       console.error("Error pasting invoices:", err);
-      showMessage("error", "Error al pegar facturas. Por favor, inténtelo de nuevo.");
+      showMessage("error", t("createByInvoice.pasteError"));
     }
   };
 
@@ -233,13 +236,13 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
       >
         <div onClick={() => onCancel()} className="header">
           <CaretLeft size={24} />
-          <h2>Crear ajuste</h2>
+          <h2>{t("shared.createAdjustment")}</h2>
         </div>
 
         {processed ? (
           <div className="modalCreateAdjustmentByInvoice__summary">
             <Flex justify="space-between">
-              <p>Facturas ({processedData?.invoice})</p>
+              <p>{t("createByInvoice.invoicesCount", { count: processedData?.invoice })}</p>
               <p>{formatMoney(processedData?.total)}</p>
             </Flex>
 
@@ -266,7 +269,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
                   key={field.id}
                   name={`adjustments.${index}.adjustment`}
                   control={control}
-                  rules={{ required: "Tipo de ajuste es obligatorio" }}
+                  rules={{ required: t("createByInvoice.adjustmentTypeRequired") }}
                   render={({ field }) => (
                     <GeneralSelect
                       errors={errors?.adjustments?.[index]?.adjustment}
@@ -277,8 +280,8 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
                           handleSelectChange();
                         }
                       }}
-                      title="Tipo de ajuste"
-                      placeholder="Seleccionar tipo de ajuste"
+                      title={t("createByInvoice.adjustmentType")}
+                      placeholder={t("createByInvoice.adjustmentTypePlaceholder")}
                       options={
                         motives?.map((motive) => ({ value: motive.id, label: motive.name })) || []
                       }
@@ -296,12 +299,12 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
               onClick={() => append({ adjustment: undefined })}
             >
               <Plus />
-              Agregar otro ajuste
+              {t("createByInvoice.addAnother")}
             </button>
 
             <div className="pasteInvoices" onClick={handlePasteInvoices}>
               <CopySimple size={20} />
-              Pegar desde excel
+              {t("shared.pasteFromExcel")}
             </div>
           </>
         )}
@@ -317,7 +320,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
 
         <div className="modal-footer">
           <SecondaryButton fullWidth onClick={handleCancel}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </SecondaryButton>
 
           <PrincipalButton
@@ -326,7 +329,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
             fullWidth
             loading={loadingCreate}
           >
-            {processed ? "Aplicar" : "Procesar"}
+            {processed ? tCommon("actions.apply") : t("createByInvoice.process")}
           </PrincipalButton>
         </div>
       </Modal>

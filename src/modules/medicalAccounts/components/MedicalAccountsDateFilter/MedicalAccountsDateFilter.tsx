@@ -2,6 +2,7 @@
 
 import { Button, Dropdown } from "antd";
 import { Calendar } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 
@@ -16,6 +17,7 @@ export function MedicalAccountsDateFilter({
   onChange,
   onClear
 }: MedicalAccountsDateFilterProps) {
+  const t = useTranslations("medicalAccounts.toolbar");
   const isActive = Boolean(dateRange.start || dateRange.end);
 
   return (
@@ -32,7 +34,7 @@ export function MedicalAccountsDateFilter({
         style={{ height: "var(--control-h)" }}
         className={isActive ? "!border-cashport-black !text-cashport-black" : ""}
       >
-        Rango de fechas
+        {t("dateRange")}
       </Button>
     </Dropdown>
   );

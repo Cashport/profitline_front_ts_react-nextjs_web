@@ -9,6 +9,7 @@ import {
   WarningCircle
 } from "phosphor-react";
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { TableProps } from "antd/lib/table";
 import Link from "next/link";
 import style from "./ClientTypeView.module.scss";
@@ -86,6 +87,8 @@ interface ClientTypeViewProps {
 const { Text } = Typography;
 
 export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewProps) => {
+  const t = useTranslations("projects.requirements.clientType");
+  const tCommon = useTranslations("common");
   const [statusForm, setStatusForm] = useState<"edit" | "review">("review");
   const [isModalAddRequirementOpen, setIsModalAddRequirementOpen] = useState(false);
   const handleChangeStatusForm = (status: "edit" | "review") => {
@@ -94,22 +97,22 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
 
   const columns: TableProps<IClientRequirement>["columns"] = [
     {
-      title: "Descripción",
+      title: tCommon("fields.description"),
       dataIndex: "description",
       key: "description"
     },
     {
-      title: "Tipo",
+      title: tCommon("fields.type"),
       dataIndex: "type",
       key: "type"
     },
     {
-      title: "Vigencia",
+      title: t("validity"),
       dataIndex: "validity",
       key: "validity"
     },
     {
-      title: "Plantilla",
+      title: t("template"),
       dataIndex: "template",
       key: "template",
       render: (template: string) => {
@@ -124,20 +127,22 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
               }}
               href={`/requisitos/plantilla/${template}`}
             >
-              Documento <FileArrowDown size={16} />
+              {t("templateLink")} <FileArrowDown size={16} />
             </Link>
           );
         } else return <Text>-</Text>;
       }
     },
     {
-      title: "Obligatorio",
+      title: t("mandatory"),
       dataIndex: "isMandatory",
       key: "isMandatory",
-      render: (isMandatory: boolean) => <Text>{isMandatory ? "Si" : "No"}</Text>
+      render: (isMandatory: boolean) => (
+        <Text>{isMandatory ? tCommon("status.yes") : tCommon("status.no")}</Text>
+      )
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       key: "isActive",
       dataIndex: "isActive",
       render: (isActive: boolean) => (
@@ -146,12 +151,12 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
           className={isActive ? style.statusContainer : style.statusContainerPending}
         >
           <div className={isActive ? style.statusActive : style.statusPending} />
-          <Text>{isActive ? "Activo" : "Inactivo"}</Text>
+          <Text>{isActive ? tCommon("status.active") : tCommon("status.inactive")}</Text>
         </Flex>
       )
     },
     {
-      title: "Aprobaciones",
+      title: t("approvals"),
       dataIndex: "approvals_quantity",
       key: "approvals_quantity",
       render: (approvals_quantity: number) => (
@@ -194,12 +199,12 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
               <ButtonGenerateAction
                 onClick={() => {}}
                 icon={<Pencil size={20} />}
-                title="Editar"
+                title={tCommon("actions.edit")}
                 hideArrow
               />
               <ButtonGenerateAction
                 icon={<ArrowsClockwise size={16} />}
-                title="Inactivar"
+                title={t("inactivate")}
                 onClick={() => {}}
                 hideArrow
               />
@@ -214,6 +219,7 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
             }}
             onClick={() => {}}
             icon={<DotsThreeVertical size={20} />}
+            aria-label={t("moreActions")}
           />
         </Tooltip>
       )
@@ -247,7 +253,7 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
             handleChangeStatusForm(statusForm === "review" ? "edit" : "review");
           }}
         >
-          {statusForm === "review" ? "Editar" : "Guardar"}
+          {statusForm === "review" ? tCommon("actions.edit") : tCommon("actions.save")}
           <Pencil size={20} />
         </Button>
       </Flex>
@@ -274,7 +280,7 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
                       onClick={() => setIsModalAddRequirementOpen(true)}
                       icon={<Plus size={16} />}
                     >
-                      Agregar requerimiento
+                      {t("addRequirement")}
                     </Button>
                   </Table.Summary.Cell>
                 </Table.Summary.Row>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Modal, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
@@ -25,6 +26,8 @@ export default function ModalAgregarGrupos({
   onClose,
   disabled
 }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.addGroupsModal");
+  const tCommon = useTranslations("common.actions");
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
@@ -57,7 +60,7 @@ export default function ModalAgregarGrupos({
 
   const columns: ColumnsType<GrupoItem> = [
     {
-      title: "Grupo",
+      title: t("group"),
       dataIndex: "group_name",
       key: "group_name",
       onHeaderCell: headerCell,
@@ -71,13 +74,13 @@ export default function ModalAgregarGrupos({
       onCancel={onClose}
       centered
       width={704}
-      title={<span className="text-base font-bold text-[#141414]">Agregar grupo de clientes</span>}
+      title={<span className="text-base font-bold text-[#141414]">{t("title")}</span>}
       footer={null}
     >
       <div className="mb-4">
         <UiSearchInput
           id="modal-agregar-grupos-search"
-          placeholder="Buscar grupo..."
+          placeholder={t("searchPlaceholder")}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
@@ -89,7 +92,7 @@ export default function ModalAgregarGrupos({
         loading={disabled}
         pagination={false}
         scroll={{ y: 320 }}
-        locale={{ emptyText: "Todos los grupos ya están asignados." }}
+        locale={{ emptyText: t("empty") }}
         rowSelection={{
           columnWidth: 40,
           selectedRowKeys: visibleSelectedIds,
@@ -99,16 +102,14 @@ export default function ModalAgregarGrupos({
 
       {selectedIds.length > 0 && (
         <p className="mt-3 text-sm text-[#666666]">
-          {selectedIds.length === 1
-            ? "1 grupo seleccionado"
-            : `${selectedIds.length} grupos seleccionados`}
+          {t("selected", { count: selectedIds.length })}
         </p>
       )}
 
       <div className="mt-6">
         <FooterButtons
-          titleCancel="Cancelar"
-          titleConfirm="Agregar seleccionados"
+          titleCancel={tCommon("cancel")}
+          titleConfirm={t("confirm")}
           onClose={onClose}
           handleOk={handleAgregar}
           isConfirmDisabled={selectedIds.length === 0}

@@ -1,6 +1,7 @@
 "use client";
 
 import { AutoComplete, ConfigProvider, Input, Select } from "antd";
+import { useTranslations } from "use-intl";
 
 import { SearchFieldIcon, searchFieldAntdClass } from "@/components/ui/search-field/search-field";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
@@ -13,6 +14,7 @@ const HEADER_THEME = { token: { controlHeight: 36, borderRadius: 8 } };
 
 /** Herramientas de la torre en el encabezado: buscador de clientes, periodo y filtros. */
 export default function TorreToolbar({ data }: { data?: ICollectionTower }) {
+  const tc = useTranslations("collections.toolbar");
   const { filters, patch } = useTowerFilters();
 
   return (
@@ -27,14 +29,14 @@ export default function TorreToolbar({ data }: { data?: ICollectionTower }) {
       >
         <Input
           allowClear
-          aria-label="Buscar cliente"
-          placeholder="Buscar cliente o NIT"
+          aria-label={tc("searchAria")}
+          placeholder={tc("searchPlaceholder")}
           className={searchFieldAntdClass("page")}
           prefix={<SearchFieldIcon />}
         />
       </AutoComplete>
       <Select
-        aria-label="Periodo"
+        aria-label={tc("period")}
         className="w-[170px]"
         disabled={!data}
         value={filters.period ?? data?.period.key}

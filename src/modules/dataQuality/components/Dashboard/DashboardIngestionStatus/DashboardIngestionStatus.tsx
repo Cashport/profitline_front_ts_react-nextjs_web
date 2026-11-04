@@ -14,6 +14,7 @@ import {
   RefreshCw,
   XCircle
 } from "lucide-react";
+import { useLocale, useTranslations } from "use-intl";
 
 import { Card } from "@/modules/chat/ui/card";
 import {
@@ -66,7 +67,12 @@ function deriveClientStatus(client: IDashboardSummaryClientStatusClient): Client
   return "Procesado";
 }
 
+// Las fechas conservan el formato; solo cambian los nombres de mes y día según el idioma.
+const useDateLocale = () => (useLocale() === "en" ? "en-US" : "es-AR");
+
 function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFile }) {
+  const t = useTranslations("dataQuality.dashboard.ingestion");
+  const dateLocale = useDateLocale();
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
@@ -84,7 +90,7 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
       if (dow !== 0 && dow !== 6)
         entries.push({
           date,
-          label: date.toLocaleDateString("es-AR", {
+          label: date.toLocaleDateString(dateLocale, {
             day: "2-digit",
             month: "short",
             weekday: "short"
@@ -97,13 +103,15 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
       if (date.getDay() === 1)
         entries.push({
           date,
-          label: `Semana del ${date.toLocaleDateString("es-AR", { day: "2-digit", month: "short" })}`
+          label: t("weekOf", {
+            date: date.toLocaleDateString(dateLocale, { day: "2-digit", month: "short" })
+          })
         });
     }
   } else {
     entries.push({
       date: new Date(year, month, 1),
-      label: `${today.toLocaleDateString("es-AR", { month: "long", year: "numeric" })}`
+      label: `${today.toLocaleDateString(dateLocale, { month: "long", year: "numeric" })}`
     });
   }
 
@@ -123,26 +131,38 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
     DeliveryStatus,
     { label: string; bg: string; text: string; dot: string }
   > = {
-    ok: { label: "OK", bg: "rgba(48,234,3,0.1)", text: "#1a6600", dot: "#30EA03" },
-    retraso: { label: "Retraso", bg: "rgba(255,40,255,0.1)", text: "#a0008a", dot: "#FF28FF" },
-    pendiente: { label: "Pendiente", bg: "rgba(141,151,157,0.1)", text: "#8D979D", dot: "#D0D3D4" }
+    ok: { label: t("delivery.ok"), bg: "rgba(48,234,3,0.1)", text: "#1a6600", dot: "#30EA03" },
+    retraso: {
+      label: t("delivery.retraso"),
+      bg: "rgba(255,40,255,0.1)",
+      text: "#a0008a",
+      dot: "#FF28FF"
+    },
+    pendiente: {
+      label: t("delivery.pendiente"),
+      bg: "rgba(141,151,157,0.1)",
+      text: "#8D979D",
+      dot: "#D0D3D4"
+    }
   };
 
   return (
     <div>
       <p className="text-[13px] font-semibold mb-2" style={{ color: "#000000" }}>
-        Historial de entregas — {file.type_archive} (
-        {periodicity.charAt(0).toUpperCase() + periodicity.slice(1)})
+        {t("deliveryHistory", {
+          fileType: file.type_archive,
+          frequency: periodicity.charAt(0).toUpperCase() + periodicity.slice(1)
+        })}
       </p>
       <div className="rounded-lg border overflow-hidden" style={{ borderColor: "#D0D3D4" }}>
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50" style={{ borderColor: "#D0D3D4" }}>
               <TableHead className="text-[13px] font-semibold pl-3" style={{ color: "#000000" }}>
-                Fecha
+                {t("columns.date")}
               </TableHead>
               <TableHead className="text-[13px] font-semibold" style={{ color: "#000000" }}>
-                Estado
+                {t("columns.status")}
               </TableHead>
               <TableHead className="w-8 pr-2" />
             </TableRow>
@@ -174,7 +194,7 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
                           className="ml-1.5 text-[13px] font-semibold"
                           style={{ color: "#30EA03" }}
                         >
-                          hoy
+                          {t("today")}
                         </span>
                       )}
                     </span>
@@ -203,13 +223,13 @@ function DeliveryTimelineTable({ file }: { file: IDashboardSummaryClientStatusFi
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="text-[13px]">
                         <DropdownMenuItem className="text-[13px] gap-2">
-                          <DownloadCloud className="h-3.5 w-3.5" /> Descargar archivo
+                          <DownloadCloud className="h-3.5 w-3.5" /> {t("actions.download")}
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-[13px] gap-2">
-                          <RefreshCw className="h-3.5 w-3.5" /> Reprocesar
+                          <RefreshCw className="h-3.5 w-3.5" /> {t("actions.reprocess")}
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-[13px] gap-2 text-red-600">
-                          <Flag className="h-3.5 w-3.5" /> Reportar problema
+                          <Flag className="h-3.5 w-3.5" /> {t("actions.reportIssue")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -238,6 +258,7 @@ function ClientDetailPanel({
   open: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("dataQuality.dashboard.ingestion");
   const { country, client } = selection;
   const totalNovedades = client.novedades;
 
@@ -269,7 +290,7 @@ function ClientDetailPanel({
         <div className="px-5 py-4 flex flex-col gap-5">
           <div>
             <p className="text-[13px] font-semibold mb-2" style={{ color: "#000000" }}>
-              Detalle por tipo
+              {t("detailByType")}
             </p>
             <div className="rounded-lg border overflow-hidden" style={{ borderColor: "#D0D3D4" }}>
               <Table>
@@ -279,7 +300,7 @@ function ClientDetailPanel({
                       className="text-[13px] font-semibold pl-3"
                       style={{ color: "#333F48" }}
                     >
-                      Tipo
+                      {t("columns.type")}
                     </TableHead>
                     <TableHead
                       className="text-[13px] font-semibold text-center"
@@ -291,25 +312,25 @@ function ClientDetailPanel({
                       className="text-[13px] font-semibold text-center"
                       style={{ color: "#333F48" }}
                     >
-                      Esperados
+                      {t("columns.expected")}
                     </TableHead>
                     <TableHead
                       className="text-[13px] font-semibold text-center"
                       style={{ color: "#333F48" }}
                     >
-                      Transformados
+                      {t("columns.transformed")}
                     </TableHead>
                     <TableHead
                       className="text-[13px] font-semibold text-center"
                       style={{ color: "#333F48" }}
                     >
-                      Novedades
+                      {t("columns.issues")}
                     </TableHead>
                     <TableHead
                       className="text-[13px] font-semibold text-center pr-3"
                       style={{ color: "#333F48" }}
                     >
-                      Pendientes
+                      {t("columns.pending")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -334,7 +355,7 @@ function ClientDetailPanel({
           {totalNovedades > 0 && (
             <div className="rounded-lg p-3" style={{ backgroundColor: "#FEF2F2" }}>
               <p className="text-[13px] font-semibold text-red-700 mb-1.5">
-                {totalNovedades} novedades detectadas
+                {t("issuesDetected", { count: totalNovedades })}
               </p>
               <ul className="space-y-1">
                 {client.files
@@ -357,7 +378,7 @@ function ClientDetailPanel({
           {totalNovedades === 0 && (
             <div className="rounded-lg p-3" style={{ backgroundColor: "rgba(48,234,3,0.08)" }}>
               <p className="text-[13px] font-medium" style={{ color: "#1a6600" }}>
-                Sin novedades. Todos los procesos completados.
+                {t("noIssues")}
               </p>
             </div>
           )}
@@ -382,16 +403,16 @@ function NovedadDetailPanel({
   open: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("dataQuality.dashboard.ingestion");
   const { country, client } = selection;
 
   const tipo = file.observation
-    ? "Observacion"
+    ? t("issueType.observation")
     : file.transformation && file.transformation.toLowerCase().includes("no")
-      ? "Error de transformacion"
-      : "Novedad general";
+      ? t("issueType.transformationError")
+      : t("issueType.general");
 
-  const descripcion =
-    file.observation || `Se detectaron novedades en el archivo ${file.type_archive}.`;
+  const descripcion = file.observation || t("issuesInFile", { fileType: file.type_archive });
 
   const etapa = file.observation
     ? "Pipeline"
@@ -447,7 +468,7 @@ function NovedadDetailPanel({
                   className="text-[13px] font-medium px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: colors.bg, color: colors.text }}
                 >
-                  {etapa}
+                  {t(`stage.${etapa as "Pipeline" | "Transformacion"}`)}
                 </span>
               </div>
             </div>
@@ -465,6 +486,8 @@ function NovedadDetailPanel({
 }
 
 export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionStatusProps) {
+  const t = useTranslations("dataQuality.dashboard.ingestion");
+  const tCommon = useTranslations("common");
   const { selectedFileType } = useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "received" | "pending">("all");
@@ -538,13 +561,13 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
         style={{ borderColor: "#D0D3D4" }}
       >
         <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>
-          Estado de Archivos por Cliente
+          {t("title")}
         </h3>
         <div className="flex items-center gap-3">
           <SearchField
             value={search}
             onChange={setSearch}
-            placeholder="Buscar cliente..."
+            placeholder={t("searchPlaceholder")}
             className="w-48"
           />
           <Select
@@ -557,12 +580,12 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
               style={{ borderColor: "#D0D3D4", color: "#000000" }}
               disabled
             >
-              <SelectValue placeholder="Estado" />
+              <SelectValue placeholder={t("columns.status")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="received">Recibidos</SelectItem>
-              <SelectItem value="pending">Pendientes</SelectItem>
+              <SelectItem value="all">{tCommon("status.all")}</SelectItem>
+              <SelectItem value="received">{t("filterReceived")}</SelectItem>
+              <SelectItem value="pending">{t("filterPending")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -575,19 +598,19 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                 className="text-[13px] font-medium bg-white pl-6 w-[280px]"
                 style={{ color: "#6B7280" }}
               >
-                Pais / Cliente / Archivo
+                {t("columns.hierarchy")}
               </TableHead>
               <TableHead
                 className="text-[13px] font-medium bg-white w-32"
                 style={{ color: "#6B7280" }}
               >
-                Estado
+                {t("columns.status")}
               </TableHead>
               <TableHead
                 className="text-[13px] font-medium bg-white w-28"
                 style={{ color: "#6B7280" }}
               >
-                Categoria
+                {t("columns.category")}
               </TableHead>
               <TableHead
                 className="text-[13px] font-medium text-center bg-white w-20"
@@ -599,31 +622,31 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                 className="text-[13px] font-medium text-center bg-white w-24"
                 style={{ color: "#6B7280" }}
               >
-                Esperados
+                {t("columns.expected")}
               </TableHead>
               <TableHead
                 className="text-[13px] font-medium text-center bg-white w-28"
                 style={{ color: "#6B7280" }}
               >
-                Transformados
+                {t("columns.transformed")}
               </TableHead>
               <TableHead
                 className="text-[13px] font-medium text-center bg-white w-24"
                 style={{ color: "#6B7280" }}
               >
-                Novedades
+                {t("columns.issues")}
               </TableHead>
               <TableHead
                 className="text-[13px] font-medium text-center bg-white w-24"
                 style={{ color: "#6B7280" }}
               >
-                Pendientes
+                {t("columns.pending")}
               </TableHead>
               <TableHead
                 className="text-[13px] font-medium bg-white w-24 pr-6"
                 style={{ color: "#6B7280" }}
               >
-                Acciones
+                {t("columns.actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -631,7 +654,7 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
             {filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={9} className="text-center text-sm text-gray-500 py-8">
-                  No se encontraron resultados.
+                  {tCommon("status.noResults")}
                 </TableCell>
               </TableRow>
             )}
@@ -654,17 +677,17 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                           <ChevronRight className="h-4 w-4" />
                         )}
                       </span>
-                      <span
-                        className="text-[13px] font-semibold"
-                        style={{ color: "#111827" }}
-                      >
+                      <span className="text-[13px] font-semibold" style={{ color: "#111827" }}>
                         {country.country_name}
                       </span>
                       <span
                         className="text-[13px] px-2 py-0.5 rounded-md"
                         style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}
                       >
-                        {country.clients_count} clientes · {country.files_count} archivos
+                        {t("countrySummary", {
+                          customers: country.clients_count,
+                          files: country.files_count
+                        })}
                       </span>
                     </div>
                   </TableCell>
@@ -726,7 +749,7 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                                 {client.client_name}
                               </span>
                               <span className="text-[13px]" style={{ color: "#8D979D" }}>
-                                · {client.files_count} archivo{client.files_count !== 1 ? "s" : ""}
+                                · {t("fileCount", { count: client.files_count })}
                               </span>
                             </div>
                           </TableCell>
@@ -739,7 +762,7 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                                 className="w-1.5 h-1.5 rounded-full shrink-0"
                                 style={{ backgroundColor: badgeCfg.dot }}
                               />
-                              {badge}
+                              {t(`clientStatus.${badge}`)}
                             </span>
                           </TableCell>
                           <TableCell className="py-2.5" />
@@ -787,7 +810,7 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                                 setSelectedClient({ country, client });
                               }}
                               className="inline-flex items-center justify-center w-7 h-7 rounded-md transition-colors text-gray-400 hover:text-[#000000] hover:bg-gray-100"
-                              title={`Ver detalle de ${client.client_name}`}
+                              title={t("viewDetailOf", { name: client.client_name })}
                               disabled
                             >
                               <Eye className="h-4 w-4" />
@@ -850,19 +873,22 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
                                         className="text-[13px] gap-2"
                                         onClick={() => setSelectedClient({ country, client })}
                                       >
-                                        <Eye className="h-3.5 w-3.5" /> Ver detalle
+                                        <Eye className="h-3.5 w-3.5" />{" "}
+                                        {tCommon("actions.viewDetail")}
                                       </DropdownMenuItem>
                                       <DropdownMenuItem className="text-[13px] gap-2">
-                                        <DownloadCloud className="h-3.5 w-3.5" /> Descargar archivo
+                                        <DownloadCloud className="h-3.5 w-3.5" />{" "}
+                                        {t("actions.download")}
                                       </DropdownMenuItem>
                                       <DropdownMenuItem className="text-[13px] gap-2">
-                                        <RefreshCw className="h-3.5 w-3.5" /> Reprocesar
+                                        <RefreshCw className="h-3.5 w-3.5" />{" "}
+                                        {t("actions.reprocess")}
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
                                         className="text-[13px] gap-2 text-red-600"
                                         onClick={() => setNovedadTarget({ country, client, file })}
                                       >
-                                        <Flag className="h-3.5 w-3.5" /> Reportar problema
+                                        <Flag className="h-3.5 w-3.5" /> {t("actions.reportIssue")}
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>
@@ -880,11 +906,11 @@ export function DashboardIngestionStatus({ clientStatus }: DashboardIngestionSta
         className="px-5 py-3 border-t text-[13px] text-gray-500 flex items-center gap-4"
         style={{ borderColor: "#D0D3D4" }}
       >
-        <span>{filtered.length} paises</span>
+        <span>{t("countriesCount", { count: filtered.length })}</span>
         <span style={{ color: "#D0D3D4" }}>·</span>
-        <span>{totalClients} clientes</span>
+        <span>{t("customersCount", { count: totalClients })}</span>
         <span style={{ color: "#D0D3D4" }}>·</span>
-        <span>{totalFiles} archivos</span>
+        <span>{t("filesCount", { count: totalFiles })}</span>
       </div>
 
       {selectedClient && (

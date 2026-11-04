@@ -1,13 +1,10 @@
-import { Metadata } from "next";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Comunicaciones masivas",
-  description: "Gestor de comunicaciones masivas"
-};
+export const generateMetadata = () => pageMetadata("massCommunications");
 const MassCommunicationsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ViewWrapper headerTitle="Comunicaciones masivas" hideHeader>
+    <ViewWrapper headerTitleKey="massCommunications" hideHeader>
       {children}
     </ViewWrapper>
   );

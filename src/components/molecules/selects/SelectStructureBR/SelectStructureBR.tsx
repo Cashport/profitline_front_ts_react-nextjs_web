@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useState } from "react";
 import { Button, Flex, Popover, Spin, Typography, message } from "antd";
 import { Plus } from "phosphor-react";
@@ -16,6 +17,7 @@ interface Props {
   isDisabledEdit: boolean;
 }
 export const SelectStructureBR = ({ isDisabledEdit }: Props) => {
+  const t = useTranslations("shared.selects");
   const [messageApi, contextHolder] = message.useMessage();
 
   const [modalRemove, setModalRemove] = useState(initModalRemoveChanel);
@@ -36,8 +38,8 @@ export const SelectStructureBR = ({ isDisabledEdit }: Props) => {
   return (
     <>
       <div className="selectzonebr">
-      {contextHolder}
-        <Typography.Text className="title">Estructura</Typography.Text>
+        {contextHolder}
+        <Typography.Text className="title">{t("structure")}</Typography.Text>
         <Flex vertical className="bres">
           {isLoading ? (
             <Spin />
@@ -60,7 +62,7 @@ export const SelectStructureBR = ({ isDisabledEdit }: Props) => {
               placement="bottom"
             >
               <Button icon={<Plus size={"16px"} />} className="addButton" type="text">
-                Agregar Canal
+                {t("addChannel")}
               </Button>
             </Popover>
           )}

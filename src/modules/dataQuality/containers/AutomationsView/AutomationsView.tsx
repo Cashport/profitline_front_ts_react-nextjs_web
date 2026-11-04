@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select as AntSelect, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import UiSearchInput from "@/components/ui/search-input";
@@ -18,6 +19,7 @@ import { useBotsStatus } from "../../hooks/useBotsStatus";
 import { BotStatusFilter, IBotsSummary } from "../../types/automations";
 
 export default function AutomationsView() {
+  const t = useTranslations("dataQuality.automations");
   const router = useRouter();
   const { data: bots = [], isLoading, mutate } = useBotsStatus();
 
@@ -44,12 +46,12 @@ export default function AutomationsView() {
     try {
       const result = await runBotNow(bot.schedule_id);
       if (result.accepted) {
-        message.success("Se solicitó la ejecución del bot correctamente.");
+        message.success(t("runRequested"));
       } else {
-        message.error(result.schedulerMessage || "No se pudo iniciar la ejecución del bot.");
+        message.error(result.schedulerMessage || t("runError"));
       }
     } catch (error: any) {
-      message.error(error?.message || "No se pudo iniciar la ejecución del bot.");
+      message.error(error?.message || t("runError"));
     } finally {
       setExecutingScheduleId(null);
       await mutate();
@@ -103,14 +105,14 @@ export default function AutomationsView() {
 
   return (
     <div className="cp-page">
-      <Header title="Salud de Automatizaciones" back="/data-quality/alerts" />
+      <Header title={t("title")} back="/data-quality/alerts" />
 
       <div className="cp-card px-[18px] py-[14px]">
         <div className="mb-6">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1 min-w-64">
               <UiSearchInput
-                placeholder="Buscar cliente o bot..."
+                placeholder={t("searchPlaceholder")}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
@@ -120,11 +122,11 @@ export default function AutomationsView() {
               optionFilterProp="label"
               value={countryFilter}
               onChange={setCountryFilter}
-              placeholder="Todos los países"
+              placeholder={t("allCountries")}
               className="w-48"
               style={{ minWidth: "12rem", height: "var(--control-h)" }}
               options={[
-                { label: "Todos los países", value: "all" },
+                { label: t("allCountries"), value: "all" },
                 ...uniqueCountries.map((country) => ({ label: country, value: country }))
               ]}
             />
@@ -139,7 +141,7 @@ export default function AutomationsView() {
 
         <div className="pt-6">
           <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
-            Bots por cliente
+            {t("botsByCustomer")}
           </h3>
           <BotsTable
             bots={filteredBots}

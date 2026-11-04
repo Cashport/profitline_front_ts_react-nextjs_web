@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "use-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 
@@ -15,6 +16,8 @@ export function ApproveOrderModal({
   onConfirm,
   loading
 }: ApproveOrderModalProps) {
+  const t = useTranslations("purchaseOrders.approveModal");
+  const tCommon = useTranslations("common");
   const handleConfirm = () => {
     onConfirm();
     onOpenChange(false);
@@ -24,10 +27,10 @@ export function ApproveOrderModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">¿Está seguro?</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{t("title")}</DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <p className="text-sm text-gray-600">¿Desea aprobar esta orden de compra?</p>
+          <p className="text-sm text-gray-600">{t("description")}</p>
         </div>
         <div className="flex gap-3 justify-end">
           <Button
@@ -35,7 +38,7 @@ export function ApproveOrderModal({
             onClick={() => onOpenChange(false)}
             className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             onClick={handleConfirm}
@@ -43,7 +46,7 @@ export function ApproveOrderModal({
             className="flex-1 text-black font-semibold"
             style={{ backgroundColor: "#CBE71E" }}
           >
-            Confirmar
+            {tCommon("actions.confirm")}
           </Button>
         </div>
       </DialogContent>

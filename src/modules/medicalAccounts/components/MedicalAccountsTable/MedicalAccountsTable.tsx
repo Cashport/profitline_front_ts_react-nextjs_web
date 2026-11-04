@@ -2,6 +2,7 @@
 
 import { Button, Flex, Popconfirm, Table, TableProps } from "antd";
 import { Eye, Trash } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { deleteMedicalAccount } from "@/services/medicalAccounts/medicalAccounts";
@@ -42,18 +43,17 @@ export function MedicalAccountsTable({
   total,
   onPageChange
 }: MedicalAccountsTableProps) {
+  const t = useTranslations("medicalAccounts.table");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
 
   const handleDelete = async (record: IMedicalAccountListItem) => {
     try {
       await deleteMedicalAccount(record.id);
-      showMessage("success", "Cuenta médica eliminada correctamente.");
+      showMessage("success", t("deleteSuccess"));
       onDeleted?.();
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "No se pudo eliminar la cuenta médica."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("deleteError"));
     }
   };
 
@@ -66,7 +66,7 @@ export function MedicalAccountsTable({
       render: (value: number) => <span className="text-sm text-cashport-black">{value}</span>
     },
     {
-      title: "No. Pedido",
+      title: t("columns.orderNumber"),
       dataIndex: "order_number",
       key: "order_number",
       width: 130,
@@ -75,7 +75,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "No. Autorización",
+      title: t("columns.authorizationNumber"),
       dataIndex: "authorization_number",
       key: "authorization_number",
       width: 160,
@@ -84,7 +84,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "Paciente",
+      title: t("columns.patient"),
       key: "paciente",
       width: 200,
       render: (_: unknown, record: IMedicalAccountListItem) => (
@@ -97,7 +97,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "Fecha Cargue",
+      title: t("columns.uploadDate"),
       dataIndex: "created_at",
       key: "created_at",
       width: 120,
@@ -106,7 +106,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "Fecha Servicio",
+      title: t("columns.serviceDate"),
       dataIndex: "service_date",
       key: "service_date",
       width: 120,
@@ -115,7 +115,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "Régimen",
+      title: t("columns.regimen"),
       dataIndex: "regimen",
       key: "regimen",
       width: 110,
@@ -124,7 +124,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "EPS",
+      title: t("columns.eps"),
       dataIndex: "eps",
       key: "eps",
       width: 150,
@@ -133,7 +133,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "Tipo Servicio",
+      title: t("columns.serviceType"),
       dataIndex: "service_type",
       key: "service_type",
       width: 130,
@@ -142,7 +142,7 @@ export function MedicalAccountsTable({
       )
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "status_name",
       key: "status_name",
       width: 210,
@@ -165,16 +165,22 @@ export function MedicalAccountsTable({
             type="text"
             onClick={() => onOpenDetail?.(record)}
             icon={<Eye size={"1.3rem"} />}
+            aria-label={tCommon("actions.viewDetail")}
           />
           <Popconfirm
-            title="Eliminar cuenta médica"
-            description="¿Seguro que deseas eliminar esta cuenta médica?"
-            okText="Eliminar"
-            cancelText="Cancelar"
+            title={t("deleteConfirm.title")}
+            description={t("deleteConfirm.description")}
+            okText={tCommon("actions.delete")}
+            cancelText={tCommon("actions.cancel")}
             okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(record)}
           >
-            <Button type="text" danger icon={<Trash size={"1.3rem"} />} />
+            <Button
+              type="text"
+              danger
+              icon={<Trash size={"1.3rem"} />}
+              aria-label={tCommon("actions.delete")}
+            />
           </Popconfirm>
         </Flex>
       )

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import { Pencil, Save } from "lucide-react";
 import Header from "@/components/organisms/header";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -33,6 +34,8 @@ interface Props {
 }
 
 export default function MarketAdminPromotionDetail({ promotionId }: Props) {
+  const t = useTranslations("marketAdmin.promotionDetail");
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
 
@@ -63,11 +66,11 @@ export default function MarketAdminPromotionDetail({ promotionId }: Props) {
     if (!form || !detail) return;
 
     if (!form.nombre.trim() || !form.fechaInicio || form.niveles.length === 0) {
-      showMessage("error", "La promoción necesita nombre, fecha de inicio y al menos un nivel.");
+      showMessage("error", t("validation.incomplete"));
       return;
     }
     if (form.fechaFin && form.fechaFin < form.fechaInicio) {
-      showMessage("error", "La fecha de fin no puede ser anterior a la fecha de inicio.");
+      showMessage("error", t("validation.endBeforeStart"));
       return;
     }
 
@@ -76,13 +79,11 @@ export default function MarketAdminPromotionDetail({ promotionId }: Props) {
       await updatePromotion(promotionId, buildPromotionUpdatePayload(form, detail));
       await mutate();
       setForm(null);
-      showMessage("success", "Promoción actualizada exitosamente.");
+      showMessage("success", t("feedback.updated"));
     } catch (err) {
       showMessage(
         "error",
-        err instanceof Error && err.message
-          ? err.message
-          : "Ocurrió un error al actualizar la promoción."
+        err instanceof Error && err.message ? err.message : t("feedback.updateError")
       );
     } finally {
       setSaving(false);
@@ -92,9 +93,9 @@ export default function MarketAdminPromotionDetail({ promotionId }: Props) {
   return (
     <div className="cp-page min-h-full">
       <Header
-        title={detail?.name ?? "Promoción"}
+        title={detail?.name ?? t("fallbackTitle")}
         back={marketAdminDiscountsListPath(MARKET_ADMIN_DISCOUNTS_TABS.bonuses)}
-        titleExtra={`Promoción automática #${promotionId}`}
+        titleExtra={t("subtitle", { id: promotionId })}
       />
 
       <div className="cp-card overflow-hidden px-[18px] py-[14px]">
@@ -104,23 +105,19 @@ export default function MarketAdminPromotionDetail({ promotionId }: Props) {
           </div>
         ) : error || !detail ? (
           <div className="flex items-center justify-center py-16">
-            <p className="text-sm text-[#999999]">
-              {error?.message || "No se encontró la promoción."}
-            </p>
+            <p className="text-sm text-[#999999]">{error?.message || t("notFound")}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-end gap-2">
               {editBlocked && !editing && (
-                <p className="text-[13px] text-[#999999] mr-auto">
-                  Esta promoción tiene premios por categoría y no se puede editar desde aquí.
-                </p>
+                <p className="text-[13px] text-[#999999] mr-auto">{t("editBlocked")}</p>
               )}
               {editing ? (
                 <>
                   <div className="h-[var(--control-h)] flex-shrink-0">
                     <SecondaryButton onClick={() => setForm(null)} disabled={saving} bordered>
-                      Cancelar
+                      {tCommon("actions.cancel")}
                     </SecondaryButton>
                   </div>
                   <div className="h-[var(--control-h)] flex-shrink-0">
@@ -131,7 +128,7 @@ export default function MarketAdminPromotionDetail({ promotionId }: Props) {
                       icon={<Save size={15} />}
                       customStyles={{ fontSize: 14 }}
                     >
-                      {saving ? "Guardando…" : "Guardar cambios"}
+                      {saving ? tCommon("status.saving") : tCommon("actions.saveChanges")}
                     </PrincipalButton>
                   </div>
                 </>
@@ -143,7 +140,7 @@ export default function MarketAdminPromotionDetail({ promotionId }: Props) {
                     icon={<Pencil size={15} />}
                     customStyles={{ fontSize: 14 }}
                   >
-                    Editar promoción
+                    {t("edit")}
                   </PrincipalButton>
                 </div>
               )}

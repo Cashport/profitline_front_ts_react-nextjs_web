@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import "./createCreditNote.scss";
 import { FieldError, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -27,14 +28,19 @@ interface Props {
   clientIdParam?: string;
 }
 
-const schema = yup.object().shape({
-  motive: yup.string().required("Campo obligatorio"),
-  amount: yup.number().min(0, "El valor no puede ser negativo").required("Campo obligatorio"),
-  validity_range: yup.array().of(yup.date()).optional(),
-  expedition_date: yup.date().required("Campo obligatorio")
-});
+type CreateAdjustmentT = ReturnType<typeof useTranslations<"modals.createAdjustment">>;
+
+const buildSchema = (t: CreateAdjustmentT) =>
+  yup.object().shape({
+    motive: yup.string().required(t("required")),
+    amount: yup.number().min(0, t("negative")).required(t("required")),
+    validity_range: yup.array().of(yup.date()).optional(),
+    expedition_date: yup.date().required(t("required"))
+  });
 
 export const CreateCreditNote = ({ onClose, messageApi, projectIdParam, clientIdParam }: Props) => {
+  const t = useTranslations("modals.createAdjustment");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const {
     control,
     handleSubmit,
@@ -73,13 +79,13 @@ export const CreateCreditNote = ({ onClose, messageApi, projectIdParam, clientId
 
       messageApi.open({
         type: "success",
-        content: "Nota de credito creado con éxito"
+        content: t("credit.success")
       });
       onClose();
     } catch (error) {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error creando nota credito. Por favor, intente nuevamente."
+        content: t("credit.error")
       });
     } finally {
       setIsSubmitting(false);
@@ -88,37 +94,37 @@ export const CreateCreditNote = ({ onClose, messageApi, projectIdParam, clientId
 
   return (
     <div className="createCreditCustom">
-      <p className="subTitleModalAction">Ingresa la información para crear el nuevo descuento</p>
+      <p className="subTitleModalAction">{t("credit.subtitle")}</p>
       <form className="modalContent" onSubmit={handleSubmit(handleSubmitForm)}>
         <div className="containterForm">
           <InputSelect
-            titleInput="Motivo"
+            titleInput={t("reason")}
             nameInput="motive"
             control={control}
             error={errors.motive}
             options={motives?.map((motive) => ({ value: motive.name, label: motive.name })) || []}
             loading={isLoading}
             isError={isError}
-            placeholder="Seleccionar motivo"
+            placeholder={t("reasonPlaceholder")}
           />
           <InputFormMoney
-            titleInput="Cupo total"
+            titleInput={t("totalAmount")}
             nameInput="amount"
             control={control}
             error={errors.amount}
-            placeholder="Ingresar valor"
+            placeholder={t("amountPlaceholder")}
             typeInput="number"
             customStyle={{ width: "100%" }}
           />
           <InputDateForm
-            titleInput="Fecha de expedición"
+            titleInput={t("issueDate")}
             nameInput="expedition_date"
-            placeholder="Seleccionar fecha de expiración"
+            placeholder={t("issueDatePlaceholder")}
             control={control}
             error={errors.expedition_date}
           />
           <InputDateRange
-            titleInput="Rango de vigencia"
+            titleInput={t("validityRange")}
             nameInput="validity_range"
             control={control}
             error={errors.validity_range as FieldError}
@@ -130,7 +136,7 @@ export const CreateCreditNote = ({ onClose, messageApi, projectIdParam, clientId
           handleOk={handleSubmit(handleSubmitForm)}
           onClose={onClose}
           isConfirmDisabled={!isValid || isSubmitting}
-          titleConfirm="Crear Nota Crédito"
+          titleConfirm={t("credit.submit")}
         />
       </form>
     </div>

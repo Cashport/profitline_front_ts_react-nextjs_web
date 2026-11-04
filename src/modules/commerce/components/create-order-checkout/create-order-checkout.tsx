@@ -3,6 +3,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { confirmOrder, createDraft, createOrder } from "@/services/commerce/commerce";
@@ -61,6 +62,9 @@ export default function CheckoutPage() {
     businessUnit
   } = useContext(OrderViewContext);
   const { showMessage } = useMessageApi();
+  const t = useTranslations("commerce.checkout");
+  const tBlocked = useTranslations("commerce.blockedOrderModal");
+  const tCommon = useTranslations("common");
 
   const [multiEntrega, setMultiEntrega] = useState(false);
   const [entregas, setEntregas] = useState<IShippingInfo[]>([]);
@@ -238,7 +242,7 @@ export default function CheckoutPage() {
     try {
       setLoadingFinish(true);
       if (!client?.id) {
-        showMessage("error", "Cliente no encontrado");
+        showMessage("error", t("clientNotFound"));
         return;
       }
       const payload = buildOrderPayload(isElectronic);
@@ -260,17 +264,17 @@ export default function CheckoutPage() {
 
         const orders = response.data?.orders ?? [];
         if (orders.length === 0) {
-          throw new Error("No se pudo obtener la orden creada");
+          throw new Error(t("createdOrderNotFound"));
         }
 
         const [firstOrder, ...restOrders] = orders;
 
         restOrders.forEach((o) => {
-          const extraUrl = `/comercio/pedidoConfirmado/${o.orderId}`;
+          const extraUrl = `/commerce/order-confirmed/${o.orderId}`;
           window.open(extraUrl, "_blank", "noopener,noreferrer");
         });
 
-        const firstUrl = `/comercio/pedidoConfirmado/${firstOrder.orderId}${
+        const firstUrl = `/commerce/order-confirmed/${firstOrder.orderId}${
           queryParamsString ? `?${queryParamsString}` : ""
         }`;
         router.prefetch(firstUrl);
@@ -279,14 +283,14 @@ export default function CheckoutPage() {
     } catch (error) {
       console.error(error);
       if (error instanceof ApiError) {
-        showMessage("error", error.message || "Error al crear la orden");
+        showMessage("error", error.message || t("createOrderError"));
         if (error.status === 400 && Array.isArray(error.data)) {
           error.data.forEach((err: { msg?: string }) => {
             if (err.msg) showMessage("error", err.msg);
           });
         }
       } else {
-        showMessage("error", "Error al crear la orden");
+        showMessage("error", t("createOrderError"));
       }
     } finally {
       setLoadingFinish(false);
@@ -314,11 +318,11 @@ export default function CheckoutPage() {
 
   const handleFinishOrder = async () => {
     if (!confirmOrderData?.total || confirmOrderData.total <= 0) {
-      showMessage("error", "El total no es válido");
+      showMessage("error", t("invalidTotal"));
       return;
     }
     if (!order_split_details?.length) {
-      showMessage("error", "Faltan datos de envío");
+      showMessage("error", t("missingShippingData"));
       return;
     }
 
@@ -348,7 +352,7 @@ export default function CheckoutPage() {
     if (transactionResult?.transaction?.status === "APPROVED") {
       setIsElectronicBillingModalOpen(true);
     } else {
-      showMessage("info", "Pago no completado, orden no generada");
+      showMessage("info", t("paymentNotCompleted"));
     }
   };
 
@@ -363,7 +367,7 @@ export default function CheckoutPage() {
 
   const handlePaymentSupportSubmit = async () => {
     if (selectedPaymentSupport.length === 0) {
-      showMessage("error", "Por favor, adjunta el soporte de pago");
+      showMessage("error", t("attachRemittance"));
       return;
     }
 
@@ -385,11 +389,11 @@ export default function CheckoutPage() {
   const handleDraftOrder = async () => {
     if (!client?.id) return;
     if (!order_split_details?.length) {
-      showMessage("error", "Faltan datos de envío");
+      showMessage("error", t("missingShippingData"));
       return;
     }
     setLoadingDraft(true);
-    router.prefetch("/comercio");
+    router.prefetch("/commerce");
     try {
       const payload = buildOrderPayload(0);
       const response = (await createDraft(
@@ -400,10 +404,10 @@ export default function CheckoutPage() {
       )) as GenericResponse<{ id_order: number }>;
 
       if (response.status === 200) {
-        router.push("/comercio");
+        router.push("/commerce");
       }
     } catch {
-      showMessage("error", "Error creating draft");
+      showMessage("error", t("createDraftError"));
     } finally {
       setLoadingDraft(false);
     }
@@ -460,9 +464,9 @@ export default function CheckoutPage() {
         onClose={handleCrossSellingConfirmCancel}
         onCancel={handleCrossSellingConfirmCancel}
         onOk={handleCrossSellingConfirmOk}
-        title="¿Confirmas continuar el pedido con crosselling?"
-        okText="Sí, continuar"
-        cancelText="Cancelar"
+        title={t("confirmCrossSelling")}
+        okText={t("yesContinue")}
+        cancelText={tCommon("actions.cancel")}
       />
 
       <ModalConfirmAction
@@ -470,9 +474,9 @@ export default function CheckoutPage() {
         onClose={() => handleElectronicBillingClose(undefined)}
         onOk={() => handleElectronicBillingClose(true)}
         onCancel={() => handleElectronicBillingClose(false)}
-        title="¿Necesita facturación electrónica?"
-        okText="Sí, necesito"
-        cancelText="No"
+        title={t("electronicBilling")}
+        okText={t("yesINeedIt")}
+        cancelText={tCommon("status.no")}
         cancelLoading={loadingFinish}
         okLoading={loadingFinish}
       />
@@ -501,10 +505,10 @@ export default function CheckoutPage() {
         isOpen={showPaymentSupportView}
         handleCancel={handlePaymentSupportCancel}
         customTexts={{
-          title: "Cargar soporte de pago",
-          description: "Cliente de contado, adjunta la evidencia del pago",
-          acceptButtonText: "Enviar soporte",
-          cancelButtonText: "Cancelar"
+          title: tBlocked("uploadRemittance"),
+          description: t("cashClientRemittance"),
+          acceptButtonText: tBlocked("sendRemittance"),
+          cancelButtonText: tCommon("actions.cancel")
         }}
         multipleFiles={true}
         noComment={true}

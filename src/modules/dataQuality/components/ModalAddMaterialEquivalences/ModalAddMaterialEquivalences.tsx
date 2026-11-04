@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import * as yup from "yup";
 import { Modal, Spin, message } from "antd";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Save } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
@@ -22,24 +23,27 @@ import {
   IPostCatalogMaterialEquivalence
 } from "@/types/dataQuality/IDataQuality";
 
-const equivalenceSchema = yup.object().shape({
-  material_code: yup.string().required("El material es requerido"),
-  conversion_factor: yup
-    .number()
-    .typeError("El factor debe ser un número")
-    .required("El factor es requerido")
-    .positive("El factor debe ser positivo"),
-  valid_from: yup.string().required("La fecha 'Desde' es requerida"),
-  is_active: yup.number().oneOf([0, 1]).required(),
-  valid_to: yup
-    .string()
-    .nullable()
-    .when("is_active", {
-      is: 0,
-      then: (schema) => schema.required("La fecha 'Hasta' es requerida"),
-      otherwise: (schema) => schema.nullable()
-    })
-});
+type MaterialFormT = ReturnType<typeof useTranslations<"dataQuality.materialForm">>;
+
+const buildEquivalenceSchema = (t: MaterialFormT) =>
+  yup.object().shape({
+    material_code: yup.string().required(t("validation.material")),
+    conversion_factor: yup
+      .number()
+      .typeError(t("validation.factorNumber"))
+      .required(t("validation.factorRequired"))
+      .positive(t("validation.factorPositive")),
+    valid_from: yup.string().required(t("validation.fromRequired")),
+    is_active: yup.number().oneOf([0, 1]).required(),
+    valid_to: yup
+      .string()
+      .nullable()
+      .when("is_active", {
+        is: 0,
+        then: (schema) => schema.required(t("validation.toRequired")),
+        otherwise: (schema) => schema.nullable()
+      })
+  });
 
 type EquivalenceFormData = {
   material_code: string;
@@ -70,6 +74,9 @@ export function ModalAddMaterialEquivalences({
   catalogMaterialId,
   onCreated
 }: ModalAddMaterialEquivalencesProps) {
+  const t = useTranslations("dataQuality.materialForm");
+  const tCommon = useTranslations("common");
+  const equivalenceSchema = useMemo(() => buildEquivalenceSchema(t), [t]);
   const params = useParams();
   const countryId = Number(params.countryId) || 0;
 
@@ -123,12 +130,11 @@ export function ModalAddMaterialEquivalences({
         is_active: data.is_active
       };
       await createCatalogMaterialEquivalence(catalogMaterialId, body);
-      message.success("Equivalencia creada correctamente");
+      message.success(t("equivalenceCreated"));
       onCreated?.();
       handleClose();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error al crear la equivalencia";
+      const errorMessage = error instanceof Error ? error.message : t("equivalenceCreateError");
       message.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -149,7 +155,7 @@ export function ModalAddMaterialEquivalences({
       {/* Header */}
       <div className="flex items-center gap-3 pb-5 border-b" style={{ borderColor: "#EEEEEE" }}>
         <h2 className="text-base font-semibold flex-1" style={{ color: "#141414" }}>
-          Nueva equivalencia
+          {t("newEquivalence")}
         </h2>
       </div>
 
@@ -159,7 +165,7 @@ export function ModalAddMaterialEquivalences({
           {/* Row 1: Material */}
           <div className="flex flex-col gap-1.5 mb-4">
             <Label className="text-sm font-medium" style={{ color: "#141414" }}>
-              Material
+              {t("material")}
             </Label>
             <Controller
               name="material_code"
@@ -169,7 +175,7 @@ export function ModalAddMaterialEquivalences({
                   showSearch
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Seleccionar material"
+                  placeholder={t("materialPlaceholder")}
                   hasError={!!errors.material_code}
                   options={materials.map((material) => ({
                     value: String(material.id),
@@ -192,7 +198,7 @@ export function ModalAddMaterialEquivalences({
           >
             <div className="flex flex-col gap-1.5">
               <Label className="text-sm font-medium" style={{ color: "#141414" }}>
-                Factor
+                {t("factor")}
               </Label>
               <Controller
                 name="conversion_factor"
@@ -220,7 +226,7 @@ export function ModalAddMaterialEquivalences({
 
             <div className="flex flex-col gap-1.5">
               <Label className="text-sm font-medium" style={{ color: "#141414" }}>
-                Desde
+                {t("from")}
               </Label>
               <Controller
                 name="valid_from"
@@ -245,10 +251,10 @@ export function ModalAddMaterialEquivalences({
                 className="text-sm font-medium"
                 style={{ color: isActive === 1 ? "#BBBBBB" : "#141414" }}
               >
-                Hasta
+                {t("to")}
                 {isActive === 1 && (
                   <span className="ml-1 text-[13px] font-normal" style={{ color: "#BBBBBB" }}>
-                    (bloqueado — vigente)
+                    {t("lockedCurrent")}
                   </span>
                 )}
               </Label>
@@ -297,7 +303,7 @@ export function ModalAddMaterialEquivalences({
                 className="text-sm font-medium cursor-pointer"
                 style={{ color: "#141414" }}
               >
-                Activo
+                {t("active")}
               </Label>
             </div>
           </div>
@@ -309,7 +315,7 @@ export function ModalAddMaterialEquivalences({
           style={{ borderColor: "#EEEEEE" }}
         >
           <Button variant="outline" type="button" onClick={handleClose} className="bg-transparent">
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="submit"
@@ -325,7 +331,7 @@ export function ModalAddMaterialEquivalences({
               <Spin size="small" />
             ) : (
               <>
-                <Save className="w-4 h-4 mr-2" /> Guardar
+                <Save className="w-4 h-4 mr-2" /> {tCommon("actions.save")}
               </>
             )}
           </Button>

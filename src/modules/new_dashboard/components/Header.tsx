@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { RefreshCcw, SlidersHorizontal, X, Check, Building2, Globe } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { COLORS } from "../lib/constants";
 
 const Header: React.FC = () => {
+  const t = useTranslations("newDashboard.settings");
+  const tCommon = useTranslations("common");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currency, setCurrency] = useState("COP");
 
@@ -18,7 +21,9 @@ const Header: React.FC = () => {
           <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shrink-0">
             <RefreshCcw size={16} className="text-white" />
           </div>
-          <h1 className="text-lg md:text-xl font-bold tracking-tight text-white">Cartera</h1>
+          <h1 className="text-lg md:text-xl font-bold tracking-tight text-white">
+            {t("headerTitle")}
+          </h1>
         </div>
 
         {/* Filter / Settings Trigger */}
@@ -27,7 +32,7 @@ const Header: React.FC = () => {
           className="flex items-center gap-2 bg-[#333] hover:bg-[#444] text-white px-3 py-2 rounded-lg transition-all border border-gray-700"
         >
           <span className="text-[13px] font-semibold text-gray-300 hidden md:block">
-            Filtros y moneda
+            {t("filtersAndCurrency")}
           </span>
           <SlidersHorizontal size={18} className="text-[#CBE71E]" />
         </button>
@@ -46,7 +51,7 @@ const Header: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden animate-fade-in scale-100 transform transition-all">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-gray-800 text-lg">Configuración de vista</h3>
+              <h3 className="font-bold text-gray-800 text-lg">{t("title")}</h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-2 bg-white rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm"
@@ -59,7 +64,7 @@ const Header: React.FC = () => {
               {/* Currency Section */}
               <div>
                 <label className="text-[13px] font-bold text-gray-400 mb-3 block">
-                  Moneda
+                  {t("currency")}
                 </label>
                 <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
                   <button
@@ -90,17 +95,17 @@ const Header: React.FC = () => {
               {/* Filters Section */}
               <div>
                 <label className="text-[13px] font-bold text-gray-400 mb-4 block">
-                  Filtros globales
+                  {t("globalFilters")}
                 </label>
                 <div className="space-y-4">
                   {/* Filter: City */}
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                       <Globe size={16} className="text-gray-400" />
-                      Ciudad
+                      {t("city")}
                     </label>
                     <select className="w-full bg-gray-50 text-gray-800 text-sm py-3 px-4 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#CBE71E] border border-gray-200 transition-shadow">
-                      <option>Todas las ciudades</option>
+                      <option>{t("allCities")}</option>
                       <option>Bogotá</option>
                       <option>Medellín</option>
                       <option>Cali</option>
@@ -111,12 +116,12 @@ const Header: React.FC = () => {
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                       <Building2 size={16} className="text-gray-400" />
-                      Tipo de negocio
+                      {t("businessType")}
                     </label>
                     <select className="w-full bg-gray-50 text-gray-800 text-sm py-3 px-4 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#CBE71E] border border-gray-200 transition-shadow">
-                      <option>Todos los tipos</option>
-                      <option>Comercial</option>
-                      <option>Logística</option>
+                      <option>{t("allTypes")}</option>
+                      <option>{t("commercial")}</option>
+                      <option>{t("logistics")}</option>
                     </select>
                   </div>
                 </div>
@@ -125,7 +130,7 @@ const Header: React.FC = () => {
               {/* Company Context */}
               <div className="pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-100">
-                  <span className="text-sm font-medium text-red-800">Organización</span>
+                  <span className="text-sm font-medium text-red-800">{t("organization")}</span>
                   <span className="text-[13px] font-bold text-red-600 bg-white px-2 py-1 rounded border border-red-200 shadow-sm">
                     COCA-COLA FEMSA
                   </span>
@@ -139,14 +144,14 @@ const Header: React.FC = () => {
                 onClick={() => setIsModalOpen(false)}
                 className="py-3 px-4 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors"
               >
-                Cancelar
+                {tCommon("actions.cancel")}
               </button>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="py-3 px-4 rounded-xl text-sm font-bold text-[#141414] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0"
                 style={{ backgroundColor: COLORS.green }}
               >
-                Aplicar cambios
+                {t("apply")}
               </button>
             </div>
           </div>

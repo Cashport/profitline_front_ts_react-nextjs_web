@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { message } from "antd";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import { AuxiliaryFilesTable } from "../../components/AuxiliaryFilesTable";
@@ -25,6 +26,8 @@ import {
 type UploadKind = "materials" | "pos" | "packs";
 
 export default function AuxiliaryCatalogsView() {
+  const t = useTranslations("dataQuality.auxiliaryView");
+  const tUploads = useTranslations("dataQuality.countryView");
   const selectedProject = useAppStore((projects) => projects.selectedProject);
   const canManage = canManageAuxiliaries(selectedProject);
 
@@ -36,13 +39,13 @@ export default function AuxiliaryCatalogsView() {
   const [downloadingCatalog, setDownloadingCatalog] = useState(false);
 
   const runDownload = async (fn: () => Promise<{ url: string }>, ok: string) => {
-    const hide = message.open({ type: "loading", content: "Descargando...", duration: 0 });
+    const hide = message.open({ type: "loading", content: t("downloading"), duration: 0 });
     try {
       const res = await fn();
       window.open(res.url, "_blank");
       message.success(ok);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al descargar el archivo.");
+      message.error(error instanceof Error ? error.message : t("downloadError"));
     } finally {
       hide();
     }
@@ -64,10 +67,10 @@ export default function AuxiliaryCatalogsView() {
       } else {
         await uploadPacksFile(file);
       }
-      message.success("Archivo cargado exitosamente.");
+      message.success(t("uploaded"));
       setUploadOpen(false);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
+      message.error(error instanceof Error ? error.message : t("uploadError"));
     } finally {
       setUploading(false);
     }
@@ -78,7 +81,7 @@ export default function AuxiliaryCatalogsView() {
       {/* Sin data-readonly no existe "vista general": el landing reducido de /data-quality
           expone el acceso a Auxiliares, por eso "‹" vuelve allí. */}
       <Header
-        title="Auxiliares LATAM"
+        title={t("title")}
         back="/data-quality"
         actionsExtra={
           canManage && (
@@ -87,7 +90,7 @@ export default function AuxiliaryCatalogsView() {
               className="text-[#141414]"
               onClick={() => setActionsOpen(true)}
             >
-              Acciones
+              {t("actions")}
             </Button>
           )
         }
@@ -106,16 +109,16 @@ export default function AuxiliaryCatalogsView() {
             setDownloadingCatalog(true);
             runDownload(
               () => downloadUnifiedCatalogFile({}),
-              "Catálogo descargado exitosamente."
+              tUploads("catalogDownloaded")
             ).finally(() => setDownloadingCatalog(false));
           }}
           isDownloadCatalogLoading={downloadingCatalog}
           onDownloadMaterials={() =>
-            runDownload(() => downloadCatalogFile({}), "Auxiliar de materiales descargado.")
+            runDownload(() => downloadCatalogFile({}), t("materialsDownloaded"))
           }
           onUploadMaterialsAuxiliary={() => openUpload("materials")}
           onDownloadPointsOfSale={() =>
-            runDownload(() => downloadPointsOfSaleFile({}), "Puntos de venta descargados.")
+            runDownload(() => downloadPointsOfSaleFile({}), t("posDownloaded"))
           }
           onUploadPointsOfSale={() => openUpload("pos")}
           onUploadPacks={() => openUpload("packs")}

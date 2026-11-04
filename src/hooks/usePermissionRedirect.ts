@@ -6,7 +6,7 @@ import {
   getFirstPermittedRoute
 } from "@/utils/permissions/routePermissions";
 
-const IGNORED_PREFIXES = ["/auth", "/mobile", "/proyectos/review"];
+const IGNORED_PREFIXES = ["/auth", "/mobile", "/projects/review"];
 
 export const usePermissionRedirect = () => {
   const router = useRouter();

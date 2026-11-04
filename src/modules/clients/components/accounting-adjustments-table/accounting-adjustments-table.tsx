@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Checkbox, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
@@ -32,6 +33,8 @@ const AccountingAdjustmentsTable = ({
   selectedRows,
   isSearchActive = false
 }: PropsInvoicesTable) => {
+  const t = useTranslations("clients.adjustments.table.columns");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -145,7 +148,7 @@ const AccountingAdjustmentsTable = ({
 
   const columns: TableProps<FinancialDiscount>["columns"] = [
     {
-      title: "ID ERP",
+      title: t("erpId"),
       dataIndex: "erp_id",
       key: "erp_id",
       render: (erp_id, record) => (
@@ -158,7 +161,7 @@ const AccountingAdjustmentsTable = ({
       width: 130
     },
     {
-      title: "Creación",
+      title: t("createdAt"),
       dataIndex: "create_at",
       key: "create_at",
       render: (text) => <Text className="cell -alignRight">{formatDate(text)}</Text>,
@@ -168,17 +171,17 @@ const AccountingAdjustmentsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Tipo de ajuste",
+      title: t("adjustmentType"),
       dataIndex: "motive_name",
       key: "motive_name"
     },
     {
-      title: "Detalle",
+      title: tCommon("fields.detail"),
       dataIndex: "comments",
       key: "comments"
     },
     {
-      title: "Monto Inicial",
+      title: t("initialAmount"),
       key: "initial_value",
       dataIndex: "initial_value",
       render: (text) => <p className="cell -alignRight fontMonoSpace">{formatMoney(text)}</p>,
@@ -187,7 +190,7 @@ const AccountingAdjustmentsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Monto aplicado",
+      title: t("appliedAmount"),
       key: "missing",
       dataIndex: "missing",
       render: (text) => <Text className="cell -alignRight fontMonoSpace">{text}</Text>,
@@ -196,7 +199,7 @@ const AccountingAdjustmentsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Monto disponible",
+      title: t("availableAmount"),
       key: "current_value",
       dataIndex: "current_value",
       render: (amount) => <p className="cell -alignRight fontMonoSpace">{formatMoney(amount)}</p>,

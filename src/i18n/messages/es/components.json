@@ -1,0 +1,187 @@
+{
+  "channelBR": {
+    "addSubline": "Agregar sublínea",
+    "addLine": "Agregar línea"
+  },
+  "dateRangeFilter": {
+    "label": "Rango de fechas",
+    "start": "Fecha inicio",
+    "end": "Fecha fin",
+    "clear": "Limpiar fechas"
+  },
+  "documentButton": {
+    "selectFile": "Seleccionar archivo",
+    "allowedFiles": "PDF, Word, PNG, XLS, MSG, EML (Tamaño máx. 30 MB)"
+  },
+  "documentClientBR": {
+    "title": "Documentos por cliente",
+    "addDocument": "Agregar documento",
+    "addClientType": "Agregar cliente",
+    "required": "Obligatorio"
+  },
+  "filters": {
+    "selectFilters": "Seleccionar filtros",
+    "customDate": "Fecha personalizada",
+    "radicationTypes": {
+      "email": "email",
+      "web": "web",
+      "radian": "radian",
+      "physical": "física",
+      "physicalAndWeb": "física y web"
+    },
+    "labels": {
+      "lines": "Líneas",
+      "sublines": "Sublíneas",
+      "zones": "Zonas",
+      "channels": "Canales",
+      "line": "Línea",
+      "subline": "Sublínea",
+      "zone": "Zona",
+      "channel": "Canal",
+      "paymentAgreement": "Acuerdo de pago",
+      "radicationType": "Tipo de radicación",
+      "radicationTypeShort": "Tipo de radicado",
+      "submitted": "Radicado",
+      "dispute": "Novedad",
+      "dates": "Fechas",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "yes": "Sí",
+      "no": "No",
+      "city": "Ciudad",
+      "holding": "Holding",
+      "status": "Estado",
+      "risk": "Riesgo",
+      "customerGroup": "Grupo de Cliente",
+      "country": "País",
+      "currency": "Moneda",
+      "userStatus": "Estado de Usuario",
+      "roles": "Roles",
+      "notificationType": "Tipo de notificación",
+      "taskType": "Tipo de tarea",
+      "last7Days": "Últimos 7 días",
+      "last30Days": "Últimos 30 días",
+      "thisMonth": "Este mes",
+      "thisQuarter": "Este trimestre",
+      "thisYear": "Este año",
+      "lastQuarter": "Trimestre pasado"
+    }
+  },
+  "itemsModal": {
+    "debitMemo": "Nota débito",
+    "creditMemo": "Nota crédito",
+    "discount": "Descuento",
+    "volume": "Volumen",
+    "invoice": "Factura {id}"
+  },
+  "generateActionButton": {
+    "label": "Generar acción"
+  },
+  "selectDay": {
+    "sun": "D",
+    "mon": "L",
+    "tue": "M",
+    "wed": "X",
+    "thu": "J",
+    "fri": "V",
+    "sat": "S"
+  },
+  "uploadDropZone": {
+    "title": "Arrastra tu archivo aquí",
+    "subtitle": "O selecciona un archivo desde tu dispositivo",
+    "selectFile": "Seleccionar archivo"
+  },
+  "uploadDocumentButton": {
+    "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.",
+    "required": "Obligatorio",
+    "optional": "Opcional"
+  },
+  "uploadImg": {
+    "invalidType": "Solo puedes subir archivos JPG o PNG.",
+    "tooLarge": "La imagen debe pesar menos de 2 MB.",
+    "logoAlt": "Logo del proyecto",
+    "watermarkAlt": "Marca de agua",
+    "hint": "* Sube la imagen del logo del proyecto que vas a crear"
+  },
+  "inputCreate": {
+    "channelPlaceholder": "Ingresar nombre del canal",
+    "clientTypePlaceholder": "Ingresar tipo de cliente",
+    "holdingPlaceholder": "Ingresar nombre de holding",
+    "linePlaceholder": "Ingresar nombre de la línea",
+    "sublinePlaceholder": "Ingresar nombre de la sublínea",
+    "zonePlaceholder": "Ingresar nombre de zona",
+    "documentPlaceholder": "Ingresar nombre del documento",
+    "required": "Obligatorio",
+    "uploadTemplate": "Cargar plantilla"
+  },
+  "inputAddress": {
+    "address": "Ingresar dirección",
+    "streetTypePlaceholder": "Carrera",
+    "complement": "Complemento",
+    "complementPlaceholder": "Local 1A"
+  },
+  "expirationNoticeDays": {
+    "title": "Aviso de vencimiento",
+    "days": "{count, plural, one {# día} other {# días}}",
+    "required": "Valor de aviso obligatorio *"
+  },
+  "search": {
+    "customerPlaceholder": "Buscar cliente"
+  },
+  "inputs": {
+    "selectPlaceholder": "Seleccionar {field}",
+    "requiredField": "{field} es obligatorio *",
+    "loadOptionsError": "Error al cargar las opciones",
+    "optional": "Opcional"
+  },
+  "filterModal": {
+    "title": "Filtros Avanzados",
+    "subtitle": "Encuentra y selecciona múltiples opciones",
+    "removeFilter": "Quitar {category}",
+    "clearAll": "Limpiar todo",
+    "apply": "Aplicar filtros",
+    "searchIn": "Buscar en {category}...",
+    "results": "{count, plural, one {# resultado} other {# resultados}}",
+    "selectAll": "Seleccionar todos",
+    "deselectAll": "Deseleccionar todos",
+    "loadingOptions": "Cargando opciones...",
+    "loadOptionsError": "No se pudieron cargar las opciones",
+    "noResults": "No se encontraron resultados"
+  },
+  "headerCutoff": {
+    "placeholder": "Corte —",
+    "reprocess": "Reprocesar",
+    "today": "Hoy",
+    "cutoffLabel": "{day} {time}",
+    "cutoffTitle": "{day} a las {time}",
+    "cadence": "Los datos se toman cada {minutes} minutos para que todos vean lo mismo. Próximo: {next}.",
+    "projectedTo": "Proyectado a {date}",
+    "project": "Proyectar a cierre",
+    "projectedHint": "Estás viendo cifras estimadas al cierre. Clic para volver a hoy.",
+    "projectHint": "Estima cómo cerrará el mes ({date})."
+  },
+  "pageHeader": {
+    "searchPlaceholder": "Buscar…",
+    "clearSearch": "Limpiar búsqueda"
+  },
+  "boardLanes": {
+    "empty": "Vacío"
+  },
+  "inputClickable": {
+    "frequencyPlaceholder": "Seleccionar frecuencia"
+  },
+  "pagination": {
+    "showing": "Mostrando {start} a {end} de {total} resultados"
+  },
+  "walletTab": {
+    "selectAtLeastOne": "Seleccione al menos una factura",
+    "addedToApplication": "Facturas añadidas correctamente a la tabla de aplicación de pagos",
+    "addToApplicationError": "Error al añadir factura(s) a la tabla de aplicación de pagos {error}",
+    "markedAsBalance": "La(s) factura(s) se han marcado como saldo correctamente",
+    "markAsBalanceError": "Error al marcar la(s) factura(s) como saldo",
+    "invoices": "Facturas",
+    "searchById": "Buscar por ID",
+    "bulkSearch": "Búsqueda masiva",
+    "generateAction": "Generar acción"
+  }
+}

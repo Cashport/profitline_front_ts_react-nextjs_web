@@ -1,0 +1,733 @@
+{
+  "actionAccountingAdjustments": {
+    "title": "Select the action you want to take",
+    "apply": "Apply accounting adjustments",
+    "selectAtLeastOne": "Select at least one accounting adjustment to apply",
+    "settleDeduction": "Resolve deduction"
+  },
+  "actionAdjustment": {
+    "title": "Select the action you want to take",
+    "settle": "Settle accounting adjustment",
+    "edit": "Edit accounting adjustment",
+    "delete": "Delete accounting adjustment",
+    "pendingSettlement": "{type} pending settlement",
+    "reference": "CM{id}",
+    "success": "Accounting adjustment settled",
+    "error": "We couldn't settle the accounting adjustment",
+    "insufficientValue": "The current amount of the selected memo is less than the amount of the memo pending settlement",
+    "badRequest": "Error 400: Bad request",
+    "unknownError": "Unknown error while settling the accounting adjustment",
+    "selectDebitMemos": "Select the debit memo(s) to apply",
+    "selectCreditMemos": "Select the credit memo(s) to apply",
+    "selectDiscounts": "Select the discounts to apply"
+  },
+  "actionDiscountCredit": {
+    "createDebitMemo": "Create debit memo",
+    "createCreditMemo": "Create credit memo",
+    "createDiscount": "Create discount",
+    "applyDebitMemo": "Apply debit memo",
+    "applyCreditMemo": "Apply credit memo",
+    "applyDiscount": "Apply discount"
+  },
+  "actionPayment": {
+    "title": "Select the action you want to take",
+    "identify": "Identify payment",
+    "apply": "Apply payments",
+    "noneToApply": "There are no selected payments to apply.",
+    "changeStatus": "Change status",
+    "notCustomerPayment": "Payment isn't from this customer",
+    "noneToUnidentify": "There are no selected payments to mark as unidentified"
+  },
+  "addDiscount": {
+    "title": "Add discount",
+    "placeholder": "Select a discount"
+  },
+  "agreementDetail": {
+    "title": "Payment plan",
+    "columns": {
+      "invoiceId": "Invoice ID",
+      "issued": "Issued",
+      "outstanding": "Outstanding",
+      "agreedAmount": "Agreed amount",
+      "date": "Date"
+    },
+    "alreadyVoided": "This payment plan is already voided",
+    "voidError": "We couldn't void the payment plan",
+    "void": "Void payment plan",
+    "owner": "Owner",
+    "status": "Payment plan status",
+    "amount": "Payment plan amount",
+    "invoiceCount": "No. of invoices",
+    "createdAt": "Created on",
+    "dueDate": "Due date",
+    "evidence": "Evidence",
+    "tabs": {
+      "summary": "Summary",
+      "invoices": "Invoices"
+    }
+  },
+  "applyAdjustment": {
+    "subtitle": "Enter the amount to apply to each invoice",
+    "columns": {
+      "invoiceId": "Invoice ID",
+      "outstanding": "Outstanding",
+      "newBalance": "New balance",
+      "amountToApply": "Amount to apply"
+    },
+    "success": "Accounting adjustment applied",
+    "error": "We couldn't apply the accounting adjustment",
+    "fileTooLarge": "The file is too large. Upload a file smaller than 30 MB."
+  },
+  "attachEvidence": {
+    "title": "Evidence",
+    "description": "Attach the evidence and enter a comment",
+    "evidence": "Evidence",
+    "required": "Required",
+    "optional": "Optional",
+    "uploadAnother": "Upload another document",
+    "commentPlaceholder": "Enter a comment",
+    "fileTooLarge": "The file is too large. Upload a file smaller than 30 MB.",
+    "duplicateName": "A file with the same name already exists"
+  },
+  "billingPeriod": {
+    "title": "Billing period",
+    "selectCutoff": "Select the billing cutoff",
+    "theDay": "Day",
+    "the": "The",
+    "startsOnDay": "The billing period starts on day {day} of each month",
+    "startsOnWeekday": "The billing period starts on the {order} {weekday} of each month",
+    "dayOfMonth": "Day {day} of the month",
+    "weekdayOfMonth": "The {order} {weekday} of the month",
+    "orders": {
+      "Primero": "first",
+      "Segundo": "second",
+      "Tercero": "third",
+      "Cuarto": "fourth",
+      "Ultimo": "last"
+    },
+    "days": {
+      "Lunes": "Monday",
+      "Martes": "Tuesday",
+      "Miercoles": "Wednesday",
+      "Jueves": "Thursday",
+      "Viernes": "Friday",
+      "Sabado": "Saturday",
+      "Domingo": "Sunday"
+    }
+  },
+  "businessRules": {
+    "title": "Business rules"
+  },
+  "changeStatus": {
+    "title": "Change status",
+    "ok": "Change status",
+    "selectNewStatus": "Select the new status",
+    "remove": "Delete {name}"
+  },
+  "changeWarehouse": {
+    "title": "Change warehouse",
+    "detailTitle": "Warehouse {warehouse}",
+    "save": "Save warehouse",
+    "updated": "Warehouse updated",
+    "updateError": "We couldn't update the warehouse",
+    "stockError": "We couldn't load the warehouse stock details",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "columns": {
+      "warehouse": "Warehouse",
+      "inventory": "Inventory",
+      "detail": "Detail",
+      "product": "Product",
+      "ordered": "Ordered",
+      "stock": "Stock"
+    }
+  },
+  "clientsGroup": {
+    "selectCustomersWarning": "Select customers to add to the group",
+    "newTitle": "New customer group",
+    "enterName": "Enter the customer group name",
+    "groupName": "Group name",
+    "update": "Update group",
+    "create": "Create group",
+    "selectToEdit": "Select the customers to add to or remove from the group",
+    "selectToAdd": "Select the customers to add to the group"
+  },
+  "createAdjustment": {
+    "required": "Required field",
+    "negative": "The amount can't be negative",
+    "percentageMax": "The percentage can't be greater than 100%",
+    "reason": "Reason",
+    "reasonPlaceholder": "Select a reason",
+    "totalAmount": "Total amount",
+    "adjustmentAmount": "Adjustment amount",
+    "amountPlaceholder": "Enter amount",
+    "percentage": "Percentage to apply",
+    "issueDate": "Issue date",
+    "issueDatePlaceholder": "Select issue date",
+    "validityRange": "Validity period",
+    "credit": {
+      "subtitle": "Enter the details to create the new credit memo",
+      "submit": "Create credit memo",
+      "success": "Credit memo created",
+      "error": "Something went wrong creating the credit memo. Try again."
+    },
+    "debit": {
+      "subtitle": "Enter the details to create the new debit memo",
+      "submit": "Create debit memo",
+      "success": "Debit memo created",
+      "error": "Something went wrong creating the debit memo. Try again."
+    },
+    "discount": {
+      "subtitle": "Enter the details to create the new discount",
+      "submit": "Create discount",
+      "success": "Discount created",
+      "error": "Something went wrong creating the discount. Try again."
+    }
+  },
+  "deleteDiscount": {
+    "title": "Are you sure you want to delete the selected discount(s)?",
+    "ok": "Delete discount",
+    "irreversible": "This action can't be undone"
+  },
+  "detailAdjustment": {
+    "events": {
+      "creditMemoApplied": "Credit memo applied",
+      "debitMemoApplied": "Debit memo applied",
+      "discountApplied": "Discount applied",
+      "submission": "Invoice submission",
+      "dispute": "Dispute",
+      "settled": "Settled from Cashport adjustment",
+      "created": "Adjustment created",
+      "issued": "Adjustment issued"
+    },
+    "types": {
+      "debitMemo": "Debit memo",
+      "creditMemo": "Credit memo",
+      "discount": "Discount"
+    },
+    "takeAction": "Take action",
+    "history": "Activity history",
+    "owner": "Owner: {name}",
+    "amount": "Amount: {amount}",
+    "comments": "comments",
+    "adjustmentId": "Adjustment ID:",
+    "summary": "Summary",
+    "initialAmount": "Original amount",
+    "appliedAmount": "Amount applied",
+    "availableAmount": "Available amount"
+  },
+  "detailPayment": {
+    "paymentId": "Payment ID {id}",
+    "viewReceipt": "View deposit slip",
+    "takeAction": "Take action",
+    "summary": "Summary",
+    "initialValue": "Original amount",
+    "appliedAmount": "Amount applied",
+    "available": "Available",
+    "image": "Image",
+    "events": {
+      "title": "Activity history",
+      "owner": "Owner: {name}",
+      "parentPaymentId": "Parent payment ID:",
+      "customer": "Customer: {name}",
+      "previousCustomer": "Previous customer: {name}",
+      "newCustomer": "New customer: {name}",
+      "applicationId": "Application ID:",
+      "appliedAmount": "Amount applied: {amount}",
+      "invoiceIds": "Invoice IDs:",
+      "comments": "Comments: {comments}"
+    }
+  },
+  "digitalRecord": {
+    "title": "Send digital record",
+    "to": "To",
+    "subject": "Subject",
+    "send": "Send record",
+    "success": "Digital record sent",
+    "error": "We couldn't send the digital record"
+  },
+  "enterProcess": {
+    "title": "Log collection activity",
+    "submit": "Log activity",
+    "loadError": "We couldn't load the collection activity data",
+    "success": "Collection activity logged",
+    "error": "We couldn't log the collection activity",
+    "typePlaceholder": "Activity type",
+    "statusPlaceholder": "Activity status",
+    "contactPlaceholder": "Contact (optional)",
+    "bodyPlaceholder": "Describe the activity..."
+  },
+  "fileDownload": {
+    "defaultTitle": "Attached document",
+    "gotIt": "Got it",
+    "imageAlt": "Document"
+  },
+  "generateAction": {
+    "title": "Take action",
+    "description": "Select the action you want to take",
+    "groups": {
+      "payments": "Payments and receivables",
+      "billing": "Billing",
+      "case": "Case management",
+      "send": "Send to customer"
+    },
+    "paymentPlan": "Payment plan",
+    "applyPayments": "Apply payments",
+    "bulkReconciliation": "Bulk reconciliation",
+    "markAsDeduction": "Mark as deduction",
+    "submitInvoice": "Submit invoice",
+    "accountingAdjustments": "Accounting adjustments",
+    "registerDispute": "Log dispute",
+    "changeStatus": "Change status",
+    "logActivity": "Log collection activity",
+    "accountStatement": "Account statement",
+    "sendLink": "Send link to customer"
+  },
+  "generateActionProjectForm": {
+    "title": "Take action",
+    "description": "Select the action you want to take",
+    "changeStatus": "Change status",
+    "cancelEdit": "Cancel editing",
+    "editProject": "Edit project",
+    "closePeriod": "Close accounting period"
+  },
+  "intakeStructure": {
+    "uploading": "Uploading file...",
+    "cancelUpload": "Cancel upload",
+    "unnamed": "(unnamed)",
+    "headersFrom": "headers from {cell}",
+    "shell": {
+      "eyebrow": "CASHPORT · UPLOAD VALIDATION",
+      "close": "Close"
+    },
+    "structureErrors": {
+      "title": "The file doesn't have the expected structure",
+      "sheet": "sheet {sheet}",
+      "stepCritical": "1 · Critical",
+      "stepWarnings": "2 · Warnings",
+      "stepConfirm": "3 · Confirm",
+      "heading": "{count, plural, one {# critical alert} other {# critical alerts}}",
+      "subheading": "Fix the file and upload it again. No data was processed.",
+      "gotIt": "Got it",
+      "warnings": "Warnings",
+      "headersFound": "Headers found in the file:"
+    },
+    "templateDecision": {
+      "title": "This file doesn't have a template yet",
+      "sheet": "Sheet {sheet}",
+      "delimiter": "delimiter {delimiter}",
+      "columnsDetected": "{count, plural, one {# column detected} other {# columns detected}}",
+      "cannotUse": "It can't be used as a template",
+      "useHint": "If you use it as a template, future files must include these same columns, in the same order and in the same position.",
+      "fixHint": "Fix the file or upload it without a template.",
+      "uploadWithout": "Upload without template",
+      "useAsTemplate": "Use as template",
+      "reviewBeforeConfirm": "Review before confirming"
+    },
+    "loaderValidations": {
+      "types": {
+        "text": "Text",
+        "number": "Number",
+        "integer": "Integer",
+        "date": "Date",
+        "boolean": "Yes / No",
+        "any": "Any"
+      },
+      "calcs": {
+        "none": "None",
+        "sum": "Sum",
+        "count": "Count",
+        "count_distinct": "Count distinct",
+        "avg": "Average"
+      },
+      "severities": {
+        "warning": "Warn",
+        "block": "Block"
+      },
+      "atLeastOneRule": "Turn on at least one rule besides the row count.",
+      "saveError": "We couldn't save the validations.",
+      "titleUpload": "Set up validations",
+      "titleEdit": "Validations",
+      "templateSaved": "the template is already saved",
+      "stepStructure": "1 · Structure",
+      "stepValidations": "2 · Validations",
+      "stepUpload": "3 · Upload",
+      "headingUpload": "This ETL doesn't have validations yet",
+      "headingEdit": "What gets checked on each upload",
+      "subheadingUpload": "Choose what to check in each column before uploading. Suggestions come from the file.",
+      "subheadingEdit": "Changes apply starting with the next upload.",
+      "rulesToCreate": "{count, plural, one {# rule will be created} other {# rules will be created}}",
+      "saveAndUpload": "Save and upload",
+      "columns": {
+        "column": "Column",
+        "type": "Type",
+        "required": "Req.",
+        "calc": "Calculate",
+        "deviation": "Dev. %",
+        "ifOut": "If out of range"
+      },
+      "filled": "{count} with a value",
+      "empty": "{count, plural, one {# empty} other {# empty}}",
+      "aria": {
+        "type": "Type of {name}",
+        "required": "{name} required",
+        "calc": "Calculation for {name}",
+        "deviation": "Allowed deviation for {name}",
+        "ifOut": "What happens if {name} is out of range",
+        "rowCountDeviation": "Allowed deviation for the row count",
+        "rowCountIfOut": "What happens if the row count is out of range",
+        "window": "Uploads included in the average"
+      },
+      "rowCount": "Row count",
+      "alwaysChecked": "always checked",
+      "countRows": "Count rows",
+      "windowBefore": "Compare against the average of the last",
+      "windowAfter": "{count, plural, one {upload} other {uploads}}",
+      "footnote": "Until there are previous uploads, only types and required columns are checked; deviations start counting from the second upload. \"Block\" stops the upload; \"Warn\" lets it through and logs it in the history."
+    }
+  },
+  "invoiceBalances": {
+    "title": "Deductions for <b>{invoice}</b>",
+    "columns": {
+      "id": "Deduction",
+      "reason": "Reason",
+      "initialValue": "Original amount",
+      "currentValue": "Current amount",
+      "status": "Status",
+      "date": "Date",
+      "comments": "Comments"
+    },
+    "empty": "This invoice has no associated deductions"
+  },
+  "invoiceClaims": {
+    "title": "Medical claims for <id>{invoice}</id>",
+    "required": "* required field",
+    "new": "new",
+    "columns": {
+      "id": "Medical claim ID",
+      "concept": "Description",
+      "status": "Status",
+      "claimDate": "Medical claim date",
+      "responseDate": "Response date",
+      "observation": "Notes",
+      "amount": "Amount"
+    },
+    "conceptPlaceholder": "Medical claim description",
+    "amountPositive": "The amount must be greater than zero",
+    "duplicate": "Duplicate",
+    "statusesError": "We couldn't load the medical claim statuses",
+    "completeRequired": "Complete the required fields",
+    "deleteTitle": "Delete medical claim",
+    "deleteContent": "Delete medical claim {id}? This action can't be undone.",
+    "searchPlaceholder": "Search medical claim or description",
+    "empty": "This invoice has no medical claims.",
+    "add": "Add medical claim",
+    "total": "Total medical claims:",
+    "invoice": "Invoice:"
+  },
+  "makeCall": {
+    "customContact": "Custom contact",
+    "title": "Call",
+    "callTo": "Call",
+    "summaryPlaceholder": "Call summary",
+    "callStatus": "Call status",
+    "callStates": {
+      "NO_ANSWER": "No answer",
+      "WRONG_PHONE": "Wrong number",
+      "CALL_BACK_LATER": "Call back later",
+      "SUCCESS": "Successful call"
+    }
+  },
+  "monthlyClosing": {
+    "title": "Close accounting period",
+    "fetchError": "We couldn't load the month-end close",
+    "success": "Accounting period closed",
+    "closeError": "We couldn't close the accounting period",
+    "mismatch": "The confirmation text doesn't match",
+    "noClosing": "There's no period to close for this project",
+    "description": "You're about to close period <b>{period}</b>, which runs from <b>{start}</b> through today <b>{end}</b>",
+    "confirmPrompt": "If you're sure, type the month you're closing <b>\"{period}\"</b>",
+    "closePeriod": "Close period"
+  },
+  "noveltyDetail": {
+    "info": {
+      "owner": "Owner: ",
+      "date": "Date: ",
+      "customer": "Customer: ",
+      "approvers": "Approvers:"
+    },
+    "evidence": {
+      "title": "Evidence"
+    },
+    "invoices": {
+      "values": "Amounts",
+      "initialAmount": "Original amount",
+      "currentAmount": "Current amount",
+      "recovered": "Recovered",
+      "documents": "Documents ({active}/{total} active)",
+      "showClosed": "Show closed ({count})",
+      "invoice": "Invoice",
+      "deduction": "Deduction",
+      "inactiveReasons": {
+        "PAID": "Paid",
+        "MANUALLY_REMOVED": "Manually removed",
+        "CANCELLED": "Voided",
+        "OTHER": "Other"
+      },
+      "closed": "Closed",
+      "noActiveDocuments": "No active documents"
+    },
+    "approved": "Dispute approved",
+    "rejected": "Dispute rejected",
+    "processError": "Something went wrong while processing the dispute. Try again.",
+    "closed": "Closed",
+    "noName": "No name",
+    "events": {
+      "title": "Events",
+      "unknownUser": "Unknown user",
+      "unknownAction": "Unknown action",
+      "commentRequired": "Enter a comment",
+      "commentAdded": "Comment added",
+      "commentError": "We couldn't add the comment",
+      "commentPlaceholder": "Add a comment"
+    }
+  },
+  "orderTracking": {
+    "header": {
+      "customer": "Customer",
+      "createdAt": "Created on",
+      "delivery": "Delivery",
+      "contact": "Contact"
+    },
+    "tracking": "Tracking",
+    "invoice": "Invoice {id}",
+    "purchaseOrderId": "Purchase order ID <b>{id}</b>",
+    "history": "Activity history",
+    "owner": "Owner: {name}",
+    "estimatedValue": "Estimated value: ",
+    "statuses": {
+      "picking": "Picking",
+      "inTransit": "In transit",
+      "delivered": "Delivered",
+      "rejected": "Rejected"
+    }
+  },
+  "periodicity": {
+    "title": "Set frequency",
+    "start": "Start",
+    "repeatEvery": "Repeat every",
+    "invalidValue": "invalid value",
+    "end": "End",
+    "endAfterStart": "The date must be at least one day after the start date",
+    "frequencies": {
+      "Semanal": "Weekly",
+      "Mensual": "Monthly"
+    },
+    "frequenciesInline": {
+      "Semanal": "weekly",
+      "Mensual": "monthly"
+    },
+    "weekdays": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    },
+    "summaryDays": "Occurs {frequency} every {days}, starting {date}",
+    "summaryTimes": "Occurs {frequency}, {count} times, starting {date}"
+  },
+  "radication": {
+    "title": "Invoice submission",
+    "description": "Attach the evidence and enter a comment",
+    "type": "Submission type",
+    "date": "Submission date",
+    "invalidDate": "Enter a valid date",
+    "dateRequired": "Submission date is required",
+    "success": "Invoice submitted",
+    "error": "We couldn't submit the invoice"
+  },
+  "redirect": {
+    "title": "You don't have a project selected",
+    "content": "Select a project to continue.",
+    "gotIt": "Got it"
+  },
+  "registerNews": {
+    "title": "Log dispute",
+    "description": "Attach the evidence and enter a comment",
+    "reason": "Reason",
+    "reasonPlaceholder": "Select a reason",
+    "amount": "Dispute amount",
+    "amountPlaceholder": "Enter amount",
+    "success": "Evidence attached",
+    "error": "We couldn't attach the evidence",
+    "openDisputes": {
+      "title": "These invoices already have open disputes. What do you want to do?",
+      "ok": "Create new dispute",
+      "cancel": "Don't create a new dispute"
+    }
+  },
+  "remove": {
+    "titleOne": "Are you sure you want to delete this {name}?",
+    "titleMany": "Are you sure you want to delete these {name}?",
+    "irreversible": "This action can't be undone"
+  },
+  "removeChannel": {
+    "title": "Are you sure you want to delete this channel?",
+    "ok": "Delete channel",
+    "contains": "This channel contains:",
+    "line": "Product line: {name}",
+    "irreversible": "This action can't be undone"
+  },
+  "removeLine": {
+    "title": "Are you sure you want to delete this product line?",
+    "ok": "Delete product line",
+    "line": "Product line: {name}",
+    "irreversible": "This action can't be undone"
+  },
+  "removeSubline": {
+    "title": "Are you sure you want to delete this subline?",
+    "ok": "Delete subline",
+    "subline": "Subline: {name}",
+    "irreversible": "This action can't be undone"
+  },
+  "resolveNovelty": {
+    "titleResolve": "Resolve dispute",
+    "titleReject": "Reject dispute",
+    "titleAdjustment": "Accounting adjustment",
+    "titleApply": "Apply adjustment",
+    "selectDebitMemo": "Select debit memo",
+    "selectCreditMemo": "Select credit memo",
+    "selectDiscount": "Select discount",
+    "intro": "Optionally, attach a document and/or enter a comment",
+    "generatedAdjustment": "Check this box if this dispute resulted in an accounting adjustment",
+    "resolve": "Resolve",
+    "selectAdjustmentType": "Select the type of accounting adjustment to apply"
+  },
+  "selectAccountingAdjustment": {
+    "createDebit": "Create debit memo",
+    "createCredit": "Create credit memo",
+    "createDiscount": "Create discount",
+    "selectDebitMemos": "Select the debit memo(s) to apply",
+    "selectCreditMemos": "Select the credit memo(s) to apply",
+    "selectDiscounts": "Select the discounts to apply"
+  },
+  "selectNoveltyNote": {
+    "selectDebitMemos": "Select the debit memo(s) to apply",
+    "selectCreditMemos": "Select the credit memo(s) to apply",
+    "selectDiscounts": "Select the discounts to apply"
+  },
+  "sendEmail": {
+    "title": "Email",
+    "to": "To",
+    "cc": "CC",
+    "subjectPlaceholder": "Enter subject",
+    "bodyPlaceholder": "Message",
+    "selectTemplate": "Select template",
+    "templates": {
+      "statement": "Account statement",
+      "disputes": "Send disputes",
+      "paymentPlan": "Send payment plan",
+      "preLegal": "Pre-legal collections",
+      "legal": "Legal collections"
+    },
+    "notSpecified": "Not specified",
+    "customEmail": "Custom email"
+  },
+  "sendEmailNotification": {
+    "attachmentsError": "We couldn't load the attachments.",
+    "templateAttachmentsError": "Something went wrong while retrieving the template attachments.",
+    "templateError": "Something went wrong while loading the template",
+    "sendError": "Something went wrong while sending the email",
+    "confirm": {
+      "title": "Do you want to send an email about this action?",
+      "description": "An email will be sent to the approvers about this action",
+      "ok": "Yes, send email",
+      "cancel": "No, don't send"
+    },
+    "template": {
+      "title": "Send email",
+      "to": "To",
+      "cc": "CC",
+      "subject": "Subject",
+      "uploadAnother": "Upload another document",
+      "send": "Send email"
+    },
+    "success": {
+      "title": "Email sent",
+      "description": "The email was sent to:",
+      "gotIt": "Got it"
+    }
+  },
+  "sendExternalLink": {
+    "title": "Send external link",
+    "to": "To",
+    "sendEmail": "Send email",
+    "sent": "Link sent",
+    "sendError": "We couldn't send the link",
+    "unexpectedError": "Unexpected error while sending the link",
+    "successTitle": "Link sent",
+    "successMessage": "The access link was sent to:",
+    "gotIt": "Got it"
+  },
+  "shared": {
+    "optional": "*Optional",
+    "attachment": "Attachment",
+    "selectFile": "Select file",
+    "fileHint30": "PDF, Word, PNG (max. 30 MB)",
+    "commentPlaceholder": "Enter a comment",
+    "creditMemo": "Credit memo",
+    "debitMemo": "Debit memo",
+    "discount": "Discount"
+  },
+  "shipTo": {
+    "update": "Update Ship To",
+    "create": "Create Ship To",
+    "editTitle": "Edit Ship To",
+    "createTitle": "Create new Ship To",
+    "code": "Ship To code",
+    "codeNoSpaces": "The code can't contain spaces",
+    "location": "Location",
+    "locationPlaceholder": "Enter location",
+    "addressRequired": "Address is required *",
+    "inherit": "Inherit customer settings",
+    "billingPlaceholder": "Second Wednesday of the month",
+    "billingRequired": "Billing period is required *",
+    "submissionType": "Submission type",
+    "paymentTerms": "Payment terms",
+    "address": {
+      "title": "Enter location",
+      "addError": "Something went wrong while adding the address.",
+      "existing": "Existing locations",
+      "empty": "There are no locations for this city yet",
+      "create": "Create Ship To location",
+      "save": "Save location"
+    }
+  },
+  "statusClient": {
+    "title": "Change status",
+    "selectStatusFirst": "Select a status before continuing.",
+    "selectNewStatus": "Select the customer's new status",
+    "loadingStatuses": "Loading statuses...",
+    "deleteCustomer": "Delete customer"
+  },
+  "uploadDocument": {
+    "okReplace": "Replace documents",
+    "okAttach": "Attach documents",
+    "titleEdit": "Edit documents",
+    "titleUpload": "Upload documents",
+    "descriptionEdit": "The selected documents will replace the current ones",
+    "descriptionUpload": "Click each box to attach the required documents"
+  },
+  "uploadIntakeFiles": {
+    "title": "Upload files",
+    "intake": "Intake",
+    "test": "Test",
+    "fileTooLarge": "The file is too large. Upload a file smaller than 100 MB.",
+    "uploading": "Uploading intake file...",
+    "success": "Intake file uploaded.",
+    "error": "We couldn't upload the intake file. Try again."
+  }
+}

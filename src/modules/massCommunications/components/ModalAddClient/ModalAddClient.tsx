@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { message, Modal, Select, Spin } from "antd";
 import { UserPlus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { Button } from "@/modules/chat/ui/button";
 import { useAppStore } from "@/lib/store/store";
@@ -26,6 +27,8 @@ export default function ModalAddClient({
   communicationId,
   onSuccess
 }: ModalAddClientProps) {
+  const t = useTranslations("massCommunications.addClient");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   const [options, setOptions] = useState<ClientOption[]>([]);
@@ -67,11 +70,11 @@ export default function ModalAddClient({
     setIsSubmitting(true);
     try {
       await addClientToCircularization(Number(communicationId), [selectedClientId]);
-      message.success("Cliente agregado a la circularización");
+      message.success(t("success"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Error al agregar el cliente";
+      const msg = error instanceof Error ? error.message : t("error");
       message.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -94,7 +97,7 @@ export default function ModalAddClient({
           <div className="w-8 h-8 rounded-lg bg-[#CBE71E]/20 flex items-center justify-center">
             <UserPlus className="w-4 h-4 text-[#141414]" />
           </div>
-          Agregar cliente
+          {t("title")}
         </div>
       }
     >
@@ -102,7 +105,7 @@ export default function ModalAddClient({
         <Select
           showSearch
           allowClear
-          placeholder="Buscar y seleccionar cliente"
+          placeholder={t("placeholder")}
           style={{ width: "100%" }}
           options={options}
           value={selectedClientId}
@@ -120,7 +123,7 @@ export default function ModalAddClient({
           disabled={isSubmitting}
           className="border-[#DDDDDD] h-9"
         >
-          Cancelar
+          {tCommon("actions.cancel")}
         </Button>
         <Button
           onClick={handleSubmit}
@@ -128,7 +131,7 @@ export default function ModalAddClient({
           className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold h-9"
         >
           {isSubmitting && <Spin size="small" className="mr-2" />}
-          Añadir
+          {tCommon("actions.add")}
         </Button>
       </div>
     </Modal>

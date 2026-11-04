@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import DashboardGenericItem from "../dashboard-generic-item";
 import DashboardColorBar from "../dashboard-color-bar";
 
@@ -17,6 +18,7 @@ const DashboardCollectApply: FC<DashboardCollectApplyProps> = ({
   pendingApplication = "$0",
   unidentifiedPayments = "$0"
 }) => {
+  const t = useTranslations("clients.dashboard.collectApply");
   const parseMoney = (value: string): number => {
     if (!value) return 0;
 
@@ -39,7 +41,7 @@ const DashboardCollectApply: FC<DashboardCollectApplyProps> = ({
   return (
     <div className={`${className}`}>
       <DashboardGenericItem
-        name="Meta de recaudo"
+        name={t("collectionTarget")}
         value={collection}
         unit="M"
         badgeText={`${percentage.toFixed(1)}%`}
@@ -47,11 +49,15 @@ const DashboardCollectApply: FC<DashboardCollectApplyProps> = ({
 
       <DashboardColorBar values={colorBarValues} percentage={percentage} />
 
-      <DashboardGenericItem name="Total aplicado" value={totalApplied} unit="M" />
+      <DashboardGenericItem name={t("totalApplied")} value={totalApplied} unit="M" />
 
-      <DashboardGenericItem name="Pend. Aplicación" value={pendingApplication} unit="M" />
+      <DashboardGenericItem name={t("pendingApplication")} value={pendingApplication} unit="M" />
 
-      <DashboardGenericItem name="Pagos no identificados" value={unidentifiedPayments} unit="M" />
+      <DashboardGenericItem
+        name={t("unidentifiedPayments")}
+        value={unidentifiedPayments}
+        unit="M"
+      />
     </div>
   );
 };

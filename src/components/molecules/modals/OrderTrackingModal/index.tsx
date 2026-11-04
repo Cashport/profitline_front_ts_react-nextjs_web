@@ -2,6 +2,7 @@ import { FC } from "react";
 import { CaretDoubleRight, ArrowsClockwise } from "phosphor-react";
 import styles from "./OrderTrackingModal.module.scss";
 import { Dropdown, Flex, MenuProps, Skeleton, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import "dayjs/locale/es"; // Importar el idioma español
 // import { formatMoney } from "@/utils/utils";
@@ -25,7 +26,23 @@ interface ModalProps {
 }
 
 const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice: _idInvoice }) => {
+  const t = useTranslations("modals.orderTracking");
   const invoice = invoiceMock;
+  // Los estados llegan en español (se usan también para el color): solo se traduce lo que se muestra.
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case "Alistando":
+        return t("statuses.picking");
+      case "En tránsito":
+        return t("statuses.inTransit");
+      case "Entregado":
+        return t("statuses.delivered");
+      case "Rechazado":
+        return t("statuses.rejected");
+      default:
+        return status;
+    }
+  };
   const timeLineData = invoice?.tracking;
 
   const itemsGenerateAction: MenuProps["items"] = [
@@ -34,7 +51,7 @@ const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice: _idInv
       label: (
         <ButtonGenerateAction
           icon={<ArrowsClockwise size={"1.5rem"} />}
-          title="Seguimiento"
+          title={t("tracking")}
           onClick={() => {}}
           hideArrow
         />
@@ -73,14 +90,17 @@ const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice: _idInv
         </button>
         <div className={styles.header}>
           <Flex vertical gap={8}>
-            <h4 className={styles.numberInvoice}>Factura {invoice.id}</h4>
+            <h4 className={styles.numberInvoice}>{t("invoice", { id: invoice.id })}</h4>
             <Text className={styles.subtitle}>
-              ID orden de compra <strong>{invoice.purchaseOrderId} </strong>
+              {t.rich("purchaseOrderId", {
+                id: invoice.purchaseOrderId,
+                b: (chunks) => <strong>{chunks} </strong>
+              })}
             </Text>
             <Flex wrap={false}>
               <Tag
                 color={getTagColor(invoice.status)}
-                content={invoice.status}
+                content={statusLabel(invoice.status)}
                 style={{ fontSize: 14, fontWeight: 400 }}
                 icon={
                   <div
@@ -125,7 +145,7 @@ const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice: _idInv
               <ModalHeader invoice={invoice} />
               <hr />
               <div className={styles.body}>
-                <div className={styles.trackingTitle}>Trazabilidad</div>
+                <div className={styles.trackingTitle}>{t("history")}</div>
                 <div className={styles.content}>
                   <div className={styles.progress}></div>
                   <div className={styles.description}>
@@ -141,17 +161,17 @@ const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice: _idInv
                                   <div
                                     style={{ display: "flex", alignItems: "center", gap: "10px" }}
                                   >
-                                    <h5 className={styles.title}>{item.status}</h5>
+                                    <h5 className={styles.title}>{statusLabel(item.status)}</h5>
                                   </div>
                                   <div className={styles.date}>{item.date}</div>
                                   {item.responsible && (
-                                    <div
-                                      className={styles.name}
-                                    >{`Responsable: ${item.responsible}`}</div>
+                                    <div className={styles.name}>
+                                      {t("owner", { name: item.responsible })}
+                                    </div>
                                   )}
                                   {item.estimatedValue && (
                                     <p className={styles.name}>
-                                      {`Valor estimado: `}
+                                      {t("estimatedValue")}
                                       <span style={{ fontWeight: 600 }}>
                                         {formatCurrencyMoney(item.estimatedValue ?? "$0")}
                                       </span>

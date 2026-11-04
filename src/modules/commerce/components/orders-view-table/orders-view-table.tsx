@@ -1,5 +1,6 @@
 import { Dispatch, Key, ReactNode, SetStateAction, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "use-intl";
 import { Button, Dropdown, MenuProps, message, Table, TableProps, Tooltip, Typography } from "antd";
 import {
   Clock,
@@ -69,6 +70,9 @@ const OrdersViewTable = ({
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { openModal } = useModalDetail();
   const { showMessage } = useMessageApi();
+  const t = useTranslations("commerce.ordersTable");
+  const tShipping = useTranslations("commerce.shippingFields");
+  const tCommon = useTranslations("common");
 
   const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
   const [currentWarehouseId, setCurrentWarehouseId] = useState<number | null>(null);
@@ -84,18 +88,15 @@ const OrdersViewTable = ({
   const handleResendToBilling = async (orderId: number) => {
     const hide = message.open({
       type: "loading",
-      content: "Reenviando a facturación...",
+      content: t("resendingToBilling"),
       duration: 0
     });
     try {
       await reprocessOrder(orderId);
-      showMessage("success", "Orden reenviada a facturación correctamente");
+      showMessage("success", t("resentToBilling"));
       setFetchMutate();
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Error al reenviar a facturación"
-      );
+      showMessage("error", error instanceof Error ? error.message : t("resendToBillingError"));
     } finally {
       hide();
     }
@@ -107,7 +108,7 @@ const OrdersViewTable = ({
         id: order.id,
         client_name: order.client_name
       });
-      window.open("/comercio/pedido", "_blank");
+      window.open("/commerce/order", "_blank");
       return;
     }
 
@@ -116,7 +117,7 @@ const OrdersViewTable = ({
       id: undefined,
       client_name: undefined
     });
-    window.open(`/comercio/pedidoConfirmado/${order.id}${notificationQuery}`, "_blank");
+    window.open(`/commerce/order-confirmed/${order.id}${notificationQuery}`, "_blank");
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: IOrder[]) => {
@@ -202,7 +203,7 @@ const OrdersViewTable = ({
 
   const allColumns: TableProps<IOrder>["columns"] = [
     {
-      title: "ID",
+      title: t("columns.id"),
       dataIndex: "id",
       key: "id",
       render: (invoiceId, row) => (
@@ -219,7 +220,7 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "client_name",
       key: "client_name",
       render: (text) => <Text className="cell">{text}</Text>,
@@ -227,7 +228,7 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Ciudad",
+      title: tShipping("city"),
       key: "city",
       dataIndex: "city",
       width: 260,
@@ -255,7 +256,7 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Unidad de negocio",
+      title: tShipping("businessUnit"),
       key: "business_unit",
       dataIndex: "business_unit",
       render: (text) => <Text className="cell">{text}</Text>,
@@ -263,7 +264,7 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Fecha de creación",
+      title: tCommon("fields.createdAt"),
       key: "order_date",
       dataIndex: "order_date",
       render: (date) => {
@@ -280,7 +281,7 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Tiempo transcurrido",
+      title: t("columns.elapsedTime"),
       key: "last_datestamp",
       dataIndex: "last_datestamp",
       render: (date: string | null) => (
@@ -294,7 +295,7 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Vendedor",
+      title: tShipping("seller"),
       key: "vendor_name",
       dataIndex: "vendor_name",
       render: (text) => <Text className="cell">{text}</Text>
@@ -349,7 +350,7 @@ const OrdersViewTable = ({
     //   }
     // },
     {
-      title: "Total",
+      title: tCommon("fields.total"),
       key: "total",
       dataIndex: "total",
       render: (amount, row) => (
@@ -359,7 +360,7 @@ const OrdersViewTable = ({
           title={
             row.total_pronto_pago != null ? (
               <>
-                <span>Pronto pago</span>
+                <span>{t("earlyPayment")}</span>
                 <span className="fontMonoSpace">
                   {formatMoney(row.total_pronto_pago, { hideDecimals: true })}
                 </span>
@@ -400,7 +401,7 @@ const OrdersViewTable = ({
                   })
                 }
               >
-                Ver novedad
+                {t("viewDispute")}
               </Button>
             )
           });
@@ -420,7 +421,7 @@ const OrdersViewTable = ({
                     setIsModalOpen(true);
                   }}
                 >
-                  Ver bodega
+                  {t("viewWarehouse")}
                 </Button>
               )
             },
@@ -432,7 +433,7 @@ const OrdersViewTable = ({
                   className="buttonNoBorder"
                   onClick={() => handleSeeDetail(row)}
                 >
-                  {row.is_draft ? "Continuar pedido" : "Detalle"}
+                  {row.is_draft ? t("continueOrder") : tCommon("fields.detail")}
                 </Button>
               )
             }
@@ -447,7 +448,7 @@ const OrdersViewTable = ({
                   className="buttonNoBorder"
                   onClick={() => setHistoryOrder(row)}
                 >
-                  Historial
+                  {t("history")}
                 </Button>
               )
             });
@@ -463,7 +464,7 @@ const OrdersViewTable = ({
                 className="buttonNoBorder"
                 onClick={() => handleResendToBilling(row.id)}
               >
-                Reenviar a facturación
+                {t("resendToBilling")}
               </Button>
             )
           });
@@ -529,7 +530,9 @@ const OrdersViewTable = ({
         isOpen={!!historyOrder}
         onClose={() => setHistoryOrder(null)}
         orderId={historyOrder?.id}
-        orderLabel={historyOrder ? `Pedido #${historyOrder.operation_number}` : undefined}
+        orderLabel={
+          historyOrder ? t("orderLabel", { number: historyOrder.operation_number }) : undefined
+        }
       />
     </>
   );

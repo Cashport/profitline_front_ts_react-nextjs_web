@@ -1,0 +1,101 @@
+{
+  "title": "Reconciliation",
+  "loading": "Loading receivables",
+  "status": {
+    "CONCILIADA": {
+      "label": "Reconciled",
+      "plural": "Reconciled",
+      "hint": "Difference under $1,000"
+    },
+    "NOVEDAD": {
+      "label": "Mismatch",
+      "plural": "Mismatches",
+      "hint": "The amount doesn't match Cashport"
+    },
+    "NO_EXISTE": {
+      "label": "Not found",
+      "plural": "Not found",
+      "hint": "Not in active receivables"
+    }
+  },
+  "documentType": {
+    "FACTURA": "Invoice",
+    "NOTA_CREDITO": "Credit memo",
+    "NOTA_DEBITO": "Debit memo",
+    "SALDO": "Deduction"
+  },
+  "summary": {
+    "allDocuments": "All documents",
+    "customerAmount": "Customer {amount}",
+    "missingFoot": "Customer {amount} · {hint}",
+    "foot": "Customer {amount} · Cashport {cashport}"
+  },
+  "uploadStatus": {
+    "processingFile": "Processing {fileName}…",
+    "processingPortfolio": "Processing receivables…",
+    "processingHint": "Reading the file and matching each document against Cashport. You can leave this screen: the upload keeps running on the server.",
+    "failedTitle": "The upload of {fileName} wasn't applied",
+    "processError": "Couldn't process the file.",
+    "unchanged": "Current receivables were not changed.",
+    "retry": "Upload corrected file",
+    "columns": {
+      "row": "Row",
+      "column": "Column",
+      "fix": "What to fix"
+    },
+    "file": "File",
+    "hiddenErrors": "Showing the first {shown} of {total} errors."
+  },
+  "upload": {
+    "onlyXlsx": "Only .xlsx files are allowed (save .xls files as .xlsx).",
+    "tooLarge": "The file is {size}; the maximum is 30 MB.",
+    "uploadError": "Couldn't upload the file.",
+    "title": "Upload customer receivables",
+    "removeFile": "Remove file",
+    "dragHint": "Drag the Excel file here or click to browse",
+    "formatHint": ".xlsx · up to 30 MB",
+    "requiredColumns": "Required columns: <b>Id documento</b>, <b>Tipo</b> (Factura, Nota crédito, Nota débito or Saldo) and <b>Monto cliente</b>. Other columns are ignored.",
+    "downloadTemplate": "Download template",
+    "replaceWarning": "This upload replaces all of the customer's reconciled receivables",
+    "currentDocs": "It currently has {count} documents, uploaded on {date}.",
+    "replaceDetail": "When it finishes, only what's in this file remains; the previous data can't be recovered from this screen. If the file has errors, nothing is replaced.",
+    "confirm": "I understand this replaces all of this customer's reconciled receivables",
+    "noFile": "No file selected",
+    "confirmToContinue": "Confirm you understand the replacement to continue",
+    "ready": "Ready to upload",
+    "submit": "Upload and reconcile"
+  },
+  "table": {
+    "columns": {
+      "file_row": "Row",
+      "document_id": "Document ID",
+      "document_type": "Type",
+      "client_amount": "Customer amount",
+      "current_amount_cashport": "Cashport amount",
+      "difference": "Difference",
+      "status_cashport": "Status"
+    },
+    "empty": "No documents match these filters.",
+    "showing": "Showing {from}–{to} of {total} documents",
+    "updating": "updating…"
+  },
+  "view": {
+    "done": "Receivables reconciled: {count} documents",
+    "failed": "The upload wasn't applied; review the errors",
+    "downloadError": "Couldn't download the file",
+    "backToCustomer": "Back to customer",
+    "title": "Bulk Receivables Reconciliation",
+    "customer": "Customer",
+    "clientLine": "{name} · Tax ID {taxId}",
+    "downloadTemplate": "Download template",
+    "upload": "Upload receivables",
+    "loadError": "Couldn't load the customer's reconciliation.",
+    "emptyTitle": "This customer doesn't have reconciled receivables yet",
+    "emptyDescription": "Upload the Excel file with Id documento, Tipo and Monto cliente. Cashport matches each document and marks it as reconciled, mismatched or not found.",
+    "currentUpload": "Current receivables: <b>{fileName}</b> · uploaded on {date} · {count} documents",
+    "currentUploadBy": "Current receivables: <b>{fileName}</b> · uploaded on {date} by {user} · {count} documents",
+    "downloadFile": "Download file",
+    "searchPlaceholder": "Search by document ID",
+    "allTypes": "All types"
+  }
+}

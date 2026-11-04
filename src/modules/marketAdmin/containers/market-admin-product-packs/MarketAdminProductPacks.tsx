@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Dropdown, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import { ChevronLeft, MoreHorizontal, Package, Plus } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
@@ -18,15 +19,18 @@ import { IProductPack } from "@/types/productPack/IProductPack";
 
 const PAGE_SIZE = 10;
 
-const STATUS_OPTIONS: { label: string; value: 0 | 1 | undefined }[] = [
-  { label: "Todos", value: undefined },
-  { label: "Activos", value: 1 },
-  { label: "Inactivos", value: 0 }
+// labelKey: clave en marketAdmin.packs.statusFilter
+const STATUS_OPTIONS: { labelKey: "all" | "active" | "inactive"; value: 0 | 1 | undefined }[] = [
+  { labelKey: "all", value: undefined },
+  { labelKey: "active", value: 1 },
+  { labelKey: "inactive", value: 0 }
 ];
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600, fontSize: 12 } });
 
 export default function MarketAdminProductPacks() {
+  const t = useTranslations("marketAdmin.packs");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<0 | 1 | undefined>(undefined);
@@ -67,9 +71,9 @@ export default function MarketAdminProductPacks() {
     try {
       await changeProductPackState(pack.id, next);
       await mutate();
-      showMessage("success", next === 1 ? "Pack activado." : "Pack inactivado.");
+      showMessage("success", next === 1 ? t("feedback.activated") : t("feedback.deactivated"));
     } catch {
-      showMessage("error", "No se pudo cambiar el estado del pack.");
+      showMessage("error", t("feedback.stateError"));
     } finally {
       setBusyId(null);
     }
@@ -82,10 +86,10 @@ export default function MarketAdminProductPacks() {
       await deleteProductPack(toDelete.id);
       if (data.length === 1 && page > 1) setPage(page - 1);
       await mutate();
-      showMessage("success", "Pack eliminado.");
+      showMessage("success", t("feedback.deleted"));
       setToDelete(null);
     } catch {
-      showMessage("error", "No se pudo eliminar el pack.");
+      showMessage("error", t("feedback.deleteError"));
     } finally {
       setBusyId(null);
     }
@@ -93,7 +97,7 @@ export default function MarketAdminProductPacks() {
 
   const columns: ColumnsType<IProductPack> = [
     {
-      title: "Pack",
+      title: t("columns.pack"),
       key: "pack",
       onHeaderCell: headerCell,
       render: (_, pack) => (
@@ -122,7 +126,7 @@ export default function MarketAdminProductPacks() {
       )
     },
     {
-      title: "Línea",
+      title: t("columns.line"),
       key: "line",
       width: 200,
       onHeaderCell: headerCell,
@@ -131,7 +135,7 @@ export default function MarketAdminProductPacks() {
       )
     },
     {
-      title: "Categoría",
+      title: t("columns.category"),
       key: "category",
       width: 200,
       onHeaderCell: headerCell,
@@ -142,7 +146,7 @@ export default function MarketAdminProductPacks() {
       )
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       key: "status",
       width: 110,
       onHeaderCell: headerCell,
@@ -152,7 +156,7 @@ export default function MarketAdminProductPacks() {
             pack.is_available === 1 ? "bg-[#cbe71e] text-[#141414]" : "bg-[#f2f2f2] text-[#6b6b6b]"
           }`}
         >
-          {pack.is_available === 1 ? "Activo" : "Inactivo"}
+          {pack.is_available === 1 ? tCommon("status.active") : tCommon("status.inactive")}
         </span>
       )
     },
@@ -167,10 +171,16 @@ export default function MarketAdminProductPacks() {
           disabled={busyId === pack.id}
           menu={{
             items: [
-              { key: "edit", label: "Editar" },
-              { key: "state", label: pack.is_available === 1 ? "Inactivar" : "Activar" },
+              { key: "edit", label: tCommon("actions.edit") },
+              {
+                key: "state",
+                label: pack.is_available === 1 ? t("actions.deactivate") : t("actions.activate")
+              },
               { type: "divider" },
-              { key: "delete", label: <span className="text-[#e5262b]">Eliminar</span> }
+              {
+                key: "delete",
+                label: <span className="text-[#e5262b]">{tCommon("actions.delete")}</span>
+              }
             ],
             onClick: ({ key }) => {
               if (key === "edit") openEdit(pack.id);
@@ -181,7 +191,7 @@ export default function MarketAdminProductPacks() {
         >
           <button
             className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4a4a4a] hover:bg-[#f2f2f2] hover:text-[#141414]"
-            aria-label="Acciones"
+            aria-label={tCommon("fields.actions")}
           >
             <MoreHorizontal size={16} />
           </button>
@@ -196,27 +206,27 @@ export default function MarketAdminProductPacks() {
         <Link
           href="/market-admin"
           className="flex h-8 w-8 items-center justify-center text-[#141414]"
-          aria-label="Volver"
+          aria-label={tCommon("actions.back")}
         >
           <ChevronLeft size={18} strokeWidth={2.4} />
         </Link>
-        <h1 className="text-[18px] font-semibold text-[#141414]">Packs de productos</h1>
+        <h1 className="text-[18px] font-semibold text-[#141414]">{t("title")}</h1>
         <div className="flex-1" />
         <button
           onClick={openCreate}
           className="flex h-9 items-center gap-1.5 rounded-[10px] bg-[#cbe71e] px-4 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#9bb514]"
         >
-          <Plus size={16} strokeWidth={2.2} /> Nuevo pack
+          <Plus size={16} strokeWidth={2.2} /> {t("new")}
         </button>
       </div>
 
       <div className="cp-list-card rounded-[14px] bg-white px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         <div className="mb-3 flex items-center gap-3">
-          <p className="text-[18px] font-semibold text-[#141414]">Packs</p>
+          <p className="text-[18px] font-semibold text-[#141414]">{t("listTitle")}</p>
           <div className="flex rounded-lg bg-[#f7f7f7] p-0.5">
             {STATUS_OPTIONS.map((option) => (
               <button
-                key={option.label}
+                key={option.labelKey}
                 onClick={() => {
                   setStatus(option.value);
                   setPage(1);
@@ -227,16 +237,16 @@ export default function MarketAdminProductPacks() {
                     : "text-[#6b6b6b] hover:text-[#141414]"
                 }`}
               >
-                {option.label}
+                {t(`statusFilter.${option.labelKey}`)}
               </button>
             ))}
           </div>
           <div className="flex-1" />
           <span className="text-[11px] text-[#8a8a8a]">
-            {pagination.totalRows} {pagination.totalRows === 1 ? "pack" : "packs"}
+            {t("count", { count: pagination.totalRows })}
           </span>
           <UiSearchInput
-            placeholder="Buscar SKU o nombre…"
+            placeholder={t("searchPlaceholder")}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
@@ -255,12 +265,12 @@ export default function MarketAdminProductPacks() {
             emptyText: (
               <div className="flex flex-col items-center gap-2 py-8">
                 <Package size={28} className="text-[#8a8a8a]" strokeWidth={1.7} />
-                <p className="text-[12.5px] text-[#6b6b6b]">Aún no hay packs en este proyecto.</p>
+                <p className="text-[12.5px] text-[#6b6b6b]">{t("empty")}</p>
                 <button
                   onClick={openCreate}
                   className="text-[12.5px] font-semibold text-[#141414] underline-offset-2 hover:underline"
                 >
-                  Crear el primero
+                  {t("createFirst")}
                 </button>
               </div>
             )
@@ -271,7 +281,7 @@ export default function MarketAdminProductPacks() {
             total: pagination.totalRows,
             showSizeChanger: false,
             position: ["bottomRight"],
-            showTotal: (total, range) => `Mostrando ${range[0]}–${range[1]} de ${total} packs`
+            showTotal: (total, range) => t("total", { from: range[0], to: range[1], total })
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);
@@ -291,11 +301,14 @@ export default function MarketAdminProductPacks() {
         onClose={() => setToDelete(null)}
         onOk={handleDelete}
         okLoading={busyId === toDelete?.id}
-        okText="Eliminar"
-        title="¿Eliminar este pack?"
+        okText={tCommon("actions.delete")}
+        title={t("deleteConfirm.title")}
         content={
           <p className="text-[13px] text-[#4a4a4a]">
-            {toDelete?.description} ({toDelete?.sku}) dejará de estar disponible en el marketplace.
+            {t("deleteConfirm.description", {
+              name: toDelete?.description ?? "",
+              sku: toDelete?.sku ?? ""
+            })}
           </p>
         }
       />

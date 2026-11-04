@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Button, Flex, Radio, Spin, Typography } from "antd";
 import { Controller, ControllerRenderProps, FieldError, useForm } from "react-hook-form";
 import { CaretLeft } from "phosphor-react";
@@ -36,6 +37,7 @@ import { useAppStore } from "@/lib/store/store";
 import { capitalize, stringFromArrayOfSelect } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
 import dayjs from "dayjs";
+import { getTranslator } from "@/i18n/translator";
 import { selectDayOptions } from "@/components/atoms/SelectDay/SelectDay";
 import { getContactOptions } from "@/services/contacts/contacts";
 
@@ -57,6 +59,8 @@ interface Props {
   onGoBackTable: () => void;
 }
 export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetails }: Props) => {
+  const t = useTranslations("shared.communicationForm");
+  const tCommon = useTranslations("common");
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [isEditAvailable] = useState(false);
   const [radioValue, setRadioValue] = useState<any>();
@@ -144,7 +148,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
       const contactPositionsData = await getContactOptions();
       const contactPositions = contactPositionsData.contact_position.map((position) => ({
         value: `0_${position.id}`,
-        label: `Cliente - ${position.name}`
+        label: t("customerRecipient", { name: position.name })
       }));
       setForwardTo([...contactPositions]);
     };
@@ -319,7 +323,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
           onClick={onGoBackTable}
           icon={<CaretLeft size={"1.45rem"} />}
         >
-          Información de la comunicación
+          {t("title")}
         </Button>
       </Flex>
 
@@ -329,14 +333,14 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
         <>
           <div className={styles.generalInfo}>
             <InputForm
-              titleInput="Nombre"
+              titleInput={tCommon("fields.name")}
               control={control}
               nameInput="name"
               error={errors.name}
               readOnly={!showCommunicationDetails.communicationId ? false : !isEditAvailable}
             />
             <InputForm
-              titleInput="Descripción"
+              titleInput={tCommon("fields.description")}
               control={control}
               nameInput="description"
               error={errors.description}
@@ -349,7 +353,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
             style={errors.trigger?.type && { border: "1px dashed red" }}
           >
             <Title className={styles.forwardType__title} level={5}>
-              Tipo de envio
+              {t("sendType")}
             </Title>
 
             <Controller
@@ -358,7 +362,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
               rules={{
                 validate: (value) => {
                   if (!value) {
-                    return "Seleccione al menos 1 tipo de envio *";
+                    return t("sendTypeRequired");
                   }
                   return true;
                 }
@@ -374,7 +378,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                       disabled={!!showCommunicationDetails.communicationId && !isEditAvailable}
                     >
                       <InputClickable
-                        title="Frecuencia"
+                        title={t("frequency")}
                         error={customFieldsError.frequency}
                         disabled={radioValue !== 1}
                         callBackFunction={() => setIsFrequencyModalOpen(true)}
@@ -383,7 +387,15 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                         }
                         value={
                           selectedPeriodicity
-                            ? `${selectedPeriodicity.frequency.value === "Mensual" ? `${selectedPeriodicity.frequency.value}, ${selectedPeriodicity.frequency_number} veces` : `Cada ${stringFromArrayOfSelect(selectedPeriodicity.days)}, ${selectedPeriodicity.frequency.value}`}`
+                            ? selectedPeriodicity.frequency.value === "Mensual"
+                              ? t("monthlySummary", {
+                                  frequency: selectedPeriodicity.frequency.label,
+                                  count: Number(selectedPeriodicity.frequency_number) || 0
+                                })
+                              : t("daysSummary", {
+                                  days: stringFromArrayOfSelect(selectedPeriodicity.days),
+                                  frequency: selectedPeriodicity.frequency.label
+                                })
                             : ""
                         }
                       />
@@ -415,8 +427,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                           <GeneralSelect
                             errors={errors.trigger?.settings?.event_type}
                             field={field}
-                            title="Tipo de evento"
-                            placeholder="Seleccionar tipo de evento"
+                            title={t("eventType")}
+                            placeholder={t("selectEventType")}
                             options={events}
                             titleAbsolute
                           />
@@ -463,8 +475,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                         rules={{ required: radioValue === 3 }}
                         render={({ field }) => (
                           <SelectOuterTags
-                            title="Tipo de acción"
-                            placeholder="Seleccionar tipo de acción"
+                            title={t("actionType")}
+                            placeholder={t("selectActionType")}
                             options={actions}
                             errors={errors.trigger?.settings?.actions}
                             field={field}
@@ -481,8 +493,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                       rules={{ required: false }}
                       render={({ field }) => (
                         <SelectOuterTags
-                          title="Subtipo de acción"
-                          placeholder="Seleccionar subtipo de acción"
+                          title={t("actionSubtype")}
+                          placeholder={t("selectActionSubtype")}
                           options={subActions}
                           errors={errors.trigger?.settings?.subActions}
                           field={field}
@@ -503,7 +515,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
 
           <div className={styles.businessRules}>
             <Title className={styles.businessRules__title} level={5}>
-              Reglas de negocio
+              {t("businessRules")}
             </Title>
             <Flex
               vertical
@@ -536,7 +548,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                 disabled={!isEditAvailable && !!showCommunicationDetails.communicationId}
               />
               <p className={styles.textError}>
-                {customFieldsError.channel && `Las Reglas de negocio  son obligatorias *`}
+                {customFieldsError.channel && t("businessRulesRequired")}
               </p>
             </Flex>
             <SelectClientsGroup
@@ -548,7 +560,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
 
           <div className={styles.communicationTemplate}>
             <Title className={styles.communicationTemplate__title} level={5}>
-              Plantilla comunicado
+              {t("template")}
             </Title>
             <Controller
               name="template.via"
@@ -559,8 +571,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                 <GeneralSelect
                   errors={errors.template?.via}
                   field={field}
-                  title="Via"
-                  placeholder="Seleccionar via"
+                  title={t("via")}
+                  placeholder={t("selectVia")}
                   options={viasSelectOption}
                   customStyleContainer={{ width: "25%", paddingRight: "0.25rem" }}
                 />
@@ -574,8 +586,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                 <GeneralSearchSelect
                   errors={errors.template?.send_to}
                   field={field}
-                  title="Para"
-                  placeholder="Enviar a"
+                  title={t("to")}
+                  placeholder={t("sendTo")}
                   options={forwardTo}
                   suffixIcon={null}
                   disabled={!isEditAvailable && !!showCommunicationDetails.communicationId}
@@ -590,8 +602,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                 <GeneralSearchSelect
                   errors={errors.template?.copy_to}
                   field={field}
-                  title="Copia"
-                  placeholder="Copia a"
+                  title={t("cc")}
+                  placeholder={t("ccTo")}
                   options={forwardTo}
                   suffixIcon={null}
                   disabled={!isEditAvailable && !!showCommunicationDetails.communicationId}
@@ -607,8 +619,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                 disabled={!isEditAvailable && !!showCommunicationDetails.communicationId}
                 render={({ field }) => (
                   <SelectOuterTags
-                    title="Tags"
-                    placeholder="Seleccionar tag"
+                    title={t("tags")}
+                    placeholder={t("selectTag")}
                     options={templateTags}
                     errors={errors.template?.tags}
                     field={field}
@@ -632,7 +644,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                       {...field}
                       onFocus={() => setLastFocusedTextArea("subject")}
                       onChange={field.onChange}
-                      placeholder="Asunto"
+                      placeholder={t("subject")}
                       customStyles={
                         errors.template?.subject ? { borderColor: "red" } : { height: "48px" }
                       }
@@ -662,7 +674,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                     {...field}
                     onFocus={() => setLastFocusedTextArea("message")}
                     onChange={field.onChange}
-                    placeholder="Ingresar cuerpo del correo"
+                    placeholder={t("bodyPlaceholder")}
                     customStyles={errors.template?.message ? { borderColor: "red" } : {}}
                     value={field.value}
                     highlightWords={watchTemplateTagsLabels}
@@ -678,8 +690,8 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
               disabled={!isEditAvailable && !!showCommunicationDetails.communicationId}
               render={({ field }) => (
                 <SelectOuterTags
-                  title="Adjunto"
-                  placeholder="Seleccionar adjunto"
+                  title={t("attachment")}
+                  placeholder={t("selectAttachment")}
                   options={attachments}
                   errors={errors.template?.files}
                   field={field}
@@ -696,7 +708,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                 loading={loadingRequest}
                 onClick={handleSubmit(handleCreateCommunication)}
               >
-                Crear comunicación
+                {t("create")}
               </PrincipalButton>
             </Flex>
           )}
@@ -725,15 +737,16 @@ const initDatSelectedBusinessRules: ISelectedBussinessRules = {
 
 const dataToDataForm = (data: ICommunicationDetail | undefined): ICommunicationForm | undefined => {
   if (!data || Object.keys(data).length === 0) return undefined;
+  const tShared = getTranslator("shared");
 
   const roles = data.user_roles?.map((role) => ({
     value: `1_${role.id}`,
-    label: `Rol - ${role.name}`
+    label: tShared("communicationForm.roleRecipient", { name: role.name })
   }));
 
   const contactPositions = data.contact_roles?.map((position) => ({
     value: `0_${position.id}`,
-    label: `Cliente - ${position.name}`
+    label: tShared("communicationForm.customerRecipient", { name: position.name })
   }));
   const send_to = [...roles, ...contactPositions];
 

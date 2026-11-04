@@ -3,6 +3,7 @@ import type { UploadFile, UploadProps } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
 import { Upload } from "antd";
 import { FileArrowUp, Trash } from "phosphor-react";
+import { useTranslations } from "use-intl";
 const { Dragger } = Upload;
 
 import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
@@ -10,6 +11,8 @@ import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 import "./documentbutton.scss";
 
 const { Text } = Typography;
+
+const LEGACY_EMPTY_FILE_NAME = "Seleccionar archivo";
 
 interface Props {
   title?: string;
@@ -28,8 +31,8 @@ interface Props {
 
 export const DocumentButton = ({
   title = "file",
-  fileName = "Seleccionar archivo",
-  fileSize = "PDF, Word, PNG, XLS, MSG, EML (Tamaño max 30mb)",
+  fileName,
+  fileSize,
   handleOnChange,
   handleOnDrop,
   handleOnDelete,
@@ -38,6 +41,11 @@ export const DocumentButton = ({
   children,
   onFileNameClick
 }: Props) => {
+  const t = useTranslations("components.documentButton");
+  // Sin archivo: `fileName` vacío o el texto "Seleccionar archivo" que aún pasan algunos llamadores.
+  const isEmpty = !fileName || fileName === LEGACY_EMPTY_FILE_NAME;
+  const displayName = isEmpty ? t("selectFile") : fileName;
+  if (fileSize === undefined) fileSize = t("allowedFiles");
   const props: UploadProps = {
     name: title,
     onChange: handleOnChange,
@@ -73,7 +81,7 @@ export const DocumentButton = ({
     <Dragger
       className={className ? `documentDragger ${className}` : "documentDragger"}
       {...props}
-      openFileDialogOnClick={fileName === "Seleccionar archivo"}
+      openFileDialogOnClick={isEmpty}
     >
       {children ? (
         children
@@ -86,12 +94,12 @@ export const DocumentButton = ({
                 onClick={onFileNameClick}
                 className={`nameFile ${onFileNameClick ? "clickable" : ""}`}
               >
-                {fileName}
+                {displayName}
               </Text>
             </Flex>
             <Text className="sizeFile">{fileSize}</Text>
           </Flex>
-          {!disabled && fileName !== "Seleccionar archivo" ? (
+          {!disabled && !isEmpty ? (
             <Button
               onClick={handleOnDelete}
               className="deleteDocButton"

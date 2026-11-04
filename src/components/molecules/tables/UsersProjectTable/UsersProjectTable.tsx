@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button, Flex, Popconfirm, Spin, Table, Typography } from "antd";
@@ -28,6 +29,8 @@ import { extractSingleParam } from "@/utils/utils";
 const { Text } = Typography;
 
 export const UsersProjectTable: React.FC = () => {
+  const t = useTranslations("shared.tables");
+  const tCommon = useTranslations("common");
   const params = useParams(); // Get project ID from the URL
   const projectId = extractSingleParam(params.id) || "";
 
@@ -43,23 +46,23 @@ export const UsersProjectTable: React.FC = () => {
   const onResendInvitation = async (email: string) => {
     const response = await onResendInvitationUser(email);
     if (response.status === SUCCESS) {
-      showMessage("success", "La invitacion fue enviada nuevamente.");
+      showMessage("success", t("users.invitationResent"));
     } else {
-      showMessage("error", "Oops, hubo un error por favor intenta mas tarde.");
+      showMessage("error", t("genericError"));
     }
   };
 
   const handleSeeUserDetail = (userId: number) => {
-    router.push(`/proyectos/review/${projectId}/users/${userId}`); // Redirects to user details
+    router.push(`/projects/review/${projectId}/users/${userId}`); // Redirects to user details
   };
 
   const handleCreateUser = () => {
-    router.push(`/proyectos/review/${projectId}/users/new`); // Redirects to create a new user
+    router.push(`/projects/review/${projectId}/users/new`); // Redirects to create a new user
   };
 
   const columns: TableProps<IUserSingle>["columns"] = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "USER_NAME",
       key: "USER_NAME",
       sorter: (a, b) => a.USER_NAME?.localeCompare(b.USER_NAME),
@@ -70,34 +73,34 @@ export const UsersProjectTable: React.FC = () => {
       )
     },
     {
-      title: "Correo",
+      title: t("users.columns.email"),
       dataIndex: "EMAIL",
       key: "EMAIL",
       sorter: (a, b) => a?.EMAIL?.localeCompare(b?.EMAIL),
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Telefono",
+      title: tCommon("fields.phone"),
       key: "PHONE",
       dataIndex: "PHONE",
       sorter: (a, b) => a?.PHONE?.localeCompare(b?.PHONE),
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Rol",
+      title: t("users.columns.role"),
       key: "ROL_NAME",
       dataIndex: "ROL_NAME",
       sorter: (a, b) => a?.ROL_NAME?.localeCompare(b?.ROL_NAME),
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Clientes",
+      title: t("users.columns.customers"),
       key: "COUTN_CLIENTS",
       dataIndex: "COUTN_CLIENTS",
       render: (text) => <Text className="cell -clients">{text}</Text>
     },
     {
-      title: "Zona",
+      title: t("users.columns.zone"),
       key: "USER_ZONES",
       dataIndex: "USER_ZONES",
       width: "120px",
@@ -118,7 +121,7 @@ export const UsersProjectTable: React.FC = () => {
         )
     },
     {
-      title: "Responsabilidad",
+      title: t("users.columns.responsibility"),
       key: "BUSSINES_RULES",
       dataIndex: "BUSSINES_RULES",
       width: "210px",
@@ -144,7 +147,7 @@ export const UsersProjectTable: React.FC = () => {
         )
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       key: "status",
       width: "150px",
       dataIndex: "status",
@@ -154,15 +157,15 @@ export const UsersProjectTable: React.FC = () => {
           {ACTIVE ? (
             <Flex align="center" className={ACTIVE ? "statusContainer" : "statusContainerPending"}>
               <div className={ACTIVE ? "statusActive" : "statusPending"} />
-              <Text>{ACTIVE ? "Activo" : "Inactivo"}</Text>
+              <Text>{ACTIVE ? tCommon("status.active") : tCommon("status.inactive")}</Text>
             </Flex>
           ) : (
             <Popconfirm
               placement="topRight"
-              title={"Invitación pendiente de aprobación"}
-              description={"Volver a Enviar invitacion?"}
-              okText="Si"
-              cancelText="No"
+              title={t("invitationPending")}
+              description={t("resendInvitation")}
+              okText={tCommon("status.yes")}
+              cancelText={tCommon("status.no")}
               onConfirm={() => onResendInvitation(EMAIL)}
             >
               <Flex
@@ -170,7 +173,7 @@ export const UsersProjectTable: React.FC = () => {
                 className={ACTIVE ? "statusContainer" : "statusContainerPending"}
               >
                 <div className={ACTIVE ? "statusActive" : "statusPending"} />
-                <Text>{ACTIVE ? "Activo" : "Inactivo"}</Text>
+                <Text>{ACTIVE ? tCommon("status.active") : tCommon("status.inactive")}</Text>
               </Flex>
             </Popconfirm>
           )}
@@ -227,10 +230,10 @@ export const UsersProjectTable: React.FC = () => {
     const response = await deleteUsersById(selectedRowKeys as number[], projectId);
 
     if (response.status === 200) {
-      showMessage("success", "Los usuarios seleccionados fueron eliminados correctamente.");
+      showMessage("success", t("users.deletedSuccess"));
       mutate(`/user/project/${projectId}?page=1`);
     } else {
-      showMessage("error", "Oops, hubo un error por favor intenta mas tarde.");
+      showMessage("error", t("genericError"));
     }
     setSelectedRowKeys([]);
     setIsOpenModalRemove(false);
@@ -241,9 +244,9 @@ export const UsersProjectTable: React.FC = () => {
     const response = await resendInvitationUsers(selectedRowKeys as number[]);
 
     if (response.status === 200) {
-      showMessage("success", "Invitación reenviada correctamente.");
+      showMessage("success", t("users.invitationResentSuccess"));
     } else {
-      showMessage("error", "Oops, hubo un error por favor intenta mas tarde.");
+      showMessage("error", t("genericError"));
     }
   };
 
@@ -252,7 +255,7 @@ export const UsersProjectTable: React.FC = () => {
       key: "1",
       label: (
         <Button className="buttonOutlined" onClick={onResendInviteSelectedUsers}>
-          Reenviar invitación
+          {t("users.resendInvitation")}
         </Button>
       )
     },
@@ -260,7 +263,7 @@ export const UsersProjectTable: React.FC = () => {
       key: "2",
       label: (
         <Button className="buttonOutlined" onClick={() => setIsOpenModalRemove(true)}>
-          Eliminar
+          {tCommon("actions.delete")}
         </Button>
       )
     }
@@ -271,7 +274,7 @@ export const UsersProjectTable: React.FC = () => {
         <Flex justify="space-between" align="center" className="mainUsersProjectTable_header">
           <Flex gap={"0.625rem"} align="center">
             <UiSearchInput
-              placeholder="Buscar usuarios"
+              placeholder={t("users.searchPlaceholder")}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <FilterUsers setSelectedUsers={setSelectedUsers} idProject={projectId} />
@@ -284,7 +287,7 @@ export const UsersProjectTable: React.FC = () => {
             onClick={handleCreateUser}
             icon={<Plus weight="bold" size={18} />}
           >
-            Nuevo Usuario
+            {t("users.newUser")}
           </Button>
         </Flex>
         {loading ? (
@@ -314,7 +317,7 @@ export const UsersProjectTable: React.FC = () => {
         )}
         <ModalRemove
           isMassiveAction={true}
-          name="usuarios"
+          name={t("users.entityName")}
           isOpen={isOpenModalRemove}
           onClose={() => setIsOpenModalRemove(false)}
           onRemove={deleteUsers}

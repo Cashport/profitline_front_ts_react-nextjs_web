@@ -3,6 +3,7 @@ import { Tag, Typography } from "antd";
 import { PaperclipIcon } from "lucide-react";
 import type { WhatsappTemplate } from "../../../lib/mockData";
 import { Badge } from "@/modules/chat/ui/badge";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -17,6 +18,7 @@ export default function WhatsAppTemplateCard({
   isSelected,
   onSelect
 }: WhatsAppTemplateCardProps) {
+  const t = useTranslations("massCommunications.message");
   return (
     <button
       type="button"
@@ -32,7 +34,7 @@ export default function WhatsAppTemplateCard({
           {template.name}
         </Text>
         <Badge className="shrink-0 text-[13px] bg-green-100 text-green-700 border-green-200">
-          Aprobada
+          {t("approved")}
         </Badge>
       </div>
 

@@ -1,5 +1,6 @@
 import { Button, Dropdown, MenuProps } from "antd";
 import { DotsThreeVertical } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { BalanceDecisionAction } from "../ModalApproveRejectBalance/ModalApproveRejectBalance";
@@ -23,6 +24,7 @@ export function BalanceRowActions({
   onSendOtherBalances,
   onDecision
 }: BalanceRowActionsProps) {
+  const t = useTranslations("balances.rowActions");
   const statusCode = (record.status_code ?? "").toLowerCase();
 
   const buildItems = (): MenuProps["items"] => {
@@ -31,12 +33,12 @@ export function BalanceRowActions({
         return [
           {
             key: "enviar-otros-saldos",
-            label: "Enviar a otros saldos",
+            label: t("sendToOther"),
             onClick: () => onSendOtherBalances(record)
           },
           {
             key: "cargar-soporte",
-            label: "Cargar soporte",
+            label: t("uploadSupport"),
             onClick: () => onCargarSoporte(record)
           }
         ];
@@ -44,13 +46,13 @@ export function BalanceRowActions({
         return [
           {
             key: "rechazar-soportes",
-            label: "Rechazar soportes",
+            label: t("rejectSupports"),
             // eslint-disable-next-line no-console
             onClick: () => console.log("Rechazar soportes", { record })
           },
           {
             key: "enviar-aprobacion",
-            label: "Enviar a aprobación",
+            label: t("sendToApproval"),
             onClick: () => onEnviarAprobacion(record)
           }
         ];
@@ -58,12 +60,12 @@ export function BalanceRowActions({
         return [
           {
             key: "aprobar",
-            label: "Aprobar",
+            label: t("approve"),
             onClick: () => onDecision(record, "approve")
           },
           {
             key: "rechazar",
-            label: "Rechazar",
+            label: t("reject"),
             onClick: () => onDecision(record, "reject")
           }
         ];

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bot } from "lucide-react";
 import { Select as AntSelect } from "antd";
+import { useTranslations } from "use-intl";
 
 import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
 import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
@@ -23,6 +24,8 @@ import {
 } from "@/types/dataQuality/IDataQuality";
 
 export default function NoveltyAlertsView() {
+  const t = useTranslations("dataQuality.alerts");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const countryIdParam = searchParams.get("countryId");
@@ -59,14 +62,16 @@ export default function NoveltyAlertsView() {
   // Las tarjetas espejan el select de tipos: una categoría está activa cuando todos sus
   // error_types ya están aplicados, así que el filtro es la única fuente de verdad.
   const activeKeys = filtersData.categories
-    .filter((c) => c.error_types.length > 0 && c.error_types.every((t) => typeFilter.includes(t)))
+    .filter(
+      (c) => c.error_types.length > 0 && c.error_types.every((type) => typeFilter.includes(type))
+    )
     .map((c) => c.key);
 
   const handleCategoryClick = (category: IAlertFilterCategory) => {
     const isActive = activeKeys.includes(category.key);
     setTypeFilter((prev) =>
       isActive
-        ? prev.filter((t) => !category.error_types.includes(t))
+        ? prev.filter((type) => !category.error_types.includes(type))
         : Array.from(new Set([...prev, ...category.error_types]))
     );
   };
@@ -116,7 +121,7 @@ export default function NoveltyAlertsView() {
   return (
     <div className="cp-page">
       <Header
-        title="Alertas y Novedades"
+        title={t("title")}
         back="/data-quality"
         actionsExtra={
           <Button
@@ -125,7 +130,7 @@ export default function NoveltyAlertsView() {
             className="whitespace-nowrap"
           >
             <Bot className="h-4 w-4 mr-1" />
-            Automatizaciones
+            {t("automations")}
           </Button>
         }
       />
@@ -137,7 +142,7 @@ export default function NoveltyAlertsView() {
             {/* Search Input */}
             <div className="flex-1 min-w-64">
               <UiSearchInput
-                placeholder="Buscar alertas..."
+                placeholder={t("searchPlaceholder")}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
@@ -148,11 +153,11 @@ export default function NoveltyAlertsView() {
               optionFilterProp="label"
               value={countryFilter}
               onChange={handleCountryChange}
-              placeholder="Todos los países"
+              placeholder={t("allCountries")}
               className="w-48"
               style={{ minWidth: "12rem", height: "var(--control-h)" }}
               options={[
-                { label: "Todos los países", value: "all" },
+                { label: t("allCountries"), value: "all" },
                 ...filtersData.countries.map((country) => ({
                   label: country.country_name,
                   value: String(country.id)
@@ -166,11 +171,11 @@ export default function NoveltyAlertsView() {
               optionFilterProp="label"
               value={clientFilter}
               onChange={setClientFilter}
-              placeholder="Todos los clientes"
+              placeholder={t("allCustomers")}
               className="w-48"
               style={{ minWidth: "12rem", height: "var(--control-h)" }}
               options={[
-                { label: "Todos los clientes", value: "all" },
+                { label: t("allCustomers"), value: "all" },
                 ...visibleClients.map((client) => ({
                   label: client.client_name,
                   value: String(client.client_id)
@@ -184,7 +189,7 @@ export default function NoveltyAlertsView() {
               allowClear
               value={typeFilter}
               onChange={setTypeFilter}
-              placeholder="Todos los tipos"
+              placeholder={t("allTypes")}
               className="w-48"
               style={{ minWidth: "12rem", height: "var(--control-h)" }}
               options={filtersData.types.map((type) => ({ label: type, value: type }))}
@@ -198,7 +203,7 @@ export default function NoveltyAlertsView() {
                 onClick={handleClearFilters}
                 className="whitespace-nowrap h-[var(--control-h)]"
               >
-                Limpiar filtros
+                {tCommon("actions.clearFilters")}
               </Button>
             )}
           </div>
@@ -213,14 +218,12 @@ export default function NoveltyAlertsView() {
         {/* Alerts Table */}
         <div className="pt-6">
           <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
-            Lista de Alertas y Novedades
+            {t("listTitle")}
           </h3>
           {error ? (
             <div className="bg-white rounded-lg p-6 text-center">
               <p className="text-red-600">
-                {error instanceof Error
-                  ? error.message
-                  : "No se pudo cargar la información de alertas."}
+                {error instanceof Error ? error.message : t("loadError")}
               </p>
             </div>
           ) : (

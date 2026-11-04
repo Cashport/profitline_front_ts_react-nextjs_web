@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { Flex, Spin } from "antd";
 import { DotsThree } from "phosphor-react";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
@@ -35,6 +36,8 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({
   isActive,
   transactionType
 }) => {
+  const tShared = useTranslations("banks.shared");
+  const tApps = useTranslations("banks.paymentApplicationsActions");
   const [selectedRows, setSelectedRows] = useState<IPaymentApplication[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
@@ -97,7 +100,7 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({
           <BanksSlot to="header" active={isActive}>
             <BanksFilterModal setSelectedFilters={setSelectedFilters} />
             <OptimizedSearchComponent
-              title="Buscar referencia, valor…"
+              title={tShared("searchPlaceholder")}
               onSearch={handleSearch}
               surface="page"
               className="!w-[220px] !flex-none"
@@ -106,11 +109,11 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({
           <BanksSlot to="tabs" active={isActive}>
             <button
               type="button"
-              title="Generar acción"
-              aria-label="Generar acción"
+              title={tShared("generateAction")}
+              aria-label={tShared("generateAction")}
               onClick={() => {
                 if (!selectedRows || selectedRows.length === 0) {
-                  showMessage("error", "Seleccione al menos una aplicación de pago");
+                  showMessage("error", tApps("selectAtLeastOne"));
                   return;
                 }
                 setisGenerateActionOpen(true);

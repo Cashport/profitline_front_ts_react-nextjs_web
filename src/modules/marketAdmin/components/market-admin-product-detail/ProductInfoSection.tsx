@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
@@ -28,25 +30,29 @@ export default function ProductInfoSection({
   activo,
   onToggleActivo
 }: Props) {
+  const t = useTranslations("marketAdmin.productDetail.info");
   return (
     <div className="grid grid-cols-2 gap-8">
       <div className="flex flex-col gap-5">
-        <p className="text-base font-bold text-[#141414]">Información del producto</p>
+        <p className="text-base font-bold text-[#141414]">{t("title")}</p>
         <div className="grid grid-cols-3 gap-4">
-          <Field label="Línea" value={linea} />
-          <Field label="Canal" value={canal} />
+          <Field label={t("line")} value={linea} />
+          <Field label={t("channel")} value={canal} />
           <Field label="SKUs" value={String(skus)} />
         </div>
       </div>
       <div className="flex flex-col gap-5">
-        <p className="text-sm font-bold text-[#141414]">Precio y estado</p>
+        <p className="text-sm font-bold text-[#141414]">{t("priceAndStatus")}</p>
         <div className="grid grid-cols-3 gap-4">
-          <Field label="Precio base" value={precioBase} />
-          <Field label="Lotes" value={String(lotesCount)} />
+          <Field label={t("basePrice")} value={precioBase} />
+          <Field label={t("lots")} value={String(lotesCount)} />
           <div className="flex flex-col gap-1">
-            <span className="text-[13px] text-[#999999]">Visible en Marketplace</span>
+            <span className="text-[13px] text-[#999999]">{t("visibleInMarketplace")}</span>
             <button
               onClick={onToggleActivo}
+              role="switch"
+              aria-checked={activo}
+              aria-label={t("visibleInMarketplace")}
               className={`w-10 h-5 rounded-full transition-colors relative mt-0.5 ${
                 activo ? "bg-cashport-green" : "bg-[#DDDDDD]"
               }`}

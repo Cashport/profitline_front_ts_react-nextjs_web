@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Flex, Spin } from "antd";
 import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 import { ModalRemove } from "@/components/molecules/modals/ModalRemove/ModalRemove";
 
@@ -19,6 +20,8 @@ interface PropsSelectedGroupView {
   };
 }
 export const SelectedGroupView = ({ onClickBack, showGroupDetails }: PropsSelectedGroupView) => {
+  const t = useTranslations("projects.clientGroup");
+  const tCommon = useTranslations("common");
   const [isOpenModalStatus, setIsOpenModalStatus] = useState({ status: false, remove: false });
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [groupInfoForEdit, setGroupInfoForEdit] = useState<groupInfo>({} as groupInfo);
@@ -64,7 +67,7 @@ export const SelectedGroupView = ({ onClickBack, showGroupDetails }: PropsSelect
           className="buttonGoBack"
           icon={<CaretLeft size={"1.45rem"} />}
         >
-          {data?.data.group_name ? data?.data.group_name : "Loading..."}
+          {data?.data.group_name ? data?.data.group_name : tCommon("status.loading")}
         </Button>
 
         <Flex gap="1.5rem">
@@ -76,7 +79,7 @@ export const SelectedGroupView = ({ onClickBack, showGroupDetails }: PropsSelect
             icon={<ArrowsClockwise size={"1.45rem"} />}
             loading={loading}
           >
-            Cambiar Estado
+            {t("changeStatus")}
           </Button>
           <Button
             size="large"
@@ -85,7 +88,7 @@ export const SelectedGroupView = ({ onClickBack, showGroupDetails }: PropsSelect
             icon={<Pencil size={"1.45rem"} />}
             loading={loading}
           >
-            Editar Grupo
+            {t("editGroup")}
           </Button>
         </Flex>
       </Flex>
@@ -115,7 +118,7 @@ export const SelectedGroupView = ({ onClickBack, showGroupDetails }: PropsSelect
         onClose={() => setIsOpenModalStatus({ status: false, remove: false })}
       />
       <ModalRemove
-        name="usuario"
+        name={t("removeEntity")}
         isOpen={isOpenModalStatus.remove}
         onClose={() => setIsOpenModalStatus({ status: false, remove: false })}
         onRemove={onRemoveGroup}

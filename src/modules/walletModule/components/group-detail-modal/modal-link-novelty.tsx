@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Input, Pagination } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -34,6 +35,7 @@ function LinkNoveltyForm({
   documentos,
   onClose
 }: Omit<ModalLinkNoveltyProps, "open">) {
+  const t = useTranslations("wallet.linkNovelty");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
 
@@ -54,7 +56,7 @@ function LinkNoveltyForm({
         setNovedades(data);
         setNovedadExistente(data[0]?.incident_id ?? undefined);
       } catch {
-        showMessage("error", "No se pudieron cargar las novedades del cliente");
+        showMessage("error", t("loadError"));
       } finally {
         setIsLoadingNovedades(false);
       }
@@ -89,35 +91,31 @@ function LinkNoveltyForm({
 
   return (
     <NoveltyPanel
-      title="Vincular a una novedad existente"
+      title={t("title")}
       subtitle={`${fac(documentos.length)} · ${fmtFull(total)} · ${clienteNombre}`}
       onClose={onClose}
-      submitLabel="Vincular facturas"
-      sendingLabel="Vinculando…"
+      submitLabel={t("submit")}
+      sendingLabel={t("submitting")}
       onSubmit={handleSubmit}
       submitDisabled={documentos.length === 0 || novedadExistente === undefined}
     >
       <div>
-        <SectionTitle>Novedades abiertas de este cliente</SectionTitle>
+        <SectionTitle>{t("openNovelties")}</SectionTitle>
         {!isLoadingNovedades && novedades.length > 0 && (
           <SearchField
             value={busqueda}
             onChange={handleSearchChange}
-            placeholder="Buscar por documento o motivo…"
+            placeholder={t("searchPlaceholder")}
             className="mb-2"
           />
         )}
         <div className="overflow-hidden rounded-md border border-border">
           {isLoadingNovedades ? (
-            <div className="px-3 py-2.5 text-[13px] text-muted-foreground">Cargando novedades…</div>
+            <div className="px-3 py-2.5 text-[13px] text-muted-foreground">{t("loading")}</div>
           ) : novedades.length === 0 ? (
-            <div className="px-3 py-2.5 text-[13px] text-muted-foreground">
-              Sin novedades abiertas para este cliente
-            </div>
+            <div className="px-3 py-2.5 text-[13px] text-muted-foreground">{t("empty")}</div>
           ) : novedadesFiltradas.length === 0 ? (
-            <div className="px-3 py-2.5 text-[13px] text-muted-foreground">
-              Sin novedades que coincidan con la búsqueda
-            </div>
+            <div className="px-3 py-2.5 text-[13px] text-muted-foreground">{t("noMatches")}</div>
           ) : (
             novedadesVisibles.map((n) => (
               <div
@@ -128,7 +126,9 @@ function LinkNoveltyForm({
                 <input
                   type="radio"
                   name="novedad-existente"
-                  aria-label={`Seleccionar ${n.id_erp ?? n.incident_motive ?? n.notification_type_name}`}
+                  aria-label={t("select", {
+                    name: n.id_erp ?? n.incident_motive ?? n.notification_type_name ?? ""
+                  })}
                   className="accent-wallet-accent"
                   checked={novedadExistente === n.incident_id}
                   onChange={() => setNovedadExistente(n.incident_id ?? undefined)}
@@ -156,16 +156,16 @@ function LinkNoveltyForm({
       </div>
 
       <div>
-        <SectionTitle>Facturas incluidas</SectionTitle>
+        <SectionTitle>{t("includedInvoices")}</SectionTitle>
         <NoveltyDocumentsTable documentos={documentos} />
       </div>
 
       <div>
-        <SectionTitle>Comentario</SectionTitle>
+        <SectionTitle>{t("comment")}</SectionTitle>
         <Input.TextArea
           rows={2}
           value={comentario}
-          placeholder="Ej.: el cliente pide el soporte firmado antes del viernes"
+          placeholder={t("commentPlaceholder")}
           onChange={(e) => setComentario(e.target.value)}
         />
       </div>

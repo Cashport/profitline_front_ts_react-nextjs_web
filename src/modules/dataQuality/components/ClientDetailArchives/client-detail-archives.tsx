@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Dropdown, Spin, message } from "antd";
 import { ChevronDown, Filter } from "lucide-react";
 import { ArrowsClockwise, Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useArchivesClientDataByType } from "../../hooks/useArchivesClientDataByType";
 
@@ -36,6 +37,7 @@ export function ClientDetailArchives({
   onMutateDetail,
   onCountsChange
 }: IClientDetailArchivesProps) {
+  const t = useTranslations("dataQuality.clientArchives");
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
     end: null
@@ -58,7 +60,13 @@ export function ClientDetailArchives({
     archivesByType,
     isValidating: isArchivesValidating,
     mutate: mutateArchives
-  } = useArchivesClientDataByType(clientId, dateRange.start, dateRange.end, showProcessed, showFuture);
+  } = useArchivesClientDataByType(
+    clientId,
+    dateRange.start,
+    dateRange.end,
+    showProcessed,
+    showFuture
+  );
 
   // Aggregate per-type counts so the parent can render the "Mostrando X de Y" footer.
   // `shown` counts the rows actually returned/displayed (grows when "show processed" is
@@ -104,16 +112,18 @@ export function ClientDetailArchives({
 
     if (intakesWithoutGroup.length > 0) {
       message.error(
-        `Ingestas sin tipo de archivo correspondiente: ${intakesWithoutGroup
-          .map((intake) => intake.tipo_archivo || intake.data_type?.description)
-          .join(", ")}`
+        t("intakesWithoutFileType", {
+          items: intakesWithoutGroup
+            .map((intake) => intake.tipo_archivo || intake.data_type?.description)
+            .join(", ")
+        })
       );
     }
     if (groupsWithoutIntake.length > 0) {
       message.error(
-        `Tipos de archivo sin ingesta configurada: ${groupsWithoutIntake
-          .map((group) => group.tipo_archivo)
-          .join(", ")}`
+        t("fileTypesWithoutIntake", {
+          items: groupsWithoutIntake.map((group) => group.tipo_archivo).join(", ")
+        })
       );
     }
   }, [archivesByType, intakes, intakeByType]);
@@ -154,7 +164,7 @@ export function ClientDetailArchives({
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center justify-start gap-3">
           <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
-            Archivos
+            {t("title")}
           </h2>
           {canManage && (
             <Button
@@ -164,7 +174,7 @@ export function ClientDetailArchives({
               style={{ color: "#141414" }}
             >
               <Plus className="w-4 h-4 mr-1" />
-              Crear nueva ingesta
+              {t("createIntake")}
             </Button>
           )}
           {canManage && (
@@ -175,7 +185,7 @@ export function ClientDetailArchives({
               style={{ color: "#141414" }}
             >
               <Plus className="w-4 h-4 mr-1" />
-              Crear nuevo archivo
+              {t("createFile")}
             </Button>
           )}
           {canManage && (
@@ -186,7 +196,7 @@ export function ClientDetailArchives({
               style={{ color: "#141414" }}
             >
               <ArrowsClockwise className="w-4 h-4 mr-1" />
-              Reprocesar fechas
+              {t("reprocessDates")}
             </Button>
           )}
         </div>
@@ -197,7 +207,7 @@ export function ClientDetailArchives({
             className="border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             <Filter className="h-4 w-4 mr-2" />
-            Filtros
+            {t("filters")}
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </Dropdown>

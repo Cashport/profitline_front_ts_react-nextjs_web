@@ -1,6 +1,7 @@
 import { FC, useContext, useEffect, useState, useMemo } from "react";
 import { Button, Collapse, Divider, Flex } from "antd";
 import { CaretLeft, CaretRight } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import UiSearchInput from "@/components/ui/search-input";
@@ -39,6 +40,7 @@ interface SubGroup {
 }
 
 const CreateOrderProducts: FC = () => {
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
   const {
     client,
@@ -234,7 +236,7 @@ const CreateOrderProducts: FC = () => {
         </Button>
         <div className={styles.searchWrapper}>
           <UiSearchInput
-            placeholder="Buscar"
+            placeholder={tCommon("placeholders.search")}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </div>

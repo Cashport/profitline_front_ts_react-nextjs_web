@@ -1,0 +1,199 @@
+{
+  "title": "Alertas de bloqueo",
+  "comingSoon": {
+    "title": "Próximamente",
+    "description": "Muy pronto vas a poder ver aquí los clientes y puntos de venta bloqueados o por bloquear por cartera vencida."
+  },
+  "status": {
+    "blocked": "Bloqueados",
+    "to_be_blocked": "Por bloquear",
+    "up_to_date": "Al día"
+  },
+  "aging": {
+    "current": "Al día",
+    "pastDue1To60": "Vencida 1–60 días",
+    "pastDueOver60": "Vencida +60 días",
+    "tip": "{label}: {amount}"
+  },
+  "sort": {
+    "urgency": "Más urgente primero",
+    "past_due_desc": "Mayor pago vencido",
+    "past_due_asc": "Menor pago vencido",
+    "oldest_overdue_days": "Más días de mora",
+    "name": "Nombre A–Z"
+  },
+  "rules": "Bloqueo: facturas de +{blockDays} días o cupo superado · Alerta desde {warningDays} días",
+  "cutoff": "Corte {date}",
+  "count": {
+    "customers": "{count, plural, one {# cliente} other {# clientes}}",
+    "pointsOfSale": "{count, plural, one {# punto de venta} other {# puntos de venta}}",
+    "invoices": "{count, plural, one {# factura} other {# facturas}}",
+    "movements": "{count, plural, one {# movimiento} other {# movimientos}}",
+    "notes": "{count, plural, one {# nota} other {# notas}}"
+  },
+  "list": {
+    "caption": "{items} · {alerts} en alerta",
+    "emptyCustomers": "Sin clientes en esta vista",
+    "emptyPointsOfSale": "Sin puntos de venta en esta vista",
+    "range": "{from}–{to} de {items}",
+    "searchClientPointsOfSale": "Buscar punto de venta o ship-to",
+    "searchPointsOfSale": "Buscar punto de venta, ship-to o cliente",
+    "searchCustomers": "Buscar cliente o ship-to",
+    "sort": "Ordenar",
+    "sortBy": "Orden: {label}",
+    "customers": "Clientes",
+    "pointsOfSale": "Puntos de venta",
+    "customer": "Cliente",
+    "loadError": "No se pudieron cargar las alertas",
+    "customerReceivables": "Cartera del cliente",
+    "totalReceivables": "Total cartera",
+    "all": "Todos",
+    "shipToHint": "Cada punto de venta se identifica por su código ship-to"
+  },
+  "card": {
+    "receivablesCurrent": "cartera al día",
+    "pastDuePayment": "pago vencido",
+    "shipTo": "Ship-to {code}",
+    "match": "Coincide · Ship-to {code} · {name}",
+    "blockedCount": "{count, plural, one {# bloqueado} other {# bloqueados}}",
+    "warningCount": "{count} por bloquear",
+    "allCurrent": "todos al día"
+  },
+  "header": {
+    "breadcrumb": "Ruta"
+  },
+  "pointsOfSaleCard": {
+    "blocked": "{count, plural, one {Bloqueado} other {Bloqueados}}",
+    "viewAll": "Ver todos",
+    "allCurrent": "Todos sus puntos de venta están al día.",
+    "pastDue": "pago vencido",
+    "viewAllCount": "Ver los {items}"
+  },
+  "documents": {
+    "selectAll": "Seleccionar todas"
+  },
+  "recipients": {
+    "to": "Para"
+  },
+  "sendToClient": {
+    "title": "Enviar al cliente",
+    "email": "correo",
+    "emailTab": "Correo",
+    "phonePlaceholder": "Contacto o número con indicativo (57…)",
+    "emailPlaceholder": "Contacto o correo",
+    "pickContact": "Elige un contacto",
+    "noContacts": "{name} no tiene contactos con {channel} para el estado de cuenta.",
+    "templateLabel": "Plantilla · Estado de cuenta",
+    "emailLabel": "Correo · Estado de cuenta",
+    "noTemplate": "El proyecto no tiene la plantilla {template} de WhatsApp.",
+    "loadingTemplate": "Cargando plantilla…",
+    "emailBody": "Le llega el estado de cuenta del cliente como adjunto.",
+    "sent": "Enviado por {channel} a {recipients}",
+    "sendError": "No se pudo enviar por {channel}",
+    "sendBy": "Enviar por {channel}"
+  },
+  "paymentLink": {
+    "sent": "Link enviado por {channel} a {contact}",
+    "copied": "Link copiado",
+    "copyError": "No se pudo copiar el link",
+    "title": "Link de pago",
+    "ready": "Link listo para enviar",
+    "expiresOn": "Vence el {date}",
+    "emailTab": "Correo",
+    "email": "correo",
+    "qr": "QR en tienda",
+    "done": "Listo",
+    "validFor": "{name} · vigente 48 horas",
+    "modePastDue": "Pago vencido",
+    "modeSelected": "Facturas seleccionadas",
+    "youWillCharge": "Vas a cobrar",
+    "linkExpires": "Vence el link",
+    "expiresValue": "{date} (48 h)",
+    "generate": "Generar link de pago"
+  },
+  "statement": {
+    "sections": {
+      "pastDue": "Facturas vencidas",
+      "upcoming": "Facturas por vencer",
+      "pendingBalances": "Saldos pendientes",
+      "creditNotes": "Notas crédito"
+    },
+    "notAvailable": "No hay estado de cuenta en {format} para descargar",
+    "downloading": "Descargando el estado de cuenta de {name} ({format})",
+    "sent": "Estado de cuenta enviado a {recipients}",
+    "downloadError": "No se pudo descargar el estado de cuenta",
+    "sendError": "No se pudo enviar el estado de cuenta",
+    "title": "Estado de cuenta",
+    "include": "Incluir en el estado de cuenta",
+    "whatToDo": "¿Qué quieres hacer?",
+    "download": "Descargar",
+    "downloadHint": "Guárdalo en este dispositivo",
+    "email": "Enviar por correo",
+    "emailHint": "Le llega al cliente como adjunto",
+    "toPlaceholder": "correo@cliente.com",
+    "optional": "Opcional",
+    "subject": "Asunto",
+    "subjectValue": "Estado de cuenta · {name} · corte {date}",
+    "attachment": "Adjunto",
+    "submitDownload": "Descargar estado de cuenta · {format}",
+    "submitEmail": "Enviar estado de cuenta"
+  },
+  "detail": {
+    "customer": "Cliente",
+    "overdueBy": "Vencida · {days, plural, one {# día} other {# días}}",
+    "dueOn": "Vence el {date}",
+    "noDueDate": "Sin fecha de vencimiento",
+    "creditNote": "Nota crédito",
+    "balance": "Saldo",
+    "tabs": {
+      "all": "Todas",
+      "past_due": "Vencidas",
+      "credit_notes": "Notas crédito",
+      "available_payments": "Pagos disponibles",
+      "balances": "Saldos",
+      "paid_invoices": "Pagadas"
+    },
+    "empty": {
+      "all": "No hay facturas pendientes para {target, select, pos {este punto de venta} other {este cliente}}.",
+      "past_due": "Sin facturas vencidas. Puede comprar con normalidad.",
+      "credit_notes": "No hay notas crédito para {target, select, pos {este punto de venta} other {este cliente}}.",
+      "available_payments": "No hay pagos disponibles para {target, select, pos {este punto de venta} other {este cliente}}.",
+      "balances": "No hay saldos pendientes para {target, select, pos {este punto de venta} other {este cliente}}.",
+      "paid_invoices": "No hay facturas pagadas pendientes de depuración."
+    },
+    "count": {
+      "all": "{count, plural, one {# factura} other {# facturas}}",
+      "past_due": "{count, plural, one {# factura} other {# facturas}}",
+      "credit_notes": "{count, plural, one {# nota crédito} other {# notas crédito}}",
+      "available_payments": "{count, plural, one {# pago disponible} other {# pagos disponibles}}",
+      "balances": "{count, plural, one {# saldo pendiente} other {# saldos pendientes}}",
+      "paid_invoices": "{count, plural, one {# factura} other {# facturas}}"
+    },
+    "selected": {
+      "all": "{count, plural, one {# factura seleccionada} other {# facturas seleccionadas}}",
+      "past_due": "{count, plural, one {# factura seleccionada} other {# facturas seleccionadas}}",
+      "credit_notes": "{count, plural, one {# nota crédito seleccionada} other {# notas crédito seleccionadas}}",
+      "available_payments": "{count, plural, one {# pago seleccionado} other {# pagos seleccionados}}",
+      "balances": "{count, plural, one {# saldo seleccionado} other {# saldos seleccionados}}",
+      "paid_invoices": "{count, plural, one {# pagada seleccionada} other {# pagadas seleccionadas}}"
+    },
+    "paymentTitle": "Pago {id}",
+    "paymentSubtitle": "Pago {id} · disponible",
+    "balanceTitle": "Saldo {id}",
+    "paidSubtitle": "Pagada el {date} · depuración SAP",
+    "paidSubtitleNoDate": "Pagada · depuración SAP",
+    "paidNotice": "En depuración SAP · no suman a la cartera ni se cobran",
+    "statement": "Estado de cuenta",
+    "sendToCustomer": "Enviar al cliente",
+    "ofCustomer": "de <b>{name}</b>",
+    "viewCustomer": "Ver cliente",
+    "receivables": "Cartera",
+    "extras": {
+      "pendingBalances": "Saldos pendientes",
+      "creditNotes": "Notas crédito",
+      "availablePayments": "Pagos disponibles"
+    },
+    "pastDue": "Pago vencido",
+    "paymentLink": "Link de pago"
+  }
+}

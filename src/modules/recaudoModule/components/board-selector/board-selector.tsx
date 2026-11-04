@@ -4,6 +4,7 @@ import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
 import { Check, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { useWalletTheme } from "@/modules/walletModule/contexts/wallet-theme-context";
@@ -17,6 +18,7 @@ import { useTowerFilters } from "../../contexts/tower-filters-context";
  * elegir, al hacer clic por fuera o con Esc, y se usa con teclado.
  */
 export default function BoardSelector() {
+  const tc = useTranslations("collections");
   const router = useRouter();
   const { resolvedTheme } = useWalletTheme();
   const { filters, patch } = useTowerFilters();
@@ -26,16 +28,18 @@ export default function BoardSelector() {
     {
       type: "group",
       key: "boards",
-      label: "Tableros de recaudo",
+      label: tc("boardSelector.group"),
       children: BOARDS.map((b) => ({
         key: b.id,
         label: (
           <span className="grid grid-cols-[1fr_16px] items-center gap-x-2.5 py-0.5">
-            <b className="text-[13px] font-semibold">{b.name}</b>
+            <b className="text-[13px] font-semibold">{tc(`boards.${b.id}.name`)}</b>
             <Check
               className={cn("row-span-2 h-4 w-4 text-primary", b.id !== active.id && "invisible")}
             />
-            <small className="text-[13px] text-muted-foreground">{b.description}</small>
+            <small className="text-[13px] text-muted-foreground">
+              {tc(`boards.${b.id}.description`)}
+            </small>
           </span>
         )
       }))
@@ -62,7 +66,7 @@ export default function BoardSelector() {
           aria-haspopup="menu"
           className="-ml-1.5 flex cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-1.5 py-0 text-[18px] font-semibold leading-[1.2] text-cp-ink hover:bg-cp-muted"
         >
-          {active.name}
+          {tc(`boards.${active.id}.name`)}
           <ChevronDown className="h-5 w-5 text-cp-ink-3" />
         </button>
       </Dropdown>

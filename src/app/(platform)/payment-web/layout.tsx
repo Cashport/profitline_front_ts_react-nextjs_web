@@ -1,17 +1,14 @@
-import { Metadata } from "next";
 import PaymentWebPage from "./page";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import PaymentWebShell from "./payment-web-shell";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Pago",
-  description: "Pantalla de pago con Wompi"
-};
+export const generateMetadata = () => pageMetadata("payment");
 
 const PaymentWebLayout = () => {
   return (
-    <ViewWrapper headerTitle="Pago">
+    <PaymentWebShell>
       <PaymentWebPage />
-    </ViewWrapper>
+    </PaymentWebShell>
   );
 };
 

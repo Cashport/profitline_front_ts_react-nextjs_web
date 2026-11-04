@@ -2,13 +2,13 @@
 
 import { memo } from "react";
 import { Alert, Empty } from "antd";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
 import { useCollectionTower } from "@/hooks/useCollectionTower";
 import { useCollectionTowerRefresh } from "@/hooks/useCollectionTowerRefresh";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
-import { FOOT_NOTE } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
 import HeaderCutoff from "@/components/ui/header-cutoff/header-cutoff";
 import AgingCard from "../aging-card/aging-card";
@@ -52,17 +52,18 @@ function Cutoff({
   canRegenerate: boolean;
   onRefresh: () => void;
 }) {
+  const tc = useTranslations("collections.cutoff");
   if (noProject) return null;
   const busy = refreshing || updating;
   // Recaudo no proyecta: solo corte y recargar (componente común con Clientes y Cartera).
   return (
     <HeaderCutoff
       cutoffAt={cutoffAt}
-      placeholder="Cargando corte…"
+      placeholder={tc("loading")}
       busy={busy}
-      busyLabel={updating ? "Actualizando…" : undefined}
+      busyLabel={updating ? tc("updating") : undefined}
       onRefresh={onRefresh}
-      refreshLabel={canRegenerate ? "Reprocesar" : "Recargar"}
+      refreshLabel={canRegenerate ? tc("reprocess") : tc("reload")}
     />
   );
 }
@@ -72,6 +73,7 @@ function Cutoff({
  * re-renderiza TorreBoard sin cambiar `data`, y el tablero no tiene que repintarse.
  */
 const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections.board");
   return (
     <>
       {/* Tres filas compartidas (encabezado, barra, leyenda): aplicación y tramos son
@@ -92,7 +94,7 @@ const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTow
       <ExecutivesTable data={data} />
       <UnappliedTable data={data} />
       <p className="m-0 max-w-[120ch] text-[13px] leading-relaxed text-muted-foreground">
-        {FOOT_NOTE}
+        {tc("footNote")}
       </p>
     </>
   );
@@ -106,6 +108,7 @@ const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTow
  * el último tablero recibido: los catálogos y periodos no se apagan.
  */
 export default function TorreBoard() {
+  const tc = useTranslations("collections.board");
   const { filters } = useTowerFilters();
   const { data, lastData, loading, refreshing, error, noProject, pending, reload } =
     useCollectionTower(filters);
@@ -139,29 +142,19 @@ export default function TorreBoard() {
       />
 
       {error && (
-        <Alert
-          type="error"
-          showIcon
-          message="No se pudo cargar la torre de control"
-          description={error.message}
-        />
+        <Alert type="error" showIcon message={tc("loadError")} description={error.message} />
       )}
 
       {pending && (
         <Alert
           type="info"
           showIcon
-          message="Estamos preparando la foto de recaudo"
-          description="Es la primera vez que se abre en este proyecto: el tablero aparece solo en unos segundos."
+          message={tc("preparingTitle")}
+          description={tc("preparingDescription")}
         />
       )}
 
-      {noProject && (
-        <Empty
-          className="cp-card p-10"
-          description="Elige un proyecto para ver la torre de control de recaudo."
-        />
-      )}
+      {noProject && <Empty className="cp-card p-10" description={tc("noProject")} />}
 
       {data ? (
         <div

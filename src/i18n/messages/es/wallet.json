@@ -1,0 +1,398 @@
+{
+  "moduleTitle": "Cartera",
+  "updatedAt": "Actualizado {date}",
+  "buckets": {
+    "current": {
+      "label": "Corriente",
+      "short": "Corriente"
+    },
+    "d1_30": {
+      "label": "1 – 30 días",
+      "short": "1–30"
+    },
+    "d31_60": {
+      "label": "31 – 60 días",
+      "short": "31–60"
+    },
+    "d61_90": {
+      "label": "61 – 90 días",
+      "short": "61–90"
+    },
+    "d91_120": {
+      "label": "91 – 120 días",
+      "short": "91–120"
+    },
+    "over120": {
+      "label": "Más de 120 días",
+      "short": "+120"
+    },
+    "pastDue": {
+      "label": "Vencido",
+      "short": "Vencido"
+    }
+  },
+  "estados": {
+    "compensada": {
+      "name": "Compensada",
+      "chip": "Por depurar",
+      "short": "Cruce aplicado, sale al depurar"
+    },
+    "pagada": {
+      "name": "Pagada sin depurar",
+      "chip": "Pagada",
+      "short": "Pagada, pendiente de depurar en SAP"
+    },
+    "conciliado": {
+      "name": "Conciliado",
+      "chip": "Esperando pago",
+      "short": "Esperando pago del cliente"
+    },
+    "abono": {
+      "name": "Abono",
+      "chip": "Abono",
+      "short": "Pago parcial aplicado; queda saldo pendiente"
+    },
+    "novedad": {
+      "name": "Con novedad",
+      "chip": "En gestión",
+      "short": "Novedad abierta en gestión"
+    },
+    "sin_conciliar": {
+      "name": "Sin conciliar",
+      "chip": "Sin gestión",
+      "short": "Sin acuerdo ni novedad"
+    },
+    "saldo": {
+      "name": "Saldo",
+      "chip": "Saldo",
+      "short": "Saldo a favor pendiente de cruce"
+    },
+    "saldo_factura": {
+      "name": "Saldo de factura",
+      "chip": "Saldo de factura",
+      "short": "Saldo pendiente de la factura"
+    },
+    "glosado": {
+      "name": "Glosado",
+      "chip": "Glosado",
+      "short": "Factura glosada por el cliente"
+    },
+    "devolucion": {
+      "name": "Devolución",
+      "chip": "Devolución",
+      "short": "Documento de devolución"
+    },
+    "nota_debito": {
+      "name": "Nota de débito",
+      "chip": "Sin gestión",
+      "short": "Nota de débito sin conciliar"
+    },
+    "otros": {
+      "name": "Otros",
+      "chip": "Otros",
+      "short": "Otros estados del catálogo"
+    },
+    "newStatus": "Estado nuevo del catálogo"
+  },
+  "documentType": {
+    "FINANCIAL_RECORD": "Factura",
+    "BALANCE": "Saldo"
+  },
+  "count": {
+    "invoices": "{count, plural, one {# factura} other {# facturas}}",
+    "customers": "{count, plural, one {# cliente} other {# clientes}}",
+    "groups": "{count, plural, one {# grupo} other {# grupos}}",
+    "docs": "{count, plural, one {# doc} other {# docs}}"
+  },
+  "sla": {
+    "closed": "Cerrada",
+    "overdueBy": "Vencida {days}d",
+    "dueToday": "Vence hoy",
+    "dueIn": "En {days}d",
+    "today": "Hoy",
+    "days": "{days}d"
+  },
+  "ticketStatus": {
+    "resolved": "Resuelto",
+    "late": "Fuera de fecha",
+    "open": "Por resolver",
+    "overdueBy": "Vencido {days}d"
+  },
+  "fallback": {
+    "noName": "Sin nombre",
+    "unassigned": "Sin asignar",
+    "attachment": "adjunto"
+  },
+  "timeline": {
+    "created": "Novedad creada",
+    "approved": "Aprobó la novedad",
+    "rejected": "Rechazó la novedad",
+    "empty": "Todavía no hay gestiones registradas en este grupo.",
+    "system": "Sistema",
+    "event": "evento"
+  },
+  "attachments": {
+    "open": "Abrir {name}",
+    "remove": "Quitar {name}"
+  },
+  "person": {
+    "noOwner": "Sin dueño",
+    "noAssignee": "Sin responsable"
+  },
+  "legend": {
+    "filterByStatus": "Filtrar por estado"
+  },
+  "actionsMenu": {
+    "downloadExcel": "Descargar a Excel",
+    "moreActions": "Más acciones"
+  },
+  "header": {
+    "title": "Cartera por cliente y tramo",
+    "loadingCutoff": "Cargando corte…",
+    "refreshing": "Actualizando…",
+    "reprocess": "Reprocesar"
+  },
+  "skeleton": {
+    "matrix": "Cargando matriz de cartera",
+    "groups": "Cargando grupos de facturas"
+  },
+  "view": {
+    "refreshTimeout": "La actualización está tardando más de lo esperado. Se muestra la última foto disponible.",
+    "refreshStarted": "Actualización de matriz iniciada",
+    "refreshInProgress": "Ya hay una actualización en curso",
+    "refreshError": "No se pudo iniciar la actualización",
+    "downloadingExcel": "Descargando Excel…",
+    "downloadWalletError": "No se pudo descargar el Excel de la cartera.",
+    "fileDownloaded": "Archivo descargado: {filename}",
+    "downloadNoveltiesError": "No se pudo descargar el Excel de novedades.",
+    "loadError": "No se pudo cargar la cartera.",
+    "empty": "No hay cartera para los filtros actuales."
+  },
+  "matrix": {
+    "title": "Matriz de control",
+    "legendHint": "clic en un estado para filtrar · shift+clic para sumar varios",
+    "filteringStatuses": "{count, plural, one {# estado filtrando} other {# estados filtrando}} la matriz y los grupos",
+    "clearFilter": "Quitar filtro",
+    "searchPlaceholder": "Buscar cliente, NIT, factura o ejecutivo…",
+    "downloadNovelties": "Descargar novedades en Excel",
+    "refreshing": "Actualizando…",
+    "clientsCount": "{count, plural, one {# cliente} other {# clientes}}",
+    "columns": {
+      "customer": "Cliente",
+      "pastDuePct": "% vencido"
+    },
+    "empty": "Ningún cliente coincide con los filtros.",
+    "wholeAccount": "{customer} · toda la cartera",
+    "clearSelection": "quitar selección",
+    "viewGroups": "ver grupos",
+    "taxIdLine": "NIT {taxId} — {collector}",
+    "showing": "Mostrando {shown} de {count, plural, one {# cliente} other {# clientes}}"
+  },
+  "groups": {
+    "title": "Grupos de facturas",
+    "titleFor": "{customer} · {bucket}",
+    "allBuckets": "todos los tramos",
+    "refreshing": "Actualizando…",
+    "summary": "{groups} · {amount} · doble clic para abrir la gestión",
+    "summaryInBucket": "{groups} · {amount} en el tramo · doble clic para abrir la gestión",
+    "viewAll": "Ver todos",
+    "columns": {
+      "group": "Grupo",
+      "customer": "Cliente",
+      "invoices": "Fact.",
+      "totalIn": "Total {bucket}",
+      "split": "Reparto",
+      "owner": "Responsable",
+      "activity": "Gest.",
+      "ticket": "Ticket",
+      "limit": "Límite",
+      "status": "Estado"
+    },
+    "empty": "No hay grupos con los filtros actuales.",
+    "splitByBucket": "Reparto por tramo",
+    "noOwner": "Sin dueño",
+    "openActivity": "Abrir gestión",
+    "showing": "Mostrando {shown} de {groups}",
+    "noteOverdue": "Sólo los grupos de {customer} con facturas vencidas, y los montos son su parte vencida. Un mismo grupo puede tener más cartera en corriente.",
+    "noteBucket": "Sólo los grupos de {customer} con facturas en {bucket}, y los montos son la parte que cae en ese tramo. Un mismo grupo puede tener más cartera en otros tramos.",
+    "noteAllBuckets": "Todos los grupos de {customer}, sin importar el tramo.",
+    "noteSnapshot": "Estos son los grupos de toda la foto.",
+    "noteTotal": "<b>Total</b> es todo lo que se resuelve con una sola gestión."
+  },
+  "filters": {
+    "coordinator": "Coordinador",
+    "market": "Mercado",
+    "kam": "KAM",
+    "kamLead": "KAM líder",
+    "collector": "Ejecutivo",
+    "status": "Estado",
+    "noveltyType": "Tipo de novedad",
+    "selectedCount": "{count} seleccionados"
+  },
+  "statCards": {
+    "total": "Cartera total",
+    "totalFoot": "{invoices} · {customers}",
+    "pastDue": "Cartera vencida",
+    "pastDueFoot": "{invoices} · +60 días {amount}",
+    "openDispute": "Con novedad abierta",
+    "openDisputeFoot": "{pct} del saldo · en gestión",
+    "unreconciled": "Sin conciliar",
+    "unreconciledFoot": "{pct} del saldo · nadie lo ha tocado",
+    "openDeductions": "Saldos abiertos",
+    "openDeductionsFoot": "{pct} · {docs} sin aplicar",
+    "pendingClearing": "Pendiente compensación",
+    "pendingClearingFoot": "{pct} · pagos sin compensar"
+  },
+  "detail": {
+    "comingSoon": "Próximamente",
+    "commentSaved": "Comentario registrado",
+    "commentError": "No se pudo registrar el comentario",
+    "actionCreated": "Acción creada",
+    "actionCreateError": "No se pudo crear la acción",
+    "actionResolved": "Acción resuelta",
+    "actionResolveError": "No se pudo resolver la acción",
+    "changingStatus": "Cambiando estado…",
+    "statusUpdated": "Estado actualizado",
+    "statusError": "No se pudo cambiar el estado",
+    "customerNotFound": "No se pudo identificar el cliente de la novedad",
+    "noveltyCreated": "Novedad creada",
+    "noveltyCreateError": "No se pudo crear la novedad",
+    "noveltyUpdated": "Novedad actualizada",
+    "noveltyUpdateError": "No se pudo actualizar la novedad",
+    "noveltyLoadError": "No se pudo cargar la novedad.",
+    "actionsLoadError": "No se pudieron cargar las acciones.",
+    "tabs": {
+      "followUp": "Seguimiento",
+      "invoices": "Facturas"
+    },
+    "searchInvoice": "Buscar factura…",
+    "invoicesLoadError": "No se pudieron cargar las facturas.",
+    "followUpUnavailable": "El seguimiento solo está disponible para grupos con novedad.",
+    "loadingFollowUp": "Cargando seguimiento…",
+    "taxId": "NIT {taxId}"
+  },
+  "rail": {
+    "inBucket": "{label} en {bucket}",
+    "amount": "Saldo",
+    "invoices": "Facturas",
+    "owner": "Responsable",
+    "lastActivity": "Últ. gestión",
+    "commitment": "Compromiso",
+    "deadline": "Fecha límite",
+    "collector": "Ejecutivo",
+    "pastDue": "Vencido",
+    "avgDpd": "Mora prom.",
+    "splitByBucket": "Reparto por tramo"
+  },
+  "composer": {
+    "placeholder": "Escribe un comentario…",
+    "attach": "Adjuntar archivo",
+    "submitting": "Registrando…",
+    "submit": "Registrar"
+  },
+  "groupActions": {
+    "loadingStatuses": "Cargando estados…",
+    "current": "actual",
+    "novelty": "Novedad",
+    "edit": "Editar datos de la novedad",
+    "changeStatus": "Cambiar estado",
+    "onSelected": "Sobre las facturas seleccionadas",
+    "create": "Crear novedad",
+    "link": "Vincular a una novedad existente",
+    "resolve": "Resolver la novedad",
+    "resolveSelected": "Resolver las seleccionadas",
+    "resolveAll": "Resolver toda la novedad ({count})",
+    "menu": "Acciones sobre el grupo"
+  },
+  "invoicesTable": {
+    "invoice": "Factura",
+    "docDate": "Fecha doc.",
+    "type": "Tipo",
+    "status": "Estado",
+    "originalAmount": "Saldo inicial",
+    "openAmount": "Saldo actual",
+    "empty": "No hay facturas para mostrar.",
+    "noMatches": "Ninguna factura coincide con la búsqueda.",
+    "selectOne": "Seleccionar {doc}",
+    "viewDetailSoon": "Ver detalle de la factura (próximamente)",
+    "viewDetail": "Ver detalle de la factura",
+    "filteredTotal": "Total filtrado",
+    "countOf": "{invoices} de {total}",
+    "collected": "Recuperado {amount}",
+    "selectedSummary": "<b>{count}</b> {count, plural, one {factura seleccionada} other {facturas seleccionadas}} · <b>{amount}</b>",
+    "noneSelected": "Sin facturas seleccionadas"
+  },
+  "ticketForm": {
+    "title": "Nuevo ticket",
+    "owner": "Responsable",
+    "ownerPlaceholder": "Quien crea la acción",
+    "deadline": "Fecha límite",
+    "action": "Acción",
+    "actionPlaceholder": "Ej.: recibir acta de la transportadora",
+    "comment": "Comentario",
+    "optional": "opcional",
+    "commentPlaceholder": "Contexto para quien lo resuelve",
+    "creating": "Creando…",
+    "create": "Crear ticket"
+  },
+  "tickets": {
+    "open": "Acciones abiertas",
+    "overdue": "{count, plural, one {# vencida} other {# vencidas}}",
+    "new": "Nuevo",
+    "loading": "Cargando acciones…",
+    "empty": "No hay acciones abiertas. Crea un ticket para fijar la próxima.",
+    "closed": "Acciones cerradas",
+    "late": "{count} fuera de fecha"
+  },
+  "ticketCard": {
+    "resolution": "Resolución:",
+    "noDate": "Sin fecha",
+    "resolve": "Resolver",
+    "resolutionPlaceholder": "Comentario de resolución (opcional)",
+    "resolving": "Resolviendo…"
+  },
+  "noveltyDocs": {
+    "invoice": "Factura",
+    "type": "Tipo",
+    "amount": "Saldo"
+  },
+  "noveltyForm": {
+    "createTitle": "Nueva novedad",
+    "createSubmit": "Crear novedad",
+    "creating": "Creando…",
+    "classification": "Clasificación",
+    "type": "Tipo de novedad",
+    "typePlaceholder": "Selecciona el tipo",
+    "owner": "Responsable",
+    "noOwner": "Sin responsable",
+    "firstTicketDate": "Fecha del primer ticket",
+    "resolutionDeadline": "Fecha límite de solución",
+    "initialComment": "Comentario inicial",
+    "initialCommentPlaceholder": "Ej.: el cliente pide el soporte firmado antes del viernes",
+    "initialCommentHint": "Queda como primera entrada en la línea de tiempo de la novedad. La próxima acción se abre como ticket con la fecha indicada.",
+    "includedInvoices": "Facturas incluidas",
+    "editTitle": "Editar novedad",
+    "editable": "Datos editables",
+    "readOnly": "No editable desde aquí",
+    "customer": "Cliente",
+    "groupedAmount": "Monto agrupado",
+    "created": "Creada",
+    "commitmentDate": "Fecha de compromiso",
+    "datesHint": "Las fechas no se editan a mano: el compromiso se mueve al cerrar el ticket en curso y la fecha límite se fija al crear la novedad. El cambio queda registrado en la línea de tiempo del grupo."
+  },
+  "linkNovelty": {
+    "loadError": "No se pudieron cargar las novedades del cliente",
+    "title": "Vincular a una novedad existente",
+    "submit": "Vincular facturas",
+    "submitting": "Vinculando…",
+    "openNovelties": "Novedades abiertas de este cliente",
+    "searchPlaceholder": "Buscar por documento o motivo…",
+    "loading": "Cargando novedades…",
+    "empty": "Sin novedades abiertas para este cliente",
+    "noMatches": "Sin novedades que coincidan con la búsqueda",
+    "select": "Seleccionar {name}",
+    "includedInvoices": "Facturas incluidas",
+    "comment": "Comentario",
+    "commentPlaceholder": "Ej.: el cliente pide el soporte firmado antes del viernes"
+  }
+}

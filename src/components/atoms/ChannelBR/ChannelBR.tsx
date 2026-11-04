@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { Button, Flex, Popover, Tag, Typography, message } from "antd";
 import { CaretDoubleRight, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { InputCreateLine } from "../inputs/InputCreateLine/InputCreateLine";
 import { InputCreateSubline } from "../inputs/InputCreateSubline/InputCreateSubline";
@@ -29,6 +30,7 @@ const initModalRemoveLine = { active: false, idChannel: 0, idLine: 0 };
 const initModalRemoveSubline = { active: false, idLine: 0, idSubline: 0, nameSubline: "" };
 
 export const ChannelBR = ({ isDisabledEdit, channel, setModalRemove }: Props) => {
+  const t = useTranslations("components.channelBR");
   const [messageApi, contextHolder] = message.useMessage();
 
   const { removeLine, removeSubline } = useStructureBR();
@@ -56,7 +58,7 @@ export const ChannelBR = ({ isDisabledEdit, channel, setModalRemove }: Props) =>
   return (
     <>
       <Flex className="channelbr" vertical>
-      {contextHolder}
+        {contextHolder}
         {/* ---------------------------------start channel------------------------------- */}
         <Flex justify="space-between">
           <Text className="titleLineBR">{channel.CHANNEL_NAME}</Text>
@@ -128,7 +130,7 @@ export const ChannelBR = ({ isDisabledEdit, channel, setModalRemove }: Props) =>
                   className="addButtonLineSub"
                   type="text"
                 >
-                  Agregar sublinea
+                  {t("addSubline")}
                 </Button>
               </Popover>
             )}
@@ -145,7 +147,7 @@ export const ChannelBR = ({ isDisabledEdit, channel, setModalRemove }: Props) =>
               className="addButtonLineSub"
               type="text"
             >
-              Agregar linea
+              {t("addLine")}
             </Button>
           </Popover>
         )}

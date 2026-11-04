@@ -13,6 +13,7 @@ import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButton
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { mockData } from "./mocked-data";
+import { useTranslations } from "use-intl";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -27,6 +28,8 @@ const defaultQuestion = {
 };
 
 const CreateFormView: React.FC = () => {
+  const t = useTranslations("projects.forms");
+  const tCommon = useTranslations("common");
   const { control, handleSubmit, watch, reset, formState } = useForm<FormValues>({
     defaultValues: {
       formName: "",
@@ -101,55 +104,55 @@ const CreateFormView: React.FC = () => {
         >
           <Row justify="space-between" align="middle">
             <Title level={4} style={{ margin: 0 }}>
-              {mode === "create" && "Crear formulario"}
-              {mode === "edit" && "Editar formulario"}
+              {mode === "create" && t("createTitle")}
+              {mode === "edit" && t("editTitle")}
               {mode === "preview" && watch("formName")}
               {mode === "answer" && watch("formName")}
             </Title>
             <Select value={mode} onChange={(value) => setMode(value)} style={{ width: 200 }}>
-              <Option value="create">Modo creación</Option>
-              <Option value="edit">Modo edición</Option>
-              <Option value="preview">Vista previa</Option>
-              <Option value="answer">Responder</Option>
+              <Option value="create">{t("modes.create")}</Option>
+              <Option value="edit">{t("modes.edit")}</Option>
+              <Option value="preview">{t("modes.preview")}</Option>
+              <Option value="answer">{t("modes.answer")}</Option>
             </Select>
           </Row>
-          <Link href={`/proyectos/complete-form`}> Ir a completar formulario</Link>
+          <Link href={`/projects/complete-form`}> {t("goToComplete")}</Link>
           <Button
             type="text"
             icon={<CloseOutlined />}
             style={{ position: "absolute", right: "1rem", top: "1rem" }}
             onClick={handleGoBack}
+            aria-label={t("close")}
           />
 
           <Row gutter={16}>
             <Col span={12}>
               <InputForm
                 nameInput="formName"
-                titleInput="Nombre del formulario"
-                placeholder="Ingresar nombre"
+                titleInput={t("formName")}
+                placeholder={t("namePlaceholder")}
                 control={control}
               />
             </Col>
             <Col span={12}>
               <InputSelect
-                titleInput="Vigencia"
+                titleInput={t("validity")}
                 nameInput="validity"
                 control={control}
                 error={undefined}
-                options={[
-                  { value: 1, label: "1 año" },
-                  { value: 2, label: "2 años" },
-                  { value: 3, label: "3 años" }
-                ]}
+                options={[1, 2, 3].map((years) => ({
+                  value: years,
+                  label: t("validityYears", { count: years })
+                }))}
                 loading={false}
-                placeholder="Seleccionar vigencia"
+                placeholder={t("validityPlaceholder")}
               />
             </Col>
           </Row>
           <InputForm
             nameInput="formDescription"
-            titleInput="Descripción"
-            placeholder="Ingresar descripción"
+            titleInput={tCommon("fields.description")}
+            placeholder={t("descriptionPlaceholder")}
             control={control}
           />
 
@@ -158,7 +161,7 @@ const CreateFormView: React.FC = () => {
               if (!question.type)
                 return (
                   <Flex vertical key={`select-${question.id}`} gap={8}>
-                    <p className={style.selectTitle}>Seleccionar tipo de pregunta</p>
+                    <p className={style.selectTitle}>{t("selectQuestionType")}</p>
                     <SelectType
                       typeSelected={question.type}
                       handleTypeClick={(type: QuestionType) =>
@@ -195,13 +198,13 @@ const CreateFormView: React.FC = () => {
                 border: "none"
               }}
             >
-              Agregar nueva pregunta
+              {t("addQuestion")}
             </Button>
           </Flex>
 
           <FooterButtons
-            backTitle={"Cancelar"}
-            nextTitle={"Guardar"}
+            backTitle={tCommon("actions.cancel")}
+            nextTitle={tCommon("actions.save")}
             handleBack={handleGoBack}
             handleNext={() => handleSubmit(onSubmit)()}
             nextDisabled={!formState.isValid}

@@ -1,18 +1,21 @@
 import React from "react";
 import { Calendar } from "lucide-react";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import type { FilterOption } from "@/modules/commerce/contexts/revenue-tracking-context";
 
-const FECHA_PRESETS: FilterOption[] = [
-  { id: "hoy", name: "Hoy" },
-  { id: "esta_semana", name: "Esta semana" },
-  { id: "mes_actual", name: "Mes actual" },
-  { id: "ultimo_mes", name: "Último mes" },
-  { id: "ultimo_trimestre", name: "Último trimestre" },
-  { id: "ytd", name: "YTD" },
-  { id: "ultimos_12_meses", name: "Últimos 12 meses" }
-];
+// Los ids viajan al cálculo de fechas (salesFilterParams); el texto sale de
+// commerce.dashboard.filters.datePresets.<id>.
+export const FECHA_PRESET_IDS = [
+  "hoy",
+  "esta_semana",
+  "mes_actual",
+  "ultimo_mes",
+  "ultimo_trimestre",
+  "ytd",
+  "ultimos_12_meses"
+] as const;
 
 const CUSTOM_PREFIX = "custom:";
 
@@ -50,6 +53,11 @@ interface DateRangeTabProps {
 }
 
 export default function DateRangeTab({ value, onChange }: DateRangeTabProps) {
+  const t = useTranslations("commerce.dashboard.filters");
+  const presets: FilterOption[] = FECHA_PRESET_IDS.map((id) => ({
+    id,
+    name: t(`datePresets.${id}`)
+  }));
   const from = value?.mode === "custom" ? value.from : "";
   const to = value?.mode === "custom" ? value.to : "";
   const today = dayjs().format("YYYY-MM-DD");
@@ -60,9 +68,9 @@ export default function DateRangeTab({ value, onChange }: DateRangeTabProps) {
   return (
     <div className="space-y-4">
       <div className="mb-4">
-        <p className="text-[13px] font-bold text-foreground mb-3">Periodos Predefinidos</p>
+        <p className="text-[13px] font-bold text-foreground mb-3">{t("presetPeriods")}</p>
         <div className="grid grid-cols-2 gap-2">
-          {FECHA_PRESETS.map((preset) => {
+          {presets.map((preset) => {
             const selected = value?.mode === "preset" && value.option.id === preset.id;
             return (
               <button
@@ -85,11 +93,11 @@ export default function DateRangeTab({ value, onChange }: DateRangeTabProps) {
       <div className="border-t border-border pt-4">
         <p className="text-[13px] font-bold text-foreground mb-3 flex items-center gap-2">
           <Calendar className="w-3 h-3" />
-          Rango Personalizado
+          {t("customRange")}
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[13px] text-muted-foreground mb-1 block">Desde</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">{t("from")}</label>
             <input
               type="date"
               value={from}
@@ -99,7 +107,7 @@ export default function DateRangeTab({ value, onChange }: DateRangeTabProps) {
             />
           </div>
           <div>
-            <label className="text-[13px] text-muted-foreground mb-1 block">Hasta</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">{t("to")}</label>
             <input
               type="date"
               value={to}

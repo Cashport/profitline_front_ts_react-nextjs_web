@@ -1,5 +1,6 @@
 import React, { ReactNode, useState } from "react";
 import { Button, Dropdown, Table, TableProps } from "antd";
+import { useTranslations } from "use-intl";
 import { Trash, DotsThreeVertical, Pencil } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -35,12 +36,14 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
 }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { openModal } = useModalDetail();
+  const t = useTranslations("clients.applyTab.tables");
+  const tCommon = useTranslations("common");
   const [activeRow, setActiveRow] = useState<IApplyTabRecord | null>(null);
   const [removeModal, setRemoveModal] = useState(false);
 
   const columns: TableProps<IApplyTabRecord>["columns"] = [
     {
-      title: "ID ajuste",
+      title: t("columns.adjustmentId"),
       dataIndex: "erp_id",
       key: "erp_id",
       render: (id, row) => {
@@ -62,7 +65,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       showSorterTooltip: false
     },
     {
-      title: "Tipo de ajuste",
+      title: t("columns.adjustmentType"),
       dataIndex: "motive_description",
       key: "motive_description",
       render: (motive_description) => <p>{motive_description}</p>,
@@ -70,12 +73,12 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       sorter: (a, b) => (b.motive_description ?? "").localeCompare(a.motive_description ?? "")
     },
     {
-      title: "Detalle",
+      title: tCommon("fields.detail"),
       dataIndex: "entity_description",
       key: "entity_description"
     },
     {
-      title: "Monto inicial",
+      title: t("columns.initialAmount"),
       dataIndex: "amount",
       key: "amount",
       render: (amount) => <p className="fontMonoSpace">{formatMoney(amount)}</p>,
@@ -84,7 +87,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       align: "right"
     },
     {
-      title: "Factura",
+      title: tCommon("fields.invoice"),
       dataIndex: "invoices",
       key: "invoices",
       render: (_, row: IApplyTabRecord) => {
@@ -116,7 +119,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       align: "right"
     },
     {
-      title: "Monto aplicado",
+      title: t("columns.appliedAmount"),
       dataIndex: "applied_amount",
       key: "applied_amount",
       render: (applied_amount) => <p className="fontMonoSpace">{formatMoney(applied_amount)}</p>,
@@ -125,7 +128,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       align: "right"
     },
     {
-      title: "Detalle",
+      title: tCommon("fields.detail"),
       width: 76,
       render: (_, row) => {
         const items = [
@@ -139,7 +142,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                   handleEditRow && handleEditRow(row);
                 }}
               >
-                Editar
+                {tCommon("actions.edit")}
               </Button>
             )
           },
@@ -154,7 +157,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                   setRemoveModal(true);
                 }}
               >
-                Eliminar
+                {tCommon("actions.delete")}
               </Button>
             )
           }
@@ -194,7 +197,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       />
 
       <ModalRemove
-        name="elemento"
+        name={t("removeItemName")}
         isOpen={removeModal}
         onClose={() => {
           setActiveRow(null);

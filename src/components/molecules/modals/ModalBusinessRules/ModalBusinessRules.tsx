@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { Button } from "antd";
+import { useTranslations } from "use-intl";
 
 import "./modalbusinessrules.scss";
 import { SelectStructure } from "../../selects/SelectStructure/SelectStructure";
@@ -21,6 +22,7 @@ export const ModalBusinessRules = ({
   selectedStructure,
   setSelectedStructure
 }: Props) => {
+  const t = useTranslations("modals.businessRules");
   return (
     <div className="modalBusinessRules">
       <Button
@@ -28,7 +30,7 @@ export const ModalBusinessRules = ({
         icon={<CaretLeft size={"1.45rem"} />}
         onClick={() => setCurrentView("main")}
       >
-        Reglas de negocio
+        {t("title")}
       </Button>
       <SelectZone zones={zones} setZones={setZones} />
       <SelectStructure

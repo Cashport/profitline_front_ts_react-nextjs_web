@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Dropdown, Button } from "antd";
 import type { MenuProps } from "antd";
+import { useTranslations } from "use-intl";
 import { ITask } from "@/types/tasks/ITasks";
 import { ModalChangeTaskStatus } from "../ModalChangeTaskStatus/ModalChangeTaskStatus";
 
@@ -36,6 +37,8 @@ export const TaskActionsDropdown: FC<TaskActionsDropdownProps> = ({
   align = "end",
   onStatusChanged
 }) => {
+  const t = useTranslations("taskManager.changeStatus");
+  const tCommon = useTranslations("common");
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   // const getMenuItems = () => {
@@ -70,7 +73,7 @@ export const TaskActionsDropdown: FC<TaskActionsDropdownProps> = ({
     {
       key: "edit",
       icon: <Pencil className="h-4 w-4" />,
-      label: "Cambiar estado",
+      label: t("menuLabel"),
       disabled: task.id === null,
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
@@ -81,16 +84,12 @@ export const TaskActionsDropdown: FC<TaskActionsDropdownProps> = ({
 
   return (
     <>
-      <Dropdown
-        menu={{ items }}
-        trigger={["click"]}
-        placement={alignToPlacement[align]}
-      >
+      <Dropdown menu={{ items }} trigger={["click"]} placement={alignToPlacement[align]}>
         <Button
           type="text"
           className={triggerClassName}
           onClick={(e) => e.stopPropagation()}
-          title="Acciones"
+          title={tCommon("fields.actions")}
           icon={<MoreVertical className="h-4 w-4 text-gray-600" />}
         />
       </Dropdown>

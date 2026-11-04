@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import type { IReport } from "@/types/reports/IReports";
 import { cn } from "@/utils/utils";
@@ -14,6 +16,7 @@ interface ReportCardProps {
 
 /** Fila del listado en pantallas angostas, donde la tabla no cabe. */
 export default function ReportCard({ report, isNew }: ReportCardProps) {
+  const t = useTranslations("reports.list");
   return (
     <div
       className={cn(
@@ -34,7 +37,11 @@ export default function ReportCard({ report, isNew }: ReportCardProps) {
         </div>
       </div>
 
-      <GenericEyeButton href={`/reports/${report.id}`} title="Ver informe" className="shrink-0" />
+      <GenericEyeButton
+        href={`/reports/${report.id}`}
+        title={t("viewReport")}
+        className="shrink-0"
+      />
     </div>
   );
 }

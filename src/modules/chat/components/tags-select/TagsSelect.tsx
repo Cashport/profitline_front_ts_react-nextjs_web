@@ -8,6 +8,7 @@ import {
 } from "react-hook-form";
 import { X } from "phosphor-react";
 import { ReactNode, useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 
 import "./tagsSelect.scss";
 
@@ -44,9 +45,9 @@ const TagsSelect = <T extends FieldValues>({
   showValueInTag,
   optionKeyField
 }: PropsTagsSelect<T>) => {
-  const [usedOptions, setUsedOptions] = useState<
-    { value: number | string; label: string; [key: string]: any }[]
-  >();
+  const t = useTranslations("chat.tagsSelect");
+  const [usedOptions, setUsedOptions] =
+    useState<{ value: number | string; label: string; [key: string]: any }[]>();
 
   useEffect(() => {
     if (!options) setUsedOptions(undefined);
@@ -69,7 +70,9 @@ const TagsSelect = <T extends FieldValues>({
     };
     let displayContent;
     if (showValueInTag && optionKeyField) {
-      const originalOption = usedOptions?.find((opt) => String(opt[optionKeyField]) === String(value));
+      const originalOption = usedOptions?.find(
+        (opt) => String(opt[optionKeyField]) === String(value)
+      );
       displayContent = originalOption?.value ?? value;
     } else {
       displayContent = showValueInTag ? (value as string) : label;
@@ -128,7 +131,11 @@ const TagsSelect = <T extends FieldValues>({
       >
         {optionKeyField &&
           usedOptions?.map((opt) => (
-            <Select.Option key={opt[optionKeyField]} value={String(opt[optionKeyField])} label={opt.label}>
+            <Select.Option
+              key={opt[optionKeyField]}
+              value={String(opt[optionKeyField])}
+              label={opt.label}
+            >
               {showLabelAndValue ? (
                 <div className="tagsSelectDrop__option">
                   <p className="tagsSelectDrop__option__label">{opt.label}</p>
@@ -144,7 +151,7 @@ const TagsSelect = <T extends FieldValues>({
       </Select>
       {errors && (
         <Typography.Text className="tagsSelectContainer__error">
-          {title} es obligatorio *
+          {t("required", { field: title ?? "" })}
         </Typography.Text>
       )}
     </Flex>

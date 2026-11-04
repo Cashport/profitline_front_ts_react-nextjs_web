@@ -1,5 +1,6 @@
 import React from "react";
 import { Loader2, Search, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import type { FilterCategoryConfig, FilterOptionItem } from "../FilterModal.types";
@@ -22,9 +23,7 @@ const MetaBar = ({ children }: { children: React.ReactNode }) => (
 );
 
 const MetaLabel = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-[13px] font-semibold text-cp-ink-2">
-    {children}
-  </span>
+  <span className="text-[13px] font-semibold text-cp-ink-2">{children}</span>
 );
 
 const EmptyState = ({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) => (
@@ -44,6 +43,8 @@ export default function FilterOptionsList({
   onToggleAll,
   onRetry
 }: FilterOptionsListProps) {
+  const t = useTranslations("components.filterModal");
+  const tCommon = useTranslations("common");
   const isCustom = category.kind === "custom";
   const isSingle = category.selectMode === "single";
   const options = category.options ?? [];
@@ -76,19 +77,21 @@ export default function FilterOptionsList({
       <SearchField
         value={searchTerm}
         onChange={onSearchChange}
-        placeholder={`Buscar en ${category.label.toLowerCase()}...`}
+        placeholder={t("searchIn", { category: category.label.toLowerCase() })}
         className="mb-3"
       />
 
       <MetaBar>
-        <MetaLabel>{category.metaLabel ?? `${filteredOptions.length} resultados`}</MetaLabel>
+        <MetaLabel>
+          {category.metaLabel ?? t("results", { count: filteredOptions.length })}
+        </MetaLabel>
         {canSelectAll && (
           <button
             type="button"
             onClick={() => onToggleAll(filteredOptions, isAllSelected)}
             className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-[#8aa30f]"
           >
-            {isAllSelected ? "Deseleccionar todos" : "Seleccionar todos"}
+            {isAllSelected ? t("deselectAll") : t("selectAll")}
           </button>
         )}
       </MetaBar>
@@ -97,22 +100,22 @@ export default function FilterOptionsList({
 
       {isLoading ? (
         <EmptyState icon={<Loader2 className="h-7 w-7 animate-spin opacity-60" />}>
-          <p className="text-[13px]">Cargando opciones...</p>
+          <p className="text-[13px]">{t("loadingOptions")}</p>
         </EmptyState>
       ) : isError ? (
         <EmptyState icon={<X className="h-7 w-7 opacity-30" />}>
-          <p className="text-[13px]">No se pudieron cargar las opciones</p>
+          <p className="text-[13px]">{t("loadOptionsError")}</p>
           <button
             type="button"
             onClick={onRetry}
             className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-[#8aa30f]"
           >
-            Reintentar
+            {tCommon("actions.retry")}
           </button>
         </EmptyState>
       ) : filteredOptions.length === 0 ? (
         <EmptyState icon={<Search className="h-7 w-7 opacity-30" />}>
-          <p className="text-[13px]">No se encontraron resultados</p>
+          <p className="text-[13px]">{t("noResults")}</p>
         </EmptyState>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-x-3 gap-y-1">

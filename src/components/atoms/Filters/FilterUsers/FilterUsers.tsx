@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 
 import { getAllRoles } from "@/services/roles/roles";
 import { getAllZones } from "@/services/zone/zones";
@@ -7,6 +8,7 @@ import { getBusinessRulesByProjectId } from "@/services/businessRules/BR";
 import { useAppStore } from "@/lib/store/store";
 import { extractChannelLineSublines } from "@/utils/utils";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 
 interface Props {
@@ -33,6 +35,7 @@ interface Props {
 }
 
 export const FilterUsers = ({ idProject, setSelectedUsers }: Props) => {
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
 
   const [zones, setZones] = useState<any>([]);
@@ -190,7 +193,7 @@ export const FilterUsers = ({ idProject, setSelectedUsers }: Props) => {
       multiple
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomLeft"
       onClear={() => setSelectedUsers(initValueFiltersData)}
       options={optionsList}
@@ -205,47 +208,47 @@ export const FilterUsers = ({ idProject, setSelectedUsers }: Props) => {
 const options: Option[] = [
   {
     value: "status",
-    label: "Estado de Usuario",
+    label: filterLabel("userStatus"),
     isLeaf: false,
     disableCheckbox: true,
     children: [
       {
         value: "statusActive",
-        label: "Activo"
+        label: filterLabel("active")
       },
       {
         value: "statusInactive",
-        label: "Inactivo"
+        label: filterLabel("inactive")
       }
     ]
   },
   {
     value: "Zona",
-    label: "Zona",
+    label: filterLabel("zone"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Roles",
-    label: "Roles",
+    label: filterLabel("roles"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "channel",
-    label: "Canales",
+    label: filterLabel("channels"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "line",
-    label: "Lineas",
+    label: filterLabel("lines"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "subline",
-    label: "Sublineas",
+    label: filterLabel("sublines"),
     isLeaf: false,
     disableCheckbox: true
   }
@@ -260,7 +263,7 @@ const initValueFiltersData = {
 };
 interface Option {
   value: string;
-  label: string;
+  label: ReactNode;
   disableCheckbox?: boolean;
   isLeaf?: boolean;
   children?: Option[];

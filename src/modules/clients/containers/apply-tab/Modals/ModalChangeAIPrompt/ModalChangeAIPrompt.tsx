@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, message, Modal, Skeleton, Typography } from "antd";
 import { Sparkle } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import { auth } from "../../../../../../../firebase";
 
 import {
@@ -36,6 +37,13 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || CLIENTUUID_DEMO;
+  const t = useTranslations("clients.applyModals.changePrompt");
+  const tCommon = useTranslations("common");
+  const aiText = (chunks: React.ReactNode) => (
+    <span className="cashportIATextGradient" style={{ fontWeight: 500 }}>
+      {chunks}
+    </span>
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -47,14 +55,14 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
 
           if (response.data === null) {
             setNotFound(true);
-            message.info("No se encontró un prompt para este cliente, por favor crea uno.");
+            message.info(t("notFound"));
             setLoadingReqRes((prev) => ({ ...prev, response: false }));
             return;
           }
           setPrompt(response?.data.prompt || "");
           setPromptData(response?.data);
         } catch (error) {
-          message.error("Error al obtener el prompt del cliente");
+          message.error(t("loadError"));
         }
         setLoadingReqRes((prev) => ({ ...prev, response: false }));
       })();
@@ -73,19 +81,19 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
     if (notFound) {
       try {
         await createPrompt(projectId, clientId, 1, prompt);
-        message.success("Prompt creado con éxito");
+        message.success(t("created"));
         onClose();
       } catch (error) {
-        message.error("Error al crear el prompt");
+        message.error(t("createError"));
       }
     } else {
       try {
         const currentUserEmail = auth.currentUser?.email || "";
         await updatePrompt(promptData?.id || 0, prompt, currentUserEmail);
-        message.success("Prompt actualizado con éxito");
+        message.success(t("updated"));
         onClose();
       } catch (error) {
-        message.error("Error al actualizar el prompt");
+        message.error(t("updateError"));
       }
     }
     setLoadingReqRes((prev) => ({ ...prev, request: false }));
@@ -98,15 +106,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
       centered
       title={
         <Title className="modalChangeAIPrompt__title" level={4}>
-          Prompt de cliente para{" "}
-          <span
-            className="cashportIATextGradient"
-            style={{
-              fontWeight: 500
-            }}
-          >
-            CashportAI
-          </span>
+          {t.rich("title", { ai: aiText })}
         </Title>
       }
       footer={null}
@@ -115,24 +115,13 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
       destroyOnClose
     >
       <Flex vertical gap={"24px"}>
-        <p className="modalChangeAIPrompt__description">
-          Si el cliente tiene condiciones especiales{" "}
-          <span
-            className="cashportIATextGradient"
-            style={{
-              fontWeight: 500
-            }}
-          >
-            CashportAI
-          </span>{" "}
-          los tendrá en cuenta en el proceso para la extracción de data
-        </p>
+        <p className="modalChangeAIPrompt__description">{t.rich("description", { ai: aiText })}</p>
 
         {loadingReqRes.response ? (
           <Skeleton active />
         ) : (
           <Flex vertical>
-            <p className="modalChangeAIPrompt__label">Prompt</p>
+            <p className="modalChangeAIPrompt__label">{t("label")}</p>
             <textarea
               defaultValue={prompt}
               className="modalChangeAIPrompt__textArea"
@@ -144,7 +133,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
 
         <div className="modalChangeAIPrompt__footer">
           <Button className="cancelButton" onClick={() => setIsEditing(!isEditing)}>
-            {isEditing ? "Cancelar edición" : "Editar"}
+            {isEditing ? t("cancelEdit") : tCommon("actions.edit")}
           </Button>
           <Button
             className="iaButton"
@@ -153,17 +142,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
             disabled={!isEditing || prompt.trim() === ""}
           >
             <Sparkle size={14} color="#5b21b6" weight="fill" />
-            <span className="textNormal">
-              Guardar{" "}
-              <span
-                className="cashportIATextGradient"
-                style={{
-                  fontWeight: 500
-                }}
-              >
-                CashportAI
-              </span>
-            </span>
+            <span className="textNormal">{t.rich("save", { ai: aiText })}</span>
           </Button>
         </div>
       </Flex>

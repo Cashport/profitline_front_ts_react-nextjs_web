@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslations } from "use-intl";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { DatePicker, Select as AntSelect, Tooltip } from "antd";
@@ -43,6 +44,10 @@ export function PurchaseOrderInfo({
   onDirtyChange,
   saveRef
 }: PurchaseOrderInfoProps) {
+  const t = useTranslations("purchaseOrders.info");
+  const tValidation = useTranslations("purchaseOrders.validation");
+  const tCommon = useTranslations("common");
+  const infoSchema = useMemo(() => purchaseOrderInfoSchema(tValidation), [tValidation]);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const initialData = useMemo(() => {
     if (isCreating || !data) return initialFormData ?? getEmptyFormData();
@@ -105,7 +110,7 @@ export function PurchaseOrderInfo({
     reset,
     watch
   } = useForm<PurchaseOrderInfoFormData>({
-    resolver: yupResolver(purchaseOrderInfoSchema),
+    resolver: yupResolver(infoSchema),
     defaultValues: initialData,
     mode: "onChange"
   });
@@ -144,7 +149,7 @@ export function PurchaseOrderInfo({
         const res = await getAdresses(clientId);
         setAddresses(res.otherAddresses || []);
       } catch (error) {
-        setAddressesError("Error al cargar las direcciones");
+        setAddressesError("load-error");
       } finally {
         setAddressesLoading(false);
       }
@@ -179,13 +184,13 @@ export function PurchaseOrderInfo({
       className="grid grid-cols-2 gap-8 mb-6"
     >
       <div>
-        <h3 className="text-lg font-semibold text-cashport-black mb-4">Información General</h3>
+        <h3 className="text-lg font-semibold text-cashport-black mb-4">{t("generalInfo")}</h3>
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             {!isCreating && (
               <div>
                 <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-                  ID Interno OC
+                  {t("internalPoId")}
                 </label>
                 <p className="text-sm font-semibold text-cashport-black mt-1">
                   {data?.id ?? "xxxx"}
@@ -194,7 +199,7 @@ export function PurchaseOrderInfo({
             )}
             <div>
               <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-                Orden de compra
+                {t("purchaseOrder")}
               </label>
               <Controller
                 name="purchase_order_number"
@@ -223,7 +228,7 @@ export function PurchaseOrderInfo({
             </div>
             <div>
               <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-                Canal
+                {t("channel")}
               </label>
               <Controller
                 name="usage_channel_id"
@@ -235,7 +240,7 @@ export function PurchaseOrderInfo({
                         value={field.value || undefined}
                         onChange={(value) => field.onChange(value)}
                         loading={channelsLoading}
-                        placeholder={channelsLoading ? "Cargando canales..." : "Seleccionar canal"}
+                        placeholder={channelsLoading ? t("loadingChannels") : t("selectChannel")}
                         options={channels}
                         className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8"
                       />
@@ -251,7 +256,7 @@ export function PurchaseOrderInfo({
           </div>
           <div>
             <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-              Cliente
+              {tCommon("fields.customer")}
             </label>
             <Controller
               name="client_name"
@@ -277,15 +282,13 @@ export function PurchaseOrderInfo({
                           }
                         }}
                         loading={clientsLoading}
-                        placeholder={
-                          clientsLoading ? "Cargando clientes..." : "Seleccionar cliente"
-                        }
+                        placeholder={clientsLoading ? t("loadingCustomers") : t("selectCustomer")}
                         options={clients.map((c) => ({
                           value: c.client_name,
                           label: c.client_name
                         }))}
                         className="mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-search-input]:!h-8 [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8 [&_.ant-select-selection-placeholder]:!text-sm [&_.ant-select-selection-placeholder]:!leading-8"
-                        notFoundContent="No hay clientes disponibles"
+                        notFoundContent={t("noCustomers")}
                       />
                     ) : (
                       <Input {...field} className="mt-1 h-8 text-sm font-semibold" disabled />
@@ -302,7 +305,7 @@ export function PurchaseOrderInfo({
           </div>
           <div>
             <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-              Fecha orden de compra
+              {t("poDate")}
             </label>
             {isCreating ? (
               <Controller
@@ -316,7 +319,7 @@ export function PurchaseOrderInfo({
                         value={field.value ? dayjs.utc(field.value) : null}
                         onChange={(date) => field.onChange(date ? date.format("YYYY-MM-DD") : "")}
                         className="mt-1 h-8 text-sm font-semibold w-full"
-                        placeholder="Seleccionar fecha"
+                        placeholder={t("selectDate")}
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
@@ -342,7 +345,7 @@ export function PurchaseOrderInfo({
                         onChange={(e) => field.onChange(e.target.value)}
                         className="mt-1 h-8 text-sm font-semibold"
                         disabled
-                        placeholder="Seleccionar fecha"
+                        placeholder={t("selectDate")}
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
@@ -360,7 +363,7 @@ export function PurchaseOrderInfo({
           {!isCreating && (
             <div>
               <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-                Facturas
+                {t("invoices")}
               </label>
 
               <p className="text-sm font-semibold text-cashport-black mt-1">
@@ -384,11 +387,11 @@ export function PurchaseOrderInfo({
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-cashport-black mb-4">Información de Entrega</h3>
+        <h3 className="text-lg font-semibold text-cashport-black mb-4">{t("deliveryInfo")}</h3>
         <div className="space-y-4">
           <div className="mt-4">
             <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-              Fecha/Hora entrega
+              {t("deliveryDateTime")}
             </label>
             <Controller
               name="delivery_date"
@@ -406,7 +409,7 @@ export function PurchaseOrderInfo({
                         field.onChange(date ? date.format("YYYY-MM-DD HH:mm") : "")
                       }
                       className="!mt-1 h-8 text-sm font-semibold w-full"
-                      placeholder="Seleccionar fecha"
+                      placeholder={t("selectDate")}
                     />
                   ) : (
                     <p className="text-sm font-semibold text-cashport-black mt-1">
@@ -422,7 +425,7 @@ export function PurchaseOrderInfo({
           </div>
           <div className="!mt-4">
             <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-              Dirección completa
+              {t("fullAddress")}
             </label>
             <Controller
               name="delivery_address"
@@ -453,22 +456,22 @@ export function PurchaseOrderInfo({
                             }
                             placeholder={
                               addressesLoading
-                                ? "Cargando direcciones..."
+                                ? t("loadingAddresses")
                                 : addresses.length === 0
-                                  ? "No hay direcciones disponibles"
-                                  : "Seleccionar dirección"
+                                  ? t("noAddresses")
+                                  : t("selectAddress")
                             }
                             options={addresses.map((a) => ({
                               value: a.id,
                               label: a.address
                             }))}
                             className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-search-input]:!h-8 [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8 [&_.ant-select-selection-placeholder]:!text-sm [&_.ant-select-selection-placeholder]:!leading-8"
-                            notFoundContent="No hay direcciones disponibles"
+                            notFoundContent={t("noAddresses")}
                           />
                         )}
                       />
                       {addressesError && (
-                        <span className="text-[13px] text-red-500 mt-1">{addressesError}</span>
+                        <span className="text-[13px] text-red-500 mt-1">{t("addressesError")}</span>
                       )}
                     </>
                   ) : (
@@ -487,7 +490,7 @@ export function PurchaseOrderInfo({
           </div>
           <div className="4">
             <label className="text-[13px] font-medium text-muted-foreground tracking-wide">
-              Observación
+              {t("observation")}
             </label>
             <Controller
               name="observations"

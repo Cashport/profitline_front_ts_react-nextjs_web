@@ -1,6 +1,7 @@
 "use client";
 
 import { X, MessageSquare, Settings, FileText } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -20,6 +21,8 @@ export function TimelineHistoryModal({
   orderId,
   orderLabel
 }: TimelineHistoryModalProps) {
+  const t = useTranslations("purchaseOrders.historyModal");
+  const tCommon = useTranslations("common");
   const { events, isLoading, error } = usePurchaseOrderHistory({
     purchaseOrderId: orderId ? String(orderId) : undefined,
     enabled: isOpen
@@ -58,10 +61,16 @@ export function TimelineHistoryModal({
       <div className="fixed top-0 right-0 h-full w-[500px] bg-white shadow-2xl z-50 flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Historial completo</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t("title")}</h2>
             <p className="text-sm text-gray-500 mt-0.5">{orderLabel}</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-8 w-8 rounded-full"
+            aria-label={tCommon("actions.close")}
+          >
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -69,7 +78,7 @@ export function TimelineHistoryModal({
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-gray-500">Cargando historial...</p>
+              <p className="text-gray-500">{t("loading")}</p>
             </div>
           ) : error ? (
             <div className="flex items-center justify-center py-12">
@@ -77,12 +86,12 @@ export function TimelineHistoryModal({
             </div>
           ) : events.length === 0 ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-gray-500">No hay eventos en el historial</p>
+              <p className="text-gray-500">{t("empty")}</p>
             </div>
           ) : (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Trazabilidad</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">{t("traceability")}</h3>
 
                 <div className="relative">
                   <div className="absolute left-[19px] top-6 bottom-0 w-0.5 bg-gradient-to-b from-green-400 via-blue-400 to-gray-300"></div>
@@ -112,14 +121,14 @@ export function TimelineHistoryModal({
                                   variant="outline"
                                   className="text-[13px] shrink-0 bg-orange-50 text-orange-700 border-orange-200"
                                 >
-                                  Abierta
+                                  {t("open")}
                                 </Badge>
                               ) : (
                                 <Badge
                                   variant="outline"
                                   className="text-[13px] shrink-0 bg-green-50 text-green-700 border-green-200"
                                 >
-                                  Cerrada
+                                  {t("closed")}
                                 </Badge>
                               )}
                             </div>
@@ -130,13 +139,14 @@ export function TimelineHistoryModal({
 
                             {event.created_by_name && (
                               <div className="text-[13px] text-gray-600 mb-1">
-                                <span className="font-medium">Acción:</span> {event.created_by_name}
+                                <span className="font-medium">{t("actionBy")}</span>{" "}
+                                {event.created_by_name}
                               </div>
                             )}
 
                             {event.event_description && (
                               <div className="text-[13px] text-gray-600">
-                                <span className="font-medium">Comentario:</span>{" "}
+                                <span className="font-medium">{t("comment")}</span>{" "}
                                 {event.event_description}
                               </div>
                             )}
@@ -152,10 +162,10 @@ export function TimelineHistoryModal({
         </div>
 
         <div className="px-6 py-4 border-t border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Resumen</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">{t("summary")}</h3>
           <div className="space-y-1 text-sm text-gray-600">
             <div className="flex justify-between">
-              <span>Total de eventos:</span>
+              <span>{t("totalEvents")}</span>
               <span className="font-medium text-gray-900">{events.length}</span>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Controller, Control, FieldError } from "react-hook-form";
 import { Checkbox, Flex, Radio, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import { Option, QuestionType } from "../../schema";
 
 const { Text } = Typography;
@@ -24,6 +25,7 @@ const OptionList: React.FC<OptionListProps> = ({
   error,
   required = false
 }) => {
+  const t = useTranslations("projects.forms.answer");
   console.log("error", error);
   return (
     <Flex vertical gap={"1rem"} align="flex-start">
@@ -77,7 +79,7 @@ const OptionList: React.FC<OptionListProps> = ({
           </>
         )}
       />
-      <Text type="danger">{error ? "Debes elegir por lo menos una opción" : ""}</Text>
+      <Text type="danger">{error ? t("chooseOption") : ""}</Text>
     </Flex>
   );
 };

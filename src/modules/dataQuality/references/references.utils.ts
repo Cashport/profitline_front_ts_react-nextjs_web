@@ -15,21 +15,16 @@ import type {
 /** Extensiones Excel aceptadas por el backend para referencias. */
 export const REFERENCE_ALLOWED_EXTENSIONS = [".xls", ".xlsx", ".xlsb"] as const;
 
-/** Ambitos permitidos. NO existe "global". */
-export const REFERENCE_SCOPE_OPTIONS: { value: IReferenceScopeLevel; label: string }[] = [
-  { value: "client", label: "Cliente" },
-  { value: "country", label: "País" },
-  { value: "region", label: "Región" }
-];
+/** Ambitos permitidos. NO existe "global". Las etiquetas las da `useReferenceScopeLabels`. */
+export const REFERENCE_SCOPE_LEVELS: IReferenceScopeLevel[] = ["client", "country", "region"];
 
-export const REFERENCE_SCOPE_LABELS: Record<IReferenceScopeLevel, string> = {
-  client: "Cliente",
-  country: "País",
-  region: "Región"
-};
+export type ReferenceScopeLabels = Record<IReferenceScopeLevel, string>;
 
-export function scopeLabel(scope: IReferenceScopeLevel | string): string {
-  return REFERENCE_SCOPE_LABELS[scope as IReferenceScopeLevel] ?? String(scope);
+export function scopeLabel(
+  scope: IReferenceScopeLevel | string,
+  labels: ReferenceScopeLabels
+): string {
+  return labels[scope as IReferenceScopeLevel] ?? String(scope);
 }
 
 /** `true` si el nombre de archivo tiene una extension Excel permitida. */
@@ -127,22 +122,26 @@ export interface ReferenceCatalogs {
   clients: { id: number; client_name: string }[];
 }
 
-/** Resuelve el nombre descriptivo del propietario (nunca muestra el ID como nombre). */
+/**
+ * Resuelve el nombre descriptivo del propietario (nunca muestra el ID como nombre).
+ * `labels` son las etiquetas traducidas de cada ambito (para el respaldo "País #12").
+ */
 export function resolveReferenceOwnerLabel(
   reference: Pick<IReferenceFile, "scope_level" | "id_client" | "id_country" | "id_region">,
-  catalogs: ReferenceCatalogs
+  catalogs: ReferenceCatalogs,
+  labels: ReferenceScopeLabels
 ): string {
   if (reference.scope_level === "country") {
     const country = catalogs.countries.find((c) => c.id === reference.id_country);
-    return country ? country.country_name : `País #${reference.id_country}`;
+    return country ? country.country_name : `${labels.country} #${reference.id_country}`;
   }
   if (reference.scope_level === "region") {
     const region = catalogs.regions.find((r) => r.id === reference.id_region);
-    return region ? region.abbreviation : `Región #${reference.id_region}`;
+    return region ? region.abbreviation : `${labels.region} #${reference.id_region}`;
   }
   if (reference.scope_level === "client") {
     const client = catalogs.clients.find((c) => c.id === reference.id_client);
-    return client ? client.client_name : `Cliente #${reference.id_client}`;
+    return client ? client.client_name : `${labels.client} #${reference.id_client}`;
   }
   return "-";
 }

@@ -1,10 +1,12 @@
 import { IMedicalAccountUploadData } from "@/types/medicalAccounts/IMedicalAccounts";
 import { IMedicalAccountEditForm } from "../../types/IMedicalAccount";
+import { useTranslations } from "use-intl";
+
 import {
-  SERVICE_TYPES,
-  SERVICE_TYPE_LABELS,
-  TIPO_DOCUMENTO_LABELS,
-  TIPO_DOCUMENTO_OPTIONS
+  DOCUMENT_TYPE_CODES,
+  SERVICE_TYPE_CODES,
+  isDocumentTypeCode,
+  isServiceTypeCode
 } from "../../constants";
 import { formatDate } from "../../utils/format";
 
@@ -46,18 +48,26 @@ const EditField = ({ label, children }: { label: string; children: React.ReactNo
   </div>
 );
 
-const withLabel = (code: string | null | undefined, labels: Record<string, string>) => {
-  if (!code) return "-";
-  return labels[code] ? `${code} — ${labels[code]}` : code;
-};
-
 export function MedicalAccountInfoPanel({
   account,
   editing,
   form,
   onChange
 }: MedicalAccountInfoPanelProps) {
-  const serviceLabel = withLabel(account.service_type, SERVICE_TYPE_LABELS);
+  const t = useTranslations("medicalAccounts");
+  const tCommon = useTranslations("common");
+
+  const withLabel = (code: string, label: string) => `${code} — ${label}`;
+  const serviceLabel = !account.service_type
+    ? "-"
+    : isServiceTypeCode(account.service_type)
+      ? withLabel(account.service_type, t(`serviceTypes.${account.service_type}`))
+      : account.service_type;
+  const documentTypeLabel = !account.document_type
+    ? "-"
+    : isDocumentTypeCode(account.document_type)
+      ? withLabel(account.document_type, t(`documentTypes.${account.document_type}`))
+      : account.document_type;
 
   return (
     <div className="flex items-stretch gap-6 px-6 py-5">
@@ -66,47 +76,44 @@ export function MedicalAccountInfoPanel({
         <div className="flex items-start gap-6">
           <div className="min-w-0 flex-1">
             {editing && form && onChange ? (
-              <EditField label="Nombre">
+              <EditField label={tCommon("fields.name")}>
                 <input
                   value={form.nombrePaciente}
                   onChange={(e) => onChange({ nombrePaciente: e.target.value })}
                   className={inputCls}
-                  placeholder="Nombre del paciente"
+                  placeholder={t("info.patientNamePlaceholder")}
                 />
               </EditField>
             ) : (
-              <Field label="Nombre" value={account.patient_name ?? "-"} />
+              <Field label={tCommon("fields.name")} value={account.patient_name ?? "-"} />
             )}
           </div>
 
           <div className="min-w-0 flex-1">
             {editing && form && onChange ? (
-              <EditField label="Tipo de documento">
+              <EditField label={t("info.documentType")}>
                 <select
                   value={form.tipoDocumento}
                   onChange={(e) => onChange({ tipoDocumento: e.target.value })}
                   className={inputCls}
                 >
-                  <option value="">Seleccionar</option>
-                  {TIPO_DOCUMENTO_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  <option value="">{tCommon("actions.select")}</option>
+                  {DOCUMENT_TYPE_CODES.map((code) => (
+                    <option key={code} value={code}>
+                      {withLabel(code, t(`documentTypes.${code}`))}
                     </option>
                   ))}
                 </select>
               </EditField>
             ) : (
-              <Field
-                label="Tipo de documento"
-                value={withLabel(account.document_type, TIPO_DOCUMENTO_LABELS)}
-              />
+              <Field label={t("info.documentType")} value={documentTypeLabel} />
             )}
           </div>
         </div>
 
         <div>
           {editing && form && onChange ? (
-            <EditField label="No. Documento">
+            <EditField label={t("info.documentNumber")}>
               <input
                 value={form.documentoPaciente}
                 onChange={(e) => onChange({ documentoPaciente: e.target.value })}
@@ -115,7 +122,7 @@ export function MedicalAccountInfoPanel({
               />
             </EditField>
           ) : (
-            <Field label="No. Documento" value={account.document_number ?? "-"} mono />
+            <Field label={t("info.documentNumber")} value={account.document_number ?? "-"} mono />
           )}
         </div>
       </div>
@@ -128,7 +135,7 @@ export function MedicalAccountInfoPanel({
         <div className="grid grid-cols-5 gap-x-6 gap-y-4">
           {editing && form && onChange ? (
             <>
-              <EditField label="No. Autorización">
+              <EditField label={t("info.authorizationNumber")}>
                 <input
                   value={form.idAutorizacion}
                   onChange={(e) => onChange({ idAutorizacion: e.target.value })}
@@ -136,7 +143,7 @@ export function MedicalAccountInfoPanel({
                   placeholder="-"
                 />
               </EditField>
-              <EditField label="Régimen">
+              <EditField label={t("info.regimen")}>
                 <select
                   value={form.regimen}
                   onChange={(e) =>
@@ -144,12 +151,12 @@ export function MedicalAccountInfoPanel({
                   }
                   className={inputCls}
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="Contributivo">Contributivo</option>
-                  <option value="Subsidiado">Subsidiado</option>
+                  <option value="">{tCommon("actions.select")}</option>
+                  <option value="Contributivo">{t("regimens.contributivo")}</option>
+                  <option value="Subsidiado">{t("regimens.subsidiado")}</option>
                 </select>
               </EditField>
-              <EditField label="Fecha de servicio">
+              <EditField label={t("info.serviceDate")}>
                 <input
                   type="date"
                   value={form.fechaServicio}
@@ -157,21 +164,21 @@ export function MedicalAccountInfoPanel({
                   className={inputCls}
                 />
               </EditField>
-              <EditField label="Tipo de servicio">
+              <EditField label={t("info.serviceType")}>
                 <select
                   value={form.tipoServicio}
                   onChange={(e) => onChange({ tipoServicio: e.target.value })}
                   className={inputCls}
                 >
-                  <option value="">Seleccionar</option>
-                  {SERVICE_TYPES.map(({ code, label }) => (
+                  <option value="">{tCommon("actions.select")}</option>
+                  {SERVICE_TYPE_CODES.map((code) => (
                     <option key={code} value={code}>
-                      {code} — {label}
+                      {withLabel(code, t(`serviceTypes.${code}`))}
                     </option>
                   ))}
                 </select>
               </EditField>
-              <EditField label="EPS">
+              <EditField label={t("info.eps")}>
                 <input
                   value={form.eps}
                   onChange={(e) => onChange({ eps: e.target.value })}
@@ -179,17 +186,21 @@ export function MedicalAccountInfoPanel({
                   placeholder="-"
                 />
               </EditField>
-              <Field label="Fecha de cargue" value={formatDate(account.created_at)} />
+              <Field label={t("info.uploadDate")} value={formatDate(account.created_at)} />
             </>
           ) : (
             <>
-              <Field label="No. Autorización" value={account.authorization_number ?? "-"} mono />
-              <Field label="No. Pedido" value={account.order_number ?? "-"} mono />
-              <Field label="Régimen" value={account.regimen ?? "-"} />
-              <Field label="Fecha de servicio" value={formatDate(account.service_date)} />
-              <Field label="Tipo de servicio" value={serviceLabel} />
-              <Field label="EPS" value={account.eps ?? "-"} />
-              <Field label="Fecha de cargue" value={formatDate(account.created_at)} />
+              <Field
+                label={t("info.authorizationNumber")}
+                value={account.authorization_number ?? "-"}
+                mono
+              />
+              <Field label={t("info.orderNumber")} value={account.order_number ?? "-"} mono />
+              <Field label={t("info.regimen")} value={account.regimen ?? "-"} />
+              <Field label={t("info.serviceDate")} value={formatDate(account.service_date)} />
+              <Field label={t("info.serviceType")} value={serviceLabel} />
+              <Field label={t("info.eps")} value={account.eps ?? "-"} />
+              <Field label={t("info.uploadDate")} value={formatDate(account.created_at)} />
             </>
           )}
         </div>

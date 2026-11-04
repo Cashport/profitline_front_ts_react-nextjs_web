@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import ProfitLoader from "@/components/ui/profit-loader";
 
 interface ReportViewerProps {
@@ -19,6 +21,7 @@ interface ReportViewerProps {
  * externos que use el informe tienen que estar permitidos allí.
  */
 export default function ReportViewer({ title, html, isLoading, error }: ReportViewerProps) {
+  const t = useTranslations("reports.detail");
   return (
     <div className="cp-card flex min-h-[calc(60*var(--vh))] flex-1 overflow-hidden">
       {html !== undefined ? (
@@ -34,7 +37,7 @@ export default function ReportViewer({ title, html, isLoading, error }: ReportVi
             <ProfitLoader size="small" />
           ) : (
             <p className="text-center text-sm text-destructive">
-              {error?.message || "No se pudo cargar el informe."}
+              {error?.message || t("loadError")}
             </p>
           )}
         </div>

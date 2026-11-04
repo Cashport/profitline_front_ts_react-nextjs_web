@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 import { useAppStore } from "@/lib/store/store";
 import { getAllLinesByProject, getSubLinesByProject } from "@/services/line/line";
 import { getAllZones } from "@/services/zone/zones";
@@ -7,12 +8,13 @@ import { getChannelByProjectId } from "@/services/businessRules/BR";
 import { ILine, ISubLine } from "@/types/lines/line";
 import { IZone } from "@/types/zones/IZones";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 import { channel } from "@/types/bre/IBRE";
 
 interface FilterOption {
   value: string | number;
-  label: string;
+  label: ReactNode;
   isLeaf?: boolean;
   children?: FilterOption[];
   line_id?: string | number;
@@ -32,6 +34,7 @@ interface Props {
 }
 
 export const WalletTabFilter: React.FC<Props> = ({ setSelectedFilters }) => {
+  const t = useTranslations("components.filters");
   const { ID } = useAppStore((state) => state.selectedProject);
   const [cascaderOptions, setCascaderOptions] = useState<FilterOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<(string | number)[][]>([]);
@@ -73,39 +76,39 @@ export const WalletTabFilter: React.FC<Props> = ({ setSelectedFilters }) => {
         setCascaderOptions([
           {
             value: "lines",
-            label: "Líneas",
+            label: filterLabel("lines"),
             children: lines
           },
           {
             value: "sublines",
-            label: "Sublíneas",
+            label: filterLabel("sublines"),
             children: sublines
           },
           {
             value: "zones",
-            label: "Zonas",
+            label: filterLabel("zones"),
             children: zones
           },
           {
             value: "channels",
-            label: "Canales",
+            label: filterLabel("channels"),
             children: channels
           },
           {
             value: "paymentAgreement",
-            label: "Acuerdo de pago",
+            label: filterLabel("paymentAgreement"),
             children: [
-              { value: 1, label: "Sí" },
-              { value: 0, label: "No" }
+              { value: 1, label: filterLabel("yes") },
+              { value: 0, label: filterLabel("no") }
             ]
           },
           {
             value: "radicationType",
-            label: "Tipo de radicación",
+            label: filterLabel("radicationType"),
             isLeaf: false,
             children: [
-              { value: 1, label: "Sí" },
-              { value: 0, label: "No" }
+              { value: 1, label: filterLabel("yes") },
+              { value: 0, label: filterLabel("no") }
             ]
           }
         ]);
@@ -198,7 +201,7 @@ export const WalletTabFilter: React.FC<Props> = ({ setSelectedFilters }) => {
       multiple
       maxTagCount="responsive"
       showCheckedStrategy={Cascader.SHOW_CHILD}
-      placeholder="Seleccionar filtros"
+      placeholder={t("selectFilters")}
     />
   );
 };

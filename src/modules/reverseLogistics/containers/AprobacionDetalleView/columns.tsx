@@ -1,4 +1,5 @@
 import type { ColumnsType } from "antd/es/table";
+import type { useTranslations } from "use-intl";
 import { IApprovalProduct } from "@/types/reverseLogistics/IReverseLogistics";
 import { fmtCop } from "../../utils/format";
 
@@ -18,9 +19,11 @@ function PoliticaBadge({ label, color }: { label: string; color: "green" | "oran
   );
 }
 
-export const productsColumns: ColumnsType<IApprovalProduct> = [
+export const getProductsColumns = (
+  t: ReturnType<typeof useTranslations<"reverseLogistics.detail.columns">>
+): ColumnsType<IApprovalProduct> => [
   {
-    title: "Producto",
+    title: t("product"),
     dataIndex: "nombre",
     render: (_: unknown, record) => (
       <div className="flex gap-3 items-start">
@@ -38,19 +41,19 @@ export const productsColumns: ColumnsType<IApprovalProduct> = [
     )
   },
   {
-    title: "Lote",
+    title: t("lot"),
     dataIndex: "lote",
     width: 90,
     render: (lote: string) => <span className="text-sm text-gray-700">{lote}</span>
   },
   {
-    title: "Fecha Vencimiento",
+    title: t("expirationDate"),
     dataIndex: "fechaVencimiento",
     width: 130,
     render: (fecha: string) => <span className="text-sm text-gray-700">{fecha}</span>
   },
   {
-    title: "Unidades",
+    title: t("units"),
     dataIndex: "unidades",
     width: 90,
     align: "right",
@@ -59,7 +62,7 @@ export const productsColumns: ColumnsType<IApprovalProduct> = [
     )
   },
   {
-    title: "Valor",
+    title: t("value"),
     dataIndex: "valor",
     width: 110,
     align: "right",
@@ -68,13 +71,13 @@ export const productsColumns: ColumnsType<IApprovalProduct> = [
     )
   },
   {
-    title: "Documento",
+    title: t("document"),
     dataIndex: "documento",
     width: 100,
     render: (documento: string) => <span className="text-sm text-gray-700">{documento}</span>
   },
   {
-    title: "Estado",
+    title: t("status"),
     dataIndex: "estado",
     render: (estado: string) => <span className="text-sm text-gray-600">{estado}</span>
   }

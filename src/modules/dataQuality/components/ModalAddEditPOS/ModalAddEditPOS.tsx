@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import * as yup from "yup";
 import { Modal, Spin, message } from "antd";
 import { useForm, Controller } from "react-hook-form";
 import { Save } from "lucide-react";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslations } from "use-intl";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
@@ -20,30 +21,33 @@ import {
 } from "@/services/dataQuality/dataQuality";
 import { IPOS } from "@/types/dataQuality/IDataQuality";
 
-const posFormSchema = yup.object().shape({
-  sold_to: yup.number().required(),
-  pos_id: yup.string().required("El POS ID es requerido"),
-  pos_name: yup.string().required("El nombre del POS es requerido"),
-  id_country: yup.number().required("El país es requerido"),
-  department_id: yup.number().optional(),
-  ship_to: yup.string().optional(),
-  pos_tax_code: yup.string().optional(),
-  pos_chain_name: yup.string().optional(),
-  pos_format_store: yup.string().optional(),
-  pos_internal_zone: yup.string().optional(),
-  pos_external_zone: yup.string().optional(),
-  pos_neighborhood: yup.string().optional(),
-  pos_address: yup.string().optional(),
-  pos_supervisor: yup.string().optional(),
-  pos_internal_sales_representative: yup.string().optional(),
-  pos_external_sales_representative: yup.string().optional(),
-  pos_cod_sfe: yup.string().optional(),
-  channel_id: yup.number().optional(),
-  sub_channel_id: yup.number().optional(),
-  pos_active: yup.boolean().optional()
-});
+type PosT = ReturnType<typeof useTranslations<"dataQuality.posModal">>;
 
-type PosFormData = yup.InferType<typeof posFormSchema>;
+const buildPosFormSchema = (t: PosT) =>
+  yup.object().shape({
+    sold_to: yup.number().required(),
+    pos_id: yup.string().required(t("validation.posId")),
+    pos_name: yup.string().required(t("validation.posName")),
+    id_country: yup.number().required(t("validation.country")),
+    department_id: yup.number().optional(),
+    ship_to: yup.string().optional(),
+    pos_tax_code: yup.string().optional(),
+    pos_chain_name: yup.string().optional(),
+    pos_format_store: yup.string().optional(),
+    pos_internal_zone: yup.string().optional(),
+    pos_external_zone: yup.string().optional(),
+    pos_neighborhood: yup.string().optional(),
+    pos_address: yup.string().optional(),
+    pos_supervisor: yup.string().optional(),
+    pos_internal_sales_representative: yup.string().optional(),
+    pos_external_sales_representative: yup.string().optional(),
+    pos_cod_sfe: yup.string().optional(),
+    channel_id: yup.number().optional(),
+    sub_channel_id: yup.number().optional(),
+    pos_active: yup.boolean().optional()
+  });
+
+type PosFormData = yup.InferType<ReturnType<typeof buildPosFormSchema>>;
 
 const INITIAL_VALUES: PosFormData = {
   sold_to: 0,
@@ -87,6 +91,9 @@ export default function ModalAddEditPOS({
   mode,
   posData
 }: Props) {
+  const t = useTranslations("dataQuality.posModal");
+  const tCommon = useTranslations("common");
+  const posFormSchema = useMemo(() => buildPosFormSchema(t), [t]);
   const [isLoading, setIsLoading] = useState(false);
 
   const [channels, setChannels] = useState<{ id: number; name: string }[]>([]);
@@ -213,10 +220,10 @@ export default function ModalAddEditPOS({
     try {
       if (mode === "edit" && posData) {
         await editPointOfSale(posData.id, data);
-        message.success("POS actualizado exitosamente");
+        message.success(t("updated"));
       } else {
         await createPointOfSale(data);
-        message.success("POS creado exitosamente");
+        message.success(t("created"));
       }
       onSuccess?.();
       handleClose();
@@ -225,8 +232,8 @@ export default function ModalAddEditPOS({
         error instanceof Error
           ? error.message
           : mode === "edit"
-            ? "Error al actualizar el POS"
-            : "Error al crear el POS"
+            ? t("updateError")
+            : t("createError")
       );
     } finally {
       setIsLoading(false);
@@ -240,7 +247,7 @@ export default function ModalAddEditPOS({
       footer={null}
       width={686}
       destroyOnClose
-      title={mode === "edit" ? "Editar POS" : "Nuevo POS"}
+      title={mode === "edit" ? t("editTitle") : t("createTitle")}
       styles={{
         body: {
           maxHeight: "calc(70 * var(--vh) - 55px)",
@@ -251,9 +258,7 @@ export default function ModalAddEditPOS({
       }}
     >
       <p style={{ color: "#8c8c8c" }}>
-        {mode === "edit"
-          ? "Modifica los datos del Punto de Venta."
-          : "Completa los datos para crear un nuevo Punto de Venta."}
+        {mode === "edit" ? t("editDescription") : t("createDescription")}
       </p>
 
       <form
@@ -273,7 +278,7 @@ export default function ModalAddEditPOS({
           {/* POS ID */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>
-              POS ID <span style={{ color: "#ff4d4f" }}>*</span>
+              {t("posId")} <span style={{ color: "#ff4d4f" }}>*</span>
             </Label>
             <Controller
               name="pos_id"
@@ -281,7 +286,7 @@ export default function ModalAddEditPOS({
               render={({ field }) => (
                 <Input
                   {...field}
-                  placeholder="Ej: POS-001"
+                  placeholder={t("posIdPlaceholder")}
                   style={{ borderColor: errors.pos_id ? "#ff4d4f" : "#DDDDDD" }}
                 />
               )}
@@ -294,7 +299,7 @@ export default function ModalAddEditPOS({
           {/* POS Name */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>
-              Nombre del POS <span style={{ color: "#ff4d4f" }}>*</span>
+              {t("posName")} <span style={{ color: "#ff4d4f" }}>*</span>
             </Label>
             <Controller
               name="pos_name"
@@ -302,7 +307,7 @@ export default function ModalAddEditPOS({
               render={({ field }) => (
                 <Input
                   {...field}
-                  placeholder="Ej: Tienda Central"
+                  placeholder={t("posNamePlaceholder")}
                   style={{ borderColor: errors.pos_name ? "#ff4d4f" : "#DDDDDD" }}
                 />
               )}
@@ -314,7 +319,7 @@ export default function ModalAddEditPOS({
 
           {/* Canal → channel_id */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Canal</Label>
+            <Label style={{ color: "#141414" }}>{t("channel")}</Label>
             <Controller
               name="channel_id"
               control={control}
@@ -323,7 +328,7 @@ export default function ModalAddEditPOS({
                   value={field.value?.toString()}
                   onChange={(val) => handleChannelChange(val ? Number(val) : undefined)}
                   options={channels.map((c) => ({ value: c.id.toString(), label: c.name }))}
-                  placeholder="Seleccionar canal"
+                  placeholder={t("channelPlaceholder")}
                 />
               )}
             />
@@ -331,7 +336,7 @@ export default function ModalAddEditPOS({
 
           {/* Sub Canal → sub_channel_id */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Sub Canal</Label>
+            <Label style={{ color: "#141414" }}>{t("subChannel")}</Label>
             <Controller
               name="sub_channel_id"
               control={control}
@@ -340,7 +345,7 @@ export default function ModalAddEditPOS({
                   value={field.value?.toString()}
                   onChange={(val) => field.onChange(val ? Number(val) : undefined)}
                   options={subChannels.map((s) => ({ value: s.id.toString(), label: s.name }))}
-                  placeholder="Seleccionar sub canal"
+                  placeholder={t("subChannelPlaceholder")}
                   disabled={!watch("channel_id")}
                   loading={isLoadingSubChannels}
                 />
@@ -351,7 +356,7 @@ export default function ModalAddEditPOS({
           {/* País → id_country */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>
-              País <span style={{ color: "#ff4d4f" }}>*</span>
+              {t("country")} <span style={{ color: "#ff4d4f" }}>*</span>
             </Label>
             <Controller
               name="id_country"
@@ -368,7 +373,7 @@ export default function ModalAddEditPOS({
                     value: c.id.toString(),
                     label: c.country_name
                   }))}
-                  placeholder="Seleccionar país"
+                  placeholder={t("countryPlaceholder")}
                   hasError={!!errors.id_country}
                 />
               )}
@@ -382,7 +387,7 @@ export default function ModalAddEditPOS({
 
           {/* Región → department_id */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Región</Label>
+            <Label style={{ color: "#141414" }}>{t("region")}</Label>
             <Controller
               name="department_id"
               control={control}
@@ -391,7 +396,7 @@ export default function ModalAddEditPOS({
                   value={field.value?.toString()}
                   onChange={(val) => field.onChange(val ? Number(val) : undefined)}
                   options={regions.map((r) => ({ value: r.id.toString(), label: r.region_name }))}
-                  placeholder="Seleccionar región"
+                  placeholder={t("regionPlaceholder")}
                   disabled={!watchedCountryId}
                   loading={isLoadingRegions}
                 />
@@ -401,151 +406,183 @@ export default function ModalAddEditPOS({
 
           {/* Ship To */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Ship To</Label>
+            <Label style={{ color: "#141414" }}>{t("shipTo")}</Label>
             <Controller
               name="ship_to"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: SH-001" />
+                <Input {...field} value={field.value ?? ""} placeholder={t("shipToPlaceholder")} />
               )}
             />
           </div>
 
           {/* Tax Code */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Tax Code</Label>
+            <Label style={{ color: "#141414" }}>{t("taxCode")}</Label>
             <Controller
               name="pos_tax_code"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: TAX-123" />
+                <Input {...field} value={field.value ?? ""} placeholder={t("taxCodePlaceholder")} />
               )}
             />
           </div>
 
           {/* Chain Name */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Nombre de cadena</Label>
+            <Label style={{ color: "#141414" }}>{t("chainName")}</Label>
             <Controller
               name="pos_chain_name"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Cadena XYZ" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("chainNamePlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* Format Store */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Formato de tienda</Label>
+            <Label style={{ color: "#141414" }}>{t("storeFormat")}</Label>
             <Controller
               name="pos_format_store"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Supermercado" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("storeFormatPlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* Internal Zone */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Zona interna</Label>
+            <Label style={{ color: "#141414" }}>{t("internalZone")}</Label>
             <Controller
               name="pos_internal_zone"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Norte" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("internalZonePlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* External Zone */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Zona externa</Label>
+            <Label style={{ color: "#141414" }}>{t("externalZone")}</Label>
             <Controller
               name="pos_external_zone"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Sur" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("externalZonePlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* Neighborhood */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Barrio</Label>
+            <Label style={{ color: "#141414" }}>{t("neighborhood")}</Label>
             <Controller
               name="pos_neighborhood"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Centro" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("neighborhoodPlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* Address */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Dirección</Label>
+            <Label style={{ color: "#141414" }}>{t("address")}</Label>
             <Controller
               name="pos_address"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Calle 123 #45-67" />
+                <Input {...field} value={field.value ?? ""} placeholder={t("addressPlaceholder")} />
               )}
             />
           </div>
 
           {/* Supervisor */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Supervisor</Label>
+            <Label style={{ color: "#141414" }}>{t("supervisor")}</Label>
             <Controller
               name="pos_supervisor"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Juan Pérez" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("supervisorPlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* Internal Sales Rep */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Representante de ventas interno</Label>
+            <Label style={{ color: "#141414" }}>{t("internalSalesRep")}</Label>
             <Controller
               name="pos_internal_sales_representative"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Ana García" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("internalSalesRepPlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* External Sales Rep */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Representante de ventas externo</Label>
+            <Label style={{ color: "#141414" }}>{t("externalSalesRep")}</Label>
             <Controller
               name="pos_external_sales_representative"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: Carlos López" />
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder={t("externalSalesRepPlaceholder")}
+                />
               )}
             />
           </div>
 
           {/* COD SFE */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>COD SFE</Label>
+            <Label style={{ color: "#141414" }}>{t("codSfe")}</Label>
             <Controller
               name="pos_cod_sfe"
               control={control}
               render={({ field }) => (
-                <Input {...field} value={field.value ?? ""} placeholder="Ej: SFE-001" />
+                <Input {...field} value={field.value ?? ""} placeholder={t("codSfePlaceholder")} />
               )}
             />
           </div>
 
           {/* Active */}
           <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Activo</Label>
+            <Label style={{ color: "#141414" }}>{t("active")}</Label>
             <div className="flex items-center h-9">
               <Controller
                 name="pos_active"
@@ -565,7 +602,7 @@ export default function ModalAddEditPOS({
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={handleClose} type="button">
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="submit"
@@ -582,7 +619,7 @@ export default function ModalAddEditPOS({
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Guardar
+                {tCommon("actions.save")}
               </>
             )}
           </Button>

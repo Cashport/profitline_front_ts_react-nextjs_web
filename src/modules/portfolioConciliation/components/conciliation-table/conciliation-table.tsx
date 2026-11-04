@@ -1,6 +1,7 @@
 "use client";
 
 import { Pagination } from "antd";
+import { useTranslations } from "use-intl";
 
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
 import { useAppStore } from "@/lib/store/store";
@@ -10,7 +11,7 @@ import {
   IConciliationQuery,
   IConciliationRow
 } from "@/types/portfolioConciliation/IPortfolioConciliation";
-import { CONCILIATION_PAGE_SIZE, DOCUMENT_TYPE_LABEL, STATUS_META } from "../../constants";
+import { CONCILIATION_PAGE_SIZE, STATUS_META } from "../../constants";
 
 interface Props {
   rows: IConciliationRow[];
@@ -26,14 +27,15 @@ interface Props {
   isRefreshing: boolean;
 }
 
-const COLUMNS: { col: ConciliationSortField; label: string; align?: "right" }[] = [
-  { col: "file_row", label: "Fila", align: "right" },
-  { col: "document_id", label: "ID documento" },
-  { col: "document_type", label: "Tipo" },
-  { col: "client_amount", label: "Monto cliente", align: "right" },
-  { col: "current_amount_cashport", label: "Valor Cashport", align: "right" },
-  { col: "difference", label: "Diferencia", align: "right" },
-  { col: "status_cashport", label: "Estado" }
+/** El rótulo de cada columna es `reconciliation.table.columns.<col>`. */
+const COLUMNS: { col: ConciliationSortField; align?: "right" }[] = [
+  { col: "file_row", align: "right" },
+  { col: "document_id" },
+  { col: "document_type" },
+  { col: "client_amount", align: "right" },
+  { col: "current_amount_cashport", align: "right" },
+  { col: "difference", align: "right" },
+  { col: "status_cashport" }
 ];
 
 /** Página de la cartera conciliada; orden y paginación los resuelve el servidor. */
@@ -48,6 +50,7 @@ const ConciliationTable = ({
   isStale,
   isRefreshing
 }: Props) => {
+  const t = useTranslations("reconciliation");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const from = total ? (page - 1) * CONCILIATION_PAGE_SIZE + 1 : 0;
   const to = Math.min(page * CONCILIATION_PAGE_SIZE, total);
@@ -70,7 +73,7 @@ const ConciliationTable = ({
         >
           <thead className="sticky top-0 z-[1]">
             <tr>
-              {COLUMNS.map(({ col, label, align }) => {
+              {COLUMNS.map(({ col, align }) => {
                 const active = sortBy === col;
                 return (
                   <th
@@ -88,7 +91,7 @@ const ConciliationTable = ({
                         align === "right" && "flex-row-reverse"
                       )}
                     >
-                      {label}
+                      {t(`table.columns.${col}`)}
                       <SortArrows dir={active ? sortDir : null} />
                     </span>
                   </th>
@@ -106,7 +109,7 @@ const ConciliationTable = ({
                   </td>
                   <td className="px-3 py-2 font-mono text-[13px]">{row.document_id}</td>
                   <td className="whitespace-nowrap px-3 py-2">
-                    {DOCUMENT_TYPE_LABEL[row.document_type]}
+                    {t(`documentType.${row.document_type}`)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
                     {formatMoney(row.client_amount)}
@@ -138,7 +141,7 @@ const ConciliationTable = ({
             {!rows.length && !isStale && (
               <tr>
                 <td colSpan={COLUMNS.length} className="px-3 py-10 text-center text-[#8a8a8a]">
-                  No hay documentos con estos filtros.
+                  {t("table.empty")}
                 </td>
               </tr>
             )}
@@ -149,7 +152,11 @@ const ConciliationTable = ({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-[13px] text-[#8a8a8a]">
           {total
-            ? `Mostrando ${formatNumber(from)}–${formatNumber(to)} de ${formatNumber(total)} documentos${isStale ? " · actualizando…" : ""}`
+            ? `${t("table.showing", {
+                from: formatNumber(from),
+                to: formatNumber(to),
+                total: formatNumber(total)
+              })}${isStale ? ` · ${t("table.updating")}` : ""}`
             : ""}
         </span>
         <Pagination

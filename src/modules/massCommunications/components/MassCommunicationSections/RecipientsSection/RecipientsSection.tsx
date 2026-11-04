@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button, Tag, Typography, Flex, message } from "antd";
 import { CheckCircle2, XCircle, FileDown, Users, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { validateClients } from "@/services/communications/communications";
 import { useClientList } from "@/modules/massCommunications/hooks/useClientList";
 import type { IValidatedClients } from "@/types/communications/ICommunications";
@@ -26,6 +27,8 @@ interface RecipientsSectionProps {
 }
 
 export default function RecipientsSection({ onValidatedCountChange }: RecipientsSectionProps) {
+  const t = useTranslations("massCommunications.recipients");
+  const tCommon = useTranslations("common");
   const [rawIds, setRawIds] = useState("");
   const [hasValidated, setHasValidated] = useState(false);
   const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
@@ -79,16 +82,14 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
       setInvalidIds(invalid);
       setHasValidated(true);
       onValidatedCountChange(valid.length);
-      message.success(
-        `Validación completada: ${valid.length} válidos, ${invalid.length} no encontrados`
-      );
+      message.success(t("validationDone", { valid: valid.length, invalid: invalid.length }));
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Error al validar los clientes";
+      const errorMsg = error instanceof Error ? error.message : t("validateError");
       message.error(errorMsg);
     } finally {
       setIsValidating(false);
     }
-  }, [rawIds, onValidatedCountChange, mutate]);
+  }, [rawIds, onValidatedCountChange, mutate, t]);
 
   const handleClear = useCallback(() => {
     setRawIds("");
@@ -111,12 +112,12 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Error al descargar el reporte";
+      const errorMsg = error instanceof Error ? error.message : t("downloadError");
       message.error(errorMsg);
     } finally {
       setIsExporting(false);
     }
-  }, [getExportClientList]);
+  }, [getExportClientList, t]);
 
   return (
     <section className="cp-card px-[18px] py-[14px]">
@@ -125,7 +126,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
           2
         </div>
         <Text strong className="text-[15px]">
-          Destinatarios
+          {t("title")}
         </Text>
         <Users size={16} className="text-gray-400 ml-1" />
       </div>
@@ -135,7 +136,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
           value={rawIds}
           onChange={(e) => handleRawIdsChange(e.target.value)}
           onPaste={handlePaste}
-          placeholder={"COL-001, COL-002, MEX-001\no uno por linea:\nCOL-001\nCOL-002\nMEX-001"}
+          placeholder={t("placeholder")}
           className="recipientsTextarea flex-1 font-mono"
         />
         <Flex vertical gap={8}>
@@ -152,11 +153,11 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
               })
             }}
           >
-            Validar
+            {t("validate")}
           </Button>
           {hasValidated && (
             <Button onClick={handleClear} icon={<X size={16} />} className="!bg-[#fafafa]">
-              Limpiar
+              {tCommon("actions.clear")}
             </Button>
           )}
         </Flex>
@@ -178,7 +179,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
                 fontWeight: 500
               }}
             >
-              {validClients.length} clientes encontrados
+              {t("found", { count: validClients.length })}
             </Tag>
             {invalidIds.length > 0 && (
               <Tag
@@ -194,11 +195,11 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
                   fontWeight: 500
                 }}
               >
-                {invalidIds.length} no encontrados
+                {t("notFound", { count: invalidIds.length })}
               </Tag>
             )}
             <Text type="secondary" className="text-[13px]">
-              de {(validClients.length + invalidIds.length).toLocaleString()} clientes totales
+              {t("ofTotal", { total: validClients.length + invalidIds.length })}
             </Text>
           </Flex>
           <Button
@@ -209,7 +210,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
             style={{ height: 31 }}
             loading={isExporting}
           >
-            Descargar reporte
+            {t("downloadReport")}
           </Button>
         </Flex>
       )}

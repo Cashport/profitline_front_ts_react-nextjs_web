@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { message, Modal, Spin } from "antd";
 import { Pencil, Users, Paperclip } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import {
   createCommunicationTemplate,
@@ -16,6 +17,13 @@ import { Button } from "@/modules/chat/ui/button";
 import { CustomTextArea } from "@/components/atoms/CustomTextArea/CustomTextArea";
 import SelectOuterTags from "@/components/ui/select-outer-tags";
 import { OptionType } from "@/components/ui/select-outer-tags/select-outer-tags";
+
+// Tags de ejemplo en los placeholders: son etiquetas que vienen del backend, no se traducen.
+const PLACEHOLDER_TAGS = {
+  receivables: "{{Cartera}}",
+  clientName: "{{Nombre Cliente}}",
+  signature: "{{Firma}}"
+};
 
 interface ISelectTag {
   value: number;
@@ -44,6 +52,9 @@ export default function ModalCreateEmailTemplate({
   templateTags,
   onSuccess
 }: ModalCreateEmailTemplateProps) {
+  const t = useTranslations("massCommunications.createTemplate");
+  const tMessage = useTranslations("massCommunications.message");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   const {
@@ -66,7 +77,7 @@ export default function ModalCreateEmailTemplate({
   });
 
   register("templateRoles", {
-    validate: (value) => value.size > 0 || "Debe seleccionar al menos un rol"
+    validate: (value) => value.size > 0 || t("validation.roleRequired")
   });
 
   const [activeField, setActiveField] = useState<"subject" | "body">("body");
@@ -112,7 +123,7 @@ export default function ModalCreateEmailTemplate({
         const contactPositionsData = await getContactOptions();
         const contactPositions = contactPositionsData.contact_position.map((position) => ({
           value: `0_${position.id}`,
-          label: `Cliente - ${position.name}`
+          label: t("clientRole", { name: position.name })
         }));
         setRoleOptions(contactPositions);
       } catch (error) {
@@ -151,22 +162,21 @@ export default function ModalCreateEmailTemplate({
         comunication_type: 3,
         action_type_ids: [17]
       });
-      message.success("Template creado exitosamente");
+      message.success(t("success"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Ocurrió un error al crear el template";
+      const errorMessage = error instanceof Error ? error.message : t("error");
       message.error(errorMessage);
     }
   };
 
   const renderedSubject = subjectValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => {
-    const found = templateTags.find((t) => t.label === tag);
+    const found = templateTags.find((tt) => tt.label === tag);
     return found?.mock ?? `[${tag}]`;
   });
   const renderedBody = bodyValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => {
-    const found = templateTags.find((t) => t.label === tag);
+    const found = templateTags.find((tt) => tt.label === tag);
     return found?.mock ?? `[${tag}]`;
   });
 
@@ -190,28 +200,23 @@ export default function ModalCreateEmailTemplate({
           <div className="w-8 h-8 rounded-lg bg-[#CBE71E]/20 flex items-center justify-center">
             <Pencil className="w-4 h-4 text-[#141414]" />
           </div>
-          Crear template de email
+          {t("title")}
         </div>
       }
     >
-      <p className="text-sm text-gray-500 mb-5">
-        Escribe el contenido del correo usando tags dinamicos. La vista previa se actualiza en
-        tiempo real.
-      </p>
+      <p className="text-sm text-gray-500 mb-5">{t("subtitle")}</p>
 
       {/* Name */}
       <div className="mb-4">
-        <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
-          Nombre del template
-        </Label>
+        <Label className="text-sm text-[#141414] font-medium mb-1.5 block">{t("name")}</Label>
         <Controller
           name="name"
           control={control}
-          rules={{ required: "El nombre es obligatorio" }}
+          rules={{ required: t("validation.nameRequired") }}
           render={({ field }) => (
             <Input
               {...field}
-              placeholder="Ej: Recordatorio mensual de cartera"
+              placeholder={t("namePlaceholder")}
               className="border-[#DDDDDD] h-10 placeholder:text-[#DDDDDD] font-light"
             />
           )}
@@ -223,16 +228,18 @@ export default function ModalCreateEmailTemplate({
         {/* Left: Editor */}
         <div className="flex flex-col gap-4">
           <div>
-            <Label className="text-sm text-[#141414] font-medium mb-1.5 block">Asunto</Label>
+            <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
+              {t("subject")}
+            </Label>
             <Controller
               name="subject"
               control={control}
-              rules={{ required: "El asunto es obligatorio" }}
+              rules={{ required: t("validation.subjectRequired") }}
               render={({ field }) => (
                 <CustomTextArea
                   {...field}
                   onFocus={() => setActiveField("subject")}
-                  placeholder="Ej: Reporte de {{Cartera}} - {{Nombre Cliente}}"
+                  placeholder={t("subjectPlaceholder", PLACEHOLDER_TAGS)}
                   highlightWords={highlightWords}
                   customStyles={{
                     height: "40px",
@@ -252,18 +259,16 @@ export default function ModalCreateEmailTemplate({
             />
           </div>
           <div className="flex flex-col flex-1">
-            <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
-              Cuerpo del mensaje
-            </Label>
+            <Label className="text-sm text-[#141414] font-medium mb-1.5 block">{t("body")}</Label>
             <Controller
               name="body"
               control={control}
-              rules={{ required: "El cuerpo es obligatorio" }}
+              rules={{ required: t("validation.bodyRequired") }}
               render={({ field }) => (
                 <CustomTextArea
                   {...field}
                   onFocus={() => setActiveField("body")}
-                  placeholder="Estimado {{Nombre Cliente}},&#10;&#10;Le informamos que su cartera actual es de {{Cartera}}...&#10;&#10;Quedamos atentos,&#10;{{Firma}}"
+                  placeholder={t("bodyPlaceholder", PLACEHOLDER_TAGS)}
                   highlightWords={highlightWords}
                   customStyles={{
                     height: "200px",
@@ -287,29 +292,29 @@ export default function ModalCreateEmailTemplate({
 
         {/* Right: Preview */}
         <div className="flex flex-col h-full">
-          <Label className="text-sm text-[#141414] font-medium mb-1.5 block">Vista previa</Label>
+          <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
+            {tMessage("preview")}
+          </Label>
           <div className="rounded-lg border border-[#DDDDDD] overflow-hidden flex flex-col flex-1 bg-[#FAFAFA]">
             <div className="bg-[#141414] px-4 py-2.5">
-              <p className="text-[13px] text-gray-400 font-medium">
-                Vista previa del correo
-              </p>
+              <p className="text-[13px] text-gray-400 font-medium">{tMessage("emailPreview")}</p>
             </div>
             <div className="p-4 flex flex-col bg-white m-2 rounded-md border border-[#EEEEEE]">
               <div className="border-b border-[#EEEEEE] pb-2.5 mb-3">
-                <p className="text-[13px] text-gray-400 mb-0.5">Para: destinatario@ejemplo.com</p>
+                <p className="text-[13px] text-gray-400 mb-0.5">{tMessage("sampleRecipient")}</p>
                 <p className="text-sm font-semibold text-[#141414] leading-snug">
-                  {renderedSubject || "Sin asunto"}
+                  {renderedSubject || tMessage("noSubject")}
                 </p>
               </div>
               <div className="text-[13px] text-[#141414] leading-relaxed whitespace-pre-wrap max-h-[200px] overflow-auto">
                 {renderedBody || (
-                  <span className="text-gray-400 italic">El contenido aparecera aqui...</span>
+                  <span className="text-gray-400 italic">{t("contentPlaceholder")}</span>
                 )}
               </div>
               {selectedAttachments.size > 0 && (
                 <div className="mt-3 pt-2.5 border-t border-[#EEEEEE]">
                   <p className="text-[13px] text-gray-400 font-medium mb-1.5">
-                    Adjuntos
+                    {tMessage("attachments")}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {attachmentOptions
@@ -334,7 +339,7 @@ export default function ModalCreateEmailTemplate({
       {/* Tag inserter */}
       <div className="flex items-center gap-3 mt-5">
         <SelectOuterTags
-          placeholder="Seleccionar tag"
+          placeholder={t("selectTag")}
           options={templateTags}
           errors={undefined}
           field={{ value: [], onChange: () => {}, onBlur: () => {}, name: "tags", ref: () => {} }}
@@ -349,14 +354,14 @@ export default function ModalCreateEmailTemplate({
             fontSize: "14px"
           }}
         />
-        <span className="text-[13px] text-gray-400">
-          Se insertara en {activeField === "subject" ? "el asunto" : "el cuerpo"}
-        </span>
+        <span className="text-[13px] text-gray-400">{t("insertInto", { field: activeField })}</span>
       </div>
 
       {/* Roles selector */}
       <div className="mt-5">
-        <Label className="text-sm text-[#141414] font-medium mb-2 block">Roles destinatarios</Label>
+        <Label className="text-sm text-[#141414] font-medium mb-2 block">
+          {t("recipientRoles")}
+        </Label>
         {loadingRoles ? (
           <Spin size="small" />
         ) : (
@@ -391,7 +396,7 @@ export default function ModalCreateEmailTemplate({
       {/* Attachments selector */}
       <div className="mt-5">
         <Label className="text-sm text-[#141414] font-medium mb-2 block">
-          Adjuntos del template
+          {t("templateAttachments")}
         </Label>
         {loadingAttachments ? (
           <Spin size="small" />
@@ -429,14 +434,14 @@ export default function ModalCreateEmailTemplate({
       {/* Footer */}
       <div className="sticky bottom-0 bg-white pt-4 pb-1 flex items-center justify-end gap-3 mt-1">
         <Button variant="outline" onClick={onClose} className="border-[#DDDDDD] h-9">
-          Cancelar
+          {tCommon("actions.cancel")}
         </Button>
         <Button
           onClick={handleSubmit(onSubmit)}
           disabled={!isValid || isSubmitting}
           className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold h-9"
         >
-          Guardar template
+          {t("save")}
         </Button>
       </div>
     </Modal>

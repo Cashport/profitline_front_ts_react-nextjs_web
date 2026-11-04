@@ -1,5 +1,6 @@
 // sections/ApproversSection.tsx
 import React from "react";
+import { useTranslations } from "use-intl";
 import { Flex } from "antd";
 import { UsersThree } from "phosphor-react";
 import ColumnText from "../../ColumnText/ColumnText";
@@ -12,9 +13,10 @@ interface ApproversSectionProps {
 }
 
 const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
+  const t = useTranslations("suppliers.drawer");
   return (
     <ColumnText
-      title="Aprobadores"
+      title={t("approvers")}
       icon={<UsersThree size={16} color="#7B7B7B" />}
       content={
         <Flex align="center" gap={8} wrap>

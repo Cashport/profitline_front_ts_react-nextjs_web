@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import { Upload, FileText } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import styles from "./uploadDropZone.module.scss";
 
@@ -14,10 +15,11 @@ interface UploadDropZoneProps {
 export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
   onFileUpload,
   allowedExtensions,
-  title = "Arrastra tu archivo aquí",
-  subtitle = "O selecciona un archivo desde tu dispositivo",
+  title,
+  subtitle,
   multiple = false
 }) => {
+  const t = useTranslations("components.uploadDropZone");
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,11 +79,11 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         <div className={styles.iconWrapper}>
           <Upload size={28} className="text-cashport-green" />
         </div>
-        <p className={styles.title}>{title}</p>
-        <p className={styles.subtitle}>{subtitle}</p>
+        <p className={styles.title}>{title ?? t("title")}</p>
+        <p className={styles.subtitle}>{subtitle ?? t("subtitle")}</p>
         <button className={styles.selectButton} onClick={handleFileSelect} type="button">
           <FileText size={18} />
-          Seleccionar Archivo
+          {t("selectFile")}
         </button>
       </div>
 

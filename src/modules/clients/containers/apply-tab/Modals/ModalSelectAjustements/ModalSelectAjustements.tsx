@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import "./modalSelectAjustements.scss";
 import { Globe, NewspaperClipping } from "phosphor-react";
@@ -16,11 +17,12 @@ export const ModalSelectAjustements: React.FC<ModalSelectAjustementsProps> = ({
   onClose,
   setModalAction
 }) => {
+  const t = useTranslations("clients.applyTab.selectAdjustmentModal");
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Selecciona el tipo de aplicación del ajuste"
+      title={t("title")}
       footer={null}
       onCancel={onClose}
       className="modal-action-payment"
@@ -29,14 +31,14 @@ export const ModalSelectAjustements: React.FC<ModalSelectAjustementsProps> = ({
       <div className="modal-content">
         <ButtonGenerateAction
           icon={<Globe size={20} />}
-          title="Global"
+          title={t("global")}
           onClick={() => {
             setModalAction(2, "global");
           }}
         />
         <ButtonGenerateAction
           icon={<NewspaperClipping size={20} />}
-          title="Por factura"
+          title={t("byInvoice")}
           onClick={() => {
             setModalAction(4, "byInvoice");
           }}

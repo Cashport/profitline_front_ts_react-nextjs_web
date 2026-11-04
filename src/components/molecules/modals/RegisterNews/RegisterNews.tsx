@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import { Modal } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
 import { CaretLeft } from "@phosphor-icons/react";
@@ -42,6 +43,8 @@ const RegisterNews = ({
   messageShow,
   onCloseAllModals
 }: RegisterNewsProps) => {
+  const t = useTranslations("modals.registerNews");
+  const tCommon = useTranslations("common");
   const { data: motives, isLoading, isError } = useInvoiceIncidentMotives();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string>();
@@ -83,7 +86,7 @@ const RegisterNews = ({
         data.amount,
         createNew
       );
-      messageShow.success("Evidencia adjuntada con éxito");
+      messageShow.success(t("success"));
       reset();
       setSelectedEvidence([]);
       setCommentary(undefined);
@@ -98,7 +101,7 @@ const RegisterNews = ({
         setLastSubmittedData(data);
         setShowIncidentConfirmation(true);
       } else {
-        messageShow.error("Error al adjuntar la evidencia");
+        messageShow.error(t("error"));
         setShowIncidentConfirmation(false);
         setLastSubmittedData(null);
       }
@@ -149,15 +152,13 @@ const RegisterNews = ({
       >
         <button className="contentRegisterNews__header" onClick={handleClose}>
           <CaretLeft size="1.25rem" />
-          <h4>Registrar novedad</h4>
+          <h4>{t("title")}</h4>
         </button>
-        <p className="contentRegisterNews__description">
-          Adjunta la evidencia e ingresa un comentario
-        </p>
+        <p className="contentRegisterNews__description">{t("description")}</p>
         <form onSubmit={handleSubmit(onSubmit)} className="contentRegisterNews__form">
           <div className="contentRegisterNews__select">
             <InputSelect
-              titleInput="Motivo"
+              titleInput={t("reason")}
               nameInput="motive"
               control={control}
               error={errors.motive}
@@ -170,15 +171,15 @@ const RegisterNews = ({
               }
               loading={isLoading}
               isError={isError}
-              placeholder="Seleccionar motivo"
+              placeholder={t("reasonPlaceholder")}
               popupMatchSelectWidth={false}
             />
             <InputFormMoney
-              titleInput="Monto novedad"
+              titleInput={t("amount")}
               nameInput="amount"
               control={control}
               error={errors.amount}
-              placeholder="Ingresar monto"
+              placeholder={t("amountPlaceholder")}
               typeInput="number"
               customStyle={{ width: "100%" }}
               validationRules={{ required: false }}
@@ -194,10 +195,10 @@ const RegisterNews = ({
             isOpen={true}
             handleCancel={handleClose}
             customTexts={{
-              title: "Registrar novedad",
-              description: "Adjunta la evidencia e ingresa un comentario",
-              cancelButtonText: "Cancelar",
-              acceptButtonText: isSubmitting ? "Enviando..." : "Guardar"
+              title: t("title"),
+              description: t("description"),
+              cancelButtonText: tCommon("actions.cancel"),
+              acceptButtonText: isSubmitting ? tCommon("status.sending") : tCommon("actions.save")
             }}
             noTitle
             noDescription
@@ -215,9 +216,9 @@ const RegisterNews = ({
         isOpen={showIncidentConfirmation}
         onClose={handleCloseIncidentConfirmation}
         onOk={handleCreateNewIncident}
-        title="La facturas ya tienen novedades abiertas ¿Qué desea hacer con las novedades?"
-        okText="Crear novedad nueva"
-        cancelText="No crear nueva novedad"
+        title={t("openDisputes.title")}
+        okText={t("openDisputes.ok")}
+        cancelText={t("openDisputes.cancel")}
         okLoading={isSubmitting}
       />
     </>

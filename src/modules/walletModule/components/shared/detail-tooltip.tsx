@@ -1,6 +1,7 @@
 "use client";
 
 import { Tooltip } from "antd";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { TRAMOS, TRAMO_BG } from "../../constants";
@@ -69,6 +70,7 @@ const SURFACE: React.CSSProperties = {
  */
 export default function DetailTooltip({ title, rows, total, children }: DetailTooltipProps) {
   const { resolvedTheme } = useWalletTheme();
+  const tCommon = useTranslations("common");
 
   const content = (
     <div className="wallet-scope text-[13px] leading-normal text-popover-foreground">
@@ -90,7 +92,7 @@ export default function DetailTooltip({ title, rows, total, children }: DetailTo
       ))}
 
       <div className="mt-[5px] flex justify-between gap-4 border-t border-border pt-[5px] font-bold">
-        <span>{total.label ?? "Total"}</span>
+        <span>{total.label ?? tCommon("fields.total")}</span>
         <b className="tabular-nums">{total.value}</b>
       </div>
     </div>

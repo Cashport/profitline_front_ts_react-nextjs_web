@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Checkbox, Dropdown, Empty, Spin } from "antd";
 import dayjs from "dayjs";
 import { CaretDown } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 
@@ -31,6 +32,8 @@ const SelectInvoices: React.FC<SelectInvoicesProps> = ({
   onChange,
   error
 }) => {
+  const t = useTranslations("chat.selectInvoices");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const formatMoney = useAppStore((state) => state.formatMoney);
@@ -81,16 +84,18 @@ const SelectInvoices: React.FC<SelectInvoicesProps> = ({
     if (diff < 0) {
       return (
         <span className="selectInvoices__badge selectInvoices__badge--overdue">
-          Vencida hace {Math.abs(diff)}d
+          {t("overdueBy", { days: Math.abs(diff) })}
         </span>
       );
     }
     if (diff < SOON_THRESHOLD) {
       return (
-        <span className="selectInvoices__badge selectInvoices__badge--soon">Vence en {diff}d</span>
+        <span className="selectInvoices__badge selectInvoices__badge--soon">
+          {t("dueIn", { days: diff })}
+        </span>
       );
     }
-    return <span className="selectInvoices__badge">Vence en {diff}d</span>;
+    return <span className="selectInvoices__badge">{t("dueIn", { days: diff })}</span>;
   };
 
   const panel = (
@@ -100,11 +105,11 @@ const SelectInvoices: React.FC<SelectInvoicesProps> = ({
           <Spin />
         </div>
       ) : invoices.length === 0 ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Sin facturas" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("noInvoices")} />
       ) : (
         <>
           <div className="selectInvoices__search">
-            <SearchField value={search} onChange={setSearch} placeholder="Buscar por ID" />
+            <SearchField value={search} onChange={setSearch} placeholder={t("searchById")} />
           </div>
           <div className="selectInvoices__all" onClick={toggleAll}>
             <Checkbox
@@ -112,10 +117,10 @@ const SelectInvoices: React.FC<SelectInvoicesProps> = ({
               onClick={(e) => e.stopPropagation()}
               onChange={toggleAll}
             />
-            <span>Seleccionar todas</span>
+            <span>{tCommon("actions.selectAll")}</span>
           </div>
           {filteredInvoices.length === 0 ? (
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Sin resultados" />
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={tCommon("status.noResults")} />
           ) : (
             <div className="selectInvoices__list">
               {filteredInvoices.map((invoice) => {
@@ -159,7 +164,7 @@ const SelectInvoices: React.FC<SelectInvoicesProps> = ({
 
   return (
     <div className="selectInvoices">
-      <p className="selectInvoices__title">Facturas a cancelar</p>
+      <p className="selectInvoices__title">{t("title")}</p>
       <Dropdown
         open={open}
         onOpenChange={setOpen}
@@ -172,7 +177,7 @@ const SelectInvoices: React.FC<SelectInvoicesProps> = ({
           className={`selectInvoices__trigger${error ? " selectInvoices__trigger--error" : ""}`}
         >
           <span className={value.length ? "" : "selectInvoices__placeholder"}>
-            {value.length ? `${value.length} factura(s) seleccionada(s)` : "Selecciona facturas"}
+            {value.length ? t("selectedCount", { count: value.length }) : t("placeholder")}
           </span>
           <CaretDown size={16} />
         </button>

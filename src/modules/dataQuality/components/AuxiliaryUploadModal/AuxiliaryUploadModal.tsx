@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, Tag, message } from "antd";
 import { ArrowsClockwise, CheckCircle, XCircle } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import ProfitLoader from "@/components/ui/profit-loader/profit-loader";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -51,18 +52,19 @@ interface LocalItem {
 
 const MAX_ATTEMPTS_PER_FILE = 2;
 
-const STATUS_META: Record<AuxiliaryUploadStatus | LocalStatus, { label: string; color: string }> = {
-  pending: { label: "Pendiente", color: "default" },
-  uploading: { label: "Subiendo", color: "processing" },
-  received: { label: "Recibido", color: "blue" },
-  processing: { label: "Procesando", color: "processing" },
-  success: { label: "Exitoso", color: "success" },
-  error: { label: "Error", color: "error" }
+// La etiqueta de cada estado está en dataQuality.auxiliaryUpload.status.
+const STATUS_META: Record<AuxiliaryUploadStatus | LocalStatus, { color: string }> = {
+  pending: { color: "default" },
+  uploading: { color: "processing" },
+  received: { color: "blue" },
+  processing: { color: "processing" },
+  success: { color: "success" },
+  error: { color: "error" }
 };
 
-const errorMessageOf = (error: unknown): string => {
+const errorMessageOf = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) return error.message;
-  return "No se pudo cargar el archivo.";
+  return fallback;
 };
 
 const formatBytes = (bytes?: number | null): string => {
@@ -77,6 +79,8 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
   onFinished,
   initialBatchId
 }) => {
+  const t = useTranslations("dataQuality.auxiliaryUpload");
+  const tCommon = useTranslations("common");
   const [selected, setSelected] = useState<File[]>([]);
   const [items, setItems] = useState<LocalItem[]>([]);
   const [batchId, setBatchId] = useState<string | null>(null);
@@ -117,9 +121,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
   const handleSelect = (file: File) => {
     setSelected((prev) => {
       if (prev.length >= (auxiliaryFile?.max_files ?? 1)) {
-        message.warning(
-          `Este auxiliar admite maximo ${auxiliaryFile?.max_files ?? 1} archivo(s) por cargue.`
-        );
+        message.warning(t("maxFilesWarning", { count: auxiliaryFile?.max_files ?? 1 }));
         return prev;
       }
       const duplicated = prev.some((item) => item.name === file.name && item.size === file.size);
@@ -163,7 +165,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
           );
           return true;
         } catch (error) {
-          lastError = errorMessageOf(error);
+          lastError = errorMessageOf(error, t("uploadError"));
         }
       }
 
@@ -174,7 +176,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
       );
       return false;
     },
-    [auxiliaryFile?.id]
+    [auxiliaryFile?.id, t]
   );
 
   const handleStart = async () => {
@@ -205,7 +207,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
     if (anyReceived) {
       await mutate();
     } else {
-      message.error("No se pudo recibir ningun archivo. Revisa la conexion e intenta de nuevo.");
+      message.error(t("noneReceivedMessage"));
     }
   };
 
@@ -223,9 +225,9 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
     try {
       await retryAuxiliaryUpload(upload.id);
       await mutate();
-      message.success("Reintento encolado.");
+      message.success(t("retryQueued"));
     } catch (error) {
-      message.error(errorMessageOf(error));
+      message.error(errorMessageOf(error, t("uploadError")));
     }
   };
 
@@ -245,8 +247,8 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
       }}
       title={
         initialBatchId
-          ? `Archivos de ${auxiliaryFile?.file_type ?? "auxiliar"}`
-          : `Cargar ${auxiliaryFile?.file_type ?? "auxiliar"}`
+          ? t("filesTitle", { fileType: auxiliaryFile?.file_type ?? t("auxiliaryFallback") })
+          : t("uploadTitle", { fileType: auxiliaryFile?.file_type ?? t("auxiliaryFallback") })
       }
       footer={null}
       width={720}
@@ -261,8 +263,8 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
             <UploadDropZone
               onFileUpload={handleSelect}
               multiple
-              title="Arrastra tus archivos aqui"
-              subtitle={`Puedes cargar hasta ${auxiliaryFile?.max_files ?? 1} archivo(s). Se suben uno por uno.`}
+              title={t("dropTitle")}
+              subtitle={t("dropSubtitle", { count: auxiliaryFile?.max_files ?? 1 })}
               allowedExtensions={[".xls", ".xlsx", ".csv"]}
             />
 
@@ -285,7 +287,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                       onClick={() => setSelected((prev) => prev.filter((_, i) => i !== index))}
                       disabled={isUploading}
                     >
-                      Quitar
+                      {tCommon("actions.remove")}
                     </button>
                   </div>
                 ))}
@@ -294,10 +296,10 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
 
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={onClose} disabled={isUploading}>
-                Cancelar
+                {tCommon("actions.cancel")}
               </Button>
               <Button onClick={handleStart} disabled={selected.length === 0 || isUploading}>
-                {isUploading ? "Subiendo..." : `Cargar ${selected.length || ""} archivo(s)`}
+                {isUploading ? t("uploadingShort") : t("uploadButton", { count: selected.length })}
               </Button>
             </div>
           </>
@@ -310,11 +312,11 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
               <Alert
                 type="error"
                 showIcon
-                message="No se pudo recibir ningun archivo"
-                description="Revisa la conexion e intenta de nuevo. No quedo ningun lote registrado."
+                message={t("noneReceivedTitle")}
+                description={t("noneReceivedDescription")}
                 action={
                   <Button variant="outline" size="sm" onClick={reset}>
-                    Volver a intentar
+                    {t("tryAgain")}
                   </Button>
                 }
               />
@@ -322,18 +324,20 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <Tag color="blue">
-                Recibidos {batch?.received_count ?? 0}/{summary.total}
+                {t("received", { count: batch?.received_count ?? 0, total: summary.total })}
               </Tag>
-              <Tag color="success">Exitosos {summary.ok}</Tag>
-              <Tag color={summary.ko > 0 ? "error" : "default"}>Error {summary.ko}</Tag>
+              <Tag color="success">{t("successful", { count: summary.ok })}</Tag>
+              <Tag color={summary.ko > 0 ? "error" : "default"}>
+                {t("errors", { count: summary.ko })}
+              </Tag>
             </div>
 
             {(batch?.status === "uploading" || localOnlyItems.length > 0) && !isUploading && (
               <Alert
                 type="warning"
                 showIcon
-                message="El cargue quedo incompleto"
-                description="Faltan archivos por recibir. Reintenta los archivos marcados; si cierras ahora, el auxiliar se libera cuando expire el lote (15 min)."
+                message={t("incompleteUploadTitle")}
+                description={t("incompleteUploadDescription")}
               />
             )}
 
@@ -342,7 +346,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                 type="success"
                 showIcon
                 icon={<CheckCircle size={18} />}
-                message="Todos los archivos fueron entregados al SFTP"
+                message={t("allDelivered")}
               />
             )}
 
@@ -351,8 +355,8 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                 type="error"
                 showIcon
                 icon={<XCircle size={18} />}
-                message="El lote termino con errores"
-                description="Puedes reintentar los archivos fallidos sin volver a subirlos."
+                message={t("batchErrorsTitle")}
+                description={t("batchErrorsDescription")}
               />
             )}
 
@@ -360,8 +364,8 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
               <Alert
                 type="error"
                 showIcon
-                message="El lote no se completo"
-                description="No se entrego ningun archivo. Vuelve a cargar el auxiliar completo."
+                message={t("batchIncompleteTitle")}
+                description={t("batchIncompleteDescription")}
               />
             )}
 
@@ -379,18 +383,18 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                           {file.slot_index}. {file.original_filename}
                         </p>
                         <p className="truncate text-[13px] text-[#6B7280]">
-                          Remoto: {file.remote_filename}
+                          {t("remote", { name: file.remote_filename })}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Tag color={meta.color}>{meta.label}</Tag>
+                        <Tag color={meta.color}>{t(`status.${file.status}`)}</Tag>
                         {file.status === "error" && (
                           <button
                             type="button"
                             className="flex items-center gap-1 text-[13px] text-[#175CD3] hover:underline"
                             onClick={() => handleRetryDelivered(file)}
                           >
-                            <ArrowsClockwise size={14} /> Reintentar
+                            <ArrowsClockwise size={14} /> {tCommon("actions.retry")}
                           </button>
                         )}
                       </div>
@@ -414,21 +418,19 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                       </p>
                       <p className="text-[13px] text-[#6B7280]">
                         {item.remoteFilename
-                          ? `Remoto: ${item.remoteFilename}`
-                          : "Sin nombre remoto asignado"}
+                          ? t("remote", { name: item.remoteFilename })
+                          : t("noRemoteName")}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Tag color={STATUS_META[item.status].color}>
-                        {STATUS_META[item.status].label}
-                      </Tag>
+                      <Tag color={STATUS_META[item.status].color}>{t(`status.${item.status}`)}</Tag>
                       {item.status === "error" && (
                         <button
                           type="button"
                           className="flex items-center gap-1 text-[13px] text-[#175CD3] hover:underline"
                           onClick={() => handleRetryItem(item)}
                         >
-                          <ArrowsClockwise size={14} /> Reintentar
+                          <ArrowsClockwise size={14} /> {tCommon("actions.retry")}
                         </button>
                       )}
                     </div>
@@ -441,13 +443,13 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
             {(isUploading || (batch && !isTerminal)) && (
               <div className="flex items-center gap-2 text-sm text-[#6B7280]">
                 <ProfitLoader size="small" />
-                {isUploading ? "Subiendo archivos..." : "Convirtiendo y entregando al SFTP..."}
+                {isUploading ? t("uploadingFiles") : t("delivering")}
               </div>
             )}
 
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={onClose} disabled={isUploading}>
-                {isTerminal ? "Cerrar" : "Cerrar y continuar en segundo plano"}
+                {isTerminal ? tCommon("actions.close") : t("closeInBackground")}
               </Button>
               {isTerminal && (
                 <Button
@@ -455,7 +457,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
                     await mutate();
                   }}
                 >
-                  Actualizar estado
+                  {t("refreshStatus")}
                 </Button>
               )}
             </div>

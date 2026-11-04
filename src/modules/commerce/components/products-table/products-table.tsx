@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Collapse } from "antd";
 import { ChevronRight, Gift, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import "./products-table.scss";
 
@@ -19,12 +20,13 @@ function DescuentoCell({
   max: number;
   onChange: (v: number) => void;
 }) {
+  const t = useTranslations("commerce.productsTable");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
   const enabled = max > 0;
 
   if (!enabled) {
-    return <span className="text-[13px] text-[#999999] italic">Sin desc.</span>;
+    return <span className="text-[13px] text-[#999999] italic">{t("noDiscount")}</span>;
   }
 
   return (
@@ -168,6 +170,7 @@ export default function ProductsTable({
   collapsible = false,
   className = ""
 }: ProductsTableProps) {
+  const t = useTranslations("commerce.productsTable");
   // Narrow-viewport detection for `responsive`. Follows the SSR-safe `matchMedia`-in-effect
   // pattern (starts `false` so server + first client render match, then resolves on mount).
   const [isNarrow, setIsNarrow] = useState(false);
@@ -227,7 +230,7 @@ export default function ProductsTable({
         >
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-[13px] font-semibold text-white bg-[#141414] rounded px-1.5 py-0.5 flex-shrink-0">
-              Pack
+              {t("pack")}
             </span>
             <p className="text-sm font-medium text-[#141414] truncate" title={pack.description}>
               {pack.description}
@@ -249,7 +252,7 @@ export default function ProductsTable({
                     -{pack.discountPct}%
                   </span>
                 ) : (
-                  <span className="text-[13px] text-[#999999] italic">Sin desc.</span>
+                  <span className="text-[13px] text-[#999999] italic">{t("noDiscount")}</span>
                 )}
               </div>
               <p className="text-sm font-semibold text-[#141414] text-right">
@@ -267,7 +270,7 @@ export default function ProductsTable({
             (pack.onRemove ? (
               <button
                 onClick={pack.onRemove}
-                title="Eliminar pack"
+                title={t("removePack")}
                 className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
               >
                 <Trash2 size={12} />
@@ -290,7 +293,7 @@ export default function ProductsTable({
               className="text-[13px] font-semibold text-[#AAAAAA] col-span-full"
               style={{ gridColumn: "1 / -1" }}
             >
-              Productos del pack
+              {t("packProducts")}
             </span>
           </div>
           {pack.products.map((sub, sIdx) => {
@@ -365,7 +368,7 @@ export default function ProductsTable({
               ) : row.discountPct > 0 ? (
                 <span className="text-[13px] font-semibold text-red-500">-{row.discountPct}%</span>
               ) : (
-                <span className="text-[13px] text-[#999999] italic">Sin desc.</span>
+                <span className="text-[13px] text-[#999999] italic">{t("noDiscount")}</span>
               )}
             </div>
             <p className="text-sm font-semibold text-[#141414] text-right">
@@ -393,7 +396,7 @@ export default function ProductsTable({
           row.onRemove && row.finalPrice === 0 ? (
             <button
               onClick={row.onRemove}
-              title="Eliminar producto"
+              title={t("removeProduct")}
               className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
             >
               <Trash2 size={12} />
@@ -416,19 +419,33 @@ export default function ProductsTable({
           className="grid px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE] rounded-t-xl flex-shrink-0"
           style={{ gridTemplateColumns }}
         >
-          <span className="text-[13px] font-medium text-[#AAAAAA]">Producto</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA]">{t("columns.product")}</span>
           {!compact && (
             <>
-              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">SKU</span>
-              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">P. Original</span>
-              <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Descuento</span>
-              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">P. Final</span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">
+                {t("columns.sku")}
+              </span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">
+                {t("columns.originalPrice")}
+              </span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-center">
+                {t("columns.discount")}
+              </span>
+              <span className="text-[13px] font-medium text-[#AAAAAA] text-right">
+                {t("columns.finalPrice")}
+              </span>
             </>
           )}
-          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Cant.</span>
-          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Total</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">
+            {t("columns.quantity")}
+          </span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">
+            {t("columns.total")}
+          </span>
           {multiEntrega && !compact && (
-            <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Rest.</span>
+            <span className="text-[13px] font-medium text-[#AAAAAA] text-right">
+              {t("columns.remaining")}
+            </span>
           )}
           {showActionsColumn && !compact && <span />}
         </div>
@@ -451,9 +468,7 @@ export default function ProductsTable({
                 key: String(category.key),
                 className: gIdx > 0 ? "border-t border-[#EEEEEE]" : "",
                 label: (
-                  <span className="text-[13px] font-semibold text-[#AAAAAA]">
-                    {category.name}
-                  </span>
+                  <span className="text-[13px] font-semibold text-[#AAAAAA]">{category.name}</span>
                 ),
                 children: category.rows.map(renderRow)
               }))}
@@ -465,9 +480,7 @@ export default function ProductsTable({
                 className={gIdx > 0 ? "border-t border-[#EEEEEE]" : ""}
               >
                 <div className="px-4 pt-3 pb-1">
-                  <span className="text-[13px] font-semibold text-[#AAAAAA]">
-                    {category.name}
-                  </span>
+                  <span className="text-[13px] font-semibold text-[#AAAAAA]">{category.name}</span>
                 </div>
                 {category.rows.map(renderRow)}
               </div>
@@ -478,9 +491,7 @@ export default function ProductsTable({
           {showPacks && (
             <>
               <div className="flex items-center gap-3 px-4 py-2 bg-[#F4F4F4] border-t border-[#EEEEEE]">
-                <span className="text-[13px] font-semibold text-[#141414]">
-                  Packs
-                </span>
+                <span className="text-[13px] font-semibold text-[#141414]">{t("packs")}</span>
               </div>
               <div className="py-3">{packItems.map(renderPack)}</div>
             </>
@@ -491,9 +502,7 @@ export default function ProductsTable({
             <>
               <div className="flex items-center gap-3 px-4 py-2 bg-[#F7FDE8] border-t border-[#EEEEEE]">
                 <Gift size={12} className="text-[#6AB000] flex-shrink-0" />
-                <span className="text-[13px] font-semibold text-[#6AB000]">
-                  Productos bonificados
-                </span>
+                <span className="text-[13px] font-semibold text-[#6AB000]">{t("freeGoods")}</span>
               </div>
 
               {bonusItems.map((b, idx) => (
@@ -511,7 +520,7 @@ export default function ProductsTable({
                         b.fixed ? "bg-[#E8F5C0] text-[#4A7A00]" : "bg-[#EEF4FF] text-[#3B5BDB]"
                       }`}
                     >
-                      {b.fixed ? "Promo auto" : "Manual"}
+                      {b.fixed ? t("autoPromo") : t("manual")}
                     </span>
                   </div>
                   {!compact && (
@@ -519,7 +528,9 @@ export default function ProductsTable({
                       <span />
                       <span />
                       <div className="flex justify-center">
-                        <span className="text-[13px] font-semibold text-[#6AB000]">100% desc.</span>
+                        <span className="text-[13px] font-semibold text-[#6AB000]">
+                          {t("fullDiscount")}
+                        </span>
                       </div>
                       <p className="text-sm font-semibold text-[#6AB000] text-right">
                         {formatPrice(0)}
@@ -536,7 +547,7 @@ export default function ProductsTable({
                     (b.onRemove ? (
                       <button
                         onClick={b.onRemove}
-                        title="Quitar bonificado"
+                        title={t("removeFreeGood")}
                         className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
                       >
                         <Trash2 size={12} />
@@ -555,7 +566,7 @@ export default function ProductsTable({
           className="grid items-center px-4 py-3 bg-[#FAFAFA] border-t border-[#EEEEEE] rounded-b-xl flex-shrink-0"
           style={{ gridTemplateColumns }}
         >
-          <span className="text-[13px] font-semibold text-[#141414]">Totales</span>
+          <span className="text-[13px] font-semibold text-[#141414]">{t("totals")}</span>
           {!compact && (
             <>
               <span />

@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "use-intl";
+
 import { TRAMOS, VENCIDO } from "../../constants";
 
 /**
@@ -37,8 +41,9 @@ export function StatCardsSkeleton() {
  * llegar los datos la tabla no salte de tamaño.
  */
 export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
+  const t = useTranslations("wallet.skeleton");
   return (
-    <section className="cp-card" aria-busy aria-label="Cargando matriz de cartera">
+    <section className="cp-card" aria-busy aria-label={t("matrix")}>
       <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
         <div>
           <Bar className="h-4 w-36" />
@@ -102,8 +107,9 @@ export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
 
 /** Tabla inferior de grupos de facturas. */
 export function GroupsSkeleton({ rows = 4 }: { rows?: number }) {
+  const t = useTranslations("wallet.skeleton");
   return (
-    <section className="cp-card" aria-busy aria-label="Cargando grupos de facturas">
+    <section className="cp-card" aria-busy aria-label={t("groups")}>
       <div className="border-b border-border p-4">
         <Bar className="h-4 w-40" />
       </div>

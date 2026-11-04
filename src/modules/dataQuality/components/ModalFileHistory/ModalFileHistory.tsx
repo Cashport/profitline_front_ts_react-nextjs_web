@@ -6,6 +6,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Spin, message } from "antd";
 import { Bot, Download, FileClock, RotateCcw, Trash2, Upload, User } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { getFileHistory } from "@/services/dataQuality/dataQuality";
 import { Badge } from "@/modules/chat/ui/badge";
@@ -45,6 +46,7 @@ const bytesToMB = (bytes: number): string => {
 };
 
 export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProps) {
+  const t = useTranslations("dataQuality.fileHistory");
   const [events, setEvents] = useState<IFileHistoryEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
         // El orden no está garantizado por el contrato, así que se ordena por versión descendente.
         setEvents([...(history ?? [])].sort((a, b) => b.version - a.version));
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar el historial.");
+        setError(err instanceof Error ? err.message : t("loadError"));
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +78,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
     if (!event.url_s3) return;
     const hide = message.open({
       type: "loading",
-      content: "Descargando archivo...",
+      content: t("downloading"),
       duration: 0
     });
     try {
@@ -91,11 +93,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      message.error(
-        err instanceof Error
-          ? err.message
-          : "Error al descargar el archivo. Por favor, inténtalo de nuevo."
-      );
+      message.error(err instanceof Error ? err.message : t("downloadError"));
     } finally {
       hide();
     }
@@ -128,7 +126,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
 
         <div className="flex-1 overflow-y-auto p-6">
           <h3 className="text-sm font-semibold mb-4" style={{ color: "#141414" }}>
-            Historial de versiones
+            {t("title")}
           </h3>
 
           {isLoading ? (
@@ -139,7 +137,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
             <p className="text-sm text-red-500">{error}</p>
           ) : events.length === 0 ? (
             <p className="text-sm" style={{ color: "#6B7280" }}>
-              Sin eventos registrados para este archivo.
+              {t("empty")}
             </p>
           ) : (
             <ol className="space-y-5">
@@ -181,7 +179,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 shrink-0"
-                            title="Descargar esta versión"
+                            title={t("downloadVersion")}
                             onClick={() => handleDownloadVersion(event)}
                           >
                             <Download className="h-3.5 w-3.5" style={{ color: "#6B7280" }} />
@@ -193,7 +191,7 @@ export function ModalFileHistory({ isOpen, onClose, file }: ModalFileHistoryProp
                         style={{ color: "#6B7280" }}
                       >
                         <ActorIcon className="h-3 w-3" />
-                        {isSystemEvent ? "Sistema" : event.user_name} ·{" "}
+                        {isSystemEvent ? t("system") : event.user_name} ·{" "}
                         {formatDateTime(event.occurred_at)} · {bytesToMB(event.size_bytes)}
                       </p>
                     </div>

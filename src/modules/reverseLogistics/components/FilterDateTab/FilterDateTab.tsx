@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import dayjs from "dayjs";
 import { Calendar } from "lucide-react";
+import { useTranslations } from "use-intl";
+import { getTranslator } from "@/i18n/translator";
 
 export type DateDraft = { from: string | null; to: string | null };
 
@@ -11,23 +13,36 @@ const daysAgo = (n: number) => dayjs().subtract(n, "day").format("YYYY-MM-DD");
 
 export type DatePresetId = "hoy" | "ayer" | "ultimos_7" | "ultimos_15" | "ultimos_30" | "este_mes";
 
-const PRESETS: { id: DatePresetId; name: string; resolve: () => DateDraft }[] = [
-  { id: "hoy", name: "Hoy", resolve: () => ({ from: today(), to: today() }) },
-  { id: "ayer", name: "Ayer", resolve: () => ({ from: daysAgo(1), to: daysAgo(1) }) },
-  { id: "ultimos_7", name: "Últimos 7 días", resolve: () => ({ from: daysAgo(7), to: today() }) },
+type PresetLabelKey =
+  | "today"
+  | "yesterday"
+  | "last7Days"
+  | "last15Days"
+  | "last30Days"
+  | "thisMonth";
+
+// `labelKey` is the preset name in `reverseLogistics.dateFilter.presets`.
+const PRESETS: { id: DatePresetId; labelKey: PresetLabelKey; resolve: () => DateDraft }[] = [
+  { id: "hoy", labelKey: "today", resolve: () => ({ from: today(), to: today() }) },
+  { id: "ayer", labelKey: "yesterday", resolve: () => ({ from: daysAgo(1), to: daysAgo(1) }) },
+  {
+    id: "ultimos_7",
+    labelKey: "last7Days",
+    resolve: () => ({ from: daysAgo(7), to: today() })
+  },
   {
     id: "ultimos_15",
-    name: "Últimos 15 días",
+    labelKey: "last15Days",
     resolve: () => ({ from: daysAgo(15), to: today() })
   },
   {
     id: "ultimos_30",
-    name: "Últimos 30 días",
+    labelKey: "last30Days",
     resolve: () => ({ from: daysAgo(30), to: today() })
   },
   {
     id: "este_mes",
-    name: "Este mes",
+    labelKey: "thisMonth",
     resolve: () => ({ from: dayjs().startOf("month").format("YYYY-MM-DD"), to: today() })
   }
 ];
@@ -44,10 +59,11 @@ const matchPreset = (draft: DateDraft) =>
   }) ?? null;
 
 // A range that matches a preset is shown by name ("Últimos 30 días"); anything
-// else falls back to the raw dates.
+// else falls back to the raw dates. Called at render time, so the name follows
+// the active language.
 export const formatDateTagValue = (draft: DateDraft): string => {
   const preset = matchPreset(draft);
-  if (preset) return preset.name;
+  if (preset) return getTranslator("reverseLogistics")(`dateFilter.presets.${preset.labelKey}`);
   return draft.from && draft.to ? `${draft.from} - ${draft.to}` : draft.from || draft.to || "";
 };
 
@@ -59,10 +75,11 @@ interface FilterDateTabProps {
 // Custom panel rendered inside FilterModal for the "Fecha" category of both
 // tabs — /visits and /approvals take the same fromDate/toDate range.
 export function FilterDateTab({ value, onChange }: FilterDateTabProps) {
+  const t = useTranslations("reverseLogistics.dateFilter");
   // Resolve each preset's concrete range once so applying and highlighting compare
   // the same values.
   const presets = useMemo(
-    () => PRESETS.map((p) => ({ id: p.id, name: p.name, range: p.resolve() })),
+    () => PRESETS.map((p) => ({ id: p.id, labelKey: p.labelKey, range: p.resolve() })),
     []
   );
 
@@ -71,7 +88,7 @@ export function FilterDateTab({ value, onChange }: FilterDateTabProps) {
   return (
     <div className="space-y-4">
       <div className="mb-4">
-        <p className="text-[13px] font-bold text-foreground mb-3">Periodos Predefinidos</p>
+        <p className="text-[13px] font-bold text-foreground mb-3">{t("presetPeriods")}</p>
         <div className="grid grid-cols-2 gap-2">
           {presets.map((preset) => {
             const selected = isSelected(preset.range);
@@ -87,7 +104,7 @@ export function FilterDateTab({ value, onChange }: FilterDateTabProps) {
                     : "bg-secondary/50 hover:bg-secondary border-border"
                 }`}
               >
-                {preset.name}
+                {t(`presets.${preset.labelKey}`)}
               </button>
             );
           })}
@@ -97,11 +114,11 @@ export function FilterDateTab({ value, onChange }: FilterDateTabProps) {
       <div className="border-t border-border pt-4">
         <p className="text-[13px] font-bold text-foreground mb-3 flex items-center gap-2">
           <Calendar className="w-3 h-3" />
-          Rango Personalizado
+          {t("customRange")}
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[13px] text-muted-foreground mb-1 block">Desde</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">{t("from")}</label>
             <input
               type="date"
               value={value.from || ""}
@@ -110,7 +127,7 @@ export function FilterDateTab({ value, onChange }: FilterDateTabProps) {
             />
           </div>
           <div>
-            <label className="text-[13px] text-muted-foreground mb-1 block">Hasta</label>
+            <label className="text-[13px] text-muted-foreground mb-1 block">{t("to")}</label>
             <input
               type="date"
               value={value.to || ""}

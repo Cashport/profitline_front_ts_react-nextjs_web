@@ -1,3 +1,5 @@
+import { getTranslator } from "@/i18n/translator";
+
 /**
  * Contrato de la Matriz de Control de cartera.
  *
@@ -21,7 +23,10 @@ export type MatrixColumnKey = AgingBucket | typeof OVERDUE_BUCKET;
 
 /** Etiquetas de las columnas, tal como se ven en la tabla. */
 export const AGING_LABELS: Record<AgingBucket, string> = {
-  corriente: "Corriente",
+  // Getter: se traduce al leerlo, con el idioma activo.
+  get corriente() {
+    return getTranslator("shared")("aging.current");
+  },
   "1-30": "1–30",
   "31-60": "31–60",
   "61-90": "61–90",

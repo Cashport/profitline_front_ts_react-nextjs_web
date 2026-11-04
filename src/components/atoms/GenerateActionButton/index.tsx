@@ -1,5 +1,6 @@
 import React from "react";
 import { DotsThree } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import styles from "./button.module.scss";
 
 interface GenerateActionButtonProps {
@@ -12,12 +13,13 @@ interface GenerateActionButtonProps {
 }
 
 export const GenerateActionButton: React.FC<GenerateActionButtonProps> = ({
-  label = "Generar acción",
+  label,
   onClick,
   icon = <DotsThree size={18} weight="bold" />, // Icono predeterminado
   style, // Estilos personalizados pasados por props
   disabled = false
 }) => {
+  const t = useTranslations("components.generateActionButton");
   return (
     <button
       className={styles.buttonGenerateAction}
@@ -28,7 +30,7 @@ export const GenerateActionButton: React.FC<GenerateActionButtonProps> = ({
       onClick={onClick}
     >
       {icon && icon}
-      {label}
+      {label ?? t("label")}
     </button>
   );
 };

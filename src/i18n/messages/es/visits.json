@@ -1,0 +1,184 @@
+{
+  "header": {
+    "title": "Visitas",
+    "searchPlaceholder": "Buscar asesor o cliente"
+  },
+  "dateNav": {
+    "previousDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "pickDay": "Elegir día"
+  },
+  "dayLabel": {
+    "date": "{weekday} {day} {month}",
+    "today": "Hoy · {date}",
+    "yesterday": "Ayer · {date}",
+    "tomorrow": "Mañana · {date}"
+  },
+  "status": {
+    "IN_VISIT": "En visita",
+    "AT_POINT": "En punto",
+    "EN_ROUTE": "En viaje",
+    "NO_VISITS": "Sin visitas",
+    "IN_TRANSIT": "En tránsito",
+    "ON_PAUSE": "En pausa"
+  },
+  "result": {
+    "efectiva": "Efectiva",
+    "reprogramada": "Reprogramada",
+    "sincontacto": "Sin contacto"
+  },
+  "projects": {
+    "ventas": {
+      "name": "Ventas",
+      "definition": "Formulario de venta con pedido cerrado"
+    },
+    "cartera": {
+      "name": "Cartera",
+      "definition": "Acuerdo de pago o pago registrado en cartera"
+    },
+    "encuestas": {
+      "name": "Encuestas",
+      "definition": "Encuesta completa y enviada"
+    }
+  },
+  "operation": {
+    "ruta": "Ruta de visitas",
+    "fijo": "Punto fijo"
+  },
+  "statusChips": {
+    "ariaLabel": "Filtrar por estado"
+  },
+  "liveClock": {
+    "future": "Programación",
+    "past": "Histórico",
+    "live": "En vivo",
+    "replay": "Reproducción"
+  },
+  "filters": {
+    "project": "Proyecto",
+    "operation": "Tipo de operación",
+    "zone": "Zona",
+    "city": "Ciudad",
+    "salesRep": "Asesor",
+    "result": "Resultado",
+    "selectedCount": "{count} seleccionados"
+  },
+  "ranking": {
+    "title": "Ranking · Actividades",
+    "counter": "{total} en campo",
+    "counterToday": "{total} en campo hoy",
+    "counterFiltered": "{shown} de {total}",
+    "tiles": {
+      "active": "Activos",
+      "visits": "Visitas",
+      "effectiveness": "Efect.",
+      "activities": "Actividades"
+    }
+  },
+  "rankingRow": {
+    "eta": "ETA {time}",
+    "toward": "Hacia {client}",
+    "zone": "Zona {zone}",
+    "noPending": "Sin visitas pendientes",
+    "noneScheduled": "Sin visitas programadas",
+    "activitiesTitle": "Actividades · {definition}",
+    "visitsShort": "{done}/{total} vis."
+  },
+  "layers": {
+    "track": "Recorrido",
+    "trackFull": "Recorrido hecho",
+    "plan": "Plan",
+    "planFull": "Plan pendiente",
+    "clients": "Clientes"
+  },
+  "legend": {
+    "actualRoute": "Recorrido real",
+    "toVisit": "Por visitar",
+    "inVisit": "En visita",
+    "pending": "Pendiente"
+  },
+  "map": {
+    "inProgressSince": "En curso desde {time}",
+    "since": "Desde {time}",
+    "eta": "ETA {time}",
+    "startPoint": "Punto de inicio",
+    "noToken": "Mapa no disponible: falta el token de Mapbox"
+  },
+  "timeline": {
+    "pause": "Pausar",
+    "play": "Reproducir",
+    "speed": "Velocidad de reproducción",
+    "bucketTitle": "{range} · {on} de {total} conectados",
+    "pointTitle": "{time} · {status}",
+    "noPoints": "Sin puntos",
+    "accumulated": "{status} acumulado",
+    "activities": "Actividades",
+    "live": "En vivo",
+    "goToday": "Ir a hoy"
+  },
+  "view": {
+    "loadErrorToday": "No se pudieron cargar las visitas de hoy.",
+    "loadErrorDay": "No se pudieron cargar las visitas de ese día.",
+    "loading": "Cargando asesores…",
+    "noMatch": "Ningún asesor coincide con el filtro.",
+    "noneToday": "No hay asesores en campo hoy.",
+    "noneDay": "No hay asesores en campo ese día."
+  },
+  "detail": {
+    "team": "Equipo",
+    "loadError": "No se pudo cargar el detalle del asesor.",
+    "loading": "Cargando detalle del asesor…",
+    "zone": "Zona {zones}",
+    "viewDay": "Ver día",
+    "nowInVisit": "en {client} · desde {time}",
+    "nowEnRoute": "hacia {client} · {time}",
+    "signalNow": "ahora",
+    "signalAgo": "hace {duration}",
+    "lastSignal": "Últ. señal <b>{value}</b>",
+    "start": "Inicio <b>{value}</b>",
+    "activities": "Actividades",
+    "registered": "{count, plural, one {# registrada} other {# registradas}}",
+    "tiles": {
+      "visits": "Visitas",
+      "toDo": "{count} por hacer",
+      "effectiveness": "Efectividad",
+      "effectiveCount": "{count, plural, one {# efectiva} other {# efectivas}}",
+      "distance": "Recorrido",
+      "inVisit": "En visita",
+      "avgMinutes": "{minutes} min prom."
+    },
+    "since": "desde {time}",
+    "dayRoute": "Ruta del día",
+    "pendingCount": "{count, plural, one {# pendiente} other {# pendientes}}",
+    "dayStart": "Inicio de jornada",
+    "checkIn": "Check-in app",
+    "orphans": "Actividades sin visita",
+    "effective": "Efectiva",
+    "notEffective": "No efectiva"
+  },
+  "dayModal": {
+    "zone": "Zona {zones}",
+    "noActivities": "No tiene actividades en el día.",
+    "showOnMap": "Ver en mapa",
+    "cutoff": "{day} · corte {time}",
+    "effectiveActivities": "Actividades efectivas",
+    "rankOf": "de {total} en el ranking",
+    "ofGoal": "<b>{pct}%</b> de la meta",
+    "projection": "Proyección al cierre <b>{value}</b>",
+    "pace": "Ritmo <b>{value}</b>/hora",
+    "kpis": {
+      "visits": "Visitas",
+      "successRate": "Tasa de éxito",
+      "visitEffectiveness": "Efectividad visita",
+      "distance": "Recorrido"
+    },
+    "byHour": "Actividades por hora",
+    "bestHour": "Mejor hora {hour}:00 · {count}",
+    "noActivitiesYet": "Sin actividades aún",
+    "dayLog": "Registro del día",
+    "logSummary": "{registered} registradas · {effective} efectivas",
+    "noLogged": "Aún no hay actividades registradas.",
+    "effective": "Efectiva",
+    "notEffective": "No efectiva"
+  }
+}

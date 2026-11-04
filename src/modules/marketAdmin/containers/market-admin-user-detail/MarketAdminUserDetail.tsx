@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import useSWR, { mutate as globalMutate } from "swr";
 import { Globe, Layers, Settings, Users } from "lucide-react";
+import { useTranslations } from "use-intl";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminUserDetail } from "@/modules/marketAdmin/hooks/useMarketAdminUserDetail";
@@ -44,6 +45,8 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 export default function MarketAdminUserDetail({ params }: { params: { id: string } }) {
   const { id } = params;
+  const t = useTranslations("marketAdmin.userDetail");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const selectedProject = useAppStore((state) => state.selectedProject);
   const projectId = selectedProject.ID;
@@ -81,11 +84,11 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       const response = await getGroupsByUser(usuario.id, projectId);
       setGrupos(response.data.map((g: { group_id: number }) => g.group_id));
     } catch (error) {
-      setGruposError(error instanceof Error ? error.message : "No se pudo cargar los grupos.");
+      setGruposError(error instanceof Error ? error.message : t("feedback.groupsLoadError"));
     } finally {
       setGruposLoaded(true);
     }
-  }, [usuario?.id, projectId]);
+  }, [usuario?.id, projectId, t]);
 
   useEffect(() => {
     loadGrupos();
@@ -122,16 +125,14 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       return true;
     } catch (error) {
       if (requestId !== paisesLoadRequest.current) return false;
-      setPaisesError(
-        error instanceof Error ? error.message : "No se pudo cargar los países del usuario."
-      );
+      setPaisesError(error instanceof Error ? error.message : t("feedback.userCountriesLoadError"));
       return false;
     } finally {
       if (requestId === paisesLoadRequest.current) {
         setPaisesLoaded(true);
       }
     }
-  }, [canManageUserCountries, projectId, usuario?.id]);
+  }, [canManageUserCountries, projectId, usuario?.id, t]);
 
   useEffect(() => {
     if (canManageUserCountries && usuario?.id && projectId) {
@@ -159,17 +160,12 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     try {
       setIsSavingGrupos(true);
       await addUserToClientGroups(grupoIds, projectId, usuario.id);
-      showMessage(
-        "success",
-        grupoIds.length === 1
-          ? "Grupo agregado correctamente."
-          : `${grupoIds.length} grupos agregados correctamente.`
-      );
+      showMessage("success", t("feedback.groupsAdded", { count: grupoIds.length }));
       await loadGrupos();
       return true;
     } catch (err) {
       setGrupos(prev);
-      showMessage("error", err instanceof Error ? err.message : "No se pudo agregar el grupo.");
+      showMessage("error", err instanceof Error ? err.message : t("feedback.groupAddError"));
       return false;
     } finally {
       setIsSavingGrupos(false);
@@ -183,11 +179,11 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     try {
       setIsSavingGrupos(true);
       await removeUserFromClientGroups([grupoId], projectId, usuario.id);
-      showMessage("success", "Grupo removido correctamente.");
+      showMessage("success", t("feedback.groupRemoved"));
       await loadGrupos();
     } catch (err) {
       setGrupos(prev);
-      showMessage("error", err instanceof Error ? err.message : "No se pudo quitar el grupo.");
+      showMessage("error", err instanceof Error ? err.message : t("feedback.groupRemoveError"));
     } finally {
       setIsSavingGrupos(false);
     }
@@ -205,15 +201,13 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       showMessage(
         reloaded ? "success" : "error",
         reloaded
-          ? ids.length === 1
-            ? "País agregado correctamente."
-            : `${ids.length} países agregados correctamente.`
-          : "El país se guardó, pero no se pudo actualizar la lista."
+          ? t("feedback.countriesAdded", { count: ids.length })
+          : t("feedback.countrySavedReloadError")
       );
       return true;
     } catch (err) {
       setCountryIds(prev);
-      showMessage("error", err instanceof Error ? err.message : "No se pudo agregar el país.");
+      showMessage("error", err instanceof Error ? err.message : t("feedback.countryAddError"));
       return false;
     } finally {
       setIsSavingPaises(false);
@@ -231,13 +225,11 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       const reloaded = await loadPaises();
       showMessage(
         reloaded ? "success" : "error",
-        reloaded
-          ? "País removido correctamente."
-          : "El país se quitó, pero no se pudo actualizar la lista."
+        reloaded ? t("feedback.countryRemoved") : t("feedback.countryRemovedReloadError")
       );
     } catch (err) {
       setCountryIds(prev);
-      showMessage("error", err instanceof Error ? err.message : "No se pudo quitar el país.");
+      showMessage("error", err instanceof Error ? err.message : t("feedback.countryRemoveError"));
     } finally {
       setIsSavingPaises(false);
     }
@@ -248,18 +240,10 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       setIsSaving(true);
       await assignClientToMarketAdminUser(id, { client_nits: nits });
       await mutate();
-      showMessage(
-        "success",
-        nits.length === 1
-          ? "Cliente asignado correctamente."
-          : `${nits.length} clientes asignados correctamente.`
-      );
+      showMessage("success", t("feedback.customersAssigned", { count: nits.length }));
       return true;
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al asignar el cliente."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.customerAssignError"));
       return false;
     } finally {
       setIsSaving(false);
@@ -271,12 +255,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       setIsSaving(true);
       await removeClientFromMarketAdminUser(id, nit);
       await mutate();
-      showMessage("success", "Cliente removido correctamente.");
+      showMessage("success", t("feedback.customerRemoved"));
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al quitar el cliente."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.customerRemoveError"));
     } finally {
       setIsSaving(false);
     }
@@ -299,15 +280,10 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       );
       showMessage(
         "success",
-        billerUserId === null
-          ? "Facturador eliminado correctamente."
-          : "Facturador actualizado correctamente."
+        billerUserId === null ? t("feedback.billerRemoved") : t("feedback.billerUpdated")
       );
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al actualizar el facturador."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("feedback.billerUpdateError"));
     } finally {
       setIsSavingBiller(false);
     }
@@ -318,11 +294,11 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       setIsSavingCategories(true);
       await updateMarketAdminUserProductCategories(id, categoryIds);
       await mutateProductLines();
-      showMessage("success", "Líneas y categorías actualizadas correctamente.");
+      showMessage("success", t("feedback.categoriesUpdated"));
     } catch (err) {
       showMessage(
         "error",
-        err instanceof Error ? err.message : "Ocurrió un error al actualizar las categorías."
+        err instanceof Error ? err.message : t("feedback.categoriesUpdateError")
       );
     } finally {
       setIsSavingCategories(false);
@@ -340,18 +316,18 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   if (error || !usuario) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-[#999999]">No se pudo cargar el usuario.</p>
+        <p className="text-sm text-[#999999]">{t("loadError")}</p>
       </div>
     );
   }
 
   const TABS = [
-    { id: "clientes", label: `Clientes (${asignados.length})`, icon: Users },
-    { id: "grupos", label: `Grupos de clientes (${grupos.length})`, icon: Layers },
+    { id: "clientes", label: t("tabs.customers", { count: asignados.length }), icon: Users },
+    { id: "grupos", label: t("tabs.customerGroups", { count: grupos.length }), icon: Layers },
     ...(canManageUserCountries
-      ? [{ id: "paises", label: `Países (${countryIds.length})`, icon: Globe }]
+      ? [{ id: "paises", label: t("tabs.countries", { count: countryIds.length }), icon: Globe }]
       : []),
-    { id: "configuraciones", label: "Configuraciones", icon: Settings }
+    { id: "configuraciones", label: t("tabs.settings"), icon: Settings }
   ];
 
   return (
@@ -359,7 +335,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       {/* Volver y rol van en el header compartido (docs/DESIGN.md §4) */}
       <Header
         title={usuario.name}
-        back="/market-admin/usuarios"
+        back="/market-admin/users"
         actionsExtra={
           <span
             className={`text-[13px] font-semibold px-3 py-1 rounded-full ${ROL_STYLES[usuario.role_name] ?? "bg-[#F5F5F5] text-[#666666]"}`}
@@ -373,17 +349,22 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         {/* Información general + Asignaciones */}
         <div className="grid grid-cols-2 gap-8">
           <div className="flex flex-col gap-5">
-            <p className="text-sm font-bold text-[#141414]">Información general</p>
+            <p className="text-sm font-bold text-[#141414]">{t("generalInfo")}</p>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Email" value={usuario.email} />
-              <Field label="Estado" value={usuario.is_active === 1 ? "Activo" : "Inactivo"} />
+              <Field label={tCommon("fields.email")} value={usuario.email} />
+              <Field
+                label={tCommon("fields.status")}
+                value={
+                  usuario.is_active === 1 ? tCommon("status.active") : tCommon("status.inactive")
+                }
+              />
             </div>
           </div>
           <div className="flex flex-col gap-5">
-            <p className="text-sm font-bold text-[#141414]">Asignaciones</p>
+            <p className="text-sm font-bold text-[#141414]">{t("assignments")}</p>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Clientes asignados" value={String(asignados.length)} />
-              <Field label="Rol" value={usuario.role_name || "—"} />
+              <Field label={t("assignedCustomers")} value={String(asignados.length)} />
+              <Field label={t("role")} value={usuario.role_name || "—"} />
             </div>
           </div>
         </div>
@@ -424,14 +405,12 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               asignadosIds={countryIds}
               allPaises={allPaises}
               loading={!paisesLoaded || isLoadingCountries}
-              error={
-                paisesError || (countriesError ? "No se pudo cargar el catálogo de países." : null)
-              }
+              error={paisesError || (countriesError ? t("feedback.countryCatalogLoadError") : null)}
               onRetry={() => {
                 void loadPaises();
                 reloadCountries().catch((error) => {
                   setPaisesError(
-                    error instanceof Error ? error.message : "No se pudo cargar los países."
+                    error instanceof Error ? error.message : t("feedback.countriesLoadError")
                   );
                 });
               }}
@@ -445,7 +424,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               <div role="alert">
                 <p className="text-red-600">{gruposError}</p>
                 <button onClick={loadGrupos} className="mt-2 text-sm underline">
-                  Reintentar
+                  {tCommon("actions.retry")}
                 </button>
               </div>
             ) : (
@@ -470,7 +449,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               <LineasCategoriasSection
                 lines={productLines}
                 loading={isLoadingProductLines}
-                error={productLinesError ? "No se pudo cargar las líneas y categorías." : null}
+                error={productLinesError ? t("feedback.linesLoadError") : null}
                 isSaving={isSavingCategories}
                 onRetry={() => void mutateProductLines()}
                 onSave={saveProductCategories}

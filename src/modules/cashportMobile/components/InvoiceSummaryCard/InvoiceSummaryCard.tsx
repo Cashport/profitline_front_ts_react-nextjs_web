@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Flex } from "antd";
 import { useAppStore } from "@/lib/store/store";
+import { useTranslations } from "use-intl";
 
 import "./invoiceSummaryCard.scss";
 import { Invoice } from "@phosphor-icons/react";
@@ -9,6 +10,7 @@ interface invoiceSummaryCardProps {}
 
 const InvoiceSummaryCard: React.FC<invoiceSummaryCardProps> = ({}) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const t = useTranslations("publicPortals.mobile.invoiceSummary");
 
   return (
     <Flex vertical gap="1rem" className="invoiceSummaryCard">
@@ -17,7 +19,7 @@ const InvoiceSummaryCard: React.FC<invoiceSummaryCardProps> = ({}) => {
 
         <Flex vertical justify="flex-start" gap="0.5rem">
           <p className="invoiceSummaryCard__label">
-            Factura <strong>VT-22214</strong>
+            {t.rich("invoice", { code: "VT-22214", strong: (chunks) => <strong>{chunks}</strong> })}
           </p>
           <p className="invoiceSummaryCard__amount">
             <span className="invoiceSummaryCard__currency">$</span>
@@ -30,7 +32,8 @@ const InvoiceSummaryCard: React.FC<invoiceSummaryCardProps> = ({}) => {
       <hr className="invoiceSummaryCard__divider" />
       <Flex align="center" justify="space-between">
         <p className="invoiceSummaryCard__label --400">
-          Pronto pago <span className="invoiceSummaryCard__label-note">(Faltan 2 días)</span>
+          {t("earlyPayment")}{" "}
+          <span className="invoiceSummaryCard__label-note">{t("daysLeft", { count: 2 })}</span>
         </p>
 
         <p className="invoiceSummaryCard__ready-amount">
@@ -49,7 +52,7 @@ const InvoiceSummaryCard: React.FC<invoiceSummaryCardProps> = ({}) => {
           className="invoiceSummaryCard__credit-button"
           onClick={() => console.log("Ir a pagar")}
         >
-          Abonar
+          {t("payPartially")}
         </Button>
 
         <Button
@@ -59,7 +62,7 @@ const InvoiceSummaryCard: React.FC<invoiceSummaryCardProps> = ({}) => {
           className="invoiceSummaryCard__pay-button"
           onClick={() => console.log("Ir a pagar")}
         >
-          Ir a pagar
+          {t("goToPay")}
         </Button>
       </Flex>
     </Flex>

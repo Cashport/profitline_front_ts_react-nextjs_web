@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -19,6 +20,7 @@ interface FilterDevolucionesTabProps {
 }
 
 export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTabProps) {
+  const t = useTranslations("reverseLogistics.filters");
   const { clientes, estados, causales, isLoading } = useProfit360Filters();
 
   // FilterModal's internal draft only holds option categories, so the date
@@ -53,8 +55,7 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
       ? [
           {
             id: value.estadoId,
-            name:
-              estadoOptions.find((o) => o.id === value.estadoId)?.name ?? value.estadoId
+            name: estadoOptions.find((o) => o.id === value.estadoId)?.name ?? value.estadoId
           }
         ]
       : [],
@@ -62,8 +63,7 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
       ? [
           {
             id: value.causalId,
-            name:
-              causalOptions.find((o) => o.id === value.causalId)?.name ?? value.causalId
+            name: causalOptions.find((o) => o.id === value.causalId)?.name ?? value.causalId
           }
         ]
       : []
@@ -82,29 +82,29 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
   const categories: FilterCategoryConfig[] = [
     {
       key: "cliente",
-      label: "Cliente",
+      label: t("customer"),
       selectMode: "single",
       options: clienteOptions
     },
     {
       key: "estado",
-      label: "Estado",
+      label: t("status"),
       selectMode: "single",
       options: estadoOptions
     },
     {
       key: "causal",
-      label: "Causal",
+      label: t("reason"),
       selectMode: "single",
       options: causalOptions
     },
     {
       key: "fecha",
-      label: "Fecha",
+      label: t("date"),
       kind: "custom",
       metaLabel: hasDraftDate
-        ? `Periodo: ${formatDateTagValue(dateDraft)}`
-        : "Selecciona un periodo",
+        ? t("period", { value: formatDateTagValue(dateDraft) })
+        : t("selectPeriod"),
       draftCount: hasDraftDate ? 1 : 0,
       renderPanel: () => <FilterDateTab value={dateDraft} onChange={setDateDraft} />,
       // Must be null (not an element that renders nothing) so FilterModal's

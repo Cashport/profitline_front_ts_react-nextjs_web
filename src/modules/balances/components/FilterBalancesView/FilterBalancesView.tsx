@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -26,12 +27,11 @@ interface FiltersBarProps {
   isLoading?: boolean;
 }
 
-const TAG_PLURALS: Record<string, string> = {
-  kam: "KAMs",
-  cliente: "Clientes",
-  motivo: "Motivos",
-  procedencia: "Procedencias"
-};
+/** Claves de las categorías con conteo en el tag ("3 Clientes"). */
+const TAG_PLURAL_KEYS = ["kam", "cliente", "motivo", "procedencia"] as const;
+type TagPluralKey = (typeof TAG_PLURAL_KEYS)[number];
+const isTagPluralKey = (key: string): key is TagPluralKey =>
+  (TAG_PLURAL_KEYS as readonly string[]).includes(key);
 
 export function FilterBalancesView({
   users,
@@ -42,6 +42,7 @@ export function FilterBalancesView({
   onChange,
   isLoading
 }: FiltersBarProps) {
+  const t = useTranslations("balances.filters");
   const [dateDraft, setDateDraft] = useState<DateDraft>({
     from_date: value.from_date,
     to_date: value.to_date
@@ -82,33 +83,37 @@ export function FilterBalancesView({
       : value.from_date || value.to_date || "";
 
   const categories: FilterCategoryConfig[] = [
-    { key: "kam", label: "KAM", options: users.map((u) => ({ id: String(u.id), name: u.name })) },
+    {
+      key: "kam",
+      label: t("kam"),
+      options: users.map((u) => ({ id: String(u.id), name: u.name }))
+    },
     {
       key: "cliente",
-      label: "Cliente",
+      label: t("customer"),
       options: clients.map((c) => ({ id: c.id, name: c.name }))
     },
     {
       key: "motivo",
-      label: "Motivo",
+      label: t("reason"),
       options: motives.map((m) => ({ id: String(m.id), name: m.name }))
     },
     {
       key: "procedencia",
-      label: "Procedencia",
+      label: t("origin"),
       options: eligibilityStatuses.map((e) => ({ id: e.id, name: e.description }))
     },
     {
       key: "fecha",
-      label: "Fecha",
+      label: t("date"),
       kind: "custom",
-      metaLabel: "Selecciona un periodo",
+      metaLabel: t("selectPeriod"),
       draftCount: dateDraft.from_date || dateDraft.to_date ? 1 : 0,
       renderPanel: () => <BalancesDateTab value={dateDraft} onChange={setDateDraft} />,
       renderTag: () =>
         hasCommittedDate ? (
           <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-[13px]">
-            <span className="text-muted-foreground font-medium">Fecha:</span>
+            <span className="text-muted-foreground font-medium">{t("dateTag")}</span>
             <span className="font-bold text-foreground">{dateTagValue}</span>
             <button
               type="button"
@@ -128,7 +133,11 @@ export function FilterBalancesView({
       value={selection}
       isLoading={isLoading}
       formatTagValue={(cat, items) =>
-        items.length === 1 ? items[0].name : `${items.length} ${TAG_PLURALS[cat.key] ?? ""}`.trim()
+        items.length === 1
+          ? items[0].name
+          : isTagPluralKey(cat.key)
+            ? t(`tagCount.${cat.key}`, { count: items.length })
+            : String(items.length)
       }
       onApply={(sel) =>
         onChange({

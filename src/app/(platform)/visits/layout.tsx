@@ -1,10 +1,7 @@
-import { Metadata } from "next";
 import VisitsLayout from "@/modules/visitsModule/containers/visits-layout/visits-layout";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Visitas",
-  description: "Seguimiento en vivo de las visitas de los asesores en campo"
-};
+export const generateMetadata = () => pageMetadata("visits");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return <VisitsLayout>{children}</VisitsLayout>;

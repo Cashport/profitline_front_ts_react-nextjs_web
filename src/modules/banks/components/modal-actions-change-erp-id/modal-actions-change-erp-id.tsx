@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Flex, Modal } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { changePaymentIdERP } from "@/services/banksPayments/banksPayments";
@@ -27,6 +28,8 @@ interface IChangeErpIdForm {
 }
 
 const ModalActionsChangeErpId = ({ isOpen, onClose, selectedRows, onSuccess }: Props) => {
+  const t = useTranslations("banks.changeErpId");
+  const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
   const {
@@ -55,19 +58,11 @@ const ModalActionsChangeErpId = ({ isOpen, onClose, selectedRows, onSuccess }: P
         id_erp: idErp,
         comment: data.comment?.trim() || undefined
       });
-      showMessage(
-        "success",
-        idErp ? "Id ERP actualizado correctamente" : "Id ERP eliminado correctamente"
-      );
+      showMessage("success", idErp ? t("updated") : t("deleted"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof ApiError && error.message
-          ? error.message
-          : "Ha ocurrido un error al cambiar el id ERP"
-      );
+      showMessage("error", error instanceof ApiError && error.message ? error.message : t("error"));
     } finally {
       setIsLoading(false);
     }
@@ -77,12 +72,12 @@ const ModalActionsChangeErpId = ({ isOpen, onClose, selectedRows, onSuccess }: P
     <Modal
       open={isOpen}
       onCancel={onClose}
-      title="Cambiar id ERP"
+      title={t("title")}
       width={520}
       destroyOnClose
       footer={
         <FooterButtons
-          titleConfirm="Cambiar id ERP"
+          titleConfirm={t("title")}
           onClose={onClose}
           handleOk={handleSubmit(handleConfirm)}
           isConfirmLoading={isLoading}
@@ -91,16 +86,16 @@ const ModalActionsChangeErpId = ({ isOpen, onClose, selectedRows, onSuccess }: P
     >
       <Flex vertical gap="1rem">
         <InputForm
-          titleInput="Id ERP"
+          titleInput={t("erpId")}
           nameInput="erpId"
           control={control}
           error={errors.erpId}
           // The API treats a blank/whitespace id as "delete the ERP id"
           validationRules={{ required: false }}
-          placeholder="Ingresar id ERP"
+          placeholder={t("erpIdPlaceholder")}
         />
         <InputForm
-          titleInput="Comentarios"
+          titleInput={tCommon("fields.comments")}
           nameInput="comment"
           control={control}
           error={errors.comment}
@@ -109,9 +104,9 @@ const ModalActionsChangeErpId = ({ isOpen, onClose, selectedRows, onSuccess }: P
           className={styles.comment}
           validationRules={{
             required: false,
-            maxLength: { value: 255, message: "Máximo 255 caracteres" }
+            maxLength: { value: 255, message: t("maxLength", { max: 255 }) }
           }}
-          placeholder="Ingresar un comentario (opcional)"
+          placeholder={t("commentPlaceholder")}
         />
       </Flex>
     </Modal>

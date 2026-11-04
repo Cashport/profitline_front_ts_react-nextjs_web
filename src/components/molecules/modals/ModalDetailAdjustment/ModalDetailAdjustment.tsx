@@ -1,6 +1,7 @@
 import { FC, useState } from "react";
 import { ArrowLineDown, CaretDoubleRight, DotsThree } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDatePlane } from "@/utils/utils";
@@ -32,6 +33,7 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
   adjusmentId = 1,
   legalized = false
 }) => {
+  const t = useTranslations("modals.detailAdjustment");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const { data: adjusmentData, isLoading } = useFinancialDiscountDetail({
@@ -47,21 +49,21 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
   const getEventTitle = (item: string) => {
     switch (item) {
       case "Generar nota de credito":
-        return "Nota de crédito aplicada";
+        return t("events.creditMemoApplied");
       case "Generar nota de debito":
-        return "Nota de débito aplicada";
+        return t("events.debitMemoApplied");
       case "Generar descuento":
-        return "Descuento aplicado";
+        return t("events.discountApplied");
       case "Radicar factura":
-        return "Radicación";
+        return t("events.submission");
       case "Registrar novedad":
-        return "Novedad";
+        return t("events.dispute");
       case "Legaliazcion de ajuste":
-        return "Legalizado desde ajuste CashPort";
+        return t("events.settled");
       case "Creacion de ajuste":
-        return "Creación de ajuste";
+        return t("events.created");
       case "Emision del ajuste":
-        return "Emisión del ajuste";
+        return t("events.issued");
       default:
         return item;
     }
@@ -69,11 +71,11 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
 
   const extractType = (type: string) => {
     if (type === "Nota debito") {
-      return "Nota de débito";
+      return t("types.debitMemo");
     } else if (type === "Nota credito") {
-      return "Nota de crédito";
+      return t("types.creditMemo");
     } else if (type === "Descuento") {
-      return "Descuento";
+      return t("types.discount");
     }
     return type;
   };
@@ -130,13 +132,13 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
                   setIsModalSelectOpen(true);
                 }}
               >
-                Generar acción
+                {t("takeAction")}
               </Button>
             </div>
 
             <div className={styles.body}>
               <div className={styles.headerBody}>
-                <div className={styles.title}>Trazabilidad</div>
+                <div className={styles.title}>{t("history")}</div>
                 {/* <div
               className={`${styles.status} ${statusClass(adjusmentData ? adjusmentData?.results[0].status_name : "")}`}
             >
@@ -170,9 +172,9 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
                                   </Flex>
                                 )}
                                 {item.username && (
-                                  <div
-                                    className={styles.name}
-                                  >{`Responsable: ${item?.username}`}</div>
+                                  <div className={styles.name}>
+                                    {t("owner", { name: item?.username ?? "" })}
+                                  </div>
                                 )}
                                 {item?.event_name === "Creacion de ajuste" && item?.comments ? (
                                   <div>
@@ -182,10 +184,10 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
                                         <div className={styles.idAdjustment}>{item.cp_id}</div>
                                       </Flex>
                                     )}
-                                    <div
-                                      className={styles.name}
-                                    >{`Valor: ${formatMoney(item?.amount ?? "0")}`}</div>
-                                    <div className={styles.date}>comentarios</div>
+                                    <div className={styles.name}>
+                                      {t("amount", { amount: formatMoney(item?.amount ?? "0") })}
+                                    </div>
+                                    <div className={styles.date}>{t("comments")}</div>
                                     <div className={styles.date}>{item?.comments}</div>{" "}
                                   </div>
                                 ) : null}
@@ -196,16 +198,16 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
                                         {item.id_financial_discount || item.cp_id}
                                       </div>
                                     )}
-                                    <div
-                                      className={styles.name}
-                                    >{`Valor: ${formatMoney(item?.amount ?? "0")}`}</div>
+                                    <div className={styles.name}>
+                                      {t("amount", { amount: formatMoney(item?.amount ?? "0") })}
+                                    </div>
                                   </div>
                                 ) : null}
                                 {item?.event_name === "Legaliazcion de ajuste" ? (
                                   <div>
                                     {item?.amount && (
                                       <div className={styles.name}>
-                                        {`Valor: ${formatMoney(item?.amount ?? "0")}`}
+                                        {t("amount", { amount: formatMoney(item?.amount ?? "0") })}
                                       </div>
                                     )}
 
@@ -218,7 +220,7 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
                                       )}
 
                                       <Flex gap={"4px"}>
-                                        ID del ajuste:
+                                        {t("adjustmentId")}
                                         <div className={styles.idAdjustment}>
                                           {item.id_financial_discount}
                                         </div>
@@ -241,9 +243,9 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
                                         }}
                                       />
                                     </div>
-                                    <div
-                                      className={styles.name}
-                                    >{`Valor: ${formatMoney(item?.amount ?? "0")}`}</div>
+                                    <div className={styles.name}>
+                                      {t("amount", { amount: formatMoney(item?.amount ?? "0") })}
+                                    </div>
                                     <Flex wrap gap={"2px"}>
                                       {Array.isArray(item?.invoices) &&
                                         item?.invoices?.map((invoice: IInvoices, index, arr) => {
@@ -275,11 +277,11 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
             </div>
           </div>
           <div className={styles.footer}>
-            <h4 className={styles.resume}>Resumen</h4>
+            <h4 className={styles.resume}>{t("summary")}</h4>
             <div className={styles.bodyContent}>
               {adjusmentData?.initial_amount !== undefined && adjusmentData?.initial_amount > 0 && (
                 <div className={styles.initialValue}>
-                  <p className={styles.value}>Monto inicial</p>
+                  <p className={styles.value}>{t("initialAmount")}</p>
                   <p className={styles.result}>
                     {formatMoney(adjusmentData?.initial_amount.toString() ?? "")}
                   </p>
@@ -287,13 +289,13 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
               )}
               {adjusmentData?.appliedamount !== undefined && adjusmentData?.appliedamount > 0 && (
                 <div className={styles.initialValue}>
-                  <p className={styles.value}>Monto aplicado</p>
+                  <p className={styles.value}>{t("appliedAmount")}</p>
                   <p className={styles.result}>{formatMoney(adjusmentData?.appliedamount ?? "")}</p>
                 </div>
               )}
               <hr />
               <div className={styles.total}>
-                <p className={styles.value}>Valor disponible</p>
+                <p className={styles.value}>{t("availableAmount")}</p>
                 <p className={styles.result}>
                   {formatMoney(adjusmentData?.current_amount.toString() ?? "")}
                 </p>

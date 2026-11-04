@@ -1,10 +1,14 @@
 /** @type {import('next').NextConfig} */
 const path = require("path");
+const legacyRoutes = require("./legacy-routes");
 const nextConfig = {
   // `yarn build:check` sets NEXT_DIST_DIR so verification builds don't overwrite the
   // `.next/` a running dev server depends on (causes "Cannot find module './NNNN.js'").
   distDir: process.env.NEXT_DIST_DIR || ".next",
   reactStrictMode: false,
+  async redirects() {
+    return legacyRoutes;
+  },
   sassOptions: {
     includePaths: [path.join(__dirname, "styles")]
   },

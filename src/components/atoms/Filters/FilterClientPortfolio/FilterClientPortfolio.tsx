@@ -1,16 +1,18 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 import { useAppStore } from "@/lib/store/store";
 
 import { extractChannelLineSublines } from "@/utils/utils";
 import { getBusinessRulesByProjectId } from "@/services/businessRules/BR";
 import { getAllZones } from "@/services/zone/zones";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 
 interface Option {
   value: string | number;
-  label: string;
+  label: ReactNode;
   disableCheckbox?: boolean;
   isLeaf?: boolean;
   children?: Option[];
@@ -32,6 +34,7 @@ interface Props {
 }
 
 export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
   const [br, setBr] = useState({
     channels: [] as { id: number; name: string }[],
@@ -180,7 +183,7 @@ export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
       multiple
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomLeft"
       onClear={() => setSelectedFilters(initValueFiltersData)}
       options={optionsList}
@@ -195,54 +198,54 @@ export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
 const options: Option[] = [
   {
     value: "Zona",
-    label: "Zona",
+    label: filterLabel("zone"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Canal",
-    label: "Canal",
+    label: filterLabel("channel"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Linea",
-    label: "Línea",
+    label: filterLabel("line"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Sublinea",
-    label: "Sublínea",
+    label: filterLabel("subline"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "paymentAgreement",
-    label: "Acuerdo de pago",
+    label: filterLabel("paymentAgreement"),
     children: [
-      { value: 1, label: "Sí" },
-      { value: 0, label: "No" }
+      { value: 1, label: filterLabel("yes") },
+      { value: 0, label: filterLabel("no") }
     ],
     disableCheckbox: true
   },
   {
     value: "radicationType",
-    label: "Tipo de radicación",
+    label: filterLabel("radicationType"),
     isLeaf: false,
     children: [
-      { value: 1, label: "Sí" },
-      { value: 0, label: "No" }
+      { value: 1, label: filterLabel("yes") },
+      { value: 0, label: filterLabel("no") }
     ],
     disableCheckbox: true
   },
   {
     value: "radicado",
-    label: "Radicado"
+    label: filterLabel("submitted")
   },
   {
     value: "novedad",
-    label: "Novedad"
+    label: filterLabel("dispute")
   }
 ];
 

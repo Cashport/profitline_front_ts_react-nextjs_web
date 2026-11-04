@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminProductDetail } from "@/modules/marketAdmin/hooks/useMarketAdminProductDetail";
 import { useMarketAdminRelatedSkus } from "@/modules/marketAdmin/hooks/useMarketAdminRelatedSkus";
@@ -23,6 +24,8 @@ const MISSING = "XXXX";
 
 export default function MarketAdminProductDetail({ params }: { params: { id: string } }) {
   const { id } = params;
+  const t = useTranslations("marketAdmin.productDetail");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
 
   const { data: product, isLoading, error, mutate } = useMarketAdminProductDetail(id);
@@ -92,9 +95,9 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
       setImageFile(null);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      showMessage("success", "Producto actualizado correctamente.");
+      showMessage("success", t("feedback.updated"));
     } catch {
-      showMessage("error", "Ocurrió un error al actualizar el producto.");
+      showMessage("error", t("feedback.updateError"));
     } finally {
       setSaving(false);
     }
@@ -111,7 +114,7 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
   if (error || !product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-[#999999]">No se pudo cargar el producto.</p>
+        <p className="text-sm text-[#999999]">{t("loadError")}</p>
       </div>
     );
   }
@@ -127,7 +130,7 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
       {/* Volver y guardar van en el header compartido (docs/DESIGN.md §4) */}
       <Header
         title={nombreVisible}
-        back="/market-admin/productos"
+        back="/market-admin/products"
         actionsExtra={
           (isDirty || saving || saved) && (
             <button
@@ -141,12 +144,12 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
             >
               {saved ? (
                 <>
-                  <Check size={14} /> Guardado
+                  <Check size={14} /> {t("saved")}
                 </>
               ) : saving ? (
-                "Guardando..."
+                tCommon("status.saving")
               ) : (
-                "Guardar cambios"
+                tCommon("actions.saveChanges")
               )}
             </button>
           )
@@ -179,14 +182,16 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
           <div className="flex flex-col gap-5">
             {/* Nombre editable */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-[#999999]">Nombre visible</label>
+              <label className="text-[13px] text-[#999999]">{t("visibleName")}</label>
               <input
                 type="text"
                 value={nombreVisible}
                 onChange={(e) => setNombreVisible(e.target.value)}
                 className="w-full text-sm text-[#141414] border border-[#DDDDDD] rounded-lg px-3 py-2.5 outline-none focus:border-[#141414] transition-colors font-bold"
               />
-              <p className="text-[13px] text-[#AAAAAA]">Nombre interno: {product.sku}</p>
+              <p className="text-[13px] text-[#AAAAAA]">
+                {t("internalName", { sku: product.sku })}
+              </p>
             </div>
 
             <div className="border-t border-[#EEEEEE]" />

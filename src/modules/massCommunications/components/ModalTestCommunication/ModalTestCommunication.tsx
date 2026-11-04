@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Modal, Button, Flex, Typography, Input } from "antd";
 import { CheckCircle2, Send } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -16,6 +17,8 @@ export default function ModalTestCommunication({
   onClose,
   channel
 }: ModalTestCommunicationProps) {
+  const t = useTranslations("massCommunications.testCommunication");
+  const tCommon = useTranslations("common");
   const [testEmail, setTestEmail] = useState("");
   const [testSent, setTestSent] = useState(false);
 
@@ -36,34 +39,34 @@ export default function ModalTestCommunication({
       open={isOpen}
       onCancel={onClose}
       footer={null}
-      title="Probar comunicacion"
+      title={t("title")}
       width={480}
       destroyOnClose
     >
       <Text type="secondary" className="block mb-4">
-        Envia una comunicacion de prueba a tu correo para verificar que todo se vea correctamente.
+        {t("description")}
       </Text>
 
       <div className="mb-4">
         <Text strong className="block mb-2 text-[13px]">
-          Email de prueba
+          {t("testEmail")}
         </Text>
         <Input
           value={testEmail}
           onChange={(e) => setTestEmail(e.target.value)}
-          placeholder="tu@email.com"
+          placeholder={t("emailPlaceholder")}
         />
       </div>
 
       <Flex justify="end" gap={12}>
-        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={onClose}>{tCommon("actions.cancel")}</Button>
         <Button
           type="primary"
           onClick={handleTestSend}
           disabled={!testEmail.trim() || testSent}
           icon={testSent ? <CheckCircle2 size={16} /> : <Send size={16} />}
         >
-          {testSent ? "Enviado" : "Enviar prueba"}
+          {testSent ? t("sent") : t("send")}
         </Button>
       </Flex>
     </Modal>

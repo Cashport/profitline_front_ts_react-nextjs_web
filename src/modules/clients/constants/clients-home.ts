@@ -6,22 +6,21 @@ import type {
 /* Home de Clientes: tramos, colores y umbrales del diseño "Clientes Home". */
 
 /** Ruta del Home (el layout de /clientes también envuelve el detalle). */
-export const CLIENTS_HOME_PATH = "/clientes/all";
+export const CLIENTS_HOME_PATH = "/clients/all";
 
 export const AGING_BUCKETS: {
   key: ClientsHomeAgingBucket;
-  label: string;
-  /** Rótulo corto de la leyenda del KPI. */
-  short: string;
+  /** Rango en días; null = "Corriente" (texto traducido, ver `useClientsHomeLabels`). */
+  range: string | null;
   color: string;
 }[] = [
-  { key: "corriente", label: "Corriente", short: "Corr.", color: "#cbe71e" },
-  { key: "1-30", label: "1–30", short: "1–30", color: "#f5b700" },
-  { key: "31-60", label: "31–60", short: "31–60", color: "#ff6a13" },
-  { key: "61-90", label: "61–90", short: "61–90", color: "#e5262b" },
-  { key: "91-120", label: "91–120", short: "91–120", color: "#e0007a" },
-  { key: "+120", label: "+120", short: "+120", color: "#a3004f" },
-  { key: "+360", label: "+360", short: "+360", color: "#6b0033" }
+  { key: "corriente", range: null, color: "#cbe71e" },
+  { key: "1-30", range: "1–30", color: "#f5b700" },
+  { key: "31-60", range: "31–60", color: "#ff6a13" },
+  { key: "61-90", range: "61–90", color: "#e5262b" },
+  { key: "91-120", range: "91–120", color: "#e0007a" },
+  { key: "+120", range: "+120", color: "#a3004f" },
+  { key: "+360", range: "+360", color: "#6b0033" }
 ];
 
 export const AGING_BY_KEY = Object.fromEntries(AGING_BUCKETS.map((b) => [b.key, b])) as Record<
@@ -65,13 +64,14 @@ export const pastDuePill = (pct: number | null, total = false): PillStyle =>
     ? { bg: "#e0007a", color: "#ffffff" }
     : { bg: total ? "#e9e9e9" : "#f2f2f2", color: "#4a4a4a" };
 
+/** El texto de cada estado está en `clients.home.forecastStatus`. */
 export const FORECAST_STATUS: Record<
   ClientsHomeForecastStatus,
-  { label: string; dot: string; bg: string; color: string }
+  { dot: string; bg: string; color: string }
 > = {
-  ok: { label: "Cumple", dot: "#9bb514", bg: "#cbe71e", color: "#141414" },
-  near: { label: "Cerca", dot: "#8a8a8a", bg: "#f2f2f2", color: "#4a4a4a" },
-  risk: { label: "En riesgo", dot: "#e0007a", bg: "#e0007a", color: "#ffffff" }
+  ok: { dot: "#9bb514", bg: "#cbe71e", color: "#141414" },
+  near: { dot: "#8a8a8a", bg: "#f2f2f2", color: "#4a4a4a" },
+  risk: { dot: "#e0007a", bg: "#e0007a", color: "#ffffff" }
 };
 
 export const FORECAST_STATUS_ORDER: ClientsHomeForecastStatus[] = ["ok", "near", "risk"];
@@ -92,15 +92,16 @@ export const forecastStyle = (pct: number | null, total = false) => {
   return status === "near" && total ? { ...s, bg: "#e9e9e9" } : s;
 };
 
-/** Periodos predefinidos del filtro de fecha (vencimiento de facturas). */
+/** Periodos predefinidos del filtro de fecha (vencimiento de facturas). Claves de
+    `clients.home.duePeriods`; no viajan al backend (se envía el rango from/to). */
 export const DUE_PERIODS = [
-  "Hoy",
-  "Esta semana",
-  "Mes actual",
-  "Último mes",
-  "Último trimestre",
-  "YTD",
-  "Últimos 12 meses"
+  "today",
+  "thisWeek",
+  "currentMonth",
+  "lastMonth",
+  "lastQuarter",
+  "ytd",
+  "last12Months"
 ] as const;
 
 export type DuePeriod = (typeof DUE_PERIODS)[number];

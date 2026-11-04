@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Checkbox, Flex } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
+import { useTranslations } from "use-intl";
 import "./resolvenoveltymodal.scss";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
 import { CaretRight } from "phosphor-react";
@@ -32,6 +33,9 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
   novelty,
   messageApi
 }) => {
+  const t = useTranslations("modals.resolveNovelty");
+  const tShared = useTranslations("modals.shared");
+  const tCommon = useTranslations("common");
   const { ID } = useAppStore((state) => state.selectedProject);
   const [file, setFile] = useState<File | null>(null);
   const [comment, setComment] = useState("");
@@ -100,16 +104,18 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
       }
     };
 
-    let title = isResolving ? "Resolver novedad" : "Rechazar novedad";
+    let title = isResolving ? t("titleResolve") : t("titleReject");
     switch (currentView) {
       case "selectAdjust":
-        title = "Ajuste contable";
+        title = t("titleAdjustment");
         break;
       case "selectNote":
-        title = titleApplyMap[Number(adjustmentType)];
+        title = titleApplyMap[Number(adjustmentType)]
+          ? t(titleApplyMap[Number(adjustmentType)])
+          : "";
         break;
       case "apply":
-        title = "Aplicar ajuste";
+        title = t("titleApply");
         break;
     }
 
@@ -149,16 +155,16 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
     >
       {currentView === "info" && (
         <div className="content">
-          <p>Si deseas, adjunta un documento y/o ingresa un comentario</p>
+          <p>{t("intro")}</p>
           <div className="upload-section">
             <Flex vertical>
-              <label>Documento</label>
-              <small>*Opcional</small>
+              <label>{tCommon("fields.document")}</label>
+              <small>{tShared("optional")}</small>
             </Flex>
             <DocumentButton
-              title="Adjunto"
-              fileName={file ? file.name : "Seleccionar archivo"}
-              fileSize={file ? file.size : "PDF, Word, PNG (Tamaño max 30mb)"}
+              title={tShared("attachment")}
+              fileName={file ? file.name : tShared("selectFile")}
+              fileSize={file ? file.size : tShared("fileHint30")}
               handleOnChange={handleFileChange}
               handleOnDelete={handleFileDelete}
             />
@@ -166,11 +172,11 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
 
           <div className="comment-section">
             <Flex vertical>
-              <label>Comentarios</label>
-              <small>*Opcional</small>
+              <label>{tCommon("fields.comments")}</label>
+              <small>{tShared("optional")}</small>
             </Flex>
             <textarea
-              placeholder="Ingresar comentario"
+              placeholder={tShared("commentPlaceholder")}
               value={comment}
               onChange={handleCommentChange}
             />
@@ -180,31 +186,31 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
               checked={isAccountingAdjustment}
               onChange={(e) => setIsAccountingAdjustment(e.target.checked)}
             >
-              Marca esta casilla si esta novedad generó un ajuste contable
+              {t("generatedAdjustment")}
             </Checkbox>
           )}
           <div className="footer">
-            <Button onClick={onCloseAll}>Cancelar</Button>
+            <Button onClick={onCloseAll}>{tCommon("actions.cancel")}</Button>
             <Button type="primary" onClick={handleResolve}>
-              {isResolving ? "Resolver" : "Rechazar"}
+              {isResolving ? t("resolve") : tCommon("actions.reject")}
             </Button>
           </div>
         </div>
       )}
       {currentView === "selectAdjust" && (
         <div className="content">
-          <p>Selecciona el tipo de ajuste contable a aplicar</p>
+          <p>{t("selectAdjustmentType")}</p>
           <Flex vertical gap="small">
             <button className="actionButton" onClick={() => handleAdjustmentTypeSelect("2")}>
-              <p className="actionButton__text">Nota crédito</p>
+              <p className="actionButton__text">{tShared("creditMemo")}</p>
               <CaretRight className="actionButton__caretRight" />
             </button>
             <button className="actionButton" onClick={() => handleAdjustmentTypeSelect("1")}>
-              <p className="actionButton__text">Nota débito</p>
+              <p className="actionButton__text">{tShared("debitMemo")}</p>
               <CaretRight className="actionButton__caretRight" />
             </button>
             <button className="actionButton" onClick={() => handleAdjustmentTypeSelect("3")}>
-              <p className="actionButton__text">Descuento</p>
+              <p className="actionButton__text">{tShared("discount")}</p>
               <CaretRight className="actionButton__caretRight" />
             </button>
           </Flex>
@@ -238,10 +244,10 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
     </Modal>
   );
 };
-const titleApplyMap: Record<number, string> = {
-  1: "Selecionar nota débito",
-  2: "Selecionar nota crédito",
-  3: "Selecionar descuento"
+const titleApplyMap: Record<number, "selectDebitMemo" | "selectCreditMemo" | "selectDiscount"> = {
+  1: "selectDebitMemo",
+  2: "selectCreditMemo",
+  3: "selectDiscount"
 };
 
 export default ResolveNoveltyModal;

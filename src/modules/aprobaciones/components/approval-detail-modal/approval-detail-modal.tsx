@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import useSWR from "swr";
+import { useLocale, useTranslations } from "use-intl";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import {
@@ -38,6 +39,9 @@ export default function ApprovalDetailModal({
   onClose,
   mutateList
 }: ApprovalDetailModalProps) {
+  const t = useTranslations("approvals.detail");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
@@ -58,7 +62,7 @@ export default function ApprovalDetailModal({
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("es-ES", {
+    return new Date(dateStr).toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -146,7 +150,9 @@ export default function ApprovalDetailModal({
                   className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
                 >
                   <Check className="h-4 w-4" style={{ color: "#CBE71E" }} />
-                  <span className="text-sm font-medium text-black">Aprobar</span>
+                  <span className="text-sm font-medium text-black">
+                    {tCommon("actions.approve")}
+                  </span>
                 </Button>
                 <Button
                   variant="outline"
@@ -154,7 +160,9 @@ export default function ApprovalDetailModal({
                   className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
                 >
                   <X className="h-4 w-4 text-red-500" />
-                  <span className="text-sm font-medium text-black">Rechazar</span>
+                  <span className="text-sm font-medium text-black">
+                    {tCommon("actions.reject")}
+                  </span>
                 </Button>
               </div>
             )}
@@ -170,7 +178,7 @@ export default function ApprovalDetailModal({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <User className="h-3.5 w-3.5" />
-                  <span>Solicitado por</span>
+                  <span>{t("requestedBy")}</span>
                 </div>
                 <p className="text-sm">{approvalDetail?.requester.userName}</p>
               </div>
@@ -179,13 +187,13 @@ export default function ApprovalDetailModal({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5" />
-                  <span>Fecha de solicitud</span>
+                  <span>{t("requestDate")}</span>
                 </div>
                 <p className="text-sm">
                   {formatDate(approvalDetail?.createdAt)}{" "}
                   {getDaysUntil(approvalDetail?.createdAt) !== null && (
                     <span className="text-amber-600 font-medium">
-                      ({getDaysUntil(approvalDetail?.createdAt)} días)
+                      {t("daysElapsed", { count: getDaysUntil(approvalDetail?.createdAt) ?? 0 })}
                     </span>
                   )}
                 </p>
@@ -197,7 +205,7 @@ export default function ApprovalDetailModal({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <MessageSquare className="h-4 w-4" />
-                  <span>Comentario</span>
+                  <span>{tCommon("fields.comment")}</span>
                 </div>
                 <p className="text-sm text-foreground">{approvalDetail?.observation}</p>
               </div>
@@ -208,7 +216,7 @@ export default function ApprovalDetailModal({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                   <Paperclip className="h-4 w-4" />
-                  <span>Adjuntos ({approvalDetail.attachments.length})</span>
+                  <span>{t("attachments", { count: approvalDetail.attachments.length })}</span>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {approvalDetail.attachments.map((attachment, index) => (
@@ -228,7 +236,7 @@ export default function ApprovalDetailModal({
 
             {/* Detalle de aprobación - Section title */}
             <div className="pt-2">
-              <h3 className="text-base font-semibold">Detalle de aprobación</h3>
+              <h3 className="text-base font-semibold">{t("approvalDetail")}</h3>
             </div>
 
             {/* Document Details */}
@@ -249,7 +257,7 @@ export default function ApprovalDetailModal({
                   className="gap-2 bg-background w-full md:w-auto"
                 >
                   <a href={approvalDetail?.approvalLink} target="_blank" rel="noopener noreferrer">
-                    Ver detalle
+                    {tCommon("actions.viewDetail")}
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
@@ -260,11 +268,11 @@ export default function ApprovalDetailModal({
             {showRejectForm && (
               <div className="space-y-3 rounded-lg border-2 border-destructive bg-destructive/5 p-4">
                 <Label htmlFor="reject-reason" className="text-sm font-medium">
-                  Motivo del rechazo *
+                  {t("rejectReason")}
                 </Label>
                 <Textarea
                   id="reject-reason"
-                  placeholder="Explica brevemente por qué rechazas esta solicitud..."
+                  placeholder={t("rejectPlaceholder")}
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   className="min-h-[80px]"
@@ -278,7 +286,7 @@ export default function ApprovalDetailModal({
                       setRejectReason("");
                     }}
                   >
-                    Cancelar
+                    {tCommon("actions.cancel")}
                   </Button>
                   <Button
                     variant="default"
@@ -286,7 +294,7 @@ export default function ApprovalDetailModal({
                     onClick={() => handleResolveApproval("REJECT")}
                     disabled={!rejectReason.trim() || isResolving}
                   >
-                    Confirmar Rechazo
+                    {t("confirmReject")}
                   </Button>
                 </div>
               </div>
@@ -297,7 +305,7 @@ export default function ApprovalDetailModal({
           <div className="pt-4 border-t px-4 md:border-t-0  md:max-w-[500px] md:min-w-[430px] md:bg-muted/10 md:px-8 md:py-6 space-y-4 overflow-y-auto">
             <div className="flex items-center gap-2 pb-3 md:border-b">
               <Users className="h-5 w-5" />
-              <h3 className="text-base md:text-lg font-semibold">Aprobadores</h3>
+              <h3 className="text-base md:text-lg font-semibold">{t("approvers")}</h3>
             </div>
             <ApproversTimeline steps={approvalDetail?.steps || []} formatDate={formatDate} />
           </div>

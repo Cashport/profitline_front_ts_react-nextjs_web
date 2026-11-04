@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Product } from "@/types/products/products";
 import { IGrupoPremio } from "@/types/marketAdmin/IMarketAdmin";
 import GrupoPremioEditor from "@/modules/marketAdmin/components/MarketAdminPromotions/GrupoPremioEditor";
@@ -26,6 +27,7 @@ export default function GruposBonificadoEditor({
   products: Product[];
   onChange: (grupos: IGrupoPremio[]) => void;
 }) {
+  const t = useTranslations("marketAdmin.promotions.rewards");
   const addGrupo = (modo: IGrupoPremio["modo"]) =>
     onChange([...grupos, createGrupoBonificado(modo)]);
 
@@ -53,7 +55,7 @@ export default function GruposBonificadoEditor({
           onClick={() => addGrupo("fijo")}
           className="flex items-center gap-1 text-[13px] text-[#666666] hover:text-[#141414] hover:underline"
         >
-          <Plus size={9} /> Agregar grupo fijo
+          <Plus size={9} /> {t("addFixedGroup")}
         </button>
         <span className="text-[#DDDDDD]">|</span>
         <button
@@ -61,7 +63,7 @@ export default function GruposBonificadoEditor({
           onClick={() => addGrupo("pool")}
           className="flex items-center gap-1 text-[13px] text-[#92400E] hover:underline"
         >
-          <Plus size={9} /> Agregar grupo a elegir
+          <Plus size={9} /> {t("addChoiceGroup")}
         </button>
       </div>
     </div>

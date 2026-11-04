@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Flex, message } from "antd";
 import { useAppStore } from "@/lib/store/store";
+import { useTranslations } from "use-intl";
 
 import "./paymentSummaryCard.scss";
 
@@ -18,6 +19,8 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
   paymentLink
 }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const t = useTranslations("publicPortals.mobile.payment");
+  const tCommon = useTranslations("common");
 
   const isValidPaymentLink =
     typeof paymentLink === "string" &&
@@ -26,7 +29,7 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
 
   const handleConfirmPayment = () => {
     if (!isValidPaymentLink) {
-      message.error("El link de pago no es válido o ya expiró.");
+      message.error(t("invalidLink"));
       return;
     }
 
@@ -36,7 +39,7 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
   return (
     <Flex vertical gap="1rem" className="paymentSummaryCard">
       <Flex align="center" justify="space-between">
-        <p className="paymentSummaryCard__label">Facturado</p>
+        <p className="paymentSummaryCard__label">{t("billed")}</p>
         <p className="paymentSummaryCard__amount">
           <span className="paymentSummaryCard__currency">$</span>
           {formatMoney(billed, { hideCurrencySymbol: true })}
@@ -44,7 +47,7 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
       </Flex>
 
       <Flex align="center" justify="space-between">
-        <p className="paymentSummaryCard__label">Descuento pronto pago</p>
+        <p className="paymentSummaryCard__label">{t("earlyPaymentDiscount")}</p>
         <p className="paymentSummaryCard__amount">
           <span className="paymentSummaryCard__currency">-$</span>
           {formatMoney(discount, { hideCurrencySymbol: true })}
@@ -54,7 +57,7 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
       <hr className="paymentSummaryCard__divider" />
 
       <Flex align="center" justify="space-between" style={{ fontWeight: "bold" }}>
-        <p className="paymentSummaryCard__label">Total</p>
+        <p className="paymentSummaryCard__label">{tCommon("fields.total")}</p>
         <p className="paymentSummaryCard__amount">
           <span className="paymentSummaryCard__currency">$</span>
           {formatMoney(total, { hideCurrencySymbol: true })}
@@ -69,7 +72,7 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
         onClick={handleConfirmPayment}
         disabled={!isValidPaymentLink}
       >
-        Confirmar pago
+        {t("confirmPayment")}
       </Button>
     </Flex>
   );

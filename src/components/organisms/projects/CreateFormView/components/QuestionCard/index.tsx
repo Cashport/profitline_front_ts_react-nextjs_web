@@ -4,6 +4,7 @@ import { ArrowLineUp, Trash } from "phosphor-react";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { FormValues, QuestionType } from "../../controllers/formSchema";
 import { Control } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import ReusableList from "../ReusableList";
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
 import "./questioncard.scss";
@@ -28,6 +29,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   onChangeIsMandatory,
   isRequired
 }) => {
+  const t = useTranslations("projects.forms.question");
+  const tCommon = useTranslations("common");
   const renderAnswer = (questionType: QuestionType) => {
     switch (questionType) {
       case QuestionType.MULTIPLE_CHOICE:
@@ -52,7 +55,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             hiddenTitle
             titleInput=""
             nameInput="expiration_date"
-            placeholder="Seleccionar fecha"
+            placeholder={t("selectDate")}
             control={control}
             error={undefined}
             disabled={true}
@@ -65,7 +68,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             control={control}
             nameInput="answer"
             error={undefined}
-            placeholder="Ingresar número"
+            placeholder={t("enterNumber")}
             typeInput="number"
             readOnly={true}
           />
@@ -90,7 +93,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             }}
           >
             <ArrowLineUp color="#DDDDDD" size={16} />
-            <Text style={{ color: "#DDDDDD" }}>Cargar archivo</Text>
+            <Text style={{ color: "#DDDDDD" }}>{tCommon("actions.uploadFile")}</Text>
           </Button>
         );
       case QuestionType.TEXT:
@@ -101,7 +104,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             nameInput="answer"
             readOnly={true}
             error={undefined}
-            placeholder="Ingresar texto"
+            placeholder={t("enterText")}
           />
         );
       default:
@@ -118,7 +121,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           control={control}
           nameInput={`questions[${index}].question`}
           error={undefined}
-          placeholder="Pregunta"
+          placeholder={t("placeholder")}
         />
         {/* Question Description */}
         <InputForm
@@ -126,7 +129,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           control={control}
           nameInput={`questions[${index}].description`}
           error={undefined}
-          placeholder="Descripción de la pregunta"
+          placeholder={t("descriptionPlaceholder")}
         />
       </>
     );
@@ -136,7 +139,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     <Card
       className="custom-card"
       title={`${order}.`}
-      extra={<Button type="text" icon={<Trash size={20} />} onClick={onDelete} />}
+      extra={
+        <Button
+          type="text"
+          icon={<Trash size={20} />}
+          onClick={onDelete}
+          aria-label={t("deleteQuestion")}
+        />
+      }
       key={order}
     >
       <Space direction="vertical" style={{ width: "100%" }} size="middle">
@@ -154,7 +164,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             }}
             style={{ marginRight: "0.5rem" }}
           />
-          <Text>Obligatorio</Text>
+          <Text>{t("mandatory")}</Text>
         </Flex>
       </Space>
     </Card>

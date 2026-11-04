@@ -7,17 +7,26 @@ import { Eye, Trash } from "phosphor-react";
 import { Discount, DiscountPackage } from "@/types/discount/DiscountPackage";
 import ApprovalStatusPill from "@/components/ui/approval-status-pill";
 import { getApprovalEntityStatusLabel } from "@/constants/approvalEntityStatus";
+import type { useTranslations } from "use-intl";
+
+// Los títulos se traducen al renderizar: quien arma las columnas pasa `t` y `tCommon`.
+type ColumnsT = ReturnType<typeof useTranslations<"discounts.columns">>;
+type CommonT = ReturnType<typeof useTranslations<"common">>;
 
 type Props = {
   // eslint-disable-next-line no-unused-vars
   handleSelect: (id: number, status: boolean) => void;
   handleChangeStatus: (id: number, newStatus: boolean) => void;
+  t: ColumnsT;
+  tCommon: CommonT;
 };
 
 // eslint-disable-next-line no-unused-vars
 const discountsColumns: (_: Props) => ColumnsType<DiscountBasics & { checked: boolean }> = ({
   handleSelect,
-  handleChangeStatus
+  handleChangeStatus,
+  t,
+  tCommon
 }) => [
   {
     title: "",
@@ -37,43 +46,43 @@ const discountsColumns: (_: Props) => ColumnsType<DiscountBasics & { checked: bo
     width: 50
   },
   {
-    title: "Nombre",
+    title: tCommon("fields.name"),
     dataIndex: "discount_name",
     key: "NameDiscount",
     render: (text, r) => (
-      <Link passHref href={`/descuentos/regla/${r.id}`}>
+      <Link passHref href={`/discounts/rule/${r.id}`}>
         {text}
       </Link>
     ),
     sorter: (a, b) => (a.discount_name < b.discount_name ? -1 : 1)
   },
   {
-    title: "Cliente",
+    title: tCommon("fields.customer"),
     dataIndex: "client_name",
     key: "ClientDiscount",
     sorter: (a, b) => (a.client_name?.localeCompare(b.client_name || "") ? 1 : -1)
   },
   {
-    title: "Tipo descuentos",
+    title: t("discountType"),
     dataIndex: "discount_type",
     key: "TypeDiscount",
     sorter: (a, b) => (a.discount_type < b.discount_type ? 1 : -1)
   },
   {
-    title: "Definiciones",
+    title: t("definitions"),
     dataIndex: "discount_definition",
     key: "DefinitionDiscount",
     sorter: (a, b) => (a.discount_definition < b.discount_definition ? 1 : -1)
   },
   {
-    title: "Fecha inicio",
+    title: t("startDate"),
     dataIndex: "start_date",
     key: "StartDateDiscount",
     sorter: (a, b) => (new Date(a.start_date) < new Date(b.start_date) ? 1 : -1),
     render: (text) => new Date(text).toLocaleDateString()
   },
   {
-    title: "Fecha fin",
+    title: t("endDate"),
     dataIndex: "end_date",
     key: "EndDateDiscount",
     sorter: (a, b) => {
@@ -84,7 +93,7 @@ const discountsColumns: (_: Props) => ColumnsType<DiscountBasics & { checked: bo
     render: (text) => (text ? new Date(text).toLocaleDateString() : "")
   },
   {
-    title: "Aprobación",
+    title: t("approval"),
     dataIndex: "approval_entity_status_id",
     key: "ApprovalDiscount",
     sorter: (a, b) =>
@@ -94,7 +103,7 @@ const discountsColumns: (_: Props) => ColumnsType<DiscountBasics & { checked: bo
     render: (statusId) => <ApprovalStatusPill statusId={statusId} />
   },
   {
-    title: "Estado",
+    title: tCommon("fields.status"),
     dataIndex: "status",
     key: "StatusDiscount",
     sorter: (a, b) => a.status - b.status,
@@ -109,8 +118,12 @@ const discountsColumns: (_: Props) => ColumnsType<DiscountBasics & { checked: bo
     width: 100,
     render: (text, r) => (
       <div>
-        <Link href={`/descuentos/regla/${r.id}`}>
-          <Button type="text" icon={<Eye size={32} style={{ padding: "0.2rem" }} />} />
+        <Link href={`/discounts/rule/${r.id}`}>
+          <Button
+            type="text"
+            icon={<Eye size={32} style={{ padding: "0.2rem" }} />}
+            aria-label={t("viewDetail")}
+          />
         </Link>
       </div>
     )
@@ -121,7 +134,9 @@ const discountPackagesColumns: (
   _: Props
 ) => ColumnsType<DiscountPackage & { checked: boolean }> = ({
   handleSelect,
-  handleChangeStatus
+  handleChangeStatus,
+  t,
+  tCommon
 }) => [
   {
     title: "",
@@ -141,31 +156,31 @@ const discountPackagesColumns: (
     width: 50
   },
   {
-    title: "Nombre",
+    title: tCommon("fields.name"),
     dataIndex: "name",
     key: "name",
     render: (text, r) => (
-      <Link passHref href={`/descuentos/paquete/${r.id}`}>
+      <Link passHref href={`/discounts/package/${r.id}`}>
         {text}
       </Link>
     ),
     sorter: (a, b) => a.name.localeCompare(b.name)
   },
   {
-    title: "Definiciones",
+    title: t("definitions"),
     dataIndex: "discountType",
     key: "discountType",
     sorter: (a, b) => a.discountType.localeCompare(b.discountType)
   },
   {
-    title: "Fecha inicio",
+    title: t("startDate"),
     dataIndex: "startDate",
     key: "startDate",
     sorter: (a, b) => (new Date(a.startDate) < new Date(b.startDate) ? 1 : -1),
     render: (text) => new Date(text).toLocaleDateString()
   },
   {
-    title: "Fecha fin",
+    title: t("endDate"),
     dataIndex: "endDate",
     key: "endDate",
     sorter: (a, b) => {
@@ -176,7 +191,7 @@ const discountPackagesColumns: (
     render: (text) => (text ? new Date(text).toLocaleDateString() : "")
   },
   {
-    title: "Aprobación",
+    title: t("approval"),
     dataIndex: "approvalEntityStatusId",
     key: "ApprovalDiscount",
     sorter: (a, b) =>
@@ -186,7 +201,7 @@ const discountPackagesColumns: (
     render: (statusId) => <ApprovalStatusPill statusId={statusId} />
   },
   {
-    title: "Estado",
+    title: tCommon("fields.status"),
     dataIndex: "active",
     key: "StatusDiscount",
     sorter: (a, b) => (a.active && b.active ? a.active - b.active : -1),
@@ -201,8 +216,12 @@ const discountPackagesColumns: (
     width: 100,
     render: (text, r) => (
       <div>
-        <Link href={`/descuentos/paquete/${r.id}`}>
-          <Button type="text" icon={<Eye size={32} style={{ padding: "0.2rem" }} />} />
+        <Link href={`/discounts/package/${r.id}`}>
+          <Button
+            type="text"
+            icon={<Eye size={32} style={{ padding: "0.2rem" }} />}
+            aria-label={t("viewDetail")}
+          />
         </Link>
       </div>
     )
@@ -213,13 +232,15 @@ const discountPackagesColumns: (
 const discountsFormColumns: (_: {
   remove: (index: number) => void;
   isFormDisabled: boolean;
-}) => ColumnsType<Discount> = ({ remove, isFormDisabled }) => [
+  t: ColumnsT;
+  tCommon: CommonT;
+}) => ColumnsType<Discount> = ({ remove, isFormDisabled, t, tCommon }) => [
   {
-    title: "Nombre",
+    title: tCommon("fields.name"),
     dataIndex: "discount_name",
     key: "NameDiscount",
     render: (text, r) => (
-      <Link passHref href={`/descuentos/regla/${r.packageId}`}>
+      <Link passHref href={`/discounts/rule/${r.packageId}`}>
         {text}
       </Link>
     ),
@@ -227,20 +248,20 @@ const discountsFormColumns: (_: {
       a.discount_name && b.discount_name && a.discount_name < b.discount_name ? -1 : 1
   },
   {
-    title: "Cliente",
+    title: tCommon("fields.customer"),
     dataIndex: "client_name",
     key: "ClientDiscount",
     sorter: (a, b) => (a.client_name?.localeCompare(b.client_name || "") ? 1 : -1)
   },
   {
-    title: "Tipo descuentos",
+    title: t("discountType"),
     dataIndex: "discount_type",
     key: "TypeDiscount",
     sorter: (a, b) =>
       a.discount_type && b.discount_type && a.discount_type < b.discount_type ? 1 : -1
   },
   {
-    title: "Definiciones",
+    title: t("definitions"),
     dataIndex: "discount_definition",
     key: "DefinitionDiscount",
     sorter: (a, b) =>
@@ -251,7 +272,7 @@ const discountsFormColumns: (_: {
         : -1
   },
   {
-    title: "Fecha inicio",
+    title: t("startDate"),
     dataIndex: "start_date",
     key: "StartDateDiscount",
     sorter: (a, b) => (new Date(a.start_date) < new Date(b.start_date) ? 1 : -1),
@@ -269,6 +290,7 @@ const discountsFormColumns: (_: {
         onClick={() => remove(index)}
         disabled={isFormDisabled}
         icon={<Trash size={32} style={{ padding: "0.2rem" }} />}
+        aria-label={t("remove")}
       />
     )
   }

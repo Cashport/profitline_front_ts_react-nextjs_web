@@ -4,6 +4,7 @@ import ColumnText from "../../ColumnText/ColumnText";
 import { FileArrowUp, Files } from "@phosphor-icons/react";
 import { FileArrowDown, Plus, Trash } from "phosphor-react";
 import { Control, useFieldArray } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import "./documentsection.scss";
 import { SupplierFormValues } from "../../../interfaces/FormData";
 
@@ -18,6 +19,7 @@ interface ExtendedFile extends File {
   uid: string;
 }
 const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control, name }) => {
+  const t = useTranslations("suppliers.drawer");
   const { fields, append, remove } = useFieldArray({
     control,
     name
@@ -44,7 +46,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
   // console.log("fields", fields);
   return (
     <ColumnText
-      title="Documento"
+      title={t("document")}
       icon={<Files size={16} color="#7B7B7B" />}
       content={
         <Flex vertical style={{ width: "100%", alignItems: "flex-end" }} gap={12}>
@@ -68,15 +70,14 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
                 >
                   <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
                     <FileArrowUp size={16} />
-                    <p style={{ fontSize: 16, fontWeight: 400 }}>
-                      {doc.name || "Seleccionar archivo"}
-                    </p>
+                    <p style={{ fontSize: 16, fontWeight: 400 }}>{doc.name || t("selectFile")}</p>
                     <p style={{ fontSize: 13, fontWeight: 300 }}>{doc.uploadedAt}</p>
                   </Flex>
                   <Button
                     type="text"
                     icon={<Trash size={16} />}
                     onClick={() => handleDelete(index)}
+                    aria-label={t("deleteDocument")}
                     style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
                   />
                 </Flex>
@@ -99,10 +100,8 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
                 >
                   <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
                     <FileArrowUp size={16} />
-                    <p style={{ fontSize: 16, fontWeight: 400 }}>Seleccionar archivo</p>
-                    <p style={{ fontSize: 13, fontWeight: 300 }}>
-                      PDF, Word, PNG. (Tamaño max 30MB)
-                    </p>
+                    <p style={{ fontSize: 16, fontWeight: 400 }}>{t("selectFile")}</p>
+                    <p style={{ fontSize: 13, fontWeight: 300 }}>{t("fileHint")}</p>
                   </Flex>
                 </Flex>
               </Upload>
@@ -119,7 +118,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
               icon={<Plus size={16} />}
               style={{ padding: 0, justifyContent: "flex-end" }}
             >
-              Agregar documento
+              {t("addDocument")}
             </Button>
           </Upload>
           {/* Enlace para descargar plantilla */}
@@ -127,7 +126,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
             <Link href={templateUrl} target="_blank" style={{ textDecoration: "underline" }}>
               <Flex align="center" gap={4}>
                 <FileArrowDown size={16} color="#1890FF" />
-                Descargar plantilla
+                {t("downloadTemplate")}
               </Flex>
             </Link>
           )}

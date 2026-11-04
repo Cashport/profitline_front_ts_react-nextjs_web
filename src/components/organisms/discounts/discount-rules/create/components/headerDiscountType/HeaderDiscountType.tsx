@@ -1,6 +1,7 @@
 "use client";
 import styles from "./HeaderDiscountType.module.scss";
 import { Button, Flex, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import discountCategories from "../../../../constants/discountTypes";
 
 const { Title } = Typography;
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export default function HeaderDiscountType({ selectedType, handleClick, discountId }: Props) {
+  const t = useTranslations("discounts");
   const canEdit = discountId === undefined;
   const handleEdit = canEdit ? handleClick : () => {};
 
@@ -20,7 +22,7 @@ export default function HeaderDiscountType({ selectedType, handleClick, discount
     <Flex className={styles.HeaderContainer} justify="space-between" vertical gap={20}>
       <Flex gap={20} justify="space-between" wrap="wrap">
         <Title style={{ width: "fit-content" }} level={4}>
-          Selecciona el tipo de descuento
+          {t("form.selectType")}
         </Title>
       </Flex>
       <Flex className={styles.buttonContainer} justify="center" wrap="wrap" gap={"32px"}>
@@ -32,7 +34,7 @@ export default function HeaderDiscountType({ selectedType, handleClick, discount
             onClick={() => handleEdit(discountCategories[key].id)}
             disabled={!canEdit && discountCategories[key].id !== selectedType}
           >
-            {discountCategories[key].name}
+            {t(`categories.${discountCategories[key].nameKey}`)}
           </Button>
         ))}
       </Flex>

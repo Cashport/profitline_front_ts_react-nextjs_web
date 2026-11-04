@@ -5,6 +5,7 @@ import { Dropdown, Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { DotsThreeVertical } from "@phosphor-icons/react";
 import { Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import ModalAgregarPaises from "@/modules/marketAdmin/components/market-admin-user-detail/ModalAgregarPaises";
 import { ICountry } from "@/types/countries/ICountries";
@@ -32,6 +33,8 @@ export default function PaisesSection({
   onAgregar,
   onQuitar
 }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.countriesTab");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
 
@@ -48,7 +51,7 @@ export default function PaisesSection({
 
   const columns: ColumnsType<ICountry> = [
     {
-      title: "País",
+      title: t("country"),
       dataIndex: "country_name",
       key: "country_name",
       onHeaderCell: headerCell,
@@ -68,7 +71,7 @@ export default function PaisesSection({
             items: [
               {
                 key: "eliminar",
-                label: "Eliminar",
+                label: tCommon("actions.delete"),
                 icon: <Trash2 size={14} />,
                 onClick: () => onQuitar(p.id)
               }
@@ -76,7 +79,8 @@ export default function PaisesSection({
           }}
         >
           <button
-            title="Acciones"
+            title={tCommon("fields.actions")}
+            aria-label={tCommon("fields.actions")}
             disabled={disabled}
             className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-transparent"
           >
@@ -92,7 +96,7 @@ export default function PaisesSection({
       <div role="alert">
         <p className="text-red-600">{error}</p>
         <button onClick={onRetry} className="mt-2 text-sm underline">
-          Reintentar
+          {tCommon("actions.retry")}
         </button>
       </div>
     );
@@ -108,15 +112,18 @@ export default function PaisesSection({
 
   return (
     <div className="cp-fill">
-      <p className="text-sm font-bold text-[#141414] mb-4">Países</p>
+      <p className="text-sm font-bold text-[#141414] mb-4">{t("title")}</p>
       <div className="flex items-center justify-between gap-4 mb-4">
-        <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
+        <UiSearchInput
+          placeholder={tCommon("placeholders.search")}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <button
           disabled={disabled}
           onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors flex-shrink-0"
         >
-          <Plus size={18} /> Agregar países
+          <Plus size={18} /> {t("add")}
         </button>
       </div>
 
@@ -128,9 +135,7 @@ export default function PaisesSection({
         loading={disabled}
         pagination={false}
         locale={{
-          emptyText: search.trim()
-            ? "No se encontraron países con ese nombre."
-            : "Este usuario aún no tiene países asignados."
+          emptyText: search.trim() ? t("noSearchResults") : t("empty")
         }}
       />
 

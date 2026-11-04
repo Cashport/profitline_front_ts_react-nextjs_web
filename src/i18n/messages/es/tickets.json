@@ -1,0 +1,85 @@
+{
+  "title": "Task manager",
+  "configError": "No se pudo cargar la configuración de tareas.",
+  "age": {
+    "minutes": "{count} min",
+    "hours": "{count} h",
+    "days": "{count, plural, one {# día} other {# días}}"
+  },
+  "noProcess": "Sin proceso",
+  "noAssignee": "Sin responsable",
+  "noTasks": "Sin tareas",
+  "noTasksForFilters": "No hay tareas con estos filtros.",
+  "emptyValue": "Sin {field}",
+  "searchPlaceholder": "Buscar tarea o cliente",
+  "showMoreOf": "Ver {count} más de {remaining}",
+  "criticalCount": "{count, plural, one {# crítica} other {# críticas}}",
+  "newTaskIn": "Nueva tarea en {group}",
+  "sortBy": "Ordenar por {field}",
+  "countOfTotal": "{count} de {total} tareas",
+  "loadMore": "Cargar más",
+  "processBar": {
+    "ariaLabel": "Procesos"
+  },
+  "cells": {
+    "dispute": "Novedad #{id}"
+  },
+  "create": {
+    "title": "Nueva tarea",
+    "submit": "Crear tarea",
+    "missing": "Falta: {fields}",
+    "created": "Tarea {code} creada",
+    "error": "No se pudo crear la tarea"
+  },
+  "detail": {
+    "loadError": "No se pudo cargar la tarea.",
+    "saveError": "No se pudo guardar",
+    "statusChanged": "Estado: {status}",
+    "updated": "Tarea actualizada",
+    "assigneeUpdated": "Responsable actualizado",
+    "meta": "· Abierta hace {age} · Creada {date} por {author}",
+    "closingComment": "Comentario de cierre",
+    "howResolved": "¿Cómo se resolvió? (opcional)",
+    "whyCanceled": "¿Por qué se cancela? (opcional)",
+    "confirmResolution": "Confirmar resolución",
+    "confirmCancellation": "Confirmar cancelación",
+    "history": "Historial",
+    "actions": {
+      "resolve": "Resolver",
+      "cancelTask": "Cancelar tarea",
+      "moveTo": "Pasar a {status}"
+    },
+    "events": {
+      "CREATED": "creó la tarea",
+      "ASSIGNED": "asignó",
+      "REASSIGNED": "reasignó",
+      "STATUS_CHANGED": "cambió el estado",
+      "COMPLETED": "resolvió la tarea",
+      "CANCELLED": "canceló la tarea",
+      "DUE_DATE_CHANGED": "cambió la fecha límite",
+      "AMOUNT_CHANGED": "cambió el monto",
+      "FIELD_CHANGED": "cambió {field}"
+    }
+  },
+  "fieldInput": {
+    "meDefault": "Yo (por defecto)",
+    "searchClient": "Buscar cliente…",
+    "searching": "Buscando…"
+  },
+  "filters": {
+    "date": "Fecha",
+    "createdDate": "Fecha de creación",
+    "matching": "{count, plural, one {# tarea coincide} other {# tareas coinciden}}"
+  },
+  "toolbar": {
+    "noGrouping": "Sin agrupar",
+    "hideClosed": "Ocultar cerradas",
+    "showClosed": "Mostrar cerradas",
+    "layouts": {
+      "list": "Lista",
+      "board": "Tablero"
+    },
+    "groupBy": "Agrupar:",
+    "sortBy": "Ordenar:"
+  }
+}

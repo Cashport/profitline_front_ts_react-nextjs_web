@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import SearchField from "@/components/ui/search-field/search-field";
 import { cn } from "@/utils/utils";
 
@@ -14,18 +16,14 @@ interface HeaderSearchProps {
 }
 
 /** Buscador fijo del header: el buscador único sobre el fondo gris (relleno blanco). */
-export function HeaderSearch({
-  value,
-  onChange,
-  placeholder = "Buscar…",
-  className
-}: HeaderSearchProps) {
+export function HeaderSearch({ value, onChange, placeholder, className }: HeaderSearchProps) {
+  const t = useTranslations("components.pageHeader");
   return (
     <SearchField
       surface="page"
       value={value}
       onChange={onChange}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t("searchPlaceholder")}
       className={cn("w-[var(--search-w)] shrink", className)}
     />
   );
@@ -41,12 +39,8 @@ interface FilterButtonProps {
 
 /** Botón "Filtrar ▾" que abre el modal Filtros Avanzados. Sin borde: relleno blanco sobre el gris
     de la página y gris dentro de tarjetas blancas (`cp-control-fill`). */
-export function FilterButton({
-  onClick,
-  count = 0,
-  label = "Filtrar",
-  disabled
-}: FilterButtonProps) {
+export function FilterButton({ onClick, count = 0, label, disabled }: FilterButtonProps) {
+  const tCommon = useTranslations("common");
   return (
     <button
       type="button"
@@ -54,7 +48,7 @@ export function FilterButton({
       disabled={disabled}
       className="box-border flex h-[var(--control-h)] shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap cp-control-fill rounded-lg border-0 px-3.5 text-[13px] font-medium text-cp-ink-4 transition-colors hover:text-cp-ink disabled:cursor-default disabled:opacity-50 disabled:hover:text-cp-ink-4"
     >
-      {label}
+      {label ?? tCommon("actions.filter")}
       {count > 0 && (
         <span className="box-border flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-cp-lime px-1.5 text-[13px] font-semibold text-[#141414]">
           {count}
@@ -96,6 +90,7 @@ interface FilterChipsProps {
  * izquierda, nunca saltan de línea y el excedente se agrupa en "+N".
  */
 export function FilterChips({ chips, max = 2 }: FilterChipsProps) {
+  const t = useTranslations("components.filterModal");
   if (!chips.length) return null;
   const shown = chips.slice(0, max);
   const rest = chips.slice(max);
@@ -119,7 +114,7 @@ export function FilterChips({ chips, max = 2 }: FilterChipsProps) {
           <button
             type="button"
             onClick={c.onRemove}
-            aria-label={`Quitar ${c.label}`}
+            aria-label={t("removeFilter", { category: c.label })}
             className="flex h-full shrink-0 cursor-pointer items-center border-0 bg-transparent px-1.5 text-[18px] leading-none text-cp-ink-4 hover:text-cp-ink"
           >
             ×

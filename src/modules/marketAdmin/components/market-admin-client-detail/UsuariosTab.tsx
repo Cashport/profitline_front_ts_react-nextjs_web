@@ -2,6 +2,7 @@
 
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import { IMarketAdminClientUser } from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
@@ -12,23 +13,25 @@ type Props = {
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export default function UsuariosTab({ usuarios, isLoading }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.users");
+  const tCommon = useTranslations("common.fields");
   const columns: ColumnsType<IMarketAdminClientUser> = [
     {
-      title: "Nombre",
+      title: tCommon("name"),
       dataIndex: "name",
       key: "name",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Email",
+      title: tCommon("email"),
       dataIndex: "email",
       key: "email",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Rol",
+      title: t("role"),
       dataIndex: "role_name",
       key: "role_name",
       width: 140,
@@ -49,7 +52,7 @@ export default function UsuariosTab({ usuarios, isLoading }: Props) {
       rowKey="id"
       loading={isLoading}
       pagination={false}
-      locale={{ emptyText: "No hay usuarios asociados." }}
+      locale={{ emptyText: t("empty") }}
     />
   );
 }

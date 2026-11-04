@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 
-import { STATUS_LABELS, STATUS_ORDER } from "../../constants";
+import { STATUS_ORDER } from "../../constants";
 import type { AdvisorStatus, IVisitsPalette } from "../../types";
 
 interface StatusChipsProps {
@@ -15,12 +17,13 @@ interface StatusChipsProps {
 
 /** Filtro rápido por estado; sólo aparecen los estados con asesores (o ya elegidos). */
 export default function StatusChips({ counts, selected, onToggle, palette }: StatusChipsProps) {
+  const tv = useTranslations("visits");
   const statuses = STATUS_ORDER.filter((s) => counts[s] || selected.includes(s));
 
   return (
     <div
       role="group"
-      aria-label="Filtrar por estado"
+      aria-label={tv("statusChips.ariaLabel")}
       className="flex min-w-0 items-center gap-1.5 overflow-x-auto pr-[18px] [mask-image:linear-gradient(90deg,#000_88%,transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {statuses.map((s) => {
@@ -40,7 +43,7 @@ export default function StatusChips({ counts, selected, onToggle, palette }: Sta
               className="h-[7px] w-[7px] rounded-full"
               style={{ background: palette.status[s] }}
             />
-            {STATUS_LABELS[s]}
+            {tv(`status.${s}`)}
             <span className="text-[13px] text-muted-foreground max-[1200px]:hidden">
               {counts[s] ?? 0}
             </span>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Table, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -88,6 +89,8 @@ function Ciudades({ value }: { value: string | null }) {
 }
 
 export default function MarketAdminClients() {
+  const t = useTranslations("marketAdmin.clients");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<IMarketAdminClientsFilter>(EMPTY_CLIENTS_FILTER);
@@ -152,13 +155,10 @@ export default function MarketAdminClients() {
       setSelectedRowKeys([]);
       showMessage(
         "success",
-        `${selectedRowKeys.length} cliente(s) ${action === "activate" ? "activados" : "inactivados"} correctamente.`
+        t("feedback.statusUpdated", { count: selectedRowKeys.length, action })
       );
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Ocurrió un error al actualizar los clientes."
-      );
+      showMessage("error", error instanceof Error ? error.message : t("feedback.updateError"));
     } finally {
       setIsRunningAccion(false);
     }
@@ -174,16 +174,18 @@ export default function MarketAdminClients() {
       const { updated, not_found } = await massiveUpdateMarketAdminClientsConfig(file);
       // La hoja cambia Ejecutivo/Coordinador/KAM, por los que también filtra el listado.
       await mutate();
-      showMessage("success", `${updated} cliente(s) actualizado(s) correctamente.`);
+      showMessage("success", t("feedback.bulkUpdated", { count: updated }));
       if (not_found.length > 0) {
-        const extra = not_found.length > 5 ? ` y ${not_found.length - 5} más` : "";
-        showMessage("warning", `NIT no encontrados: ${not_found.slice(0, 5).join(", ")}${extra}.`);
+        showMessage(
+          "warning",
+          t("feedback.taxIdsNotFound", {
+            list: not_found.slice(0, 5).join(", "),
+            more: Math.max(not_found.length - 5, 0)
+          })
+        );
       }
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Ocurrió un error al cargar el archivo."
-      );
+      showMessage("error", error instanceof Error ? error.message : t("feedback.uploadError"));
     } finally {
       setIsRunningAccion(false);
     }
@@ -198,10 +200,7 @@ export default function MarketAdminClients() {
       setIsRunningAccion(true);
       await downloadMarketAdminClientsConfig(nits);
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Ocurrió un error al exportar los clientes."
-      );
+      showMessage("error", error instanceof Error ? error.message : t("feedback.exportError"));
     } finally {
       setIsRunningAccion(false);
     }
@@ -209,7 +208,7 @@ export default function MarketAdminClients() {
 
   const columns: ColumnsType<IMarketAdminClient> = [
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "client_name",
       key: "client_name",
       sorter: (a, b) => a.client_name.localeCompare(b.client_name),
@@ -217,7 +216,7 @@ export default function MarketAdminClients() {
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Ciudad",
+      title: t("columns.city"),
       dataIndex: "city",
       key: "city",
       sorter: (a, b) => (a.city ?? "").localeCompare(b.city ?? ""),
@@ -225,7 +224,7 @@ export default function MarketAdminClients() {
       render: (v: string) => <Ciudades value={v} />
     },
     {
-      title: "Usuarios",
+      title: t("columns.users"),
       dataIndex: "usuarios_count",
       key: "usuarios_count",
       width: 110,
@@ -234,7 +233,7 @@ export default function MarketAdminClients() {
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Líneas",
+      title: t("columns.lines"),
       dataIndex: "lineas",
       key: "lineas",
       width: 150,
@@ -242,7 +241,7 @@ export default function MarketAdminClients() {
       render: (lineas: string | null) => <LineasBadges lineas={splitLineas(lineas)} />
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "is_active",
       key: "is_active",
       width: 140,
@@ -254,7 +253,7 @@ export default function MarketAdminClients() {
         c.in_marketplace === 0 ? (
           // Sin registro en client_marketplace: no hay estado que editar.
           <span className="text-[13px] font-semibold px-2 py-0.5 rounded-full w-fit bg-[#F0F0F0] text-[#999999]">
-            Sin marketplace
+            {t("noMarketplace")}
           </span>
         ) : (
           <span
@@ -262,7 +261,7 @@ export default function MarketAdminClients() {
               isActive === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
             }`}
           >
-            {isActive === 1 ? "Activo" : "Inactivo"}
+            {isActive === 1 ? tCommon("status.active") : tCommon("status.inactive")}
           </span>
         )
     },
@@ -271,19 +270,19 @@ export default function MarketAdminClients() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, c) => <GenericEyeButton href={`/market-admin/clientes/${c.nit}`} />
+      render: (_, c) => <GenericEyeButton href={`/market-admin/clients/${c.nit}`} />
     }
   ];
 
   return (
     <div className="cp-page min-h-full">
-      <Header title="Clientes" back="/market-admin" />
+      <Header title={t("title")} back="/market-admin" />
 
       <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
           <UiSearchInput
-            placeholder="Buscar..."
+            placeholder={t("searchPlaceholder")}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
@@ -302,14 +301,14 @@ export default function MarketAdminClients() {
                   onClick={() => runAccionEstado("activate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 >
-                  Activar
+                  {t("actions.activate")}
                 </button>
                 <button
                   disabled={selectedRowKeys.length === 0}
                   onClick={() => runAccionEstado("inactivate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 >
-                  Inactivar
+                  {t("actions.inactivate")}
                 </button>
                 <div className="h-px bg-[#EEEEEE] my-1" />
                 <button
@@ -319,14 +318,14 @@ export default function MarketAdminClients() {
                   }}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Actualización masiva
+                  {t("actions.bulkUpdate")}
                 </button>
                 <button
                   disabled={selectedRowKeys.length === 0}
                   onClick={handleExportarClientes}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 >
-                  Exportar clientes
+                  {t("actions.export")}
                 </button>
               </div>
             )}
@@ -349,7 +348,7 @@ export default function MarketAdminClients() {
           rowKey="client_id"
           loading={isLoading || isRunningAccion}
           showSorterTooltip={false}
-          locale={{ emptyText: "No se encontraron clientes." }}
+          locale={{ emptyText: t("empty") }}
           rowSelection={{
             selectedRowKeys,
             onChange: setSelectedRowKeys,
@@ -377,7 +376,7 @@ export default function MarketAdminClients() {
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} clientes · ${activos} activos`
+              t("total", { from: range[0], to: range[1], total, active: activos })
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);

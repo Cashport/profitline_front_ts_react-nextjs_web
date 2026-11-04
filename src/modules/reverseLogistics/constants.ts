@@ -5,6 +5,7 @@ import {
   TipoAprobacion,
   TipoDevolucionCodigo
 } from "@/types/reverseLogistics/IReverseLogistics";
+import { getTranslator } from "@/i18n/translator";
 
 export const PAGE_SIZE = 25;
 
@@ -18,9 +19,8 @@ export const APPROVALS_FETCH_LIMIT = 200;
 // hard rule: the user can drop it or swap it from the filter modal.
 export const ESTADO_PENDIENTE_APROBACION_ID = "607455C8-5788-41F3-A323-BFFE2BDF025A";
 
-// Label for the estado above, used as the filter-tag fallback while the picklist
-// is still loading so the tag never renders a bare GUID.
-export const ESTADO_PENDIENTE_APROBACION_NOMBRE = "Pendiente aprobación";
+// The filter-tag fallback label for the estado above (shown while the picklist is
+// still loading so the tag never renders a bare GUID) is `reverseLogistics.filters.pendingApproval`.
 
 // Colored pill styling per estado (bg + text), ported from the reference.
 export const estadoConfig: Record<EstadoDevolucion, { bg: string; text: string }> = {
@@ -52,20 +52,33 @@ export const CAUSAL_OPTIONS: { value: CausalDevolucion; label: CausalDevolucion 
   { value: "Garantía", label: "Garantía" }
 ];
 
-export const TIPO_APROBACION_OPTIONS: { value: TipoAprobacion; label: string }[] = [
-  { value: "Fuera de politicas por fecha (01-vencimiento)", label: "Fuera de políticas fecha" },
-  { value: "Causal con aprobación (04-Calidad)", label: "Causal con aprobación" },
-  { value: "Supera el monto máximo", label: "Supera monto máximo" },
-  { value: "Sin autorización de recogida", label: "Sin autorización recogida" }
+// `value` is the backend tipo (compared against the approvals payload); `labelKey`
+// is the short label in `reverseLogistics.approvalTypes`.
+export const TIPO_APROBACION_OPTIONS: {
+  value: TipoAprobacion;
+  labelKey:
+    | "outOfPolicyDate"
+    | "reasonNeedsApproval"
+    | "exceedsMaxAmount"
+    | "noPickupAuthorization";
+}[] = [
+  { value: "Fuera de politicas por fecha (01-vencimiento)", labelKey: "outOfPolicyDate" },
+  { value: "Causal con aprobación (04-Calidad)", labelKey: "reasonNeedsApproval" },
+  { value: "Supera el monto máximo", labelKey: "exceedsMaxAmount" },
+  { value: "Sin autorización de recogida", labelKey: "noPickupAuthorization" }
 ];
 
-// Short labels for the devolucion fase codigos. Used by the stats bar KPI
-// cards and by the Devoluciones tab to render the highest fase as the estado.
-export const FASE_LABELS: Record<TipoDevolucionCodigo, string> = {
-  F1_LOGISTICA: "Profitline",
-  F2_SOLISTICA: "Transporte",
-  F3_SUPPLA: "Bodega",
-  F4_NOTA_CREDITO: "Nota Crédito"
+// Catalog keys (`reverseLogistics.phases`) of the short labels for the devolucion
+// fase codigos. Used by the stats bar KPI cards and by the Devoluciones tab to
+// render the highest fase as the estado.
+export const FASE_LABEL_KEYS: Record<
+  TipoDevolucionCodigo,
+  "logistics" | "transport" | "warehouse" | "creditMemo"
+> = {
+  F1_LOGISTICA: "logistics",
+  F2_SOLISTICA: "transport",
+  F3_SUPPLA: "warehouse",
+  F4_NOTA_CREDITO: "creditMemo"
 };
 
 // Orden de mayor a menor — F4 (Nota Crédito) es la fase más avanzada y siempre
@@ -79,7 +92,9 @@ export const FASE_PRIORITY: TipoDevolucionCodigo[] = [
 
 // Devuelve el código de la fase más alta registrada en `fases`. Devuelve
 // `undefined` si la lista está vacía o no trae ninguno de los F1..F4.
-export const highestFaseCode = (fases?: DevolucionesEstados[]): TipoDevolucionCodigo | undefined => {
+export const highestFaseCode = (
+  fases?: DevolucionesEstados[]
+): TipoDevolucionCodigo | undefined => {
   if (!fases || fases.length === 0) return undefined;
   const codes = new Set(fases.map((f) => f.Codigo));
   return FASE_PRIORITY.find((code) => codes.has(code));
@@ -89,5 +104,5 @@ export const highestFaseCode = (fases?: DevolucionesEstados[]): TipoDevolucionCo
 // "Nota Crédito") o `null` si no hay fases válidas.
 export const highestFaseLabel = (fases?: DevolucionesEstados[]): string | null => {
   const code = highestFaseCode(fases);
-  return code ? FASE_LABELS[code] : null;
+  return code ? getTranslator("reverseLogistics")(`phases.${FASE_LABEL_KEYS[code]}`) : null;
 };

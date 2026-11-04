@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import { Gift, Plus } from "lucide-react";
 import Header from "@/components/organisms/header";
 import HeaderBackTitle from "../header-back-title/HeaderBackTitle";
@@ -23,6 +24,8 @@ import { buildManualBonusPayload, summarizeManualBonus } from "./buildManualBonu
 import { ASIGNACIONES_INICIALES } from "./mockAsignaciones";
 
 export default function MarketAdminManualBonus({ onBack }: { onBack: () => void }) {
+  const t = useTranslations("marketAdmin.manualBonus");
+  const tCommon = useTranslations("common.fields");
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
 
@@ -64,10 +67,10 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
         nota: data.nota
       };
       setAsignaciones((prev) => [nueva, ...prev]);
-      showMessage("success", "Bonificado creado exitosamente.");
+      showMessage("success", t("feedback.created"));
       setShowModal(false);
     } catch {
-      showMessage("error", "Ocurrió un error al crear el bonificado.");
+      showMessage("error", t("feedback.createError"));
     } finally {
       setSaving(false);
     }
@@ -95,14 +98,14 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
     <div className="cp-page min-h-full">
       {/* Header compartido (docs/DESIGN.md §4): volver a la vista anterior + acción principal */}
       <Header
-        title="Bonificados manuales"
-        titleNode={<HeaderBackTitle title="Bonificados manuales" onBack={onBack} />}
+        title={t("title")}
+        titleNode={<HeaderBackTitle title={t("title")} onBack={onBack} />}
         titleExtra={
           <>
-            <span>Asignaciones por cliente con flujo de aprobación</span>
+            <span>{t("subtitle")}</span>
             {pendientes > 0 && (
               <span className="px-2 py-0.5 text-[13px] font-semibold bg-amber-100 text-amber-700 rounded-full">
-                {pendientes} pendiente{pendientes > 1 ? "s" : ""}
+                {t("pendingCount", { count: pendientes })}
               </span>
             )}
           </>
@@ -112,7 +115,7 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 px-4 h-[var(--control-h)] bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
           >
-            <Plus size={18} /> Nueva asignación
+            <Plus size={18} /> {t("newAssignment.button")}
           </button>
         }
       />
@@ -128,18 +131,28 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
 
         {/* Table header */}
         <div className="grid grid-cols-[2fr_1.5fr_80px_80px_100px_120px] px-6 py-3 border-b border-[#EEEEEE] bg-[#FAFAFA]">
-          <span className="text-[13px] font-medium text-[#AAAAAA]">Cliente</span>
-          <span className="text-[13px] font-medium text-[#AAAAAA]">Producto bonificado</span>
-          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Asignadas</span>
-          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Disponibles</span>
-          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">Estado</span>
-          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">Acciones</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA]">{tCommon("customer")}</span>
+          <span className="text-[13px] font-medium text-[#AAAAAA]">
+            {t("columns.freeGoodsProduct")}
+          </span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">
+            {t("columns.assigned")}
+          </span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">
+            {t("columns.available")}
+          </span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-center">
+            {tCommon("status")}
+          </span>
+          <span className="text-[13px] font-medium text-[#AAAAAA] text-right">
+            {tCommon("actions")}
+          </span>
         </div>
 
         {filtradas.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <Gift size={28} className="text-[#DDDDDD]" />
-            <p className="text-sm text-[#999999]">No hay asignaciones</p>
+            <p className="text-sm text-[#999999]">{t("empty")}</p>
           </div>
         ) : (
           filtradas.map((a, idx) => (

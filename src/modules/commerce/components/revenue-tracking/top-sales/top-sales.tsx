@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 import { useDashboardSalesRanking } from "@/modules/commerce/hooks/revenue-tracking/useDashboardSalesRanking";
@@ -10,34 +11,40 @@ import { formatNumber } from "@/utils/utils";
 
 type CategoryKey = "producto" | "cliente" | "ciudad" | "vendedor";
 
-const categoryLabels: Record<CategoryKey, { name: string; unit: string }> = {
-  producto: { name: "Productos", unit: "Unid." },
-  cliente: { name: "Clientes", unit: "Órdenes" },
-  ciudad: { name: "Ciudades", unit: "Órdenes" },
-  vendedor: { name: "Vendedores", unit: "Órdenes" }
+// Claves de texto en commerce.dashboard.topSales.categories.<category>.
+const CATEGORY_UNIT: Record<CategoryKey, "units" | "orders"> = {
+  producto: "units",
+  cliente: "orders",
+  ciudad: "orders",
+  vendedor: "orders"
 };
 
 export default function TopSales() {
+  const t = useTranslations("commerce.dashboard.topSales");
+  const tCommon = useTranslations("common");
   const [category, setCategory] = useState<CategoryKey>("producto");
   const { filters, includeIva } = useRevenueTracking();
   const { data, isLoading } = useDashboardSalesRanking(category, filters, 10, includeIva);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
-  const labels = categoryLabels[category];
+  const labels = {
+    name: t(`categories.${category}.plural`),
+    unit: t(`units.${CATEGORY_UNIT[category]}`)
+  };
   const items = data?.items ?? [];
 
   const renderRows = () => {
     if (isLoading && !data) {
       return (
         <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-          Cargando…
+          {tCommon("status.loading")}
         </div>
       );
     }
     if (items.length === 0) {
       return (
         <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-          Sin datos
+          {tCommon("status.noData")}
         </div>
       );
     }
@@ -96,10 +103,14 @@ export default function TopSales() {
     <div className="cp-card px-[18px] py-[14px] flex flex-col h-full">
       <div className="flex items-start justify-between mb-5 shrink-0 gap-2">
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-1.5">Top de ventas</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-1.5">{t("title")}</h3>
           <p className="text-sm font-bold text-muted-foreground">
-            {labels.name} {data?.total_entities ?? 0} -{" "}
-            <span className="text-primary">Pareto {data?.pareto_count ?? 0}</span>
+            {t.rich("summary", {
+              name: labels.name,
+              total: data?.total_entities ?? 0,
+              pareto: data?.pareto_count ?? 0,
+              highlight: (chunks) => <span className="text-primary">{chunks}</span>
+            })}
           </p>
         </div>
 
@@ -109,10 +120,10 @@ export default function TopSales() {
             value={category}
             onChange={(e) => setCategory(e.target.value as CategoryKey)}
           >
-            <option value="producto">Producto</option>
-            <option value="cliente">Cliente</option>
-            <option value="ciudad">Ciudad</option>
-            <option value="vendedor">Vendedor</option>
+            <option value="producto">{t("categories.producto.singular")}</option>
+            <option value="cliente">{t("categories.cliente.singular")}</option>
+            <option value="ciudad">{t("categories.ciudad.singular")}</option>
+            <option value="vendedor">{t("categories.vendedor.singular")}</option>
           </select>
           <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
         </div>
@@ -123,7 +134,7 @@ export default function TopSales() {
           <div></div>
           <div className="text-left">{labels.name}</div>
           <div className="text-left">{labels.unit}</div>
-          <div className="text-left">Ventas</div>
+          <div className="text-left">{t("sales")}</div>
           <div className="text-left">%</div>
         </div>
 

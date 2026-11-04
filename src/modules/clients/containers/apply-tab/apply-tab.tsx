@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { DotsThree, Plus, Sparkle } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
@@ -86,6 +87,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   const clientId = isInApplyModule ? clientUUID || CLIENTUUID_DEMO : rawClientId || CLIENTUUID_DEMO;
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
+  const t = useTranslations("clients.applyTab");
+  const tCommon = useTranslations("common");
   const [loadingSave, setLoadingSave] = useState(false);
   const [loadingRequest, setLoadingRequest] = useState(false);
   //TODO this is the context that is not being used
@@ -145,7 +148,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     try {
       await addItemsToTable(projectId, clientId, adding_type, selectedIds);
 
-      showMessage("success", "Se han agregado los elementos correctamente");
+      showMessage("success", t("messages.addSuccess"));
       // handleAdd is shared by ModalAddToTables and ModalListAdjustments; only one is open
       // at a time, so close both regardless of adding_type.
       setIsModalAddToTableOpen({
@@ -159,7 +162,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
 
       mutate();
     } catch (error) {
-      showMessage("error", "Ha ocurrido un error al agregar los elementos");
+      showMessage("error", t("messages.addError"));
     }
   };
 
@@ -167,10 +170,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     // Handle removing selected
     try {
       await removeItemsFromTable(row_id);
-      showMessage("success", `Se ha eliminado el elemento correctamente ${row_id}`);
+      showMessage("success", t("messages.removeSuccess", { rowId: row_id }));
       mutate();
     } catch (error) {
-      showMessage("error", "Ha ocurrido un error al eliminar el elemento");
+      showMessage("error", t("messages.removeError"));
     }
   };
 
@@ -188,10 +191,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   const handlePaymentUnidentified = async (row: IApplyTabRecord) => {
     try {
       await markPaymentsAsUnidentified([row.payment_id]);
-      showMessage("success", "Pago marcado como no identificado");
+      showMessage("success", t("messages.markUnidentifiedSuccess"));
       mutate();
     } catch (error) {
-      showMessage("error", "Ha ocurrido un error al marcar el pago como no identificado");
+      showMessage("error", t("messages.markUnidentifiedError"));
     }
   };
 
@@ -230,12 +233,11 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         file: selectedEvidence[0],
         useExistingFile: useDefaultFileInEvidence
       });
-      showMessage("success", "Se ha guardado la aplicación correctamente");
+      showMessage("success", t("messages.saveSuccess"));
       mutate();
       setIsModalOpen({ selected: 0 });
     } catch (error) {
-      const errormessage =
-        error instanceof Error ? error.message : "Ha ocurrido un error al guardar la aplicación";
+      const errormessage = error instanceof Error ? error.message : t("messages.saveError");
       showMessage("error", errormessage);
     }
     setLoadingSave(false);
@@ -276,6 +278,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   const dataForCollapse = useMemo(() => {
     const invoices = {
       statusName: "facturas",
+      sectionKey: "invoices" as const,
       color: "#FF7A00",
       statusId: 1,
       itemsList: filteredData?.invoices,
@@ -285,6 +288,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
 
     const payments = {
       statusName: "pagos",
+      sectionKey: "payments" as const,
       color: "#0085FF",
       statusId: 2,
       itemsList: filteredData?.payments,
@@ -294,6 +298,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
 
     const discounts = {
       statusName: "notas crédito",
+      sectionKey: "creditMemos" as const,
       color: "#E53261",
       statusId: 3,
       itemsList: filteredData?.discounts,
@@ -303,6 +308,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
 
     const balances = {
       statusName: "saldos",
+      sectionKey: "deductions" as const,
       color: "#000000",
       statusId: 4,
       itemsList: filteredData?.balances,
@@ -352,15 +358,12 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     if (selectedRows && selectedRows.length > 0) {
       try {
         await removeMultipleRows(selectedRows.map((row) => row.id));
-        showMessage("success", "Se han eliminado las filas correctamente");
+        showMessage("success", t("messages.deleteRowsSuccess"));
         setIsModalOpen({ selected: 0 });
         deselectAllRows();
         mutate();
       } catch (error) {
-        showMessage(
-          "error",
-          `Error al eliminar ${selectedRows.length} fila${selectedRows.length > 1 ? "s" : ""} `
-        );
+        showMessage("error", t("messages.deleteRowsError", { count: selectedRows.length }));
       }
     }
     setLoadingRequest(false);
@@ -372,10 +375,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         window.open(applicationData.summary.url_log, "_blank");
         setIsModalOpen({ selected: 0 });
       } else {
-        showMessage("error", "No hay log disponible para descargar");
+        showMessage("error", t("messages.noLogAvailable"));
       }
     } catch (error) {
-      showMessage("error", "Error al descargar el log");
+      showMessage("error", t("messages.downloadLogError"));
     }
   };
 
@@ -387,10 +390,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         window.open(data.excel_url, "_blank");
         setIsModalOpen({ selected: 0 });
       } else {
-        showMessage("error", "No se pudo obtener el excel log");
+        showMessage("error", t("messages.excelLogUnavailable"));
       }
     } catch (error) {
-      showMessage("error", "Error al descargar el excel log");
+      showMessage("error", t("messages.downloadExcelLogError"));
     }
   };
 
@@ -415,12 +418,12 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
 
     try {
       await removeMultipleRows(allRowsIds);
-      showMessage("success", "Se ha eliminado todo correctamente");
+      showMessage("success", t("messages.deleteAllSuccess"));
       setIsModalOpen({ selected: 0 });
       deselectAllRows();
       mutate();
     } catch (error) {
-      showMessage("error", "Error al eliminar todo");
+      showMessage("error", t("messages.deleteAllError"));
     }
     setLoadingRequest(false);
   };
@@ -451,7 +454,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
-              placeholder="Buscar"
+              placeholder={tCommon("placeholders.search")}
               onChange={(event) => {
                 setSearchQuery(event.target.value.toLowerCase());
               }}
@@ -462,20 +465,23 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
               icon={<DotsThree size={18} />}
               onClick={() => handleOpenModal(3)}
             >
-              Generar acción
+              {t("generateAction")}
             </Button>
             <Button className="iaButton" onClick={() => setIsModalOpen({ selected: 2 })}>
               <Sparkle size={14} color="#5b21b6" weight="fill" />
               <span className="textNormal">
-                Aplicar con{" "}
-                <span
-                  className="cashportIATextGradient"
-                  style={{
-                    fontWeight: 500
-                  }}
-                >
-                  CashportAI
-                </span>
+                {t.rich("applyWithAI", {
+                  brand: (chunks) => (
+                    <span
+                      className="cashportIATextGradient"
+                      style={{
+                        fontWeight: 500
+                      }}
+                    >
+                      {chunks}
+                    </span>
+                  )
+                })}
               </span>
             </Button>
           </Flex>
@@ -485,7 +491,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
             className="save-btn"
             onClick={handleSave}
           >
-            Guardar
+            {tCommon("actions.save")}
           </Button>
         </Flex>
 
@@ -501,7 +507,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
               label: (
                 <Flex>
                   <LabelCollapse
-                    status={section.statusName}
+                    status={t(`sections.${section.sectionKey}.label`)}
                     color={section.color}
                     total={section.total}
                     quantity={section.count}
@@ -529,7 +535,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                       }}
                     >
                       <Plus />
-                      <p>Agregar {`${section.statusName}`}</p>
+                      <p>{t(`sections.${section.sectionKey}.add`)}</p>
                     </button>
                   ) : null}
                 </Flex>
@@ -717,8 +723,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
           setIsModalOpen({ selected: 0 });
         }}
         onOk={handleDeleteMultipleRows}
-        title={`¿Está seguro de eliminar ${selectedRows?.length ?? 0} fila${(selectedRows?.length ?? 0) > 1 ? "s" : ""}?`}
-        okText="Eliminar"
+        title={t("confirm.deleteRows", { count: selectedRows?.length ?? 0 })}
+        okText={tCommon("actions.delete")}
         okLoading={loadingRequest}
       />
 
@@ -743,8 +749,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
           setIsModalOpen({ selected: 0 });
         }}
         onOk={handleDeleteAllRows}
-        title={`¿Está seguro de eliminar todo?`}
-        okText="Eliminar"
+        title={t("confirm.deleteAll")}
+        okText={tCommon("actions.delete")}
         okLoading={loadingRequest}
       />
       <ModalChangeAIPrompt

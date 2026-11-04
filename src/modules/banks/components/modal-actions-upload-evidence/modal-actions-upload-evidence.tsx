@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import { useForm } from "react-hook-form";
 
 import { uploadEvidence } from "@/services/banksPayments/banksPayments";
@@ -29,6 +30,9 @@ interface Props {
 }
 
 const ModalActionsUploadEvidence = ({ isOpen, onClose, selectedRows }: Props) => {
+  const t = useTranslations("banks.uploadSlip");
+  const tShared = useTranslations("banks.shared");
+  const tCommon = useTranslations("common");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userId = useAppStore((state) => state.userId);
   const { showMessage } = useMessageApi();
@@ -50,10 +54,7 @@ const ModalActionsUploadEvidence = ({ isOpen, onClose, selectedRows }: Props) =>
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        showMessage(
-          "error",
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
+        showMessage("error", tShared("fileTooLarge", { maxMb: 30 }));
         return;
       }
       setValue("evidence", rawFile);
@@ -73,11 +74,11 @@ const ModalActionsUploadEvidence = ({ isOpen, onClose, selectedRows }: Props) =>
     try {
       await uploadEvidence(selectedRows[0].id, userId, data.evidence);
 
-      showMessage("success", "Tirilla enviada correctamente");
+      showMessage("success", t("success"));
 
       onClose();
     } catch (error) {
-      showMessage("error", "Error al enviar tirilla");
+      showMessage("error", t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -92,12 +93,12 @@ const ModalActionsUploadEvidence = ({ isOpen, onClose, selectedRows }: Props) =>
       closable={false}
       destroyOnClose
     >
-      <Title level={4}>Cargar tirilla</Title>
+      <Title level={4}>{t("title")}</Title>
 
-      <p className="modalActionsUploadEvidence__subTitle">Cargar el archivo correspondiente</p>
+      <p className="modalActionsUploadEvidence__subTitle">{t("subtitle")}</p>
 
       <div className="modalActionsUploadEvidence__file">
-        <p>Tirilla</p>
+        <p>{t("slip")}</p>
         <DocumentButton
           key={evidence?.name}
           title={evidence?.name}
@@ -109,14 +110,14 @@ const ModalActionsUploadEvidence = ({ isOpen, onClose, selectedRows }: Props) =>
       </div>
 
       <div className="modalActionsUploadEvidence__footer">
-        <SecondaryButton onClick={() => onClose(true)}>Cancelar</SecondaryButton>
+        <SecondaryButton onClick={() => onClose(true)}>{tCommon("actions.cancel")}</SecondaryButton>
 
         <PrincipalButton
           onClick={handleSubmit(onSubmit)}
           disabled={!evidence}
           loading={isSubmitting}
         >
-          Cargar tirilla
+          {t("title")}
         </PrincipalButton>
       </div>
     </Modal>

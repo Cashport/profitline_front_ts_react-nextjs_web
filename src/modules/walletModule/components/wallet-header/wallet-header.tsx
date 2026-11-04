@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import Header from "@/components/organisms/header";
 import HeaderCutoff from "@/components/ui/header-cutoff/header-cutoff";
-import { FECHA_CORTE_PLACEHOLDER } from "../../constants";
 import ModalFilterMatrix from "../modal-filter-matrix/modal-filter-matrix";
 import WalletActionsMenu from "../wallet-actions-menu/wallet-actions-menu";
 import type { EstadoId, IWalletMatrixModalFilters } from "../../types";
@@ -56,6 +57,7 @@ export default function WalletHeader({
   onDownloadExcel,
   downloadingExcel
 }: WalletHeaderProps) {
+  const t = useTranslations("wallet.header");
   // El API manda la fecha como medianoche UTC ("2026-09-30T00:00:00Z"): leída en hora local
   // (UTC-5) se pintaría el día anterior.
   const projectedTo = cutoffDate
@@ -68,15 +70,15 @@ export default function WalletHeader({
 
   return (
     <Header
-      title="Cartera por cliente y tramo"
+      title={t("title")}
       titleExtra={
         <HeaderCutoff
           cutoffAt={lastUpdatedAt}
-          placeholder={FECHA_CORTE_PLACEHOLDER}
+          placeholder={t("loadingCutoff")}
           busy={isRefreshing}
-          busyLabel="Actualizando…"
+          busyLabel={t("refreshing")}
           onRefresh={onRefresh}
-          refreshLabel="Reprocesar"
+          refreshLabel={t("reprocess")}
           projection={{
             checked: Boolean(projected),
             onChange: (value) => onToggleProjection?.(value),

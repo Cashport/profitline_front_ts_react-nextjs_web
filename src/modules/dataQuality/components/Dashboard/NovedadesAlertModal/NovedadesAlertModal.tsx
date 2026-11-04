@@ -2,6 +2,7 @@
 
 import { Modal } from "antd";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { IDashboardSummaryAlert } from "@/types/dataQuality/IDataQuality";
 
@@ -11,6 +12,7 @@ interface NovedadesAlertModalProps {
 }
 
 export const NovedadesAlertModal = ({ alert, onClose }: NovedadesAlertModalProps) => {
+  const t = useTranslations("dataQuality.dashboard.issues");
   return (
     <Modal
       open={!!alert}
@@ -33,8 +35,7 @@ export const NovedadesAlertModal = ({ alert, onClose }: NovedadesAlertModalProps
                 {alert.name}
               </h2>
               <p className="text-sm mt-0.5" style={{ color: "#888" }}>
-                {alert.clients.length} caso{alert.clients.length !== 1 ? "s" : ""} detectado
-                {alert.clients.length !== 1 ? "s" : ""}
+                {t("detectedCases", { count: alert.clients.length })}
               </p>
             </div>
           </div>
@@ -47,7 +48,7 @@ export const NovedadesAlertModal = ({ alert, onClose }: NovedadesAlertModalProps
             <thead>
               <tr className="border-b border-cp-line bg-cp-surface">
                 <th className="py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                  Cliente
+                  {t("customer")}
                 </th>
               </tr>
             </thead>
@@ -55,7 +56,7 @@ export const NovedadesAlertModal = ({ alert, onClose }: NovedadesAlertModalProps
               {alert.clients.length === 0 ? (
                 <tr>
                   <td className="text-center text-sm py-8" style={{ color: "#888" }}>
-                    No hay registros.
+                    {t("noRecords")}
                   </td>
                 </tr>
               ) : (

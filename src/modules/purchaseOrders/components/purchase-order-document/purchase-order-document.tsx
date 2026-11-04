@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import { FileText, Download } from "lucide-react";
 import { LoadError, Viewer, Worker } from "@react-pdf-viewer/core";
@@ -17,6 +18,8 @@ export function PurchaseOrderDocument({
   pdfWidth,
   onCollapse
 }: PurchaseOrderDocumentProps) {
+  const t = useTranslations("purchaseOrders.document");
+  const tCommon = useTranslations("common");
   const pdfUrl = fileUrl ?? data?.document_url;
   const archivoOriginal = data?.document_name;
   const numeroFactura = data?.purchase_order_number;
@@ -32,16 +35,16 @@ export function PurchaseOrderDocument({
     let message = "";
     switch (error.name) {
       case "InvalidPDFException":
-        message = "The document is invalid or corrupted";
+        message = t("errors.invalid");
         break;
       case "MissingPDFException":
-        message = "The document is missing";
+        message = t("errors.missing");
         break;
       case "UnexpectedResponseException":
-        message = "Unexpected server response";
+        message = t("errors.unexpectedResponse");
         break;
       default:
-        message = "Cannot load the document";
+        message = t("errors.cannotLoad");
         break;
     }
 
@@ -51,7 +54,7 @@ export function PurchaseOrderDocument({
           <FileText className="h-16 w-16 mx-auto text-cashport-green opacity-50" />
           <div>
             <p className="text-lg font-medium text-cashport-black mb-2">
-              Vista previa no disponible
+              {t("previewUnavailable")}
             </p>
             <p className="text-sm text-muted-foreground mb-2">{message}</p>
             <p className="text-sm text-muted-foreground mb-4">
@@ -62,7 +65,7 @@ export function PurchaseOrderDocument({
               className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
             >
               <Download className="h-4 w-4 mr-2" />
-              Descargar
+              {tCommon("actions.download")}
             </Button>
           </div>
         </div>
@@ -78,7 +81,7 @@ export function PurchaseOrderDocument({
         <div className="flex items-center justify-between mb-4">
           <h3 className="flex items-center text-lg font-semibold text-cashport-black">
             <FileText className="h-5 w-5 mr-2 text-cashport-green" />
-            Documento Original
+            {t("title")}
           </h3>
           <div className="flex items-center space-x-2">
             <Button
@@ -89,13 +92,14 @@ export function PurchaseOrderDocument({
               className="border-cashport-gray-light text-cashport-black hover:bg-cashport-white bg-transparent"
             >
               <Download className="h-4 w-4 mr-2" />
-              Descargar
+              {tCommon("actions.download")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={onCollapse}
               className="text-cashport-black hover:bg-cashport-white"
+              aria-label={tCommon("actions.close")}
             >
               ×
             </Button>
@@ -119,15 +123,11 @@ export function PurchaseOrderDocument({
               <div className="space-y-4">
                 <FileText className="h-16 w-16 mx-auto text-cashport-green opacity-50" />
                 <div>
-                  <p className="text-lg font-medium text-cashport-black mb-2">
-                    Documento no disponible
-                  </p>
+                  <p className="text-lg font-medium text-cashport-black mb-2">{t("unavailable")}</p>
                   <p className="text-sm text-muted-foreground mb-4">
                     {archivoOriginal || `factura-${numeroFactura}.pdf`}
                   </p>
-                  <p className="text-[13px] text-muted-foreground">
-                    El PDF original no está disponible para visualización
-                  </p>
+                  <p className="text-[13px] text-muted-foreground">{t("pdfUnavailable")}</p>
                 </div>
               </div>
             </div>

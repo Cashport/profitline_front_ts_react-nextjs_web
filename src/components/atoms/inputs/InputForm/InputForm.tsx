@@ -1,4 +1,5 @@
 import { Flex, Input, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
 
@@ -46,6 +47,7 @@ export const InputForm = ({
   rows = 4, // Número de filas por defecto para TextArea
   changeInterceptor
 }: Props) => {
+  const tInputs = useTranslations("components.inputs");
   return (
     <Flex vertical className={`containerInput ${className}`} style={customStyle}>
       {!hiddenTitle && (
@@ -90,7 +92,11 @@ export const InputForm = ({
         }
       />
       <Typography.Text className="textError">
-        {error ? (error.message ? ` ${error.message}` : `${titleInput} es obligatorio *`) : ""}
+        {error
+          ? error.message
+            ? ` ${error.message}`
+            : tInputs("requiredField", { field: titleInput ?? "" })
+          : ""}
       </Typography.Text>
     </Flex>
   );

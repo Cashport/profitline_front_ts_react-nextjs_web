@@ -1,0 +1,247 @@
+{
+  "title": "Medical Billing",
+  "serviceTypes": {
+    "ACC": "Accessories",
+    "PRO": "Monitoring or Programming",
+    "RH": "Rehabilitation",
+    "SYS": "Surgery",
+    "UPG": "Upgrade"
+  },
+  "documentTypes": {
+    "CC": "Citizenship ID card",
+    "TI": "Minor's ID card",
+    "CE": "Foreigner ID card",
+    "RC": "Birth certificate",
+    "PA": "Passport",
+    "PEP": "Special Stay Permit",
+    "PPT": "Temporary Protection Permit",
+    "NIT": "Tax ID"
+  },
+  "noveltyTypes": {
+    "tipo_documento": "Document type",
+    "tipo_regimen": "Health plan type",
+    "no_coinciden_fechas": "Dates don't match",
+    "nombre_servicio": "Service name",
+    "codigo_producto": "Product code",
+    "documento_diferente": "Document mismatch",
+    "falta_factura": "Missing invoice",
+    "falta_autorizacion": "Missing authorization",
+    "falta_preautorizacion": "Missing pre-authorization"
+  },
+  "regimens": {
+    "contributivo": "Contributory",
+    "subsidiado": "Subsidized"
+  },
+  "upload": {
+    "onlyPdf": "Only PDF files are allowed.",
+    "onlyZip": "Only ZIP files are allowed.",
+    "removeFile": "Remove file",
+    "dropTitle": "Drag the PDF here",
+    "dropZipTitle": "Drag the ZIP here",
+    "dropSubtitle": "or click to select it",
+    "dropSubtitleFromDevice": "or click to select it from your computer"
+  },
+  "list": {
+    "bulkSubmit": "{count, plural, =0 {Bulk submission} other {Bulk submission (#)}}",
+    "downloadReport": "Download report",
+    "downloadReportError": "Something went wrong while downloading the report."
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search by ID, patient, or document",
+    "epsPlaceholder": "Insurer (EPS)",
+    "dateRange": "Date range",
+    "add": "Add medical bill"
+  },
+  "table": {
+    "columns": {
+      "orderNumber": "Order no.",
+      "authorizationNumber": "Authorization no.",
+      "patient": "Patient",
+      "uploadDate": "Upload date",
+      "serviceDate": "Service date",
+      "regimen": "Health plan",
+      "eps": "Insurer (EPS)",
+      "serviceType": "Service type"
+    },
+    "deleteSuccess": "Medical bill deleted.",
+    "deleteError": "We couldn't delete the medical bill.",
+    "deleteConfirm": {
+      "title": "Delete medical bill",
+      "description": "Are you sure you want to delete this medical bill?"
+    }
+  },
+  "addModal": {
+    "title": "New Medical Bill",
+    "description": "Select the service type and attach the medical bill PDF.",
+    "orderNumber": "Order number",
+    "orderNumberPlaceholder": "e.g. PED-001",
+    "serviceType": "Service type",
+    "pdfFile": "PDF file",
+    "pdfHint": "PDF only · Max. 500 pages",
+    "processing": "Processing the medical bill. This can take up to 90 seconds…",
+    "confirm": "Upload medical bill",
+    "selectProject": "Select a project before uploading the medical bill.",
+    "success": "Medical bill uploaded and processed.",
+    "error": "Something went wrong while uploading the medical bill."
+  },
+  "bulkSubmitModal": {
+    "title": "Bulk submission",
+    "confirm": "Submit",
+    "description": "<b>{count}</b> selected {count, plural, one {medical bill} other {medical bills}} in Invoiced status will be submitted. Attach the evidence PDF.",
+    "evidence": "Evidence PDF",
+    "success": "{count, plural, one {# medical bill submitted.} other {# medical bills submitted.}}",
+    "error": "Something went wrong during bulk submission."
+  },
+  "submitModal": {
+    "title": "Submit",
+    "confirm": "Submit",
+    "description": "Attach the PDF with the submission evidence.",
+    "evidence": "Evidence PDF",
+    "success": "Medical bill submitted.",
+    "error": "Something went wrong while submitting the medical bill."
+  },
+  "invoiceModal": {
+    "title": "Invoice",
+    "confirm": "Invoice",
+    "description": "Enter the invoice number and attach the PDF. The ZIP is optional.",
+    "invoiceNumber": "Invoice number",
+    "invoiceNumberPlaceholder": "e.g. FAC-001",
+    "invoicePdf": "Invoice PDF",
+    "invoiceZip": "Invoice ZIP",
+    "optional": "(optional)",
+    "success": "Invoice uploaded.",
+    "error": "Something went wrong while uploading the invoice."
+  },
+  "uploadSupportModal": {
+    "title": "Upload supporting document",
+    "confirm": "Upload supporting document",
+    "description": "Attach the PDF and enter the document type.",
+    "documentType": "Document type",
+    "documentTypePlaceholder": "e.g. soporte_medico",
+    "success": "Supporting document uploaded.",
+    "error": "Something went wrong while uploading the supporting document."
+  },
+  "replaceSupportModal": {
+    "title": "Replace supporting document",
+    "confirm": "Replace",
+    "description": "Attach the new PDF for this document to replace the current supporting document.",
+    "success": "Supporting document replaced.",
+    "error": "Something went wrong while replacing the supporting document."
+  },
+  "detail": {
+    "loading": "Loading medical bill…",
+    "loadError": "We couldn't load the medical bill.",
+    "notFound": "Medical bill not found.",
+    "history": "History",
+    "actions": {
+      "sendToAudit": "Send to audit",
+      "audit": "Audit",
+      "auditing": "Auditing…",
+      "invoice": "Invoice",
+      "submit": "Submit",
+      "deleting": "Deleting…"
+    },
+    "deleteConfirm": {
+      "title": "Delete medical bill",
+      "description": "Are you sure you want to delete this medical bill?"
+    },
+    "deleteSuccess": "Medical bill deleted.",
+    "deleteError": "Something went wrong while deleting the medical bill.",
+    "sendToAuditSuccess": "Medical bill sent to pending audit.",
+    "sendToAuditError": "Something went wrong while sending the medical bill to audit.",
+    "auditSuccess": "Medical bill audited.",
+    "auditError": "Something went wrong while auditing the medical bill.",
+    "updateSuccess": "Medical bill updated.",
+    "updateError": "Something went wrong while updating the medical bill."
+  },
+  "info": {
+    "patientNamePlaceholder": "Patient name",
+    "documentType": "ID type",
+    "documentNumber": "ID number",
+    "authorizationNumber": "Authorization no.",
+    "orderNumber": "Order no.",
+    "regimen": "Health plan",
+    "serviceDate": "Service date",
+    "serviceType": "Service type",
+    "eps": "Insurer (EPS)",
+    "uploadDate": "Upload date"
+  },
+  "novelties": {
+    "title": "Issues",
+    "confirm": "Confirm issue",
+    "confirming": "Confirming…",
+    "resolveSuccess": "Issue resolved.",
+    "resolveError": "We couldn't resolve the issue.",
+    "severity": {
+      "CRITICA": "Critical",
+      "ALTA": "High",
+      "MEDIA": "Medium",
+      "BAJA": "Low"
+    }
+  },
+  "invoices": {
+    "title": "Invoices",
+    "columns": {
+      "invoiceNumber": "Invoice no.",
+      "invoiceDate": "Invoice date",
+      "uploadDate": "Upload date",
+      "files": "Files"
+    }
+  },
+  "submission": {
+    "title": "Invoice submission",
+    "columns": {
+      "evidence": "Evidence",
+      "submissionDate": "Submission date",
+      "submittedBy": "Submitted by",
+      "file": "File"
+    },
+    "evidenceLabel": "Submission evidence",
+    "system": "System"
+  },
+  "timeline": {
+    "by": "By: {actor}",
+    "system": "System",
+    "current": "Current status",
+    "currentWithNovelties": "With issues · Current status",
+    "pending": "Pending"
+  },
+  "documents": {
+    "title": "Classified documents",
+    "fallbackName": "Document {sequence}",
+    "pages": "p. {start}–{end}",
+    "columns": {
+      "novelties": "Issues"
+    },
+    "empty": {
+      "title": "No classified documents",
+      "description": "This file hasn't been processed yet."
+    },
+    "noSelection": {
+      "title": "No document selected",
+      "description": "Click the eye icon on a document to view it here."
+    },
+    "preview": {
+      "unavailable": "Preview not available",
+      "invalidPdf": "The document is invalid or corrupted.",
+      "missingPdf": "The document wasn't found.",
+      "unexpectedResponse": "Unexpected server response.",
+      "loadError": "We couldn't load the document.",
+      "notAvailableTitle": "Document not available",
+      "notAvailableDescription": "The PDF for this document isn't available yet."
+    },
+    "menu": {
+      "download": "Download",
+      "fixNovelties": "Fix issues",
+      "replaceSupport": "Replace supporting document"
+    },
+    "viewDocument": "View document",
+    "uploadSupport": "Upload supporting document",
+    "generating": "Generating…",
+    "downloadPdfs": "{count, plural, one {Download PDF} other {Download PDFs}}",
+    "mergeError": "We couldn't generate the merged PDF.",
+    "downloadError": "We couldn't download the documents.",
+    "noveltiesResolved": "{count, plural, one {# issue resolved.} other {# issues resolved.}}",
+    "noveltiesResolveError": "We couldn't resolve the issues."
+  }
+}

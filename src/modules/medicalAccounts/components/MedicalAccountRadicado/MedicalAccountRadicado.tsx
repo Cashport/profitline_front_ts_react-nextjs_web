@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, FileCheck2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useMedicalAccountHistory } from "../../hooks/useMedicalAccountHistory";
 import { formatDate } from "../../utils/format";
@@ -16,6 +17,7 @@ const handleDownload = (url: string | null) => {
 };
 
 export function MedicalAccountRadicado({ accountId }: MedicalAccountRadicadoProps) {
+  const t = useTranslations("medicalAccounts.submission");
   const { history } = useMedicalAccountHistory(accountId);
 
   const radications = history.filter(
@@ -27,7 +29,7 @@ export function MedicalAccountRadicado({ accountId }: MedicalAccountRadicadoProp
   return (
     <div className="border-b border-gray-100">
       <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/40 px-6 py-3">
-        <span className="text-[13px] font-semibold text-gray-600">Radicación</span>
+        <span className="text-[13px] font-semibold text-gray-600">{t("title")}</span>
         <span className="text-[13px] font-medium text-gray-400">{radications.length}</span>
       </div>
 
@@ -36,16 +38,16 @@ export function MedicalAccountRadicado({ accountId }: MedicalAccountRadicadoProp
           <thead>
             <tr className="border-b border-cp-line bg-cp-surface">
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                Evidencia
+                {t("columns.evidence")}
               </th>
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                Fecha de radicación
+                {t("columns.submissionDate")}
               </th>
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                Radicado por
+                {t("columns.submittedBy")}
               </th>
               <th className="px-6 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                Archivo
+                {t("columns.file")}
               </th>
             </tr>
           </thead>
@@ -55,7 +57,7 @@ export function MedicalAccountRadicado({ accountId }: MedicalAccountRadicadoProp
                 <td className="px-6 py-3">
                   <div className="flex items-center gap-2">
                     <FileCheck2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                    <span className="font-medium text-gray-700">Evidencia de radicación</span>
+                    <span className="font-medium text-gray-700">{t("evidenceLabel")}</span>
                   </div>
                 </td>
                 <td className="px-6 py-3">
@@ -63,7 +65,7 @@ export function MedicalAccountRadicado({ accountId }: MedicalAccountRadicadoProp
                 </td>
                 <td className="px-6 py-3">
                   <span className="text-gray-500">
-                    {item.created_by_name ?? item.created_by ?? "Sistema"}
+                    {item.created_by_name ?? item.created_by ?? t("system")}
                   </span>
                 </td>
                 <td className="px-6 py-3">

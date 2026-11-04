@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import axios from "axios";
 
 import config from "@/config";
@@ -317,7 +318,7 @@ export const downloadMedicalAccountsReport = async (
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
       const json = JSON.parse(await error.response.data.text());
-      throw new Error(json?.message || "Error al descargar el reporte.");
+      throw new Error(json?.message || getTranslator("shared")("services.downloadReportError"));
     }
     throw error;
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "use-intl";
 
 import type { FilterModalProps, FilterOptionItem, FilterSelection } from "./FilterModal.types";
 import FilterTrigger from "./components/FilterTrigger";
@@ -12,9 +13,6 @@ import {
   FilterChips,
   type FilterChipItem
 } from "@/components/ui/page-header-controls/page-header-controls";
-
-const defaultTagValue = (_cat: unknown, items: FilterOptionItem[]) =>
-  items.length === 1 ? items[0].name : `${items.length} seleccionados`;
 
 const emptyOptionSelection = (categories: FilterModalProps["categories"]): FilterSelection => {
   const empty: FilterSelection = {};
@@ -47,6 +45,10 @@ export default function FilterModal({
   onDraftChange,
   footerSummary
 }: FilterModalProps) {
+  const t = useTranslations("components.filterModal");
+  const tCommon = useTranslations("common");
+  const defaultTagValue = (_cat: unknown, items: FilterOptionItem[]) =>
+    items.length === 1 ? items[0].name : tCommon("count.selected", { count: items.length });
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(categories[0]?.key ?? "");
   const [searchTerm, setSearchTerm] = useState("");
@@ -210,14 +212,12 @@ export default function FilterModal({
                 </svg>
               </div>
               <div className="flex-1">
-                <div className="text-[17px] font-semibold">Filtros Avanzados</div>
-                <div className="text-[13px] text-cp-ink-3">
-                  Encuentra y selecciona múltiples opciones
-                </div>
+                <div className="text-[17px] font-semibold">{t("title")}</div>
+                <div className="text-[13px] text-cp-ink-3">{t("subtitle")}</div>
               </div>
               <button
                 type="button"
-                aria-label="Cerrar"
+                aria-label={tCommon("actions.close")}
                 onClick={() => setIsOpen(false)}
                 className="h-8 w-8 cursor-pointer rounded-lg border-0 bg-transparent text-xl text-cp-ink-2 hover:bg-cp-muted"
               >

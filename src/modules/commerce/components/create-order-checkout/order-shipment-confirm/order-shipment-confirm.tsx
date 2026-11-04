@@ -20,7 +20,7 @@ import { formatNumber } from "@/utils/utils";
 import ModalShippingInfo from "../modal-shipping-info";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import CitiesSelect from "@/modules/commerce/components/cities-select";
-import { useCityWarehouse } from "@/app/(platform)/comercio/pedido/hooks/useCityWarehouses";
+import { useCityWarehouse } from "@/app/(platform)/commerce/order/hooks/useCityWarehouses";
 import {
   NEW_ADDRESS_OPTION,
   getDefaultCommentForBusinessUnit,
@@ -31,6 +31,7 @@ import {
   sanitizeComment
 } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
+import { useTranslations } from "use-intl";
 
 export type BonusRow = {
   product_id: number;
@@ -99,6 +100,12 @@ export default function OrderShipmentConfirm({
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
   const { showMessage } = useMessageApi();
+  const t = useTranslations("commerce.checkout");
+  const tShipping = useTranslations("commerce.shippingFields");
+  const tSearch = useTranslations("commerce.searchClient");
+  const tSummary = useTranslations("commerce.summary");
+  const tCart = useTranslations("commerce.cart");
+  const tCommon = useTranslations("common");
 
   // Sin descuentos el backend no devuelve `discounts`; los productos llegan en
   // `products` (mismo shape sin `discount`, que solo se lee de forma opcional).
@@ -480,7 +487,7 @@ export default function OrderShipmentConfirm({
     if (firstInvalid) {
       setShowErrors(true);
       firstInvalid.ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      showMessage("error", "Completa los datos faltantes para finalizar el pedido");
+      showMessage("error", t("completeMissingData"));
       return;
     }
 
@@ -586,7 +593,7 @@ export default function OrderShipmentConfirm({
   const total = confirmOrderData?.total ?? 0;
 
   const addressOptions = [
-    NEW_ADDRESS_OPTION,
+    { value: NEW_ADDRESS_OPTION.value, label: t("newAddressOption") },
     ...addresses.map((a) => ({ value: String(a.id), label: a.address }))
   ];
 
@@ -599,7 +606,7 @@ export default function OrderShipmentConfirm({
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#DDDDDD] flex-shrink-0">
           <div>
             <h2 className="text-sm font-bold text-[#141414]">
-              {multiEntrega ? "Múltiples entregas" : "Datos de envío"}
+              {multiEntrega ? t("multipleDeliveries") : t("shippingData")}
             </h2>
             <p className="text-[13px] text-[#999999]">{client?.name}</p>
           </div>
@@ -609,7 +616,7 @@ export default function OrderShipmentConfirm({
               className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:text-[#141414] transition-colors"
             >
               <GitBranch size={12} />
-              Dividir entregas
+              {t("splitDeliveries")}
             </button>
           ) : (
             <button
@@ -617,7 +624,7 @@ export default function OrderShipmentConfirm({
               className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-red-400 hover:text-red-500 transition-colors"
             >
               <X size={12} />
-              Un solo envío
+              {t("singleShipment")}
             </button>
           )}
         </div>
@@ -628,7 +635,7 @@ export default function OrderShipmentConfirm({
             <div className="px-5 py-5 flex flex-col gap-3">
               <div ref={addressRef} className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-semibold text-[#666666]">
-                  Dirección de entrega
+                  {t("deliveryAddress")}
                 </label>
                 <select
                   value={singleForm.addressSelectValue}
@@ -640,7 +647,7 @@ export default function OrderShipmentConfirm({
                   )}`}
                 >
                   <option value="" disabled>
-                    Seleccione una dirección
+                    {tSearch("selectAddress")}
                   </option>
                   {addressOptions.map((o) => (
                     <option key={String(o.value)} value={String(o.value)}>
@@ -651,14 +658,16 @@ export default function OrderShipmentConfirm({
                 {showFieldError("address") && (
                   <p className="text-[13px] text-red-500">
                     {singleForm.addressSelectValue === ""
-                      ? "Selecciona una dirección de entrega"
-                      : "La dirección seleccionada no tiene bodega asociada"}
+                      ? t("selectDeliveryAddress")
+                      : t("addressWithoutWarehouse")}
                   </p>
                 )}
               </div>
 
               <div ref={cityRef} className="flex flex-col gap-1.5">
-                <label className="text-[13px] font-semibold text-[#666666]">Ciudad</label>
+                <label className="text-[13px] font-semibold text-[#666666]">
+                  {tShipping("city")}
+                </label>
                 <CitiesSelect
                   cities={warehouseCities}
                   isLoading={isCityLoading}
@@ -669,13 +678,13 @@ export default function OrderShipmentConfirm({
                   status={showFieldError("city") ? "error" : undefined}
                 />
                 {showFieldError("city") && (
-                  <p className="text-[13px] text-red-500">Ingresa la ciudad</p>
+                  <p className="text-[13px] text-red-500">{t("enterCity")}</p>
                 )}
               </div>
 
               <div ref={dispatchAddressRef} className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-semibold text-[#666666]">
-                  Dirección de despacho
+                  {tShipping("dispatchAddress")}
                 </label>
                 <input
                   type="text"
@@ -691,10 +700,12 @@ export default function OrderShipmentConfirm({
                   )}`}
                 />
                 {showFieldError("dispatch_address") ? (
-                  <p className="text-[13px] text-red-500">Ingresa la dirección de despacho</p>
+                  <p className="text-[13px] text-red-500">{t("enterDispatchAddress")}</p>
                 ) : (
                   isNewAddressSingle && (
-                    <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
+                    <p className="text-[13px] text-[#999999]">
+                      {tSearch("maxChars", { count: 35 })}
+                    </p>
                   )
                 )}
               </div>
@@ -702,7 +713,7 @@ export default function OrderShipmentConfirm({
               {isNewAddressSingle && (
                 <div ref={warehouseRef} className="flex flex-col gap-1.5">
                   <label className="text-[13px] font-semibold text-[#666666]">
-                    Bodega de despacho
+                    {tShipping("dispatchWarehouse")}
                   </label>
                   <WarehouseSelect
                     warehouseForced={warehouseForced}
@@ -713,18 +724,18 @@ export default function OrderShipmentConfirm({
                     status={showFieldError("warehouse") ? "error" : undefined}
                   />
                   {showFieldError("warehouse") && (
-                    <p className="text-[13px] text-red-500">Selecciona una bodega de despacho</p>
+                    <p className="text-[13px] text-red-500">{t("selectDispatchWarehouse")}</p>
                   )}
                 </div>
               )}
 
               <div ref={emailRef} className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-semibold text-[#666666]">
-                  Correo electrónico
+                  {tCommon("fields.email")}
                 </label>
                 <input
                   type="email"
-                  placeholder="correo@ejemplo.com"
+                  placeholder={t("emailPlaceholder")}
                   value={singleForm.email}
                   onChange={(e) => setSingleForm((f) => ({ ...f, email: e.target.value }))}
                   className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${fieldBorder(
@@ -733,16 +744,14 @@ export default function OrderShipmentConfirm({
                 />
                 {(isSingleEmailInvalid || showFieldError("email")) && (
                   <p className="text-[13px] text-red-500">
-                    {singleForm.email.trim() === ""
-                      ? "Ingresa un correo electrónico"
-                      : "Correo electrónico no válido"}
+                    {singleForm.email.trim() === "" ? t("enterEmail") : t("invalidEmail")}
                   </p>
                 )}
               </div>
 
               <div ref={phoneRef} className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-semibold text-[#666666]">
-                  Teléfono de contacto
+                  {t("contactPhone")}
                 </label>
                 <div className="flex gap-2">
                   <select
@@ -776,16 +785,18 @@ export default function OrderShipmentConfirm({
                 {(isSinglePhoneInvalid || showFieldError("phone")) && (
                   <p className="text-[13px] text-red-500">
                     {singleForm.telefono.trim() === ""
-                      ? "Ingresa un teléfono de contacto"
+                      ? t("enterPhone")
                       : phoneErrorMessage(singleForm.indicativo)}
                   </p>
                 )}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] font-semibold text-[#666666]">Observaciones</label>
+                <label className="text-[13px] font-semibold text-[#666666]">
+                  {tShipping("comments")}
+                </label>
                 <textarea
-                  placeholder="Ingresar un comentario"
+                  placeholder={t("enterComment")}
                   maxLength={35}
                   value={singleForm.observaciones}
                   onChange={(e) =>
@@ -794,7 +805,7 @@ export default function OrderShipmentConfirm({
                   rows={1}
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
                 />
-                <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
+                <p className="text-[13px] text-[#999999]">{tSearch("maxChars", { count: 35 })}</p>
               </div>
             </div>
           )}
@@ -812,19 +823,19 @@ export default function OrderShipmentConfirm({
                       {eIdx + 1}
                     </span>
                     <p className="flex-1 text-[13px] font-medium text-[#141414] truncate">
-                      {entrega.dispatch_address || "Sin dirección"}
+                      {entrega.dispatch_address || t("noAddress")}
                     </p>
                     <button
                       onClick={() => openEditModal(entrega)}
                       className="w-6 h-6 rounded flex items-center justify-center text-[#999999] hover:text-[#141414] hover:bg-white transition-colors flex-shrink-0"
-                      title="Editar destino"
+                      title={t("editDestination")}
                     >
                       <Pencil size={12} />
                     </button>
                     <button
                       onClick={() => removeEntrega(entrega.id)}
                       className="w-6 h-6 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
-                      title="Eliminar destino"
+                      title={t("removeDestination")}
                     >
                       <Trash2 size={12} />
                     </button>
@@ -854,7 +865,7 @@ export default function OrderShipmentConfirm({
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F7FDE8] border-t border-[#F0F9D8]">
                         <Gift size={10} className="text-[#6AB000] flex-shrink-0" />
                         <span className="text-[13px] font-semibold text-[#6AB000]">
-                          Bonificados
+                          {tCart("freeGoods")}
                         </span>
                       </div>
                       <div className="divide-y divide-[#F0F9D8] bg-[#FDFFF5]">
@@ -919,7 +930,7 @@ export default function OrderShipmentConfirm({
                 className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-[13px] text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors"
               >
                 <Plus size={12} />
-                Agregar destino
+                {t("addDestination")}
               </button>
             </div>
           )}
@@ -933,7 +944,7 @@ export default function OrderShipmentConfirm({
                   onClick={onOpenPurchaseOrder}
                   disabled={loadingFinish || loadingDraft}
                   className="flex-1 text-left text-[13px] text-[#141414] truncate hover:underline disabled:cursor-not-allowed"
-                  title="Editar orden de compra"
+                  title={t("editPurchaseOrder")}
                 >
                   {purchaseOrderNumber || purchaseOrderFile?.name}
                 </button>
@@ -941,7 +952,7 @@ export default function OrderShipmentConfirm({
                   onClick={onClearPurchaseOrder}
                   disabled={loadingFinish || loadingDraft}
                   className="w-6 h-6 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 disabled:cursor-not-allowed"
-                  title="Quitar orden de compra"
+                  title={t("removePurchaseOrder")}
                 >
                   <X size={12} />
                 </button>
@@ -957,13 +968,13 @@ export default function OrderShipmentConfirm({
                 }`}
               >
                 <Paperclip size={12} />
-                Adjuntar orden de compra
+                {t("attachPurchaseOrder")}
                 {isPurchaseOrderRequired && <span className="text-red-500">*</span>}
               </button>
             )}
             {showFieldError("purchaseOrder") && (
               <p className="mt-1 text-[13px] text-red-500">
-                Obligatorio para el canal {businessUnit}
+                {t("requiredForChannel", { channel: businessUnit })}
               </p>
             )}
           </div>
@@ -994,11 +1005,11 @@ export default function OrderShipmentConfirm({
           {/* Totals */}
           <div className="rounded-[7px] py-3 flex flex-col gap-1">
             <div className="flex justify-between font-medium">
-              <p>Subtotal</p>
+              <p>{tSummary("subtotal")}</p>
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </div>
             <div className="flex justify-between text-[13px] text-[#999999]">
-              <p>Descuentos ({selectedDiscount?.name})</p>
+              <p>{t("discountsWithName", { name: selectedDiscount?.name ?? "" })}</p>
               {confirmOrderData?.discounts ? (
                 <p>-${formatNumber(descuentoDeProductos)}</p>
               ) : (
@@ -1007,26 +1018,26 @@ export default function OrderShipmentConfirm({
             </div>
 
             <div className="flex justify-between text-[13px] text-[#999999]">
-              <p>Descuento de orden</p>
+              <p>{t("orderDiscount")}</p>
               <p>-${formatNumber(descuentoDeOrden)}</p>
             </div>
 
             {totalDescuento > 0 && (
               <div className="flex justify-between text-[13px] text-[#999999]">
-                <span>Descuentos aplicados</span>
+                <span>{t("appliedDiscounts")}</span>
                 <span>-{formatNumber(totalDescuento)}</span>
               </div>
             )}
             <div className="flex justify-between text-xl font-bold text-[#141414] pt-1.5 border-t border-[#DDDDDD] mt-0.5">
-              <span>Total</span>
+              <span>{tSummary("total")}</span>
               <span>{formatNumber(total)}</span>
             </div>
             <div className="flex justify-between font-medium">
-              <p>IVA</p>
+              <p>{tSummary("vat")}</p>
               <p>${formatNumber(confirmOrderData?.taxes)}</p>
             </div>
             <div className="flex justify-between font-medium">
-              <p>Total con pronto pago</p>
+              <p>{tSummary("totalWithEarlyPayment")}</p>
               <p>${formatNumber(confirmOrderData?.total_pronto_pago)}</p>
             </div>
           </div>
@@ -1038,14 +1049,14 @@ export default function OrderShipmentConfirm({
               disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
               className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {loadingDraft ? "Guardando…" : "Guardar borrador"}
+              {loadingDraft ? tCommon("status.saving") : t("saveDraft")}
             </button>
             <button
               onClick={handleConfirmClick}
               disabled={loadingFinish || loadingDraft || (multiEntrega && hayDesbalance)}
               className="flex-1 py-3 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {loadingFinish ? "Procesando…" : "Finalizar pedido"}
+              {loadingFinish ? tCommon("status.processing") : t("finishOrder")}
             </button>
           </div>
         </div>

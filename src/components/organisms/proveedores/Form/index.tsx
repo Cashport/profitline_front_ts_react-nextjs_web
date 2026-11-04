@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { useForm } from "react-hook-form";
 import { Table, Flex } from "antd";
 import { FieldError } from "react-hook-form";
+import { useTranslations } from "use-intl";
 
 import { fetcher } from "@/utils/api/api";
 import { deleteDocumentById } from "@/services/providers/providers";
@@ -28,6 +29,9 @@ import { Document, FormField, Props, ApiResponse, IOption, UserType } from "./ty
 import "./form.scss";
 
 const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
+  const t = useTranslations("suppliers.form");
+  const tTable = useTranslations("suppliers.documentsTable");
+  const tCommon = useTranslations("common");
   const {
     control,
     handleSubmit,
@@ -123,7 +127,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
 
     const commonProps = {
       titleInput: field.question,
-      placeholder: `Ingresar ${field.description.toLowerCase()}`,
+      placeholder: t("enterField", { field: field.description.toLowerCase() }),
       control: control,
       nameInput: fieldName,
       error: errors?.[fieldName] as FieldError | undefined,
@@ -147,7 +151,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
               })) || []
             }
             loading={false}
-            placeholder={`Seleccionar ${field.description.toLowerCase()}`}
+            placeholder={t("selectField", { field: field.description.toLowerCase() })}
           />
         );
       case "MC":
@@ -162,7 +166,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
               })) || []
             }
             loading={false}
-            placeholder={`Seleccionar`}
+            placeholder={t("select")}
             mode="tags"
           />
         );
@@ -171,7 +175,12 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     }
   };
 
-  const tableColumns = columns({ handleOpenDrawer, setSelectedDocument });
+  const tableColumns = columns({
+    handleOpenDrawer,
+    setSelectedDocument,
+    t: tTable,
+    tCommon
+  });
 
   // Header compartido (docs/DESIGN.md §4) con "‹" de detalle. En auto gestión (cliente) el
   // header lo pone el layout de la ruta.
@@ -179,13 +188,13 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     const actions = <GenerateActionButton onClick={() => handleOpenModal(1)} />;
     switch (userType) {
       case UserType.ADMIN:
-        return <Header title="Proveedor" back="/proveedores" actionsExtra={actions} />;
+        return <Header title={t("supplier")} back="/suppliers" actionsExtra={actions} />;
       case UserType.CLIENT:
         return null;
       case UserType.APPROVER:
-        return <Header title="Nuevo proveedor" back="/proveedores" actionsExtra={actions} />;
+        return <Header title={t("newSupplier")} back="/suppliers" actionsExtra={actions} />;
       default:
-        return <Header title="Nuevo proveedor" />;
+        return <Header title={t("newSupplier")} />;
     }
   };
 
@@ -205,12 +214,12 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       const ids = selectedDocumentRows.map((row) => row.id);
       try {
         await Promise.all(ids.map((id) => deleteDocumentById(supplierId ?? "0", id)));
-        showMessage("success", "Documentos eliminados correctamente");
+        showMessage("success", t("deleteSuccess"));
         setIsModalOpen({ selected: 0 });
         setSelectedDocumentRows([]);
         mutate();
       } catch (error) {
-        showMessage("error", "Error al eliminar documentos");
+        showMessage("error", t("deleteError"));
       }
     }
     setLoadingRequest(false);
@@ -222,14 +231,14 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       {/* Tarjeta compartida (docs/DESIGN.md §3). */}
       <div className="cp-card flex flex-col gap-6 px-[18px] py-[14px]">
         <Flex vertical gap={16}>
-          <h3>Información General</h3>
+          <h3>{t("generalInfo")}</h3>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-grid">{formFields.map((field) => renderFormField(field))}</div>
           </form>
         </Flex>
         <hr style={{ border: "1px solid #DDDDDD" }} />
         <Flex vertical gap={16}>
-          <h3>Documentos</h3>
+          <h3>{t("documents")}</h3>
           <Table
             dataSource={documents.map((doc) => ({ ...doc, key: doc.id }))}
             columns={tableColumns}
@@ -286,8 +295,8 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
           setIsModalOpen({ selected: 0 });
         }}
         onOk={handleDeleteDocument}
-        title={`¿Está seguro de eliminar ${selectedDocumentRows?.length ?? 0} documento${(selectedDocumentRows?.length ?? 0) > 1 ? "s" : ""}?`}
-        okText="Eliminar"
+        title={t("confirmDelete", { count: selectedDocumentRows?.length ?? 0 })}
+        okText={tCommon("actions.delete")}
         okLoading={loadingRequest}
       />
     </div>

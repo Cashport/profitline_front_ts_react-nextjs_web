@@ -3,6 +3,7 @@
 import { useMemo, type KeyboardEvent } from "react";
 import { Pagination } from "antd";
 import { Download } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import UiSearchInput from "@/components/ui/search-input";
@@ -82,7 +83,7 @@ export default function ControlMatrix({
   pageSize,
   onPageChange,
   loading,
-  emptyMessage = "Ningún cliente coincide con los filtros.",
+  emptyMessage,
   drilldown,
   onSelect,
   legendEstados,
@@ -93,6 +94,8 @@ export default function ControlMatrix({
   onDownloadNovelties,
   downloadingNovelties
 }: ControlMatrixProps) {
+  const t = useTranslations("wallet.matrix");
+  const tCommon = useTranslations("common");
   // Ni la búsqueda ni el orden se resuelven aquí: la tabla sólo tiene la
   // página cargada, 15 de miles de clientes. Filtrar daría "sin resultados"
   // para clientes que sí existen y reordenar contradiría el orden de las
@@ -175,7 +178,7 @@ export default function ControlMatrix({
     <section className="cp-card text-card-foreground">
       <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
         <div>
-          <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>
+          <h3 className="text-[13.5px] font-semibold text-foreground">{t("title")}</h3>
           <div className="mt-2">
             <StatusLegend
               estados={legendEstados}
@@ -188,17 +191,16 @@ export default function ControlMatrix({
           {selectableEstados.length > 0 && (
             <p className="mt-1.5 text-[13px] text-muted-foreground">
               {estados.length === 0 ? (
-                "clic en un estado para filtrar · shift+clic para sumar varios"
+                t("legendHint")
               ) : (
                 <>
-                  {estados.length} {estados.length === 1 ? "estado filtrando" : "estados filtrando"}{" "}
-                  la matriz y los grupos ·{" "}
+                  {t("filteringStatuses", { count: estados.length })} ·{" "}
                   <button
                     type="button"
                     onClick={onEstadosClear}
                     className="font-semibold text-foreground hover:underline"
                   >
-                    Quitar filtro
+                    {t("clearFilter")}
                   </button>
                 </>
               )}
@@ -212,7 +214,7 @@ export default function ControlMatrix({
             <div className="min-w-0 flex-1">
               <UiSearchInput
                 id="wallet-matrix-search"
-                placeholder="Buscar cliente, NIT, factura o ejecutivo…"
+                placeholder={t("searchPlaceholder")}
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
@@ -221,17 +223,15 @@ export default function ControlMatrix({
               type="button"
               onClick={onDownloadNovelties}
               disabled={downloadingNovelties}
-              title="Descargar"
-              aria-label="Descargar novedades en Excel"
+              title={tCommon("actions.download")}
+              aria-label={t("downloadNovelties")}
               className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-[15px] w-[15px]" />
             </button>
           </div>
           <p className="mt-1.5 text-right text-[13px] text-muted-foreground">
-            {loading
-              ? "Actualizando…"
-              : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"}`}
+            {loading ? t("refreshing") : t("clientsCount", { count: totalClients })}
           </p>
         </div>
       </div>
@@ -253,7 +253,12 @@ export default function ControlMatrix({
           <thead>
             <tr>
               {/* Los `col` son los `sort_by` del API, así la vista los manda tal cual. */}
-              <SortableTh col="client_name" label="Cliente" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="client_name"
+                label={t("columns.customer")}
+                sort={sort}
+                onSort={onSort}
+              />
               {TRAMOS.map((t) => (
                 <SortableTh
                   key={t.i}
@@ -271,10 +276,16 @@ export default function ControlMatrix({
                 sort={sort}
                 onSort={onSort}
               />
-              <SortableTh col="total" label="Total" align="right" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="total"
+                label={tCommon("fields.total")}
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
               <SortableTh
                 col="overdue_percentage"
-                label="% vencido"
+                label={t("columns.pastDuePct")}
                 align="right"
                 sort={sort}
                 onSort={onSort}
@@ -286,7 +297,7 @@ export default function ControlMatrix({
             {visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={10} className="p-9 text-center text-muted-foreground">
-                  {emptyMessage}
+                  {emptyMessage ?? t("empty")}
                 </td>
               </tr>
             ) : (
@@ -299,7 +310,7 @@ export default function ControlMatrix({
                   <tr key={row.id} className="border-b border-border last:border-b-0">
                     {/* Abre todos los grupos del cliente, sin importar el tramo. */}
                     <DetailTooltip
-                      title={`${corto(row.nombre)} · toda la cartera`}
+                      title={t("wholeAccount", { customer: corto(row.nombre) })}
                       rows={estadoRows(g)}
                       total={{ value: fmtM(g.total) }}
                     >
@@ -317,10 +328,10 @@ export default function ControlMatrix({
                         <span className="font-semibold text-foreground">{row.nombre}</span>
                         {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
                         <span className="ml-2 whitespace-nowrap text-[13px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
-                          {nombreActiva ? "quitar selección" : "ver grupos"}
+                          {nombreActiva ? t("clearSelection") : t("viewGroups")}
                         </span>
                         <div className="text-[13px] text-muted-foreground">
-                          NIT {row.nit} — {row.ejecutivo}
+                          {t("taxIdLine", { taxId: row.nit, collector: row.ejecutivo })}
                         </div>
                       </td>
                     </DetailTooltip>
@@ -348,7 +359,7 @@ export default function ControlMatrix({
           <tfoot>
             <tr className="border-t border-border">
               <th scope="row" className="px-3 py-2.5 text-left font-semibold text-foreground">
-                Total
+                {tCommon("fields.total")}
               </th>
               {TRAMOS.map((t) => (
                 <th
@@ -376,8 +387,7 @@ export default function ControlMatrix({
           foto completa (salvo el pie con una fila plegada, que es de esa fila). */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
         <span className="text-[13px] text-muted-foreground">
-          Mostrando {visibleRows.length} de {totalClients}{" "}
-          {totalClients === 1 ? "cliente" : "clientes"}
+          {t("showing", { shown: visibleRows.length, count: totalClients })}
         </span>
         <Pagination
           current={page}

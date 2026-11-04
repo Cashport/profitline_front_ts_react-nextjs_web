@@ -17,6 +17,7 @@ import {
 import { Maximize2, Minimize2, TrendingUp } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import {
   useRevenueTracking,
@@ -26,32 +27,38 @@ import { useDashboardSalesEvolucion } from "@/modules/commerce/hooks/revenue-tra
 
 type ChartDatum = { label: string; revenue: number; cumulative: number };
 
-const MONTHS_ES = [
-  "Ene",
-  "Feb",
-  "Mar",
-  "Abr",
-  "May",
-  "Jun",
-  "Jul",
-  "Ago",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dic"
-];
+// Claves de commerce.dashboard.revenueChart.monthsShort, en orden.
+const MONTH_KEYS = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec"
+] as const;
+
+type ChartLabels = {
+  week: (week: number) => string;
+  month: (index: number) => string | undefined;
+};
 
 // The evolución endpoint encodes `date` differently per frequency, so a single dayjs parse fails
 // for the non-daily forms (semanal "2026-W19", mensual "2026-05", trimestral "2026-Q2", anual "2026").
-const formatSeriesLabel = (raw: string): string => {
+const formatSeriesLabel = (raw: string, labels: ChartLabels): string => {
   const week = raw.match(/^\d{4}-W(\d{1,2})$/);
-  if (week) return `S${Number(week[1])}`;
+  if (week) return labels.week(Number(week[1]));
 
   const quarter = raw.match(/^\d{4}-Q(\d)$/);
   if (quarter) return `Q${quarter[1]}`;
 
   const month = raw.match(/^\d{4}-(\d{2})$/);
-  if (month) return MONTHS_ES[Number(month[1]) - 1] ?? raw;
+  if (month) return labels.month(Number(month[1]) - 1) ?? raw;
 
   if (/^\d{4}$/.test(raw)) return raw;
 
@@ -59,129 +66,149 @@ const formatSeriesLabel = (raw: string): string => {
   return day.isValid() ? day.format("DD/MM") : raw;
 };
 
-const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: number }) => (
-  <div className="h-full w-full min-h-[440px]">
-    <ResponsiveContainer width="100%" height="100%">
-      <ComposedChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
-        <defs>
-          <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#FF5500" stopOpacity={0.1} />
-            <stop offset="95%" stopColor="#FF5500" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-        <XAxis dataKey="label" stroke="#a1a1aa" fontSize={13} tickLine={false} axisLine={false} />
-        <YAxis
-          stroke="#a1a1aa"
-          fontSize={13}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) =>
-            value >= 1000000 ? `${(value / 1000000).toFixed(1)}M` : `${value / 1000}k`
-          }
-        />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "rgb(9, 9, 11)",
-            borderColor: "rgb(39, 39, 42)",
-            borderRadius: "12px",
-            border: "1px solid rgb(39, 39, 42)",
-            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.5)"
-          }}
-          itemStyle={{ fontSize: "13px", fontWeight: "600" }}
-          labelStyle={{
-            color: "#a1a1aa",
-            marginBottom: "8px",
-            fontSize: "13px"
-          }}
-          formatter={(value: any, name: string) => {
-            if (name === "cumulative") return [`$ ${value.toLocaleString()}`, "Acumulado"];
-            if (name === "revenue") return [`$ ${value.toLocaleString()}`, "Venta periodo"];
-            return [`$ ${value.toLocaleString()}`, name];
-          }}
-        />
-
-        {targetGoal != null && (
-          <ReferenceLine
-            y={targetGoal}
-            stroke="#22c55e"
-            strokeDasharray="3 3"
-            strokeWidth={2}
-            label={{
-              position: "top",
-              value: `META: $${(targetGoal / 1000000).toFixed(1)}M`,
-              fill: "#22c55e",
-              fontSize: 13,
-              fontWeight: "bold",
-              className: "tracking-wider"
+const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: number }) => {
+  const t = useTranslations("commerce.dashboard.revenueChart");
+  return (
+    <div className="h-full w-full min-h-[440px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+          <defs>
+            <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#FF5500" stopOpacity={0.1} />
+              <stop offset="95%" stopColor="#FF5500" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
+          <XAxis dataKey="label" stroke="#a1a1aa" fontSize={13} tickLine={false} axisLine={false} />
+          <YAxis
+            stroke="#a1a1aa"
+            fontSize={13}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) =>
+              value >= 1000000 ? `${(value / 1000000).toFixed(1)}M` : `${value / 1000}k`
+            }
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "rgb(9, 9, 11)",
+              borderColor: "rgb(39, 39, 42)",
+              borderRadius: "12px",
+              border: "1px solid rgb(39, 39, 42)",
+              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.5)"
+            }}
+            itemStyle={{ fontSize: "13px", fontWeight: "600" }}
+            labelStyle={{
+              color: "#a1a1aa",
+              marginBottom: "8px",
+              fontSize: "13px"
+            }}
+            formatter={(value: any, name: string) => {
+              if (name === "cumulative") return [`$ ${value.toLocaleString()}`, t("cumulative")];
+              if (name === "revenue") return [`$ ${value.toLocaleString()}`, t("periodSales")];
+              return [`$ ${value.toLocaleString()}`, name];
             }}
           />
-        )}
 
-        <Bar
-          dataKey="revenue"
-          name="revenue"
-          fill="#3b82f6"
-          barSize={20}
-          radius={[4, 4, 0, 0]}
-          animationDuration={1000}
-        >
-          {data.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={entry.revenue > 1000000 ? "#3b82f6" : "#6366f1"}
-              fillOpacity={0.4}
+          {targetGoal != null && (
+            <ReferenceLine
+              y={targetGoal}
+              stroke="#22c55e"
+              strokeDasharray="3 3"
+              strokeWidth={2}
+              label={{
+                position: "top",
+                value: t("targetLine", { value: (targetGoal / 1000000).toFixed(1) }),
+                fill: "#22c55e",
+                fontSize: 13,
+                fontWeight: "bold",
+                className: "tracking-wider"
+              }}
             />
-          ))}
-        </Bar>
+          )}
 
-        <Area
-          type="monotone"
-          dataKey="cumulative"
-          name="cumulative"
-          stroke="none"
-          fill="url(#colorCumulative)"
-          tooltipType="none"
-          animationDuration={1500}
-        />
+          <Bar
+            dataKey="revenue"
+            name="revenue"
+            fill="#3b82f6"
+            barSize={20}
+            radius={[4, 4, 0, 0]}
+            animationDuration={1000}
+          >
+            {data.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.revenue > 1000000 ? "#3b82f6" : "#6366f1"}
+                fillOpacity={0.4}
+              />
+            ))}
+          </Bar>
 
-        <Line
-          type="monotone"
-          dataKey="cumulative"
-          name="cumulative"
-          stroke="#FF5500"
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 6, fill: "#FF5500", stroke: "#fff", strokeWidth: 2 }}
-          animationDuration={1500}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
-  </div>
-);
+          <Area
+            type="monotone"
+            dataKey="cumulative"
+            name="cumulative"
+            stroke="none"
+            fill="url(#colorCumulative)"
+            tooltipType="none"
+            animationDuration={1500}
+          />
 
-const FREQUENCY_OPTIONS: { short: string; option: FilterOption }[] = [
-  { short: "D", option: { id: "diaria", name: "Diaria" } },
-  { short: "S", option: { id: "semanal", name: "Semanal" } },
-  { short: "M", option: { id: "mensual", name: "Mensual" } }
-];
-
-const SUBTEXT_BY_FREQUENCY: Record<string, string> = {
-  diaria: "Ventas diarias y avance acumulado",
-  semanal: "Ventas semanales acumuladas",
-  mensual: "Evolución mensual acumulada",
-  trimestral: "Evolución trimestral acumulada",
-  anual: "Evolución anual acumulada"
+          <Line
+            type="monotone"
+            dataKey="cumulative"
+            name="cumulative"
+            stroke="#FF5500"
+            strokeWidth={3}
+            dot={false}
+            activeDot={{ r: 6, fill: "#FF5500", stroke: "#fff", strokeWidth: 2 }}
+            animationDuration={1500}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
 };
+
+// ids de frecuencia del filtro; textos en commerce.dashboard.filters.frequency.<id> y
+// commerce.dashboard.revenueChart.{frequencyShort,subtext}.<id>.
+const FREQUENCY_IDS = ["diaria", "semanal", "mensual"] as const;
+const SUBTEXT_FREQUENCIES = ["diaria", "semanal", "mensual", "trimestral", "anual"] as const;
+type SubtextFrequency = (typeof SUBTEXT_FREQUENCIES)[number];
+const DATE_PRESET_IDS = [
+  "hoy",
+  "esta_semana",
+  "mes_actual",
+  "ultimo_mes",
+  "ultimo_trimestre",
+  "ytd",
+  "ultimos_12_meses"
+] as const;
+type DatePresetId = (typeof DATE_PRESET_IDS)[number];
 
 export default function RevenueChart() {
   const { filters, setFilters, includeIva } = useRevenueTracking();
   const { data, isLoading } = useDashboardSalesEvolucion(filters, includeIva);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const t = useTranslations("commerce.dashboard.revenueChart");
+  const tFilters = useTranslations("commerce.dashboard.filters");
+  const tCommon = useTranslations("common");
 
   const frequency = filters?.frecuencia?.[0]?.id || "diaria";
-  const frequencyLabel = filters?.frecuencia?.[0]?.name || "Diaria";
-  const dateRange = filters?.fecha?.[0]?.name || "Mes actual";
+  const isSubtextFrequency = (SUBTEXT_FREQUENCIES as readonly string[]).includes(frequency);
+  const frequencyLabel = isSubtextFrequency
+    ? tFilters(`frequency.${frequency as SubtextFrequency}`)
+    : filters?.frecuencia?.[0]?.name || tFilters("frequency.diaria");
+  const fechaOption = filters?.fecha?.[0];
+  const dateRange = !fechaOption
+    ? tFilters("datePresets.mes_actual")
+    : (DATE_PRESET_IDS as readonly string[]).includes(fechaOption.id)
+      ? tFilters(`datePresets.${fechaOption.id as DatePresetId}`)
+      : fechaOption.name;
+  const frequencyOptions = FREQUENCY_IDS.map((id) => ({
+    short: t(`frequencyShort.${id}`),
+    option: { id, name: tFilters(`frequency.${id}`) } as FilterOption
+  }));
 
   const handleFrequencyChange = (option: FilterOption) => {
     setFilters({
@@ -191,6 +218,10 @@ export default function RevenueChart() {
   };
 
   const chartData = useMemo<ChartDatum[]>(() => {
+    const chartLabels: ChartLabels = {
+      week: (week) => t("weekShort", { week }),
+      month: (index) => (MONTH_KEYS[index] ? t(`monthsShort.${MONTH_KEYS[index]}`) : undefined)
+    };
     const series = data?.series ?? [];
     const isCumulative = data?.cumulative ?? false;
 
@@ -199,26 +230,26 @@ export default function RevenueChart() {
       const prevCumulative = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
       const revenue = isCumulative ? point.value - prevValue : point.value;
       const cumulative = isCumulative ? point.value : prevCumulative + point.value;
-      acc.push({ label: formatSeriesLabel(point.date), revenue, cumulative });
+      acc.push({ label: formatSeriesLabel(point.date, chartLabels), revenue, cumulative });
       return acc;
     }, []);
-  }, [data]);
+  }, [data, t]);
 
-  const subtext = SUBTEXT_BY_FREQUENCY[frequency] ?? "Evolución de ingresos";
+  const subtext = isSubtextFrequency ? t(`subtext.${frequency as SubtextFrequency}`) : t("title");
   const hasData = chartData.length > 0;
 
   const renderBody = () => {
     if (isLoading && !data) {
       return (
         <div className="h-full w-full min-h-[440px] flex items-center justify-center text-sm text-muted-foreground">
-          Cargando…
+          {tCommon("status.loading")}
         </div>
       );
     }
     if (!hasData) {
       return (
         <div className="h-full w-full min-h-[440px] flex items-center justify-center text-sm text-muted-foreground">
-          Sin datos
+          {tCommon("status.noData")}
         </div>
       );
     }
@@ -234,7 +265,7 @@ export default function RevenueChart() {
               <div className="p-1.5 bg-orange-500/10 rounded-lg">
                 <TrendingUp className="w-4 h-4 text-orange-500" />
               </div>
-              <h3 className="text-lg font-bold tracking-tight">Evolución de ingresos</h3>
+              <h3 className="text-lg font-bold tracking-tight">{t("title")}</h3>
             </div>
             <p className="text-[13px] text-muted-foreground">
               {subtext} • <span className="text-foreground font-medium">{dateRange}</span>
@@ -243,7 +274,7 @@ export default function RevenueChart() {
 
           <div className="flex items-center gap-3 ml-auto sm:ml-0">
             <div className="flex items-center gap-1 bg-secondary/50 rounded-xl border border-border p-1 text-[13px] font-bold text-muted-foreground">
-              {FREQUENCY_OPTIONS.map(({ short, option }) => (
+              {frequencyOptions.map(({ short, option }) => (
                 <button
                   key={option.id}
                   onClick={() => handleFrequencyChange(option)}
@@ -276,11 +307,15 @@ export default function RevenueChart() {
             <div>
               <Dialog.Title className="text-3xl font-bold text-foreground tracking-tight flex items-center gap-3">
                 <TrendingUp className="w-8 h-8 text-orange-500" />
-                Evolución de ingresos
+                {t("title")}
               </Dialog.Title>
               <Dialog.Description className="text-muted-foreground mt-2 text-base">
-                {subtext} en <span className="text-foreground font-bold">{dateRange}</span> (
-                {frequencyLabel.toLowerCase()}).
+                {t.rich("fullscreenDescription", {
+                  subtext,
+                  range: dateRange,
+                  frequency: frequencyLabel.toLowerCase(),
+                  b: (chunks) => <span className="text-foreground font-bold">{chunks}</span>
+                })}
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>

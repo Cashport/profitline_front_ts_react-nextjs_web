@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useAppStore } from "@/lib/store/store";
 import { IClientSummary } from "@/types/commerce/ICommerce";
 
@@ -7,6 +8,7 @@ interface ICarteraCardProps {
 }
 
 function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
+  const t = useTranslations("commerce.searchClient.receivables");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const noQuota = cupo.availableQuota < 0;
   const cupoUsadoPct = noQuota ? 0 : Math.round(cupo.percentageUsed);
@@ -15,17 +17,17 @@ function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
   return (
     <div className="bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
       <div className="px-5 py-3 border-b border-[#F0F0F0]">
-        <p className="text-[13px] font-semibold text-[#141414]">Cartera</p>
+        <p className="text-[13px] font-semibold text-[#141414]">{t("title")}</p>
       </div>
       <div className="grid grid-cols-2 divide-x divide-[#F0F0F0] border-b border-[#F0F0F0]">
         <div className="px-5 py-4">
-          <p className="text-[13px] text-[#999999] mb-1">Cartera total</p>
+          <p className="text-[13px] text-[#999999] mb-1">{t("total")}</p>
           <p className="text-sm font-bold text-[#141414]">
             {formatMoney(cartera.totalPortfolio, { hideDecimals: true })}
           </p>
         </div>
         <div className="px-5 py-4">
-          <p className="text-[13px] text-[#999999] mb-1">Cartera vencida</p>
+          <p className="text-[13px] text-[#999999] mb-1">{t("pastDue")}</p>
           <p className="text-sm font-bold text-red-500">
             {formatMoney(cartera.pastDueAmount, { hideDecimals: true })}
           </p>
@@ -34,13 +36,13 @@ function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
       <div className="px-5 py-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[13px] text-[#999999] mb-0.5">Cupo disponible</p>
+            <p className="text-[13px] text-[#999999] mb-0.5">{t("availableCredit")}</p>
             <p className="text-sm font-bold text-[#141414]">
               {formatMoney(noQuota ? 0 : cupo.availableQuota, { hideDecimals: true })}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[13px] text-[#999999] mb-0.5">Cupo total</p>
+            <p className="text-[13px] text-[#999999] mb-0.5">{t("creditLimit")}</p>
             <p className="text-sm font-bold text-[#141414]">
               {formatMoney(noQuota ? 0 : cupo.totalQuota, { hideDecimals: true })}
             </p>
@@ -57,9 +59,9 @@ function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
           </div>
           <div className="flex items-center justify-between mt-1.5">
             <p className="text-[13px] font-semibold text-[#141414]">
-              Disponible: {cupoDisponiblePct}%
+              {t("availablePct", { pct: cupoDisponiblePct })}
             </p>
-            <p className="text-[13px] text-[#999999]">Saldo: {cupoUsadoPct}%</p>
+            <p className="text-[13px] text-[#999999]">{t("usedPct", { pct: cupoUsadoPct })}</p>
           </div>
         </div>
       </div>

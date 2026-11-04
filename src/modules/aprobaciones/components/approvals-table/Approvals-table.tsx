@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
@@ -50,6 +51,8 @@ export default function ApprovalsTable({
   pagination,
   isLoading
 }: ApprovalsTableProps) {
+  const t = useTranslations("approvals.table");
+  const tCommon = useTranslations("common");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
@@ -81,7 +84,7 @@ export default function ApprovalsTable({
       showSorterTooltip: false
     },
     {
-      title: "Tipo de Aprobación",
+      title: t("columns.approvalType"),
       dataIndex: "approvalName",
       key: "approvalName",
       render: (approvalName: string) => <Text>{approvalName}</Text>,
@@ -89,14 +92,14 @@ export default function ApprovalsTable({
       showSorterTooltip: false
     },
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "clientName",
       key: "clientName",
       render: (clientName: string) => <Text className="clientText">{clientName}</Text>,
       showSorterTooltip: false
     },
     {
-      title: "Fecha",
+      title: tCommon("fields.date"),
       dataIndex: "createdAt",
       key: "createdAt",
       render: (text) => <Text>{formatDate(text)}</Text>,
@@ -105,12 +108,12 @@ export default function ApprovalsTable({
       width: 115
     },
     {
-      title: "Días Pendientes",
+      title: t("columns.daysPending"),
       key: "daysWaiting",
       align: "center",
       render: (_, record) => {
         const days = getDaysUntil(record.createdAt);
-        return <Text className="daysText">{days !== null ? `${days} días` : "-"}</Text>;
+        return <Text className="daysText">{days !== null ? t("days", { count: days }) : "-"}</Text>;
       },
       sorter: (a, b) => {
         const daysA = getDaysUntil(a.createdAt) ?? 0;
@@ -121,7 +124,7 @@ export default function ApprovalsTable({
       width: 130
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "status",
       key: "status",
       render: (status: IApprovalStepStatus) => (
@@ -138,7 +141,7 @@ export default function ApprovalsTable({
               : undefined
           }
         >
-          {status?.name || "Desconocido"}
+          {status?.name || t("unknownStatus")}
         </Badge>
       ),
       sorter: (a, b) => a.status.name.localeCompare(b.status.name),
@@ -153,6 +156,7 @@ export default function ApprovalsTable({
           className="buttonSeeDetail"
           onClick={() => onSelectApproval(record)}
           icon={<Eye size={"1.3rem"} />}
+          aria-label={tCommon("actions.viewDetail")}
         />
       )
     }
@@ -198,6 +202,7 @@ export default function ApprovalsTable({
                 className="buttonSeeDetail"
                 onClick={() => onSelectApproval(approval)}
                 icon={<Eye size={"1.3rem"} />}
+                aria-label={tCommon("actions.viewDetail")}
               />
             </div>
           </div>

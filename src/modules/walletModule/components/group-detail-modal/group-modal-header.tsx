@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { estadoMeta } from "../../utils/estados";
@@ -29,6 +30,8 @@ export default function GroupModalHeader({
   onChangeStatus,
   onOpenNoveltyModal
 }: GroupModalHeaderProps) {
+  const t = useTranslations("wallet.detail");
+  const tCommon = useTranslations("common");
   const nov = detail.novedad;
   const meta = estadoMeta(detail.tipo);
   const sla = nov ? slaDe(nov) : null;
@@ -64,7 +67,9 @@ export default function GroupModalHeader({
 
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[13px] text-muted-foreground">
           {corto(detail.cliente.nombre)}
-          <span className="tabular-nums opacity-80">· NIT {detail.cliente.nit}</span>
+          <span className="tabular-nums opacity-80">
+            · {t("taxId", { taxId: detail.cliente.nit })}
+          </span>
         </div>
       </div>
 
@@ -79,7 +84,7 @@ export default function GroupModalHeader({
         />
         <button
           type="button"
-          aria-label="Cerrar"
+          aria-label={tCommon("actions.close")}
           onClick={onClose}
           className="flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-border bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >

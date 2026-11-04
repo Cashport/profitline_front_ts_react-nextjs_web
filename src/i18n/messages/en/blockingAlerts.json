@@ -1,0 +1,199 @@
+{
+  "title": "Credit Hold Alerts",
+  "comingSoon": {
+    "title": "Coming soon",
+    "description": "Soon you'll be able to see customers and points of sale on credit hold, or about to be, due to past-due receivables."
+  },
+  "status": {
+    "blocked": "On hold",
+    "to_be_blocked": "At risk",
+    "up_to_date": "Current"
+  },
+  "aging": {
+    "current": "Current",
+    "pastDue1To60": "Past due 1–60 days",
+    "pastDueOver60": "Past due 60+ days",
+    "tip": "{label}: {amount}"
+  },
+  "sort": {
+    "urgency": "Most urgent first",
+    "past_due_desc": "Highest past due",
+    "past_due_asc": "Lowest past due",
+    "oldest_overdue_days": "Most days past due",
+    "name": "Name A–Z"
+  },
+  "rules": "Hold: invoices {blockDays}+ days past due or credit limit exceeded · Alert from {warningDays} days",
+  "cutoff": "As of {date}",
+  "count": {
+    "customers": "{count, plural, one {# customer} other {# customers}}",
+    "pointsOfSale": "{count, plural, one {# point of sale} other {# points of sale}}",
+    "invoices": "{count, plural, one {# invoice} other {# invoices}}",
+    "movements": "{count, plural, one {# item} other {# items}}",
+    "notes": "{count, plural, one {# memo} other {# memos}}"
+  },
+  "list": {
+    "caption": "{items} · {alerts} on alert",
+    "emptyCustomers": "No customers in this view",
+    "emptyPointsOfSale": "No points of sale in this view",
+    "range": "{from}–{to} of {items}",
+    "searchClientPointsOfSale": "Search point of sale or ship-to",
+    "searchPointsOfSale": "Search point of sale, ship-to or customer",
+    "searchCustomers": "Search customer or ship-to",
+    "sort": "Sort",
+    "sortBy": "Sort: {label}",
+    "customers": "Customers",
+    "pointsOfSale": "Points of sale",
+    "customer": "Customer",
+    "loadError": "Couldn't load alerts",
+    "customerReceivables": "Customer receivables",
+    "totalReceivables": "Total receivables",
+    "all": "All",
+    "shipToHint": "Each point of sale is identified by its ship-to code"
+  },
+  "card": {
+    "receivablesCurrent": "receivables current",
+    "pastDuePayment": "past due",
+    "shipTo": "Ship-to {code}",
+    "match": "Match · Ship-to {code} · {name}",
+    "blockedCount": "{count} on hold",
+    "warningCount": "{count} at risk",
+    "allCurrent": "all current"
+  },
+  "header": {
+    "breadcrumb": "Breadcrumb"
+  },
+  "pointsOfSaleCard": {
+    "blocked": "{count, plural, other {On hold}}",
+    "viewAll": "View all",
+    "allCurrent": "All of its points of sale are current.",
+    "pastDue": "past due",
+    "viewAllCount": "View all {items}"
+  },
+  "documents": {
+    "selectAll": "Select all"
+  },
+  "recipients": {
+    "to": "To"
+  },
+  "sendToClient": {
+    "title": "Send to customer",
+    "email": "email",
+    "emailTab": "Email",
+    "phonePlaceholder": "Contact or number with country code (57…)",
+    "emailPlaceholder": "Contact or email",
+    "pickContact": "Choose a contact",
+    "noContacts": "{name} has no {channel} contacts for the account statement.",
+    "templateLabel": "Template · Account statement",
+    "emailLabel": "Email · Account statement",
+    "noTemplate": "The project doesn't have the {template} WhatsApp template.",
+    "loadingTemplate": "Loading template…",
+    "emailBody": "The customer's account statement arrives as an attachment.",
+    "sent": "Sent via {channel} to {recipients}",
+    "sendError": "Couldn't send via {channel}",
+    "sendBy": "Send via {channel}"
+  },
+  "paymentLink": {
+    "sent": "Link sent via {channel} to {contact}",
+    "copied": "Link copied",
+    "copyError": "Couldn't copy the link",
+    "title": "Payment link",
+    "ready": "Link ready to send",
+    "expiresOn": "Expires {date}",
+    "emailTab": "Email",
+    "email": "email",
+    "qr": "In-store QR",
+    "done": "Done",
+    "validFor": "{name} · valid for 48 hours",
+    "modePastDue": "Past-due amount",
+    "modeSelected": "Selected invoices",
+    "youWillCharge": "You'll collect",
+    "linkExpires": "Link expires",
+    "expiresValue": "{date} (48 h)",
+    "generate": "Generate payment link"
+  },
+  "statement": {
+    "sections": {
+      "pastDue": "Past-due invoices",
+      "upcoming": "Not-yet-due invoices",
+      "pendingBalances": "Pending deductions",
+      "creditNotes": "Credit memos"
+    },
+    "notAvailable": "There's no {format} account statement to download",
+    "downloading": "Downloading {name}'s account statement ({format})",
+    "sent": "Account statement sent to {recipients}",
+    "downloadError": "Couldn't download the account statement",
+    "sendError": "Couldn't send the account statement",
+    "title": "Account statement",
+    "include": "Include in the account statement",
+    "whatToDo": "What do you want to do?",
+    "download": "Download",
+    "downloadHint": "Save it to this device",
+    "email": "Send by email",
+    "emailHint": "The customer gets it as an attachment",
+    "toPlaceholder": "email@customer.com",
+    "optional": "Optional",
+    "subject": "Subject",
+    "subjectValue": "Account statement · {name} · as of {date}",
+    "attachment": "Attachment",
+    "submitDownload": "Download account statement · {format}",
+    "submitEmail": "Send account statement"
+  },
+  "detail": {
+    "customer": "Customer",
+    "overdueBy": "Past due · {days, plural, one {# day} other {# days}}",
+    "dueOn": "Due {date}",
+    "noDueDate": "No due date",
+    "creditNote": "Credit memo",
+    "balance": "Deduction",
+    "tabs": {
+      "all": "All",
+      "past_due": "Past due",
+      "credit_notes": "Credit memos",
+      "available_payments": "Available payments",
+      "balances": "Deductions",
+      "paid_invoices": "Paid"
+    },
+    "empty": {
+      "all": "No open invoices for this {target, select, pos {point of sale} other {customer}}.",
+      "past_due": "No past-due invoices. They can keep ordering as usual.",
+      "credit_notes": "No credit memos for this {target, select, pos {point of sale} other {customer}}.",
+      "available_payments": "No available payments for this {target, select, pos {point of sale} other {customer}}.",
+      "balances": "No pending deductions for this {target, select, pos {point of sale} other {customer}}.",
+      "paid_invoices": "No paid invoices pending clearing."
+    },
+    "count": {
+      "all": "{count, plural, one {# invoice} other {# invoices}}",
+      "past_due": "{count, plural, one {# invoice} other {# invoices}}",
+      "credit_notes": "{count, plural, one {# credit memo} other {# credit memos}}",
+      "available_payments": "{count, plural, one {# available payment} other {# available payments}}",
+      "balances": "{count, plural, one {# pending deduction} other {# pending deductions}}",
+      "paid_invoices": "{count, plural, one {# invoice} other {# invoices}}"
+    },
+    "selected": {
+      "all": "{count, plural, one {# invoice selected} other {# invoices selected}}",
+      "past_due": "{count, plural, one {# invoice selected} other {# invoices selected}}",
+      "credit_notes": "{count, plural, one {# credit memo selected} other {# credit memos selected}}",
+      "available_payments": "{count, plural, one {# payment selected} other {# payments selected}}",
+      "balances": "{count, plural, one {# deduction selected} other {# deductions selected}}",
+      "paid_invoices": "{count, plural, one {# paid invoice selected} other {# paid invoices selected}}"
+    },
+    "paymentTitle": "Payment {id}",
+    "paymentSubtitle": "Payment {id} · available",
+    "balanceTitle": "Deduction {id}",
+    "paidSubtitle": "Paid {date} · SAP clearing",
+    "paidSubtitleNoDate": "Paid · SAP clearing",
+    "paidNotice": "In SAP clearing · not counted in receivables or collected",
+    "statement": "Account statement",
+    "sendToCustomer": "Send to customer",
+    "ofCustomer": "of <b>{name}</b>",
+    "viewCustomer": "View customer",
+    "receivables": "Receivables",
+    "extras": {
+      "pendingBalances": "Pending deductions",
+      "creditNotes": "Credit memos",
+      "availablePayments": "Available payments"
+    },
+    "pastDue": "Past due",
+    "paymentLink": "Payment link"
+  }
+}

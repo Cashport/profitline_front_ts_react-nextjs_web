@@ -8,6 +8,7 @@ import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm
 import "./answercard.scss";
 import OptionList from "./OptionList/OptionList";
 import FileUploadButton from "./FileUploadButton/FileUploadButton";
+import { useTranslations } from "use-intl";
 const { Text, Title } = Typography;
 
 interface AnswerCardProps {
@@ -19,6 +20,9 @@ interface AnswerCardProps {
 }
 
 const AnswerCard: React.FC<AnswerCardProps> = ({ index, question, control, setValue, errors }) => {
+  const t = useTranslations("projects.forms.question");
+  const tCommon = useTranslations("common");
+  const requiredMessage = tCommon("validation.required");
   const renderAnswer = (questionType: QuestionType) => {
     const fieldName = `answers[${index}].value`;
     switch (questionType) {
@@ -52,11 +56,11 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ index, question, control, setVa
             hiddenTitle
             titleInput=""
             nameInput={fieldName}
-            placeholder="Seleccionar fecha"
+            placeholder={t("selectDate")}
             control={control}
             error={errors?.answers?.[index]?.value}
             validationRules={{
-              required: question.isRequired ? "Este campo es obligatorio" : false
+              required: question.isRequired ? requiredMessage : false
             }}
           />
         );
@@ -67,10 +71,10 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ index, question, control, setVa
             control={control}
             nameInput={fieldName}
             error={errors?.answers?.[index]?.value}
-            placeholder="Ingresar número"
+            placeholder={t("enterNumber")}
             typeInput="number"
             validationRules={{
-              required: question.isRequired ? "Este campo es obligatorio" : false
+              required: question.isRequired ? requiredMessage : false
             }}
           />
         );
@@ -89,9 +93,9 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ index, question, control, setVa
             control={control}
             nameInput={`answers[${index}].value`}
             error={errors?.answers?.[index]?.value}
-            placeholder="Ingresar texto"
+            placeholder={t("enterText")}
             validationRules={{
-              required: question.isRequired ? "Este campo es obligatorio" : false
+              required: question.isRequired ? requiredMessage : false
             }}
           />
         );

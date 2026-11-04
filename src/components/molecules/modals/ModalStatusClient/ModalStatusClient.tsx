@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Flex, Modal, Radio, Space, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import { useClientStatus } from "@/hooks/useClientStatus";
 import { changeClientStatus } from "@/services/clients/clients";
 import { MessageType } from "@/context/MessageContext";
@@ -15,7 +16,6 @@ interface Props {
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void;
   initialStatus: string;
-
 }
 
 export const ModalStatusClient = ({
@@ -25,6 +25,8 @@ export const ModalStatusClient = ({
   showMessage,
   initialStatus
 }: Props) => {
+  const t = useTranslations("modals.statusClient");
+  const tCommon = useTranslations("common");
   const { data: statusClient, loading } = useClientStatus();
   const [selectedStatus, setSelectedStatus] = useState<number | null>(null);
   const [loadingChange, setLoadingChange] = useState<boolean>(false);
@@ -47,7 +49,7 @@ export const ModalStatusClient = ({
       setLoadingChange(false);
       setIsStatusClient({ status: false, remove: false });
     } else {
-      showMessage("warning", "Por favor selecciona un estado antes de continuar.");
+      showMessage("warning", t("selectStatusFirst"));
     }
   };
 
@@ -55,7 +57,7 @@ export const ModalStatusClient = ({
     <Modal
       open={isOpen}
       onCancel={() => setIsStatusClient({ status: false, remove: false })}
-      title="Cambio de estado"
+      title={t("title")}
       okButtonProps={{
         className: "buttonOk",
         loading: loadingChange,
@@ -64,12 +66,12 @@ export const ModalStatusClient = ({
       cancelButtonProps={{
         className: "buttonCancel"
       }}
-      okText="Guardar cambios"
-      cancelText="Cancelar"
+      okText={tCommon("actions.saveChanges")}
+      cancelText={tCommon("actions.cancel")}
       className="modalstatusclient"
     >
       <Flex vertical>
-        <Text>Selecciona el nuevo estado del cliente</Text>
+        <Text>{t("selectNewStatus")}</Text>
         <Radio.Group
           style={{ padding: "1rem 0", width: "100%" }}
           onChange={(e) => setSelectedStatus(e.target.value)}
@@ -77,7 +79,7 @@ export const ModalStatusClient = ({
         >
           <Space direction="vertical" style={{ width: "100%" }}>
             {loading ? (
-              <Text>Cargando estados...</Text>
+              <Text>{t("loadingStatuses")}</Text>
             ) : (
               statusClient?.map((status) => (
                 <Flex className="radioStatus" key={status.id}>
@@ -93,7 +95,7 @@ export const ModalStatusClient = ({
           className="deleteText"
           onClick={() => setIsStatusClient({ status: true, remove: true })}
         >
-          Eliminar Cliente
+          {t("deleteCustomer")}
         </Text>
       </Flex>
     </Modal>

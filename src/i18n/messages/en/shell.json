@@ -1,0 +1,70 @@
+{
+  "nav": {
+    "groups": {
+      "receivables": "Collections",
+      "collections": "Payments",
+      "commercial": "Sales",
+      "automation": "Automation",
+      "management": "Management"
+    },
+    "modules": {
+      "receivables": "Collections",
+      "aging": "AR Aging",
+      "novelties": "Disputes",
+      "balances": "Deductions",
+      "blockingAlerts": "Credit Hold Alerts",
+      "medicalAccounts": "Medical Billing",
+      "collectionsTower": "Collections Control Tower",
+      "banks": "Banks",
+      "cashApplication": "Cash Application",
+      "marketplace": "Marketplace",
+      "purchaseOrders": "Purchase Orders",
+      "visits": "Visits",
+      "surveys": "Surveys",
+      "reverseLogistics": "Reverse Logistics",
+      "bots": "Bots",
+      "mail": "Mail",
+      "whatsapp": "WhatsApp",
+      "dataQuality": "Data Quality",
+      "approvals": "Approvals",
+      "tasks": "Tasks",
+      "reports": "Reports",
+      "settings": "Settings"
+    },
+    "switchProject": "Switch project",
+    "projectLogo": "Project logo",
+    "pinMenu": "Pin menu",
+    "unpinMenu": "Unpin menu",
+    "openMenu": "Open menu"
+  },
+  "header": {
+    "back": "Back"
+  },
+  "userMenu": {
+    "trigger": "User menu",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": "Language",
+    "languageSaveError": "We changed the language on this device, but couldn't save it to your profile. Please try again later.",
+    "changePassword": "Change password",
+    "sendingEmail": "Sending email…",
+    "passwordEmailSent": "We sent an email to {email} so you can change your password",
+    "passwordEmailError": "We couldn't send the email. Please try again.",
+    "contactSupport": "Contact support",
+    "logout": "Sign out"
+  },
+  "logout": {
+    "title": "Sign out?",
+    "description": "You'll be signed out of Cashport on this device. Your filters and preferences are saved.",
+    "confirm": "Sign out"
+  },
+  "projectSelector": {
+    "title": "Choose a project",
+    "projectImage": "Project image",
+    "showMore": "Show more projects"
+  }
+}

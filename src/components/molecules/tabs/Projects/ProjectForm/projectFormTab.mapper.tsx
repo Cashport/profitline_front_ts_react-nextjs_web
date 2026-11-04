@@ -90,14 +90,15 @@ export const _onSubmit = async (
   }
 };
 
+// Devuelve la clave de traducción (shared.projectForm.submit.*) del botón principal.
 export const validationButtonText = (statusForm: "create" | "edit" | "review") => {
   switch (statusForm) {
     case "create":
-      return "Crear nuevo proyecto";
+      return "create" as const;
     case "edit":
-      return "Guardar Cambios";
+      return "edit" as const;
     case "review":
-      return "Editar Proyecto";
+      return "review" as const;
   }
 };
 

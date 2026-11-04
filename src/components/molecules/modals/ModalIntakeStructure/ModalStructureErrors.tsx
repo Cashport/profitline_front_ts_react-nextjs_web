@@ -1,4 +1,6 @@
 import { IStructureDetected, IStructureIssue } from "@/types/dataQuality/IIntakeStructure";
+import { useTranslations } from "use-intl";
+
 import { PlCol, PlModalShell } from "./PlModalShell";
 
 export interface IStructureErrorsState {
@@ -16,6 +18,8 @@ interface Props {
 
 /** Etapa "Críticas": errores de estructura del archivo (422), todos juntos y con su celda. */
 export const ModalStructureErrors = ({ open, state, onClose }: Props) => {
+  const t = useTranslations("modals.intakeStructure.structureErrors");
+  const tShared = useTranslations("modals.intakeStructure");
   const detected = state?.detected;
   const issues = state?.issues ?? [];
   const count = issues.length;
@@ -24,29 +28,29 @@ export const ModalStructureErrors = ({ open, state, onClose }: Props) => {
     <PlModalShell
       open={open}
       onClose={onClose}
-      title="El archivo no tiene la estructura esperada"
+      title={t("title")}
       meta={
         detected?.headerCell
           ? `${detected.format ? `${detected.format.toUpperCase()} · ` : ""}${
-              detected.sheet ? `hoja ${detected.sheet} · ` : ""
-            }encabezados desde ${detected.headerCell}`
+              detected.sheet ? `${t("sheet", { sheet: detected.sheet })} · ` : ""
+            }${tShared("headersFrom", { cell: detected.headerCell })}`
           : null
       }
       steps={[
-        { label: "1 · Críticas", state: "error" },
-        { label: "2 · Advertencias", state: "pending" },
-        { label: "3 · Confirmar", state: "pending" }
+        { label: t("stepCritical"), state: "error" },
+        { label: t("stepWarnings"), state: "pending" },
+        { label: t("stepConfirm"), state: "pending" }
       ]}
-      heading={`${count} ${count === 1 ? "alerta crítica" : "alertas críticas"}`}
-      subheading="Corrige el archivo y vuelve a cargarlo. No se procesó ningún dato."
+      heading={t("heading", { count })}
+      subheading={t("subheading")}
       footer={
         <>
           <button type="button" className="plBtn" onClick={onClose}>
-            Cancelar cargue
+            {tShared("cancelUpload")}
           </button>
           <span className="plSpacer" />
           <button type="button" className="plBtn plBtnPrimary" onClick={onClose}>
-            Entendido
+            {t("gotIt")}
           </button>
         </>
       }
@@ -65,7 +69,7 @@ export const ModalStructureErrors = ({ open, state, onClose }: Props) => {
 
       {!!state?.warnings.length && (
         <div className="plAlert">
-          <strong>Advertencias</strong>
+          <strong>{t("warnings")}</strong>
           <ul>
             {state.warnings.map((w, i) => (
               <li key={i}>{w.message}</li>
@@ -76,10 +80,10 @@ export const ModalStructureErrors = ({ open, state, onClose }: Props) => {
 
       {!!detected?.headers.length && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <span className="plNote">Encabezados encontrados en el archivo:</span>
+          <span className="plNote">{t("headersFound")}</span>
           <div className="plTags">
             {detected.headers.map((h, i) => (
-              <PlCol key={`${h}-${i}`}>{h || "(sin nombre)"}</PlCol>
+              <PlCol key={`${h}-${i}`}>{h || tShared("unnamed")}</PlCol>
             ))}
           </div>
         </div>

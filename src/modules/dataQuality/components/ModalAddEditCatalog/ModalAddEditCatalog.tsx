@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as yup from "yup";
 import { Modal, Spin } from "antd";
 import { useForm, Controller } from "react-hook-form";
 import { Save } from "lucide-react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
@@ -22,27 +23,30 @@ import {
   getMaterialProductType
 } from "@/services/dataQuality/dataQuality";
 
-export const catalogFormSchema = yup.object().shape({
-  customer_product_cod: yup
-    .string()
-    .required("El código del cliente es requerido")
-    .min(1, "El código debe tener al menos 1 caracter"),
-  customer_product_description: yup
-    .string()
-    .required("El producto del cliente es requerido")
-    .min(1, "La descripción debe tener al menos 1 caracter"),
-  material_code: yup.string().required("El material es requerido"),
-  product_type: yup.string().required("El tipo de producto es requerido"),
-  type_vol: yup.string().required("El tipo de volumen es requerido"),
-  factor: yup
-    .number()
-    .typeError("El factor debe ser un número")
-    .required("El factor es requerido")
-    .positive("El factor debe ser positivo"),
-  excluded: yup.boolean().default(false)
-});
+type MaterialFormT = ReturnType<typeof useTranslations<"dataQuality.materialForm">>;
 
-export type CatalogFormData = yup.InferType<typeof catalogFormSchema>;
+export const buildCatalogFormSchema = (t: MaterialFormT) =>
+  yup.object().shape({
+    customer_product_cod: yup
+      .string()
+      .required(t("validation.customerCode"))
+      .min(1, t("validation.codeMin")),
+    customer_product_description: yup
+      .string()
+      .required(t("validation.customerProduct"))
+      .min(1, t("validation.descriptionMin")),
+    material_code: yup.string().required(t("validation.material")),
+    product_type: yup.string().required(t("validation.productType")),
+    type_vol: yup.string().required(t("validation.volumeType")),
+    factor: yup
+      .number()
+      .typeError(t("validation.factorNumber"))
+      .required(t("validation.factorRequired"))
+      .positive(t("validation.factorPositive")),
+    excluded: yup.boolean().default(false)
+  });
+
+export type CatalogFormData = yup.InferType<ReturnType<typeof buildCatalogFormSchema>>;
 
 const INITIAL_VALUES: CatalogFormData = {
   customer_product_cod: "",
@@ -73,6 +77,9 @@ export default function ModalAddEditCatalog({
   countryId,
   isLoadingCreateEdit = false
 }: Props) {
+  const t = useTranslations("dataQuality.materialForm");
+  const tCommon = useTranslations("common");
+  const catalogFormSchema = useMemo(() => buildCatalogFormSchema(t), [t]);
   const {
     control,
     handleSubmit,
@@ -149,12 +156,10 @@ export default function ModalAddEditCatalog({
       footer={null}
       width={600}
       destroyOnClose
-      title={mode === "edit" ? "Editar Equivalencia" : "Nueva Equivalencia"}
+      title={mode === "edit" ? t("editEquivalenceTitle") : t("newEquivalenceTitle")}
     >
       <p style={{ color: "#8c8c8c" }}>
-        {mode === "edit"
-          ? "Modifica la equivalencia del producto."
-          : "Crea una nueva equivalencia de producto."}
+        {mode === "edit" ? t("editEquivalenceDescription") : t("newEquivalenceDescription")}
       </p>
 
       <form onSubmit={handleSubmit(handleFormSubmit)}>
@@ -162,7 +167,7 @@ export default function ModalAddEditCatalog({
           {/* Campo 1: Código del Cliente */}
           <div className="grid gap-2">
             <Label htmlFor="clientCode" style={{ color: "#141414" }}>
-              Código del Cliente
+              {t("customerCode")}
             </Label>
             <Controller
               name="customer_product_cod"
@@ -171,7 +176,7 @@ export default function ModalAddEditCatalog({
                 <Input
                   {...field}
                   id="clientCode"
-                  placeholder="Ej: DLX001"
+                  placeholder={t("customerCodePlaceholder")}
                   style={{ borderColor: errors.customer_product_cod ? "#ff4d4f" : "#DDDDDD" }}
                 />
               )}
@@ -186,7 +191,7 @@ export default function ModalAddEditCatalog({
           {/* Campo 2: Producto del Cliente */}
           <div className="grid gap-2">
             <Label htmlFor="clientProduct" style={{ color: "#141414" }}>
-              Producto del Cliente
+              {t("customerProduct")}
             </Label>
             <Controller
               name="customer_product_description"
@@ -195,7 +200,7 @@ export default function ModalAddEditCatalog({
                 <Input
                   {...field}
                   id="clientProduct"
-                  placeholder="Ej: DOLEX x6 presentación MAX"
+                  placeholder={t("customerProductPlaceholder")}
                   style={{
                     borderColor: errors.customer_product_description ? "#ff4d4f" : "#DDDDDD"
                   }}
@@ -212,7 +217,7 @@ export default function ModalAddEditCatalog({
           {/* Campo 3: Material */}
           <div className="grid gap-2">
             <Label htmlFor="materialCode" style={{ color: "#141414" }}>
-              Material
+              {t("material")}
             </Label>
             <Controller
               name="material_code"
@@ -222,7 +227,7 @@ export default function ModalAddEditCatalog({
                   showSearch
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Seleccionar material"
+                  placeholder={t("materialPlaceholder")}
                   hasError={!!errors.material_code}
                   options={selectOptions.materials.map((material) => ({
                     value: String(material.id),
@@ -241,7 +246,7 @@ export default function ModalAddEditCatalog({
           {/* Campo 4: Tipo Producto */}
           <div className="grid gap-2">
             <Label htmlFor="productType" style={{ color: "#141414" }}>
-              Tipo producto
+              {t("productType")}
             </Label>
             <Controller
               name="product_type"
@@ -250,7 +255,7 @@ export default function ModalAddEditCatalog({
                 <Select
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Seleccionar tipo de producto"
+                  placeholder={t("productTypePlaceholder")}
                   hasError={!!errors.product_type}
                   options={selectOptions.productTypes.map((type) => ({
                     value: String(type.id),
@@ -269,7 +274,7 @@ export default function ModalAddEditCatalog({
           {/* Campo 5: Tipo Volumen */}
           <div className="grid gap-2">
             <Label htmlFor="typeVol" style={{ color: "#141414" }}>
-              Tipo volumen
+              {t("volumeType")}
             </Label>
             <Controller
               name="type_vol"
@@ -278,7 +283,7 @@ export default function ModalAddEditCatalog({
                 <Select
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Seleccionar tipo de volumen"
+                  placeholder={t("volumeTypePlaceholder")}
                   hasError={!!errors.type_vol}
                   options={selectOptions.typeVols.map((vol) => ({
                     value: String(vol.id),
@@ -295,7 +300,7 @@ export default function ModalAddEditCatalog({
           {/* Campo 6: Factor */}
           <div className="grid gap-2">
             <Label htmlFor="factor" style={{ color: "#141414" }}>
-              Factor
+              {t("factor")}
             </Label>
             <Controller
               name="factor"
@@ -306,7 +311,7 @@ export default function ModalAddEditCatalog({
                   id="factor"
                   type="number"
                   step="any"
-                  placeholder="Ej: 2"
+                  placeholder={t("factorPlaceholder")}
                   value={field.value ?? ""}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -326,7 +331,7 @@ export default function ModalAddEditCatalog({
           {/* Campo 7: Exclusión */}
           <div className="grid gap-2">
             <Label htmlFor="excluded" style={{ color: "#141414" }}>
-              Exclusión
+              {t("exclusion")}
             </Label>
             <Controller
               name="excluded"
@@ -335,7 +340,7 @@ export default function ModalAddEditCatalog({
                 <div className="flex items-center gap-2">
                   <Switch id="excluded" checked={!!field.value} onCheckedChange={field.onChange} />
                   <span style={{ color: field.value ? "#cf1322" : "#141414" }}>
-                    {field.value ? "Excluido" : "Incluido"}
+                    {field.value ? t("excluded") : t("included")}
                   </span>
                 </div>
               )}
@@ -345,7 +350,7 @@ export default function ModalAddEditCatalog({
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={handleClose} type="button">
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="submit"
@@ -368,7 +373,7 @@ export default function ModalAddEditCatalog({
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Guardar
+                {tCommon("actions.save")}
               </>
             )}
           </Button>

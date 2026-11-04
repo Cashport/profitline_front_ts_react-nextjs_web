@@ -18,6 +18,7 @@ import {
   DownloadSimple,
   FileArrowUp
 } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
@@ -62,6 +63,8 @@ export const PaymentApplicationsTable = ({
   clearSelected,
   mutate
 }: PropsPaymentApplicationsTable) => {
+  const t = useTranslations("banks.applicationsTable");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const screens = Grid.useBreakpoint();
@@ -131,7 +134,7 @@ export const PaymentApplicationsTable = ({
 
   const handleDownload = (url?: string | null) => {
     if (!url) {
-      message.error("No hay archivo disponible para descargar");
+      message.error(t("noFile"));
       return;
     }
     window.open(url, "_blank");
@@ -145,15 +148,15 @@ export const PaymentApplicationsTable = ({
       if (!file) return;
       const hide = message.open({
         type: "loading",
-        content: "Cargando archivo...",
+        content: t("uploading"),
         duration: 0
       });
       try {
         await uploadFinalFile(String(applicationId), file);
-        message.success("Archivo cargado exitosamente");
+        message.success(t("uploadSuccess"));
         mutate();
       } catch (error) {
-        message.error(error instanceof Error ? error.message : "Error al cargar el archivo");
+        message.error(error instanceof Error ? error.message : t("uploadError"));
       } finally {
         hide();
       }
@@ -164,7 +167,7 @@ export const PaymentApplicationsTable = ({
   const handleRegenerateExcel = async (applicationId: number) => {
     const hide = message.open({
       type: "loading",
-      content: "Regenerando archivo...",
+      content: t("regenerating"),
       duration: 0
     });
     try {
@@ -173,14 +176,14 @@ export const PaymentApplicationsTable = ({
       handleDownload(data.excel_url);
     } catch (error) {
       hide();
-      message.error(error instanceof Error ? error.message : "Error al regenerar el archivo");
+      message.error(error instanceof Error ? error.message : t("regenerateError"));
     }
   };
 
   const handleRegeneratePDF = async (applicationId: number) => {
     const hide = message.open({
       type: "loading",
-      content: "Regenerando archivo...",
+      content: t("regenerating"),
       duration: 0
     });
     try {
@@ -189,7 +192,7 @@ export const PaymentApplicationsTable = ({
       handleDownload(data.pdf_url);
     } catch (error) {
       hide();
-      message.error(error instanceof Error ? error.message : "Error al regenerar el archivo");
+      message.error(error instanceof Error ? error.message : t("regenerateError"));
     }
   };
 
@@ -209,7 +212,7 @@ export const PaymentApplicationsTable = ({
     setIsReversing(true);
     try {
       await reversePaymentApplication(applicationToReverse.id);
-      message.success("Aplicación reversada correctamente");
+      message.success(t("reverseSuccess"));
       setReverseModalOpen(false);
       setApplicationToReverse(null);
       mutate();
@@ -223,7 +226,7 @@ export const PaymentApplicationsTable = ({
       if (normalizedMessage) {
         message.error(normalizedMessage);
       } else {
-        message.error("No se pudo reversar, intenta de nuevo");
+        message.error(t("reverseError"));
       }
     } finally {
       setIsReversing(false);
@@ -233,15 +236,15 @@ export const PaymentApplicationsTable = ({
   const handleChangeStatusToApplied = async (applicationId: number) => {
     const hide = message.open({
       type: "loading",
-      content: "Legalizando...",
+      content: t("settling"),
       duration: 0
     });
     try {
       await changeStatusToApplied(applicationId);
-      message.success("Estado actualizado a Aplicado");
+      message.success(t("settleSuccess"));
       mutate();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al legalizar");
+      message.error(error instanceof Error ? error.message : t("settleError"));
     } finally {
       hide();
     }
@@ -249,7 +252,7 @@ export const PaymentApplicationsTable = ({
 
   const columns: TableProps<applicationByStatus>["columns"] = [
     {
-      title: "Id. Aplicación",
+      title: t("columns.applicationId"),
       dataIndex: "id",
       key: "id",
       render: (id) => <Text className="idText">{id}</Text>,
@@ -258,7 +261,7 @@ export const PaymentApplicationsTable = ({
       width: 130
     },
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "client_name",
       key: "client_name",
       render: (text) => <Text>{text}</Text>,
@@ -266,7 +269,7 @@ export const PaymentApplicationsTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Fecha",
+      title: tCommon("fields.date"),
       dataIndex: "created_at",
       key: "created_at",
       render: (text) => <Text>{formatDate(text)}</Text>,
@@ -275,7 +278,7 @@ export const PaymentApplicationsTable = ({
       width: 115
     },
     {
-      title: "Id. Pago Cashport",
+      title: t("columns.cashportPaymentId"),
       key: "payment_ids",
       dataIndex: "payment_ids",
       render: (ids: number[]) =>
@@ -299,7 +302,7 @@ export const PaymentApplicationsTable = ({
       width: isXXL ? "auto" : 130
     },
     {
-      title: "Id. Pago ERP",
+      title: t("columns.erpPaymentId"),
       key: "id_erps",
       dataIndex: "id_erps",
       render: (ids: string[]) =>
@@ -318,7 +321,7 @@ export const PaymentApplicationsTable = ({
       width: 130
     },
     {
-      title: "Usuario",
+      title: tCommon("fields.user"),
       key: "userName",
       dataIndex: "userName",
       render: (text) => <Text>{text}</Text>,
@@ -327,7 +330,7 @@ export const PaymentApplicationsTable = ({
       width: 160
     },
     {
-      title: "Recaudo",
+      title: t("columns.collected"),
       key: "amount",
       dataIndex: "amount",
       align: "right",
@@ -366,7 +369,7 @@ export const PaymentApplicationsTable = ({
                 className="buttonNoBorder"
                 onClick={() => handleDownload(record.excel_url)}
               >
-                Template
+                {t("template")}
               </Button>
             )
           },
@@ -378,7 +381,7 @@ export const PaymentApplicationsTable = ({
                 className="buttonNoBorder"
                 onClick={() => handleRegenerateExcel(record.id)}
               >
-                Regenerar Excel
+                {t("regenerateExcel")}
               </Button>
             )
           },
@@ -390,7 +393,7 @@ export const PaymentApplicationsTable = ({
                 className="buttonNoBorder"
                 onClick={() => handleRegeneratePDF(record.id)}
               >
-                Regenerar PDF
+                {t("regeneratePdf")}
               </Button>
             )
           },
@@ -404,7 +407,7 @@ export const PaymentApplicationsTable = ({
                       className="buttonNoBorder"
                       onClick={() => handleUploadFile(record.id)}
                     >
-                      Cargar Template
+                      {t("uploadTemplate")}
                     </Button>
                   )
                 }
@@ -420,7 +423,7 @@ export const PaymentApplicationsTable = ({
                       className="buttonNoBorder"
                       onClick={() => handleOpenReverseModal(record)}
                     >
-                      Reversar aplicación
+                      {t("reverse")}
                     </Button>
                   )
                 }
@@ -436,7 +439,7 @@ export const PaymentApplicationsTable = ({
                       className="buttonNoBorder"
                       onClick={() => handleChangeStatusToApplied(record.id)}
                     >
-                      Legalizar
+                      {t("settle")}
                     </Button>
                   )
                 }
@@ -453,7 +456,7 @@ export const PaymentApplicationsTable = ({
                       className="buttonNoBorder"
                       onClick={() => handleDownload(record.final_file_url)}
                     >
-                      Descargar archivo final
+                      {t("downloadFinalFile")}
                     </Button>
                   )
                 }
@@ -507,34 +510,31 @@ export const PaymentApplicationsTable = ({
         isOpen={reverseModalOpen}
         onClose={handleCloseReverseModal}
         onOk={handleConfirmReverse}
-        title="Reversar aplicación de pago"
-        okText="Confirmar reversión"
-        cancelText="Cancelar"
+        title={t("reverseModal.title")}
+        okText={t("reverseModal.confirm")}
+        cancelText={tCommon("actions.cancel")}
         okLoading={isReversing}
         content={
           applicationToReverse ? (
             <div>
-              <p>¿Estás seguro de que deseas reversar esta aplicación de pago?</p>
+              <p>{t("reverseModal.question")}</p>
               <p style={{ marginTop: "0.5rem" }}>
-                <strong>Id. Aplicación:</strong> {applicationToReverse.id}
+                <strong>{t("reverseModal.applicationId")}</strong> {applicationToReverse.id}
               </p>
               <p>
-                <strong>Cliente:</strong> {applicationToReverse.client_name}
+                <strong>{t("reverseModal.customer")}</strong> {applicationToReverse.client_name}
               </p>
               <p>
-                <strong>Recaudo:</strong>{" "}
+                <strong>{t("reverseModal.collected")}</strong>{" "}
                 {formatMoney(applicationToReverse.amount, { hideDecimals: true })}
               </p>
               <p>
-                <strong>Id. Pago Cashport:</strong>{" "}
+                <strong>{t("reverseModal.cashportPaymentId")}</strong>{" "}
                 {applicationToReverse.payment_ids?.length
                   ? applicationToReverse.payment_ids.join(", ")
                   : "-"}
               </p>
-              <p style={{ marginTop: "0.5rem", color: "#888" }}>
-                Esta acción no se puede deshacer. Las facturas vinculadas volverán a estar
-                disponibles y los pagos quedarán sin aplicar.
-              </p>
+              <p style={{ marginTop: "0.5rem", color: "#888" }}>{t("reverseModal.warning")}</p>
             </div>
           ) : null
         }

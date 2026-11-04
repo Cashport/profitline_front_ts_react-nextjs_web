@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Select, Typography } from "antd";
 import useSWR from "swr";
 
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const SelectRisks = ({ errors, field }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading } = useSWR<IRisks>("/risk", fetcher, {});
   const options = data?.data.map((option) => {
     return {
@@ -27,7 +29,7 @@ export const SelectRisks = ({ errors, field }: Props) => {
   return (
     <>
       <Select
-        placeholder="Seleccione un riesgo"
+        placeholder={t("selectRisk")}
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={isLoading}
         variant="borderless"
@@ -36,9 +38,7 @@ export const SelectRisks = ({ errors, field }: Props) => {
         popupClassName="selectDrop"
         options={options}
       />
-      {errors && (
-        <Typography.Text className="textError">El riesgo es obligatorio *</Typography.Text>
-      )}
+      {errors && <Typography.Text className="textError">{t("riskRequired")}</Typography.Text>}
     </>
   );
 };

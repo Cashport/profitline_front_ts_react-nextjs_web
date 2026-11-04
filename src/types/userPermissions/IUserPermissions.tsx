@@ -19,6 +19,8 @@ interface IPermissionData {
 interface IPreferences {
   currency: string;
   id: string;
+  /** Idioma guardado en el usuario; null si nunca lo eligió. */
+  language?: "es" | "en" | null;
 }
 
 interface IPermissionsByProject {

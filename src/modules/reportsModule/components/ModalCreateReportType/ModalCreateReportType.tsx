@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Flex, Input, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { useMessageApi } from "@/context/MessageContext";
@@ -20,6 +21,8 @@ interface ModalCreateReportTypeProps {
 
 /** "Crear tipo de informe". Se abre desde Publicar informe, que se cierra mientras tanto. */
 export function ModalCreateReportType({ isOpen, onClose, onSuccess }: ModalCreateReportTypeProps) {
+  const t = useTranslations("reports.typeModal");
+  const tCommon = useTranslations("common");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,15 +40,12 @@ export function ModalCreateReportType({ isOpen, onClose, onSuccess }: ModalCreat
     setIsLoading(true);
     try {
       const type = await createType(name.trim());
-      showMessage("success", "Tipo de informe creado");
+      showMessage("success", t("created"));
       onSuccess?.(type);
       onClose();
     } catch (err) {
       // Un nombre repetido responde 409 con su mensaje: el modal sigue abierto para cambiarlo.
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "No se pudo crear el tipo de informe."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("createError"));
     } finally {
       setIsLoading(false);
     }
@@ -57,10 +57,11 @@ export function ModalCreateReportType({ isOpen, onClose, onSuccess }: ModalCreat
       open={isOpen}
       width={480}
       onCancel={isLoading ? undefined : onClose}
-      title={<Title level={4}>Crear tipo de informe</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Guardar"
+          titleConfirm={tCommon("actions.save")}
+          titleCancel={tCommon("actions.cancel")}
           isConfirmDisabled={!name.trim()}
           isConfirmLoading={isLoading}
           onClose={onClose}
@@ -71,12 +72,12 @@ export function ModalCreateReportType({ isOpen, onClose, onSuccess }: ModalCreat
     >
       <Flex vertical gap="0.5rem" style={{ marginBottom: "1rem" }}>
         <p className="text-[13px] font-semibold text-gray-500">
-          Nombre del tipo de informe <span className="text-red-500">*</span>
+          {t("nameLabel")} <span className="text-red-500">*</span>
         </p>
         <Input
           size="large"
           autoFocus
-          placeholder="Ej. Informe de cartera"
+          placeholder={t("namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onPressEnter={handleOk}

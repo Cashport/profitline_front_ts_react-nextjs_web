@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type { FilterCategoryConfig, FilterSelection } from "@/components/ui/filter-modal";
@@ -40,6 +41,7 @@ export default function FilterTasksModal({
   isLoading,
   inHeader
 }: FilterTasksModalProps) {
+  const t = useTranslations("taskManager.filters");
   // Draft for the custom "Fechas" category — owned here, seeded from the committed value.
   const [dateDraft, setDateDraft] = useState<DateDraft>(datesToDraft(value.dates));
 
@@ -47,7 +49,7 @@ export default function FilterTasksModal({
   const selection: FilterSelection = {
     taskTypes: (value.taskTypes ?? []).map((id) => ({
       id: String(id),
-      name: taskTypes.find((t) => t.ID === id)?.NAME ?? String(id)
+      name: taskTypes.find((tt) => tt.ID === id)?.NAME ?? String(id)
     }))
   };
 
@@ -61,15 +63,15 @@ export default function FilterTasksModal({
   const categories: FilterCategoryConfig[] = [
     {
       key: "fecha",
-      label: "Fechas",
+      label: t("dates"),
       kind: "custom",
-      metaLabel: "Selecciona un periodo",
+      metaLabel: t("selectPeriod"),
       draftCount: dateDraft.from_date || dateDraft.to_date ? 1 : 0,
       renderPanel: () => <TaskDateTab value={dateDraft} onChange={setDateDraft} />,
       renderTag: () =>
         hasCommittedDate ? (
           <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-[13px]">
-            <span className="text-muted-foreground font-medium">Fecha:</span>
+            <span className="text-muted-foreground font-medium">{t("dateTag")}</span>
             <span className="font-bold text-foreground">{dateTagValue}</span>
             <button
               type="button"
@@ -83,8 +85,8 @@ export default function FilterTasksModal({
     },
     {
       key: "taskTypes",
-      label: "Tipo de tarea",
-      options: taskTypes.map((t) => ({ id: String(t.ID), name: t.NAME }))
+      label: t("taskType"),
+      options: taskTypes.map((tt) => ({ id: String(tt.ID), name: tt.NAME }))
     }
   ];
 
@@ -95,7 +97,7 @@ export default function FilterTasksModal({
       isLoading={isLoading}
       inHeader={inHeader}
       formatTagValue={(_cat, items) =>
-        items.length === 1 ? items[0].name : `${items.length} tipos`
+        items.length === 1 ? items[0].name : t("typesCount", { count: items.length })
       }
       onApply={(sel) =>
         onChange({

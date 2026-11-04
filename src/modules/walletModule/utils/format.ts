@@ -2,6 +2,8 @@
    fmtM produce la forma compacta del diseño ("$51,26 MM", "$377 M"), que
    formatCurrencyMoney de @/utils/utils no cubre. */
 
+import { getTranslator } from "@/i18n/translator";
+
 /** Millones / miles de millones abreviados, con separadores es-CO. */
 export const fmtM = (v: number): string => {
   const m = v / 1e6;
@@ -14,10 +16,10 @@ export const fmtM = (v: number): string => {
 /** Valor completo en pesos, sin decimales. */
 export const fmtFull = (v: number): string => "$" + Math.round(v).toLocaleString("es-CO");
 
-export const fac = (n: number): string => `${n} ${n === 1 ? "factura" : "facturas"}`;
-export const cli = (n: number): string => `${n} ${n === 1 ? "cliente" : "clientes"}`;
-export const grp = (n: number): string => `${n} ${n === 1 ? "grupo" : "grupos"}`;
-export const doc = (n: number): string => `${n} ${n === 1 ? "doc" : "docs"}`;
+export const fac = (n: number): string => getTranslator("wallet")("count.invoices", { count: n });
+export const cli = (n: number): string => getTranslator("wallet")("count.customers", { count: n });
+export const grp = (n: number): string => getTranslator("wallet")("count.groups", { count: n });
+export const doc = (n: number): string => getTranslator("wallet")("count.docs", { count: n });
 
 /** Quita el sufijo societario para que el nombre quepa en una celda. */
 export const corto = (n: string | null | undefined): string =>
@@ -55,13 +57,15 @@ export const fmtDc = (d: Date): string =>
 /** "Actualizado dd/mm/aaaa hh:mm" de la última respuesta; placeholder mientras no llega. */
 export const fmtActualizado = (fecha: Date | null, placeholder: string): string =>
   fecha
-    ? `Actualizado ${fecha.toLocaleString("es-CO", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      })}`
+    ? getTranslator("wallet")("updatedAt", {
+        date: fecha.toLocaleString("es-CO", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        })
+      })
     : placeholder;
 
 /** Días de `a` a `b`: positivo si `b` es posterior. */

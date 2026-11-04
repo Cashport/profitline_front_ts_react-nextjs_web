@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 import IvaToggle from "@/modules/commerce/components/revenue-tracking/iva-toggle/iva-toggle";
@@ -18,28 +19,25 @@ import type {
   FilterOptionItem
 } from "@/components/ui/filter-modal";
 import DateRangeTab, {
+  FECHA_PRESET_IDS,
   type FechaDraft,
   fechaDraftFromOption,
   fechaDraftToOption
 } from "./DateRangeTab";
 
-const FRECUENCIA_OPTIONS: FilterOptionItem[] = [
-  { id: "diaria", name: "Diaria" },
-  { id: "semanal", name: "Semanal" },
-  { id: "mensual", name: "Mensual" },
-  { id: "trimestral", name: "Trimestral" },
-  { id: "anual", name: "Anual" }
-];
+// Los ids son los valores del filtro; el texto sale de commerce.dashboard.filters.frequency.<id>.
+const FRECUENCIA_IDS = ["diaria", "semanal", "mensual", "trimestral", "anual"] as const;
 
-const ENTITY_CATEGORIES: { key: string; label: string; entity: string }[] = [
-  { key: "channelIds", label: "Unidad de negocio", entity: "canal" },
-  { key: "productIds", label: "Producto", entity: "producto" },
-  { key: "productTypes", label: "Tipo de producto", entity: "tipo_producto" },
-  { key: "sellerIds", label: "Vendedor", entity: "vendedor" },
-  { key: "clientIds", label: "Cliente", entity: "cliente" },
-  { key: "cityIds", label: "Ciudad", entity: "ciudad" },
-  { key: "lineIds", label: "Categoría", entity: "linea" }
-];
+// `key` es también la clave del texto en commerce.dashboard.filters.categories.<key>.
+const ENTITY_CATEGORIES = [
+  { key: "channelIds", entity: "canal" },
+  { key: "productIds", entity: "producto" },
+  { key: "productTypes", entity: "tipo_producto" },
+  { key: "sellerIds", entity: "vendedor" },
+  { key: "clientIds", entity: "cliente" },
+  { key: "cityIds", entity: "ciudad" },
+  { key: "lineIds", entity: "linea" }
+] as const;
 
 const ENTITY_BY_KEY: Record<string, string> = Object.fromEntries(
   ENTITY_CATEGORIES.map((c) => [c.key, c.entity])
@@ -55,6 +53,17 @@ const normalizeOptions = (data: unknown): FilterOptionItem[] => {
 
 export default function FiltersBar() {
   const { filters, setFilters } = useRevenueTracking();
+  const t = useTranslations("commerce.dashboard.filters");
+  const frecuenciaOptions: FilterOptionItem[] = FRECUENCIA_IDS.map((id) => ({
+    id,
+    name: t(`frequency.${id}`)
+  }));
+  // Las fechas predefinidas se guardan con el nombre del idioma en que se eligieron; se
+  // vuelven a traducir por id para que el chip siga el idioma actual.
+  const fechaName = (opt: { id: string; name: string }) =>
+    (FECHA_PRESET_IDS as readonly string[]).includes(opt.id)
+      ? t(`datePresets.${opt.id as (typeof FECHA_PRESET_IDS)[number]}`)
+      : opt.name;
   const [optionsByEntity, setOptionsByEntity] = useState<Record<string, FilterOptionItem[]>>({});
   const [statusByEntity, setStatusByEntity] = useState<Record<string, FilterCategoryStatus>>({});
   const [fechaDraft, setFechaDraft] = useState<FechaDraft>(
@@ -72,9 +81,9 @@ export default function FiltersBar() {
       .catch(() => setStatusByEntity((prev) => ({ ...prev, [entity]: "error" })));
   };
 
-  const toEntityCategory = ({ key, label, entity }: (typeof ENTITY_CATEGORIES)[number]) => ({
+  const toEntityCategory = ({ key, entity }: (typeof ENTITY_CATEGORIES)[number]) => ({
     key,
-    label,
+    label: t(`categories.${key}`),
     options: optionsByEntity[entity] ?? [],
     status: statusByEntity[entity]
   });
@@ -82,16 +91,16 @@ export default function FiltersBar() {
   const categories: FilterCategoryConfig[] = [
     {
       key: "fecha",
-      label: "Fecha",
+      label: t("date"),
       kind: "custom",
-      metaLabel: "Selecciona un periodo",
+      metaLabel: t("selectPeriod"),
       draftCount: fechaDraftToOption(fechaDraft) ? 1 : 0,
       renderPanel: () => <DateRangeTab value={fechaDraft} onChange={setFechaDraft} />,
       renderTag: () =>
         filters.fecha?.[0] ? (
           <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-[13px]">
-            <span className="text-muted-foreground font-medium">Fecha:</span>
-            <span className="font-bold text-foreground">{filters.fecha[0].name}</span>
+            <span className="text-muted-foreground font-medium">{t("dateLabel")}</span>
+            <span className="font-bold text-foreground">{fechaName(filters.fecha[0])}</span>
             <button
               type="button"
               onClick={() => setFilters({ ...filters, fecha: [] })}
@@ -103,7 +112,12 @@ export default function FiltersBar() {
         ) : null
     },
     toEntityCategory(ENTITY_CATEGORIES[0]),
-    { key: "frecuencia", label: "Frecuencia", selectMode: "single", options: FRECUENCIA_OPTIONS },
+    {
+      key: "frecuencia",
+      label: t("frequencyLabel"),
+      selectMode: "single",
+      options: frecuenciaOptions
+    },
     ...ENTITY_CATEGORIES.slice(1).map(toEntityCategory)
   ];
 
@@ -114,8 +128,8 @@ export default function FiltersBar() {
       ? [
           {
             key: "fecha",
-            label: "Fecha",
-            value: filters.fecha[0].name,
+            label: t("date"),
+            value: fechaName(filters.fecha[0]),
             onRemove: () => setFilters({ ...filters, fecha: [] })
           }
         ]
@@ -127,7 +141,12 @@ export default function FiltersBar() {
         {
           key: cat.key,
           label: cat.label,
-          value: items.length === 1 ? items[0].name : `${items.length} seleccionados`,
+          value:
+            items.length === 1
+              ? cat.key === "frecuencia"
+                ? t(`frequency.${items[0].id as (typeof FRECUENCIA_IDS)[number]}`)
+                : items[0].name
+              : t("selectedCount", { count: items.length }),
           onRemove: () => setFilters({ ...filters, [cat.key]: [] })
         }
       ];

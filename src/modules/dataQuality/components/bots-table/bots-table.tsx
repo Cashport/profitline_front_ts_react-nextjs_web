@@ -2,10 +2,12 @@
 
 import { useMemo } from "react";
 import { Table } from "antd";
+import { useTranslations } from "use-intl";
 
 import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
 import { IBotClientGroupRow } from "../../types/automations";
 
+import { useBotLabels } from "../../hooks/useBotLabels";
 import { getBotColumns, getGroupColumns } from "./columns";
 
 interface BotsTableProps {
@@ -44,10 +46,15 @@ export function BotsTable({
   onViewHistory,
   onClientClick
 }: BotsTableProps) {
-  const groupColumns = useMemo(() => getGroupColumns({ onClientClick }), [onClientClick]);
+  const t = useTranslations("dataQuality.bots");
+  const botLabels = useBotLabels();
+  const groupColumns = useMemo(
+    () => getGroupColumns({ onClientClick, t, botLabels }),
+    [onClientClick, t, botLabels]
+  );
   const botColumns = useMemo(
-    () => getBotColumns({ executingScheduleId, onRun, onViewHistory }),
-    [executingScheduleId, onRun, onViewHistory]
+    () => getBotColumns({ executingScheduleId, onRun, onViewHistory, t, botLabels }),
+    [executingScheduleId, onRun, onViewHistory, t, botLabels]
   );
 
   // Agrupa por cliente (id_client_data) para que la tabla muestre una fila
@@ -114,7 +121,7 @@ export function BotsTable({
       />
 
       <div className="my-4 text-sm text-gray-500">
-        Mostrando {bots.length} de {totalBots} bots
+        {t("showing", { count: bots.length, total: totalBots })}
       </div>
     </>
   );

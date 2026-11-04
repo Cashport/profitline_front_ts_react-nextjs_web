@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Pagination } from "antd";
 import { Eye } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { DOCUMENT_TYPE_LABEL } from "../../constants";
@@ -51,6 +52,8 @@ export default function GroupInvoicesTable({
   onSort,
   pagination
 }: GroupInvoicesTableProps) {
+  const t = useTranslations("wallet.invoicesTable");
+  const tCommon = useTranslations("common");
   // Sin reordenar: la tabla sólo tiene la página cargada, y ordenarla aquí
   // contradiría el orden del servidor sobre el grupo completo.
   const visibles = useMemo(() => {
@@ -96,47 +99,27 @@ export default function GroupInvoicesTable({
               <th scope="col" className={cn(TH, "w-[38px]")}>
                 <input
                   type="checkbox"
-                  aria-label="Seleccionar todo"
+                  aria-label={tCommon("actions.selectAll")}
                   className="accent-wallet-accent"
                   checked={todasVisiblesSel}
                   onChange={(e) => toggleAll(e.target.checked)}
                 />
               </th>
               {/* Los `col` son los `sort_by` del API, así el modal los manda tal cual. */}
-              <SortableTh
-                col="document"
-                label="Factura"
-                sort={sort}
-                onSort={onSort}
-              />
-              <SortableTh
-                col="document_date"
-                label="Fecha doc."
-                sort={sort}
-                onSort={onSort}
-              />
-              <SortableTh
-                col="type"
-                label="Tipo"
-                sort={sort}
-                onSort={onSort}
-              />
-              <SortableTh
-                col="status"
-                label="Estado"
-                sort={sort}
-                onSort={onSort}
-              />
+              <SortableTh col="document" label={t("invoice")} sort={sort} onSort={onSort} />
+              <SortableTh col="document_date" label={t("docDate")} sort={sort} onSort={onSort} />
+              <SortableTh col="type" label={t("type")} sort={sort} onSort={onSort} />
+              <SortableTh col="status" label={t("status")} sort={sort} onSort={onSort} />
               <SortableTh
                 col="initial_amount"
-                label="Saldo inicial"
+                label={t("originalAmount")}
                 align="right"
                 sort={sort}
                 onSort={onSort}
               />
               <SortableTh
                 col="amount"
-                label="Saldo actual"
+                label={t("openAmount")}
                 align="right"
                 sort={sort}
                 onSort={onSort}
@@ -149,9 +132,7 @@ export default function GroupInvoicesTable({
             {visibles.length === 0 ? (
               <tr>
                 <td colSpan={8} className="p-9 text-center text-muted-foreground">
-                  {documentos.length === 0
-                    ? "No hay facturas para mostrar."
-                    : "Ninguna factura coincide con la búsqueda."}
+                  {documentos.length === 0 ? t("empty") : t("noMatches")}
                 </td>
               </tr>
             ) : (
@@ -166,7 +147,7 @@ export default function GroupInvoicesTable({
                   <td className="px-3 py-2.5">
                     <input
                       type="checkbox"
-                      aria-label={`Seleccionar ${d.doc}`}
+                      aria-label={t("selectOne", { doc: d.doc })}
                       className="accent-wallet-accent"
                       checked={isSelected(d)}
                       onChange={() => toggle(d)}
@@ -189,8 +170,8 @@ export default function GroupInvoicesTable({
                   <td className="px-3 py-2.5">
                     <button
                       type="button"
-                      title="Ver detalle de la factura (próximamente)"
-                      aria-label="Ver detalle de la factura"
+                      title={t("viewDetailSoon")}
+                      aria-label={t("viewDetail")}
                       className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
                       <Eye className="h-3.5 w-3.5" />
@@ -204,7 +185,7 @@ export default function GroupInvoicesTable({
           <tfoot>
             <tr className="border-t border-border">
               <th colSpan={5} className="px-3 py-2.5 text-left font-semibold text-foreground">
-                Total{query.trim() ? " filtrado" : ""}
+                {query.trim() ? t("filteredTotal") : tCommon("fields.total")}
               </th>
               <th
                 colSpan={2}
@@ -219,14 +200,15 @@ export default function GroupInvoicesTable({
                 colSpan={5}
                 className="px-3 pb-2.5 text-left text-[13px] font-medium text-muted-foreground"
               >
-                {fac(visibles.length)}
-                {visibles.length !== totalConocido ? ` de ${totalConocido}` : ""}
+                {visibles.length !== totalConocido
+                  ? t("countOf", { invoices: fac(visibles.length), total: totalConocido })
+                  : fac(visibles.length)}
               </th>
               <th
                 colSpan={2}
                 className="whitespace-nowrap px-3 pb-2.5 text-right text-[13px] font-medium tabular-nums text-muted-foreground"
               >
-                Recuperado {fmtFull(recuperadoVista)}
+                {t("collected", { amount: fmtFull(recuperadoVista) })}
               </th>
               <th />
             </tr>
@@ -247,16 +229,15 @@ export default function GroupInvoicesTable({
         )}
 
         <span className="ml-auto">
-          {selected.length ? (
-            <>
-              <b className="font-semibold tabular-nums text-foreground">{selected.length}</b>
-              &nbsp;{selected.length === 1 ? "factura seleccionada" : "facturas seleccionadas"}{" "}
-              ·&nbsp;
-              <b className="font-semibold tabular-nums text-foreground">{fmtM(montoSel)}</b>
-            </>
-          ) : (
-            "Sin facturas seleccionadas"
-          )}
+          {selected.length
+            ? t.rich("selectedSummary", {
+                count: selected.length,
+                amount: fmtM(montoSel),
+                b: (chunks) => (
+                  <b className="font-semibold tabular-nums text-foreground">{chunks}</b>
+                )
+              })
+            : t("noneSelected")}
         </span>
       </div>
     </>

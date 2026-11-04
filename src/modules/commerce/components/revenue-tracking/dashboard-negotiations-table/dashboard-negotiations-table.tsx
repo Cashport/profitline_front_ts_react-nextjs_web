@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { message, Pagination, Switch } from "antd";
 import { Download } from "lucide-react";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -23,14 +24,16 @@ const PAGE_SIZE = 25;
 const formatDate = (value: string | null, withTime = false) =>
   value ? dayjs(value).format(withTime ? "DD/MM/YYYY HH:mm" : "DD/MM/YYYY") : "—";
 
-const thClass =
-  "py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink";
+const thClass = "py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink";
 const tdClass = "py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm";
 
 export default function DashboardNegotiationsTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { filters, includeIva } = useRevenueTracking();
   const { showMessage } = useMessageApi();
+  const t = useTranslations("commerce.dashboard.negotiations");
+  const tTables = useTranslations("commerce.dashboard.tables");
+  const tCommon = useTranslations("common");
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
@@ -60,7 +63,7 @@ export default function DashboardNegotiationsTable() {
     setIsExporting(true);
     const hide = message.open({
       type: "loading",
-      content: "Generando informe de negociaciones...",
+      content: t("generating"),
       duration: 0
     });
     try {
@@ -72,9 +75,9 @@ export default function DashboardNegotiationsTable() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      showMessage("success", "Descarga exitosa");
+      showMessage("success", tTables("downloadSuccess"));
     } catch (err) {
-      showMessage("error", err instanceof Error ? err.message : "Error al descargar el archivo");
+      showMessage("error", err instanceof Error ? err.message : tTables("fileDownloadError"));
     } finally {
       hide();
       setIsExporting(false);
@@ -86,26 +89,22 @@ export default function DashboardNegotiationsTable() {
       <CardHeader className="sm:px-[18px] sm:pt-[14px] !pb-0">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div>
-            <CardTitle className="text-base sm:text-lg font-semibold">
-              Informe de Negociaciones
-            </CardTitle>
+            <CardTitle className="text-base sm:text-lg font-semibold">{t("title")}</CardTitle>
             <p className="text-[13px] text-muted-foreground mt-1">
-              Clientes con descuento negociado (Plan Anual). Promedio de venta facturada de
               {averageMonths
-                ? ` los últimos ${averageMonths} meses cerrados`
-                : " los meses cerrados"}
-              ; solo clientes con promedio mayor a cero.
+                ? t("descriptionMonths", { months: averageMonths })
+                : t("descriptionNoMonths")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
             <label className="flex items-center gap-2 text-[13px] sm:text-sm text-muted-foreground">
               <Switch size="small" checked={includeExpired} onChange={setIncludeExpired} />
-              Incluir vencidas
+              {t("includeExpired")}
             </label>
             <SearchField
               value={search}
               onChange={setSearch}
-              placeholder="Buscar cliente o NIT..."
+              placeholder={tTables("searchClientOrTaxId")}
               className="sm:w-56"
             />
             <button
@@ -115,7 +114,7 @@ export default function DashboardNegotiationsTable() {
               className="flex h-[var(--control-h)] items-center gap-2 px-4 text-sm font-medium bg-background border border-border rounded-lg hover:bg-secondary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="h-4 w-4" />
-              Export
+              {tTables("export")}
             </button>
           </div>
         </div>
@@ -123,15 +122,15 @@ export default function DashboardNegotiationsTable() {
       <CardContent className="p-0 sm:px-[18px] sm:py-[14px]">
         {isLoading && !data ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <p>Cargando datos...</p>
+            <p>{tTables("loading")}</p>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <p>{error.message || "Error al cargar las negociaciones"}</p>
+            <p>{error.message || t("loadError")}</p>
           </div>
         ) : items.length === 0 ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <p>No hay datos disponibles</p>
+            <p>{tTables("noData")}</p>
           </div>
         ) : (
           <>
@@ -139,13 +138,17 @@ export default function DashboardNegotiationsTable() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-cp-line bg-cp-surface">
-                    <th className={`text-left ${thClass}`}>Cliente</th>
-                    <th className={`hidden md:table-cell text-left ${thClass}`}>Inicio</th>
-                    <th className={`text-left ${thClass}`}>Fin</th>
-                    <th className={`text-right ${thClass}`}>Negociación</th>
-                    <th className={`text-right ${thClass}`}>Promedio mes</th>
-                    <th className={`text-right ${thClass}`}>Último mes</th>
-                    <th className={`hidden md:table-cell text-right ${thClass}`}>Última compra</th>
+                    <th className={`text-left ${thClass}`}>{tCommon("fields.customer")}</th>
+                    <th className={`hidden md:table-cell text-left ${thClass}`}>
+                      {t("columns.start")}
+                    </th>
+                    <th className={`text-left ${thClass}`}>{t("columns.end")}</th>
+                    <th className={`text-right ${thClass}`}>{t("columns.negotiation")}</th>
+                    <th className={`text-right ${thClass}`}>{t("columns.monthlyAverage")}</th>
+                    <th className={`text-right ${thClass}`}>{t("columns.lastMonth")}</th>
+                    <th className={`hidden md:table-cell text-right ${thClass}`}>
+                      {t("columns.lastPurchase")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -186,8 +189,11 @@ export default function DashboardNegotiationsTable() {
             {total > PAGE_SIZE && (
               <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 px-2 sm:px-0 pt-4 pb-4 sm:pb-0">
                 <p className="text-[13px] sm:text-sm text-muted-foreground">
-                  Mostrando {(page - 1) * PAGE_SIZE + 1} a {Math.min(page * PAGE_SIZE, total)} de{" "}
-                  {total} resultados
+                  {tTables("showingResults", {
+                    from: (page - 1) * PAGE_SIZE + 1,
+                    to: Math.min(page * PAGE_SIZE, total),
+                    total
+                  })}
                 </p>
                 <Pagination
                   current={page}

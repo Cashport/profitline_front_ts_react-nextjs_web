@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useMessageApi } from "@/context/MessageContext";
+import { getTranslator } from "@/i18n/translator";
 import type {
   IUpsertVisitFormBody,
   IVisitForm,
@@ -34,6 +35,14 @@ const newOption = (label: string): IVisitFormQuestionOption => ({
 
 const newQuestion = (type: IVisitFormQuestionType): IVisitFormQuestion => {
   const defaults = NEW_QUESTION_DEFAULTS[type];
+  const t = getTranslator("surveys");
+  const optionLabels = defaults?.yesNo
+    ? [t("questionDefaults.yes"), t("questionDefaults.no")]
+    : defaults?.optionCount
+      ? Array.from({ length: defaults.optionCount }, (_, i) =>
+          t("questionDefaults.option", { number: i + 1 })
+        )
+      : undefined;
   return {
     id: newId("q"),
     type,
@@ -41,9 +50,11 @@ const newQuestion = (type: IVisitFormQuestionType): IVisitFormQuestion => {
     description: null,
     required: false,
     order: 0,
-    placeholder: defaults?.placeholder ?? null,
+    placeholder: defaults?.placeholder
+      ? t(`questionDefaults.placeholders.${defaults.placeholder}`)
+      : null,
     validation: { ...defaults?.validation },
-    options: defaults?.optionLabels?.map(newOption)
+    options: optionLabels?.map(newOption)
   };
 };
 
@@ -102,13 +113,14 @@ const toDefinition = (questions: IVisitFormQuestion[]) => ({
 
 /** Lo mismo que revisa el diseño antes de publicar; el resto lo valida el backend. */
 const firstProblem = (draft: ISurveyDraft) => {
-  if (!draft.name.trim()) return "Ponle un nombre a la encuesta";
-  if (!draft.questions.length) return "Agrega al menos una pregunta";
+  const t = getTranslator("surveys");
+  if (!draft.name.trim()) return t("editor.problems.name");
+  if (!draft.questions.length) return t("editor.problems.noQuestions");
   const untitled = draft.questions.filter((q) => !q.label.trim()).length;
-  if (untitled)
-    return untitled === 1 ? "1 pregunta sin título" : `${untitled} preguntas sin título`;
+  if (untitled) return t("editor.problems.untitled", { count: untitled });
   const withEmptyOption = draft.questions.findIndex((q) => q.options?.some((o) => !o.label.trim()));
-  if (withEmptyOption >= 0) return `La pregunta ${withEmptyOption + 1} tiene opciones sin texto`;
+  if (withEmptyOption >= 0)
+    return t("editor.problems.emptyOptions", { number: withEmptyOption + 1 });
   return null;
 };
 
@@ -229,7 +241,11 @@ export const useSurveyEditor = (formId?: number) => {
   /** Sin `after` agrega "Opción N" al final; con `after` deja una vacía debajo. Devuelve su id. */
   const addOption = (id: string, after?: number) => {
     const count = draft.questions.find((q) => q.id === id)?.options?.length ?? 0;
-    const option = newOption(after === undefined ? `Opción ${count + 1}` : "");
+    const option = newOption(
+      after === undefined
+        ? getTranslator("surveys")("questionDefaults.option", { number: count + 1 })
+        : ""
+    );
     patchQuestion(id, (q) => {
       const options = q.options ?? [];
       const at = after === undefined ? options.length : after + 1;
@@ -279,12 +295,18 @@ export const useSurveyEditor = (formId?: number) => {
     try {
       const response = await saveForm(buildBody());
       setInitial(draft);
-      showMessage("success", form ? response.message : "Encuesta publicada");
+      showMessage(
+        "success",
+        form ? response.message : getTranslator("surveys")("editor.published")
+      );
       return response.data;
     } catch (err) {
       // 400 "Formulario inválido" trae en data.errors qué falló en cada pregunta.
       if (err instanceof ApiError && Array.isArray(err.data?.errors)) setErrors(err.data.errors);
-      showMessage("error", err instanceof Error ? err.message : "No se pudo publicar la encuesta");
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : getTranslator("surveys")("editor.publishError")
+      );
       return null;
     } finally {
       setIsSaving(false);

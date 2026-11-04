@@ -3,6 +3,7 @@ import { Button, Modal, Table, TableProps, DatePicker, Input, Tooltip } from "an
 import { MessageInstance } from "antd/es/message/interface";
 import { CaretLeft, Warning, Trash } from "phosphor-react";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { formatCurrencyMoney, formatDate } from "@/utils/utils";
 import { createPaymentAgreement } from "@/services/accountingAdjustment/accountingAdjustment";
@@ -42,6 +43,8 @@ const PaymentAgreementModal: React.FC<Props> = ({
   messageShow,
   onCloseAllModals
 }) => {
+  const t = useTranslations("clients.paymentAgreement");
+  const tCommon = useTranslations("common");
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string>();
   const [isSecondView, setIsSecondView] = useState(false);
@@ -70,7 +73,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
         adjustmentData,
         selectedEvidence[0] || null
       );
-      messageShow.success("Acuerdo de pago creado exitosamente");
+      messageShow.success(t("success"));
       onCloseAllModals();
       setGlobalDate(null);
       setIsSecondView(false);
@@ -81,9 +84,9 @@ const PaymentAgreementModal: React.FC<Props> = ({
       setIsSecondView(false);
       if (data?.invoices_with_active_agreement?.length) {
         setInvoicesWithError(data.invoices_with_active_agreement);
-        messageShow.error(data.message || "Error al crear el acuerdo de pago.");
+        messageShow.error(data.message || t("error"));
       } else {
-        messageShow.error("Error al crear el acuerdo de pago. Por favor, intente de nuevo.");
+        messageShow.error(t("errorRetry"));
       }
     } finally {
       setIsSubmitting(false);
@@ -139,7 +142,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
 
   const columns: TableProps<ITableData>["columns"] = [
     {
-      title: "ID Factura",
+      title: t("columns.invoiceId"),
       dataIndex: "id",
       key: "id",
       render: (text, record) => {
@@ -147,7 +150,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
       }
     },
     {
-      title: "Emisión",
+      title: t("columns.issueDate"),
       dataIndex: "emission",
       key: "emission",
       render: (text) => {
@@ -155,7 +158,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
       }
     },
     {
-      title: "Pendiente",
+      title: t("columns.pending"),
       dataIndex: "pending",
       key: "pending",
       render: (text) => {
@@ -164,7 +167,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
       align: "end"
     },
     {
-      title: "Valor acordado",
+      title: t("columns.agreedAmount"),
       dataIndex: "agreedValue",
       key: "agreedValue",
       render: (text: string, record, index: number) => (
@@ -186,7 +189,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
       align: "center"
     },
     {
-      title: "Nueva fecha",
+      title: t("columns.newDate"),
       dataIndex: "newDate",
       key: "newDate",
       render: (text: string, _, index: number) => (
@@ -206,7 +209,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
       render: (_, record) => (
         <div className="actions__buttons">
           {invoicesWithError.includes(String(record.id)) && (
-            <Tooltip title="Esta factura ya tiene un acuerdo de pago activo">
+            <Tooltip title={t("activeAgreement")}>
               <Button
                 type="text"
                 className="iconBtn"
@@ -262,31 +265,32 @@ const PaymentAgreementModal: React.FC<Props> = ({
           <div className="content_payment">
             <Button onClick={onClenModal} className="content_payment__header">
               <CaretLeft size={"1.25rem"} />
-              <h4>Acuerdo de pago</h4>
+              <h4>{t("title")}</h4>
             </Button>
 
-            <p className="content_payment__description">
-              Selecciona la fecha y el valor para definir el acuerdo de pago
-            </p>
+            <p className="content_payment__description">{t("description")}</p>
             <div className="content_payment__dateAndTotal">
               <DatePicker
                 value={globalDate}
-                placeholder="Selecciona la fecha"
+                placeholder={t("datePlaceholder")}
                 onChange={onChangeDate}
                 className="date-input"
                 disabledDate={disabledDate}
               />
               <div className="totalAmount">
                 <span>
-                  Total acordado:{" "}
-                  <strong className="total">
-                    {formatCurrencyMoney(
-                      tableData.reduce(
-                        (total, item) => total + parseFloat(item.agreedValue || "0"),
-                        0
-                      )
-                    )}
-                  </strong>
+                  {t.rich("totalAgreed", {
+                    total: () => (
+                      <strong className="total">
+                        {formatCurrencyMoney(
+                          tableData.reduce(
+                            (total, item) => total + parseFloat(item.agreedValue || "0"),
+                            0
+                          )
+                        )}
+                      </strong>
+                    )
+                  })}
                 </span>
               </div>
             </div>
@@ -300,14 +304,14 @@ const PaymentAgreementModal: React.FC<Props> = ({
           </div>
           <div className="footer">
             <Button className="cancelButton" onClick={onClenModal}>
-              Cancelar
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               className="acceptButton"
               disabled={tableData.length === 0 || tableData.some((row) => !row.newDate)}
               onClick={() => setIsSecondView(true)}
             >
-              Guardar cambios
+              {tCommon("actions.saveChanges")}
             </Button>
           </div>
         </>

@@ -1,0 +1,373 @@
+{
+  "layout": {
+    "title": "Órdenes de compra"
+  },
+  "stages": {
+    "purchaseOrder": "Orden de compra",
+    "validations": "Validaciones",
+    "invoiced": "Facturado",
+    "inDispatch": "En despacho",
+    "delivered": "Entregado"
+  },
+  "process": {
+    "title": "Proceso de la orden",
+    "viewStock": "Ver stock",
+    "viewFullHistory": "Ver historial completo"
+  },
+  "approveModal": {
+    "title": "¿Está seguro?",
+    "description": "¿Desea aprobar esta orden de compra?"
+  },
+  "noveltyCard": {
+    "title": "Novedades",
+    "needsAttention": "Requiere atención"
+  },
+  "validation": {
+    "orderNumberRequired": "Número de orden de compra requerido",
+    "customerNameRequired": "Nombre del cliente requerido",
+    "createdAtRequired": "Fecha de creación requerida",
+    "invalidOrderDate": "Fecha de orden inválida",
+    "invalidDeliveryDate": "Fecha de entrega inválida",
+    "addressMaxLength": "La dirección no puede exceder {max} caracteres",
+    "observationsMaxLength": "Las observaciones no pueden exceder {max} caracteres",
+    "productIdRequired": "ID de producto requerido",
+    "quantityRequired": "Cantidad requerida",
+    "quantityMin": "La cantidad mínima es {min}",
+    "quantityInteger": "La cantidad debe ser un número entero",
+    "minValue": "El valor mínimo es {min}",
+    "productsRequired": "Productos requeridos",
+    "productsMin": "Debe haber al menos un producto"
+  },
+  "rejectModal": {
+    "title": "Rechazar orden",
+    "description": "Selecciona el motivo y agrega una observación",
+    "reasonLabel": "Motivo de rechazo",
+    "reasonPlaceholder": "Seleccionar motivo",
+    "reasons": {
+      "wrongPrice": "Precio incorrecto",
+      "productUnavailable": "Producto no disponible",
+      "incompleteInfo": "Información incompleta",
+      "customerError": "Error del cliente",
+      "other": "Otro"
+    },
+    "observationLabel": "Observación",
+    "observationPlaceholder": "Escribe una observación..."
+  },
+  "document": {
+    "title": "Documento original",
+    "previewUnavailable": "Vista previa no disponible",
+    "unavailable": "Documento no disponible",
+    "pdfUnavailable": "El PDF original no está disponible para visualización",
+    "errors": {
+      "invalid": "El documento no es válido o está dañado",
+      "missing": "No se encontró el documento",
+      "unexpectedResponse": "Respuesta inesperada del servidor",
+      "cannotLoad": "No se pudo cargar el documento"
+    }
+  },
+  "dispatchModal": {
+    "title": "Confirmar despacho",
+    "description": "Confirma que el pedido ha sido despachado por logística",
+    "notesLabel": "Observaciones",
+    "notesPlaceholder": "Agrega notas sobre el despacho (opcional)",
+    "orderNumber": "Orden de compra: {number}",
+    "statusWillChange": "El estado cambiará a \"{status}\" una vez confirmado",
+    "dispatching": "Despachando...",
+    "success": "Orden despachada correctamente",
+    "error": "Error al despachar la orden"
+  },
+  "downloadPlane": {
+    "title": "Descargar plano",
+    "subtitle": "Selecciona los archivos que deseas descargar:",
+    "selectAll": "Seleccionar todos",
+    "selectedCount": "{selected} de {total} seleccionados",
+    "fetchError": "Error al obtener los archivos disponibles",
+    "success": "Archivos descargados exitosamente",
+    "downloadError": "Error al descargar los archivos"
+  },
+  "rebillingModal": {
+    "title": "Confirmar refacturación",
+    "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de {maxMb} MB.",
+    "success": "Refacturación confirmada exitosamente.",
+    "error": "Error al confirmar la refacturación. Por favor, inténtalo de nuevo.",
+    "invoiceId": "Id de factura",
+    "invoiceIdPlaceholder": "Ingresa el Id de factura",
+    "newInvoice": "Nueva factura",
+    "creditNote": "Nota crédito"
+  },
+  "sendToApprovalModal": {
+    "title": "Enviar a aprobación",
+    "description": "Selecciona quién debe aprobar esta novedad",
+    "approvers": "Aprobadores",
+    "success": "Orden enviada a aprobación correctamente",
+    "error": "Error al enviar a aprobación"
+  },
+  "historyModal": {
+    "title": "Historial completo",
+    "loading": "Cargando historial...",
+    "empty": "No hay eventos en el historial",
+    "traceability": "Trazabilidad",
+    "open": "Abierta",
+    "closed": "Cerrada",
+    "actionBy": "Acción:",
+    "comment": "Comentario:",
+    "summary": "Resumen",
+    "totalEvents": "Total de eventos:"
+  },
+  "aiProcessing": {
+    "title": "Procesamiento con IA",
+    "analyzingFile": "Analizando {fileName}",
+    "progress": "Progreso del análisis",
+    "stepOf": "Paso {current} de {total}",
+    "steps": {
+      "analyzingPdf": "Analizando documento PDF",
+      "extractingInvoice": "Extrayendo información de la factura",
+      "identifyingParties": "Identificando datos del comprador y vendedor",
+      "processingProducts": "Procesando detalle de productos",
+      "calculatingTotals": "Calculando montos y totales",
+      "validatingData": "Validando información extraída"
+    }
+  },
+  "backorderModal": {
+    "fetchError": "Error al obtener productos de la bodega",
+    "sentSuccess": "Orden de compra enviada a Back Order exitosamente",
+    "sendError": "Error al enviar la orden de compra a Back Order",
+    "processedSuccess": "Orden de compra procesada exitosamente",
+    "removeError": "Error al eliminar productos no disponibles",
+    "noData": "No hay data de la bodega seleccionada",
+    "allInStock": "Todos los productos tienen stock",
+    "confirmSendAll": "¿Está seguro que quiere enviar a Back Order?",
+    "noneInStock": "Ninguno de los productos tiene stock",
+    "confirmSend": "¿Está seguro de enviar a Back Order?",
+    "someInStock": "Algunos productos tienen stock",
+    "sendAllToBackorder": "Enviar todo a Back order",
+    "processAvailable": "Procesar disponibles",
+    "processAvailableQuestion": "¿Desea eliminar los productos no disponibles o guardarlos en una orden de compra para después?",
+    "removeUnavailable": "Eliminar no disponibles",
+    "saveInNewPo": "Guardar en nueva OC"
+  },
+  "filters": {
+    "filters": "Filtros",
+    "statuses": "Estados",
+    "allStatuses": "Todos los estados",
+    "allCustomers": "Todos los clientes",
+    "allOf": "Todos: {label}",
+    "seller": "Vendedor",
+    "allSellers": "Todos los vendedores"
+  },
+  "invoiceModal": {
+    "title": "Facturar orden de compra",
+    "description": "Puede dividir esta orden en múltiples facturas. Agregue el ID y el PDF de cada factura generada.",
+    "onlyPdf": "Solo se permiten archivos PDF",
+    "fileTooLarge": "El archivo es demasiado grande (máximo {maxMb} MB)",
+    "incomplete": "Cada factura debe tener un ID y un archivo PDF",
+    "success": "Facturas agregadas correctamente",
+    "error": "Error al agregar las facturas",
+    "changePdf": "Cambiar PDF",
+    "uploadPdf": "Subir PDF",
+    "invoiceIdPlaceholder": "ID de factura (Ej: FV-2024-001)",
+    "addAnother": "+ Agregar otra factura",
+    "duplicateIds": "Hay IDs de factura duplicados",
+    "importantInfo": "Información importante",
+    "totalsHint": "Asegúrese de que la suma de todas las facturas corresponda al monto total de la orden de compra.",
+    "save": "Guardar facturas"
+  },
+  "create": {
+    "missingOrderNumber": "Archivo \"{fileName}\": falta el número de orden de compra",
+    "missingCustomer": "Archivo \"{fileName}\": falta seleccionar un cliente",
+    "missingProducts": "Archivo \"{fileName}\": debe tener al menos un producto",
+    "productsWithoutSelection": "Archivo \"{fileName}\": todos los productos deben tener un producto seleccionado",
+    "sameCustomerRequired": "Todos los archivos deben pertenecer al mismo cliente. Por favor verifica los clientes seleccionados.",
+    "success": "Órdenes de compra creadas correctamente",
+    "error": "Error al crear las órdenes de compra",
+    "creating": "Creando...",
+    "submit": "Crear orden de compra"
+  },
+  "list": {
+    "generateAction": "Generar acción",
+    "uploadPurchaseOrder": "Cargar orden de compra",
+    "emptyState": "Carga tu primera orden de compra para comenzar el análisis"
+  },
+  "uploadInvoicesModal": {
+    "title": "Subir facturas",
+    "submit": "Cargar facturas",
+    "incomplete": "Cada factura debe tener un número y un archivo adjunto",
+    "success": "Facturas cargadas correctamente",
+    "error": "Error al cargar las facturas",
+    "selectAtLeastOne": "Selecciona al menos una OC del listado para subir facturas.",
+    "columns": {
+      "po": "OC",
+      "invoiceNumber": "No. Factura"
+    },
+    "invoiceNumberPlaceholder": "Ej: FAC-2024-001",
+    "attachPdf": "Adjuntar PDF",
+    "addInvoice": "Agregar factura",
+    "removeInvoice": "Quitar factura"
+  },
+  "uploadModal": {
+    "title": "Cargar orden de compra",
+    "onlyPdf": "Solo se permiten archivos PDF",
+    "fileTooLarge": "El archivo es demasiado grande (máximo {maxMb} MB)",
+    "sentToProcessing": "La orden fue enviada a procesamiento",
+    "uploadSuccess": "Orden cargada con éxito",
+    "uploadError": "Error al cargar la orden de compra",
+    "scanUnavailable": "La función de escaneo no está disponible en este navegador",
+    "scanError": "Error al acceder a la cámara para escanear",
+    "tabs": {
+      "ai": "Procesar con IA",
+      "manual": "Procesar manualmente"
+    },
+    "dropPdf": "Arrastra tu archivo PDF aquí",
+    "orSelectFile": "O selecciona un archivo desde tu dispositivo",
+    "selectFile": "Seleccionar archivo",
+    "scanning": "Escaneando...",
+    "scanDocument": "Escanear documento",
+    "uploadedFiles": "Archivos cargados",
+    "continueManual": "Continuar a digitación manual"
+  },
+  "detail": {
+    "loading": "Cargando orden de compra...",
+    "notFound": "Orden de compra no encontrada",
+    "backToList": "Volver al listado",
+    "updateSuccess": "Información actualizada correctamente",
+    "updateError": "Error al actualizar la información",
+    "downloadFlatFileError": "Error al descargar el plano de la orden de compra",
+    "poLabel": "OC {number}",
+    "unsavedTitle": "Cambios sin guardar",
+    "unsavedContent": "Tienes cambios sin guardar. ¿Deseas guardarlos antes de salir?",
+    "dontSave": "No guardar"
+  },
+  "actionsModal": {
+    "title": "Selecciona la acción que vas a realizar",
+    "selectAtLeastOneOrder": "Selecciona al menos un pedido para realizar esta acción",
+    "selectOnlyOneOrder": "Solo puedes seleccionar un pedido para realizar esta acción",
+    "sameStatusRequired": "Todos los pedidos seleccionados deben tener el mismo estado",
+    "selectAtLeastOnePo": "Selecciona al menos una orden para realizar esta acción",
+    "sendingToDispatch": "Enviando pedido a despacho...",
+    "sentToDispatch": "Pedido enviado a despacho exitosamente",
+    "sendToDispatchError": "Error enviando pedido a despacho",
+    "sameOrderRequired": "Todas las órdenes seleccionadas deben pertenecer al mismo pedido",
+    "splitSuccess": "Órdenes separadas del pedido exitosamente",
+    "splitError": "Error separando las órdenes del pedido",
+    "sendingToBilling": "Enviando pedido a facturación...",
+    "sentToBilling": "Pedido enviado a facturación exitosamente",
+    "sendToBillingError": "Error enviando pedido a facturación",
+    "deleteError": "Error al eliminar las órdenes",
+    "downloadingSalesFile": "Descargando plano de ventas...",
+    "salesFileError": "Error al descargar el plano de ventas",
+    "downloadingInventory": "Descargando inventario...",
+    "inventoryError": "Error al descargar el inventario",
+    "generatingTxt": "Generando TXT...",
+    "txtGenerated": "TXT generado correctamente",
+    "txtError": "Error al generar el TXT",
+    "generatingTxtEan": "Generando TXT EAN...",
+    "txtEanGenerated": "TXT EAN generado correctamente",
+    "txtEanError": "Error al generar el TXT EAN",
+    "downloadTxtErp": "Descargar TXT ERP",
+    "downloadTxtEan": "Descargar TXT EAN",
+    "deleteSelected": "Eliminar órdenes seleccionadas",
+    "splitPo": "Separar OC del pedido",
+    "sendToBilling": "Enviar a facturación",
+    "uploadInvoices": "Cargar facturas",
+    "downloadFlatFile": "Descargar plano",
+    "sendToDispatch": "Enviar a despacho",
+    "exportSalesFile": "Exportar plano de ventas",
+    "exportInventory": "Exportar inventario",
+    "confirmSplit": "{count, plural, one {¿Está seguro de separar la OC del pedido?} other {¿Está seguro de separar las OC del pedido?}}",
+    "confirmSendToApproval": "¿Desea enviar a aprobación?",
+    "insufficientCredit": "El cliente no tiene cupo suficiente para gestionar el pedido",
+    "sendForApproval": "Enviar aprobación",
+    "confirmDelete": "{count, plural, one {¿Estás seguro de eliminar la orden de compra?} other {¿Estás seguro de eliminar las órdenes de compra?}}"
+  },
+  "detailHeader": {
+    "generatingTxtErp": "Generando TXT ERP...",
+    "txtErpGenerated": "TXT ERP generado correctamente",
+    "txtErpError": "Error al generar el TXT ERP",
+    "filesCount": "{count, plural, one {# archivo} other {# archivos}}",
+    "noFile": "Sin archivo",
+    "sendingToRebilling": "Enviando orden a refacturación...",
+    "sentToRebilling": "Orden enviada a refacturación exitosamente",
+    "sendToRebillingError": "Error enviando orden a refacturación",
+    "uploadInvoice": "Cargar factura",
+    "confirmDispatchDelivery": "Confirmar despacho/entrega",
+    "markAsBackorder": "Marcar como Backorder",
+    "rebill": "Refacturar",
+    "confirmRebilling": "Confirmar refacturación",
+    "generateAction": "Generar acción",
+    "region": "Región: {region}",
+    "destination": "Destino: {code}",
+    "viewApproval": "Ver aprobación",
+    "ordersCount": "{count, plural, one {# orden} other {# órdenes}}",
+    "unknownStatus": "Desconocido",
+    "confirmRebillTitle": "¿Está seguro que quiere refacturar?",
+    "confirmRebillContent": "Esta opción no se puede regresar"
+  },
+  "info": {
+    "addressesError": "Error al cargar las direcciones",
+    "generalInfo": "Información general",
+    "internalPoId": "ID interno OC",
+    "purchaseOrder": "Orden de compra",
+    "channel": "Canal",
+    "loadingChannels": "Cargando canales...",
+    "selectChannel": "Seleccionar canal",
+    "loadingCustomers": "Cargando clientes...",
+    "selectCustomer": "Seleccionar cliente",
+    "noCustomers": "No hay clientes disponibles",
+    "poDate": "Fecha orden de compra",
+    "selectDate": "Seleccionar fecha",
+    "invoices": "Facturas",
+    "deliveryInfo": "Información de entrega",
+    "deliveryDateTime": "Fecha/Hora entrega",
+    "fullAddress": "Dirección completa",
+    "loadingAddresses": "Cargando direcciones...",
+    "noAddresses": "No hay direcciones disponibles",
+    "selectAddress": "Seleccionar dirección",
+    "observation": "Observación"
+  },
+  "table": {
+    "columns": {
+      "orderId": "ID Pedido",
+      "purchaseOrder": "Orden de compra",
+      "delivery": "Entrega",
+      "products": "Productos"
+    },
+    "empty": "No hay órdenes de compra.",
+    "ordersCount": "{count, plural, one {# orden} other {# órdenes}}",
+    "noveltyType": "Tipo de novedad:",
+    "changeWarehouse": "Cambiar bodega",
+    "showing": "Mostrando {from} a {to} de {total} resultados"
+  },
+  "products": {
+    "title": "Detalle de productos",
+    "warehouse": "Almacén: {name}",
+    "editProducts": "Editar productos",
+    "noDecimals": "No se pueden pedir decimales en cajas o unidades",
+    "updateSuccess": "Productos actualizados correctamente",
+    "updateError": "Error al actualizar los productos",
+    "columns": {
+      "product": "Producto",
+      "batch": "Lote",
+      "batchExpiration": "Vencimiento lote",
+      "units": "Unidades",
+      "boxes": "Cajas",
+      "stock": "Stock",
+      "unitPrice": "Precio unitario",
+      "vat": "IVA",
+      "totalPrice": "Precio total"
+    },
+    "selectProduct": "Seleccionar producto",
+    "selectBatch": "Seleccionar lote",
+    "sku": "SKU: {sku}",
+    "batchLabel": "{batch} - {date} - {months, plural, one {# mes} other {# meses}}",
+    "batchExpiresStock": "Vence: {date}  |  {stock} uds",
+    "monthsCount": "{count, plural, one {# mes} other {# meses}}",
+    "original": {
+      "title": "Datos originales del cliente",
+      "totalValue": "Valor total",
+      "observation": "Observación",
+      "viewTooltip": "Ver datos originales del PDF"
+    },
+    "removeProduct": "Eliminar producto",
+    "addProduct": "Agregar producto"
+  }
+}

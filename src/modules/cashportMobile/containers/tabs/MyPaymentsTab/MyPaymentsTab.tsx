@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Flex } from "antd";
 import { CurrencyDollarSimple, PlusCircle, CaretDown, CaretUp } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import BaseCard from "@/modules/cashportMobile/components/atoms/BaseCard/BaseCard";
 
 import "./myPaymentsTab.scss";
@@ -15,6 +16,8 @@ export interface MyPaymentsTabProps {
 
 const MyPaymentsTab: React.FC<MyPaymentsTabProps> = ({ availablePayments }) => {
   const [showAllAvailable, setShowAllAvailable] = useState(false);
+  const t = useTranslations("publicPortals.mobile.myPayments");
+  const tCommon = useTranslations("common");
   const INITIAL_COUNT = 5;
 
   const visibleAvailable = showAllAvailable
@@ -44,7 +47,7 @@ const MyPaymentsTab: React.FC<MyPaymentsTabProps> = ({ availablePayments }) => {
     <Flex className="myPaymentsTab" vertical gap="2rem">
       {availablePayments.length > 0 && (
         <Flex vertical gap="1rem">
-          <h4 className="myPaymentsTab__title">Pagos disponibles</h4>
+          <h4 className="myPaymentsTab__title">{t("title")}</h4>
 
           <Flex vertical gap="0.5rem">
             {visibleAvailable.map((payment) => (
@@ -68,13 +71,13 @@ const MyPaymentsTab: React.FC<MyPaymentsTabProps> = ({ availablePayments }) => {
               className="myPaymentsTab__seeMoreButton"
               onClick={() => setShowAllAvailable(!showAllAvailable)}
             >
-              {showAllAvailable ? "Ver menos" : "Ver más"}
+              {showAllAvailable ? tCommon("actions.showLess") : tCommon("actions.showMore")}
               {showAllAvailable ? <CaretUp size={14} /> : <CaretDown size={14} />}
             </button>
           )}
 
           <button className="myPaymentsTab__reportButton" disabled>
-            Reportar pago
+            {t("reportPayment")}
             <PlusCircle size={14} />
           </button>
         </Flex>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { DatePicker, Input, InputNumber, Modal } from "antd";
 import dayjs, { Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import { IProfit360DevolucionDocumento } from "@/types/reverseLogistics/IReverseLogistics";
@@ -18,6 +19,8 @@ interface ModalEditarDocumentoProps {
 // Edita los 4 campos que acepta el cambio `documento` de actualizar-productos:
 // número, fecha, valor (montoDocumento) y unidades.
 export function ModalEditarDocumento({ documento, onClose, onApply }: ModalEditarDocumentoProps) {
+  const t = useTranslations("reverseLogistics.returnDetail.editDocumentModal");
+  const tCommon = useTranslations("common");
   const [numero, setNumero] = useState("");
   const [fecha, setFecha] = useState<Dayjs | null>(null);
   const [monto, setMonto] = useState<number | null>(null);
@@ -54,7 +57,7 @@ export function ModalEditarDocumento({ documento, onClose, onApply }: ModalEdita
 
   return (
     <Modal
-      title="Editar documento"
+      title={t("title")}
       open={!!documento}
       onCancel={onClose}
       footer={null}
@@ -65,37 +68,38 @@ export function ModalEditarDocumento({ documento, onClose, onApply }: ModalEdita
       <div className="flex flex-col gap-4 py-2">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Número del documento
+            {t("documentNumber")}
             <Input
               value={numero}
               onChange={(e) => setNumero(e.target.value)}
-              placeholder="Número"
+              placeholder={t("numberPlaceholder")}
               status={numero.trim() ? undefined : "error"}
             />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Fecha
+            {t("date")}
             <DatePicker value={fecha} onChange={setFecha} format="DD/MM/YYYY" className="w-full" />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Valor del documento
+            {t("documentValue")}
             <InputNumber value={monto} onChange={setMonto} min={0} prefix="$" className="w-full" />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Unidades
+            {t("units")}
             <InputNumber value={unidades} onChange={setUnidades} min={0} className="w-full" />
           </label>
         </div>
         <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
-          Los productos suman{" "}
-          <b className="font-semibold text-gray-900">
-            {fmtNumber(sumaUnidades)} unid. · {fmtCop(sumaValor)}
-          </b>
+          {t.rich("productsSum", {
+            units: fmtNumber(sumaUnidades),
+            amount: fmtCop(sumaValor),
+            b: (chunks) => <b className="font-semibold text-gray-900">{chunks}</b>
+          })}
         </div>
         <div className="flex items-center justify-end gap-2 pt-2">
-          <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+          <SecondaryButton onClick={onClose}>{tCommon("actions.cancel")}</SecondaryButton>
           <PrincipalButton onClick={handleApply} disabled={!completo}>
-            Aplicar
+            {tCommon("actions.apply")}
           </PrincipalButton>
         </div>
       </div>

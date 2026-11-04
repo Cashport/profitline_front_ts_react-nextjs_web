@@ -1,4 +1,5 @@
 import { Flex, Input, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
 import "./inputFormMoney.scss";
 import { useAppStore } from "@/lib/store/store";
@@ -36,6 +37,7 @@ export const InputFormMoney = ({
   defaultValue,
   changeInterceptor
 }: Props) => {
+  const tInputs = useTranslations("components.inputs");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const parseNumber = (value: string): string => {
@@ -89,7 +91,11 @@ export const InputFormMoney = ({
         )}
       />
       <Typography.Text className="textError">
-        {error ? (error.message ? ` ${error.message}` : `${titleInput} es obligatorio *`) : ""}
+        {error
+          ? error.message
+            ? ` ${error.message}`
+            : tInputs("requiredField", { field: titleInput ?? "" })
+          : ""}
       </Typography.Text>
     </Flex>
   );

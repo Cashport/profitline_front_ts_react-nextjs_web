@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { ILoadAnalysisMeasure } from "@/types/marketAdmin/IMarketAdmin";
 import {
   COLORS,
   formatDayLong,
   formatDayShort,
+  formatMonthStartShort,
   formatMeasure,
   formatSigma,
   isMonthStart,
@@ -20,6 +22,7 @@ type Props = {
 };
 
 export default function AnalysisSigmaChart({ measure, historyDays }: Props) {
+  const t = useTranslations("marketAdmin.load.validation.chart");
   const [hover, setHover] = useState<number | null>(null);
 
   const dates = [...measure.history.map((p) => p.date), todayString()];
@@ -52,7 +55,7 @@ export default function AnalysisSigmaChart({ measure, historyDays }: Props) {
     .filter(({ d, i }) => i === 0 || (i > 2 && isMonthStart(d, dates[i - 1])))
     .map(({ d, i }) => ({
       left: i === 0 ? "0%" : `${x(i)}%`,
-      label: i === 0 ? formatDayShort(d) : `1 ${formatDayShort(d).split(" ")[1]}`
+      label: i === 0 ? formatDayShort(d) : formatMonthStartShort(d)
     }));
 
   const gid = `g-${measure.key}`;
@@ -177,7 +180,7 @@ export default function AnalysisSigmaChart({ measure, historyDays }: Props) {
                 padding: "2px 8px"
               }}
             >
-              Hoy · {formatMeasure(measure.unit, measure.value)}
+              {t("todayValue", { value: formatMeasure(measure.unit, measure.value) })}
             </div>
           )}
           {hover !== null && (
@@ -210,7 +213,7 @@ export default function AnalysisSigmaChart({ measure, historyDays }: Props) {
               >
                 <span className="text-[10.5px] font-semibold tracking-[.04em] text-[#B1BBC1]">
                   {hover === n - 1
-                    ? `HOY · ${formatDayLong(dates[hover])}`
+                    ? t("todayDate", { date: formatDayLong(dates[hover]) })
                     : formatDayLong(dates[hover])}
                 </span>
                 <span className="text-sm font-semibold tabular-nums">
@@ -218,7 +221,7 @@ export default function AnalysisSigmaChart({ measure, historyDays }: Props) {
                 </span>
                 {hasBands && (
                   <span className="text-[11px] text-[#B1BBC1] tabular-nums">
-                    {formatSigma((vals[hover] - mu) / sd)} vs media
+                    {t("sigmaVsMean", { sigma: formatSigma((vals[hover] - mu) / sd) })}
                   </span>
                 )}
               </div>
@@ -261,8 +264,13 @@ export default function AnalysisSigmaChart({ measure, historyDays }: Props) {
       </div>
       <div className="text-[11.5px]" style={{ color: COLORS.muted }}>
         {hasBands
-          ? `Media ${formatMeasure(measure.unit, mu)} · σ ${formatMeasure(measure.unit, sd)} · ${measure.history.length} cargues de los últimos ${historyDays} días. Pasa el cursor sobre la serie para ver cada cargue.`
-          : `Todavía no hay suficientes cargues en los últimos ${historyDays} días para calcular la media y la desviación estándar.`}
+          ? t("summary", {
+              mean: formatMeasure(measure.unit, mu),
+              sd: formatMeasure(measure.unit, sd),
+              count: measure.history.length,
+              days: historyDays
+            })
+          : t("notEnoughData", { days: historyDays })}
       </div>
     </div>
   );

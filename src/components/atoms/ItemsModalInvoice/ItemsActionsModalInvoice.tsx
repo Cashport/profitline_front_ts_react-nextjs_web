@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import { Checkbox } from "antd";
 
 import { useAppStore } from "@/lib/store/store";
@@ -18,6 +19,7 @@ interface ItemsActionsModalProps {
 }
 
 const ItemsActionsModalInvoice: FC<ItemsActionsModalProps> = ({ onHeaderClick, item, type }) => {
+  const t = useTranslations("components.itemsModal");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   return (
@@ -28,7 +30,7 @@ const ItemsActionsModalInvoice: FC<ItemsActionsModalProps> = ({ onHeaderClick, i
         <div className={"texts"}>
           <div className={"mainText"}>
             <strong className={"name"}>
-              <span> Factura {item.id}</span>
+              <span> {t("invoice", { id: item.id })}</span>
             </strong>
           </div>
           <div className={"label"}>{item.date ?? ""}</div>

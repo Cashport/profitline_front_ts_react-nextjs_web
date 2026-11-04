@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -21,6 +22,7 @@ import type {
 import { useTaskFacets } from "../../hooks/useTaskData";
 import { useTicketsView } from "../../stores/tickets-view-store";
 import type { TaskViewState } from "../../types";
+import { getTranslator } from "@/i18n/translator";
 
 /** Orden de las categorías del modal (el del prototipo); el resto va al final. */
 const FILTER_ORDER: TaskFieldKey[] = [
@@ -46,7 +48,8 @@ export const filterableFields = (config: ITaskConfig) =>
       return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
     });
 
-export const emptyLabelOf = (field: ITaskFieldConfig) => `Sin ${field.label.toLowerCase()}`;
+export const emptyLabelOf = (field: ITaskFieldConfig) =>
+  getTranslator("tickets")("emptyValue", { field: field.label.toLowerCase() });
 
 /**
  * Opciones de un campo con su conteo: las del proyecto (proceso, catálogos,
@@ -88,6 +91,7 @@ export default function TasksFilterModal({ config }: { config: ITaskConfig }) {
       clearFilters: s.clearFilters
     }))
   );
+  const t = useTranslations("tickets.filters");
   const [openedOnce, setOpenedOnce] = useState(false);
   const [draftFilters, setDraftFilters] = useState<TaskViewState["filters"] | null>(null);
   const [dateDraft, setDateDraft] = useState<DateDraft>({ from_date: null, to_date: null });
@@ -107,9 +111,9 @@ export default function TasksFilterModal({ config }: { config: ITaskConfig }) {
   const categories: FilterCategoryConfig[] = [
     {
       key: "fecha",
-      label: "Fecha",
+      label: t("date"),
       kind: "custom",
-      metaLabel: "Fecha de creación",
+      metaLabel: t("createdDate"),
       draftCount: dateDraft.from_date || dateDraft.to_date ? 1 : 0,
       renderPanel: () => <TaskDateTab value={dateDraft} onChange={setDateDraft} />,
       // Con hideTags solo cuenta para el badge de "Filtrar".
@@ -142,11 +146,7 @@ export default function TasksFilterModal({ config }: { config: ITaskConfig }) {
       categories={categories}
       value={value}
       hideTags
-      footerSummary={
-        facets
-          ? `${facets.total} ${facets.total === 1 ? "tarea coincide" : "tareas coinciden"}`
-          : null
-      }
+      footerSummary={facets ? t("matching", { count: facets.total }) : null}
       onOpen={() => {
         setOpenedOnce(true);
         setDraftFilters(null);

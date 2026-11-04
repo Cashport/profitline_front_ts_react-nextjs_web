@@ -1,14 +1,11 @@
-import { Metadata } from "next";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Informes",
-  description: "Informes publicados para el equipo"
-};
+export const generateMetadata = () => pageMetadata("reports");
 
 const ReportsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ViewWrapper headerTitle="Informes" hideHeader>
+    <ViewWrapper headerTitleKey="reports" hideHeader>
       {children}
     </ViewWrapper>
   );

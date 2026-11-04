@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { User } from "@phosphor-icons/react";
 import { Flex, Modal, Typography } from "antd";
 import { Envelope, Files, MagnifyingGlass, Megaphone, Trash } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 
@@ -28,6 +29,8 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
   selectedClientType,
   selectedDocumentRows
 }) => {
+  const t = useTranslations("suppliers.generateAction");
+  const tCommon = useTranslations("common");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { showMessage } = useMessageApi();
 
@@ -36,7 +39,7 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
       centered
       open={isOpen}
       onClose={onClose}
-      title={<Title level={4}>Generar acción</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       footer={null}
       onCancel={onClose}
     >
@@ -44,7 +47,7 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
         {selectedClientType && (
           <ButtonGenerateAction
             icon={<Files size={20} />}
-            title="Agregar requerimiento"
+            title={t("addRequirement")}
             onClick={() => {
               if (handleOpenModal) handleOpenModal(3);
             }}
@@ -53,22 +56,26 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
 
         <ButtonGenerateAction
           icon={<MagnifyingGlass size={20} />}
-          title="Auditar requerimientos"
+          title={t("auditRequirements")}
           onClick={() => {
             if (!selectedDocumentRows || selectedDocumentRows.length === 0) {
-              return showMessage("error", "No hay documentos seleccionados para auditar.");
+              return showMessage("error", t("noDocumentsToAudit"));
             }
 
             if (handleOpenModal) handleOpenModal(2);
           }}
         />
-        <ButtonGenerateAction icon={<User size={20} />} disabled={true} title="Crear cliente" />
+        <ButtonGenerateAction
+          icon={<User size={20} />}
+          disabled={true}
+          title={t("createCustomer")}
+        />
         <ButtonGenerateAction
           icon={<Trash size={20} />}
-          title="Eliminar"
+          title={tCommon("actions.delete")}
           onClick={() => {
             if (!selectedDocumentRows || selectedDocumentRows.length === 0) {
-              return showMessage("error", "No hay documentos seleccionados para eliminar.");
+              return showMessage("error", t("noDocumentsToDelete"));
             }
 
             if (handleOpenModal) handleOpenModal(4);
@@ -76,12 +83,12 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
         />
         <ButtonGenerateAction
           icon={<Megaphone size={20} />}
-          title="Enviar recordatorio"
+          title={t("sendReminder")}
           disabled={true}
         />
         <ButtonGenerateAction
           icon={<Envelope size={20} />}
-          title="Enviar invitación"
+          title={t("sendInvitation")}
           onClick={() => {
             setIsModalOpen(true);
           }}

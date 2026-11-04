@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import { Product } from "@/types/products/products";
 import { ClienteOption, IGrupoPremio, NuevaAsignacionData } from "@/types/marketAdmin/IMarketAdmin";
 import ClienteSearchSelect from "./ClienteSearchSelect";
@@ -31,6 +32,9 @@ export default function NuevaAsignacionModal({
   onClose: () => void;
   onSave: (data: NuevaAsignacionData) => void;
 }) {
+  const t = useTranslations("marketAdmin.manualBonus.newAssignment");
+  const tShared = useTranslations("marketAdmin.shared");
+  const tCommon = useTranslations("common");
   const [cliente, setCliente] = useState<ClienteOption | null>(clienteFijo ?? null);
   const [grupos, setGrupos] = useState<IGrupoPremio[]>(() => [createGrupoBonificado("fijo")]);
   const [fechaExpiracion, setFechaExpiracion] = useState("");
@@ -58,7 +62,7 @@ export default function NuevaAsignacionModal({
       onCancel={onClose}
       centered
       width={560}
-      title={<span className="text-base font-bold text-[#141414]">Crear bonificado</span>}
+      title={<span className="text-base font-bold text-[#141414]">{t("title")}</span>}
       styles={{ body: { maxHeight: "calc(60 * var(--vh))", overflowY: "auto" } }}
       footer={
         <div className="flex gap-3">
@@ -66,14 +70,14 @@ export default function NuevaAsignacionModal({
             onClick={onClose}
             className="flex-1 py-2.5 text-sm font-semibold text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </button>
           <button
             onClick={handleSave}
             disabled={!isValid || saving}
             className="flex-1 py-2.5 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {saving ? "Guardando…" : "Crear"}
+            {saving ? tCommon("status.saving") : tCommon("actions.create")}
           </button>
         </div>
       }
@@ -81,11 +85,15 @@ export default function NuevaAsignacionModal({
       <div className="flex flex-col gap-4">
         {/* Cliente */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-medium text-[#666666]">Cliente</label>
+          <label className="text-[13px] font-medium text-[#666666]">
+            {tCommon("fields.customer")}
+          </label>
           {clienteFijo ? (
             <div className="px-3 py-2.5 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg">
               <p className="text-sm text-[#141414]">{clienteFijo.nombre}</p>
-              <p className="text-[13px] text-[#999999]">NIT: {clienteFijo.nit}</p>
+              <p className="text-[13px] text-[#999999]">
+                {tShared("taxIdValue", { taxId: clienteFijo.nit })}
+              </p>
             </div>
           ) : (
             <ClienteSearchSelect
@@ -99,10 +107,12 @@ export default function NuevaAsignacionModal({
         {/* Productos bonificados (grupos fijos / a elegir) */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-[13px] font-medium text-[#666666]">Productos bonificados</label>
+            <label className="text-[13px] font-medium text-[#666666]">{t("freeGoods")}</label>
             <span className="text-[13px] text-[#999999]">
-              Total a asignar: <span className="font-semibold text-[#141414]">{totalUnidades}</span>{" "}
-              und.
+              {t.rich("totalToAssign", {
+                total: totalUnidades,
+                b: (chunks) => <span className="font-semibold text-[#141414]">{chunks}</span>
+              })}
             </span>
           </div>
           <GruposBonificadoEditor grupos={grupos} products={productos} onChange={setGrupos} />
@@ -111,7 +121,7 @@ export default function NuevaAsignacionModal({
         {/* Fechas */}
         <div className="flex gap-3">
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-[#666666]">Fecha de expiración</label>
+            <label className="text-[13px] font-medium text-[#666666]">{t("expirationDate")}</label>
             <input
               type="date"
               value={fechaExpiracion}
@@ -120,7 +130,7 @@ export default function NuevaAsignacionModal({
             />
           </div>
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-[#666666]">Fecha de fin</label>
+            <label className="text-[13px] font-medium text-[#666666]">{t("endDate")}</label>
             <input
               type="date"
               value={fechaFin}
@@ -133,10 +143,10 @@ export default function NuevaAsignacionModal({
 
         {/* Nota / comentarios */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-medium text-[#666666]">Comentarios (opcional)</label>
+          <label className="text-[13px] font-medium text-[#666666]">{t("comments")}</label>
           <textarea
             rows={2}
-            placeholder="Motivo de la asignación..."
+            placeholder={t("commentsPlaceholder")}
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             className="px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"

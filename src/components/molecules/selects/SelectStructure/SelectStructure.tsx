@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Dispatch, SetStateAction } from "react";
 import { Flex, Spin, Typography } from "antd";
 import useSWR from "swr";
@@ -19,6 +20,7 @@ export const SelectStructure = ({
   selectedBusinessRules,
   setSelectedBusinessRules
 }: Props) => {
+  const t = useTranslations("shared.selects");
   const { ID } = useAppStore((state) => state.selectedProject);
   const { data: response, isLoading } = useSWR<GenericResponse<IChanel[]>>(
     `/bussines-rule/project/${ID}`,
@@ -28,7 +30,7 @@ export const SelectStructure = ({
 
   return (
     <div className="selectstructure">
-      <Typography.Text className="title">Estructura</Typography.Text>
+      <Typography.Text className="title">{t("structure")}</Typography.Text>
       <Flex className="structure" gap={"1rem"}>
         {isLoading ? (
           <Spin />

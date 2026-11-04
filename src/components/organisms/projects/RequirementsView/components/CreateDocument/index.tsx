@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Modal, Form, Switch, Typography, Flex } from "antd";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import UploadButton from "../UploadButton";
 import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
@@ -30,6 +31,8 @@ export const CreateDocument: React.FC<CreateDocumentModalProps> = ({
   onSubmit,
   initialValues
 }) => {
+  const t = useTranslations("projects.requirements");
+  const tCommon = useTranslations("common");
   const [form] = Form.useForm();
   const [file, setFile] = useState<File | null>(initialValues?.file || null);
 
@@ -57,13 +60,17 @@ export const CreateDocument: React.FC<CreateDocumentModalProps> = ({
 
   return (
     <Modal
-      title={<Title level={4}>{mode === "create" ? "Nuevo documento" : "Editar documento"}</Title>}
+      title={
+        <Title level={4}>
+          {mode === "create" ? t("createDocument.newTitle") : t("createDocument.editTitle")}
+        </Title>
+      }
       open={isOpen}
       onCancel={onClose}
       footer={
         <FooterButtons
-          backTitle={"Cancelar"}
-          nextTitle={`Agregar documentos`}
+          backTitle={tCommon("actions.cancel")}
+          nextTitle={t("createDocument.addDocuments")}
           handleBack={onClose}
           handleNext={() => {}}
           nextDisabled={false}
@@ -82,16 +89,16 @@ export const CreateDocument: React.FC<CreateDocumentModalProps> = ({
         <Flex vertical gap={"1.5rem"}>
           <Flex gap={"1.5rem"} align="center">
             <InputForm
-              titleInput="Nombre del documento"
-              placeholder="Ingresar nombre"
+              titleInput={t("createDocument.name")}
+              placeholder={t("createDocument.namePlaceholder")}
               control={control}
               nameInput="documentName"
               error={undefined}
               customStyle={{ width: "100%" }}
             />
             <InputSelect
-              titleInput="Vigencia"
-              placeholder="Seleccionar vigencia"
+              titleInput={t("createDocument.validity")}
+              placeholder={t("createDocument.validityPlaceholder")}
               control={control}
               nameInput="validity"
               error={errors.validity}
@@ -101,8 +108,8 @@ export const CreateDocument: React.FC<CreateDocumentModalProps> = ({
             />
           </Flex>
           <InputForm
-            titleInput="Descripción"
-            placeholder="Ingresar descripción"
+            titleInput={tCommon("fields.description")}
+            placeholder={t("createDocument.descriptionPlaceholder")}
             control={control}
             nameInput="description"
             error={undefined}
@@ -110,7 +117,7 @@ export const CreateDocument: React.FC<CreateDocumentModalProps> = ({
           <UploadButton
             onUpload={handleUpload}
             file={file}
-            buttonText="Cargar plantilla"
+            buttonText={t("uploadButton.uploadTemplate")}
             handleRemoveFile={handleRemoveFile}
           />
           <Flex gap={"0.5rem"} justify="flex-end">
@@ -121,7 +128,7 @@ export const CreateDocument: React.FC<CreateDocumentModalProps> = ({
                 setValue("mandatory", event);
               }}
             />
-            <Text>Obligatorio</Text>
+            <Text>{t("createDocument.mandatory")}</Text>
           </Flex>
           <hr style={{ marginBottom: "1.5rem", border: "1px solid #EDEDED" }} />
         </Flex>

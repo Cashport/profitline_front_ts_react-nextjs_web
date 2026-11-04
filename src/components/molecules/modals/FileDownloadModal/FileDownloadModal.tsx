@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import "./fileDownloadModal.scss";
 import { useAdaptiveImageModalWidth } from "./useAdaptiveImageModalWidth";
 
@@ -16,6 +17,8 @@ export const FileDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
   onCloseModal,
   title
 }) => {
+  const t = useTranslations("modals.fileDownload");
+  const tCommon = useTranslations("common");
   const { modalWidth, imgRef, onImgLoad } = useAdaptiveImageModalWidth(url, isModalOpen);
 
   return (
@@ -24,7 +27,7 @@ export const FileDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
         title ? (
           <div className="title_modal_file_download">{title}</div>
         ) : (
-          <div className="title_modal_file_download">Documento adjunto</div>
+          <div className="title_modal_file_download">{t("defaultTitle")}</div>
         )
       }
       className="file-download-modal"
@@ -40,10 +43,10 @@ export const FileDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
             target="_blank"
             rel="noopener noreferrer"
           >
-            Descargar
+            {tCommon("actions.download")}
           </a>
           <button type="button" className="button-check" onClick={() => onCloseModal(false)}>
-            Entendido
+            {t("gotIt")}
           </button>
         </div>
       }
@@ -54,7 +57,7 @@ export const FileDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
           <img
             ref={imgRef}
             src={url}
-            alt="Document"
+            alt={t("imageAlt")}
             onLoad={onImgLoad}
             style={{ visibility: modalWidth ? "visible" : "hidden" }}
           />

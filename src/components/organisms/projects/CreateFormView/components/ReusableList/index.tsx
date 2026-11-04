@@ -2,6 +2,7 @@ import React from "react";
 import { useFieldArray, Controller, Control } from "react-hook-form";
 import { Checkbox, Button, Flex, Radio } from "antd";
 import { Plus, Trash } from "phosphor-react";
+import { useTranslations } from "use-intl";
 import { InputForm } from "../Input";
 import { QuestionType } from "../../controllers/formSchema";
 
@@ -20,6 +21,7 @@ interface ReusableListProps {
 }
 
 const ReusableList: React.FC<ReusableListProps> = ({ control, name, onAdd, onRemove, type }) => {
+  const t = useTranslations("projects.forms.question");
   const { fields, append, remove } = useFieldArray({
     control,
     name
@@ -67,7 +69,7 @@ const ReusableList: React.FC<ReusableListProps> = ({ control, name, onAdd, onRem
             <InputForm
               hiddenTitle
               {...field}
-              placeholder={`Opción ${index + 1}`}
+              placeholder={t("option", { number: index + 1 })}
               control={control}
               nameInput={`${name}.${index}.label`}
               customStyle={{ width: "100%" }}
@@ -75,6 +77,7 @@ const ReusableList: React.FC<ReusableListProps> = ({ control, name, onAdd, onRem
             <Button
               type="text"
               icon={<Trash size={20} />}
+              aria-label={t("deleteOption")}
               onClick={() => {
                 remove(index);
                 onRemove && onRemove(index);
@@ -93,7 +96,7 @@ const ReusableList: React.FC<ReusableListProps> = ({ control, name, onAdd, onRem
         }}
         icon={<Plus size={16} />}
       >
-        Agregar opción
+        {t("addOption")}
       </Button>
     </Flex>
   );

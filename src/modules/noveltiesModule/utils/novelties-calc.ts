@@ -1,4 +1,5 @@
 import type { KpiCardItem } from "@/components/ui/kpi-cards/kpi-cards";
+import { getTranslator } from "@/i18n/translator";
 import { HOY, diasEntre, fmtM } from "@/modules/walletModule/utils/format";
 import type { Sev } from "@/modules/walletModule/types";
 import type { IIncidentListItem, IIncidentListKpis } from "@/types/novelties/INovelties";
@@ -8,13 +9,14 @@ export const noveltyCode = (n: IIncidentListItem): string => `NOV-${n.incident_i
 
 /** Semáforo del compromiso, con el mismo texto que muestra la cabecera del modal. */
 export function slaDe(n: IIncidentListItem): { sev: Sev; txt: string; d: number } {
-  if (!n.is_open) return { sev: "ok", txt: "Cerrada", d: 0 };
+  const t = getTranslator("wallet");
+  if (!n.is_open) return { sev: "ok", txt: t("sla.closed"), d: 0 };
   if (!n.next_ticket_date) return { sev: "idle", txt: "—", d: 0 };
 
   const d = diasEntre(HOY, new Date(n.next_ticket_date));
-  if (d < 0) return { sev: "crit", txt: `Vencida ${Math.abs(d)}d`, d };
-  if (d === 0) return { sev: "crit", txt: "Vence hoy", d };
-  return { sev: d <= 2 ? "warn" : "ok", txt: `En ${d}d`, d };
+  if (d < 0) return { sev: "crit", txt: t("sla.overdueBy", { days: Math.abs(d) }), d };
+  if (d === 0) return { sev: "crit", txt: t("sla.dueToday"), d };
+  return { sev: d <= 2 ? "warn" : "ok", txt: t("sla.dueIn", { days: d }), d };
 }
 
 /** Días sin gestión: verde ≤3, ámbar ≤7, rojo por encima. */

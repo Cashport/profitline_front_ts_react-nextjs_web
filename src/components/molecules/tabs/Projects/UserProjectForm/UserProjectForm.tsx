@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useEffect, useState } from "react";
 import { Button, Flex, Spin, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
@@ -40,6 +41,8 @@ interface Props {
   onGoBackTable: () => void;
 }
 export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => {
+  const t = useTranslations("shared.userForm");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const [isEditAvailable, setIsEditAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -103,7 +106,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
         setAssignedGroups(groupsByUserResponse.data.map((group) => group.group_id));
       } catch (error) {
         if (cancelled) return;
-        setLoadError(error instanceof Error ? error.message : "No se pudo cargar el usuario.");
+        setLoadError(error instanceof Error ? error.message : t("loadError"));
         setDataUser((prev) => ({ ...prev, isLoading: false }));
       }
     })();
@@ -146,14 +149,13 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
           });
 
       if (response.status === 200 || response.status === 202) {
-        const isEdit = isViewDetailsUser?.id ? "editado" : "creado";
-        showMessage("success", `El usuario fue ${isEdit} exitosamente.`);
+        showMessage("success", isViewDetailsUser?.id ? t("updatedSuccess") : t("createdSuccess"));
         !isViewDetailsUser?.id && onGoBackTable();
         setIsEditAvailable(false);
       } else if (response.status === 409) {
-        showMessage("error", "Este email ya esta en uso, prueba otro.");
+        showMessage("error", t("emailInUse"));
       } else {
-        showMessage("error", response?.message || "Oops ocurrio un error.");
+        showMessage("error", response?.message || t("genericError"));
       }
     } catch (error) {
       const status =
@@ -165,10 +167,10 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
       showMessage(
         "error",
         status === 409
-          ? "Este email ya esta en uso, prueba otro."
+          ? t("emailInUse")
           : error instanceof Error
             ? error.message
-            : "Oops ocurrio un error."
+            : t("genericError")
       );
     } finally {
       setLoading(false);
@@ -200,7 +202,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
               className="buttonGoBack"
               icon={<CaretLeft size={"1.45rem"} />}
             >
-              Ver Usuarios
+              {t("viewUsers")}
             </Button>
             {/* -----------right buttons--------------- */}
             {isViewDetailsUser?.id > 0 && (
@@ -216,7 +218,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                   }}
                   icon={<ArrowsClockwise size={"1.45rem"} />}
                 >
-                  Cambiar Estado
+                  {t("changeStatus")}
                 </Button>
                 <Button
                   size="large"
@@ -228,7 +230,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                   htmlType="button"
                   icon={<Pencil size={"1.45rem"} />}
                 >
-                  {isEditAvailable ? "Cancelar" : "Editar Usuario"}
+                  {isEditAvailable ? tCommon("actions.cancel") : t("editUser")}
                 </Button>
               </Flex>
             )}
@@ -238,42 +240,44 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
               <Typography.Text type="danger" role="alert">
                 {loadError}
               </Typography.Text>
-              <Button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Reintentar</Button>
+              <Button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>
+                {tCommon("actions.retry")}
+              </Button>
             </Flex>
           ) : !dataUser.isLoading ? (
             <Flex vertical component={"main"} className="mainUserForm">
-              <Title level={4}>Información del usuario</Title>
+              <Title level={4}>{t("userInfo")}</Title>
               {/* -----------------------------------Informacion del Usuario--------------------------------------- */}
               <div className="generalProject">
                 <InputForm
-                  titleInput="Nombre del Contacto"
+                  titleInput={t("contactName")}
                   control={control}
                   nameInput="info.name"
                   error={errors.info?.name}
                 />
                 <InputForm
-                  titleInput="Cargo"
+                  titleInput={t("position")}
                   control={control}
                   nameInput="info.cargo"
                   error={errors.info?.cargo}
                 />
                 <InputForm
                   typeInput="email"
-                  titleInput="Correo electrónico"
+                  titleInput={tCommon("fields.email")}
                   control={control}
                   nameInput="info.email"
                   error={errors.info?.email}
                 />
                 <InputForm
                   typeInput="phone"
-                  titleInput="Telefono"
+                  titleInput={tCommon("fields.phone")}
                   control={control}
                   nameInput="info.phone"
                   error={errors.info?.phone}
                 />
                 <Flex vertical className="containerInput">
                   <Title className="containerInput__title" level={5}>
-                    Rol
+                    {t("role")}
                   </Title>
                   <Controller
                     name="info.rol"
@@ -284,12 +288,12 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                 </Flex>
               </div>
               {/* -----------------------------------Experiencia----------------------------------- */}
-              <Title level={4}>Reglas de Proyecto</Title>
+              <Title level={4}>{t("projectRules")}</Title>
               <Flex component={"section"} gap={"1rem"} className="breRules">
                 <Flex vertical style={{ width: "30%" }}>
                   <SelectZone zones={zones} setZones={setZones} disabled={!isEditAvailable} />
                   <Typography.Text className="textError">
-                    {customFieldsError.zone && `La Zona es obligatorio *`}
+                    {customFieldsError.zone && t("zoneRequired")}
                   </Typography.Text>
                 </Flex>
                 <Flex vertical style={{ width: "37%" }}>
@@ -301,7 +305,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                     />
                   )}
                   <Typography.Text className="textError">
-                    {customFieldsError.channel && `Las Reglas de negocio  son obligatorias *`}
+                    {customFieldsError.channel && t("businessRulesRequired")}
                   </Typography.Text>
                 </Flex>
                 <Flex vertical style={{ width: "30%" }}>
@@ -313,7 +317,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                 </Flex>
               </Flex>
               {/* -----------------------------------Países----------------------------------- */}
-              <Title level={4}>Países</Title>
+              <Title level={4}>{t("countries")}</Title>
               <Flex vertical component={"section"} className="breRules">
                 <SelectUserCountries
                   disabled={!isEditAvailable}
@@ -322,7 +326,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                 />
                 {customFieldsError.country && countryIds.length === 0 && (
                   <Typography.Text className="textError" role="alert">
-                    Selecciona al menos un país para registrar un usuario no administrador.
+                    {t("countryRequired")}
                   </Typography.Text>
                 )}
               </Flex>
@@ -342,7 +346,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
               size="large"
               icon={loading ? null : <Plus weight="bold" size={15} />}
             >
-              {isViewDetailsUser?.id ? "Actualizar usuario" : "Registrar usuario"}
+              {isViewDetailsUser?.id ? t("updateUser") : t("registerUser")}
             </Button>
           </Flex>
         )}
@@ -358,7 +362,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
             onClose={() => setIsOpenModalStatus(initDataOpenModalStatus)}
           />
           <ModalRemove
-            name="usuario"
+            name={t("entityName")}
             isOpen={isOpenModalStatus.remove}
             onClose={() => setIsOpenModalStatus(initDataOpenModalStatus)}
             onRemove={onRemoveUser}

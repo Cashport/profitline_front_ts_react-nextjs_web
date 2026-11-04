@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import { DownloadSimple, UploadSimple } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -31,11 +32,12 @@ export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModal
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale
 }) => {
+  const t = useTranslations("dataQuality.actionsModal");
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Selecciona la acción que vas a realizar"
+      title={t("title")}
       footer={null}
       onCancel={onClose}
       className="catalogMaterialsActionsModal"
@@ -46,13 +48,13 @@ export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModal
           <>
             <ButtonGenerateAction
               icon={<DownloadSimple size={20} />}
-              title="Descargar Auxiliar Materiales"
+              title={t("downloadMaterialsAux")}
               onClick={onDownloadCatalog}
               disabled={isDownloadCatalogLoading}
             />
             <ButtonGenerateAction
               icon={<UploadSimple size={20} />}
-              title="Cargar Auxiliar Materiales"
+              title={t("uploadMaterialsAux")}
               onClick={onUploadMaterialsAuxiliary}
             />
           </>
@@ -61,13 +63,13 @@ export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModal
           <>
             <ButtonGenerateAction
               icon={<DownloadSimple size={20} />}
-              title="Descargar Puntos de venta"
+              title={t("downloadPos")}
               onClick={onDownloadPointsOfSale}
               disabled={isDownloadPointsOfSaleLoading}
             />
             <ButtonGenerateAction
               icon={<UploadSimple size={20} />}
-              title="Cargar Puntos de venta"
+              title={t("uploadPos")}
               onClick={onUploadPointsOfSale}
             />
           </>

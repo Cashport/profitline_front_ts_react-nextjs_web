@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import StatCards, { type StatCardItem } from "@/components/ui/stat-cards/stat-cards";
 import SegBar from "@/modules/walletModule/components/shared/seg-bar";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
@@ -17,40 +19,43 @@ const META_VENCIDO = 16;
 
 /** Las cuatro cifras de cabecera de la torre. */
 export default function TorreKpiCards({ resumen, novedades }: TorreKpiCardsProps) {
+  const t = useTranslations("controlTower.kpis");
   const { segments, vencidos } = resumen;
   const cobertura = vencidos.total ? (resumen.cubierto / vencidos.total) * 100 : null;
 
   const cards: StatCardItem[] = [
     {
       id: "cartera",
-      label: "Cartera total",
+      label: t("total"),
       value: fmtM(segments.total),
-      foot: `${fac(resumen.facturas)} · ${cli(resumen.clientes)}`
+      foot: t("totalFoot", { invoices: fac(resumen.facturas), customers: cli(resumen.clientes) })
     },
     {
       id: "vencido",
-      label: "Vencido",
+      label: t("pastDue"),
       value: fmtM(segments.vencido),
       suffix: segments.total ? `${pct(segments.vencido, segments.total).toFixed(1)}%` : "—",
-      foot: `Meta de operación ${META_VENCIDO}%`
+      foot: t("pastDueFoot", { pct: META_VENCIDO })
     },
     {
       id: "cubierto",
-      label: "Vencido cubierto",
+      label: t("covered"),
       value: cobertura === null ? "—" : cobertura.toFixed(0),
       suffix: cobertura === null ? undefined : "%",
       // Los anchos salen sobre el vencido, no sobre la cartera: es lo que se cubre.
       bar: <SegBar segments={vencidos} className="mt-2.5 h-[7px]" />,
-      foot: `${fmtM(vencidos.sin_conciliar)} sin conciliar`
+      foot: t("coveredFoot", { amount: fmtM(vencidos.sin_conciliar) })
     },
     {
       id: "novedades",
-      label: "Novedades abiertas",
+      label: t("openDisputes"),
       value: String(novedades.length),
       foot: (
         <span className="flex flex-wrap items-center gap-1.5">
-          <StatusChip sev="crit">{novedades.filter(vencida).length} con ticket vencido</StatusChip>
-          <StatusChip sev="warn">{novedades.filter(fria).length} sin gestión +7d</StatusChip>
+          <StatusChip sev="crit">
+            {t("overdueTicket", { count: novedades.filter(vencida).length })}
+          </StatusChip>
+          <StatusChip sev="warn">{t("stale", { count: novedades.filter(fria).length })}</StatusChip>
         </span>
       )
     }

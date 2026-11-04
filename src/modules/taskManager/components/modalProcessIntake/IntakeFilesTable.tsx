@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { Select as AntSelect, Spin } from "antd";
 import { Calendar } from "lucide-react";
 import { FileArrowUp } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
 import { useArchivesClientData } from "@/modules/dataQuality/hooks/useArchivesClientData";
@@ -28,6 +29,8 @@ interface IIntakeFilesTableProps {
 }
 
 export const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
+  const t = useTranslations("taskManager.intake");
+  const tCommon = useTranslations("common");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [activeFileId, setActiveFileId] = useState<number | null>(null);
   const [selectedFileType, setSelectedFileType] = useState<number | null>(null);
@@ -51,9 +54,9 @@ export const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
           allowClear
           value={selectedFileType ?? undefined}
           onChange={(value) => setSelectedFileType(value ?? null)}
-          options={(fileTypes ?? []).map((t) => ({ value: t.id, label: t.description }))}
+          options={(fileTypes ?? []).map((ft) => ({ value: ft.id, label: ft.description }))}
           loading={fileTypesLoading}
-          placeholder="Selecionar Tipo archivo"
+          placeholder={t("selectFileType")}
           className="w-full [&_.ant-select-selector]:!h-[38px]"
         />
       </div>
@@ -62,18 +65,16 @@ export const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
           <Spin />
         </div>
       ) : !files || files.length === 0 ? (
-        <div className="flex justify-center items-center py-12 text-gray-500">
-          No hay archivos disponibles para este cliente
-        </div>
+        <div className="flex justify-center items-center py-12 text-gray-500">{t("noFiles")}</div>
       ) : (
         <div className="max-h-[calc(60*var(--vh))] overflow-y-auto">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-white">
               <TableRow style={{ borderColor: "#DDDDDD" }}>
-                <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-                <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+                <TableHead style={{ color: "#141414", fontWeight: 600 }}>{t("fileType")}</TableHead>
+                <TableHead style={{ color: "#141414", fontWeight: 600 }}>{t("fileDate")}</TableHead>
                 <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
-                  Acciones
+                  {tCommon("fields.actions")}
                 </TableHead>
               </TableRow>
             </TableHeader>

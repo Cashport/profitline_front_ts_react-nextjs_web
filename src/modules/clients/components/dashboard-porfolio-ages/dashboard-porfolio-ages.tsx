@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import { Poppins } from "next/font/google";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
@@ -25,6 +26,7 @@ const DashboardPortfolioAges: FC<DashboardPortfolioAgesProps> = ({
   className,
   pastDuePortfolio = "0"
 }) => {
+  const t = useTranslations("clients.dashboard.portfolioAges");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const options: ApexOptions = {
@@ -84,7 +86,7 @@ const DashboardPortfolioAges: FC<DashboardPortfolioAgesProps> = ({
 
   return (
     <div className={`${styles.wrapper} ${className}`}>
-      <DashboardGenericItem name="Cartera vencida" value={pastDuePortfolio} unit="M" />
+      <DashboardGenericItem name={t("title")} value={pastDuePortfolio} unit="M" />
       <div className={styles.chart}>
         <ReactApexChart
           className=""
@@ -99,27 +101,27 @@ const DashboardPortfolioAges: FC<DashboardPortfolioAgesProps> = ({
       <div className={styles.legends}>
         <div className={styles.legend}>
           <div className={styles.circle} style={{ backgroundColor: "#CBE71E" }}></div>
-          Actual
+          {t("current")}
         </div>
         <div className={styles.legend}>
           <div className={styles.circle} style={{ backgroundColor: "#A8C600" }}></div>
-          30 días
+          {t("days", { days: 30 })}
         </div>
         <div className={styles.legend}>
           <div className={styles.circle} style={{ backgroundColor: "#86A600" }}></div>
-          60 días
+          {t("days", { days: 60 })}
         </div>
         <div className={styles.legend}>
           <div className={styles.circle} style={{ backgroundColor: "#6E7B57" }}></div>
-          90 días
+          {t("days", { days: 90 })}
         </div>
         <div className={styles.legend}>
           <div className={styles.circle} style={{ backgroundColor: "#4F4F4F" }}></div>
-          120 días
+          {t("days", { days: 120 })}
         </div>
         <div className={styles.legend}>
           <div className={styles.circle} style={{ backgroundColor: "#141414" }}></div>
-          +120 días
+          {t("over", { days: 120 })}
         </div>
       </div>
     </div>

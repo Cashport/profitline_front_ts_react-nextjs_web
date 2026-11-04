@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import useSWR from "swr";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSalesDashboard } from "@/services/commerce/commerce";
@@ -26,6 +27,8 @@ type SortDirection = "asc" | "desc";
 
 export default function SalesTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const t = useTranslations("commerce.dashboard.salesTable");
+  const tCommon = useTranslations("common");
 
   const { filters } = useRevenueTracking();
   const { data: salesData, isLoading } = useSWR(
@@ -47,7 +50,7 @@ export default function SalesTable() {
     return (
       <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
         <div className="flex items-center justify-center min-h-[400px]">
-          <p>Cargando datos...</p>
+          <p>{t("loading")}</p>
         </div>
       </Card>
     );
@@ -57,7 +60,7 @@ export default function SalesTable() {
     return (
       <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
         <div className="flex items-center justify-center min-h-[400px]">
-          <p>No hay datos disponibles</p>
+          <p>{t("noData")}</p>
         </div>
       </Card>
     );
@@ -191,12 +194,8 @@ export default function SalesTable() {
   return (
     <Card className="cp-card gap-0 rounded-[var(--card-radius)] border-0 bg-cp-surface py-0 shadow-none">
       <CardHeader className="sm:px-[18px] sm:pt-[14px] !pb-0">
-        <CardTitle className="text-base sm:text-lg font-semibold">
-          Resumen de ventas por regional y vendedor
-        </CardTitle>
-        <CardDescription className="text-[13px] sm:text-sm">
-          Ventas agrupadas por región con detalle de vendedores
-        </CardDescription>
+        <CardTitle className="text-base sm:text-lg font-semibold">{t("title")}</CardTitle>
+        <CardDescription className="text-[13px] sm:text-sm">{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="p-0 sm:px-[18px] sm:py-[14px]">
         <div className="overflow-x-auto">
@@ -205,43 +204,43 @@ export default function SalesTable() {
               <thead>
                 <tr className="border-b border-cp-line bg-cp-surface">
                   <th className="text-center py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                    Regional / Vendedor
+                    {t("columns.regionSeller")}
                   </th>
                   <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                    Borrador
+                    {t("columns.draft")}
                   </th>
                   <th className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink">
-                    Cartera
+                    {t("columns.creditHold")}
                   </th>
                   <th
                     className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_sales_in_process")}
                   >
-                    {renderSortLabel("En proceso", "total_sales_in_process")}
+                    {renderSortLabel(t("columns.inProcess"), "total_sales_in_process")}
                   </th>
                   <th
                     className="hidden md:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_sales_invoiced")}
                   >
-                    {renderSortLabel("Facturado", "total_sales_invoiced")}
+                    {renderSortLabel(t("columns.billed"), "total_sales_invoiced")}
                   </th>
                   <th
                     className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_sales")}
                   >
-                    {renderSortLabel("Total", "total_sales")}
+                    {renderSortLabel(tCommon("fields.total"), "total_sales")}
                   </th>
                   <th
                     className="text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("total_cuota")}
                   >
-                    {renderSortLabel("Meta", "total_cuota")}
+                    {renderSortLabel(t("columns.target"), "total_cuota")}
                   </th>
                   <th
                     className="hidden lg:table-cell text-right py-3 px-2 sm:px-4 text-[13.5px] font-semibold text-cp-ink cursor-pointer select-none"
                     onClick={() => handleSort("pending_cuota")}
                   >
-                    {renderSortLabel("Monto faltante", "pending_cuota")}
+                    {renderSortLabel(t("columns.remaining"), "pending_cuota")}
                   </th>
                 </tr>
               </thead>
@@ -412,7 +411,9 @@ export default function SalesTable() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <tr className="border-t-2 border-cashport-black dark:border-border bg-gray-100 dark:bg-secondary font-bold cursor-pointer">
-                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm">Total</td>
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm">
+                          {tCommon("fields.total")}
+                        </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-[13px] sm:text-sm text-right">
                           {formatMoney(iaTotal.total_sales_pending, {
                             hideDecimals: true

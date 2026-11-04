@@ -1,10 +1,11 @@
 "use client";
 
 import { MapPin } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 
-import { MISSING, PROJECTS } from "../../constants";
+import { MISSING } from "../../constants";
 import type { ILiveAdvisor, ILiveState, IVisitsPalette } from "../../types";
 import { fmtClock, fmtDuration } from "../../utils/visits-format";
 
@@ -20,8 +21,10 @@ interface RankingRowProps {
   onHover: (id: number | null) => void;
 }
 
+type RowT = ReturnType<typeof useTranslations<"visits.rankingRow">>;
+
 /** Detalle del estado y dónde está, como lo cuenta la fila; "XX" en lo que aún no llega. */
-function describe(a: ILiveAdvisor, s: ILiveState, t: number) {
+function describe(a: ILiveAdvisor, s: ILiveState, t: number, tv: RowT) {
   const zone = a.zoneName ?? MISSING;
   let detail: string | null = null;
   let where: string;
@@ -39,12 +42,12 @@ function describe(a: ILiveAdvisor, s: ILiveState, t: number) {
       where = a.currentClient ?? MISSING;
       break;
     case "EN_ROUTE":
-      detail = a.next ? `ETA ${fmtClock(a.next.start)}` : null;
-      where = a.next ? `Hacia ${a.next.clientName}` : `Zona ${zone}`;
+      detail = a.next ? tv("eta", { time: fmtClock(a.next.start) }) : null;
+      where = a.next ? tv("toward", { client: a.next.clientName }) : tv("zone", { zone });
       break;
     default:
       // NO_VISITS.
-      where = a.visits.total ? "Sin visitas pendientes" : "Sin visitas programadas";
+      where = a.visits.total ? tv("noPending") : tv("noneScheduled");
   }
 
   return { detail, where: `${where}` };
@@ -59,13 +62,17 @@ export default function RankingRow({
   onSelect,
   onHover
 }: RankingRowProps) {
+  const tv = useTranslations("visits.rankingRow");
+  const tProjects = useTranslations("visits.projects");
   const color = palette.status[state.status];
-  const project = a.project ? PROJECTS[a.project] : null;
+  const project = a.project
+    ? { name: tProjects(`${a.project}.name`), definition: tProjects(`${a.project}.definition`) }
+    : null;
   const ratio = a.activitiesOk != null && a.goal ? a.activitiesOk / a.goal : null;
   const low = ratio == null || ratio < 0.35;
   // Avance de visitas: las completadas sobre el total del día.
   const visitsPct = a.visits.total ? Math.round((a.visits.completed / a.visits.total) * 100) : null;
-  const { detail, where } = describe(a, state, t);
+  const { detail, where } = describe(a, state, t, tv);
   // Mientras no lleguen las actividades, el podio sale de las visitas efectivas.
   const podium = position <= 3 && a.visits.completed > 0 ? position : 0;
 
@@ -124,7 +131,7 @@ export default function RankingRow({
 
       <div
         className="flex flex-col items-end gap-[3px] pt-px"
-        title={`Actividades · ${project?.definition ?? MISSING}`}
+        title={tv("activitiesTitle", { definition: project?.definition ?? MISSING })}
       >
         {/* Las actividades aún no llegan en today-visits. */}
         <span
@@ -140,7 +147,7 @@ export default function RankingRow({
             {visitsPct != null ? `${visitsPct}%` : "—"}
           </b>
           {" · "}
-          {a.visits.done}/{a.visits.total} vis.
+          {tv("visitsShort", { done: a.visits.done, total: a.visits.total })}
         </span>
       </div>
     </li>

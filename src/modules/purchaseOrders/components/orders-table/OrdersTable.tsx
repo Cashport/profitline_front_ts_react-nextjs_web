@@ -2,11 +2,8 @@
 
 import { useState, useMemo, Fragment } from "react";
 import { Pagination as AntPagination, Spin, Flex, Button } from "antd";
-import {
-  AlertCircle,
-  ChevronDown,
-  ChevronRight
-} from "lucide-react";
+import { useTranslations } from "use-intl";
+import { AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import {
   IPurchaseOrder,
   IOrder,
@@ -23,7 +20,8 @@ import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWareho
 import "./OrdersTable.scss";
 
 // Encabezado de Clientes (docs/DESIGN.md §7)
-const TH = "border-b border-cp-line bg-cp-surface px-4 py-3 text-[13.5px] font-semibold text-cp-ink";
+const TH =
+  "border-b border-cp-line bg-cp-surface px-4 py-3 text-[13.5px] font-semibold text-cp-ink";
 
 type SortDirection = "asc" | "desc" | null;
 type SortableColumn =
@@ -54,6 +52,7 @@ const renderStatusBadge = (
   status: string,
   statusColor: string,
   noveltyTypes: string,
+  noveltyTypeLabel: string,
   projectId?: number
 ) => {
   // Abbott (204): si la OC tiene la novedad "OC duplicada", el fondo del badge
@@ -85,7 +84,7 @@ const renderStatusBadge = (
           </TooltipTrigger>
           <TooltipContent side="bottom" className="bg-gray-900 text-white p-3 max-w-xs">
             <div className="space-y-1">
-              <div className="font-semibold text-sm">Tipo de novedad:</div>
+              <div className="font-semibold text-sm">{noveltyTypeLabel}</div>
               <div className="text-sm whitespace-pre-wrap">{noveltyTypes}</div>
             </div>
           </TooltipContent>
@@ -165,6 +164,8 @@ export function OrdersTable({
   onRowClick,
   onOrderClick
 }: OrdersTableProps) {
+  const t = useTranslations("purchaseOrders.table");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
   // projectId del proyecto seleccionado (para aislar el color de OC duplicada a Abbott).
   const { ID: selectedProjectId } = useAppStore((projects) => projects.selectedProject);
@@ -220,7 +221,9 @@ export function OrdersTable({
         className={`${align === "right" ? "text-right" : "text-left"} ${TH} cursor-pointer select-none ${extraClass}`}
         onClick={() => handleSort(column)}
       >
-        <span className={`inline-flex items-center gap-1 ${align === "right" ? "flex-row-reverse" : ""}`}>
+        <span
+          className={`inline-flex items-center gap-1 ${align === "right" ? "flex-row-reverse" : ""}`}
+        >
           {label}
           <SortArrows dir={dir} />
         </span>
@@ -307,7 +310,7 @@ export function OrdersTable({
                       <Checkbox
                         checked={isAllSelected}
                         onCheckedChange={handleSelectAll}
-                        aria-label="Select all"
+                        aria-label={tCommon("actions.selectAll")}
                       />
                     </div>
                   )}
@@ -315,20 +318,20 @@ export function OrdersTable({
                     className="flex items-center gap-1"
                     onClick={() => handleSort("packageNumber")}
                   >
-                    <span>ID Pedido</span>
+                    <span>{t("columns.orderId")}</span>
                     <SortArrows
                       dir={sortConfig.column === "packageNumber" ? sortConfig.direction : null}
                     />
                   </div>
                 </div>
               </th>
-              <th className={`text-left ${TH}`}>Orden de compra</th>
-              {renderSortableHeader("Cliente", "customerName")}
-              {renderSortableHeader("Entrega", "deliveryDate")}
-              {renderSortableHeader("Estado", "status")}
-              <th className={`text-left ${TH}`}>Factura</th>
-              {renderSortableHeader("Productos", "totalProducts", "right")}
-              {renderSortableHeader("Monto", "totalAmount", "right", "w-28")}
+              <th className={`text-left ${TH}`}>{t("columns.purchaseOrder")}</th>
+              {renderSortableHeader(tCommon("fields.customer"), "customerName")}
+              {renderSortableHeader(t("columns.delivery"), "deliveryDate")}
+              {renderSortableHeader(tCommon("fields.status"), "status")}
+              <th className={`text-left ${TH}`}>{tCommon("fields.invoice")}</th>
+              {renderSortableHeader(t("columns.products"), "totalProducts", "right")}
+              {renderSortableHeader(tCommon("fields.amount"), "totalAmount", "right", "w-28")}
               <th className={`${TH} w-16`} />
             </tr>
           </thead>
@@ -336,7 +339,7 @@ export function OrdersTable({
             {data.length === 0 && (
               <tr>
                 <td colSpan={9} className="text-center text-gray-500 py-8">
-                  No hay órdenes de compra.
+                  {t("empty")}
                 </td>
               </tr>
             )}
@@ -383,7 +386,9 @@ export function OrdersTable({
                       className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                     >
                       {renderIdPedidoCell()}
-                      <td className="p-4 text-gray-500 text-sm">{pkg.orderCount} ordenes</td>
+                      <td className="p-4 text-gray-500 text-sm">
+                        {t("ordersCount", { count: pkg.orderCount })}
+                      </td>
                       <td className="p-4 text-gray-700">
                         <span className="block truncate max-w-64" title={pkg.customerName}>
                           {pkg.customerName || "-"}
@@ -401,6 +406,7 @@ export function OrdersTable({
                           pkg.status,
                           pkg.statusColor,
                           pkg.noveltyTypes,
+                          t("noveltyType"),
                           selectedProjectId
                         )}
                       </td>
@@ -508,6 +514,7 @@ export function OrdersTable({
                             order.status,
                             order.statusColor,
                             order.noveltyTypes,
+                            t("noveltyType"),
                             selectedProjectId
                           )}
                         </td>
@@ -538,6 +545,7 @@ export function OrdersTable({
                               }}
                               className="buttonSeeProject"
                               icon={<WarningDiamond size={"1.3rem"} />}
+                              aria-label={t("changeWarehouse")}
                             />
                             <Button
                               onClick={() => onOrderClick?.(order)}
@@ -559,17 +567,17 @@ export function OrdersTable({
       {/* Pagination */}
       <div className="flex items-center justify-between mt-2 px-4 py-2">
         <span className="text-sm text-gray-500">
-          Mostrando{" "}
-          {Math.min(
-            ((pagination?.actualPage || 1) - 1) * (pagination?.rowsperpage || 10) + 1,
-            pagination?.totalRows || 0
-          )}{" "}
-          a{" "}
-          {Math.min(
-            (pagination?.actualPage || 1) * (pagination?.rowsperpage || 10),
-            pagination?.totalRows || 0
-          )}{" "}
-          de {pagination?.totalRows || 0} resultados
+          {t("showing", {
+            from: Math.min(
+              ((pagination?.actualPage || 1) - 1) * (pagination?.rowsperpage || 10) + 1,
+              pagination?.totalRows || 0
+            ),
+            to: Math.min(
+              (pagination?.actualPage || 1) * (pagination?.rowsperpage || 10),
+              pagination?.totalRows || 0
+            ),
+            total: pagination?.totalRows || 0
+          })}
         </span>
         <AntPagination
           current={pagination?.actualPage || 1}

@@ -11,6 +11,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getClients } from "@/services/commerce/commerce";
 import "./create-order-select-client.scss";
 import { IEcommerceClient } from "@/types/commerce/ICommerce";
+import { useTranslations } from "use-intl";
 
 type ExtendedFieldError =
   | OriginalFieldError
@@ -22,6 +23,7 @@ interface Props {
 }
 
 const SelectClientSimplified = ({ errors, field }: Props) => {
+  const t = useTranslations("commerce.searchClient");
   const { ID } = useAppStore((state) => state.selectedProject);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<IEcommerceClient[]>([]);
@@ -100,7 +102,7 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
     <Select
       showSearch
       optionFilterProp="label"
-      placeholder="Seleccione un cliente"
+      placeholder={t("selectClient")}
       className={`selectInputClientBase ${errors ? "selectInputClientError" : "selectInputClientCustom"}`}
       loading={loading}
       variant="borderless"

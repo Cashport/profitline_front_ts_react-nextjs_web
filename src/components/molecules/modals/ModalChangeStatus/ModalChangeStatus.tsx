@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Checkbox, Flex, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import "./modalchangestatus.scss";
 
@@ -26,6 +27,8 @@ export const ModalChangeStatus = ({
   onRemove,
   customOnOk
 }: Props) => {
+  const t = useTranslations("modals.changeStatus");
+  const tCommon = useTranslations("common");
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
@@ -46,24 +49,24 @@ export const ModalChangeStatus = ({
       cancelButtonProps={{
         className: "buttonCancel"
       }}
-      okText="Cambiar de estado"
+      okText={t("ok")}
       okButtonProps={{ className: "acceptButton" }}
       className="modalChangeStatus"
-      title="Cambio de Estado"
+      title={t("title")}
       onOk={onOk}
-      cancelText="Cancelar"
+      cancelText={tCommon("actions.cancel")}
     >
-      <Text className="textModal">Selecciona el nuevo estado</Text>
+      <Text className="textModal">{t("selectNewStatus")}</Text>
       <Flex vertical className="options">
         <Checkbox className="option" checked={isActive} onClick={() => setIsActive(true)}>
-          Activo
+          {tCommon("status.active")}
         </Checkbox>
         <Checkbox checked={!isActive} className="option" onClick={() => setIsActive(false)}>
-          Inactivo
+          {tCommon("status.inactive")}
         </Checkbox>
         {onRemove && (
           <Text onClick={onRemove} className="textRemove">
-            Eliminar {name}
+            {t("remove", { name })}
           </Text>
         )}
       </Flex>

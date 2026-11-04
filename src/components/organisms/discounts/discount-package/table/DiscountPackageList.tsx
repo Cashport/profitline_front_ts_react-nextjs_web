@@ -1,5 +1,6 @@
 "use client";
 import { Table } from "antd";
+import { useTranslations } from "use-intl";
 import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
 import { discountPackagesColumns } from "../../constants/column";
 import { DiscountPackageState } from "../../hooks/useDiscount";
@@ -25,12 +26,16 @@ export default function DiscountPackages({
   handleChangePage,
   loading
 }: Readonly<IDiscountPackageTable>) {
+  const t = useTranslations("discounts.columns");
+  const tCommon = useTranslations("common");
   return (
     <Table
       scroll={{ y: "calc(61 * var(--vh))", x: undefined }}
       columns={discountPackagesColumns({
         handleSelect: handleSelectToDelete,
-        handleChangeStatus
+        handleChangeStatus,
+        t,
+        tCommon
       })}
       dataSource={data}
       loading={loading}

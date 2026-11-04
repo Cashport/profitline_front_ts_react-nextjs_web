@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Spin, Input, message } from "antd";
 import { Trash, Plus, X } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import {
   getClientDataEmails,
@@ -24,6 +25,8 @@ interface Props {
 }
 
 export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
+  const t = useTranslations("dataQuality.emailRules");
+  const tCommon = useTranslations("common");
   const [existingEmails, setExistingEmails] = useState<IDataEmail[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newEmails, setNewEmails] = useState<string[]>([]);
@@ -36,9 +39,7 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
       const rules = await getClientDataEmails(clientId);
       setExistingEmails(rules);
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al obtener los correos registrados"
-      );
+      message.error(error instanceof Error ? error.message : t("loadEmailsError"));
     }
   };
 
@@ -48,7 +49,7 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
       setAiContext(ai_context || "");
       setInitialAiContext(ai_context || "");
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al obtener el prompt");
+      message.error(error instanceof Error ? error.message : t("loadPromptError"));
     }
   };
 
@@ -69,13 +70,13 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
   }, [isOpen]);
 
   const handleDelete = async (rule: IDataEmail) => {
-    const hide = message.loading("Eliminando correo...", 0);
+    const hide = message.loading(t("deleting"), 0);
     try {
       await deleteClientDataEmail([rule.id]);
-      message.success("Correo eliminado exitosamente");
+      message.success(t("deleted"));
       setExistingEmails((prev) => prev.filter((email) => email.id !== rule.id));
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al eliminar el correo");
+      message.error(error instanceof Error ? error.message : t("deleteError"));
     } finally {
       hide();
     }
@@ -100,37 +101,37 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
 
     if (!hasNewEmails && !promptChanged) return;
     if (hasNewEmails && !nonEmpty.every((email) => isValidEmail(email))) {
-      message.error("Ingresa correos válidos");
+      message.error(t("invalidEmails"));
       return;
     }
 
     setIsSaving(true);
-    const hide = message.loading("Guardando...", 0);
+    const hide = message.loading(tCommon("status.saving"), 0);
     try {
       if (hasNewEmails) {
         try {
           await addClientDataEmail(nonEmpty.map((sender) => ({ client_id: clientId, sender })));
-          message.success("Correos guardados exitosamente");
+          message.success(t("saved"));
           setNewEmails([]);
           await fetchEmails();
         } catch (error) {
           message.error(
             error instanceof Error
-              ? `Error al guardar los correos: ${error.message}`
-              : "Error al guardar los correos"
+              ? t("saveErrorWithDetail", { detail: error.message })
+              : t("saveError")
           );
         }
       }
       if (promptChanged) {
         try {
           await editClientPrompt(clientId, aiContext);
-          message.success("Prompt actualizado exitosamente");
+          message.success(t("promptUpdated"));
           setInitialAiContext(aiContext);
         } catch (error) {
           message.error(
             error instanceof Error
-              ? `Error al actualizar el prompt: ${error.message}`
-              : "Error al actualizar el prompt"
+              ? t("promptErrorWithDetail", { detail: error.message })
+              : t("promptError")
           );
         }
       }
@@ -152,7 +153,7 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
       open={isOpen}
       onCancel={onClose}
       onClose={onClose}
-      title="Editar reglas de correo"
+      title={t("title")}
       footer={null}
       centered
       destroyOnClose
@@ -166,7 +167,7 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
         ) : (
           <div className="modalDataEmailRules__list">
             <div className="modalDataEmailRules__promptField">
-              <p className="modalDataEmailRules__label">Prompt</p>
+              <p className="modalDataEmailRules__label">{t("prompt")}</p>
               <Input.TextArea
                 value={aiContext}
                 autoSize={{ minRows: 3, maxRows: 8 }}
@@ -174,10 +175,10 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
               />
             </div>
 
-            <p className="modalDataEmailRules__title">Remitentes</p>
+            <p className="modalDataEmailRules__title">{t("senders")}</p>
 
             {existingEmails.length === 0 && newEmails.length === 0 && (
-              <p className="modalDataEmailRules__empty">No hay correos registrados.</p>
+              <p className="modalDataEmailRules__empty">{t("empty")}</p>
             )}
 
             {existingEmails.map((rule) => (
@@ -187,7 +188,7 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
                   type="button"
                   className="modalDataEmailRules__iconButton"
                   onClick={() => handleDelete(rule)}
-                  aria-label="Eliminar correo"
+                  aria-label={t("deleteEmail")}
                 >
                   <Trash size={18} />
                 </button>
@@ -202,7 +203,7 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
                     <div className="modalDataEmailRules__field">
                       <Input
                         value={email}
-                        placeholder="correo@ejemplo.com"
+                        placeholder={t("emailPlaceholder")}
                         status={isInvalid ? "error" : undefined}
                         onChange={(e) => handleChangeNewEmail(index, e.target.value)}
                       />
@@ -211,19 +212,19 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
                       type="button"
                       className="modalDataEmailRules__iconButton"
                       onClick={() => handleRemoveNewRow(index)}
-                      aria-label="Quitar correo"
+                      aria-label={t("removeEmail")}
                     >
                       <X size={14} />
                     </button>
                   </div>
-                  {isInvalid && <p className="modalDataEmailRules__error">Correo no válido</p>}
+                  {isInvalid && <p className="modalDataEmailRules__error">{t("invalidEmail")}</p>}
                 </div>
               );
             })}
 
             <button type="button" className="modalDataEmailRules__addButton" onClick={handleAddRow}>
               <Plus size={18} />
-              Agregar correo
+              {t("addEmail")}
             </button>
           </div>
         )}
@@ -234,7 +235,7 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
             loading={isSaving}
             disabled={!hasSomethingToSave || emailsInvalid || isSaving}
           >
-            Guardar
+            {tCommon("actions.save")}
           </PrincipalButton>
         </div>
       </div>

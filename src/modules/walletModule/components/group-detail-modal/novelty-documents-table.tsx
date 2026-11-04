@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { DOCUMENT_TYPE_LABEL } from "../../constants";
 import { fmtFull } from "../../utils/format";
 import type { IWalletDocument } from "../../types";
@@ -17,6 +19,8 @@ const TH =
  * seleccionados y su total. Sin vencimiento ni tramo: incident-detail no los manda.
  */
 export default function NoveltyDocumentsTable({ documentos }: NoveltyDocumentsTableProps) {
+  const t = useTranslations("wallet.noveltyDocs");
+  const tCommon = useTranslations("common");
   const total = documentos.reduce((sum, d) => sum + d.saldo, 0);
 
   return (
@@ -25,13 +29,13 @@ export default function NoveltyDocumentsTable({ documentos }: NoveltyDocumentsTa
         <thead>
           <tr>
             <th scope="col" className={TH}>
-              Factura
+              {t("invoice")}
             </th>
             <th scope="col" className={TH}>
-              Tipo
+              {t("type")}
             </th>
             <th scope="col" className={`${TH} text-right`}>
-              Saldo
+              {t("amount")}
             </th>
           </tr>
         </thead>
@@ -49,7 +53,7 @@ export default function NoveltyDocumentsTable({ documentos }: NoveltyDocumentsTa
         <tfoot>
           <tr>
             <th colSpan={2} className="px-3 py-2 text-left font-semibold text-foreground">
-              Total
+              {tCommon("fields.total")}
             </th>
             <th className="whitespace-nowrap px-3 py-2 text-right font-semibold tabular-nums text-foreground">
               {fmtFull(total)}

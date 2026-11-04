@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 import { EST_META, ORDEN_EST } from "../../constants";
 import { toEstadoId } from "../../utils/api-adapter";
@@ -40,6 +42,7 @@ const compositionSegments = (total: IMatrixSummaryTotal) => {
 
 /** Las seis tarjetas de resumen sobre la matriz. */
 export default function WalletStatCards({ summary, totals }: WalletStatCardsProps) {
+  const t = useTranslations("wallet.statCards");
   const { total, overdue, openNovelty, unreconciled, openBalances, pendingCompensation } = summary;
   // Tramos 61–90, 91–120 y +120.
   const overdueOver60 = AGING_BUCKETS.slice(3).reduce(
@@ -57,9 +60,9 @@ export default function WalletStatCards({ summary, totals }: WalletStatCardsProp
   }[] = [
     {
       key: "total",
-      label: "Cartera total",
+      label: t("total"),
       value: fmtM(total.amount),
-      foot: `${fac(total.invoices)} · ${cli(total.clients)}`,
+      foot: t("totalFoot", { invoices: fac(total.invoices), customers: cli(total.clients) }),
       bar: <SegBar segments={compositionSegments(total)} className="mt-2.5 h-1.5" />
     },
     {
@@ -67,56 +70,59 @@ export default function WalletStatCards({ summary, totals }: WalletStatCardsProp
       label: (
         <>
           <Swatch className="bg-rose-400" />
-          Cartera vencida
+          {t("pastDue")}
         </>
       ),
       value: fmtM(overdue.amount),
       badge: fmtPct(overdue.percentage),
-      foot: `${fac(overdue.count)} · +60 días ${fmtM(overdueOver60)}`
+      foot: t("pastDueFoot", { invoices: fac(overdue.count), amount: fmtM(overdueOver60) })
     },
     {
       key: "novedad",
       label: (
         <>
           <Swatch className={EST_META.novedad.bg} />
-          Con novedad abierta
+          {t("openDispute")}
         </>
       ),
       value: fmtM(openNovelty.amount),
-      foot: `${fmtPct(openNovelty.percentage)} del saldo · en gestión`
+      foot: t("openDisputeFoot", { pct: fmtPct(openNovelty.percentage) })
     },
     {
       key: "sin-conciliar",
       label: (
         <>
           <Swatch className={EST_META.sin_conciliar.bg} />
-          Sin conciliar
+          {t("unreconciled")}
         </>
       ),
       value: fmtM(unreconciled.amount),
-      foot: `${fmtPct(unreconciled.percentage)} del saldo · nadie lo ha tocado`
+      foot: t("unreconciledFoot", { pct: fmtPct(unreconciled.percentage) })
     },
     {
       key: "saldos-abiertos",
       label: (
         <>
           <Swatch className={EST_META.saldo.bg} />
-          Saldos abiertos
+          {t("openDeductions")}
         </>
       ),
       value: fmtM(openBalances.amount),
-      foot: `${fmtPct(openBalances.percentage)} · ${doc(openBalances.count)} sin aplicar`
+      foot: t("openDeductionsFoot", {
+        pct: fmtPct(openBalances.percentage),
+        docs: doc(openBalances.count)
+      })
     },
     {
       key: "pendiente-compensacion",
       label: (
         <>
           <Swatch className={EST_META.pagada.bg} />
-          Pendiente compensación
+          {t("pendingClearing")}
         </>
       ),
       value: fmtM(pendingCompensation.amount),
-      foot: `${fmtPct(pendingCompensation.percentage)} · pagos sin compensar`
+      foot: t("pendingClearingFoot", { pct: fmtPct(pendingCompensation.percentage) })
     }
   ];
 

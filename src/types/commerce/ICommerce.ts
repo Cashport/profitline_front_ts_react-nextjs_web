@@ -1,4 +1,4 @@
-import { IOrderViewContext } from "@/app/(platform)/comercio/cetaphil/page";
+import { IOrderViewContext } from "@/app/(platform)/commerce/cetaphil/page";
 
 export interface IEcommerceClient {
   client_id: string;

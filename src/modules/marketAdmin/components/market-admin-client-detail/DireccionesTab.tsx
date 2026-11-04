@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Table, Popconfirm } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl";
 import ModalDireccion from "@/modules/marketAdmin/components/market-admin-client-detail/ModalDireccion";
 import {
   ICreateMarketAdminClientAddressBody,
@@ -34,6 +35,8 @@ export default function DireccionesTab({
   onDelete,
   canCreate = true
 }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.addresses");
+  const tCommon = useTranslations("common.actions");
   const [modal, setModal] = useState<ModalState>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -50,7 +53,7 @@ export default function DireccionesTab({
 
   const columns: ColumnsType<IMarketAdminClientAddress> = [
     {
-      title: "Dirección",
+      title: t("columns.address"),
       dataIndex: "address",
       key: "address",
       onHeaderCell: headerCell,
@@ -59,21 +62,21 @@ export default function DireccionesTab({
           <span className="text-sm text-[#141414]">{v}</span>
           {d.is_principal === 1 && (
             <span className="text-[13px] font-semibold px-2 py-0.5 rounded-full bg-[#F0F7E1] text-[#5A7A00]">
-              Principal
+              {t("main")}
             </span>
           )}
         </div>
       )
     },
     {
-      title: "Ciudad",
+      title: t("columns.city"),
       dataIndex: "city",
       key: "city",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v || "—"}</span>
     },
     {
-      title: "Bodega",
+      title: t("columns.warehouse"),
       key: "bodega",
       onHeaderCell: headerCell,
       render: (_, d) => (
@@ -91,20 +94,24 @@ export default function DireccionesTab({
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setModal({ mode: "edit", direccion: d })}
+            aria-label={tCommon("edit")}
             className="w-7 h-7 rounded-lg text-[#AAAAAA] hover:text-[#141414] hover:bg-[#F0F0F0] flex items-center justify-center transition-colors"
           >
             <Pencil size={13} />
           </button>
           <Popconfirm
-            title="Eliminar dirección"
-            description={`¿Eliminar "${d.address}"?`}
-            okText="Eliminar"
-            cancelText="Cancelar"
+            title={t("deleteConfirm.title")}
+            description={t("deleteConfirm.description", { address: d.address })}
+            okText={tCommon("delete")}
+            cancelText={tCommon("cancel")}
             okButtonProps={{ danger: true, loading: deletingId === d.id }}
             placement="topRight"
             onConfirm={() => handleDelete(d.id)}
           >
-            <button className="w-7 h-7 rounded-lg text-[#AAAAAA] hover:text-[#E53E3E] hover:bg-[#FFF5F5] flex items-center justify-center transition-colors">
+            <button
+              aria-label={tCommon("delete")}
+              className="w-7 h-7 rounded-lg text-[#AAAAAA] hover:text-[#E53E3E] hover:bg-[#FFF5F5] flex items-center justify-center transition-colors"
+            >
               <Trash2 size={13} />
             </button>
           </Popconfirm>
@@ -116,15 +123,13 @@ export default function DireccionesTab({
   return (
     <div className="cp-fill">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-[#666666]">
-          {direcciones.length} {direcciones.length === 1 ? "dirección" : "direcciones"} registradas
-        </p>
+        <p className="text-sm text-[#666666]">{t("count", { count: direcciones.length })}</p>
         {canCreate && (
           <button
             onClick={() => setModal({ mode: "new" })}
             className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
           >
-            <Plus size={18} /> Nueva dirección
+            <Plus size={18} /> {t("new")}
           </button>
         )}
       </div>
@@ -136,7 +141,7 @@ export default function DireccionesTab({
         rowKey="id"
         loading={isLoading}
         pagination={false}
-        locale={{ emptyText: "No hay direcciones registradas." }}
+        locale={{ emptyText: t("empty") }}
       />
 
       {modal && (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { DatePicker, Input, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { useProjectUsers } from "@/hooks/useProjectUsers";
 import type { ICreateIncidentActionBody } from "@/types/novelties/INovelties";
@@ -25,6 +26,8 @@ export default function GroupTicketForm({
   onCancel,
   onCreate
 }: GroupTicketFormProps) {
+  const t = useTranslations("wallet.ticketForm");
+  const tCommon = useTranslations("common");
   const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
   const [assignedTo, setAssignedTo] = useState<number | undefined>(defaultAssignedTo ?? undefined);
@@ -55,14 +58,12 @@ export default function GroupTicketForm({
 
   return (
     <div className="border-t border-border px-[18px] pb-4 pt-3.5">
-      <h4 className="mb-[11px] text-[13px] font-semibold text-muted-foreground">
-        Nuevo ticket
-      </h4>
+      <h4 className="mb-[11px] text-[13px] font-semibold text-muted-foreground">{t("title")}</h4>
 
       <form className="flex flex-col gap-2.5" onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <Label>Responsable</Label>
+            <Label>{t("owner")}</Label>
             <Select
               className="w-full"
               value={assignedTo}
@@ -73,11 +74,11 @@ export default function GroupTicketForm({
               optionFilterProp="label"
               loading={isLoadingUsers}
               disabled={isSending}
-              placeholder="Quien crea la acción"
+              placeholder={t("ownerPlaceholder")}
             />
           </div>
           <div>
-            <Label>Fecha límite</Label>
+            <Label>{t("deadline")}</Label>
             <DatePicker
               className="w-full"
               format="DD/MM/YYYY"
@@ -90,24 +91,24 @@ export default function GroupTicketForm({
         </div>
 
         <div>
-          <Label>Acción</Label>
+          <Label>{t("action")}</Label>
           <Input
             value={titulo}
             disabled={isSending}
-            placeholder="Ej.: recibir acta de la transportadora"
+            placeholder={t("actionPlaceholder")}
             onChange={(e) => setTitulo(e.target.value)}
           />
         </div>
 
         <div>
           <Label>
-            Comentario <span className="font-normal opacity-70">opcional</span>
+            {t("comment")} <span className="font-normal opacity-70">{t("optional")}</span>
           </Label>
           <Input.TextArea
             rows={2}
             value={descripcion}
             disabled={isSending}
-            placeholder="Contexto para quien lo resuelve"
+            placeholder={t("commentPlaceholder")}
             onChange={(e) => setDescripcion(e.target.value)}
           />
         </div>
@@ -119,14 +120,14 @@ export default function GroupTicketForm({
             onClick={onCancel}
             className="rounded-md border border-border bg-card px-2.5 py-[3px] text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </button>
           <button
             type="submit"
             disabled={isSending || !titulo.trim()}
             className="rounded-md bg-cashport-green px-2.5 py-[3px] text-[13px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
           >
-            {isSending ? "Creando…" : "Crear ticket"}
+            {isSending ? t("creating") : t("create")}
           </button>
         </div>
       </form>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Input, InputNumber, Modal, Select } from "antd";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import {
@@ -49,6 +50,8 @@ export function ModalAgregarProducto({
   onClose,
   onAdd
 }: ModalAgregarProductoProps) {
+  const t = useTranslations("reverseLogistics.returnDetail.addProductModal");
+  const tCommon = useTranslations("common");
   const [idProducto, setIdProducto] = useState<string>();
   const [numeroLote, setNumeroLote] = useState<string>();
   const [cantidad, setCantidad] = useState<number | null>(1);
@@ -93,7 +96,7 @@ export function ModalAgregarProducto({
 
   return (
     <Modal
-      title="Agregar producto"
+      title={t("title")}
       open={open}
       onCancel={onClose}
       footer={null}
@@ -103,7 +106,7 @@ export function ModalAgregarProducto({
     >
       <div className="flex flex-col gap-4 py-2">
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-          Producto
+          {t("product")}
           <Select
             showSearch
             value={idProducto}
@@ -116,36 +119,36 @@ export function ModalAgregarProducto({
             filterOption={(input, option) =>
               !!option?.descripcion.toLowerCase().includes(input.toLowerCase())
             }
-            placeholder="Buscar producto"
+            placeholder={t("searchProduct")}
             className="w-full"
           />
         </label>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Lote
+            {t("lot")}
             <Select
               value={numeroLote}
               onChange={setNumeroLote}
               options={lotesProducto}
               fieldNames={{ label: "lote", value: "lote" }}
               disabled={!producto}
-              notFoundContent="Sin lotes vigentes"
-              placeholder="Selecciona el lote"
+              notFoundContent={t("noLots")}
+              placeholder={t("selectLot")}
               className="w-full"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Vencimiento
+            {t("expiration")}
             <span className="flex h-8 items-center text-sm font-normal text-gray-900">
               {lote ? dayjs(lote.fecha).format("DD/MM/YYYY") : "—"}
             </span>
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Cantidad
+            {t("quantity")}
             <InputNumber value={cantidad} onChange={setCantidad} min={1} className="w-full" />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-            Valor unitario
+            {t("unitPrice")}
             <InputNumber
               value={precio}
               onChange={setPrecio}
@@ -156,21 +159,23 @@ export function ModalAgregarProducto({
           </label>
         </div>
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-          Observación
+          {t("observation")}
           <Input
             value={observacion}
             onChange={(e) => setObservacion(e.target.value)}
-            placeholder="Opcional"
+            placeholder={t("optional")}
           />
         </label>
         <div className="flex items-center justify-between gap-2 pt-2">
           <span className="text-xs text-gray-500">
-            {cantidad && precio !== null ? `Valor total ${fmtCop(cantidad * precio)}` : ""}
+            {cantidad && precio !== null
+              ? t("totalValue", { amount: fmtCop(cantidad * precio) })
+              : ""}
           </span>
           <div className="flex items-center gap-2">
-            <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+            <SecondaryButton onClick={onClose}>{tCommon("actions.cancel")}</SecondaryButton>
             <PrincipalButton onClick={handleAdd} disabled={!completo}>
-              Agregar
+              {tCommon("actions.add")}
             </PrincipalButton>
           </div>
         </div>

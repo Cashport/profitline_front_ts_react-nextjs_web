@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Button, Flex, Popover, Spin, Typography, message } from "antd";
 import { Plus, X } from "phosphor-react";
 
@@ -9,13 +10,14 @@ interface Props {
   isDisabledEdit: boolean;
 }
 export const SelectHoldingBR = ({ isDisabledEdit }: Props) => {
+  const t = useTranslations("shared.selects");
   const { data, isLoading, removeHolding } = useHolding();
   const [messageApi, contextHolder] = message.useMessage();
 
   return (
     <div className="selectholdingbr">
       {contextHolder}
-      <Typography.Text className="title">Holdings</Typography.Text>
+      <Typography.Text className="title">{t("holdings")}</Typography.Text>
       <Flex vertical className="holdings">
         {isLoading ? (
           <Spin />
@@ -44,7 +46,7 @@ export const SelectHoldingBR = ({ isDisabledEdit }: Props) => {
             placement="bottom"
           >
             <Button icon={<Plus size={"16px"} />} className="addButton" type="text">
-              Agregar Holding
+              {t("addHolding")}
             </Button>
           </Popover>
         )}

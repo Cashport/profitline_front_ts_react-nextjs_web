@@ -5,7 +5,9 @@ import type {
   ITodayVisitsUser
 } from "@/types/visits/IVisits";
 
-import { ACTIVE_STATUSES, STATUS_LABELS } from "../constants";
+import { getTranslator } from "@/i18n/translator";
+
+import { ACTIVE_STATUSES } from "../constants";
 import type {
   AdvisorStatus,
   ILiveAdvisor,
@@ -43,7 +45,7 @@ function pointsOf(
   // `current_position` no trae etiqueta.
   const reports =
     cur && minutesOfDay(cur.timestamp) > lastAt
-      ? [...locations, { ...cur, state_name: STATUS_LABELS[cur.state] }]
+      ? [...locations, { ...cur, state_name: getTranslator("visits")(`status.${cur.state}`) }]
       : locations;
   let km = 0;
   return reports.map((p, i): IPoint => {

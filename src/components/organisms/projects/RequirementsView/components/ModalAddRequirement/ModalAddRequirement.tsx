@@ -6,6 +6,7 @@ import { useState } from "react";
 import DocumentList from "../DocumentList";
 import { CreateDocument } from "../CreateDocument";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 const { Title } = Typography;
 
@@ -17,6 +18,7 @@ interface Props {
 }
 type ActionType = "document" | "form" | null;
 export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Props) => {
+  const t = useTranslations("projects.requirements.addRequirement");
   const [isModalCreateDocumentOpen, setIsModalCreateDocumentOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState<ActionType>(null);
   const router = useRouter();
@@ -31,11 +33,11 @@ export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Pro
           <ButtonGenerateAction
             onClick={() => handleActionClick("document")}
             icon={<Files size={16} />}
-            title="Documento"
+            title={t("document")}
           />
           <ButtonGenerateAction
             icon={<ListChecks size={16} />}
-            title="Formulario"
+            title={t("form")}
             onClick={() => handleActionClick("form")}
             disabled={true}
           />
@@ -63,7 +65,7 @@ export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Pro
         <DocumentList
           onClose={() => setCurrentAction(null)}
           selectedClientType={selectedClientType}
-          addNewDocument={() => router.push("/proyectos/create-form")}
+          addNewDocument={() => router.push("/projects/create-form")}
           listType={"forms"}
         />
       );
@@ -71,13 +73,13 @@ export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Pro
   };
   const getTitle = () => {
     if (currentAction === null) {
-      return "Requerimiento";
+      return t("title");
     }
     if (currentAction === "document") {
-      return "Documentos";
+      return t("documentsTitle");
     }
     if (currentAction === "form") {
-      return "Formularios";
+      return t("formsTitle");
     }
   };
 

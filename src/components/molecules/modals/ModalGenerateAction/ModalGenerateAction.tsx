@@ -2,6 +2,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import {
   ArrowLeftRight,
   DollarSign,
@@ -45,6 +46,7 @@ export const ModalGenerateAction = ({
   addInvoicesToApplicationTable,
   markAsBalance
 }: Props) => {
+  const t = useTranslations("modals.generateAction");
   const router = useRouter();
 
   // "Ajustes contables" queda deshabilitado hasta definir cómo se elige el subtipo
@@ -78,38 +80,36 @@ export const ModalGenerateAction = ({
       centered
       title={
         <div className="pr-6">
-          <h2 className="text-xl font-semibold text-foreground">Generar acción</h2>
-          <p className="mt-1 text-sm font-normal text-muted-foreground">
-            Selecciona la acción que vas a realizar
-          </p>
+          <h2 className="text-xl font-semibold text-foreground">{t("title")}</h2>
+          <p className="mt-1 text-sm font-normal text-muted-foreground">{t("description")}</p>
         </div>
       }
       footer={null}
       onCancel={onClose}
     >
       <div className="mt-5 space-y-5">
-        <ActionTileGroup title="Pagos y cartera" tone="emerald">
+        <ActionTileGroup title={t("groups.payments")} tone="emerald">
           <ActionTile
             icon={<ArrowLeftRight />}
-            label="Acuerdo de pago"
+            label={t("paymentPlan")}
             tone="emerald"
             onClick={() => handleOpenModal(6)}
           />
           <ActionTile
             icon={<DollarSign />}
-            label="Aplicar pagos"
+            label={t("applyPayments")}
             tone="emerald"
             onClick={() => addInvoicesToApplicationTable()}
           />
           <ActionTile
             icon={<Shuffle />}
-            label="Conciliación masiva"
+            label={t("bulkReconciliation")}
             tone="emerald"
-            onClick={() => router.push(`/conciliacion/${clientId}`)}
+            onClick={() => router.push(`/reconciliation/${clientId}`)}
           />
           <ActionTile
             icon={<FileCheck />}
-            label="Marcar como saldo"
+            label={t("markAsDeduction")}
             tone="emerald"
             onClick={() => {
               if (validateInvoiceIsSelected()) {
@@ -119,47 +119,47 @@ export const ModalGenerateAction = ({
           />
         </ActionTileGroup>
 
-        <ActionTileGroup title="Facturación" tone="blue">
+        <ActionTileGroup title={t("groups.billing")} tone="blue">
           <ActionTile
             icon={<FileText />}
-            label="Radicar factura"
+            label={t("submitInvoice")}
             tone="blue"
             onClick={() => handleOpenModal(3)}
           />
-          <ActionTile icon={<FileEdit />} label="Ajustes contables" tone="blue" disabled />
+          <ActionTile icon={<FileEdit />} label={t("accountingAdjustments")} tone="blue" disabled />
         </ActionTileGroup>
 
-        <ActionTileGroup title="Gestión del caso" tone="violet">
+        <ActionTileGroup title={t("groups.case")} tone="violet">
           <ActionTile
             icon={<Diamond />}
-            label="Registrar novedad"
+            label={t("registerDispute")}
             tone="violet"
             onClick={() => handleOpenModal(1)}
           />
           <ActionTile
             icon={<RefreshCcw />}
-            label="Cambio de estado"
+            label={t("changeStatus")}
             tone="violet"
             onClick={() => handleOpenModal(2)}
           />
           <ActionTile
             icon={<Pencil />}
-            label="Ingresar gestión"
+            label={t("logActivity")}
             tone="violet"
             onClick={() => handleOpenModal(9)}
           />
         </ActionTileGroup>
 
-        <ActionTileGroup title="Envíos al cliente" tone="orange">
+        <ActionTileGroup title={t("groups.send")} tone="orange">
           <ActionTile
             icon={<Send />}
-            label="Estado de cuenta"
+            label={t("accountStatement")}
             tone="orange"
             onClick={() => handleOpenModal(7)}
           />
           <ActionTile
             icon={<Link2 />}
-            label="Enviar link a cliente"
+            label={t("sendLink")}
             tone="orange"
             onClick={() => handleOpenModal(8)}
           />

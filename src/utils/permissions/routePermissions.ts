@@ -3,51 +3,51 @@ import { checkUserViewPermissions } from "@/utils/utils";
 
 export const PERMISSION_ROUTE_MAP: Record<string, string> = {
   Dashboard: "/dashboard",
-  Clientes: "/clientes/all",
-  Descuentos: "/descuentos",
-  Notificaciones: "/notificaciones",
-  Marketplace: "/comercio",
-  Bancos: "/banco",
+  Clientes: "/clients/all",
+  Descuentos: "/discounts",
+  Notificaciones: "/notifications",
+  Marketplace: "/commerce",
+  Bancos: "/banks",
   Configuracion: "/settings",
-  Proveedores: "/proveedores",
+  Proveedores: "/suppliers",
   AdministracionClientes: "/client-management",
   Whatsapp: "/chat",
-  Aprobaciones: "/aprobaciones",
+  Aprobaciones: "/approvals",
   GestorTareas: "/task-manager",
   PurchaseOrders: "/purchase-orders",
   DataQuality: "/data-quality",
-  MedicalAccounts: "/cuentas-medicas",
+  MedicalAccounts: "/medical-accounts",
   Visits: "/visits",
   Reports: "/reports",
-  BlockingAlerts: "/blockingAlerts"
+  BlockingAlerts: "/blocking-alerts"
 };
 
 const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/clientes": "Clientes",
-  "/descuentos": "Descuentos",
-  "/notificaciones": "Notificaciones",
-  "/comercio": "Marketplace",
-  "/banco": "Bancos",
+  "/clients": "Clientes",
+  "/discounts": "Descuentos",
+  "/notifications": "Notificaciones",
+  "/commerce": "Marketplace",
+  "/banks": "Bancos",
   "/settings": "Configuracion",
-  "/proveedores": "Proveedores",
+  "/suppliers": "Proveedores",
   "/client-management": "AdministracionClientes",
   "/chat": "Whatsapp",
-  "/aprobaciones": "Aprobaciones",
+  "/approvals": "Aprobaciones",
   "/task-manager": "GestorTareas",
   "/purchase-orders": "PurchaseOrders",
   "/data-quality": "DataQuality",
-  "/cuentas-medicas": "MedicalAccounts",
+  "/medical-accounts": "MedicalAccounts",
   "/visits": "Visits",
   "/reports": "Reports",
-  "/blockingAlerts": "BlockingAlerts"
+  "/blocking-alerts": "BlockingAlerts"
 };
 
 export const getFirstPermittedRoute = (selectedProject: ISelectedProject | undefined): string => {
   const FALLBACK_ROUTE = "/land";
 
   if (!selectedProject) return FALLBACK_ROUTE;
-  if (selectedProject.isSuperAdmin) return "/clientes/all";
+  if (selectedProject.isSuperAdmin) return "/clients/all";
 
   const viewPermissions = selectedProject.views_permissions;
   if (!viewPermissions?.length) return FALLBACK_ROUTE;

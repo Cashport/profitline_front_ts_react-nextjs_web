@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Modal, Typography, message } from "antd";
+import { useTranslations } from "use-intl";
 import "./modalActionDiscountCredit.scss";
 import { CreateCreditNote } from "../CreateAccountingAdjustment/CreateCreditNote/CreateCreditNote";
 import { CreateDiscount } from "../CreateAccountingAdjustment/CreateDiscount/CreateDiscount";
@@ -44,7 +45,9 @@ export const ModalActionDiscountCredit = ({
   invoiceSelected,
   onCloseAllModals
 }: Props) => {
+  const t = useTranslations("modals.actionDiscountCredit");
   const [selectedRows, setSelectedRows] = useState<ISelectedAccountingAdjustment[]>([]);
+  const actionType = showActionDetailModal?.actionType || 1;
   const [currentView, setCurrentView] = useState("select");
   const [messageApi, contextHolder] = message.useMessage();
   const params = useParams();
@@ -65,9 +68,12 @@ export const ModalActionDiscountCredit = ({
         }}
         title={
           <Title level={4}>
-            {(currentView === "create" && titleCreateMap[showActionDetailModal?.actionType || 1]) ||
-              (currentView === "select" && titleMap[showActionDetailModal?.actionType || 1]) ||
-              (currentView === "apply" && titleApplyMap[showActionDetailModal?.actionType || 1])}
+            {(currentView === "create" &&
+              titleCreateMap[actionType] &&
+              t(titleCreateMap[actionType])) ||
+              ((currentView === "select" || currentView === "apply") &&
+                titleApplyMap[actionType] &&
+                t(titleApplyMap[actionType]))}
           </Title>
         }
         footer={null}
@@ -148,18 +154,14 @@ export const ModalActionDiscountCredit = ({
   );
 };
 
-const titleMap: Record<number, string> = {
-  1: "Aplicar nota débito",
-  2: "Aplicar nota crédito",
-  3: "Aplicar descuento"
+const titleCreateMap: Record<number, "createDebitMemo" | "createCreditMemo" | "createDiscount"> = {
+  1: "createDebitMemo",
+  2: "createCreditMemo",
+  3: "createDiscount"
 };
-const titleCreateMap: Record<number, string> = {
-  1: "Crear nota débito",
-  2: "Crear nota crédito",
-  3: "Crear descuento"
-};
-const titleApplyMap: Record<number, string> = {
-  1: "Aplicar nota débito",
-  2: "Aplicar nota crédito",
-  3: "Aplicar descuento"
+// "select" y "apply" usan el mismo título.
+const titleApplyMap: Record<number, "applyDebitMemo" | "applyCreditMemo" | "applyDiscount"> = {
+  1: "applyDebitMemo",
+  2: "applyCreditMemo",
+  3: "applyDiscount"
 };

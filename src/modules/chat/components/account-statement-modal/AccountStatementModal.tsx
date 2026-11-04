@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Controller, useForm, Resolver, FieldErrors } from "react-hook-form";
 import { Flex, Modal, Typography, message } from "antd";
+import { useTranslations } from "use-intl";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -43,6 +44,8 @@ const AccountStatementModal = ({
   clientId,
   contactPhone
 }: AccountStatementModalProps) => {
+  const t = useTranslations("chat.accountStatement");
+  const tCommon = useTranslations("common");
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const [activeTab, setActiveTab] = useState<"correo" | "whatsapp" | "descargar">("correo");
   const [recipients, setRecipients] = useState<IUser[]>([]);
@@ -63,7 +66,7 @@ const AccountStatementModal = ({
     ) {
       errors.recipients = {
         type: "required",
-        message: "Se requiere seleccionar destinatarios"
+        message: t("recipientsRequired")
       };
     }
 
@@ -129,7 +132,7 @@ const AccountStatementModal = ({
         setValue("files", mappedAttachments);
       } catch (error) {
         console.error("Error getting digital record form info:", error);
-        message.error("Error al cargar la información");
+        message.error(t("loadError"));
       } finally {
         setIsLoading(false);
       }
@@ -174,7 +177,7 @@ const AccountStatementModal = ({
 
   const onSubmit = async (data: IAccountStatementForm) => {
     if (!clientId) {
-      message.error("No se ha seleccionado un cliente");
+      message.error(t("noClientSelected"));
       return;
     }
 
@@ -191,7 +194,7 @@ const AccountStatementModal = ({
             subject: ""
           };
           await sendDigitalRecord(clientId, emailData);
-          message.success("Estado de cuenta enviado por correo correctamente");
+          message.success(t("sentByEmail"));
           break;
         }
 
@@ -205,7 +208,7 @@ const AccountStatementModal = ({
               .map(Number) || [];
 
           await sendDigitalRecordWhatsapp(clientId, recipientPhoneNumbers);
-          message.success("Estado de cuenta enviado por WhatsApp correctamente");
+          message.success(t("sentByWhatsapp"));
           break;
         }
 
@@ -216,16 +219,16 @@ const AccountStatementModal = ({
               window.open(file.url, "_blank");
             });
 
-            message.success("Archivos del estado de cuenta descargados correctamente");
+            message.success(t("downloaded"));
           } else {
-            message.warning("No se pudieron descargar los archivos");
+            message.warning(t("downloadFailed"));
             return; // No cerrar modal si falla
           }
           break;
         }
 
         default:
-          message.error("Método de envío no válido");
+          message.error(t("invalidMethod"));
           return;
       }
 
@@ -243,11 +246,11 @@ const AccountStatementModal = ({
       } else {
         // Fall back to generic messages
         const errorMessages = {
-          correo: "Error al enviar el estado de cuenta por correo",
-          whatsapp: "Error al enviar el estado de cuenta por WhatsApp",
-          descargar: "Error al descargar los archivos del estado de cuenta"
+          correo: t("errors.email"),
+          whatsapp: t("errors.whatsapp"),
+          descargar: t("errors.download")
         };
-        errorMessage = errorMessages[data.method] || "Error al procesar el estado de cuenta";
+        errorMessage = errorMessages[data.method] || t("errors.generic");
       }
 
       message.error(errorMessage);
@@ -272,15 +275,11 @@ const AccountStatementModal = ({
       >
         <Flex vertical gap={24}>
           <div className="AccountStatementModalContainer__header">
-            <h2 className="AccountStatementModalContainer__header__title">
-              Envío de estado de cuenta
-            </h2>
-            <Typography.Text type="danger">
-              No se ha seleccionado un cliente. Por favor, seleccione una conversación primero.
-            </Typography.Text>
+            <h2 className="AccountStatementModalContainer__header__title">{t("title")}</h2>
+            <Typography.Text type="danger">{t("noClientSelectedHint")}</Typography.Text>
           </div>
           <div className="AccountStatementModalContainer__footer">
-            <SecondaryButton onClick={handleClose}>Cerrar</SecondaryButton>
+            <SecondaryButton onClick={handleClose}>{tCommon("actions.close")}</SecondaryButton>
           </div>
         </Flex>
       </Modal>
@@ -297,9 +296,7 @@ const AccountStatementModal = ({
     >
       <Flex vertical gap={24}>
         <div className="AccountStatementModalContainer__header">
-          <h2 className="AccountStatementModalContainer__header__title">
-            Envío de estado de cuenta
-          </h2>
+          <h2 className="AccountStatementModalContainer__header__title">{t("title")}</h2>
         </div>
 
         <div className="AccountStatementModalContainer__content">
@@ -308,9 +305,9 @@ const AccountStatementModal = ({
             onValueChange={(value) => setActiveTab(value as "correo" | "whatsapp" | "descargar")}
           >
             <TabsList>
-              <TabsTrigger value="correo">Correo</TabsTrigger>
-              <TabsTrigger value="whatsapp">Whatsapp</TabsTrigger>
-              <TabsTrigger value="descargar">Descargar</TabsTrigger>
+              <TabsTrigger value="correo">{t("tabs.email")}</TabsTrigger>
+              <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
+              <TabsTrigger value="descargar">{tCommon("actions.download")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="correo">
@@ -321,8 +318,8 @@ const AccountStatementModal = ({
                   <TagsSelect
                     errors={errors.recipients}
                     field={field}
-                    title="Para"
-                    placeholder="Seleccione o escriba destinatarios"
+                    title={t("to")}
+                    placeholder={t("recipientsPlaceholder")}
                     options={recipients}
                     loading={isLoading}
                     suffixIcon={null}
@@ -342,8 +339,8 @@ const AccountStatementModal = ({
                   <TagsSelect
                     errors={errors.recipients}
                     field={field}
-                    title="Para"
-                    placeholder="Seleccione o escriba destinatarios"
+                    title={t("to")}
+                    placeholder={t("recipientsPlaceholder")}
                     options={recipients
                       .filter((user) => !user.full_phone.includes("INACTIVE"))
                       .map((user) => ({
@@ -369,8 +366,8 @@ const AccountStatementModal = ({
                   <TagsSelect
                     errors={errors.files}
                     field={field}
-                    title="Archivos"
-                    placeholder="Seleccione archivos"
+                    title={t("files")}
+                    placeholder={t("filesPlaceholder")}
                     options={attachments}
                     loading={isLoading}
                     suffixIcon={null}
@@ -383,13 +380,13 @@ const AccountStatementModal = ({
         </div>
 
         <div className="AccountStatementModalContainer__footer">
-          <SecondaryButton onClick={handleClose}>Cancelar</SecondaryButton>
+          <SecondaryButton onClick={handleClose}>{tCommon("actions.cancel")}</SecondaryButton>
           <PrincipalButton
             disabled={!isValid || isSubmitting}
             onClick={handleSubmit(onSubmit)}
             loading={isSubmitting}
           >
-            Enviar
+            {tCommon("actions.send")}
           </PrincipalButton>
         </div>
       </Flex>

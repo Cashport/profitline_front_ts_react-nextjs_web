@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AutoComplete, Input, Select } from "antd";
 import { Percent, Plus, Trash2, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { IDiscountGroup, IDiscountGroupProduct } from "@/types/marketAdmin/IMarketAdmin";
 import { SearchFieldIcon, searchFieldAntdClass } from "@/components/ui/search-field/search-field";
 
@@ -27,6 +28,7 @@ export default function DiscountGroupCard({
   onChange,
   onRemove
 }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.discountGroup");
   const [search, setSearch] = useState("");
 
   const lineName = lineOptions.find((l) => l.value === group.lineId)?.label;
@@ -64,9 +66,9 @@ export default function DiscountGroupCard({
     <div className="border border-[#EEEEEE] rounded-2xl bg-white">
       <div className="px-5 py-4 bg-[#FAFAFA] border-b border-[#EEEEEE] rounded-t-2xl">
         <div className="flex items-center gap-4 mb-1.5 pl-10">
-          <span className="w-24 text-[13px] font-medium text-[#666666]">Descuento</span>
-          <span className="w-28 text-[13px] font-medium text-[#666666]">Cantidad mínima</span>
-          <span className="w-44 text-[13px] font-medium text-[#666666]">Línea</span>
+          <span className="w-24 text-[13px] font-medium text-[#666666]">{t("discount")}</span>
+          <span className="w-28 text-[13px] font-medium text-[#666666]">{t("minQuantity")}</span>
+          <span className="w-44 text-[13px] font-medium text-[#666666]">{t("line")}</span>
         </div>
         <div className="flex items-center gap-4">
           <span className="w-6 h-6 rounded-full bg-[#141414] text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">
@@ -103,7 +105,7 @@ export default function DiscountGroupCard({
           />
           <Select
             allowClear
-            placeholder="Todas las líneas"
+            placeholder={t("allLines")}
             value={group.lineId}
             options={lineOptions}
             loading={isLoadingLines}
@@ -114,7 +116,8 @@ export default function DiscountGroupCard({
           <button
             type="button"
             onClick={onRemove}
-            title="Eliminar grupo"
+            title={t("removeGroup")}
+            aria-label={t("removeGroup")}
             className="ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-[#AAAAAA] hover:text-[#E53E3E] hover:bg-[#FFF5F5] transition-colors flex-shrink-0"
           >
             <Trash2 size={14} />
@@ -143,18 +146,14 @@ export default function DiscountGroupCard({
             }))}
             notFoundContent={
               <span className="text-[13px] text-[#999999]">
-                {search.trim()
-                  ? "Sin resultados disponibles."
-                  : "No hay más productos disponibles."}
+                {search.trim() ? t("noResults") : t("noMoreProducts")}
               </span>
             }
             className="flex-1"
           >
             <Input
               prefix={<SearchFieldIcon />}
-              placeholder={
-                lineName ? `Buscar producto de ${lineName}` : "Buscar producto para agregar..."
-              }
+              placeholder={lineName ? t("searchInLine", { line: lineName }) : t("searchToAdd")}
               className={searchFieldAntdClass()}
             />
           </AutoComplete>
@@ -164,15 +163,13 @@ export default function DiscountGroupCard({
               onClick={handleAddAll}
               className="text-[13px] font-semibold text-[#141414] underline decoration-[#DDDDDD] hover:decoration-[#141414] transition-colors whitespace-nowrap flex-shrink-0"
             >
-              Agregar todos
+              {t("addAll")}
             </button>
           )}
         </div>
 
         {group.products.length === 0 ? (
-          <p className="text-[13px] text-[#BBBBBB] px-1 py-1">
-            Busca y agrega los productos a los que aplica este descuento.
-          </p>
+          <p className="text-[13px] text-[#BBBBBB] px-1 py-1">{t("emptyHint")}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {group.products.map((p) => (
@@ -184,6 +181,7 @@ export default function DiscountGroupCard({
                 <button
                   type="button"
                   onClick={() => handleRemoveProduct(p.id)}
+                  aria-label={t("removeProduct")}
                   className="text-[#AAAAAA] hover:text-[#E53E3E] transition-colors"
                 >
                   <X size={12} />

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Modal, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import UiSearchInput from "@/components/ui/search-input";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -26,6 +27,8 @@ export default function ModalAgregarClientes({
   onClose,
   disabled
 }: Props) {
+  const t = useTranslations("marketAdmin.userDetail.addCustomersModal");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedNits, setSelectedNits] = useState<string[]>([]);
@@ -66,14 +69,14 @@ export default function ModalAgregarClientes({
 
   const columns: ColumnsType<IMarketAdminClient> = [
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "client_name",
       key: "client_name",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "NIT",
+      title: tCommon("fields.taxId"),
       dataIndex: "client_id",
       key: "client_id",
       width: 160,
@@ -81,7 +84,7 @@ export default function ModalAgregarClientes({
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Ciudad",
+      title: t("city"),
       dataIndex: "city",
       key: "city",
       width: 160,
@@ -96,13 +99,13 @@ export default function ModalAgregarClientes({
       onCancel={onClose}
       centered
       width={832}
-      title={<span className="text-base font-bold text-[#141414]">Agregar clientes</span>}
+      title={<span className="text-base font-bold text-[#141414]">{t("title")}</span>}
       footer={null}
     >
       <div className="mb-4">
         <UiSearchInput
           id="modal-agregar-clientes-search"
-          placeholder="Buscar cliente..."
+          placeholder={t("searchPlaceholder")}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
@@ -116,7 +119,7 @@ export default function ModalAgregarClientes({
         rowKey="client_id"
         loading={isLoading}
         scroll={{ y: 360 }}
-        locale={{ emptyText: "No se encontraron clientes." }}
+        locale={{ emptyText: t("empty") }}
         rowSelection={{
           columnWidth: 40,
           selectedRowKeys: visibleSelectedNits,
@@ -128,7 +131,7 @@ export default function ModalAgregarClientes({
           total: pagination.totalRows,
           showSizeChanger: false,
           position: ["bottomRight"],
-          showTotal: (t, range) => `Mostrando ${range[0]}–${range[1]} de ${t} clientes`
+          showTotal: (total, range) => t("total", { from: range[0], to: range[1], total })
         }}
         onChange={(pag, _filters, _sorter, extra) => {
           if (extra.action === "paginate") setPage(pag.current ?? 1);
@@ -137,16 +140,14 @@ export default function ModalAgregarClientes({
 
       {selectedNits.length > 0 && (
         <p className="mt-3 text-sm text-[#666666]">
-          {selectedNits.length === 1
-            ? "1 cliente seleccionado"
-            : `${selectedNits.length} clientes seleccionados`}
+          {t("selected", { count: selectedNits.length })}
         </p>
       )}
 
       <div className="mt-6">
         <FooterButtons
-          titleCancel="Cancelar"
-          titleConfirm="Agregar seleccionados"
+          titleCancel={tCommon("actions.cancel")}
+          titleConfirm={t("confirm")}
           onClose={onClose}
           handleOk={handleAgregar}
           isConfirmDisabled={selectedNits.length === 0}

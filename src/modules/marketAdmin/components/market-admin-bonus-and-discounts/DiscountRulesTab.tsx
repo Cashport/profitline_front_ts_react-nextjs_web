@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Select, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -18,13 +19,13 @@ import DiscountsToolbar from "./DiscountsToolbar";
 import {
   DateCell,
   ESTADO_FILTER_ALL,
-  ESTADO_FILTER_OPTIONS,
   ESTADO_SELECT_CLASSNAME,
   PAGE_SIZE,
   StatusPill,
   TextCell,
   TypePill,
-  headerCell
+  headerCell,
+  useEstadoFilterOptions
 } from "./discountsTableConfig";
 
 interface DiscountRulesTabProps {
@@ -32,6 +33,9 @@ interface DiscountRulesTabProps {
 }
 
 export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps) {
+  const t = useTranslations("marketAdmin.discountsTable");
+  const tCommon = useTranslations("common");
+  const estadoFilterOptions = useEstadoFilterOptions();
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState(ESTADO_FILTER_ALL);
   const [page, setPage] = useState(1);
@@ -59,7 +63,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
 
   const columns: ColumnsType<DiscountBasics> = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "discount_name",
       key: "discount_name",
       sorter: (a, b) => (a.discount_name ?? "").localeCompare(b.discount_name ?? ""),
@@ -67,7 +71,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       render: (v: string) => <TextCell value={v} />
     },
     {
-      title: "Cliente",
+      title: tCommon("fields.customer"),
       dataIndex: "client_name",
       key: "client_name",
       sorter: (a, b) => (a.client_name ?? "").localeCompare(b.client_name ?? ""),
@@ -75,7 +79,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       render: (v: string | null) => <TextCell value={v} />
     },
     {
-      title: "Tipo descuentos",
+      title: t("columns.discountType"),
       dataIndex: "discount_type",
       key: "discount_type",
       width: 160,
@@ -84,7 +88,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       render: (tipo: string) => <TypePill tipo={tipo} />
     },
     {
-      title: "Definiciones",
+      title: t("columns.definitions"),
       dataIndex: "discount_definition",
       key: "discount_definition",
       sorter: (a, b) => (a.discount_definition ?? "").localeCompare(b.discount_definition ?? ""),
@@ -92,7 +96,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       render: (v: string | null) => <TextCell value={v} />
     },
     {
-      title: "Inicio",
+      title: t("columns.start"),
       dataIndex: "start_date",
       key: "start_date",
       sorter: (a, b) => (a.start_date ?? "").localeCompare(b.start_date ?? ""),
@@ -100,7 +104,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       render: (v: string) => <DateCell value={v} />
     },
     {
-      title: "Fin",
+      title: t("columns.end"),
       dataIndex: "end_date",
       key: "end_date",
       sorter: (a, b) => (a.end_date ?? "").localeCompare(b.end_date ?? ""),
@@ -108,7 +112,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       render: (v: string | null) => <DateCell value={v} />
     },
     {
-      title: "Aprobación",
+      title: t("columns.approval"),
       dataIndex: "approval_entity_status_id",
       key: "approval_entity_status_id",
       width: 140,
@@ -120,7 +124,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       render: (statusId: number | null) => <ApprovalStatusPill statusId={statusId} />
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "status",
       key: "status",
       width: 110,
@@ -133,7 +137,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, r) => <GenericEyeButton href={`${MARKET_ADMIN_DISCOUNTS_BASE}/regla/${r.id}`} />
+      render: (_, r) => <GenericEyeButton href={`${MARKET_ADMIN_DISCOUNTS_BASE}/rule/${r.id}`} />
     }
   ];
 
@@ -141,7 +145,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
     <>
       <DiscountsToolbar onCrearNuevo={onCrearNuevo}>
         <UiSearchInput
-          placeholder="Buscar..."
+          placeholder={t("searchPlaceholder")}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
@@ -149,7 +153,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
         />
         <AccionesDropdown
           selectedCount={selectedRowKeys.length}
-          entityLabel="regla(s)"
+          entity="rules"
           onClearSelection={() => setSelectedRowKeys([])}
         />
         <Select
@@ -158,8 +162,8 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
             setEstadoFilter(value);
             setPage(1);
           }}
-          options={ESTADO_FILTER_OPTIONS}
-          placeholder="Estado"
+          options={estadoFilterOptions}
+          placeholder={tCommon("fields.status")}
           style={{ minWidth: 140 }}
           className={ESTADO_SELECT_CLASSNAME}
         />
@@ -175,7 +179,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
           dataSource={filtered}
           rowKey="id"
           showSorterTooltip={false}
-          locale={{ emptyText: "No se encontraron reglas de descuento." }}
+          locale={{ emptyText: t("rules.empty") }}
           rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
           onRow={(record) => ({
             onClick: (e) => {
@@ -195,7 +199,7 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} reglas · ${activas} activas`
+              t("rules.total", { from: range[0], to: range[1], total, active: activas })
           }}
           onChange={(pag, _filters, _sorter, extra) =>
             setPage(extra.action === "paginate" ? pag.current ?? 1 : 1)

@@ -2,6 +2,7 @@
    coma, montos cortos en M / MM y fechas dd/mm/yyyy. Las fechas "YYYY-MM-DD"
    se leen por partes y no con new Date(iso), que las tomaría en UTC y en
    Colombia las correría al día anterior. */
+import { getTranslator } from "@/i18n/translator";
 import type { Tone } from "../types";
 
 export function fmt(x: number, dec = 0): string {
@@ -49,8 +50,6 @@ export const pp = (x: number) =>
     ? (x > 0.0005 ? "+" : x < -0.0005 ? "-" : "") + fmt(Math.abs(x * 100), 1) + " pp"
     : "—";
 
-export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
 export const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 /** Semáforo de cumplimiento: ≥100% bien · ≥90% alerta · <90% crítico. */
@@ -58,7 +57,11 @@ export const sem = (x: number): Tone => (x >= 1 ? "ok" : x >= 0.9 ? "warn" : "cr
 
 /* ---------- fechas ---------- */
 
-export const WEEKDAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+
+/** Día de la semana corto (0 = domingo) en el idioma activo: "lun" / "Mon". */
+export const weekdayShort = (w: number) =>
+  getTranslator("collections")(`weekdays.${WEEKDAY_KEYS[w]}`);
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -88,7 +91,7 @@ export const fechaCorta = (iso: string) => {
 };
 
 /** "2026-09-28" → "Lun 28/09" (títulos de los tooltips por día). */
-export const diaLabel = (iso: string) => `${cap(WEEKDAYS[weekdayOf(iso)])} ${fechaCorta(iso)}`;
+export const diaLabel = (iso: string) => `${cap(weekdayShort(weekdayOf(iso)))} ${fechaCorta(iso)}`;
 
 /** El corte y los pagos se leen en hora de Colombia, no en la del navegador. */
 const TIME_ZONE = "America/Bogota";
@@ -137,7 +140,7 @@ const BOGOTA_PARTS = new Intl.DateTimeFormat("en-CA", {
  */
 export const fmtPaidAt = (iso: string) => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-    return { date: fecha(iso), weekday: WEEKDAYS[weekdayOf(iso)], time: null };
+    return { date: fecha(iso), weekday: weekdayShort(weekdayOf(iso)), time: null };
   }
   const parts = Object.fromEntries(
     BOGOTA_PARTS.formatToParts(new Date(iso)).map((part) => [part.type, part.value])
@@ -145,7 +148,7 @@ export const fmtPaidAt = (iso: string) => {
   const day = `${parts.year}-${parts.month}-${parts.day}`;
   return {
     date: fecha(day),
-    weekday: WEEKDAYS[weekdayOf(day)],
+    weekday: weekdayShort(weekdayOf(day)),
     time: `${parts.hour}:${parts.minute}`
   };
 };

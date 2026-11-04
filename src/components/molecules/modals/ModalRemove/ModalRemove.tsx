@@ -1,4 +1,5 @@
 import { Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 import "./modalRemove.scss";
 
 const { Text } = Typography;
@@ -11,23 +12,24 @@ interface Props {
   onRemove?: () => void;
 }
 export const ModalRemove = ({ isOpen, name, onClose, onRemove, isMassiveAction }: Props) => {
-  const titleFix = isMassiveAction ? "estos" : "este";
+  const t = useTranslations("modals.remove");
+  const tCommon = useTranslations("common");
   return (
     <Modal
       className="modalRemove"
       width={"60%"}
       open={isOpen}
       onCancel={onClose}
-      cancelText="Cancelar"
+      cancelText={tCommon("actions.cancel")}
       okButtonProps={{ className: "acceptButton" }}
-      okText="Aceptar"
+      okText={tCommon("actions.accept")}
       cancelButtonProps={{
         className: "cancelButton"
       }}
-      title={`¿Estás seguro que deseas eliminar ${titleFix} ${name}?`}
+      title={t(isMassiveAction ? "titleMany" : "titleOne", { name: name ?? "" })}
       onOk={onRemove}
     >
-      <Text className="textModal">Esta acción es definitiva</Text>
+      <Text className="textModal">{t("irreversible")}</Text>
     </Modal>
   );
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { DollarSign, Tag, Package, TrendingUp, TrendingDown } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 import { useDashboardSalesKpis } from "@/modules/commerce/hooks/revenue-tracking/useDashboardSalesKpis";
@@ -16,6 +17,7 @@ const metricTrend = (metric?: IKpiMetric) => {
 };
 
 export default function StatCards() {
+  const t = useTranslations("commerce.dashboard.kpis");
   const { filters, includeIva } = useRevenueTracking();
   const { data } = useDashboardSalesKpis(filters, includeIva);
 
@@ -30,31 +32,31 @@ export default function StatCards() {
     badge?: string;
   }> = [
     {
-      title: "Total facturado",
+      title: t("totalBilled"),
       value: data ? formatCurrencyMoney(data.total_revenue.value) : PLACEHOLDER,
       icon: DollarSign,
       ...metricTrend(data?.total_revenue)
     },
     {
-      title: "Pedidos en proceso",
+      title: t("ordersInProcess"),
       value: data ? formatCurrencyMoney(data.orders_in_process.value) : PLACEHOLDER,
-      badge: data ? `${data.orders_in_process.count} pedidos` : undefined
+      badge: data ? t("ordersCount", { count: data.orders_in_process.count }) : undefined
     },
     {
-      title: "Facturación esperada",
+      title: t("expectedBilling"),
       value: data
         ? formatCurrencyMoney(data.orders_in_process.value + data.total_revenue.value)
         : PLACEHOLDER,
       icon: DollarSign
     },
     {
-      title: "Cantidad de pedidos",
+      title: t("orderCount"),
       value: data ? formatNumber(data.total_orders.value) : PLACEHOLDER,
       icon: Package,
       ...metricTrend(data?.total_orders)
     },
     {
-      title: "Valor promedio por pedido",
+      title: t("avgOrderValue"),
       value: data ? formatCurrencyMoney(data.avg_ticket.value) : PLACEHOLDER,
       icon: Tag,
       ...metricTrend(data?.avg_ticket)

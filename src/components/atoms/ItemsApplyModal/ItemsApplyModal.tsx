@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useTranslations } from "use-intl";
 import { useAppStore } from "@/lib/store/store";
 import { DividerVerticalModal } from "../DividerVertical/DividerVerticalModal";
 
@@ -16,6 +17,7 @@ interface ItemsApplyModalProps {
 }
 
 const ItemApplyModal: FC<ItemsApplyModalProps> = ({ item, type, availableValue }) => {
+  const t = useTranslations("components.itemsModal");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   return (
@@ -25,11 +27,11 @@ const ItemApplyModal: FC<ItemsApplyModalProps> = ({ item, type, availableValue }
         <div className={"texts"}>
           <div className={"mainText"}>
             <strong className={"name"}>
-              {titleMap[type]}
+              {titleMap[type] ? t(titleMap[type]) : null}
               <span>{item?.id}</span>
             </strong>
           </div>
-          <div className={"label"}>{item?.motive_name ?? "Volumen"}</div>
+          <div className={"label"}>{item?.motive_name ?? t("volume")}</div>
         </div>
         <div className={"mainValues"}>
           <div className={"value"}>{formatMoney(availableValue?.toString() ?? "")}</div>
@@ -44,10 +46,10 @@ const ItemApplyModal: FC<ItemsApplyModalProps> = ({ item, type, availableValue }
   );
 };
 
-const titleMap: Record<number, string> = {
-  1: "Nota débito",
-  2: "Nota crédito",
-  3: "Descuento"
+const titleMap: Record<number, "debitMemo" | "creditMemo" | "discount"> = {
+  1: "debitMemo",
+  2: "creditMemo",
+  3: "discount"
 };
 
 export default ItemApplyModal;

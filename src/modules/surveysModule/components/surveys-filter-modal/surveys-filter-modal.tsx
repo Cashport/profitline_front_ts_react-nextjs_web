@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -35,11 +36,9 @@ const toIds = (items?: FilterOptionItem[]) => (items ?? []).map((o) => Number(o.
  * creador y fecha de actualización. Las opciones salen del backend y los
  * filtros viajan como query de GET /visit-forms.
  */
-export default function SurveysFilterModal({
-  value,
-  onChange,
-  inHeader
-}: SurveysFilterModalProps) {
+export default function SurveysFilterModal({ value, onChange, inHeader }: SurveysFilterModalProps) {
+  const t = useTranslations("surveys.filters");
+  const tCommon = useTranslations("common");
   const statuses = useVisitFormStatuses();
   const creators = useVisitFormCreators();
   // El draft interno de FilterModal sólo cubre categorías de opciones, así que
@@ -64,21 +63,21 @@ export default function SurveysFilterModal({
   const categories: FilterCategoryConfig[] = [
     {
       key: "status",
-      label: "Estado",
+      label: tCommon("fields.status"),
       options: statuses.map((s) => ({ id: s.code, name: s.name }))
     },
     {
       key: "created_by",
-      label: "Creada por",
+      label: t("createdBy"),
       options: creators.map((c) => ({ id: String(c.id), name: c.name }))
     },
     {
       key: "updated_at",
-      label: "Fecha de actualización",
+      label: t("updatedAt"),
       kind: "custom",
       metaLabel: hasDraftDate
-        ? `Periodo: ${formatDateTagValue(dateDraft)}`
-        : "Selecciona un periodo",
+        ? t("period", { value: formatDateTagValue(dateDraft) })
+        : t("selectPeriod"),
       draftCount: hasDraftDate ? 1 : 0,
       renderPanel: () => <FilterDateTab value={dateDraft} onChange={setDateDraft} />,
       // Debe ser null (no un elemento vacío) para que FilterModal no lo cuente como activo.
@@ -86,7 +85,7 @@ export default function SurveysFilterModal({
         hasCommittedDate ? (
           <DateFilterTag
             value={committedDate}
-            label="Actualizada"
+            label={t("updatedTag")}
             onClear={() => onChange({ ...value, from: null, to: null })}
           />
         ) : null

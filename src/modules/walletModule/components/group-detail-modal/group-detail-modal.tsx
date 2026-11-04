@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "antd";
 import { X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { ApiError } from "@/utils/api/api";
@@ -88,41 +89,47 @@ const TabButton = ({
   onClick: () => void;
   disabled?: boolean;
   children: React.ReactNode;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    title={disabled ? "Próximamente" : undefined}
-    className={cn(
-      "-mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-1 pb-3 pt-3.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground",
-      active && "border-cashport-green text-foreground",
-      disabled && "cursor-not-allowed opacity-50 hover:text-muted-foreground"
-    )}
-  >
-    {children}
-    <span
+}) => {
+  const t = useTranslations("wallet.detail");
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={disabled ? t("comingSoon") : undefined}
       className={cn(
-        "rounded-full px-1.5 text-[13px] font-bold leading-[17px] tabular-nums",
-        active ? "bg-cashport-green text-cashport-black" : "bg-muted text-muted-foreground"
+        "-mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-1 pb-3 pt-3.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground",
+        active && "border-cashport-green text-foreground",
+        disabled && "cursor-not-allowed opacity-50 hover:text-muted-foreground"
       )}
     >
-      {count}
-    </span>
-  </button>
-);
+      {children}
+      <span
+        className={cn(
+          "rounded-full px-1.5 text-[13px] font-bold leading-[17px] tabular-nums",
+          active ? "bg-cashport-green text-cashport-black" : "bg-muted text-muted-foreground"
+        )}
+      >
+        {count}
+      </span>
+    </button>
+  );
+};
 
 /** Cierre para los estados sin cabecera (cargando / error). */
-const CloseButton = ({ onClose }: { onClose: () => void }) => (
-  <button
-    type="button"
-    aria-label="Cerrar"
-    onClick={onClose}
-    className="absolute right-[22px] top-[18px] flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-border bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-  >
-    <X className="h-4 w-4" />
-  </button>
-);
+const CloseButton = ({ onClose }: { onClose: () => void }) => {
+  const tCommon = useTranslations("common");
+  return (
+    <button
+      type="button"
+      aria-label={tCommon("actions.close")}
+      onClick={onClose}
+      className="absolute right-[22px] top-[18px] flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-border bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+    >
+      <X className="h-4 w-4" />
+    </button>
+  );
+};
 
 /** Contenido del modal. Va en su propio componente y con `key` por grupo para
  *  que el estado local (pestaña, selección, formulario) nazca limpio. */
@@ -138,6 +145,7 @@ function GroupDetailBody({
   runId?: string;
   onClose: () => void;
 }) {
+  const t = useTranslations("wallet.detail");
   const { showMessage, messageApi } = useMessageApi();
   // Sin novedad no hay seguimiento: el modal abre directo en las facturas.
   const [tab, setTab] = useState<Tab>(incidentId ? "gestion" : "facturas");
@@ -230,10 +238,10 @@ function GroupDetailBody({
     try {
       await addIncidentComment(incidentId, { comments: comment, files });
       await mutateIncident();
-      showMessage("success", "Comentario registrado");
+      showMessage("success", t("commentSaved"));
       return true;
     } catch {
-      showMessage("error", "No se pudo registrar el comentario");
+      showMessage("error", t("commentError"));
       return false;
     }
   };
@@ -245,11 +253,11 @@ function GroupDetailBody({
     try {
       await createIncidentAction(incidentId, body);
       await Promise.all([mutateActions(), mutateIncident()]);
-      showMessage("success", "Acción creada");
+      showMessage("success", t("actionCreated"));
       setTicketForm(false);
       return true;
     } catch {
-      showMessage("error", "No se pudo crear la acción");
+      showMessage("error", t("actionCreateError"));
       return false;
     }
   };
@@ -259,10 +267,10 @@ function GroupDetailBody({
     try {
       await resolveIncidentAction(incidentId, ticket.actionId, { resolution_comment: comment });
       await Promise.all([mutateActions(), mutateIncident()]);
-      showMessage("success", "Acción resuelta");
+      showMessage("success", t("actionResolved"));
       return true;
     } catch {
-      showMessage("error", "No se pudo resolver la acción");
+      showMessage("error", t("actionResolveError"));
       return false;
     }
   };
@@ -275,16 +283,16 @@ function GroupDetailBody({
     // El menú se cierra al elegir el estado: el loader es el único feedback
     // hasta que llega la respuesta. Va por el messageApi del contexto (no el
     // estático de antd) para que herede el tema claro/oscuro del módulo.
-    const hide = messageApi.open({ type: "loading", content: "Cambiando estado…", duration: 0 });
+    const hide = messageApi.open({ type: "loading", content: t("changingStatus"), duration: 0 });
     try {
       await updateIncidentStatus(incidentId, { novelty_status_id: statusId });
       await mutateIncident();
-      showMessage("success", "Estado actualizado");
+      showMessage("success", t("statusUpdated"));
       return true;
     } catch (error) {
       showMessage(
         "error",
-        error instanceof ApiError && error.message ? error.message : "No se pudo cambiar el estado"
+        error instanceof ApiError && error.message ? error.message : t("statusError")
       );
       return false;
     } finally {
@@ -300,7 +308,7 @@ function GroupDetailBody({
   const handleCreateNovelty = async (body: CreateNoveltyBody): Promise<boolean> => {
     const clientUuid = incident?.client_uuid ?? matrixDetail?.rows[0]?.clientUuid;
     if (!clientUuid) {
-      showMessage("error", "No se pudo identificar el cliente de la novedad");
+      showMessage("error", t("customerNotFound"));
       return false;
     }
     try {
@@ -308,12 +316,12 @@ function GroupDetailBody({
       await mutateIncident();
       setSelected([]);
       setNoveltyModal(null);
-      showMessage("success", "Novedad creada");
+      showMessage("success", t("noveltyCreated"));
       return true;
     } catch (error) {
       showMessage(
         "error",
-        error instanceof ApiError && error.message ? error.message : "No se pudo crear la novedad"
+        error instanceof ApiError && error.message ? error.message : t("noveltyCreateError")
       );
       return false;
     }
@@ -326,14 +334,12 @@ function GroupDetailBody({
       await updateIncident(incidentId, body);
       await mutateIncident();
       setNoveltyModal(null);
-      showMessage("success", "Novedad actualizada");
+      showMessage("success", t("noveltyUpdated"));
       return true;
     } catch (error) {
       showMessage(
         "error",
-        error instanceof ApiError && error.message
-          ? error.message
-          : "No se pudo actualizar la novedad"
+        error instanceof ApiError && error.message ? error.message : t("noveltyUpdateError")
       );
       return false;
     }
@@ -349,7 +355,7 @@ function GroupDetailBody({
           <ProfitLoader size="small" />
         ) : (
           <p className="px-6 text-center text-[13px] text-destructive">
-            {(incidentError as Error)?.message || "No se pudo cargar la novedad."}
+            {(incidentError as Error)?.message || t("noveltyLoadError")}
           </p>
         )}
       </div>
@@ -413,7 +419,7 @@ function GroupDetailBody({
                   loading={isLoadingActions}
                   error={
                     actionsError
-                      ? (actionsError as Error).message || "No se pudieron cargar las acciones."
+                      ? (actionsError as Error).message || t("actionsLoadError")
                       : undefined
                   }
                   onNew={() => setTicketForm(true)}
@@ -432,7 +438,7 @@ function GroupDetailBody({
               onClick={() => setTab("gestion")}
               disabled={!incidentId}
             >
-              Seguimiento
+              {t("tabs.followUp")}
             </TabButton>
             {/* El total que reporta la foto (o el del grupo mientras llega). */}
             <TabButton
@@ -440,14 +446,14 @@ function GroupDetailBody({
               count={totalFacturas}
               onClick={() => setTab("facturas")}
             >
-              Facturas
+              {t("tabs.invoices")}
             </TabButton>
 
             {tab === "facturas" && (
               <SearchField
                 value={query}
                 onChange={setQuery}
-                placeholder="Buscar factura…"
+                placeholder={t("searchInvoice")}
                 className="ml-auto min-w-[160px] max-w-[260px] flex-1"
               />
             )}
@@ -456,7 +462,7 @@ function GroupDetailBody({
           {tab === "facturas" ? (
             invoicesError ? (
               <p className="flex flex-1 items-center justify-center px-6 text-center text-[13px] text-destructive">
-                {(invoicesError as Error)?.message || "No se pudieron cargar las facturas."}
+                {(invoicesError as Error)?.message || t("invoicesLoadError")}
               </p>
             ) : isLoadingInvoices && !matrixDetail ? (
               <div className="flex flex-1 items-center justify-center">
@@ -480,7 +486,7 @@ function GroupDetailBody({
             )
           ) : !incidentId ? (
             <p className="flex flex-1 items-center justify-center px-6 text-center text-[13px] text-muted-foreground">
-              El seguimiento solo está disponible para grupos con novedad.
+              {t("followUpUnavailable")}
             </p>
           ) : (
             <>
@@ -488,7 +494,7 @@ function GroupDetailBody({
                 <div className="mt-auto w-full px-[22px] pb-2.5 pt-[22px]">
                   {isLoadingIncident ? (
                     <p className="text-[13px] leading-relaxed text-muted-foreground">
-                      Cargando seguimiento…
+                      {t("loadingFollowUp")}
                     </p>
                   ) : (
                     <GroupTimeline entries={bitacora} tickets={tickets} />

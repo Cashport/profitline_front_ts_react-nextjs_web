@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Flex, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 import { changePaymentPeriod } from "@/services/banksPayments/banksPayments";
@@ -32,6 +33,7 @@ interface IChangePeriodForm {
  * Solo se ofrece sobre pagos identificados/aplicados (el padre filtra).
  */
 const ModalActionsChangePeriod = ({ isOpen, onClose, selectedRows, onSuccess }: Props) => {
+  const t = useTranslations("banks.changePeriod");
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
   const {
@@ -57,16 +59,11 @@ const ModalActionsChangePeriod = ({ isOpen, onClose, selectedRows, onSuccess }: 
         payment_ids: paymentIds,
         payment_period: data.paymentPeriod.trim()
       });
-      showMessage("success", "Periodo contable actualizado correctamente");
+      showMessage("success", t("success"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof ApiError && error.message
-          ? error.message
-          : "Ha ocurrido un error al cambiar el periodo contable"
-      );
+      showMessage("error", error instanceof ApiError && error.message ? error.message : t("error"));
     } finally {
       setIsLoading(false);
     }
@@ -76,12 +73,12 @@ const ModalActionsChangePeriod = ({ isOpen, onClose, selectedRows, onSuccess }: 
     <Modal
       open={isOpen}
       onCancel={onClose}
-      title="Cambiar periodo contable"
+      title={t("title")}
       width={520}
       destroyOnClose
       footer={
         <FooterButtons
-          titleConfirm="Cambiar periodo"
+          titleConfirm={t("confirm")}
           onClose={onClose}
           handleOk={handleSubmit(handleConfirm)}
           isConfirmLoading={isLoading}
@@ -89,20 +86,17 @@ const ModalActionsChangePeriod = ({ isOpen, onClose, selectedRows, onSuccess }: 
       }
     >
       <Flex vertical gap="0.75rem">
-        <Text type="secondary">
-          Se actualizará el periodo contable de {selectedRows?.length ?? 0} pago(s). No se modifica
-          la fecha de ingreso ni el estado del pago.
-        </Text>
+        <Text type="secondary">{t("description", { count: selectedRows?.length ?? 0 })}</Text>
         <InputForm
-          titleInput="Periodo contable (YYYY-MM)"
+          titleInput={t("periodLabel")}
           nameInput="paymentPeriod"
           control={control}
           error={errors.paymentPeriod}
           validationRules={{
-            required: "El periodo es obligatorio",
+            required: t("required"),
             pattern: {
               value: PAYMENT_PERIOD_PATTERN,
-              message: "Formato inválido. Use YYYY-MM (ej. 2026-08)"
+              message: t("invalidFormat")
             }
           }}
           placeholder="2026-08"

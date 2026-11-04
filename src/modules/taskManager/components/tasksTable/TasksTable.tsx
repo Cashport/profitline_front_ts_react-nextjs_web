@@ -4,7 +4,7 @@ import { FC } from "react";
 import { Eye, Sparkles } from "lucide-react";
 import { Spin } from "antd";
 import dayjs from "dayjs";
-import "dayjs/locale/es";
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
@@ -46,7 +46,7 @@ const formatTaskDate = (isoDate: string): string => {
   if (!date.isValid()) return "-";
 
   const now = dayjs();
-  const ddd = date.locale("es").format("ddd").replace(".", "");
+  const ddd = date.format("ddd").replace(".", "");
 
   if (date.isSame(now, "day")) return formatTime(isoDate);
 
@@ -81,6 +81,8 @@ const TasksTable: FC<ITasksTableProps> = ({
   isLoading = false,
   onTaskStatusChanged
 }) => {
+  const t = useTranslations("taskManager.table");
+  const tCommon = useTranslations("common");
   const isAllSelected =
     tasks.length > 0 && tasks.every((task) => task.id !== null && selectedIds.includes(task.id));
   const isIndeterminate =
@@ -113,10 +115,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                 />
               </th>
               <th className="text-left px-2 py-3 md:px-4 text-[13.5px] font-semibold text-cp-ink">
-                <button
-                  onClick={() => onSort("id")}
-                  className="inline-flex items-center gap-1"
-                >
+                <button onClick={() => onSort("id")} className="inline-flex items-center gap-1">
                   ID
                   <SortArrows dir={sortConfig?.key === "id" ? sortConfig.direction : null} />
                 </button>
@@ -126,8 +125,10 @@ const TasksTable: FC<ITasksTableProps> = ({
                   onClick={() => onSort("created_at")}
                   className="inline-flex items-center gap-1"
                 >
-                  Fecha
-                  <SortArrows dir={sortConfig?.key === "created_at" ? sortConfig.direction : null} />
+                  {tCommon("fields.date")}
+                  <SortArrows
+                    dir={sortConfig?.key === "created_at" ? sortConfig.direction : null}
+                  />
                 </button>
               </th>
               <th className="text-left px-2 py-3 md:px-4 text-[13.5px] font-semibold text-cp-ink w-[60%] md:w-auto">
@@ -135,8 +136,10 @@ const TasksTable: FC<ITasksTableProps> = ({
                   onClick={() => onSort("client_name")}
                   className="inline-flex items-center gap-1"
                 >
-                  Cliente
-                  <SortArrows dir={sortConfig?.key === "client_name" ? sortConfig.direction : null} />
+                  {tCommon("fields.customer")}
+                  <SortArrows
+                    dir={sortConfig?.key === "client_name" ? sortConfig.direction : null}
+                  />
                 </button>
               </th>
               <th className="text-left px-2 py-3 md:px-4 text-[13.5px] font-semibold text-cp-ink w-[30%] md:w-auto">
@@ -144,7 +147,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                   onClick={() => onSort("task_type")}
                   className="inline-flex items-center gap-1"
                 >
-                  Tipo de tarea
+                  {t("taskType")}
                   <SortArrows dir={sortConfig?.key === "task_type" ? sortConfig.direction : null} />
                 </button>
               </th>
@@ -154,16 +157,15 @@ const TasksTable: FC<ITasksTableProps> = ({
                   onClick={() => onSort("description")}
                   className="inline-flex items-center gap-1"
                 >
-                  Descripción
-                  <SortArrows dir={sortConfig?.key === "description" ? sortConfig.direction : null} />
+                  {tCommon("fields.description")}
+                  <SortArrows
+                    dir={sortConfig?.key === "description" ? sortConfig.direction : null}
+                  />
                 </button>
               </th>
               <th className="hidden md:table-cell px-4 py-3 text-[13.5px] font-semibold text-cp-ink">
-                <button
-                  onClick={() => onSort("status")}
-                  className="inline-flex items-center gap-1"
-                >
-                  Estado
+                <button onClick={() => onSort("status")} className="inline-flex items-center gap-1">
+                  {tCommon("fields.status")}
                   <SortArrows dir={sortConfig?.key === "status" ? sortConfig.direction : null} />
                 </button>
               </th>
@@ -173,7 +175,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                   onClick={() => onSort("user_name")}
                   className="inline-flex items-center gap-1"
                 >
-                  Usuario
+                  {tCommon("fields.user")}
                   <SortArrows dir={sortConfig?.key === "user_name" ? sortConfig.direction : null} />
                 </button>
               </th>
@@ -183,7 +185,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                   onClick={() => onSort("amount")}
                   className="inline-flex flex-row-reverse items-center gap-1"
                 >
-                  Monto
+                  {tCommon("fields.amount")}
                   <SortArrows dir={sortConfig?.key === "amount" ? sortConfig.direction : null} />
                 </button>
               </th>
@@ -230,7 +232,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                         variant="outline"
                         className="bg-gray-50 text-gray-500 border-dashed font-normal text-[13px]"
                       >
-                        Sin asignar
+                        {t("unassigned")}
                       </Badge>
                     )}
                   </td>
@@ -249,7 +251,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                         variant="outline"
                         className="bg-gray-50 text-gray-500 border-dashed text-[13px]"
                       >
-                        Sin asignar
+                        {t("unassigned")}
                       </Badge>
                     )}
                   </td>
@@ -260,7 +262,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                         {task.description}
                       </div>
                     ) : (
-                      <span className="text-gray-400 italic">Sin descripción</span>
+                      <span className="text-gray-400 italic">{t("noDescription")}</span>
                     )}
                   </td>
                   {/* Estado */}
@@ -295,7 +297,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                         variant="outline"
                         className="bg-gray-50 text-gray-500 border-dashed font-normal"
                       >
-                        Sin asignar
+                        {t("unassigned")}
                       </Badge>
                     )}
                   </td>
@@ -314,7 +316,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                           e.stopPropagation();
                           onViewTask(task);
                         }}
-                        title="Ver detalles"
+                        title={t("viewDetails")}
                       >
                         <Eye className="h-4 w-4 text-gray-600" />
                       </Button>

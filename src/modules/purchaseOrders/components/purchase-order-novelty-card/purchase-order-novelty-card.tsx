@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/modules/chat/ui/badge";
 import { IPurchaseOrderNovelty } from "@/types/purchaseOrders/purchaseOrders";
 
@@ -7,6 +8,7 @@ interface PurchaseOrderNoveltyCardProps {
 }
 
 export function PurchaseOrderNoveltyCard({ novelties }: PurchaseOrderNoveltyCardProps) {
+  const t = useTranslations("purchaseOrders.noveltyCard");
   if (novelties.length === 0) return null;
 
   return (
@@ -27,7 +29,7 @@ export function PurchaseOrderNoveltyCard({ novelties }: PurchaseOrderNoveltyCard
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-base" style={{ color: "#FFA726" }}>
-              Novedades
+              {t("title")}
             </h3>
             <Badge
               variant="outline"
@@ -38,7 +40,7 @@ export function PurchaseOrderNoveltyCard({ novelties }: PurchaseOrderNoveltyCard
                 backgroundColor: "white"
               }}
             >
-              Requiere atención
+              {t("needsAttention")}
             </Badge>
           </div>
           <div className="space-y-2">

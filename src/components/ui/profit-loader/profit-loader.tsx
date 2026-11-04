@@ -1,5 +1,7 @@
+"use client";
 import React, { FC } from "react";
 import Image from "next/image";
+import { useTranslations } from "use-intl";
 import styles from "./profit-loader.module.scss";
 
 interface ProfitLoaderProps {
@@ -9,6 +11,7 @@ interface ProfitLoaderProps {
 }
 
 const ProfitLoader: FC<ProfitLoaderProps> = ({ size = "medium", message, className }) => {
+  const tCommon = useTranslations("common");
   const sizeMap = {
     small: 80,
     medium: 120,
@@ -22,7 +25,7 @@ const ProfitLoader: FC<ProfitLoaderProps> = ({ size = "medium", message, classNa
       <div className={styles.imageWrapper}>
         <Image
           src="/gifs/Profitline_Motion_Isotipo_Positivo.gif"
-          alt="Loading"
+          alt={tCommon("status.loading")}
           width={imageSize}
           height={imageSize}
           className={styles.loaderImage}

@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import axios from "axios";
 import { ILoaderValidationConfig, ILoaderValidations } from "@/types/dataQuality/IIntakeStructure";
 
@@ -234,7 +235,7 @@ export const downloadMarketAdminClientsConfig = async (nits: string[]): Promise<
         // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
       }
     }
-    throw new Error(message || "No se pudo descargar la configuración de los clientes.");
+    throw new Error(message || getTranslator("shared")("services.downloadCustomersConfigError"));
   }
 };
 

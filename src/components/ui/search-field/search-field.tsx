@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, type InputHTMLAttributes } from "react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 
@@ -60,12 +61,13 @@ const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(function Sear
     surface = "card",
     allowClear = true,
     className,
-    placeholder = "Buscar…",
+    placeholder,
     type = "text",
     ...inputProps
   },
   ref
 ) {
+  const t = useTranslations("components.pageHeader");
   return (
     <label
       className={cn(
@@ -80,14 +82,14 @@ const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(function Sear
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t("searchPlaceholder")}
         {...inputProps}
         className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-[13px] font-medium text-cp-ink shadow-none outline-none placeholder:font-medium placeholder:text-[#9a9a9a]"
       />
       {allowClear && value && (
         <button
           type="button"
-          aria-label="Limpiar búsqueda"
+          aria-label={t("clearSearch")}
           onClick={() => onChange("")}
           className="-mr-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent p-0 text-[16px] leading-none text-[#9a9a9a] hover:text-cp-ink"
         >

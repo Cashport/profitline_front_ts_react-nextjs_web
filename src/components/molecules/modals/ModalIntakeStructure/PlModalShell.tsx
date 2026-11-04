@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import { DM_Mono, DM_Sans, Sora } from "next/font/google";
 
 import "./modalIntakeStructure.scss";
@@ -51,73 +52,76 @@ export const PlModalShell = ({
   children,
   footer,
   width = 880
-}: Props) => (
-  <Modal
-    open={open}
-    onCancel={onClose}
-    footer={null}
-    closable={false}
-    width={width}
-    centered
-    destroyOnClose
-    className="plModal"
-  >
-    <div className={`plShell ${sora.variable} ${dmSans.variable} ${dmMono.variable}`}>
-      <div className="plHeader">
-        <div className="plTitleRow">
-          <div className="plTitleBlock">
-            <span className="plEyebrow">CASHPORT · VALIDACIÓN DE CARGUE</span>
-            <h2 className="plTitle">{title}</h2>
-            {(fileName || meta) && (
-              <div className="plFileRow">
-                {fileName && <span className="plFileChip">{fileName}</span>}
-                {meta && <span>{meta}</span>}
-              </div>
-            )}
+}: Props) => {
+  const t = useTranslations("modals.intakeStructure.shell");
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      closable={false}
+      width={width}
+      centered
+      destroyOnClose
+      className="plModal"
+    >
+      <div className={`plShell ${sora.variable} ${dmSans.variable} ${dmMono.variable}`}>
+        <div className="plHeader">
+          <div className="plTitleRow">
+            <div className="plTitleBlock">
+              <span className="plEyebrow">{t("eyebrow")}</span>
+              <h2 className="plTitle">{title}</h2>
+              {(fileName || meta) && (
+                <div className="plFileRow">
+                  {fileName && <span className="plFileChip">{fileName}</span>}
+                  {meta && <span>{meta}</span>}
+                </div>
+              )}
+            </div>
+            <button type="button" aria-label={t("close")} className="plClose" onClick={onClose}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                aria-hidden="true"
+              >
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
           </div>
-          <button type="button" aria-label="Cerrar" className="plClose" onClick={onClose}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              aria-hidden="true"
+          {steps && steps.length > 0 && (
+            <div
+              className="plSteps"
+              style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
             >
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
+              {steps.map((step) => (
+                <div key={step.label} className={`plStep plStep--${step.state}`}>
+                  <span className="plStepBar" />
+                  <span className="plStepLabel">{step.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        {steps && steps.length > 0 && (
-          <div
-            className="plSteps"
-            style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
-          >
-            {steps.map((step) => (
-              <div key={step.label} className={`plStep plStep--${step.state}`}>
-                <span className="plStepBar" />
-                <span className="plStepLabel">{step.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      <div className="plBody">
-        {(heading || subheading) && (
-          <div className="plHeading">
-            {heading && <h3>{heading}</h3>}
-            {subheading && <span>{subheading}</span>}
-          </div>
-        )}
-        {children}
-      </div>
+        <div className="plBody">
+          {(heading || subheading) && (
+            <div className="plHeading">
+              {heading && <h3>{heading}</h3>}
+              {subheading && <span>{subheading}</span>}
+            </div>
+          )}
+          {children}
+        </div>
 
-      <div className="plFooter">{footer}</div>
-    </div>
-  </Modal>
-);
+        <div className="plFooter">{footer}</div>
+      </div>
+    </Modal>
+  );
+};
 
 /** Nombre de columna o archivo en mono, como en el diseño. */
 export const PlCol = ({ children }: { children: ReactNode }) => (

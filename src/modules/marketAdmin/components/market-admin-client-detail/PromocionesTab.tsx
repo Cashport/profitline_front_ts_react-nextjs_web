@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Switch, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus, Paperclip } from "lucide-react";
+import { useTranslations } from "use-intl";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import ProfitLoader from "@/components/ui/profit-loader";
 import ApprovalStatusPill from "@/components/ui/approval-status-pill";
@@ -16,7 +17,7 @@ import {
   TypePill,
   headerCell
 } from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/discountsTableConfig";
-import { bonificadosColumns } from "@/modules/marketAdmin/components/market-admin-client-detail/bonificadosColumns";
+import { useBonificadosColumns } from "@/modules/marketAdmin/components/market-admin-client-detail/bonificadosColumns";
 import { MARKET_ADMIN_DISCOUNTS_BASE } from "@/components/organisms/discounts/constants/routes";
 import { DiscountByClient } from "@/types/discount/DiscountBasics";
 import {
@@ -53,6 +54,10 @@ export default function PromocionesTab({
   productos,
   onCreateBonificado
 }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.promotionsTab");
+  const tTable = useTranslations("marketAdmin.discountsTable.columns");
+  const tCommon = useTranslations("common.fields");
+  const bonificadosColumns = useBonificadosColumns();
   const [showBonusModal, setShowBonusModal] = useState(false);
   const [savingBonus, setSavingBonus] = useState(false);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
@@ -89,7 +94,7 @@ export default function PromocionesTab({
 
   const columns: ColumnsType<DiscountByClient> = [
     {
-      title: "Nombre",
+      title: tCommon("name"),
       dataIndex: "discount_name",
       key: "discount_name",
       sorter: (a, b) => (a.discount_name ?? "").localeCompare(b.discount_name ?? ""),
@@ -97,7 +102,7 @@ export default function PromocionesTab({
       render: (v: string) => <TextCell value={v} />
     },
     {
-      title: "Tipo descuentos",
+      title: tTable("discountType"),
       dataIndex: "discount_type",
       key: "discount_type",
       width: 160,
@@ -106,7 +111,7 @@ export default function PromocionesTab({
       render: (tipo: string) => <TypePill tipo={tipo} />
     },
     {
-      title: "Definiciones",
+      title: tTable("definitions"),
       dataIndex: "discount_definition",
       key: "discount_definition",
       sorter: (a, b) => (a.discount_definition ?? "").localeCompare(b.discount_definition ?? ""),
@@ -114,7 +119,7 @@ export default function PromocionesTab({
       render: (v: string | null) => <TextCell value={v} />
     },
     {
-      title: "Inicio",
+      title: tTable("start"),
       dataIndex: "start_date",
       key: "start_date",
       sorter: (a, b) => (a.start_date ?? "").localeCompare(b.start_date ?? ""),
@@ -122,7 +127,7 @@ export default function PromocionesTab({
       render: (v: string) => <DateCell value={v} />
     },
     {
-      title: "Fin",
+      title: tTable("end"),
       dataIndex: "end_date",
       key: "end_date",
       sorter: (a, b) => (a.end_date ?? "").localeCompare(b.end_date ?? ""),
@@ -130,7 +135,7 @@ export default function PromocionesTab({
       render: (v: string | null) => <DateCell value={v} />
     },
     {
-      title: "Aprobación",
+      title: tTable("approval"),
       dataIndex: "approval_entity_status_id",
       key: "approval_entity_status_id",
       width: 140,
@@ -142,7 +147,7 @@ export default function PromocionesTab({
       render: (statusId: number | null) => <ApprovalStatusPill statusId={statusId} />
     },
     {
-      title: "Estado",
+      title: tCommon("status"),
       dataIndex: "status",
       key: "status",
       width: 110,
@@ -153,7 +158,7 @@ export default function PromocionesTab({
       )
     },
     {
-      title: "Adjunto",
+      title: t("attachment"),
       dataIndex: "contract_archive",
       key: "contract_archive",
       width: 90,
@@ -164,7 +169,7 @@ export default function PromocionesTab({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            title="Ver contrato"
+            title={t("viewContract")}
             className="w-7 h-7 flex items-center justify-center border border-[#DDDDDD] rounded-md text-[#666666] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
             <Paperclip size={13} />
@@ -178,7 +183,7 @@ export default function PromocionesTab({
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, r) => <GenericEyeButton href={`${MARKET_ADMIN_DISCOUNTS_BASE}/regla/${r.id}`} />
+      render: (_, r) => <GenericEyeButton href={`${MARKET_ADMIN_DISCOUNTS_BASE}/rule/${r.id}`} />
     }
   ];
 
@@ -189,7 +194,7 @@ export default function PromocionesTab({
           onClick={handleCreateDiscount}
           className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
         >
-          <Plus size={18} /> Crear descuento
+          <Plus size={18} /> {t("createDiscount")}
         </button>
       </div>
 
@@ -204,7 +209,7 @@ export default function PromocionesTab({
           rowKey="id"
           showSorterTooltip={false}
           pagination={false}
-          locale={{ emptyText: "No hay descuentos creados aún." }}
+          locale={{ emptyText: t("noDiscounts") }}
         />
       )}
 
@@ -212,11 +217,14 @@ export default function PromocionesTab({
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
-            <p className="text-sm font-bold text-[#141414]">Bonificados manuales</p>
+            <p className="text-sm font-bold text-[#141414]">{t("manualBonuses")}</p>
             {bonificadosTotals && (
               <span className="text-[13px] text-[#999999]">
-                {bonificadosTotals.total_assigned} asignadas · {bonificadosTotals.total_available}{" "}
-                disponibles · {bonificadosTotals.total_consumed} consumidas
+                {t("bonusTotals", {
+                  assigned: bonificadosTotals.total_assigned,
+                  available: bonificadosTotals.total_available,
+                  consumed: bonificadosTotals.total_consumed
+                })}
               </span>
             )}
           </div>
@@ -224,7 +232,7 @@ export default function PromocionesTab({
             onClick={handleCreateBonus}
             className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 h-[var(--control-h)] rounded-lg hover:bg-[#b8d11a] transition-colors"
           >
-            <Plus size={18} /> Crear bonificado
+            <Plus size={18} /> {t("createBonus")}
           </button>
         </div>
 
@@ -239,7 +247,7 @@ export default function PromocionesTab({
               dataSource={bonificados}
               rowKey="group_id"
               pagination={false}
-              locale={{ emptyText: "No hay bonificados manuales creados aún." }}
+              locale={{ emptyText: t("noBonuses") }}
             />
           </div>
         )}

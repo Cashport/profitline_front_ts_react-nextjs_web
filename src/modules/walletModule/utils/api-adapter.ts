@@ -1,6 +1,7 @@
 /* Traduce la respuesta de /portfolio/matrix a los tipos que consumen los
    componentes de este módulo. Vive aparte para que el diseño no dependa de
    la forma exacta del API: si el contrato cambia, se toca sólo este archivo. */
+import { getTranslator } from "@/i18n/translator";
 import { EST_META, ORDEN_EST, TRAMOS } from "../constants";
 import { estadoMeta, toEstadoNuevo } from "./estados";
 import { HOY, diasEntre } from "./format";
@@ -86,7 +87,8 @@ export const statusKeysByEstado = (
 };
 
 /** El API a veces manda el nombre del cliente en null; la UI siempre espera texto. */
-const clientName = (nombre: string | null | undefined): string => nombre?.trim() || "Sin nombre";
+const clientName = (nombre: string | null | undefined): string =>
+  nombre?.trim() || getTranslator("wallet")("fallback.noName");
 
 const emptyCell = (): IWalletMatrixCell => {
   const cell = { total: 0, n: 0 } as IWalletMatrixCell;
@@ -113,7 +115,7 @@ export const toClientRows = (matrix: IWalletMatrix): IWalletClientRow[] =>
     id: row.clientId,
     nombre: clientName(row.clientName),
     nit: row.clientId,
-    ejecutivo: row.responsibleName ?? "Sin asignar",
+    ejecutivo: row.responsibleName ?? getTranslator("wallet")("fallback.unassigned"),
     tramos: TRAMO_BUCKETS.map((bucket) => toCell(row.cells?.[bucket])),
     vencido: toCell(row.cells?.[OVERDUE_BUCKET])
   }));
@@ -172,7 +174,11 @@ export const toPerson = (nombre: string | null | undefined): IWalletPerson | nul
 };
 
 /** Responsable de respaldo: el formulario de tickets necesita un `id`. */
-const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", iniciales: "—" };
+const sinAsignar = (): IWalletPerson => ({
+  id: "sin-asignar",
+  nombre: getTranslator("wallet")("fallback.unassigned"),
+  iniciales: "—"
+});
 
 /**
  * Detalle del modal de gestión a partir del grupo del API.
@@ -217,7 +223,7 @@ export const toGroupDetail = (
             cerrada: false
           },
     cliente: { nombre: clientName(group.clientName), nit: group.clientId },
-    ejecutivo: responsable ?? SIN_ASIGNAR,
+    ejecutivo: responsable ?? sinAsignar(),
     monto: group.total,
     tramos: group.byAging ?? TRAMOS.map(() => 0),
     tramo,
@@ -290,7 +296,7 @@ export const toIncidentGroupDetail = (
       cerrada: incident.is_closed
     },
     cliente: { nombre: clientName(incident.client), nit: incident.client_id },
-    ejecutivo: responsable ?? SIN_ASIGNAR,
+    ejecutivo: responsable ?? sinAsignar(),
     monto: incident.actual_amount,
     tramos: base?.tramos ?? TRAMOS.map(() => 0),
     tramo: null,
@@ -310,7 +316,7 @@ export const toTicket = (action: IIncidentAction): IWalletTicket => ({
   actionId: action.id,
   titulo: action.title,
   comentario: action.description?.trim() || undefined,
-  responsable: toPerson(action.assigned_to_name) ?? SIN_ASIGNAR,
+  responsable: toPerson(action.assigned_to_name) ?? sinAsignar(),
   deadline: parseApiDate(action.due_date),
   estado: action.status === "OPEN" ? "abierto" : "resuelto",
   resueltoEl: parseApiDate(action.resolved_at) ?? undefined,
@@ -325,7 +331,9 @@ const toAttachment = (file: unknown): IWalletAttachment => {
   const obj = typeof file === "string" ? null : (file as { name?: string; url?: string } | null);
   const url = typeof file === "string" ? file : obj?.url;
   const raw = obj?.name ?? url ?? "";
-  const nombre = decodeURIComponent(raw.split("/").pop()?.split("?")[0] || "") || "adjunto";
+  const nombre =
+    decodeURIComponent(raw.split("/").pop()?.split("?")[0] || "") ||
+    getTranslator("wallet")("fallback.attachment");
   return { nombre, peso: "", url: url || undefined };
 };
 
@@ -343,7 +351,7 @@ export const toTimelineEntries = (incident: IIncidentDetail): IWalletTimelineEnt
     fecha: parseApiDate(incident.date) ?? new Date(0),
     autor: toPerson(incident.responsible_user),
     tipo: "evento",
-    texto: incident.evidence_comments?.trim() || "Novedad creada",
+    texto: incident.evidence_comments?.trim() || getTranslator("wallet")("timeline.created"),
     adjuntos: evidencia.length ? evidencia : undefined
   };
 
@@ -353,7 +361,8 @@ export const toTimelineEntries = (incident: IIncidentDetail): IWalletTimelineEnt
       const adjuntos = (ev.files ?? []).map(toAttachment);
       const esDecision = !!(ev.approved_by || ev.rejected_by);
       const texto =
-        ev.comments?.trim() || (ev.approved_by ? "Aprobó la novedad" : "Rechazó la novedad");
+        ev.comments?.trim() ||
+        getTranslator("wallet")(ev.approved_by ? "timeline.approved" : "timeline.rejected");
 
       return {
         id: `ev-${i}`,

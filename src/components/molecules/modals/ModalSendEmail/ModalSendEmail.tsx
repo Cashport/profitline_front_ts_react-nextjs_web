@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useFormatter, useTranslations } from "use-intl";
 import { Button, Flex, Modal } from "antd";
 import { useParams } from "next/navigation";
 import { CaretLeft, Plus } from "phosphor-react";
@@ -45,6 +46,9 @@ interface Props {
   customOnReject?: () => void;
 }
 export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnReject }: Props) => {
+  const t = useTranslations("modals.sendEmailNotification");
+  const tCommon = useTranslations("common");
+  const format = useFormatter();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "0";
@@ -141,19 +145,16 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
             if (validFiles.length > 0) {
               setValue("attachments", validFiles);
             } else {
-              showMessage("error", "No se pudieron cargar los archivos adjuntos.");
+              showMessage("error", t("attachmentsError"));
             }
           } catch (error) {
             console.error("Error fetching attachments:", error);
-            showMessage(
-              "error",
-              "Ocurrió un error al recuperar los archivos adjuntos de la plantilla."
-            );
+            showMessage("error", t("templateAttachmentsError"));
           }
         }
       }
     } catch (error) {
-      showMessage("error", "Ocurrió un error al obtener la plantilla");
+      showMessage("error", t("templateError"));
     }
     setLoading(false);
     //change view to template
@@ -179,7 +180,7 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
       // change view to success view if email was sent
       setCurrentView("success");
     } catch (error) {
-      showMessage("error", "Ocurrió un error al enviar el correo");
+      showMessage("error", t("sendError"));
     }
     setLoading(false);
   };
@@ -199,16 +200,16 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
     >
       {currentView === "sendEmail" && (
         <>
-          <h2 className="modalSendEmail__title">{sendEmailConstants.title}</h2>
+          <h2 className="modalSendEmail__title">{t("confirm.title")}</h2>
 
-          <p className="modalSendEmail__description">{sendEmailConstants.description}</p>
+          <p className="modalSendEmail__description">{t("confirm.description")}</p>
           <div className="modalSendEmail__footer">
             <SecondaryButton onClick={handleRejectSendingEmail}>
-              {sendEmailConstants.cancelText}
+              {t("confirm.cancel")}
             </SecondaryButton>
 
             <PrincipalButton onClick={handleAcceptSendingEmail} loading={loading}>
-              {sendEmailConstants.okText}
+              {t("confirm.ok")}
             </PrincipalButton>
           </div>
         </>
@@ -218,7 +219,7 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
         <>
           <button className="modalSendEmail__goBackBtn" onClick={onClose}>
             <CaretLeft size="1.25rem" />
-            {templateConstants.title}
+            {t("template.title")}
           </button>
           <Flex vertical gap="1.5rem">
             <Controller
@@ -228,7 +229,7 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
               render={({ field }) => (
                 <GeneralSearchSelect
                   field={field}
-                  title="Para"
+                  title={t("template.to")}
                   placeholder=""
                   options={recipients}
                   suffixIcon={null}
@@ -244,7 +245,7 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
               render={({ field }) => (
                 <GeneralSearchSelect
                   field={field}
-                  title="CC"
+                  title={t("template.cc")}
                   placeholder=""
                   options={recipients}
                   suffixIcon={null}
@@ -255,7 +256,7 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
 
             <InputForm
               validationRules={{ required: true }}
-              titleInput="Asunto"
+              titleInput={t("template.subject")}
               control={control}
               nameInput="subject"
               placeholder=" "
@@ -309,7 +310,7 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
                     className="modalSendEmail__addDocument"
                     icon={<Plus size={"1rem"} />}
                   >
-                    Cargar otro documento
+                    {t("template.uploadAnother")}
                   </Button>
                   <input
                     type="file"
@@ -323,16 +324,14 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
             </div>
           </Flex>
           <div className="modalSendEmail__footer">
-            <SecondaryButton onClick={() => onClose()}>
-              {templateConstants.cancelText}
-            </SecondaryButton>
+            <SecondaryButton onClick={() => onClose()}>{tCommon("actions.cancel")}</SecondaryButton>
 
             <PrincipalButton
               onClick={handleSubmit(onSubmit)}
               disabled={!isValid || attachments.length === 0}
               loading={loading}
             >
-              {templateConstants.okText}
+              {t("template.send")}
             </PrincipalButton>
           </div>
         </>
@@ -340,51 +339,25 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
 
       {currentView === "success" && (
         <>
-          <h2 className="modalSendEmail__title">{successConstants.title}</h2>
+          <h2 className="modalSendEmail__title">{t("success.title")}</h2>
 
           <div className="modalSendEmail__description" style={{ maxWidth: "90%" }}>
-            <p>{successConstants.description}</p>
+            <p>{t("success.description")}</p>
             <p>
-              {forwards
-                .concat(copyTo || []) // Concatenate forwards and copys
-                .map((recipient, index, combinedArray) => {
-                  if (combinedArray.length === 1) {
-                    return recipient.label;
-                  }
-                  return index === combinedArray.length - 1
-                    ? `y ${recipient.label}` // Add "y" before the last recipient
-                    : `${recipient.label},`;
-                })
-                .join(" ")}
+              {format.list(
+                forwards.concat(copyTo || []).map((recipient) => recipient.label),
+                { type: "conjunction" }
+              )}
             </p>
           </div>
 
           <Flex justify="center" style={{ alignSelf: "center", height: "3rem", width: "320px" }}>
             <PrincipalButton fullWidth onClick={handleOkSuccess}>
-              {successConstants.okText}
+              {t("success.gotIt")}
             </PrincipalButton>
           </Flex>
         </>
       )}
     </Modal>
   );
-};
-
-const sendEmailConstants = {
-  title: "¿Deseas enviar un correo notificando esta acción?",
-  description: "Se enviará un correo a los aprobadores notificando esta acción",
-  okText: "Sí, enviar correo",
-  cancelText: "No, no enviar"
-};
-
-const templateConstants = {
-  title: "Enviar correo",
-  okText: "Enviar correo",
-  cancelText: "Cancelar"
-};
-
-const successConstants = {
-  title: "Correo enviado exitosamente",
-  description: "Se ha enviado el correo a:",
-  okText: "Entendido"
 };

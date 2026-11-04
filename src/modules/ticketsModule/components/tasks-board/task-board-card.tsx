@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import BoardCard, { type BoardCardSeverity } from "@/components/ui/board-lanes/board-card";
 import type { ITaskConfig, ITicket } from "@/types/tickets/ITickets";
 import { isAgeAlert } from "../../utils/task-format";
@@ -16,6 +18,7 @@ const severityOf = (config: ITaskConfig, t: ITicket): BoardCardSeverity =>
 
 /** Tarjeta de una tarea en una columna (estado) del tablero. */
 export default function TaskBoardCard({ ticket: t, config, onOpen }: TaskBoardCardProps) {
+  const tr = useTranslations("tickets");
   const client = t.client_data_name ?? t.client_name;
   const context = [client, t.process_name].filter(Boolean).join(" · ");
 
@@ -23,7 +26,7 @@ export default function TaskBoardCard({ ticket: t, config, onOpen }: TaskBoardCa
     <BoardCard sev={severityOf(config, t)} onClick={() => onOpen(t.id)}>
       <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
         <span className="font-mono">{t.ticket_code}</span>
-        {t.incident_id && <span>· Novedad #{t.incident_id}</span>}
+        {t.incident_id && <span>· {tr("cells.dispute", { id: t.incident_id })}</span>}
         {t.country_code && <span className="ml-auto font-semibold">{t.country_code}</span>}
       </div>
 

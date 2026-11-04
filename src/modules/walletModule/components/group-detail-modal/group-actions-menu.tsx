@@ -12,6 +12,7 @@ import {
   Pencil,
   Plus
 } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown/dropdown";
@@ -33,9 +34,7 @@ interface GroupActionsMenuProps {
 
 // Sin color: el popup vive en un portal fuera de .dark/.wallet-scope, así que
 // los tokens de Tailwind darían el valor claro en tema oscuro. AntD ya lo tiñe.
-const titulo = (texto: string) => (
-  <span className="text-[13px] font-semibold">{texto}</span>
-);
+const titulo = (texto: string) => <span className="text-[13px] font-semibold">{texto}</span>;
 
 /** Acciones sobre el grupo y la selección.
  *  TODO: conectar "Resolver" cuando exista el endpoint. */
@@ -47,6 +46,7 @@ export default function GroupActionsMenu({
   onChangeStatus,
   onOpenNoveltyModal
 }: GroupActionsMenuProps) {
+  const t = useTranslations("wallet.groupActions");
   const haySeleccion = seleccionadas > 0;
 
   // AntD Dropdown sólo soporta submenús laterales, así que la lista de estados
@@ -74,7 +74,7 @@ export default function GroupActionsMenu({
   };
 
   const estadoItems: DropdownItem[] = isLoadingStatuses
-    ? [{ key: "estado-cargando", label: "Cargando estados…", disabled: true }]
+    ? [{ key: "estado-cargando", label: t("loadingStatuses"), disabled: true }]
     : statuses.map((s) => {
         const actual = s.id === estadoActualId;
         return {
@@ -90,7 +90,7 @@ export default function GroupActionsMenu({
                 style={{ backgroundColor: s.color }}
               />
               <span className="flex-1">{s.description}</span>
-              {actual && <span className="text-[13px] opacity-60">actual</span>}
+              {actual && <span className="text-[13px] opacity-60">{t("current")}</span>}
             </span>
           )
         };
@@ -100,12 +100,12 @@ export default function GroupActionsMenu({
     {
       key: "novedad",
       type: "group",
-      label: titulo("Novedad"),
+      label: titulo(t("novelty")),
       children: [
         {
           key: "editar",
           icon: <Pencil className="h-4 w-4" />,
-          label: "Editar datos de la novedad",
+          label: t("edit"),
           onClick: () => onOpenNoveltyModal("editar")
         },
         {
@@ -113,7 +113,7 @@ export default function GroupActionsMenu({
           icon: <ListFilter className="h-4 w-4" />,
           label: (
             <span className="flex items-center gap-2">
-              <span className="flex-1">Cambiar estado</span>
+              <span className="flex-1">{t("changeStatus")}</span>
               <ChevronDown
                 className={cn("h-3.5 w-3.5 transition-transform", estadoAbierto && "rotate-180")}
               />
@@ -131,19 +131,19 @@ export default function GroupActionsMenu({
     {
       key: "seleccion",
       type: "group",
-      label: titulo("Sobre las facturas seleccionadas"),
+      label: titulo(t("onSelected")),
       children: [
         {
           key: "crear-novedad",
           icon: <Plus className="h-4 w-4" />,
-          label: "Crear novedad",
+          label: t("create"),
           disabled: !haySeleccion,
           onClick: () => onOpenNoveltyModal("crear")
         },
         {
           key: "vincular",
           icon: <Link2 className="h-4 w-4" />,
-          label: "Vincular a una novedad existente",
+          label: t("link"),
           disabled: !haySeleccion,
           onClick: () => onOpenNoveltyModal("vincular")
         }
@@ -156,18 +156,18 @@ export default function GroupActionsMenu({
     {
       key: "resolver",
       type: "group",
-      label: titulo("Resolver la novedad"),
+      label: titulo(t("resolve")),
       children: [
         {
           key: "resolver-sel",
           icon: <Check className="h-4 w-4" />,
-          label: "Resolver las seleccionadas",
+          label: t("resolveSelected"),
           disabled: !haySeleccion
         },
         {
           key: "resolver-todo",
           icon: <CheckCheck className="h-4 w-4" />,
-          label: `Resolver toda la novedad (${totalFacturas})`
+          label: t("resolveAll", { count: totalFacturas })
         }
       ]
     }
@@ -183,8 +183,8 @@ export default function GroupActionsMenu({
     <GeneralDropdown items={items} align="end" open={open} onOpenChange={handleOpenChange}>
       <button
         type="button"
-        aria-label="Acciones sobre el grupo"
-        title="Acciones sobre el grupo"
+        aria-label={t("menu")}
+        title={t("menu")}
         className="flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-border bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
       >
         <MoreHorizontal className="h-4 w-4" />

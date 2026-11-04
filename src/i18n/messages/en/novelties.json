@@ -1,0 +1,78 @@
+{
+  "types": {
+    "nc_comercial": "Commercial credit memo",
+    "nc_precio": "Price difference credit memo",
+    "refact": "Rebilling",
+    "rechazo": "Rejected / not submitted invoice",
+    "cruce": "Deduction offset / resolution",
+    "acuerdo": "Payment plan",
+    "pago_ni": "Unidentified payment",
+    "faltante": "Shortage / damaged goods on delivery"
+  },
+  "kpis": {
+    "abiertas": {
+      "label": "Open",
+      "foot": "grouped balance being worked"
+    },
+    "vencidas": {
+      "label": "Overdue ticket",
+      "foot": "the current action is past its date"
+    },
+    "frias": {
+      "label": "No activity 7+ days",
+      "foot": "nothing logged in over a week"
+    },
+    "limite": {
+      "label": "Past deadline",
+      "foot": "the case should already be closed"
+    },
+    "sinresp": {
+      "label": "Unassigned",
+      "foot": "no owner assigned"
+    },
+    "nounOne": "dispute",
+    "nounOther": "disputes"
+  },
+  "filters": {
+    "status": "Status",
+    "type": "Dispute type",
+    "coordinator": "Coordinator",
+    "kam": "KAM",
+    "market": "Market",
+    "collector": "Collector",
+    "dates": "Dates",
+    "period": "Period: {range}",
+    "selectPeriod": "Select a period"
+  },
+  "header": {
+    "title": "Disputes",
+    "loadingCutoff": "Loading cutoff…",
+    "searchPlaceholder": "Customer, invoice or collector…"
+  },
+  "list": {
+    "novelty": "Dispute",
+    "customer": "Customer",
+    "invoices": "Inv.",
+    "amount": "Amount",
+    "owner": "Owner",
+    "lastActivity": "Last activity",
+    "nextTicket": "Next ticket",
+    "deadline": "Deadline",
+    "status": "Status",
+    "empty": "No disputes match these filters."
+  },
+  "toolbar": {
+    "summary": "{count, plural, one {# dispute} other {# disputes}} · {amount} · {invoices} linked"
+  },
+  "card": {
+    "lastActivity": "Last activity",
+    "deadline": "Deadline {date}"
+  },
+  "view": {
+    "modes": {
+      "list": "List",
+      "board": "Board"
+    },
+    "loadError": "Couldn't load disputes."
+  }
+}

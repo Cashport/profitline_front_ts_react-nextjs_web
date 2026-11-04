@@ -1,6 +1,7 @@
 "use client";
 
 import { Drawer, Spin } from "antd";
+import { useTranslations } from "use-intl";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { IVariableHistoryEntry } from "@/types/dataQuality/IDataQuality";
@@ -17,11 +18,11 @@ interface VariableHistoryDrawerProps {
 
 const CHANGE_TYPE_META: Record<
   IVariableHistoryEntry["change_type"],
-  { label: string; color: string; bg: string }
+  { color: string; bg: string }
 > = {
-  CREATED: { label: "Creada", color: "#16A34A", bg: "#F0FDF4" },
-  UPDATED: { label: "Actualizada", color: "#2143b0", bg: "#e2ecfe" },
-  DELETED: { label: "Eliminada", color: "#DC2626", bg: "#FEF2F2" }
+  CREATED: { color: "#16A34A", bg: "#F0FDF4" },
+  UPDATED: { color: "#2143b0", bg: "#e2ecfe" },
+  DELETED: { color: "#DC2626", bg: "#FEF2F2" }
 };
 
 // Los valores se guardan en backend con JSON.stringify; se intenta mostrar el
@@ -42,6 +43,7 @@ function formatTimestamp(isoDate: string) {
 }
 
 export function VariableHistoryDrawer({ archiveId, isOpen, onClose }: VariableHistoryDrawerProps) {
+  const t = useTranslations("dataQuality.variableHistory");
   const { history, isLoading, error } = useVariableHistory(isOpen ? archiveId : null);
 
   return (
@@ -52,11 +54,7 @@ export function VariableHistoryDrawer({ archiveId, isOpen, onClose }: VariableHi
       width={420}
       destroyOnClose
       styles={{ body: { padding: 24 } }}
-      title={
-        <h3 className="text-lg font-semibold text-cashport-black">
-          Historial de variables de configuración
-        </h3>
-      }
+      title={<h3 className="text-lg font-semibold text-cashport-black">{t("title")}</h3>}
     >
       {isLoading && (
         <div className="flex justify-center py-6">
@@ -66,13 +64,13 @@ export function VariableHistoryDrawer({ archiveId, isOpen, onClose }: VariableHi
 
       {!isLoading && error && (
         <p className="text-sm" style={{ color: CHANGE_TYPE_META.DELETED.color }}>
-          No se pudo cargar el historial de variables. Intenta de nuevo más tarde.
+          {t("loadError")}
         </p>
       )}
 
       {!isLoading && !error && history && history.length === 0 && (
         <p className="text-sm" style={{ color: BOT_MUTED_TEXT_COLOR }}>
-          Sin cambios registrados para estas credenciales.
+          {t("empty")}
         </p>
       )}
 
@@ -98,8 +96,10 @@ export function VariableHistoryDrawer({ archiveId, isOpen, onClose }: VariableHi
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-cashport-black">{entry.variable_key}</p>
                     <p className="mt-0.5 text-[13px]" style={{ color: BOT_MUTED_TEXT_COLOR }}>
-                      por {entry.changed_by_email || "usuario desconocido"} ·{" "}
-                      {formatTimestamp(entry.created_at)}
+                      {t("changedBy", {
+                        user: entry.changed_by_email || t("unknownUser"),
+                        date: formatTimestamp(entry.created_at)
+                      })}
                     </p>
                     {entry.change_type === "UPDATED" && (
                       <p
@@ -115,7 +115,7 @@ export function VariableHistoryDrawer({ archiveId, isOpen, onClose }: VariableHi
                     className="shrink-0 gap-1 text-[13px]"
                     style={{ backgroundColor: meta.bg, color: meta.color }}
                   >
-                    {meta.label}
+                    {t(`changeType.${entry.change_type}`)}
                   </Badge>
                 </div>
               </li>

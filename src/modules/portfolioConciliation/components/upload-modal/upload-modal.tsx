@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, Checkbox, Modal, Typography, Upload } from "antd";
 import { UploadSimple, Warning, X } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { uploadPortfolioConciliation } from "@/services/portfolioConciliation/portfolioConciliation";
@@ -30,6 +31,8 @@ const UploadModal = ({
   onClose,
   onUploaded
 }: Props) => {
+  const t = useTranslations("reconciliation.upload");
+  const tCommon = useTranslations("common");
   const [file, setFile] = useState<File | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -44,9 +47,9 @@ const UploadModal = ({
 
   const handleBeforeUpload = (selected: File) => {
     if (!/\.xlsx$/i.test(selected.name)) {
-      setError("Solo se permiten archivos .xlsx (guarda los .xls como .xlsx).");
+      setError(t("onlyXlsx"));
     } else if (selected.size > UPLOAD_MAX_BYTES) {
-      setError(`El archivo pesa ${formatFileSize(selected.size)}; el máximo es 30 MB.`);
+      setError(t("tooLarge", { size: formatFileSize(selected.size) }));
     } else {
       setError(null);
       setFile(selected);
@@ -64,7 +67,7 @@ const UploadModal = ({
       onUploaded(upload);
       onClose();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "No se pudo cargar el archivo.");
+      setError(err instanceof Error && err.message ? err.message : t("uploadError"));
       setIsSending(false);
     }
   };
@@ -87,12 +90,14 @@ const UploadModal = ({
       <div className="flex flex-col text-foreground">
         <header className="flex items-center gap-3 border-b border-[#ececec] px-[22px] py-4">
           <div className="mr-auto min-w-0">
-            <h3 className="text-base font-semibold">Cargar cartera del cliente</h3>
-            {clientName && <p className="truncate text-[13px] text-muted-foreground">{clientName}</p>}
+            <h3 className="text-base font-semibold">{t("title")}</h3>
+            {clientName && (
+              <p className="truncate text-[13px] text-muted-foreground">{clientName}</p>
+            )}
           </div>
           <Button
             type="text"
-            aria-label="Cerrar"
+            aria-label={tCommon("actions.close")}
             icon={<X size={14} />}
             onClick={onClose}
             disabled={isSending}
@@ -114,7 +119,7 @@ const UploadModal = ({
                 </span>
                 <Button
                   type="text"
-                  aria-label="Quitar archivo"
+                  aria-label={t("removeFile")}
                   icon={<X size={12} />}
                   onClick={() => setFile(null)}
                   disabled={isSending}
@@ -130,21 +135,16 @@ const UploadModal = ({
             >
               <div className="flex flex-col items-center gap-2 px-4">
                 <UploadSimple size={26} />
-                <span className="text-[13px] font-medium">
-                  Arrastra el Excel aquí o haz clic para buscarlo
-                </span>
-                <span className="text-[13px] text-[#8a8a8a]">.xlsx · hasta 30 MB</span>
+                <span className="text-[13px] font-medium">{t("dragHint")}</span>
+                <span className="text-[13px] text-[#8a8a8a]">{t("formatHint")}</span>
               </div>
             </Upload.Dragger>
           )}
 
           <div className="flex flex-col gap-1 text-[13px] text-[#444]">
-            <span>
-              Columnas obligatorias: <b>Id documento</b>, <b>Tipo</b> (Factura, Nota crédito, Nota
-              débito o Saldo) y <b>Monto cliente</b>. Las demás columnas se ignoran.
-            </span>
+            <span>{t.rich("requiredColumns", { b: (chunks) => <b>{chunks}</b> })}</span>
             <Typography.Link href={TEMPLATE_URL} download underline className="!text-[13px]">
-              Descargar plantilla
+              {t("downloadTemplate")}
             </Typography.Link>
           </div>
 
@@ -152,16 +152,16 @@ const UploadModal = ({
             <Warning size={20} weight="fill" className="mt-0.5 flex-none text-[#c2410c]" />
             <div className="flex min-w-0 flex-col gap-1">
               <span className="text-[13px] font-semibold text-[#9a3412]">
-                Esta carga reemplaza toda la cartera conciliada del cliente
+                {t("replaceWarning")}
               </span>
               <span className="text-[13px] text-[#7c2d12]">
                 {currentUpload
-                  ? `Hoy tiene ${formatNumber(currentUpload.total_rows ?? 0)} documentos, cargados el ${formatDateTime(
-                      currentUpload.finished_at ?? currentUpload.created_at
-                    )}. `
+                  ? `${t("currentDocs", {
+                      count: formatNumber(currentUpload.total_rows ?? 0),
+                      date: formatDateTime(currentUpload.finished_at ?? currentUpload.created_at)
+                    })} `
                   : ""}
-                Al terminar queda solo lo que traiga este archivo; lo anterior no se puede recuperar
-                desde esta pantalla. Si el archivo tiene errores, no se reemplaza nada.
+                {t("replaceDetail")}
               </span>
             </div>
           </div>
@@ -171,9 +171,7 @@ const UploadModal = ({
             onChange={(event) => setAccepted(event.target.checked)}
             disabled={isSending}
           >
-            <span className="text-[13px]">
-              Entiendo que se reemplaza toda la cartera conciliada de este cliente
-            </span>
+            <span className="text-[13px]">{t("confirm")}</span>
           </Checkbox>
 
           {error && (
@@ -185,17 +183,13 @@ const UploadModal = ({
 
         <footer className="flex items-center gap-2.5 border-t border-[#ececec] px-[22px] py-3.5">
           <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">
-            {!file
-              ? "Ningún archivo seleccionado"
-              : !accepted
-                ? "Confirma que entiendes el reemplazo para continuar"
-                : "Listo para cargar"}
+            {!file ? t("noFile") : !accepted ? t("confirmToContinue") : t("ready")}
           </span>
           <Button type="text" size="large" onClick={onClose} disabled={isSending}>
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <PrincipalButton disabled={!file || !accepted} loading={isSending} onClick={handleSubmit}>
-            Cargar y conciliar
+            {t("submit")}
           </PrincipalButton>
         </footer>
       </div>

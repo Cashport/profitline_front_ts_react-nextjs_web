@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as yup from "yup";
 import { Modal, Spin } from "antd";
 import { useForm, Controller } from "react-hook-form";
 import { Save } from "lucide-react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
@@ -21,18 +22,21 @@ import {
   getMaterialProductType
 } from "@/services/dataQuality/dataQuality";
 
-const packMaterialFormSchema = yup.object().shape({
-  material_code: yup.string().required("El material es requerido"),
-  product_type: yup.string().required("El tipo de producto es requerido"),
-  type_vol: yup.string().required("El tipo de volumen es requerido"),
-  factor: yup
-    .number()
-    .typeError("El factor debe ser un número")
-    .required("El factor es requerido")
-    .positive("El factor debe ser positivo")
-});
+type MaterialFormT = ReturnType<typeof useTranslations<"dataQuality.materialForm">>;
 
-export type PackMaterialFormData = yup.InferType<typeof packMaterialFormSchema>;
+const buildPackMaterialFormSchema = (t: MaterialFormT) =>
+  yup.object().shape({
+    material_code: yup.string().required(t("validation.material")),
+    product_type: yup.string().required(t("validation.productType")),
+    type_vol: yup.string().required(t("validation.volumeType")),
+    factor: yup
+      .number()
+      .typeError(t("validation.factorNumber"))
+      .required(t("validation.factorRequired"))
+      .positive(t("validation.factorPositive"))
+  });
+
+export type PackMaterialFormData = yup.InferType<ReturnType<typeof buildPackMaterialFormSchema>>;
 
 const INITIAL_VALUES: PackMaterialFormData = {
   material_code: "",
@@ -60,6 +64,9 @@ export default function ModalAddEditPackMaterial({
   countryId,
   isLoadingCreateEdit = false
 }: Props) {
+  const t = useTranslations("dataQuality.materialForm");
+  const tCommon = useTranslations("common");
+  const packMaterialFormSchema = useMemo(() => buildPackMaterialFormSchema(t), [t]);
   const {
     control,
     handleSubmit,
@@ -132,10 +139,10 @@ export default function ModalAddEditPackMaterial({
       footer={null}
       width={600}
       destroyOnClose
-      title={mode === "edit" ? "Editar Material" : "Agregar Material"}
+      title={mode === "edit" ? t("editMaterialTitle") : t("addMaterialTitle")}
     >
       <p style={{ color: "#8c8c8c" }}>
-        {mode === "edit" ? "Modifica el material del pack." : "Agrega un nuevo material al pack."}
+        {mode === "edit" ? t("editMaterialDescription") : t("addMaterialDescription")}
       </p>
 
       <form onSubmit={handleSubmit(handleFormSubmit)}>
@@ -143,7 +150,7 @@ export default function ModalAddEditPackMaterial({
           {/* Material */}
           <div className="grid gap-2">
             <Label htmlFor="materialCode" style={{ color: "#141414" }}>
-              Material
+              {t("material")}
             </Label>
             <Controller
               name="material_code"
@@ -153,7 +160,7 @@ export default function ModalAddEditPackMaterial({
                   showSearch
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Seleccionar material"
+                  placeholder={t("materialPlaceholder")}
                   hasError={!!errors.material_code}
                   options={selectOptions.materials.map((material) => ({
                     value: String(material.id),
@@ -172,7 +179,7 @@ export default function ModalAddEditPackMaterial({
           {/* Tipo Producto */}
           <div className="grid gap-2">
             <Label htmlFor="productType" style={{ color: "#141414" }}>
-              Tipo producto
+              {t("productType")}
             </Label>
             <Controller
               name="product_type"
@@ -181,7 +188,7 @@ export default function ModalAddEditPackMaterial({
                 <Select
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Seleccionar tipo de producto"
+                  placeholder={t("productTypePlaceholder")}
                   hasError={!!errors.product_type}
                   options={selectOptions.productTypes.map((type) => ({
                     value: String(type.id),
@@ -200,7 +207,7 @@ export default function ModalAddEditPackMaterial({
           {/* Tipo Volumen */}
           <div className="grid gap-2">
             <Label htmlFor="typeVol" style={{ color: "#141414" }}>
-              Tipo volumen
+              {t("volumeType")}
             </Label>
             <Controller
               name="type_vol"
@@ -209,7 +216,7 @@ export default function ModalAddEditPackMaterial({
                 <Select
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Seleccionar tipo de volumen"
+                  placeholder={t("volumeTypePlaceholder")}
                   hasError={!!errors.type_vol}
                   options={selectOptions.typeVols.map((vol) => ({
                     value: String(vol.id),
@@ -226,7 +233,7 @@ export default function ModalAddEditPackMaterial({
           {/* Factor */}
           <div className="grid gap-2">
             <Label htmlFor="factor" style={{ color: "#141414" }}>
-              Factor
+              {t("factor")}
             </Label>
             <Controller
               name="factor"
@@ -237,7 +244,7 @@ export default function ModalAddEditPackMaterial({
                   id="factor"
                   type="number"
                   step="any"
-                  placeholder="Ej: 2"
+                  placeholder={t("factorPlaceholder")}
                   value={field.value ?? ""}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -257,7 +264,7 @@ export default function ModalAddEditPackMaterial({
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={handleClose} type="button">
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             type="submit"
@@ -280,7 +287,7 @@ export default function ModalAddEditPackMaterial({
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Guardar
+                {tCommon("actions.save")}
               </>
             )}
           </Button>

@@ -2,6 +2,7 @@ import React from "react";
 import { Typography, Button, Flex } from "antd";
 import Image from "next/image";
 import { useAppStore } from "@/lib/store/store";
+import { useTranslations } from "use-intl";
 
 import "./totalDebtCard.scss";
 
@@ -16,12 +17,13 @@ interface TotalDebtProps {
 
 const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const t = useTranslations("publicPortals.mobile.totalDebt");
 
   return (
     <div className="TotalDebtCard">
       <Flex align="center" justify="space-between">
         <div className="TotalDebtCard__total-section">
-          <Text className="TotalDebtCard__label">Deuda total</Text>
+          <Text className="TotalDebtCard__label">{t("totalDebt")}</Text>
           <div className="TotalDebtCard__total-row">
             <Title level={3} className="TotalDebtCard__total-amount">
               <span className="TotalDebtCard__currency">$</span>{" "}
@@ -30,7 +32,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
               })}
             </Title>
           </div>
-          <Text className="TotalDebtCard__label">Total a pagar</Text>
+          <Text className="TotalDebtCard__label">{t("totalToPay")}</Text>
           <div className="TotalDebtCard__total-row">
             <Title level={3} className="TotalDebtCard__total-amount">
               <span className="TotalDebtCard__currency">$</span>{" "}
@@ -45,7 +47,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
           src={
             "https://media.istockphoto.com/id/2147589548/es/vector/fondo-degradado-blanco-producto-de-presentaci%C3%B3n-de-estudio-abstracto-ilustraci%C3%B3n-vectorial.jpg?s=612x612&w=0&k=20&c=PBDOG8tvsOBcAzN0NvPmBXRexy6O2jSmdnJk7IkUuoU="
           }
-          alt="Brand"
+          alt={t("brandAlt")}
           width={60}
           height={60}
           className="TotalDebtCard__brand-logo"
@@ -75,7 +77,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
         className="TotalDebtCard__pay-button"
         onClick={onPay}
       >
-        Ir a pagar
+        {t("goToPay")}
       </Button>
     </div>
   );

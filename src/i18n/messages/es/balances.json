@@ -1,0 +1,132 @@
+{
+  "view": {
+    "itemName": "Saldos"
+  },
+  "table": {
+    "sendingToOther": "Enviando a otros saldos...",
+    "sentToOther": "Saldo enviado a otros saldos correctamente",
+    "sendToOtherError": "Ocurrió un error al enviar a otros saldos",
+    "columns": {
+      "id": "Id",
+      "date": "Fecha saldo",
+      "days": "Días",
+      "customer": "Cliente",
+      "type": "Tipo",
+      "origin": "Procedencia",
+      "description": "Descripción",
+      "originalAmount": "Saldo inicial",
+      "pending": "Pendiente"
+    }
+  },
+  "rowActions": {
+    "sendToOther": "Enviar a otros saldos",
+    "uploadSupport": "Cargar soporte",
+    "rejectSupports": "Rechazar soportes",
+    "sendToApproval": "Enviar a aprobación",
+    "approve": "Aprobar",
+    "reject": "Rechazar"
+  },
+  "changeStatus": {
+    "options": {
+      "novelty": "Novedad",
+      "pendingCreditMemo": "NC Aprobada - Pendiente creación",
+      "creditMemoCreated": "NC Creada - Pendiente cruce"
+    },
+    "success": "El estado de los saldos se actualizó correctamente.",
+    "title": "Cambio de estado",
+    "description": "Selecciona el nuevo estado del saldo",
+    "confirm": "Cambiar de estado"
+  },
+  "decision": {
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "approved": "Saldo aprobado correctamente",
+    "rejected": "Saldo rechazado correctamente",
+    "error": "Ocurrió un error al procesar la decisión",
+    "observations": "Observaciones",
+    "observationsPlaceholder": "Ingresar observaciones"
+  },
+  "changeOrigin": {
+    "success": "La procedencia de los saldos se actualizó correctamente.",
+    "title": "Cambio de procedencia",
+    "description": "Selecciona la nueva procedencia del saldo",
+    "confirm": "Cambiar procedencia"
+  },
+  "actions": {
+    "downloadingReport": "Descargando informe comercial...",
+    "downloadSuccess": "Descarga exitosa",
+    "downloadError": "Error al descargar el archivo",
+    "title": "Selecciona la acción que vas a realizar",
+    "downloadReport": "Descargar informe comercial",
+    "changeStatus": "Cambiar estado",
+    "changeOrigin": "Cambiar procedencia"
+  },
+  "sendToApproval": {
+    "success": "Saldo enviado a aprobación correctamente",
+    "error": "Ocurrió un error al enviar a aprobación",
+    "title": "Enviar a aprobación",
+    "approver": "Usuario aprobación",
+    "approverPlaceholder": "Selecciona el usuario de aprobación"
+  },
+  "filters": {
+    "kam": "KAM",
+    "customer": "Cliente",
+    "reason": "Motivo",
+    "origin": "Procedencia",
+    "date": "Fecha",
+    "selectPeriod": "Selecciona un periodo",
+    "dateTag": "Fecha:",
+    "tagCount": {
+      "kam": "{count} KAMs",
+      "cliente": "{count} Clientes",
+      "motivo": "{count} Motivos",
+      "procedencia": "{count} Procedencias"
+    }
+  },
+  "dateTab": {
+    "presetsTitle": "Periodos predefinidos",
+    "presets": {
+      "currentMonth": "Mes actual",
+      "lastMonth": "Último mes",
+      "lastQuarter": "Último trimestre",
+      "ytd": "YTD",
+      "last12Months": "Últimos 12 meses"
+    },
+    "customRange": "Rango personalizado",
+    "from": "Desde",
+    "to": "Hasta"
+  },
+  "upload": {
+    "tooLarge": "El archivo es demasiado grande. Sube un archivo de menos de {max} MB.",
+    "duplicate": "Ya existe un archivo con el mismo nombre",
+    "success": "Soporte cargado correctamente",
+    "error": "Ocurrió un error al cargar el soporte",
+    "title": "Cargar soporte",
+    "type": "Tipo de novedad",
+    "typePlaceholder": "Selecciona el tipo de novedad",
+    "support": "Soporte",
+    "observation": "Observación",
+    "observationPlaceholder": "Ingresar una observación",
+    "clientDocument": "Documento del cliente *"
+  },
+  "detail": {
+    "updated": "Saldo actualizado correctamente",
+    "updateError": "Error al actualizar el saldo",
+    "customer": "Cliente",
+    "type": "Tipo",
+    "typePlaceholder": "Selecciona un tipo",
+    "kam": "KAM",
+    "createdAt": "Fecha creación",
+    "origin": "Procedencia",
+    "description": "Descripción",
+    "auditNote": "Observación auditoría",
+    "auditNotePlaceholder": "Ingresar una observación de auditoría",
+    "clientDocument": "Documento cliente",
+    "clientDocumentPlaceholder": "Ingresar documento",
+    "originalAmount": "Saldo inicial",
+    "pending": "Pendiente",
+    "supports": "Soportes",
+    "newFile": "Nuevo archivo: {name}"
+  },
+  "title": "Saldos"
+}

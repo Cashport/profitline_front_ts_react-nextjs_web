@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
@@ -13,6 +15,7 @@ import TowerTooltip from "../shared/tower-tooltip";
 
 /** Aplicación del recaudo: aplicado vs. sin aplicar (PNA) y lead time de aplicación. */
 export default function ApplicationCard({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections.applicationCard");
   const { application: ap, daily, unappliedPayments } = data;
   const { applied: as, unapplied: us } = ap.series;
   const applied = sumBy(daily, (d) => d.applied ?? 0);
@@ -22,30 +25,30 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
   const lt = ap.leadTimeDays;
   const prev = ap.previousLeadTimeDays;
   const delta = lt !== null && prev !== null ? lt - prev : NaN;
-  const days = (v: number | null) => (v === null ? "—" : `${fmt(v, 1)} días`);
+  const days = (v: number | null) => (v === null ? "—" : tc("days", { value: fmt(v, 1) }));
 
   return (
     <div className={KPI_CARD}>
       <div>
-        <div className={KPI_LABEL}>Aplicación del recaudo</div>
+        <div className={KPI_LABEL}>{tc("title")}</div>
 
         <div className="flex items-start justify-between gap-3">
           <div className={KPI_VALUE}>
             {pct(applied / total, 0)}
             <small className="text-[13px] font-medium tracking-normal text-muted-foreground">
               {" "}
-              aplicado
+              {tc("applied")}
             </small>
           </div>
           <TowerTooltip
-            title="Lead time de aplicación"
+            title={tc("leadTimeTitle")}
             rows={[
-              { key: "mes", color: as.color, label: "Este mes", value: days(lt) },
-              { key: "ant", color: MUTED, label: "Mes anterior", value: days(prev) },
+              { key: "mes", color: as.color, label: tc("thisMonth"), value: days(lt) },
+              { key: "ant", color: MUTED, label: tc("previousMonth"), value: days(prev) },
               {
                 key: "le2",
                 color: us.color,
-                label: "Aplicado en ≤ 2 días",
+                label: tc("within2Days"),
                 value: pct(ap.appliedWithin2Days, 0)
               }
             ]}
@@ -55,16 +58,18 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
                 {lt === null ? "—" : fmt(lt, 1)}
                 <small className="text-[13px] font-medium tracking-normal text-muted-foreground">
                   {" "}
-                  días
+                  {tc("daysUnit")}
                 </small>
               </div>
               <div className="mt-1 text-[13px] text-muted-foreground">
-                lead time de aplicación
+                {tc("leadTimeCaption")}
                 {isFinite(delta) && Math.abs(delta) >= 0.05 && (
                   <>
                     {" · "}
                     <span className={TONE_TEXT[delta <= 0 ? "ok" : "crit"]}>
-                      {(delta > 0 ? "+" : "-") + fmt(Math.abs(delta), 1)} d vs mes ant.
+                      {tc("vsPrevious", {
+                        delta: (delta > 0 ? "+" : "-") + fmt(Math.abs(delta), 1)
+                      })}
                     </span>
                   </>
                 )}
@@ -86,11 +91,11 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
             <TowerTooltip
               title={serie.label}
               rows={[
-                { key: "v", color: serie.color, label: "Valor", value: money(seg.value) },
+                { key: "v", color: serie.color, label: tc("value"), value: money(seg.value) },
                 {
                   key: "p",
                   color: serie.color,
-                  label: "Del recaudo",
+                  label: tc("ofCollected"),
                   value: pct(seg.value / total)
                 }
               ]}
@@ -106,20 +111,20 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
         <LegendItem mark={<Swatch color={us.color} />} label={us.label} value={money(unapplied)} />
         {aged.length > 0 && (
           <TowerTooltip
-            title="Pendientes de aplicar"
+            title={tc("pendingTitle")}
             rows={[
               {
                 key: "v",
                 color: us.color,
-                label: `Con más de ${PNA_DAYS_WARN} días`,
+                label: tc("olderThan", { days: PNA_DAYS_WARN }),
                 value: money(sumBy(aged, (p) => p.amount))
               },
-              { key: "n", label: "Pagos", value: String(aged.length) }
+              { key: "n", label: tc("payments"), value: String(aged.length) }
             ]}
           >
             <span className="ml-auto">
               <StatusChip sev="warn" className="rounded tabular-nums">
-                {aged.length} con +{PNA_DAYS_WARN} días
+                {tc("agedChip", { count: aged.length, days: PNA_DAYS_WARN })}
               </StatusChip>
             </span>
           </TowerTooltip>

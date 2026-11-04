@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "use-intl";
 
 import type { IVisitFormListItem } from "@/types/surveys/ISurveys";
 import { formatDateAndTime } from "@/utils/utils";
@@ -12,6 +13,8 @@ const ACTION_CLASS =
 
 /** Fila del listado en pantallas angostas, donde la tabla no cabe. */
 export default function SurveyCard({ form }: { form: IVisitFormListItem }) {
+  const t = useTranslations("surveys.card");
+  const tCommon = useTranslations("common");
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-border px-3.5 py-3">
       <div className="flex min-w-0 items-center gap-2">
@@ -26,28 +29,29 @@ export default function SurveyCard({ form }: { form: IVisitFormListItem }) {
 
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-muted-foreground">
         <span>
-          <b className="font-semibold text-foreground">
-            {form.response_count.toLocaleString("es-CO")}
-          </b>{" "}
-          respuestas
+          {t.rich("responses", {
+            count: form.response_count,
+            formatted: form.response_count.toLocaleString("es-CO"),
+            b: (chunks) => <b className="font-semibold text-foreground">{chunks}</b>
+          })}
         </span>
-        <span>{form.question_count} preguntas</span>
+        <span>{t("questions", { count: form.question_count })}</span>
         <span>
           {form.last_response_at
-            ? `Última ${formatDateAndTime(form.last_response_at)}`
-            : "Sin respuestas"}
+            ? t("lastResponse", { date: formatDateAndTime(form.last_response_at) })
+            : t("noResponses")}
         </span>
       </div>
 
       <div className="flex flex-wrap gap-2">
         <Link href={`/surveys/${form.id}`} className={ACTION_CLASS}>
-          Visualizar
+          {t("view")}
         </Link>
         <Link href={`/surveys/${form.id}?edit=1`} className={ACTION_CLASS}>
-          Editar
+          {tCommon("actions.edit")}
         </Link>
         <Link href={`/surveys/${form.id}/answers`} className={ACTION_CLASS}>
-          Ver respuestas
+          {t("viewResponses")}
         </Link>
       </div>
     </div>

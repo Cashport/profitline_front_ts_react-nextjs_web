@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { message } from "antd";
+import { useTranslations } from "use-intl";
 
 import { ApiError } from "@/utils/api/api";
 import { ITemplatePreview, IValidationsRequired } from "@/types/dataQuality/IIntakeStructure";
@@ -37,6 +38,7 @@ const isTemplatePreview = (data: unknown): data is ITemplatePreview =>
  * o el archivo fue rechazado (el modal ya informó el motivo).
  */
 export const useIntakeStructureUpload = () => {
+  const t = useTranslations("modals.intakeStructure");
   const [preview, setPreview] = useState<ITemplatePreview | null>(null);
   const [errorsState, setErrorsState] = useState<IStructureErrorsState | null>(null);
   // eslint-disable-next-line no-unused-vars
@@ -77,7 +79,7 @@ export const useIntakeStructureUpload = () => {
             hideRetry?.();
             const saved = await options.onValidationsRequired(error.data);
             if (!saved) return false;
-            hideRetry = message.loading("Subiendo archivo...", 0);
+            hideRetry = message.loading(t("uploading"), 0);
             continue;
           }
 
@@ -90,7 +92,7 @@ export const useIntakeStructureUpload = () => {
             const answer = await askDecision(error.data);
             if (answer === null) return false;
             useAsTemplate = answer;
-            hideRetry = message.loading("Subiendo archivo...", 0);
+            hideRetry = message.loading(t("uploading"), 0);
             continue;
           }
 

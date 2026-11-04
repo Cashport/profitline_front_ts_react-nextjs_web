@@ -10,6 +10,7 @@ import { Spin, message } from "antd";
 import { DownloadSimple } from "phosphor-react";
 import { useInView } from "react-intersection-observer";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslations } from "use-intl";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import ProgressVsGoal from "@/components/ui/progress-vs-goal/progress-vs-goal";
@@ -37,6 +38,7 @@ import {
   pastDuePill
 } from "../../../constants/clients-home";
 import { useClientsHomeFilters } from "../../../stores/clients-home-filters";
+import { useClientsHomeLabels } from "../../../hooks/clients-home/use-clients-home-labels";
 import { clientsLabel, fmt, money, pct1, pctInt } from "../../../utils/clients-home-format";
 import AgingBreakdownTooltip, {
   AGING_TIP_SIZE
@@ -73,7 +75,7 @@ type QuickFilter = { kind: "name" | "fc"; x: number; y: number } | null;
 
 const ROW_PAD = "10px 14px";
 const detailHref = (row: IClientsHomeRow) =>
-  `/clientes/detail/${row.clientUuid}/project/${row.projectId}`;
+  `/clients/detail/${row.clientUuid}/project/${row.projectId}`;
 
 type Rect = Pick<DOMRect, "left" | "right" | "top" | "bottom">;
 
@@ -133,6 +135,9 @@ export default function ClientsHomeTable({
   listRef
 }: ClientsHomeTableProps) {
   const router = useRouter();
+  const t = useTranslations("clients.home");
+  const tCommon = useTranslations("common");
+  const labels = useClientsHomeLabels();
   const f = useClientsHomeFilters(
     useShallow((s) => ({
       projectId: s.projectId,
@@ -177,7 +182,7 @@ export default function ClientsHomeTable({
 
     setDownloading(true);
     const hide = message.loading({
-      content: "Generando Excel de cartera…",
+      content: t("table.generatingExcel"),
       duration: 0
     });
     try {
@@ -194,11 +199,9 @@ export default function ClientsHomeTable({
         sortBy: f.sortBy,
         sortDir: f.sortDir
       });
-      message.success(`Archivo descargado: ${filename}`);
+      message.success(t("table.downloaded", { filename }));
     } catch (err) {
-      message.error(
-        err instanceof Error ? err.message : "No se pudo descargar el Excel de cartera por cliente."
-      );
+      message.error(err instanceof Error ? err.message : t("table.downloadError"));
     } finally {
       hide();
       setDownloading(false);
@@ -223,31 +226,35 @@ export default function ClientsHomeTable({
   const cNotasPna = width >= 1120 + ex;
 
   const columns: Column[] = [
-    col("name", "Nombre", "name", "minmax(120px,1.8fr)", "qf-name"),
+    col("name", t("table.columns.name"), "name", "minmax(120px,1.8fr)", "qf-name"),
     col(
       "cartera",
-      focus ? `Cartera ${AGING_BY_KEY[focus].label}` : "Cartera",
+      focus
+        ? t("table.columns.portfolioFocus", { bucket: labels.aging(focus) })
+        : t("table.columns.portfolio"),
       "portfolio",
       "minmax(120px,1fr)",
       "expand"
     ),
     ...(showAgeCols
-      ? AGING_BUCKETS.map((b) => col(`ag-${b.key}`, b.label, `aging:${b.key}`, "minmax(78px,.7fr)"))
+      ? AGING_BUCKETS.map((b) =>
+          col(`ag-${b.key}`, labels.aging(b.key), `aging:${b.key}`, "minmax(78px,.7fr)")
+        )
       : []),
     ...(cVenc
       ? [
-          col("venc", "Vencida", "pastDue", "minmax(100px,.85fr)"),
-          col("vpct", "% Venc.", "pastDuePct", "minmax(84px,.6fr)")
+          col("venc", t("table.columns.pastDue"), "pastDue", "minmax(100px,.85fr)"),
+          col("vpct", t("table.columns.pastDuePct"), "pastDuePct", "minmax(84px,.6fr)")
         ]
       : []),
     ...(cNotasPna
       ? [
-          col("notas", "Notas", "creditNotes", "minmax(80px,.7fr)"),
-          col("pna", "PNA", "unappliedPayments", "minmax(80px,.7fr)")
+          col("notas", t("table.columns.creditNotes"), "creditNotes", "minmax(80px,.7fr)"),
+          col("pna", t("table.columns.unappliedPayments"), "unappliedPayments", "minmax(80px,.7fr)")
         ]
       : []),
-    col("rec", "Recaudo vs meta", "collectedPct", "minmax(100px,.75fr)"),
-    col("fc", "Forecast", "forecastPct", "minmax(80px,.55fr)", "qf-fc"),
+    col("rec", t("table.columns.collectedVsGoal"), "collectedPct", "minmax(100px,.75fr)"),
+    col("fc", t("table.columns.forecast"), "forecastPct", "minmax(80px,.55fr)", "qf-fc"),
     col("chev", "", undefined, "20px")
   ];
   const gridCols = columns.map((c) => c.width).join(" ");
@@ -324,7 +331,7 @@ export default function ClientsHomeTable({
               {row.clientName}
             </Link>
             <span className="truncate text-[13px] leading-[1.2] text-[#9a9a9a]">
-              {row.executive.name ?? "Sin ejecutivo"} · {row.market.name ?? "Sin mercado"}
+              {row.executive.name ?? t("noExecutive")} · {row.market.name ?? t("noMarket")}
             </span>
           </div>
         );
@@ -418,7 +425,7 @@ export default function ClientsHomeTable({
               bg={s.bg}
               color={s.color}
               width={48}
-              title={`Forecast ${fmt(c.forecast)}`}
+              title={`${t("table.columns.forecast")} ${fmt(c.forecast)}`}
             >
               {pctInt(c.forecastPct)}
             </StatusBadge>
@@ -463,7 +470,7 @@ export default function ClientsHomeTable({
       case "name":
         return (
           <div key={column.key} className="truncate whitespace-nowrap text-[13px] font-semibold">
-            Total{" "}
+            {tCommon("fields.total")}{" "}
             <span className="text-[13px] font-normal text-[#8a8a8a]">
               · {clientsLabel(totals.clients)}
             </span>
@@ -550,7 +557,7 @@ export default function ClientsHomeTable({
         {column.extra === "expand" && (
           <button
             type="button"
-            title={showAgeCols ? "Ocultar edades" : "Ver edades en columnas"}
+            title={showAgeCols ? t("table.hideAging") : t("table.showAging")}
             onClick={(e) => {
               e.stopPropagation();
               setExpAge((v) => !v);
@@ -567,14 +574,14 @@ export default function ClientsHomeTable({
         {column.extra === "qf-name" && (
           <QuickFilterButton
             on={f.executives.length > 0}
-            title="Filtrar Ejecutivo"
+            title={t("table.filterExecutive")}
             onClick={(e) => openQf("name", e)}
           />
         )}
         {column.extra === "qf-fc" && (
           <QuickFilterButton
             on={f.forecastStatuses.length > 0}
-            title="Filtrar Forecast"
+            title={t("table.filterForecast")}
             onClick={(e) => openQf("fc", e)}
           />
         )}
@@ -592,10 +599,8 @@ export default function ClientsHomeTable({
   const anyMarket = f.markets.length > 0;
   const total = meta?.pagination.total ?? 0;
   const mkHint = anyMarket
-    ? `${f.markets.length} ${
-        f.markets.length > 1 ? "mercados filtrando" : "mercado filtrando"
-      } la tabla · ${clientsLabel(total)}`
-    : "clic en un mercado para filtrar · clic en varios para sumarlos";
+    ? t("table.marketsFiltering", { count: f.markets.length, customers: clientsLabel(total) })
+    : t("table.marketsHint");
 
   const empty = !loading && !error && rows.length === 0;
 
@@ -609,7 +614,7 @@ export default function ClientsHomeTable({
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1.5">
           <div className="flex min-w-0 flex-nowrap items-baseline gap-x-2.5 gap-y-1 leading-[1.35]">
             <span className="whitespace-nowrap text-[15px] font-semibold text-cp-ink">
-              Cartera por cliente
+              {t("table.title")}
             </span>
             <span className="min-w-0 flex-[1_1_0] truncate text-[13px] leading-[1.35] text-cp-ink-4">
               {mkHint}
@@ -634,7 +639,7 @@ export default function ClientsHomeTable({
                     className="h-2.5 w-2.5 rounded-[3px]"
                     style={{ background: m.color, opacity: on || !anyMarket ? 1 : 0.45 }}
                   />
-                  {m.name ?? "Sin mercado"}
+                  {m.name ?? t("noMarket")}
                 </button>
               );
             })}
@@ -644,7 +649,7 @@ export default function ClientsHomeTable({
                 onClick={() => f.setMarkets([])}
                 className="cursor-pointer whitespace-nowrap border-0 bg-transparent px-1 text-[13px] font-semibold text-cp-ink hover:underline"
               >
-                Quitar filtro
+                {t("table.clearFilter")}
               </button>
             )}
           </div>
@@ -655,15 +660,15 @@ export default function ClientsHomeTable({
               <SearchField
                 value={f.search}
                 onChange={f.setSearch}
-                placeholder="Buscar cliente, NIT, ejecutivo"
+                placeholder={t("table.searchPlaceholder")}
               />
             </div>
             <button
               type="button"
               onClick={handleDownloadExcel}
               disabled={downloading || !f.projectId}
-              title="Descargar Excel"
-              aria-label="Descargar cartera por cliente en Excel"
+              title={t("table.downloadExcel")}
+              aria-label={t("table.downloadExcelAria")}
               className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               <DownloadSimple size={15} className={downloading ? "animate-pulse" : undefined} />
@@ -756,18 +761,18 @@ export default function ClientsHomeTable({
           <QuickFilterPopover
             x={qf.x}
             y={qf.y}
-            title={qf.kind === "name" ? "Ejecutivo" : "Forecast"}
+            title={qf.kind === "name" ? t("table.executive") : t("table.columns.forecast")}
             options={
               qf.kind === "name"
                 ? executives.map((e) => ({
                     key: e.key,
-                    label: e.name ?? "Sin ejecutivo",
+                    label: e.name ?? t("noExecutive"),
                     n: e.clients,
                     on: f.executives.includes(e.key)
                   }))
                 : FORECAST_STATUS_ORDER.map((k) => ({
                     key: k,
-                    label: FORECAST_STATUS[k].label,
+                    label: labels.forecast(k),
                     dot: FORECAST_STATUS[k].dot,
                     n: meta?.forecastStatusCounts[k] ?? 0,
                     on: f.forecastStatuses.includes(k)
@@ -787,11 +792,10 @@ export default function ClientsHomeTable({
   );
 }
 
-const EmptyState = () => (
-  <div className="p-12 text-center text-[13px] text-[#6b6b6b]">
-    Ningún cliente coincide con la búsqueda o los filtros.
-  </div>
-);
+const EmptyState = () => {
+  const t = useTranslations("clients.home.table");
+  return <div className="p-12 text-center text-[13px] text-[#6b6b6b]">{t("empty")}</div>;
+};
 
 const ErrorState = ({ message }: { message: string }) => (
   <div className="p-12 text-center text-[13px] text-[#b0124a]">{message}</div>
@@ -895,11 +899,16 @@ const QuickFilterPopover = ({
         onClick={onClear}
         className="h-8 cursor-pointer rounded-lg border-0 bg-transparent px-2.5 text-left text-[13px] font-semibold text-[#4a4a4a] hover:bg-[#f7f7f7]"
       >
-        Limpiar
+        <ClearLabel />
       </button>
     </div>
   </>
 );
+
+const ClearLabel = () => {
+  const tCommon = useTranslations("common");
+  return <>{tCommon("actions.clear")}</>;
+};
 
 /** Vista angosta (< 820px): una tarjeta por cliente con chips de orden arriba. */
 const CardList = ({
@@ -921,16 +930,17 @@ const CardList = ({
   sentinelRef: (node?: Element | null) => void;
   footer: React.ReactNode;
 }) => {
+  const t = useTranslations("clients.home");
   const [sortBy, sortDir, sortByColumn] = useClientsHomeFilters(
     useShallow((s) => [s.sortBy, s.sortDir, s.sortByColumn] as const)
   );
   const chips: [string, ClientsHomeSortColumn][] = [
-    ["Cartera", "portfolio"],
-    ["Vencida", "pastDue"],
-    ["% Venc.", "pastDuePct"],
-    ["Recaudo", "collectedPct"],
-    ["Forecast", "forecastPct"],
-    ["Nombre", "name"]
+    [t("table.columns.portfolio"), "portfolio"],
+    [t("table.columns.pastDue"), "pastDue"],
+    [t("table.columns.pastDuePct"), "pastDuePct"],
+    [t("table.columns.collected"), "collectedPct"],
+    [t("table.columns.forecast"), "forecastPct"],
+    [t("table.columns.name"), "name"]
   ];
   return (
     <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto">
@@ -965,7 +975,7 @@ const CardList = ({
                   {row.clientName}
                 </span>
                 <span className="truncate text-[13px] text-[#9a9a9a]">
-                  {row.executive.name ?? "Sin ejecutivo"} · {row.market.name ?? "Sin mercado"}
+                  {row.executive.name ?? t("noExecutive")} · {row.market.name ?? t("noMarket")}
                 </span>
               </div>
               <span className="whitespace-nowrap text-[13.5px] font-semibold tabular-nums">
@@ -975,7 +985,7 @@ const CardList = ({
             {portfolioBar(row, 5)}
             <div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5 text-[13px] tabular-nums">
               <span className="flex items-center gap-1.5 whitespace-nowrap text-[#6b6b6b]">
-                Vencida
+                {t("table.columns.pastDue")}
                 <span
                   className="rounded-md px-1.5 py-px text-[13px] font-semibold"
                   style={{ background: pill.bg, color: pill.color }}
@@ -985,7 +995,7 @@ const CardList = ({
                 <span className="text-[#141414]">{fmt(row.pastDue)}</span>
               </span>
               <span className="flex items-center gap-1.5 whitespace-nowrap text-[#6b6b6b]">
-                Recaudo
+                {t("table.columns.collected")}
                 <b className="font-semibold text-[#141414]">{fmt(row.collection.collected)}</b>
                 {pctInt(row.collection.collectedPct)}
               </span>

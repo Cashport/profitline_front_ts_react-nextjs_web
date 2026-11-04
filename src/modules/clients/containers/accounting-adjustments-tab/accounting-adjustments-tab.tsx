@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
 import { DotsThree } from "phosphor-react";
 import { AxiosError } from "axios";
+import { useTranslations } from "use-intl";
 
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
 import { extractSingleParam } from "@/utils/utils";
@@ -33,6 +34,8 @@ export interface ISelectedAccountingRows extends FinancialDiscount {
 }
 
 const AccountingAdjustmentsTab = () => {
+  const t = useTranslations("clients.adjustments.tab");
+  const tCommon = useTranslations("common");
   const [selectedRows, setSelectedRows] = useState<ISelectedAccountingRows[] | undefined>();
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState({
@@ -116,17 +119,14 @@ const AccountingAdjustmentsTab = () => {
         selectedRows?.map((adjustment) => adjustment.id) || []
       );
       setIsModalOpen({ selected: 0 });
-      showMessage("success", "Ajuste(s) añadidos a la tabla de aplicación de pagos");
+      showMessage("success", t("addedToApplication", { count: selectedRows?.length ?? 0 }));
       // mutate Applytable data
       mutateApplyTabData();
     } catch (error) {
       if (error instanceof AxiosError) {
-        showMessage(
-          "error",
-          `Error al añadir ajuste(s) a la tabla de aplicación de pagos ${error.message}`
-        );
+        showMessage("error", t("addToApplicationErrorDetail", { detail: error.message }));
       } else {
-        showMessage("error", `Error al añadir ajuste(s) a la tabla de aplicación de pagos`);
+        showMessage("error", t("addToApplicationError"));
       }
     }
   };
@@ -153,7 +153,7 @@ const AccountingAdjustmentsTab = () => {
       {selectedRows && selectedRows.length > 0 && (
         <DraggableTotalModal
           totalAmount={selectedRows.reduce((acc, adjustment) => acc + adjustment.current_value, 0)}
-          itemName="Ajustes"
+          itemName={t("itemName")}
           count={selectedRows.length}
         />
       )}
@@ -166,7 +166,7 @@ const AccountingAdjustmentsTab = () => {
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
-              placeholder="Buscar"
+              placeholder={tCommon("placeholders.search")}
               onChange={handleSearchChange}
             />
             {/* <AccountingAdjustmentsFilter onFilterChange={setFilters} /> */}
@@ -177,7 +177,7 @@ const AccountingAdjustmentsTab = () => {
               disabled={false}
               onClick={() => setIsModalOpen({ selected: 1 })} // Open modal for actions
             >
-              Generar acción
+              {t("generateAction")}
             </Button>
           </Flex>
         </Flex>

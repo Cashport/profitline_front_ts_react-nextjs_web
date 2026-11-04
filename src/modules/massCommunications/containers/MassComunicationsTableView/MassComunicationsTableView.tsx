@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useParams } from "next/navigation";
 import { UserPlus } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Button } from "@/modules/chat/ui/button";
 import Header from "@/components/organisms/header";
 import UiSearchInput from "@/components/ui/search-input/search-input";
@@ -15,6 +16,7 @@ import { useClientCommunication } from "../../hooks/useClientCommunication";
 import type { IPreviewClient } from "@/types/communications/ICommunications";
 
 export default function MassComunicationsTableView() {
+  const t = useTranslations("massCommunications.tableView");
   const { communicationId } = useParams<{ communicationId: string }>();
   const isEmail = /^\d+$/.test(communicationId);
 
@@ -40,12 +42,12 @@ export default function MassComunicationsTableView() {
 
   return (
     <div className="cp-page">
-      <Header title="Envío masivo de comunicación" back="/mass-communications" />
+      <Header title={t("title")} back="/mass-communications" />
       <div className="cp-card px-[18px] py-[14px]">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-4">
-            <UiSearchInput placeholder="Buscar cliente..." onChange={handleSearch} />
+            <UiSearchInput placeholder={t("searchPlaceholder")} onChange={handleSearch} />
           </div>
           <Button
             size="sm"
@@ -53,7 +55,7 @@ export default function MassComunicationsTableView() {
             onClick={() => setIsAddClientOpen(true)}
           >
             <UserPlus className="size-[18px]" />
-            +Añadir cliente
+            {t("addClient")}
           </Button>
         </div>
 

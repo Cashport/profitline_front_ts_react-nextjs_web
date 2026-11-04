@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import { DiscountItem, IBonus, IExecutiveDiscount } from "@/types/commerce/ICommerce";
@@ -28,6 +29,7 @@ export default function ProductsDetailsAndDiscounts({
   multiEntrega,
   cantidadesAsignadas
 }: ProductsDetailsAndDiscountsProps) {
+  const t = useTranslations("commerce.checkout");
   const {
     client,
     confirmOrderData,
@@ -289,7 +291,7 @@ export default function ProductsDetailsAndDiscounts({
 
         {/* Section title */}
         <div className="px-5 pt-5 pb-4 flex-shrink-0">
-          <h2 className="text-sm font-bold text-[#141414]">Detalle de productos</h2>
+          <h2 className="text-sm font-bold text-[#141414]">{t("productDetails")}</h2>
         </div>
 
         {/* Table wrapper */}
@@ -307,7 +309,7 @@ export default function ProductsDetailsAndDiscounts({
         {/* Otros descuentos */}
         <div className="mx-5 mt-4 mb-5 rounded-xl border border-[#EEEEEE] overflow-hidden flex-shrink-0">
           <div className="px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE]">
-            <p className="text-[13px] font-semibold text-[#141414]">Otros descuentos</p>
+            <p className="text-[13px] font-semibold text-[#141414]">{t("otherDiscounts")}</p>
           </div>
           <div className="flex items-center gap-3 px-4 py-3">
             <span className="flex-1 text-sm text-[#141414]">{secondaryDiscount?.name}</span>

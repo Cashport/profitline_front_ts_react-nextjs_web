@@ -2,11 +2,15 @@
 import { useState } from "react";
 import { Popover } from "antd";
 import { ChevronDown, MessageCircle, User } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useMessageApi } from "@/context/MessageContext";
 import { useThemeMenu, type ThemePreference } from "@/context/ThemeMenuContext";
 import { sendEmailResetPassword } from "@/services/users/users";
+import { updateUserPreferences } from "@/services/users/preferences";
+import { useAppLocale } from "@/i18n/I18nProvider";
+import { LOCALES, LOCALE_LABELS, type Locale } from "@/i18n/config";
 import { cn } from "@/utils/utils";
 import { LogoutIcon, useLogoutConfirm } from "./logout-confirm";
 
@@ -76,19 +80,20 @@ const MenuIcon = ({ d, size = 17 }: { d: string; size?: number }) => (
 
 const ICON_THEME = "M12 3a9 9 0 1 0 0 18zM12 3a9 9 0 0 1 0 18";
 const ICON_LOCK = "M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3";
+const ICON_LANGUAGE =
+  "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18";
 
-const THEME_OPTIONS: { key: ThemePreference; label: string; d: string }[] = [
+const THEME_OPTIONS: { key: ThemePreference; d: string }[] = [
   {
     key: "light",
-    label: "Claro",
     d: "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
   },
-  { key: "dark", label: "Oscuro", d: "M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" },
-  { key: "system", label: "Sistema", d: "M4 5h16v11H4zM2 19h20" }
+  { key: "dark", d: "M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" },
+  { key: "system", d: "M4 5h16v11H4zM2 19h20" }
 ];
 
 /**
- * Avatar del header y su menú: nombre/correo, tema (solo en módulos con modo oscuro),
+ * Avatar del header y su menú: nombre/correo, tema (solo en módulos con modo oscuro), idioma,
  * cambiar contraseña, (soporte) y cerrar sesión.
  */
 export default function UserMenu() {
@@ -98,6 +103,8 @@ export default function UserMenu() {
   const [sending, setSending] = useState(false);
   const themeMenu = useThemeMenu();
   const { askLogout, logoutModal } = useLogoutConfirm();
+  const t = useTranslations("shell.userMenu");
+  const { locale, setLocale, canChooseLanguage } = useAppLocale();
 
   const name = user?.name ?? "";
   const email = user?.email ?? "";
@@ -108,12 +115,24 @@ export default function UserMenu() {
     setSending(true);
     try {
       await sendEmailResetPassword(email);
-      showMessage("success", `Te enviamos un correo a ${email} para cambiar tu contraseña`);
+      showMessage("success", t("passwordEmailSent", { email }));
       setOpen(false);
     } catch {
-      showMessage("error", "No pudimos enviar el correo. Intenta de nuevo.");
+      showMessage("error", t("passwordEmailError"));
     }
     setSending(false);
+  };
+
+  // El cambio se ve de inmediato y queda en este navegador; además se guarda en el usuario
+  // para que lo siga en otros equipos.
+  const handleLanguage = async (next: Locale) => {
+    if (next === locale) return;
+    await setLocale(next);
+    try {
+      await updateUserPreferences({ language: next });
+    } catch {
+      showMessage("error", t("languageSaveError"));
+    }
   };
 
   const content = (
@@ -130,11 +149,12 @@ export default function UserMenu() {
         <div className="flex flex-col gap-2 px-2.5 pb-2.5 pt-2">
           <span className="flex items-center gap-3 text-[13.5px]">
             <MenuIcon d={ICON_THEME} />
-            Tema
+            {t("theme")}
           </span>
           <div className="grid grid-cols-3 gap-0.5 rounded-lg bg-cp-bg p-[3px]">
-            {THEME_OPTIONS.map(({ key, label, d }) => {
+            {THEME_OPTIONS.map(({ key, d }) => {
               const active = themeMenu.theme === key;
+              const label = t(`themes.${key}`);
               return (
                 <button
                   key={key}
@@ -157,16 +177,46 @@ export default function UserMenu() {
           </div>
         </div>
       )}
+      {canChooseLanguage && (
+        <div className="flex flex-col gap-2 px-2.5 pb-2.5 pt-2">
+          <span className="flex items-center gap-3 text-[13.5px]">
+            <MenuIcon d={ICON_LANGUAGE} />
+            {t("language")}
+          </span>
+          <div className="grid grid-cols-2 gap-0.5 rounded-lg bg-cp-bg p-[3px]">
+            {LOCALES.map((key) => {
+              const active = locale === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  lang={key}
+                  aria-pressed={active}
+                  onClick={() => handleLanguage(key)}
+                  className={cn(
+                    "flex h-[30px] min-w-0 cursor-pointer items-center justify-center rounded-md border-0 text-[13px] text-cp-ink",
+                    active
+                      ? "bg-white font-semibold shadow-[0_1px_3px_rgba(0,0,0,.12)]"
+                      : "bg-transparent font-normal"
+                  )}
+                >
+                  {LOCALE_LABELS[key]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <MenuItem
         icon={<MenuIcon d={ICON_LOCK} />}
-        label={sending ? "Enviando correo…" : "Cambiar contraseña"}
+        label={sending ? t("sendingEmail") : t("changePassword")}
         onClick={handleChangePassword}
         disabled={sending || !email}
       />
       {SHOW_SUPPORT && (
         <MenuItem
           icon={<MessageCircle size={17} strokeWidth={1.7} />}
-          label="Contactar soporte"
+          label={t("contactSupport")}
           onClick={() => setOpen(false)}
         />
       )}
@@ -174,7 +224,7 @@ export default function UserMenu() {
       <MenuItem
         danger
         icon={<LogoutIcon />}
-        label="Cerrar sesión"
+        label={t("logout")}
         onClick={() => {
           setOpen(false);
           askLogout();
@@ -201,7 +251,7 @@ export default function UserMenu() {
       >
         <button
           type="button"
-          aria-label="Menú de usuario"
+          aria-label={t("trigger")}
           className="ml-1 flex shrink-0 cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-cp-ink"
         >
           <Avatar initials={initials} className="h-[var(--avatar)] w-[var(--avatar)] text-[13px]" />

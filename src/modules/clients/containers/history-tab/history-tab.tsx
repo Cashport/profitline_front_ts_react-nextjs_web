@@ -17,6 +17,7 @@ import {
   Users,
   type LucideIcon
 } from "lucide-react";
+import { useLocale, useTranslations } from "use-intl";
 
 import { cn, extractSingleParam } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
@@ -87,22 +88,22 @@ const toLocalDate = (createdAt: string) => dayjs.utc(createdAt).subtract(5, "hou
 const getDateKey = (createdAt: string) => toLocalDate(createdAt).format("YYYY-MM-DD");
 const getTime = (createdAt: string) => toLocalDate(createdAt).format("HH:mm");
 
-const getRelativeLabel = (dateKey: string) => {
+const getDaysAgo = (dateKey: string) => {
   const today = toLocalDate(new Date().toISOString()).startOf("day");
-  const diffDays = today.diff(dayjs.utc(dateKey), "day");
-  if (diffDays <= 0) return "Hoy";
-  if (diffDays === 1) return "Ayer";
-  return `${diffDays} días`;
+  return today.diff(dayjs.utc(dateKey), "day");
 };
 
-const formatFullDate = (dateKey: string) => {
-  const label = dayjs.utc(dateKey).toDate().toLocaleDateString("es-CO", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC"
-  });
+const formatFullDate = (dateKey: string, locale: string) => {
+  const label = dayjs
+    .utc(dateKey)
+    .toDate()
+    .toLocaleDateString(locale === "en" ? "en-US" : "es-CO", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC"
+    });
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
@@ -161,6 +162,8 @@ const HistoryEventRow = ({
   onRegenerateExcel,
   onRegeneratePDF
 }: HistoryEventRowProps) => {
+  const t = useTranslations("clients.history.rowActions");
+  const tCommon = useTranslations("common");
   const docRef = getDocRef(row);
   const { icon: Icon, color, bg } = getEventMeta(row.event);
 
@@ -176,7 +179,7 @@ const HistoryEventRow = ({
                 className="buttonNoBorder"
                 onClick={() => onOpenDetail(row)}
               >
-                Ver detalle
+                {tCommon("actions.viewDetail")}
               </Button>
             )
           }
@@ -190,7 +193,7 @@ const HistoryEventRow = ({
           className="buttonNoBorder"
           onClick={() => onRegenerateExcel(row)}
         >
-          Descargar plano
+          {t("downloadFlatFile")}
         </Button>
       )
     },
@@ -202,7 +205,7 @@ const HistoryEventRow = ({
           className="buttonNoBorder"
           onClick={() => onRegeneratePDF(row)}
         >
-          Ver pdf
+          {t("viewPdf")}
         </Button>
       )
     }
@@ -274,6 +277,9 @@ const HistoryEventRow = ({
 };
 
 const HistoryTab = () => {
+  const t = useTranslations("clients.history");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
   const { showMessage } = useMessageApi();
@@ -294,7 +300,7 @@ const HistoryTab = () => {
   });
 
   useEffect(() => {
-    if (error) showMessage("error", "No se pudo cargar el historial del cliente");
+    if (error) showMessage("error", t("loadError"));
   }, [error]);
 
   const rows = useMemo(() => data ?? [], [data]);
@@ -349,15 +355,22 @@ const HistoryTab = () => {
   const filterCategories: FilterCategoryConfig[] = [
     {
       key: "evento",
-      label: "Evento",
+      label: t("columns.event"),
       options: eventCounts.map(([label]) => ({ id: label, name: label }))
     },
     {
       key: "usuario",
-      label: "Usuario",
+      label: tCommon("fields.user"),
       options: userNames.map((name) => ({ id: name, name }))
     }
   ];
+
+  const getRelativeLabel = (dateKey: string) => {
+    const diffDays = getDaysAgo(dateKey);
+    if (diffDays <= 0) return t("today");
+    if (diffDays === 1) return t("yesterday");
+    return t("daysAgo", { days: diffDays });
+  };
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -386,7 +399,7 @@ const HistoryTab = () => {
       <div className="flex flex-wrap items-center gap-2">
         <UiSearchInput
           className="standardSearch"
-          placeholder="Buscar en el historial"
+          placeholder={t("searchPlaceholder")}
           value={searchTerm}
           onChange={handleSearchChange}
         />
@@ -396,7 +409,7 @@ const HistoryTab = () => {
           value={filters}
           isLoading={isLoading}
           formatTagValue={(_category, items) =>
-            items.length === 1 ? items[0].name : `${items.length} seleccionados`
+            items.length === 1 ? items[0].name : tCommon("count.selected", { count: items.length })
           }
           onApply={handleFiltersChange}
           onValueChange={handleFiltersChange}
@@ -406,7 +419,7 @@ const HistoryTab = () => {
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <FilterPill
           active={activeEvent === ALL_EVENTS}
-          label="Todos"
+          label={tCommon("status.all")}
           count={rows.length}
           onClick={() => handleEventPillChange(ALL_EVENTS)}
         />
@@ -430,9 +443,13 @@ const HistoryTab = () => {
         <>
           <div className="mt-5 overflow-hidden rounded-lg border border-gray-100 bg-white">
             <div className={cn(ROW_GRID, "border-b border-gray-100 py-2.5")}>
-              <span className="text-[13px] font-medium text-gray-400">Evento</span>
-              <span className="text-[13px] font-medium text-gray-400">Descripción</span>
-              <span className="text-[13px] font-medium text-gray-400">Usuario</span>
+              <span className="text-[13px] font-medium text-gray-400">{t("columns.event")}</span>
+              <span className="text-[13px] font-medium text-gray-400">
+                {tCommon("fields.description")}
+              </span>
+              <span className="text-[13px] font-medium text-gray-400">
+                {tCommon("fields.user")}
+              </span>
               {/* <span className="text-right text-[13px] font-medium text-gray-400">Monto</span> */}
               <span />
             </div>
@@ -440,7 +457,7 @@ const HistoryTab = () => {
             {groups.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Inbox className="mb-3 h-10 w-10 text-gray-200" />
-                <p className="text-sm text-gray-400">Sin resultados para esta búsqueda.</p>
+                <p className="text-sm text-gray-400">{t("noResults")}</p>
               </div>
             ) : (
               groups.map(([dateKey, events], index) => (
@@ -449,7 +466,9 @@ const HistoryTab = () => {
                     <span className="text-[13px] font-semibold text-cashport-black">
                       {getRelativeLabel(dateKey)}
                     </span>
-                    <span className="text-[13px] text-gray-400">{formatFullDate(dateKey)}</span>
+                    <span className="text-[13px] text-gray-400">
+                      {formatFullDate(dateKey, locale)}
+                    </span>
                   </div>
 
                   {events.map((row) => (
@@ -471,7 +490,7 @@ const HistoryTab = () => {
           {filtered.length > 0 && (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
               <p className="text-[13px] text-gray-400">
-                Mostrando {pageItems.length} de {filtered.length} eventos
+                {t("showing", { shown: pageItems.length, total: filtered.length })}
               </p>
               <Pagination
                 current={currentPage}
@@ -495,10 +514,10 @@ const HistoryTab = () => {
       <ModalConfirmAction
         isOpen={openModal.selected === 2}
         onClose={handleCloseModal}
-        title="¿Estás seguro que deseas anular esta aplicación de pago?"
-        content="Esta acción es definitiva"
+        title={t("voidConfirm.title")}
+        content={t("voidConfirm.content")}
         onOk={handleCancelApplication}
-        okText="Anular aplicación"
+        okText={t("voidConfirm.okText")}
       />
 
       <ModalCommunicationDetail

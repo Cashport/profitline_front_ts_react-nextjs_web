@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Checkbox, Dropdown, Table, TableProps, Tooltip, Typography } from "antd";
 import {
@@ -48,6 +49,8 @@ export const InvoicesTable = ({
   isSearchActive: _isSearchActive = false,
   onOpenPaymentAgreement
 }: PropsInvoicesTable) => {
+  const t = useTranslations("shared.tables.invoices");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -166,7 +169,7 @@ export const InvoicesTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Emisión",
+      title: t("columns.issueDate"),
       dataIndex: "financial_record_date",
       key: "financial_record_date",
       render: (text) => <Text className="cell -alignRight">{formatDate(text)}</Text>,
@@ -176,7 +179,7 @@ export const InvoicesTable = ({
       width: 120
     },
     {
-      title: "Pronto pago",
+      title: t("columns.earlyPayment"),
       key: "earlypay_date",
       dataIndex: "earlypay_date",
       render: (date) => <Text className="cell -alignRight">{date ? formatDate(date) : "-"}</Text>,
@@ -186,23 +189,24 @@ export const InvoicesTable = ({
       width: 150
     },
     {
-      title: "Vence",
+      title: t("columns.due"),
       key: "expiration_date",
       dataIndex: "expiration_date",
       render: (text, record) => (
         <Tooltip
           title={
             <div className="toolTip -expirationDate">
-              <p>Fecha de vencimiento</p>
+              <p>{tCommon("fields.dueDate")}</p>
               <strong>{formatDate(text)}</strong>
               <p>
-                Condición de pago{" "}
+                {t("paymentTerms")}{" "}
                 <strong>
-                  {calculateDaysDifference(
-                    new Date(record?.financial_record_date),
-                    new Date(record?.expiration_date)
-                  )}{" "}
-                  días
+                  {t("days", {
+                    count: calculateDaysDifference(
+                      new Date(record?.financial_record_date),
+                      new Date(record?.expiration_date)
+                    )
+                  })}
                 </strong>
               </p>
             </div>
@@ -211,7 +215,7 @@ export const InvoicesTable = ({
           key={record.id}
         >
           <Text className="expirationText cell -alignRight">
-            {daysLeft(text)} días <WarningCircle size={16} />
+            {t("days", { count: daysLeft(text) })} <WarningCircle size={16} />
           </Text>
         </Tooltip>
       ),
@@ -221,7 +225,7 @@ export const InvoicesTable = ({
       width: 140
     },
     {
-      title: "Detalle",
+      title: tCommon("fields.detail"),
       dataIndex: "comments",
       key: "comments",
       render: (text) => <p className="cell -alignRight">{text ? text : "-"}</p>,
@@ -230,7 +234,7 @@ export const InvoicesTable = ({
       align: "right"
     },
     {
-      title: "Monto inicial",
+      title: t("columns.originalAmount"),
       key: "initial_value",
       dataIndex: "initial_value",
       render: (amount) => <p className="cell -alignRight fontMonoSpace">{formatMoney(amount)}</p>,
@@ -239,7 +243,7 @@ export const InvoicesTable = ({
       align: "right"
     },
     {
-      title: "Ajustes",
+      title: t("columns.adjustments"),
       key: "ajust_value",
       dataIndex: "ajust_value",
       render: (amount) =>
@@ -253,7 +257,7 @@ export const InvoicesTable = ({
       align: "right"
     },
     {
-      title: "Pendiente",
+      title: t("columns.outstanding"),
       key: "current_value",
       dataIndex: "current_value",
       render: (amount) => <p className="cell -alignRight fontMonoSpace">{formatMoney(amount)}</p>,
@@ -270,12 +274,13 @@ export const InvoicesTable = ({
             <Tooltip
               title={
                 <div className="toolTip -paymentAgreement">
-                  <p>Acuerdo de pago</p>
+                  <p>{t("paymentPlan")}</p>
                   <p>
-                    Fecha <strong>{record?.agreement_info?.Fecha}</strong>
+                    {tCommon("fields.date")} <strong>{record?.agreement_info?.Fecha}</strong>
                   </p>
                   <p>
-                    Monto <strong>{formatMoney(record?.agreement_info?.Monto)}</strong>
+                    {tCommon("fields.amount")}{" "}
+                    <strong>{formatMoney(record?.agreement_info?.Monto)}</strong>
                   </p>
                 </div>
               }
@@ -305,9 +310,9 @@ export const InvoicesTable = ({
             <Tooltip
               title={
                 <div className="toolTip -priceDifference">
-                  <p>Diferencia en precios</p>
+                  <p>{t("priceDifference")}</p>
                   <p>
-                    Monto{" "}
+                    {tCommon("fields.amount")}{" "}
                     <strong>{formatMoney(record?.novelty_info?.incidentAmount ?? "0")}</strong>
                   </p>
                   <p>{record?.novelty_info?.incidentType}</p>
@@ -324,7 +329,7 @@ export const InvoicesTable = ({
             <Tooltip
               title={
                 <div className="toolTip -clientAccept">
-                  <p>Aceptación cliente</p>
+                  <p>{t("customerAcceptance")}</p>
                   <p>{record?.acceptance_info?.radication_type}</p>
                   <strong>{record?.acceptance_info?.accept_date ?? " DD-MM-YYYY"}</strong>
                 </div>
@@ -345,13 +350,13 @@ export const InvoicesTable = ({
               items: [
                 {
                   key: "claims",
-                  label: "Ver glosas",
+                  label: t("viewDenials"),
                   icon: <ArrowsSplit size={16} />,
                   onClick: () => setClaimsInvoice(record)
                 },
                 {
                   key: "balances",
-                  label: "Ver Saldos",
+                  label: t("viewDeductions"),
                   icon: <Coins size={16} />,
                   onClick: () => setBalancesInvoice(record)
                 }

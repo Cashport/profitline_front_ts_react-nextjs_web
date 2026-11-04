@@ -1,11 +1,34 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useReducer, useState } from "react";
 import { Flex, InputNumber, Modal, Radio, RadioChangeEvent, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { SelectBillingPeriod } from "@/components/molecules/selects/clients/SelectBillingPeriod/SelectBillingPeriod";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 import "./modalBillingPeriod.scss";
 
 const { Text } = Typography;
+
+// "order" y "day_of_week" se guardan en español (los envía el backend y se le devuelven así):
+// solo se traduce lo que se muestra.
+const BILLING_ORDERS = ["Primero", "Segundo", "Tercero", "Cuarto", "Ultimo"] as const;
+const BILLING_DAYS = [
+  "Lunes",
+  "Martes",
+  "Miercoles",
+  "Jueves",
+  "Viernes",
+  "Sabado",
+  "Domingo"
+] as const;
+type BillingPeriodT = ReturnType<typeof useTranslations<"modals.billingPeriod">>;
+export const billingOrderLabel = (t: BillingPeriodT, value?: string) =>
+  value && (BILLING_ORDERS as readonly string[]).includes(value)
+    ? t(`orders.${value as (typeof BILLING_ORDERS)[number]}`)
+    : value ?? "";
+export const billingDayLabel = (t: BillingPeriodT, value?: string) =>
+  value && (BILLING_DAYS as readonly string[]).includes(value)
+    ? t(`days.${value as (typeof BILLING_DAYS)[number]}`)
+    : value ?? "";
 
 interface Props {
   isOpen: boolean;
@@ -43,9 +66,11 @@ export const ModalBillingPeriod = ({
   setBillingPeriod,
   billingPeriod
 }: Props) => {
+  const t = useTranslations("modals.billingPeriod");
+  const tCommon = useTranslations("common");
   const [radioState, setRadioState] = useState<boolean | null>(null);
-  const orderOptions = ["Primero", "Segundo", "Tercero", "Cuarto", "Ultimo"];
-  const daysOptions = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+  const orderOptions = [...BILLING_ORDERS];
+  const daysOptions = [...BILLING_DAYS];
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -110,7 +135,7 @@ export const ModalBillingPeriod = ({
       zIndex={3}
       open={isOpen}
       onCancel={() => setIsBillingPeriodOpen(false)}
-      title="Periodo de facturación"
+      title={t("title")}
       okButtonProps={{
         className: "buttonOk",
         disabled: modalDisabled()
@@ -118,13 +143,13 @@ export const ModalBillingPeriod = ({
       cancelButtonProps={{
         className: "buttonCancel"
       }}
-      okText="Guardar cambios"
-      cancelText="Cancelar"
+      okText={tCommon("actions.saveChanges")}
+      cancelText={tCommon("actions.cancel")}
       className="modalBillingPeriod"
       onOk={onSaveChanges}
     >
       <Flex vertical>
-        <Text>Selecciona el corte de facturación</Text>
+        <Text>{t("selectCutoff")}</Text>
         <Radio.Group
           style={{
             padding: "1.2rem .5rem",
@@ -139,7 +164,7 @@ export const ModalBillingPeriod = ({
           <Radio value={true}>
             <Flex align="center" gap="1rem" style={{ width: "100%" }}>
               <Flex justify="center" align="center">
-                <Text className="textPre-input">El día</Text>
+                <Text className="textPre-input">{t("theDay")}</Text>
               </Flex>
               <Flex
                 vertical={false}
@@ -159,18 +184,18 @@ export const ModalBillingPeriod = ({
           </Radio>
           <Radio value={false} style={{ width: "100%" }}>
             <Flex align="center" gap="1rem" style={{ width: "100%" }}>
-              <Text className="textPre-input">El</Text>
+              <Text className="textPre-input">{t("the")}</Text>
               <Flex style={{ width: "20rem", gap: "1rem" }}>
                 {[
                   {
                     options: orderOptions,
-                    placeHolder: "Segundo",
+                    placeHolder: billingOrderLabel(t, "Segundo"),
                     orderRadioValue: state.order,
                     setValueSelected: handleSetPeriod
                   },
                   {
                     options: daysOptions,
-                    placeHolder: "Miercoles",
+                    placeHolder: billingDayLabel(t, "Miercoles"),
                     orderRadioValue: state.dayOfWeek,
                     setValueSelected: handleSetDayOfWeek
                   }
@@ -187,11 +212,12 @@ export const ModalBillingPeriod = ({
         </Radio.Group>
 
         <Text>
-          El periodo de facturación inicia el
           {radioState === true
-            ? ` día ${state.day ?? ""} `
-            : ` ${state.order ?? ""} ${state.dayOfWeek ?? ""} `}
-          de cada mes
+            ? t("startsOnDay", { day: state.day ?? "" })
+            : t("startsOnWeekday", {
+                order: billingOrderLabel(t, state.order),
+                weekday: billingDayLabel(t, state.dayOfWeek)
+              })}
         </Text>
       </Flex>
     </Modal>

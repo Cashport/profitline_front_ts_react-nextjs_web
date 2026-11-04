@@ -10,7 +10,7 @@ import type { SortState } from "@/modules/walletModule/types";
 import { DUE_SOON_DAYS, STATUS_ORDER } from "../constants";
 import type { AgreementView, Grouping } from "../types";
 import { CatalogIndex, coordinatorOf, coordinatorOfClient, managementOf } from "./filters";
-import { plural } from "./format";
+import { getTranslator } from "@/i18n/translator";
 
 export const sumBy = <T>(rows: T[], f: (row: T) => number) =>
   rows.reduce((acc, row) => acc + f(row), 0);
@@ -61,8 +61,9 @@ export const clientName = (ix: CatalogIndex, clientId: string) =>
 export const clientSub = (ix: CatalogIndex, clientId: string) => {
   const c = ix.clients.get(clientId);
   if (!c) return "";
-  const executive = ix.executives.get(c.executiveId)?.name ?? "Sin ejecutivo";
-  return `${executive} · ${ix.channels.get(c.channelId)?.name ?? "Sin canal"}`;
+  const t = getTranslator("collections");
+  const executive = ix.executives.get(c.executiveId)?.name ?? t("rows.noExecutive");
+  return `${executive} · ${ix.channels.get(c.channelId)?.name ?? t("rows.noChannel")}`;
 };
 
 export { coordinatorOfClient };
@@ -86,7 +87,7 @@ export const groupName = (by: Grouping, id: string, ix: CatalogIndex) => {
         : by === "channel"
           ? ix.channels
           : ix.coordinators;
-  return map.get(id)?.name ?? "Sin asignar";
+  return map.get(id)?.name ?? getTranslator("collections")("rows.unassigned");
 };
 
 /** Agrupa las filas de clientes por la dimensión, en el orden en que llegan. */
@@ -118,13 +119,16 @@ export interface GoalRow {
 }
 
 const goalGroupSub = (by: Grouping, id: string, n: number, ix: CatalogIndex) => {
+  const t = getTranslator("collections");
   const context =
     by === "executive"
-      ? `Coord. ${ix.coordinators.get(coordinatorOf(ix, id))?.name ?? "—"}`
+      ? t("rows.coordinatorShort", {
+          name: ix.coordinators.get(coordinatorOf(ix, id))?.name ?? "—"
+        })
       : by === "channel"
-        ? "Canal"
+        ? t("rows.channel")
         : ix.managements.get(managementOf(ix, id))?.name ?? "—";
-  return `${context} · ${plural(n, "cliente", "clientes")}`;
+  return `${context} · ${t("rows.customers", { count: n })}`;
 };
 
 /** Filas de "frente a su meta". El ritmo de un grupo es el de sus clientes ponderado por la meta. */
@@ -168,13 +172,14 @@ export interface ExecutiveRow {
 
 const executiveSub = (by: Grouping, id: string, n: number, ix: CatalogIndex) => {
   if (by === "client") return clientSub(ix, id);
+  const t = getTranslator("collections");
   const context =
     by === "executive"
       ? ix.coordinators.get(coordinatorOf(ix, id))?.name ?? "—"
       : by === "coordinator"
         ? ix.managements.get(managementOf(ix, id))?.name ?? "—"
-        : "canal";
-  return `${plural(n, "cliente", "clientes")} · ${context}`;
+        : t("rows.channelLower");
+  return `${t("rows.customers", { count: n })} · ${context}`;
 };
 
 const sumExecutive = (
@@ -212,7 +217,7 @@ export function executiveRows(
 
 /** Fila de total de la tabla de ejecutivos. */
 export const executiveTotal = (clients: ITowerClientRow[]) =>
-  sumExecutive("total", "Total", "", clients);
+  sumExecutive("total", getTranslator("collections")("rows.total"), "", clients);
 
 /* ---------- Detalle de acuerdos ---------- */
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Input } from "antd";
 import { Download, Mail } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiTab from "@/components/ui/ui-tab";
@@ -15,7 +16,7 @@ import { cn } from "@/utils/utils";
 
 import { MOBILE_TABS } from "../../constants";
 import { useStatementContacts } from "../../hooks/use-blocking-alert-contacts";
-import { fmtDay, plural } from "../../utils/blocking-alerts";
+import { fmtDay } from "../../utils/blocking-alerts";
 import AlertModal from "../alert-modal/alert-modal";
 import RecipientsField, { useRecipients } from "../recipients-field/recipients-field";
 
@@ -40,6 +41,8 @@ interface AccountStatementModalProps {
 export default function AccountStatementModal({ detail, onClose }: AccountStatementModalProps) {
   const formatMoney = useAppStore((s) => s.formatMoney);
   const { showMessage } = useMessageApi();
+  const t = useTranslations("blockingAlerts.statement");
+  const tCount = useTranslations("blockingAlerts.count");
   const [format, setFormat] = useState<StatementFormat>("pdf");
   const [mode, setMode] = useState<StatementMode>("download");
   const [sending, setSending] = useState(false);
@@ -52,23 +55,23 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
   const sections = [
     {
       key: "past_due",
-      label: "Facturas vencidas",
-      meta: `${plural(pastDue.count, "factura", "facturas")} · ${money(pastDue.total)}`
+      label: t("sections.pastDue"),
+      meta: `${tCount("invoices", { count: pastDue.count })} · ${money(pastDue.total)}`
     },
     {
       key: "upcoming",
-      label: "Facturas por vencer",
-      meta: `${plural(upcoming.count, "factura", "facturas")} · ${money(upcoming.total)}`
+      label: t("sections.upcoming"),
+      meta: `${tCount("invoices", { count: upcoming.count })} · ${money(upcoming.total)}`
     },
     {
       key: "pending_balances",
-      label: "Saldos pendientes",
-      meta: `${plural(balances.count, "movimiento", "movimientos")} · ${money(balances.total)}`
+      label: t("sections.pendingBalances"),
+      meta: `${tCount("movements", { count: balances.count })} · ${money(balances.total)}`
     },
     {
       key: "credit_notes",
-      label: "Notas crédito",
-      meta: `${plural(creditNotes.count, "nota", "notas")} · ${money(creditNotes.total)}`
+      label: t("sections.creditNotes"),
+      meta: `${tCount("notes", { count: creditNotes.count })} · ${money(creditNotes.total)}`
     }
   ];
 
@@ -76,7 +79,7 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
   const ready = mode === "download" || to.length > 0;
   const subject =
     contacts.subject ||
-    `Estado de cuenta · ${detail.name} · corte ${fmtDay(detail.cutoffAt, true)}`;
+    t("subjectValue", { name: detail.name, date: fmtDay(detail.cutoffAt, true) });
   // "estado_cuenta_oxxo_colombia.xlsx": nombre sin tildes ni símbolos.
   const fileName = `estado_cuenta_${detail.name
     .normalize("NFD")
@@ -93,35 +96,30 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
         const files = await downloadDigitalRecordFiles(clientUuid);
         const file = files?.find((f) => FILE_OF[format].test(f.fileName));
         if (!file) {
-          showMessage("warning", `No hay estado de cuenta en ${ext} para descargar`);
+          showMessage("warning", t("notAvailable", { format: ext }));
           return;
         }
         window.open(file.url, "_blank");
-        showMessage("success", `Descargando el estado de cuenta de ${detail.client.name} (${ext})`);
+        showMessage("success", t("downloading", { name: detail.client.name, format: ext }));
       } else {
         await sendDigitalRecord(clientUuid, {
           forward_to: to.map((email) => ({ label: email, value: email })),
           subject
         });
-        showMessage("success", `Estado de cuenta enviado a ${to.join(", ")}`);
+        showMessage("success", t("sent", { recipients: to.join(", ") }));
       }
       onClose();
     } catch {
-      showMessage(
-        "error",
-        mode === "download"
-          ? "No se pudo descargar el estado de cuenta"
-          : "No se pudo enviar el estado de cuenta"
-      );
+      showMessage("error", mode === "download" ? t("downloadError") : t("sendError"));
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <AlertModal onClose={onClose} title="Estado de cuenta" subtitle={detail.name}>
+    <AlertModal onClose={onClose} title={t("title")} subtitle={detail.name}>
       <div className="flex flex-col gap-2">
-        <span className={SECTION_LABEL}>Incluir en el estado de cuenta</span>
+        <span className={SECTION_LABEL}>{t("include")}</span>
         <div className="flex flex-col gap-2">
           {sections.map((s) => (
             <label
@@ -159,19 +157,19 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
         />
       </div>
 
-      <span className={SECTION_LABEL}>¿Qué quieres hacer?</span>
+      <span className={SECTION_LABEL}>{t("whatToDo")}</span>
       <div className="grid grid-cols-2 gap-2">
         {[
           {
             key: "download" as const,
-            label: "Descargar",
-            sub: "Guárdalo en este dispositivo",
+            label: t("download"),
+            sub: t("downloadHint"),
             Icon: Download
           },
           {
             key: "email" as const,
-            label: "Enviar por correo",
-            sub: "Le llega al cliente como adjunto",
+            label: t("email"),
+            sub: t("emailHint"),
             Icon: Mail
           }
         ].map(({ key, label, sub, Icon }) => (
@@ -211,7 +209,7 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
               value={to}
               onChange={setTo}
               loading={contacts.isLoading}
-              placeholder="correo@cliente.com"
+              placeholder={t("toPlaceholder")}
               className="border-b border-cp-line"
             />
             <label className="flex min-h-[44px] items-center gap-2.5 border-b border-cp-line max-md:min-h-[38px]">
@@ -220,12 +218,12 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
                 disabled
                 variant="borderless"
                 aria-label="CC"
-                placeholder="Opcional"
+                placeholder={t("optional")}
                 className="!px-0 !text-[13px] max-md:!text-[12.5px]"
               />
             </label>
             <div className="flex items-start gap-2.5 py-3 max-md:py-2">
-              <span className={FIELD_LABEL}>Asunto</span>
+              <span className={FIELD_LABEL}>{t("subject")}</span>
               <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-cp-ink max-md:text-[12px]">
                 {subject}
               </span>
@@ -238,7 +236,7 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
             <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-cp-ink">
               {fileName}
             </span>
-            <span className="shrink-0 text-[13px] text-cp-ink-4">Adjunto</span>
+            <span className="shrink-0 text-[13px] text-cp-ink-4">{t("attachment")}</span>
           </div>
         </div>
       )}
@@ -250,7 +248,7 @@ export default function AccountStatementModal({ detail, onClose }: AccountStatem
         icon={mode === "download" ? <Download className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
         onClick={submit}
       >
-        {mode === "download" ? `Descargar estado de cuenta · ${ext}` : "Enviar estado de cuenta"}
+        {mode === "download" ? t("submitDownload", { format: ext }) : t("submitEmail")}
       </PrincipalButton>
     </AlertModal>
   );

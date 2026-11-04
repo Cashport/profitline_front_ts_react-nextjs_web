@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import { getTasksByStatus, getTaskTabs, getTaskTypes } from "@/services/tasks/tasks";
 import { ITask, ITaskTypes } from "@/types/tasks/ITasks";
 
@@ -31,6 +32,7 @@ interface FilterState {
 }
 
 export const TaskManagerView: React.FC = () => {
+  const t = useTranslations("taskManager");
   // States
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState({
@@ -333,9 +335,11 @@ export const TaskManagerView: React.FC = () => {
           {pagination && pagination.total > pagination.limit && (
             <div className="flex items-center justify-between mt-2 px-4 py-2">
               <span className="text-sm text-gray-500">
-                Mostrando {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}{" "}
-                a {Math.min(pagination.page * pagination.limit, pagination.total)} de{" "}
-                {pagination.total} resultados
+                {t("showingRange", {
+                  from: Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total),
+                  to: Math.min(pagination.page * pagination.limit, pagination.total),
+                  total: pagination.total
+                })}
               </span>
               <AntPagination
                 current={pagination.page}
@@ -357,7 +361,7 @@ export const TaskManagerView: React.FC = () => {
   return (
     <main className="cp-page flex-1 min-h-0 overflow-hidden">
       <Header
-        title="Gestor de tareas"
+        title={t("title")}
         actionsExtra={
           <FilterTasksModal
             inHeader
@@ -374,7 +378,7 @@ export const TaskManagerView: React.FC = () => {
             <div className="flex gap-2">
               <UiSearchInput
                 className="search"
-                placeholder="Buscar tarea"
+                placeholder={t("searchPlaceholder")}
                 onChange={(event) => setSearchTerm(event.target.value)}
               />
               <GenerateActionButton
@@ -388,7 +392,7 @@ export const TaskManagerView: React.FC = () => {
             <div className="h-[var(--control-h)] flex-shrink-0">
               <PrincipalButton fullWidth customStyles={{ fontSize: 14 }}>
                 <Plus className="h-[18px] w-[18px] mr-2" />
-                Nueva tarea
+                {t("newTask")}
               </PrincipalButton>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, getIdToken } from "@/utils/api/api";
@@ -21,12 +22,12 @@ export const addHolding = async ({
     if (response.status === CREATED) {
       messageApi.open({
         type: "success",
-        content: `El holding fue creado exitosamente.`
+        content: getTranslator("shared")("services.holdingCreated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
 
@@ -55,12 +56,12 @@ export const removeHoldingById = async ({
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `El holding fue eliminado exitosamente.`
+        content: getTranslator("shared")("services.holdingDeleted")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error."
+        content: getTranslator("shared")("services.genericError")
       });
     }
 

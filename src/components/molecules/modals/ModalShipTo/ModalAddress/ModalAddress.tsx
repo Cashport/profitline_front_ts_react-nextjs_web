@@ -9,6 +9,7 @@ import {
   useState
 } from "react";
 import { Controller, UseFormSetValue, useForm } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import { InputAddress } from "@/components/atoms/inputs/InputAddress/InputAddress";
 import { CaretLeft } from "phosphor-react";
 import { SelectLocations } from "../../../selects/clients/SelectLocations/SelectLocations";
@@ -47,6 +48,7 @@ export const ModalAddress = ({ setIsModalAddressOpen, setParentFormValue }: Prop
     address: string;
     id: number;
   } | null>(null);
+  const t = useTranslations("modals.shipTo.address");
   const { showMessage } = useMessageApi();
 
   const { selectedShipToData } = useContext(ShipToContext);
@@ -127,7 +129,7 @@ export const ModalAddress = ({ setIsModalAddressOpen, setParentFormValue }: Prop
       setIsModalAddressOpen(false);
     } catch (error) {
       console.error("Failed to add address: ", error);
-      message.error("An error occurred while adding the address.");
+      message.error(t("addError"));
     }
   };
 
@@ -139,7 +141,7 @@ export const ModalAddress = ({ setIsModalAddressOpen, setParentFormValue }: Prop
           icon={<CaretLeft size={"1.45rem"} />}
           onClick={() => setIsModalAddressOpen(false)}
         >
-          Ingresar ubicación
+          {t("title")}
         </Button>
 
         <div className="modalAddress__city">
@@ -151,7 +153,7 @@ export const ModalAddress = ({ setIsModalAddressOpen, setParentFormValue }: Prop
           />
         </div>
         <Title level={5} className="titleSection">
-          Ubicaciones disponibles ya creadas
+          {t("existing")}
         </Title>
         <div className="existingLocations">
           {alreadyExistingAddresses?.length > 0 ? (
@@ -179,13 +181,11 @@ export const ModalAddress = ({ setIsModalAddressOpen, setParentFormValue }: Prop
               />
             ))
           ) : (
-            <p className="existingLocations__emptyText">
-              Aún no hay ubicaciones creadas para esta ciudad
-            </p>
+            <p className="existingLocations__emptyText">{t("empty")}</p>
           )}
         </div>
         <Title level={5} className="titleSection">
-          Crear ubicación del Ship To
+          {t("create")}
         </Title>
         <InputAddress control={control} errors={errors} disabled={selectedAddress !== null} />
 
@@ -195,7 +195,7 @@ export const ModalAddress = ({ setIsModalAddressOpen, setParentFormValue }: Prop
             onClick={handleSubmit(onSubmitLocation)}
             className="acceptButton -address"
           >
-            Guardar ubicación
+            {t("save")}
           </Button>
         </div>
       </form>

@@ -1,8 +1,11 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 
 import { BOT_STATUS_META } from "../../constants";
+import { useBotLabels } from "../../hooks/useBotLabels";
 import { BotStatusFilter, IBotsSummary } from "../../types/automations";
 
 // Orden pedido por producto: Operativo, Con fallas, En revisión, Ejecutando.
@@ -27,6 +30,8 @@ export function AutomationStatusCards({
   statusFilter,
   onStatusClick
 }: AutomationStatusCardsProps) {
+  const t = useTranslations("dataQuality.bots");
+  const botLabels = useBotLabels();
   const isTotalActive = statusFilter === "all";
 
   return (
@@ -41,7 +46,7 @@ export function AutomationStatusCards({
             : "bg-cashport-gray-lighter text-cashport-black hover:bg-[#EFEFEF]"
         )}
       >
-        <span className="block truncate text-sm font-light">Total de bots</span>
+        <span className="block truncate text-sm font-light">{t("totalBots")}</span>
         <span className="block truncate text-2xl font-medium">{summary.total}</span>
       </button>
 
@@ -61,7 +66,7 @@ export function AutomationStatusCards({
                 : "bg-cashport-gray-lighter text-cashport-black hover:bg-[#EFEFEF]"
             )}
           >
-            <span className="block truncate text-sm font-light">{meta.label}</span>
+            <span className="block truncate text-sm font-light">{botLabels.status(key)}</span>
             <span
               className={cn(
                 "block truncate text-2xl font-medium",

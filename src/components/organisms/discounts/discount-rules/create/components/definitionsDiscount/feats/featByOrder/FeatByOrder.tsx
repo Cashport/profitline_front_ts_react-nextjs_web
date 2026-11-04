@@ -10,6 +10,7 @@ import { DiscountSchema } from "../../../../resolvers/generalResolver";
 import { typesWithMinByOrder } from "@/components/organisms/discounts/constants/discountTypes";
 import useDiscountFeats from "../hooks/useDiscountFeats";
 import { useMemo } from "react";
+import { useTranslations } from "use-intl";
 
 const { Title, Text } = Typography;
 
@@ -20,6 +21,7 @@ type FeatByOrderProps = {
 };
 
 export default function FeatByOrder({ discountType, form, statusForm }: FeatByOrderProps) {
+  const t = useTranslations("discounts.byOrder");
   const {
     formState: { errors },
     control,
@@ -36,23 +38,23 @@ export default function FeatByOrder({ discountType, form, statusForm }: FeatByOr
   const handleGetLabels = (discountType: number) => {
     if (discountType === 1) {
       return {
-        unitsFrom: "Cantidad mínima",
-        unitsTo: "Cantidad máxima"
+        unitsFrom: t("labels.minQuantity"),
+        unitsTo: t("labels.maxQuantity")
       };
     } else if (discountType === 2) {
       return {
-        unitsFrom: "Monto mínimo",
-        unitsTo: "Monto máximo"
+        unitsFrom: t("labels.minAmount"),
+        unitsTo: t("labels.maxAmount")
       };
     } else if (discountType === 3) {
       return {
-        unitsFrom: "Minimo de Marcas",
-        unitsTo: "Mínimo de unidades por Marca"
+        unitsFrom: t("labels.minBrands"),
+        unitsTo: t("labels.minUnitsPerBrand")
       };
     } else {
       return {
-        unitsFrom: "Minimo de SKU's",
-        unitsTo: "Mínimo de unidades por SKU"
+        unitsFrom: t("labels.minSkus"),
+        unitsTo: t("labels.minUnitsPerSku")
       };
     }
   };
@@ -67,7 +69,7 @@ export default function FeatByOrder({ discountType, form, statusForm }: FeatByOr
       {typesWithMinByOrder.includes(discountType) && (
         <>
           <Title style={{ marginBottom: 0 }} level={5}>
-            Cantidad mínima de orden
+            {t("minOrderQuantity")}
           </Title>
           <InputForm
             control={control}
@@ -90,8 +92,8 @@ export default function FeatByOrder({ discountType, form, statusForm }: FeatByOr
         className={styles.radioGroup}
         disabled={statusForm === "review"}
       >
-        <Radio value={1}>Descuento aplicable en porcentaje</Radio>
-        <Radio value={2}>Descuento aplicable en valor fijo</Radio>
+        <Radio value={1}>{t("percentage")}</Radio>
+        <Radio value={2}>{t("fixedAmount")}</Radio>
       </Radio.Group>
       <Text type="danger" hidden={!errors?.computation_type}>
         {errors?.computation_type?.message}
@@ -101,7 +103,7 @@ export default function FeatByOrder({ discountType, form, statusForm }: FeatByOr
           <Row>
             <Col span={8}>{handleGetLabels(watch("discount_type") || 0).unitsFrom}</Col>
             <Col span={8}>{handleGetLabels(watch("discount_type") || 0).unitsTo}</Col>
-            <Col span={8}>Descuento a aplicar</Col>
+            <Col span={8}>{t("discountToApply")}</Col>
           </Row>
           <hr />
           {fields.map((_, index) => (
@@ -130,7 +132,7 @@ export default function FeatByOrder({ discountType, form, statusForm }: FeatByOr
               icon={<Plus />}
               iconPosition="end"
             >
-              Agregar rango
+              {t("addRange")}
             </PrincipalButton>
           </Flex>
         )}

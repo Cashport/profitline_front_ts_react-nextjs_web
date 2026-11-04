@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ConfigProvider } from "antd";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { MessageProvider } from "@/context/MessageContext";
 import { Poppins } from "next/font/google";
@@ -10,7 +9,7 @@ import { UnsavedChangesProvider } from "@/context/UnsavedChangesContext";
 import localFont from "next/font/local"; // Import localFont from next/font/local
 
 import Loader from "@/components/atoms/loaders/loader";
-import theme from "@/theme/themeConfig";
+import { I18nProvider } from "@/i18n/I18nProvider";
 
 // Import the styles provided by the react-pdf-viewer packages
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -60,11 +59,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   }, []);
 
   return (
-    <ConfigProvider theme={theme}>
-      <html lang="es" className={`${poppins.variable} ${aptosNarrow.variable}`}>
-        <QueryClientProvider client={queryClient}>
-          <body className={poppins.className} suppressHydrationWarning>
-            <AntdRegistry>
+    <html lang="es" className={`${poppins.variable} ${aptosNarrow.variable}`}>
+      <QueryClientProvider client={queryClient}>
+        <body className={poppins.className} suppressHydrationWarning>
+          <AntdRegistry>
+            {/* Tema y textos de Ant Design viven en I18nProvider: dependen del idioma. */}
+            <I18nProvider fallback={<Loader />}>
               {loading ? (
                 <Loader />
               ) : (
@@ -74,10 +74,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   </ModalProvider>
                 </MessageProvider>
               )}
-            </AntdRegistry>
-          </body>
-        </QueryClientProvider>
-      </html>
-    </ConfigProvider>
+            </I18nProvider>
+          </AntdRegistry>
+        </body>
+      </QueryClientProvider>
+    </html>
   );
 }

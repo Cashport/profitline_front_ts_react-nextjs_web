@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal, Select, Spin } from "antd";
+import { useTranslations } from "use-intl";
 import { ImagePlus, Minus, Package, Plus, Trash2, X } from "lucide-react";
 import { useMessageApi } from "@/context/MessageContext";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -34,6 +35,8 @@ const labelClass = "text-[11.5px] font-medium text-[#6b6b6b]";
 const hasImage = (src?: string | null): src is string => !!src && src !== ".";
 
 export default function ProductPackFormModal({ open, packId, onClose, onSaved }: Props) {
+  const t = useTranslations("marketAdmin.packs.form");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const isEdit = packId !== null;
   const { data: pack, isLoading: isLoadingPack } = useProductPackDetail(packId);
@@ -111,15 +114,19 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
   const totalUnits = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const errors = {
-    sku: !sku.trim() ? "El SKU es obligatorio" : sku.length > 100 ? "Máximo 100 caracteres" : "",
-    description: !description.trim()
-      ? "La descripción es obligatoria"
-      : description.length > 255
-        ? "Máximo 255 caracteres"
+    sku: !sku.trim()
+      ? t("validation.skuRequired")
+      : sku.length > 100
+        ? t("validation.maxLength", { max: 100 })
         : "",
-    line: lineId === null ? "Selecciona una línea" : "",
-    category: categoryId === null ? "Selecciona una categoría" : "",
-    items: items.length === 0 ? "Agrega al menos un producto" : ""
+    description: !description.trim()
+      ? t("validation.descriptionRequired")
+      : description.length > 255
+        ? t("validation.maxLength", { max: 255 })
+        : "",
+    line: lineId === null ? t("selectLine") : "",
+    category: categoryId === null ? t("selectCategory") : "",
+    items: items.length === 0 ? t("validation.itemsRequired") : ""
   };
   const isValid = Object.values(errors).every((e) => !e);
 
@@ -181,19 +188,16 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
           try {
             await updateProductPack(created.id, body, imageFile);
           } catch {
-            showMessage("warning", "El pack se creó, pero no se pudo subir la imagen.");
+            showMessage("warning", t("feedback.imageUploadError"));
           }
         }
       }
-      showMessage(
-        "success",
-        isEdit ? "Pack actualizado correctamente." : "Pack creado correctamente."
-      );
+      showMessage("success", isEdit ? t("feedback.updated") : t("feedback.created"));
       onSaved();
       onClose();
     } catch (error) {
       const message = error instanceof Error && error.message ? error.message : "";
-      showMessage("error", message || "Ocurrió un error al guardar el pack.");
+      showMessage("error", message || t("feedback.saveError"));
     } finally {
       setSaving(false);
     }
@@ -220,17 +224,14 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[17px] font-semibold text-[#141414]">
-              {isEdit ? "Editar pack" : "Nuevo pack de productos"}
+              {isEdit ? t("editTitle") : t("createTitle")}
             </p>
-            <p className="text-[12px] text-[#6b6b6b]">
-              Agrupa productos del catálogo en un solo SKU. El precio se calcula con la lista de
-              precios de cada cliente.
-            </p>
+            <p className="text-[12px] text-[#6b6b6b]">{t("subtitle")}</p>
           </div>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8a8a8a] hover:bg-[#f2f2f2] hover:text-[#141414]"
-            aria-label="Cerrar"
+            aria-label={tCommon("actions.close")}
           >
             <X size={18} />
           </button>
@@ -265,12 +266,12 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
                 onClick={() => fileInputRef.current?.click()}
                 className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#e3e3e3] bg-white text-[13px] font-medium text-[#4a4a4a] transition-colors hover:text-[#141414]"
               >
-                <ImagePlus size={15} /> {imagePreview ? "Cambiar imagen" : "Subir imagen"}
+                <ImagePlus size={15} /> {imagePreview ? t("changeImage") : t("uploadImage")}
               </button>
 
               {!isEdit && (
                 <label className="mt-1 flex cursor-pointer items-center justify-between rounded-lg bg-[#f7f7f7] px-3 py-2.5">
-                  <span className="text-[13px] text-[#141414]">Activo al crear</span>
+                  <span className="text-[13px] text-[#141414]">{t("activeOnCreate")}</span>
                   <input
                     type="checkbox"
                     checked={isAvailable}
@@ -284,32 +285,32 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
             <div className="flex min-w-0 flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className={labelClass}>SKU del pack</label>
+                  <label className={labelClass}>{t("sku")}</label>
                   <input
                     value={sku}
                     maxLength={100}
                     onChange={(e) => setSku(e.target.value)}
-                    placeholder="Ej. PACK-ALAS-001"
+                    placeholder={t("skuPlaceholder")}
                     className={inputClass}
                   />
                   {fieldError(errors.sku)}
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className={labelClass}>Nombre visible</label>
+                  <label className={labelClass}>{t("visibleName")}</label>
                   <input
                     value={description}
                     maxLength={255}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Ej. Kit rutina antiedad"
+                    placeholder={t("visibleNamePlaceholder")}
                     className={inputClass}
                   />
                   {fieldError(errors.description)}
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className={labelClass}>Línea</label>
+                  <label className={labelClass}>{t("line")}</label>
                   <Select
                     value={lineId ?? undefined}
-                    placeholder="Selecciona una línea"
+                    placeholder={t("selectLine")}
                     showSearch
                     optionFilterProp="label"
                     options={lines.map((l) => ({ value: l.id, label: l.description }))}
@@ -322,12 +323,10 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
                   {fieldError(errors.line)}
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className={labelClass}>Categoría</label>
+                  <label className={labelClass}>{t("category")}</label>
                   <Select
                     value={categoryId ?? undefined}
-                    placeholder={
-                      lineId === null ? "Primero elige la línea" : "Selecciona una categoría"
-                    }
+                    placeholder={lineId === null ? t("selectLineFirst") : t("selectCategory")}
                     disabled={lineId === null}
                     showSearch
                     optionFilterProp="label"
@@ -342,24 +341,21 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
               <div className="h-px bg-[#ececec]" />
 
               <div className="flex items-center justify-between">
-                <p className="text-[13.5px] font-semibold text-[#141414]">Productos del pack</p>
+                <p className="text-[13.5px] font-semibold text-[#141414]">{t("items")}</p>
                 <p className="text-[11px] text-[#8a8a8a]">
-                  {items.length} {items.length === 1 ? "producto" : "productos"} · {totalUnits}{" "}
-                  {totalUnits === 1 ? "unidad" : "unidades"}
+                  {t("itemsSummary", { products: items.length, units: totalUnits })}
                 </p>
               </div>
 
               <Select<number>
                 showSearch
                 value={null as unknown as number}
-                placeholder="Buscar producto por SKU o nombre…"
+                placeholder={t("searchProduct")}
                 filterOption={false}
                 searchValue={productSearch}
                 onSearch={setProductSearch}
                 onSelect={handleAddProduct}
-                notFoundContent={
-                  isLoadingProducts ? <Spin size="small" /> : "No se encontraron productos"
-                }
+                notFoundContent={isLoadingProducts ? <Spin size="small" /> : t("noProducts")}
                 options={productOptions}
                 className="h-9 w-full"
               />
@@ -368,8 +364,8 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
               {items.length > 0 && (
                 <div className="overflow-hidden rounded-[10px] border border-[#ececec]">
                   <div className="grid h-8 grid-cols-[minmax(0,1fr)_120px_36px] items-center gap-3 border-b border-[#ececec] px-4 text-[12px] font-semibold text-[#141414]">
-                    <span>Producto</span>
-                    <span className="text-right">Cantidad</span>
+                    <span>{t("product")}</span>
+                    <span className="text-right">{tCommon("fields.quantity")}</span>
                     <span />
                   </div>
                   {items.map((item) => (
@@ -401,7 +397,7 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
                           onClick={() => handleQuantity(item.productId, item.quantity - 1)}
                           disabled={item.quantity <= 1}
                           className="flex h-7 w-7 items-center justify-center rounded-md text-[#141414] hover:bg-[#f2f2f2] disabled:text-[#c4c4c4] disabled:hover:bg-transparent"
-                          aria-label="Restar"
+                          aria-label={t("decrease")}
                         >
                           <Minus size={14} />
                         </button>
@@ -415,7 +411,7 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
                         <button
                           onClick={() => handleQuantity(item.productId, item.quantity + 1)}
                           className="flex h-7 w-7 items-center justify-center rounded-md text-[#141414] hover:bg-[#f2f2f2]"
-                          aria-label="Sumar"
+                          aria-label={t("increase")}
                         >
                           <Plus size={14} />
                         </button>
@@ -425,7 +421,7 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
                           setItems((prev) => prev.filter((p) => p.productId !== item.productId))
                         }
                         className="flex h-7 w-7 items-center justify-center rounded-md text-[#8a8a8a] hover:bg-[#f2f2f2] hover:text-[#e5262b]"
-                        aria-label="Quitar producto"
+                        aria-label={t("removeProduct")}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -442,14 +438,18 @@ export default function ProductPackFormModal({ open, packId, onClose, onSaved }:
             onClick={onClose}
             className="h-10 rounded-[10px] px-4 text-[13px] font-semibold text-[#141414] hover:bg-[#f2f2f2]"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving || (isEdit && isLoadingPack)}
             className="h-10 rounded-[10px] bg-[#cbe71e] px-5 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#9bb514] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {saving ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear pack"}
+            {saving
+              ? tCommon("status.saving")
+              : isEdit
+                ? tCommon("actions.saveChanges")
+                : t("create")}
           </button>
         </div>
       </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import PersonBadge from "@/modules/walletModule/components/shared/person-badge";
 import { corto, fmtM, pct } from "@/modules/walletModule/utils/format";
@@ -13,21 +15,19 @@ const TH = "bg-cp-surface px-3 py-3 text-left text-[13.5px] font-semibold text-c
 
 /** Los ocho clientes con más saldo vencido que nadie ha tocado. */
 export default function TopClientsPanel({ clientes }: TopClientsPanelProps) {
+  const t = useTranslations("controlTower.topCustomers");
+  const tCommon = useTranslations("common");
   return (
-    <PanelCard
-      title="Clientes con más saldo sin conciliar"
-      hint="vencido sin acuerdo ni novedad"
-      flush
-    >
+    <PanelCard title={t("title")} hint={t("hint")} flush>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr className="border-b border-cp-line">
-              <th className={TH}>Cliente</th>
-              <th className={TH}>Ejecutivo</th>
-              <th className={`${TH} text-right`}>Vencido</th>
-              <th className={`${TH} text-right`}>Sin conciliar</th>
-              <th className={`${TH} text-right`}>Cubierto</th>
+              <th className={TH}>{tCommon("fields.customer")}</th>
+              <th className={TH}>{t("collector")}</th>
+              <th className={`${TH} text-right`}>{t("pastDue")}</th>
+              <th className={`${TH} text-right`}>{t("unreconciled")}</th>
+              <th className={`${TH} text-right`}>{t("covered")}</th>
             </tr>
           </thead>
 
@@ -35,7 +35,7 @@ export default function TopClientsPanel({ clientes }: TopClientsPanelProps) {
             {clientes.length === 0 ? (
               <tr>
                 <td colSpan={5} className="p-9 text-center text-muted-foreground">
-                  Sin clientes con vencido bajo estos filtros.
+                  {t("empty")}
                 </td>
               </tr>
             ) : (

@@ -8,14 +8,13 @@ import localeData from "dayjs/plugin/localeData";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import "dayjs/locale/es";
+import { useTranslations } from "use-intl";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.locale("es");
 
 import { API } from "@/utils/api/api";
 import { InputDate } from "@/components/atoms/inputs/InputDate/InputDate";
@@ -35,6 +34,8 @@ const ExpirationSection: React.FC<ExpirationSectionProps> = ({
   mutateSupplierInfo,
   expirationDate
 }) => {
+  const t = useTranslations("suppliers.drawer");
+  const tCommon = useTranslations("common");
   const [loading, setLoading] = React.useState(false);
   const [newExpirationDate, setNewExpirationDate] = React.useState<dayjs.Dayjs | null>(null);
   const handleSave = async () => {
@@ -64,16 +65,16 @@ const ExpirationSection: React.FC<ExpirationSectionProps> = ({
   return (
     <Flex vertical gap={16} style={{ width: "100%" }}>
       <ColumnText
-        title="Vencimiento"
+        title={t("expiration")}
         icon={<Files size={16} color="#7B7B7B" />}
         content={
           <InputDate
-            titleInput="Vencimiento"
+            titleInput={t("expiration")}
             value={newExpirationDate ? dayjs(newExpirationDate) : undefined}
             onChange={(date) => setNewExpirationDate(date)}
             hiddenTitle
             customStyleContainer={{ width: "100%" }}
-            placeholder="Seleccionar fecha de expiración"
+            placeholder={t("expirationPlaceholder")}
           />
         }
       />
@@ -83,7 +84,7 @@ const ExpirationSection: React.FC<ExpirationSectionProps> = ({
         disabled={newExpirationDate?.isSame(dayjs.utc(expirationDate))}
         style={{ width: "fit-content", alignSelf: "flex-end" }}
       >
-        Guardar
+        {tCommon("actions.save")}
       </Button>
     </Flex>
   );

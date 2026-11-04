@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Flex, Modal, Select, Typography } from "antd";
 import { Plus } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
@@ -29,6 +30,7 @@ export function ModalUploadBalanceFile({
   record,
   onUploaded
 }: ModalUploadBalanceFileProps) {
+  const t = useTranslations("balances.upload");
   const { showMessage } = useMessageApi();
   const [tipoNovedadId, setTipoNovedadId] = useState<number | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -50,7 +52,7 @@ export function ModalUploadBalanceFile({
 
   const isValidSize = (file: File) => {
     if (file.size / (1024 * 1024) > MAX_FILE_MB) {
-      showMessage("error", "El archivo es demasiado grande. Sube un archivo de menos de 30 MB.");
+      showMessage("error", t("tooLarge", { max: MAX_FILE_MB }));
       return false;
     }
     return true;
@@ -60,7 +62,7 @@ export function ModalUploadBalanceFile({
     const accepted = incoming.filter((file) => {
       if (!isValidSize(file)) return false;
       if (files.some((existing) => existing.name === file.name)) {
-        showMessage("error", "Ya existe un archivo con el mismo nombre");
+        showMessage("error", t("duplicate"));
         return false;
       }
       return true;
@@ -95,12 +97,11 @@ export function ModalUploadBalanceFile({
         file: files[0],
         clientDocuments: clientDocuments.trim() || undefined
       });
-      showMessage("success", "Soporte cargado correctamente");
+      showMessage("success", t("success"));
       onUploaded?.();
       onClose();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Ocurrió un error al cargar el soporte";
+      const message = error instanceof Error ? error.message : t("error");
       showMessage("error", message);
     } finally {
       setIsLoading(false);
@@ -113,10 +114,10 @@ export function ModalUploadBalanceFile({
       open={isOpen}
       width={600}
       onCancel={onClose}
-      title={<Title level={4}>Cargar soporte</Title>}
+      title={<Title level={4}>{t("title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Cargar soporte"
+          titleConfirm={t("title")}
           onClose={onClose}
           handleOk={handleOk}
           isConfirmDisabled={
@@ -129,9 +130,9 @@ export function ModalUploadBalanceFile({
     >
       <Flex vertical gap="1rem" style={{ marginBottom: "1rem" }}>
         <Flex vertical gap="0.25rem">
-          <h4 className="inputTitle">Tipo de novedad</h4>
+          <h4 className="inputTitle">{t("type")}</h4>
           <Select
-            placeholder="Selecciona el tipo de novedad"
+            placeholder={t("typePlaceholder")}
             style={{ width: "100%", height: 38 }}
             options={motives?.map((motive) => ({ value: motive.id, label: motive.name })) || []}
             loading={motivesLoading}
@@ -141,7 +142,7 @@ export function ModalUploadBalanceFile({
         </Flex>
 
         <Flex vertical gap="0.25rem">
-          <h4 className="inputTitle">Soporte</h4>
+          <h4 className="inputTitle">{t("support")}</h4>
 
           <div className={styles.documents}>
             {/* first slot: empty -> opens picker; filled -> shows file + delete */}
@@ -187,17 +188,17 @@ export function ModalUploadBalanceFile({
         </Flex>
 
         <Flex vertical gap="0.25rem">
-          <h4 className="inputTitle">Observación</h4>
+          <h4 className="inputTitle">{t("observation")}</h4>
           <textarea
             className={styles.textarea}
             value={observation}
             onChange={(e) => setObservation(e.target.value)}
-            placeholder="Ingresar una observación"
+            placeholder={t("observationPlaceholder")}
             rows={2}
           />
         </Flex>
         <Flex vertical gap="0.25rem">
-          <h4 className="inputTitle">Documento del cliente *</h4>
+          <h4 className="inputTitle">{t("clientDocument")}</h4>
           <textarea
             className={styles.textarea}
             value={clientDocuments}

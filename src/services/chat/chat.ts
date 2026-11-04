@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 import { API, ApiError } from "@/utils/api/api";
 import {
@@ -84,7 +85,7 @@ export const sendMessage = async (customerId: string, message: string): Promise<
     if (error instanceof ApiError && error?.data?.message) {
       const res = error.data as { message: string };
       if (res?.message) {
-        throw new Error(res.message || "Error sending message");
+        throw new Error(res.message || getTranslator("shared")("services.sendMessageError"));
       }
     }
     throw error;

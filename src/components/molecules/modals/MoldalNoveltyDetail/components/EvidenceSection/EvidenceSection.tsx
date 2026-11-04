@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { IconLabel } from "@/components/atoms/IconLabel/IconLabel";
 import { FileText, PaperclipHorizontal } from "phosphor-react";
 import { Typography, Tag } from "antd";
+import { useTranslations } from "use-intl";
 import "./evidencesection.scss";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
 
@@ -16,6 +17,7 @@ export const EvidenceSection: React.FC<EvidenceSectionProps> = ({
   evidenceComments,
   evidenceFiles
 }) => {
+  const t = useTranslations("modals.noveltyDetail.evidence");
   const [urlStep, setUrlStep] = useState<string | undefined>(undefined);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -31,7 +33,7 @@ export const EvidenceSection: React.FC<EvidenceSectionProps> = ({
 
   return (
     <div className="evidence-section">
-      <IconLabel icon={<FileText size={20} />} text="Evidencia" />
+      <IconLabel icon={<FileText size={20} />} text={t("title")} />
       <div className="evidence-content">
         <Paragraph>{evidenceComments}</Paragraph>
         <div className="attachments">

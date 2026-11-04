@@ -2,6 +2,7 @@
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { useTranslations } from "use-intl";
 import { IProductInventoryItem } from "@/types/marketAdmin/IMarketAdmin";
 
 dayjs.extend(utc);
@@ -22,28 +23,29 @@ const formatVence = (date: string) => {
 };
 
 export default function ProductLotes({ lotes, loading = false }: Props) {
+  const t = useTranslations("marketAdmin.productDetail.lots");
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-base font-bold text-[#141414]">Lotes</p>
+        <p className="text-base font-bold text-[#141414]">{t("title")}</p>
         {!loading && (
-          <span className="text-[13px] text-[#999999]">
-            {lotes.length} lote{lotes.length !== 1 ? "s" : ""}
-          </span>
+          <span className="text-[13px] text-[#999999]">{t("count", { count: lotes.length })}</span>
         )}
       </div>
 
       {loading ? (
-        <p className="text-sm text-[#999999]">Cargando lotes…</p>
+        <p className="text-sm text-[#999999]">{t("loading")}</p>
       ) : lotes.length === 0 ? (
-        <p className="text-sm text-[#999999]">Sin lotes disponibles.</p>
+        <p className="text-sm text-[#999999]">{t("empty")}</p>
       ) : (
         <div>
           <div className={`${gridCols} pb-2`}>
-            <span className="text-[13px] font-bold text-[#141414]">Lote</span>
-            <span className="text-[13px] font-bold text-[#141414]">Bodega</span>
-            <span className="text-[13px] font-bold text-[#141414]">Vence</span>
-            <span className="text-[13px] font-bold text-[#141414] text-right">Unidades</span>
+            <span className="text-[13px] font-bold text-[#141414]">{t("columns.lot")}</span>
+            <span className="text-[13px] font-bold text-[#141414]">{t("columns.warehouse")}</span>
+            <span className="text-[13px] font-bold text-[#141414]">{t("columns.expires")}</span>
+            <span className="text-[13px] font-bold text-[#141414] text-right">
+              {t("columns.units")}
+            </span>
           </div>
           {lotes.map((lote) => (
             <div

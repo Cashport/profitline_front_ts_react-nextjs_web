@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 import { IClient } from "@/types/clients/IClients";
 import { useClients } from "@/hooks/useClients";
 import { useParams } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import "../filterCascader.scss";
 
@@ -28,6 +29,8 @@ interface FilterClientsProps {
 }
 
 export const FilterClients = ({ setFilterClients }: FilterClientsProps) => {
+  const t = useTranslations("components.filters");
+  const tCommon = useTranslations("common");
   const { id: idProject } = useParams<{ id: string }>();
 
   const { data: filterOptions } = useClients({
@@ -157,19 +160,25 @@ export const FilterClients = ({ setFilterClients }: FilterClientsProps) => {
       if (client.radication_type) {
         switch (client.radication_type) {
           case 1:
-            radication_type = { value: client.radication_type, label: "email" };
+            radication_type = { value: client.radication_type, label: t("radicationTypes.email") };
             break;
           case 2:
-            radication_type = { value: client.radication_type, label: "web" };
+            radication_type = { value: client.radication_type, label: t("radicationTypes.web") };
             break;
           case 3:
-            radication_type = { value: client.radication_type, label: "radian" };
+            radication_type = { value: client.radication_type, label: t("radicationTypes.radian") };
             break;
           case 4:
-            radication_type = { value: client.radication_type, label: "fisica" };
+            radication_type = {
+              value: client.radication_type,
+              label: t("radicationTypes.physical")
+            };
             break;
           case 5:
-            radication_type = { value: client.radication_type, label: "fisica y web" };
+            radication_type = {
+              value: client.radication_type,
+              label: t("radicationTypes.physicalAndWeb")
+            };
             break;
         }
         radicationTypeSet.add(JSON.stringify(radication_type));
@@ -222,35 +231,35 @@ export const FilterClients = ({ setFilterClients }: FilterClientsProps) => {
   const options: Option[] = [
     {
       value: "cities",
-      label: "Ciudad",
+      label: t("labels.city"),
       isLeaf: false,
       disableCheckbox: true,
       children: cities
     },
     {
       value: "holdings",
-      label: "Holding",
+      label: t("labels.holding"),
       isLeaf: false,
       disableCheckbox: true,
       children: holdings
     },
     {
       value: "status",
-      label: "Estado",
+      label: t("labels.status"),
       isLeaf: false,
       disableCheckbox: true,
       children: status
     },
     {
       value: "risks",
-      label: "Riesgo",
+      label: t("labels.risk"),
       isLeaf: false,
       disableCheckbox: true,
       children: risks
     },
     {
       value: "radicationTypes",
-      label: "Tipo de radicado",
+      label: t("labels.radicationTypeShort"),
       isLeaf: false,
       disableCheckbox: true,
       children: radicationTypes
@@ -264,7 +273,7 @@ export const FilterClients = ({ setFilterClients }: FilterClientsProps) => {
       multiple
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomLeft"
       options={options}
       onChange={onChange}

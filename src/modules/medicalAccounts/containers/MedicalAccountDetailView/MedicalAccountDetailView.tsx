@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Popconfirm } from "antd";
 import { mutate as globalMutate } from "swr";
 import { Check, FileCheck2, FileUp, Pencil, Send, ShieldCheck, Trash, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { useMedicalAccountDetail } from "../../hooks/useMedicalAccountDetail";
 import { MedicalAccountStatusTag } from "../../components/MedicalAccountStatusTag/MedicalAccountStatusTag";
@@ -85,6 +86,8 @@ const primaryButton =
   "inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:opacity-50";
 
 export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailViewProps) {
+  const t = useTranslations("medicalAccounts.detail");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { account, isLoading, error, mutate } = useMedicalAccountDetail(accountId);
   const { showMessage } = useMessageApi();
@@ -103,13 +106,10 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
     setIsDeleting(true);
     try {
       await deleteMedicalAccount(account.id);
-      showMessage("success", "Cuenta médica eliminada correctamente.");
-      router.push("/cuentas-medicas");
+      showMessage("success", t("deleteSuccess"));
+      router.push("/medical-accounts");
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al eliminar la cuenta."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("deleteError"));
       setIsDeleting(false);
     }
   }, [account, router, showMessage]);
@@ -139,13 +139,10 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
     setIsBusy(true);
     try {
       const response = await changeMedicalAccountStatus(account.id, "PENDIENTE_AUDITORIA");
-      showMessage("success", "Cuenta enviada a pendiente por auditar.");
+      showMessage("success", t("sendToAuditSuccess"));
       handleDetailUpdate(response.data);
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al enviar a auditar."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("sendToAuditError"));
     } finally {
       setIsBusy(false);
     }
@@ -156,13 +153,10 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
     setIsBusy(true);
     try {
       const response = await auditMedicalAccount(account.id);
-      showMessage("success", "Cuenta médica auditada correctamente.");
+      showMessage("success", t("auditSuccess"));
       handleDetailUpdate(response.data);
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al auditar la cuenta."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("auditError"));
     } finally {
       setIsBusy(false);
     }
@@ -196,15 +190,12 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
     setIsSaving(true);
     try {
       const response = await updateMedicalAccount(account.id, payload);
-      showMessage("success", "Cuenta médica actualizada correctamente.");
+      showMessage("success", t("updateSuccess"));
       handleDetailUpdate(response.data);
       setIsEditing(false);
       setForm(EMPTY_FORM);
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al actualizar la cuenta."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("updateError"));
     } finally {
       setIsSaving(false);
     }
@@ -219,9 +210,9 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
     </main>
   );
 
-  if (isLoading && !account) return renderMessage("Cargando cuenta médica…");
-  if (error) return renderMessage("No se pudo cargar la cuenta médica.");
-  if (!account) return renderMessage("Cuenta médica no encontrada.");
+  if (isLoading && !account) return renderMessage(t("loading"));
+  if (error) return renderMessage(t("loadError"));
+  if (!account) return renderMessage(t("notFound"));
 
   const action = getAction(account.status_code);
 
@@ -236,14 +227,14 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
             className={primaryButton}
           >
             <Send className="h-3.5 w-3.5" />
-            {isBusy ? "Enviando…" : "Enviar a pendiente auditar"}
+            {isBusy ? tCommon("status.sending") : t("actions.sendToAudit")}
           </button>
         );
       case "AUDIT":
         return (
           <button type="button" onClick={handleAudit} disabled={isBusy} className={primaryButton}>
             <ShieldCheck className="h-3.5 w-3.5" />
-            {isBusy ? "Auditando…" : "Auditar"}
+            {isBusy ? t("actions.auditing") : t("actions.audit")}
           </button>
         );
       case "INVOICE":
@@ -254,14 +245,14 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
             className={primaryButton}
           >
             <FileUp className="h-3.5 w-3.5" />
-            Facturar
+            {t("actions.invoice")}
           </button>
         );
       case "RADICATE":
         return (
           <button type="button" onClick={() => setShowRadiate(true)} className={primaryButton}>
             <FileCheck2 className="h-3.5 w-3.5" />
-            Radicar
+            {t("actions.submit")}
           </button>
         );
       default:
@@ -284,7 +275,7 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
                   className={primaryButton}
                 >
                   <Check className="h-3.5 w-3.5" />
-                  {isSaving ? "Guardando…" : "Guardar"}
+                  {isSaving ? tCommon("status.saving") : tCommon("actions.save")}
                 </button>
                 <button
                   type="button"
@@ -293,7 +284,7 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
                   className={barButton}
                 >
                   <X className="h-3.5 w-3.5" />
-                  Cancelar
+                  {tCommon("actions.cancel")}
                 </button>
               </>
             ) : (
@@ -302,14 +293,14 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
 
                 <button type="button" onClick={handleStartEdit} className={barButton}>
                   <Pencil className="h-3.5 w-3.5" />
-                  Editar
+                  {tCommon("actions.edit")}
                 </button>
 
                 <Popconfirm
-                  title="Eliminar cuenta médica"
-                  description="¿Seguro que deseas eliminar esta cuenta médica?"
-                  okText="Eliminar"
-                  cancelText="Cancelar"
+                  title={t("deleteConfirm.title")}
+                  description={t("deleteConfirm.description")}
+                  okText={tCommon("actions.delete")}
+                  cancelText={tCommon("actions.cancel")}
                   okButtonProps={{ danger: true }}
                   onConfirm={handleDelete}
                 >
@@ -319,7 +310,7 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
                     className="inline-flex items-center gap-1.5 rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                   >
                     <Trash className="h-3.5 w-3.5" />
-                    {isDeleting ? "Eliminando…" : "Eliminar"}
+                    {isDeleting ? t("actions.deleting") : tCommon("actions.delete")}
                   </button>
                 </Popconfirm>
               </>
@@ -361,7 +352,7 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
         {/* Status tracking timeline */}
         <div className="border-b border-gray-100">
           <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/40 px-6 py-3">
-            <span className="text-[13px] font-semibold text-gray-600">Historial</span>
+            <span className="text-[13px] font-semibold text-gray-600">{t("history")}</span>
           </div>
           <MedicalAccountTimeline accountId={account.id} currentStatusCode={account.status_code} />
         </div>

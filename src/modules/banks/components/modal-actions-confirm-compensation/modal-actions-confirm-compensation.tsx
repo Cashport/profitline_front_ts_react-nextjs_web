@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Flex, Modal, Typography, message } from "antd";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "use-intl";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -24,6 +25,8 @@ interface Props {
 }
 
 const ModalActionsConfirmCompensation = ({ isOpen, onClose, selectedRow, onSuccess }: Props) => {
+  const t = useTranslations("banks.confirmCompensation");
+  const tCommon = useTranslations("common");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: { id_erp: "", id_erp_compensation: "" }
@@ -47,11 +50,11 @@ const ModalActionsConfirmCompensation = ({ isOpen, onClose, selectedRow, onSucce
         id_erp: values.id_erp,
         id_erp_compensation: values.id_erp_compensation
       });
-      message.success("Compensación confirmada correctamente");
+      message.success(t("success"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al confirmar la compensación");
+      message.error(error instanceof Error ? error.message : t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -68,16 +71,20 @@ const ModalActionsConfirmCompensation = ({ isOpen, onClose, selectedRow, onSucce
       destroyOnClose
     >
       <Typography.Title level={4} className="modalActionsConfirmCompensation__title">
-        Confirmar compensación
+        {t("title")}
       </Typography.Title>
       <Flex vertical gap="1rem" className="modalActionsConfirmCompensation__body">
-        <InputForm titleInput="Id pago" nameInput="id_erp" control={control} />
-        <InputForm titleInput="Id compensación" nameInput="id_erp_compensation" control={control} />
+        <InputForm titleInput={t("paymentId")} nameInput="id_erp" control={control} />
+        <InputForm
+          titleInput={t("compensationId")}
+          nameInput="id_erp_compensation"
+          control={control}
+        />
       </Flex>
       <div className="modalActionsConfirmCompensation__footer">
-        <SecondaryButton onClick={onClose}>No confirmar</SecondaryButton>
+        <SecondaryButton onClick={onClose}>{t("dontConfirm")}</SecondaryButton>
         <PrincipalButton onClick={handleSubmit(onSubmit)} loading={isSubmitting}>
-          Confirmar
+          {tCommon("actions.confirm")}
         </PrincipalButton>
       </div>
     </Modal>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Flex, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -42,6 +43,9 @@ interface Props {
 }
 
 const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
+  const t = useTranslations("banks.editCustomer");
+  const tShared = useTranslations("banks.shared");
+  const tCommon = useTranslations("common");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clients, setClients] = useState<ISelect[]>([]);
   const { ID } = useAppStore((state) => state.selectedProject);
@@ -98,10 +102,7 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        showMessage(
-          "error",
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
+        showMessage("error", tShared("fileTooLarge", { maxMb: 30 }));
         return;
       }
       setValue("evidence", rawFile);
@@ -127,11 +128,11 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
         current_client_id: selectedRows[0].id_client.toString()
       });
 
-      showMessage("success", "Cliente editado correctamente");
+      showMessage("success", t("success"));
 
       onClose();
     } catch (error) {
-      showMessage("error", "Error al editar cliente");
+      showMessage("error", t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -146,15 +147,13 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
       closable={false}
       destroyOnClose
     >
-      <Title level={4}>Editar cliente</Title>
+      <Title level={4}>{t("title")}</Title>
 
-      <p className="modalActionsEditClient__subTitle">
-        Ingresa el nombre del cliente para realizar el cambio
-      </p>
+      <p className="modalActionsEditClient__subTitle">{t("subtitle")}</p>
       <Flex gap={"1rem"}>
         <InputForm
           customStyle={{ width: "100%" }}
-          titleInput="Cliente"
+          titleInput={tCommon("fields.customer")}
           control={control}
           nameInput="client"
           error={errors.client}
@@ -172,8 +171,8 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
             <GeneralSelect
               errors={errors.change_for}
               field={field}
-              title="Cambiar por"
-              placeholder="Ingresar cliente"
+              title={t("changeTo")}
+              placeholder={t("customerPlaceholder")}
               options={clients}
               showSearch
               customStyleContainer={{ width: "100%" }}
@@ -185,8 +184,8 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
 
       <div className="modalActionsEditClient__file">
         <Flex vertical>
-          <p>Evidencia</p>
-          <em>*Opcional</em>
+          <p>{tShared("evidence")}</p>
+          <em>{tShared("optional")}</em>
         </Flex>
         <DocumentButton
           key={evidence?.name}
@@ -199,14 +198,14 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
       </div>
 
       <div className="modalActionsEditClient__footer">
-        <SecondaryButton onClick={() => onClose(true)}>Cancelar</SecondaryButton>
+        <SecondaryButton onClick={() => onClose(true)}>{tCommon("actions.cancel")}</SecondaryButton>
 
         <PrincipalButton
           onClick={handleSubmit(onSubmit)}
           disabled={!isValid}
           loading={isSubmitting}
         >
-          Editar cliente
+          {t("title")}
         </PrincipalButton>
       </div>
     </Modal>

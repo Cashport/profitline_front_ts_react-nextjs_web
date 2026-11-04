@@ -5,6 +5,7 @@ import { IChanel } from "@/types/bre/IBRE";
 import { ISelectStringType } from "@/types/communications/ICommunications";
 import utc from "dayjs/plugin/utc";
 import dayjs from "dayjs";
+import { getActiveLocale, getTranslator } from "@/i18n/translator";
 
 dayjs.extend(utc);
 
@@ -192,26 +193,31 @@ export const formatDateBars = (dateString: string): string => {
 };
 
 export const formatDatePlane = (dateString: string): string => {
+  const t = getTranslator("shared");
   if (!dateString || dateString === "0000-00-00") {
-    return "Fecha no disponible";
+    return t("dates.notAvailable");
   }
 
   const d = new Date(dateString);
 
   if (isNaN(d.getTime())) {
-    return "Fecha inválida";
+    return t("dates.invalid");
   }
 
   const year = d.getUTCFullYear();
-  const month = new Intl.DateTimeFormat("es-ES", { month: "long", timeZone: "UTC" }).format(d);
+  const month = new Intl.DateTimeFormat(getActiveLocale(), {
+    month: "long",
+    timeZone: "UTC"
+  }).format(d);
   const day = d.getUTCDate();
 
-  return `${day} ${month}, ${year}`;
+  return t("dates.longDate", { day, month, year });
 };
 
 export const formatDatePlaneWithTime = (dateString: string): string => {
+  const t = getTranslator("shared");
   if (!dateString || dateString === "0000-00-00") {
-    return "Fecha no disponible";
+    return t("dates.notAvailable");
   }
 
   let iso = dateString;
@@ -223,16 +229,19 @@ export const formatDatePlaneWithTime = (dateString: string): string => {
   const d = new Date(iso);
 
   if (isNaN(d.getTime())) {
-    return "Fecha inválida";
+    return t("dates.invalid");
   }
 
   const year = d.getUTCFullYear();
-  const month = new Intl.DateTimeFormat("es-ES", { month: "long", timeZone: "UTC" }).format(d);
+  const month = new Intl.DateTimeFormat(getActiveLocale(), {
+    month: "long",
+    timeZone: "UTC"
+  }).format(d);
   const day = d.getUTCDate();
   const hours = String(d.getUTCHours()).padStart(2, "0");
   const minutes = String(d.getUTCMinutes()).padStart(2, "0");
 
-  return `${day} ${month}, ${year} ${hours}:${minutes}`;
+  return t("dates.longDateTime", { day, month, year, time: `${hours}:${minutes}` });
 };
 export function daysLeft(dateString: string): number {
   const today = new Date();
@@ -305,16 +314,17 @@ export const timeAgo = (date: string): string => {
   const diffInWeeks = Math.floor(diffInDays / 7);
   const diffInMonths = Math.floor(diffInDays / 30);
 
+  const t = getTranslator("shared");
   if (diffInMinutes < 60) {
-    return `Hace ${diffInMinutes} minutos`;
+    return t("dates.minutesAgo", { count: diffInMinutes });
   } else if (diffInHours < 24) {
-    return `Hace ${diffInHours} horas`;
+    return t("dates.hoursAgo", { count: diffInHours });
   } else if (diffInDays < 7) {
-    return `Hace ${diffInDays} días`;
+    return t("dates.daysAgo", { count: diffInDays });
   } else if (diffInWeeks < 4) {
-    return `Hace ${diffInWeeks} semanas`;
+    return t("dates.weeksAgo", { count: diffInWeeks });
   } else {
-    return `Hace ${diffInMonths} meses`;
+    return t("dates.monthsAgo", { count: diffInMonths });
   }
 };
 
@@ -436,7 +446,6 @@ export const canManageAuxiliaries = (selectedProject: ISelectedProject | undefin
 export const canReadDataQuality = (selectedProject: ISelectedProject | undefined): boolean =>
   checkUserComponentPermission(selectedProject, "DataQuality", "data-readonly");
 
-
 export function capitalize(str: string): string {
   if (typeof str !== "string" || str.length === 0) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -530,15 +539,12 @@ export function formatTimeAgo(utcDateString: string): string {
   const months = Math.floor(days / 30);
   const years = Math.floor(days / 365);
 
-  if (minutes === 1) return "1 minuto";
-  if (minutes < 60) return `${minutes} minutos`;
-  if (hours < 24) return `${hours} horas`;
-  if (days === 1) return `1 día`;
-  if (days < 30) return `${days} días`;
-  if (months === 1) return `1 mes`;
-  if (months < 12) return `${months} meses`;
-  if (years === 1) return `1 año`;
-  return `${years} años`;
+  const t = getTranslator("shared");
+  if (minutes < 60) return t("dates.minutes", { count: minutes });
+  if (hours < 24) return t("dates.hours", { count: hours });
+  if (days < 30) return t("dates.days", { count: days });
+  if (months < 12) return t("dates.months", { count: months });
+  return t("dates.years", { count: years });
 }
 
 export function formatChatDate(dateString: string): string {
@@ -552,8 +558,8 @@ export function formatChatDate(dateString: string): string {
   const diffDays = Math.floor((now.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays >= 0 && diffDays < 7) {
-    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-    return days[date.getDay()];
+    const weekday = new Intl.DateTimeFormat(getActiveLocale(), { weekday: "long" }).format(date);
+    return weekday.charAt(0).toUpperCase() + weekday.slice(1);
   }
 
   const day = String(date.getDate()).padStart(2, "0");

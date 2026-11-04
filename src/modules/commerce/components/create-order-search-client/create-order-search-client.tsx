@@ -4,6 +4,7 @@ import { FC, useContext, useEffect, useState } from "react";
 import { message, Spin } from "antd";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
 import {
@@ -39,6 +40,9 @@ export interface ISelectClientForm {
 }
 
 const CreateOrderSearchClient: FC = () => {
+  const t = useTranslations("commerce.searchClient");
+  const tShipping = useTranslations("commerce.shippingFields");
+  const tCommon = useTranslations("common");
   const { setClient, setShippingInfo, setChannelCode, setBusinessUnit, setChannelName } =
     useContext(OrderViewContext);
   const { config, projectId } = useAppStore((state) => ({
@@ -141,7 +145,7 @@ const CreateOrderSearchClient: FC = () => {
 
       const documentTypeId = getDocumentTypeId(data.documentType);
       if (!documentTypeId) {
-        message.error("Tipo de documento inválido");
+        message.error(t("invalidDocumentType"));
         return;
       }
 
@@ -163,10 +167,10 @@ const CreateOrderSearchClient: FC = () => {
         client_bu: []
       });
 
-      message.success("Cliente registrado exitosamente");
+      message.success(t("clientRegistered"));
       setShowNewClientDialog(false);
     } catch (error) {
-      message.error("Error al registrar el cliente. Por favor intente nuevamente.");
+      message.error(t("clientRegisterError"));
     } finally {
       setIsRegistering(false);
     }
@@ -208,8 +212,8 @@ const CreateOrderSearchClient: FC = () => {
       <div className="flex flex-col w-full max-w-[340px] flex-shrink-0 bg-white rounded-xl border border-[#DDDDDD] overflow-hidden h-full">
         <div className="px-6 pt-6 pb-5 border-b border-[#EEEEEE] flex-shrink-0 flex items-start justify-between gap-2">
           <div>
-            <h1 className="text-base font-bold text-[#141414] leading-tight">Nueva orden</h1>
-            <p className="text-sm text-[#999999] mt-0.5">Completa los datos para comenzar</p>
+            <h1 className="text-base font-bold text-[#141414] leading-tight">{t("newOrder")}</h1>
+            <p className="text-sm text-[#999999] mt-0.5">{t("newOrderDescription")}</p>
           </div>
           {config.create_client_btn && (
             <button
@@ -218,7 +222,7 @@ const CreateOrderSearchClient: FC = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-[#141414] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:bg-[#F7F7F7] transition-colors flex-shrink-0"
             >
               <Plus size={12} />
-              Nuevo cliente
+              {t("newClient")}
             </button>
           )}
         </div>
@@ -226,7 +230,7 @@ const CreateOrderSearchClient: FC = () => {
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
           {/* Cliente */}
           <div>
-            <p className="text-sm font-medium text-[#141414] mb-2">Cliente</p>
+            <p className="text-sm font-medium text-[#141414] mb-2">{tCommon("fields.customer")}</p>
             <ClienteDropdown
               options={clientOptions}
               loading={clientsLoading}
@@ -237,7 +241,7 @@ const CreateOrderSearchClient: FC = () => {
 
           {/* Canal */}
           <div>
-            <p className="text-sm font-medium text-[#141414] mb-2">Canal</p>
+            <p className="text-sm font-medium text-[#141414] mb-2">{t("channel")}</p>
             <CanalSelect
               value={canal}
               onChange={handleSelectCanal}
@@ -245,15 +249,15 @@ const CreateOrderSearchClient: FC = () => {
               disabled={!selectedClient || (selectedClient.client_bu?.length ?? 0) === 0}
             />
             {selectedClient && (selectedClient.client_bu?.length ?? 0) === 0 && (
-              <p className="text-[13px] text-[#999999] mt-1.5">
-                Este cliente no tiene canales disponibles
-              </p>
+              <p className="text-[13px] text-[#999999] mt-1.5">{t("noChannels")}</p>
             )}
           </div>
 
           {/* Dirección */}
           <div>
-            <p className="text-sm font-medium text-[#141414] mb-2">Dirección de despacho</p>
+            <p className="text-sm font-medium text-[#141414] mb-2">
+              {tShipping("dispatchAddress")}
+            </p>
             <DireccionDropdown
               addresses={addresses}
               selected={selectedAddress}
@@ -264,17 +268,19 @@ const CreateOrderSearchClient: FC = () => {
           </div>
 
           {selectedAddress?.warehouse && (
-            <p className="text-sm text-[#999999] text-right">Bodega {selectedAddress.warehouse}</p>
+            <p className="text-sm text-[#999999] text-right">
+              {t("warehouseValue", { warehouse: selectedAddress.warehouse })}
+            </p>
           )}
         </div>
 
         <div className="px-6 py-4 border-t border-[#EEEEEE] flex items-center gap-3 flex-shrink-0">
-          <Link href="/comercio" className="flex-1">
+          <Link href="/commerce" className="flex-1">
             <button
               type="button"
               className="w-full py-2.5 text-sm font-medium text-[#141414] bg-white border border-[#DDDDDD] rounded-xl hover:bg-[#F7F7F7] transition-colors"
             >
-              Cancelar
+              {tCommon("actions.cancel")}
             </button>
           </Link>
           <button
@@ -283,7 +289,7 @@ const CreateOrderSearchClient: FC = () => {
             onClick={handleCrearOrden}
             className="flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors disabled:opacity-35 disabled:cursor-not-allowed bg-[#CBE71E] text-[#141414] hover:bg-[#b8d11a]"
           >
-            Crear orden
+            {t("createOrder")}
           </button>
         </div>
       </div>
@@ -292,7 +298,7 @@ const CreateOrderSearchClient: FC = () => {
       <div className="flex-1 flex flex-col gap-4 min-w-0 h-full overflow-y-auto">
         {!selectedClient ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-sm text-[#999999]">Selecciona un cliente para ver su información</p>
+            <p className="text-sm text-[#999999]">{t("selectClientHint")}</p>
           </div>
         ) : summaryLoading ? (
           <div className="flex-1 flex items-center justify-center">
@@ -330,9 +336,9 @@ const CreateOrderSearchClient: FC = () => {
         open={showNewClientDialog}
         onOpenChange={setShowNewClientDialog}
         onSubmit={handleSaveClient}
-        title="Registrar Nuevo Cliente"
-        description="Complete los datos del cliente para crear la orden"
-        submitButtonText="Guardar Cliente"
+        title={t("registerDialog.title")}
+        description={t("registerDialog.description")}
+        submitButtonText={t("registerDialog.submit")}
         showReferralEmail={false}
         isSubmitting={isRegistering}
       />

@@ -3,6 +3,7 @@ import { Modal, Table, Checkbox, Button, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { FileArrowDown, Plus } from "phosphor-react";
 import Link from "next/link";
+import { useTranslations } from "use-intl";
 import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
 const { Text } = Typography;
 
@@ -51,11 +52,14 @@ interface Props {
 
 const DocumentModal = ({ isOpen, onClose }: Props) => {
   // const [isModalVisible, setIsModalVisible] = useState(true);
+  const t = useTranslations("projects.requirements.documentList");
+  const tRequirements = useTranslations("projects.requirements");
+  const tCommon = useTranslations("common");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   const columns: ColumnsType<Document> = [
     {
-      title: "Documento",
+      title: t("document"),
       dataIndex: "documentName",
       key: "documentName",
       render: (text, record) => (
@@ -68,12 +72,12 @@ const DocumentModal = ({ isOpen, onClose }: Props) => {
       )
     },
     {
-      title: "Vigencia",
+      title: t("validity"),
       dataIndex: "validity",
       key: "validity"
     },
     {
-      title: "Plantilla",
+      title: t("template"),
       dataIndex: "template",
       key: "template",
       render: (template: string) => {
@@ -88,7 +92,7 @@ const DocumentModal = ({ isOpen, onClose }: Props) => {
               }}
               href={`/requisitos/plantilla/${template}`}
             >
-              Documento <FileArrowDown size={16} />
+              {t("templateLink")} <FileArrowDown size={16} />
             </Link>
           );
         } else return <Text>-</Text>;
@@ -113,7 +117,7 @@ const DocumentModal = ({ isOpen, onClose }: Props) => {
 
   return (
     <Modal
-      title="Documentos"
+      title={tRequirements("documents")}
       open={isOpen}
       width={"53rem"}
       onCancel={onClose}
@@ -127,8 +131,8 @@ const DocumentModal = ({ isOpen, onClose }: Props) => {
       // ]}
       footer={
         <FooterButtons
-          backTitle={"Cancelar"}
-          nextTitle={"Agregar documentos"}
+          backTitle={tCommon("actions.cancel")}
+          nextTitle={t("addDocuments")}
           handleBack={onClose}
           handleNext={() => {}}
           nextDisabled={false}
@@ -158,7 +162,7 @@ const DocumentModal = ({ isOpen, onClose }: Props) => {
                 onClick={() => {}}
                 icon={<Plus size={16} />}
               >
-                Nuevo documento
+                {t("newDocument")}
               </Button>
             </Table.Summary.Cell>
           </Table.Summary.Row>

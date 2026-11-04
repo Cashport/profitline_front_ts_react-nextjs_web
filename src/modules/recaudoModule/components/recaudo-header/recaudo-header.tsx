@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import Header from "@/components/organisms/header";
 import BoardSelector from "../board-selector/board-selector";
 
@@ -18,13 +20,14 @@ interface RecaudoHeaderProps {
  * tablero, el tema y el avatar. Queda fijo al hacer scroll junto con los chips de filtros.
  */
 export default function RecaudoHeader({ info, tools, below }: RecaudoHeaderProps) {
+  const tc = useTranslations("collections");
   return (
     // El Header va envuelto (fijo junto con los chips), así que .cp-page no lo reconoce como hijo
     // directo: el margen negativo anula aquí el --section-gap de la vista, igual que hace .cp-page
     // con el Header suelto. El contenido arranca justo bajo el header, como en Clientes.
     <div className="sticky top-0 z-20 -mb-[var(--section-gap)] flex flex-col bg-cp-bg">
       <Header
-        title="Torre de control de recaudo"
+        title={tc("boards.torre.name")}
         titleNode={<BoardSelector />}
         titleExtra={info}
         actionsExtra={<>{tools}</>}

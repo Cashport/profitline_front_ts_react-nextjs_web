@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -13,6 +14,8 @@ interface IClienteDropdownProps {
 
 // ── Cliente dropdown (real clients via getClients) ─────────────────────────
 function ClienteDropdown({ options, loading, selected, onSelect }: IClienteDropdownProps) {
+  const t = useTranslations("commerce.searchClient");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const filtered = options.filter((c) =>
@@ -27,7 +30,7 @@ function ClienteDropdown({ options, loading, selected, onSelect }: IClienteDropd
         className="w-full flex items-center justify-between px-4 py-3 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg text-sm text-left transition-colors hover:border-[#141414] focus:outline-none"
       >
         <span className={selected ? "text-[#141414] truncate" : "text-[#999999]"}>
-          {selected ? selected.client_name : "Seleccione un cliente"}
+          {selected ? selected.client_name : t("selectClient")}
         </span>
         <ChevronDown
           size={16}
@@ -50,14 +53,16 @@ function ClienteDropdown({ options, loading, selected, onSelect }: IClienteDropd
                 autoFocus
                 value={search}
                 onChange={setSearch}
-                placeholder="Buscar cliente..."
+                placeholder={t("searchClient")}
               />
             </div>
             <ul className="max-h-56 overflow-y-auto py-1">
               {loading ? (
-                <li className="px-4 py-3 text-sm text-[#999999] text-center">Cargando…</li>
+                <li className="px-4 py-3 text-sm text-[#999999] text-center">
+                  {tCommon("status.loading")}
+                </li>
               ) : filtered.length === 0 ? (
-                <li className="px-4 py-3 text-sm text-[#999999] text-center">Sin resultados</li>
+                <li className="px-4 py-3 text-sm text-[#999999] text-center">{t("noResults")}</li>
               ) : (
                 filtered.map((c) => (
                   <li key={c.client_id}>

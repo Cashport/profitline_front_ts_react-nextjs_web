@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Button, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ArrowRight, DownloadSimple } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiSearchInput from "@/components/ui/search-input";
@@ -30,20 +31,6 @@ const RESULT_KINDS: BulkResultKind[] = ["found", "missing", "other", "dup"];
 // La tabla sólo pinta las primeras filas; el Excel trae todas
 const VISIBLE_ROWS = 100;
 
-const getDetail = (row: IBulkSearchRow) => {
-  if (row.result === "found") return row.status;
-  if (row.result === "other") return row.otherClient;
-  if (row.result === "dup") return "Se consideró una sola vez";
-  return "—";
-};
-
-// Días de vencimiento del servicio: > 0 ya venció, < 0 todavía no
-const formatDueDays = (days: number) => {
-  if (!days) return "Hoy";
-  const label = `${formatNumber(Math.abs(days))} ${Math.abs(days) === 1 ? "día" : "días"}`;
-  return days > 0 ? `Hace ${label}` : `En ${label}`;
-};
-
 const BulkSearchResultsStep = ({
   rows,
   summary,
@@ -56,6 +43,7 @@ const BulkSearchResultsStep = ({
   onRestart,
   onContinue
 }: Props) => {
+  const t = useTranslations("clients.bulkSearch.results");
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   // IDs por resultado: las cuatro suman el total recibido
@@ -66,6 +54,19 @@ const BulkSearchResultsStep = ({
     dup: summary.duplicated
   };
 
+  const getDetail = (row: IBulkSearchRow) => {
+    if (row.result === "found") return row.status;
+    if (row.result === "other") return row.otherClient;
+    if (row.result === "dup") return t("countedOnce");
+    return "—";
+  };
+
+  // Días de vencimiento del servicio: > 0 ya venció, < 0 todavía no
+  const formatDueDays = (days: number) => {
+    if (!days) return t("dueToday");
+    return days > 0 ? t("dueAgo", { days: Math.abs(days) }) : t("dueIn", { days: Math.abs(days) });
+  };
+
   const filteredRows = useMemo(() => {
     const normalizedQuery = query.trim().toUpperCase();
     return rows.filter(
@@ -74,10 +75,10 @@ const BulkSearchResultsStep = ({
   }, [rows, tab, query]);
 
   const cardMeta: Record<BulkResultKind, string> = {
-    found: `${formatMillions(summary.found_pending_amount)} pendiente`,
-    missing: "No existen en Cashport",
-    other: "Pertenecen a otro cliente",
-    dup: "Repetidas en tu archivo"
+    found: t("cards.foundPending", { amount: formatMillions(summary.found_pending_amount) }),
+    missing: t("cards.missing"),
+    other: t("cards.other"),
+    dup: t("cards.dup")
   };
 
   const columns: ColumnsType<IBulkSearchRow> = [
@@ -87,7 +88,7 @@ const BulkSearchResultsStep = ({
       render: (id: string) => <span className="font-mono text-[13px]">{id}</span>
     },
     {
-      title: "Resultado",
+      title: t("columns.result"),
       dataIndex: "result",
       width: 150,
       render: (result: BulkResultKind) => (
@@ -101,12 +102,12 @@ const BulkSearchResultsStep = ({
           }}
           className="font-medium"
         >
-          {RESULT_META[result].label}
+          {t(`kinds.${result}.label`)}
         </Tag>
       )
     },
     {
-      title: "Estado / detalle",
+      title: t("columns.detail"),
       key: "detail",
       render: (_, row) => (
         <span className="flex min-w-0 items-center gap-1.5 text-[#444]">
@@ -121,7 +122,7 @@ const BulkSearchResultsStep = ({
       )
     },
     {
-      title: "Pendiente",
+      title: t("columns.pending"),
       dataIndex: "amount",
       align: "right",
       render: (amount?: number) =>
@@ -132,7 +133,7 @@ const BulkSearchResultsStep = ({
         )
     },
     {
-      title: "Vence",
+      title: t("columns.due"),
       dataIndex: "dueDays",
       align: "right",
       width: 110,
@@ -164,7 +165,7 @@ const BulkSearchResultsStep = ({
                   className="h-[7px] w-[7px] rounded-full"
                   style={{ backgroundColor: RESULT_META[kind].dot }}
                 />
-                {RESULT_META[kind].plural}
+                {t(`kinds.${kind}.plural`)}
               </span>
               <span className="text-lg font-semibold tabular-nums text-foreground">
                 {formatNumber(counts[kind])}
@@ -179,14 +180,14 @@ const BulkSearchResultsStep = ({
         <div className="flex flex-wrap items-center gap-2">
           <UiSearchInput
             id="bulk-search-results-query"
-            placeholder="Buscar en resultados"
+            placeholder={t("searchPlaceholder")}
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
           />
           <span className="mr-auto text-[13px] text-[#8a8a8a]">
             {filteredRows.length > VISIBLE_ROWS
-              ? `Mostrando ${VISIBLE_ROWS} de ${formatNumber(filteredRows.length)} · el Excel trae todo`
-              : `${formatNumber(filteredRows.length)} registros`}
+              ? t("showing", { visible: VISIBLE_ROWS, total: filteredRows.length })
+              : t("records", { count: filteredRows.length })}
           </span>
           <Button
             size="large"
@@ -194,7 +195,7 @@ const BulkSearchResultsStep = ({
             loading={isDownloading}
             onClick={onDownload}
           >
-            Descargar Excel
+            {t("downloadExcel")}
           </Button>
         </div>
 
@@ -206,14 +207,14 @@ const BulkSearchResultsStep = ({
             dataSource={filteredRows.slice(0, VISIBLE_ROWS)}
             pagination={false}
             sticky
-            locale={{ emptyText: "Sin registros para este filtro" }}
+            locale={{ emptyText: t("empty") }}
           />
         </div>
       </div>
 
       <footer className="mt-3 flex flex-none flex-wrap items-center gap-2.5 border-t border-[#ececec] px-[22px] py-3.5">
         <Button type="text" size="large" onClick={onRestart}>
-          Nueva búsqueda
+          {t("newSearch")}
         </Button>
         <div className="flex-1" />
         <PrincipalButton
@@ -222,7 +223,7 @@ const BulkSearchResultsStep = ({
           icon={<ArrowRight size={14} />}
           iconPosition="end"
         >
-          Continuar con {formatNumber(summary.found_invoices)} encontradas
+          {t("continue", { count: summary.found_invoices })}
         </PrincipalButton>
       </footer>
     </>

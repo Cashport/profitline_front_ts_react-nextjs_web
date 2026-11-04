@@ -2,6 +2,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Cascader } from "antd";
 import { CaretDown, Funnel } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 import { getOrdersFilter } from "@/services/commerce/commerce";
 
 import "./filterMarketplaceOrders.scss";
@@ -54,11 +55,14 @@ const MobileButton = (props: any) => (
 );
 
 // Sub-component for Default (Desktop) Button
-const DefaultButton = (props: any) => (
-  <Button {...props} type="text" className="default-filter-button">
-    Filtrar <CaretDown size={16} />
-  </Button>
-);
+const DefaultButton = (props: any) => {
+  const tCommon = useTranslations("common");
+  return (
+    <Button {...props} type="text" className="default-filter-button">
+      {tCommon("actions.filter")} <CaretDown size={16} />
+    </Button>
+  );
+};
 
 export const FilterMarketplaceOrders = ({ setSelectedFilters, isMobile }: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>([]);

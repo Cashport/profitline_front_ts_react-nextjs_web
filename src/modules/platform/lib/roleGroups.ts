@@ -1,22 +1,17 @@
 import { IProjectRole } from "@/types/roles/IProjectRoles";
 
-export const ROLE_GROUPS = [
-  "Cashport",
-  "Data",
-  "Órdenes de compra",
-  "Marketplace y externos",
-  "TMS"
-] as const;
+/** Códigos de grupo; la etiqueta visible sale de `platform.groups.<código>`. */
+export const ROLE_GROUPS = ["cashport", "data", "purchaseOrders", "marketplace", "tms"] as const;
 
 export type RoleGroup = (typeof ROLE_GROUPS)[number];
 
 export const getRoleGroup = (rolName: string): RoleGroup => {
   const name = rolName.toLowerCase();
-  if (name.startsWith("tms-")) return "TMS";
-  if (name.startsWith("oc ")) return "Órdenes de compra";
-  if (name.includes("data")) return "Data";
-  if (name.includes("marketplace") || name.includes("external")) return "Marketplace y externos";
-  return "Cashport";
+  if (name.startsWith("tms-")) return "tms";
+  if (name.startsWith("oc ")) return "purchaseOrders";
+  if (name.includes("data")) return "data";
+  if (name.includes("marketplace") || name.includes("external")) return "marketplace";
+  return "cashport";
 };
 
 export const groupRoles = (roles: IProjectRole[]) =>

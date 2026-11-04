@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import type {
   IClientsHomeCatalogItem,
@@ -9,6 +10,7 @@ import type {
 import { DUE_PERIODS, type DuePeriod } from "../../../constants/clients-home";
 import { duePeriodRange, executivesForCoordinators } from "../../../utils/clients-home-format";
 import SearchField from "@/components/ui/search-field/search-field";
+import { useClientsHomeLabels } from "../../../hooks/clients-home/use-clients-home-labels";
 
 export interface ClientsHomeFilterDraft {
   due: { from: string; to: string; period: DuePeriod | null };
@@ -29,12 +31,8 @@ interface ClientsHomeFilterModalProps {
   onClose: () => void;
 }
 
-const CATEGORIES: { key: CategoryKey; label: string }[] = [
-  { key: "fecha", label: "Fecha" },
-  { key: "coordinators", label: "Coordinador" },
-  { key: "executives", label: "Ejecutivo" },
-  { key: "markets", label: "Mercado" }
-];
+/** Texto en `clients.home.filters.categories`. */
+const CATEGORIES: CategoryKey[] = ["fecha", "coordinators", "executives", "markets"];
 
 const emptyDraft = (): ClientsHomeFilterDraft => ({
   due: { from: "", to: "", period: null },
@@ -43,12 +41,12 @@ const emptyDraft = (): ClientsHomeFilterDraft => ({
   markets: []
 });
 
-/* Por dimensión: texto de "sin dato" y nombre en el buscador. */
-const LIST_LABELS: Record<ListCategoryKey, { empty: string; search: string }> = {
-  coordinators: { empty: "Sin coordinador", search: "coordinador" },
-  executives: { empty: "Sin ejecutivo", search: "ejecutivo" },
-  markets: { empty: "Sin mercado", search: "mercado" }
-};
+/* Por dimensión: clave del texto de "sin dato" (en `clients.home`). */
+const EMPTY_LABEL_KEYS = {
+  coordinators: "noCoordinator",
+  executives: "noExecutive",
+  markets: "noMarket"
+} as const satisfies Record<ListCategoryKey, string>;
 
 /** "Filtros Avanzados" del Home: Fecha (vencimiento), Coordinador, Ejecutivo y Mercado. */
 export default function ClientsHomeFilterModal({
@@ -59,6 +57,9 @@ export default function ClientsHomeFilterModal({
   onApply,
   onClose
 }: ClientsHomeFilterModalProps) {
+  const t = useTranslations("clients.home");
+  const tCommon = useTranslations("common");
+  const labels = useClientsHomeLabels();
   const [draft, setDraft] = useState<ClientsHomeFilterDraft>(initial);
   const [cat, setCat] = useState<CategoryKey>("fecha");
   const [optQuery, setOptQuery] = useState("");
@@ -72,7 +73,7 @@ export default function ClientsHomeFilterModal({
   };
   const catalog = cat === "fecha" ? [] : catalogs[cat];
   const nameOf = (o: IClientsHomeCatalogItem) =>
-    o.name ?? (cat === "fecha" ? "" : LIST_LABELS[cat].empty);
+    o.name ?? (cat === "fecha" ? "" : t(EMPTY_LABEL_KEYS[cat]));
   const optList = catalog.filter((o) => nameOf(o).toLowerCase().includes(optQuery.toLowerCase()));
   const selected = cat === "fecha" ? [] : draft[cat];
 
@@ -129,14 +130,13 @@ export default function ClientsHomeFilterModal({
             </svg>
           </div>
           <div className="flex-1">
-            <div className="text-[17px] font-semibold">Filtros Avanzados</div>
-            <div className="text-[13px] text-[#6b6b6b]">
-              Encuentra y selecciona múltiples opciones
-            </div>
+            <div className="text-[17px] font-semibold">{t("filters.title")}</div>
+            <div className="text-[13px] text-[#6b6b6b]">{t("filters.subtitle")}</div>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label={tCommon("actions.close")}
             className="h-8 w-8 cursor-pointer rounded-lg border-0 bg-transparent text-xl text-[#4a4a4a] hover:bg-[#f2f2f2]"
           >
             ×
@@ -145,14 +145,14 @@ export default function ClientsHomeFilterModal({
 
         <div className="flex min-h-[380px] flex-1 overflow-hidden">
           <div className="w-[120px] shrink-0 border-r border-[#ececec] py-2 sm:w-[240px]">
-            {CATEGORIES.map((c) => {
-              const on = c.key === cat;
-              const n = countOf(c.key);
+            {CATEGORIES.map((key) => {
+              const on = key === cat;
+              const n = countOf(key);
               return (
                 <div
-                  key={c.key}
+                  key={key}
                   onClick={() => {
-                    setCat(c.key);
+                    setCat(key);
                     setOptQuery("");
                   }}
                   className="relative flex h-11 cursor-pointer items-center pl-[22px] pr-[18px] text-sm"
@@ -166,7 +166,7 @@ export default function ClientsHomeFilterModal({
                     className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-[3px]"
                     style={{ background: on ? "#cbe71e" : "transparent" }}
                   />
-                  <span className="flex-1">{c.label}</span>
+                  <span className="flex-1">{t(`filters.categories.${key}`)}</span>
                   <span className="mr-2 text-[13px] text-[#8a8a8a]">{n || ""}</span>
                   <span style={{ color: on ? "#141414" : "transparent" }}>&gt;</span>
                 </div>
@@ -178,9 +178,9 @@ export default function ClientsHomeFilterModal({
             {cat === "fecha" ? (
               <>
                 <div className="mb-3.5 rounded-lg bg-[#f7f7f7] px-3 py-2 text-[13px] font-semibold tracking-[.6px] text-[#4a4a4a]">
-                  SELECCIONA UN PERIODO
+                  {t("filters.selectPeriod")}
                 </div>
-                <div className="mb-2.5 text-[13px] font-semibold">Periodos Predefinidos</div>
+                <div className="mb-2.5 text-[13px] font-semibold">{t("filters.presetPeriods")}</div>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2">
                   {DUE_PERIODS.map((p) => {
                     const on = draft.due.period === p;
@@ -196,7 +196,7 @@ export default function ClientsHomeFilterModal({
                           fontWeight: on ? 600 : 400
                         }}
                       >
-                        {p}
+                        {labels.duePeriod(p)}
                       </button>
                     );
                   })}
@@ -214,12 +214,12 @@ export default function ClientsHomeFilterModal({
                     <rect x="3" y="5" width="18" height="16" rx="2" />
                     <path d="M3 10h18M8 3v4M16 3v4" />
                   </svg>
-                  Rango Personalizado
+                  {t("filters.customRange")}
                 </div>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
                   {(["from", "to"] as const).map((field) => (
                     <label key={field} className="flex flex-col gap-1 text-[13px] text-[#6b6b6b]">
-                      {field === "from" ? "Desde" : "Hasta"}
+                      {field === "from" ? t("filters.from") : t("filters.to")}
                       <input
                         type="date"
                         value={draft.due[field]}
@@ -237,19 +237,19 @@ export default function ClientsHomeFilterModal({
                 <SearchField
                   value={optQuery}
                   onChange={setOptQuery}
-                  placeholder={`Buscar en ${LIST_LABELS[cat].search}...`}
+                  placeholder={t(`filters.search.${cat}`)}
                   className="mb-3"
                 />
                 <div className="mb-2.5 flex items-center justify-between rounded-lg bg-[#f7f7f7] px-3 py-2">
                   <span className="text-[13px] font-semibold tracking-[.6px] text-[#4a4a4a]">
-                    {optList.length} RESULTADOS
+                    {t("filters.results", { count: optList.length })}
                   </span>
                   <button
                     type="button"
                     onClick={selectAll}
                     className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-[#8aa30f]"
                   >
-                    Seleccionar todos
+                    {t("filters.selectAll")}
                   </button>
                 </div>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-x-3 gap-y-1">
@@ -289,7 +289,7 @@ export default function ClientsHomeFilterModal({
             onClick={() => setDraft(emptyDraft())}
             className="cursor-pointer border-0 bg-transparent text-[13px] font-semibold text-[#4a4a4a]"
           >
-            Limpiar todo
+            {t("filters.clearAll")}
           </button>
           <div className="flex-1" />
           <button
@@ -297,7 +297,7 @@ export default function ClientsHomeFilterModal({
             onClick={onClose}
             className="h-10 cursor-pointer border-0 bg-transparent px-3.5 text-[13px] font-semibold text-[#141414]"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </button>
           <button
             type="button"
@@ -308,7 +308,7 @@ export default function ClientsHomeFilterModal({
             }}
             className="h-10 cursor-pointer rounded-[10px] border-0 bg-[#cbe71e] px-[18px] text-[13px] font-semibold text-[#141414] hover:bg-[#d8f032]"
           >
-            Aplicar Filtros
+            {t("filters.apply")}
           </button>
         </div>
       </div>

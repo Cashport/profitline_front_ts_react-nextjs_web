@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { DotsThree } from "phosphor-react";
 import { ListMagnifyingGlass } from "@phosphor-icons/react";
 import { AxiosError } from "axios";
+import { useTranslations } from "use-intl";
 
 import { extractSingleParam } from "@/utils/utils";
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
@@ -38,6 +39,7 @@ import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
 import "./wallettab.scss";
 export const WalletTab = () => {
+  const t = useTranslations("components.walletTab");
   const { portfolioData, clientFilters } = useContext(ClientDetailsContext);
   const { openModal } = useModalDetail();
   const [filters, setFilters] = useState<SelectedFiltersWallet>({
@@ -148,7 +150,7 @@ export const WalletTab = () => {
 
   const validateInvoiceIsSelected = (): boolean => {
     if (!selectedRows || selectedRows.length === 0) {
-      messageShow.error("Seleccione al menos una factura");
+      messageShow.error(t("selectAtLeastOne"));
       return false;
     }
     return true;
@@ -170,14 +172,12 @@ export const WalletTab = () => {
         selectedRows?.map((invoice) => invoice.id) || []
       );
       setisGenerateActionOpen(false);
-      messageShow.success("Facturas añadidas correctamente a la tabla de aplicación de pagos");
+      messageShow.success(t("addedToApplication"));
       // mutate Applytable data
       mutateApplyTabData();
     } catch (error) {
       if (error instanceof AxiosError) {
-        messageShow.error(
-          `Error al añadir facturas(s) a la tabla de aplicación de pagos ${error.message}`
-        );
+        messageShow.error(t("addToApplicationError", { error: error.message }));
       }
     }
   };
@@ -204,9 +204,9 @@ export const WalletTab = () => {
         clientId,
         selectedRows?.map((invoice) => invoice.id) || []
       );
-      messageShow.success("La(s) factura(s) se han marcado como saldo correctamente");
+      messageShow.success(t("markedAsBalance"));
     } catch (error) {
-      messageShow.error("Error al marcar la(s) factura(s) como saldo");
+      messageShow.error(t("markAsBalanceError"));
     }
     setisGenerateActionOpen(false);
     closeAllModal();
@@ -218,7 +218,7 @@ export const WalletTab = () => {
       {selectedRows && selectedRows?.length > 0 && (
         <DraggableTotalModal
           totalAmount={selectedRows.reduce((acc, invoice) => acc + invoice.current_value, 0)}
-          itemName="Facturas"
+          itemName={t("invoices")}
           count={selectedRows.length}
         />
       )}
@@ -228,7 +228,7 @@ export const WalletTab = () => {
           <Flex gap={"0.5rem"} align="center" style={{ height: "var(--control-h)" }}>
             <UiSearchInput
               className="standardSearch"
-              placeholder="Buscar por ID"
+              placeholder={t("searchById")}
               onChange={handleSearchChange}
             />
             {/* <WalletTabFilter setSelectedFilters={setFilters} /> */}
@@ -237,7 +237,7 @@ export const WalletTab = () => {
               onClick={() => setIsBulkSearchOpen(true)}
               customStyles={{ fontSize: 14 }}
             >
-              Búsqueda masiva
+              {t("bulkSearch")}
             </PrincipalButton>
             <Button
               className="button__actions"
@@ -246,7 +246,7 @@ export const WalletTab = () => {
               disabled={isLoading}
               onClick={handleisGenerateActionOpen}
             >
-              Generar acción
+              {t("generateAction")}
             </Button>
           </Flex>
         </div>

@@ -5,6 +5,7 @@ import UiTabs from "@/components/ui/ui-tabs";
 import ItemApplyModal from "@/components/atoms/ItemsApplyModal/ItemsApplyModal";
 import Table, { ColumnsType } from "antd/es/table";
 import { Flex, InputNumber, Spin } from "antd";
+import { useTranslations } from "use-intl";
 import { applyAccountingAdjustment } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useParams } from "next/navigation";
 import { extractSingleParam } from "@/utils/utils";
@@ -48,6 +49,8 @@ export const ApplyNoveltyModal = ({
   comment,
   invoiceSelected = []
 }: Props) => {
+  const t = useTranslations("modals.applyAdjustment");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
@@ -170,14 +173,14 @@ export const ApplyNoveltyModal = ({
       if (response.status === 200) {
         messageApi.open({
           type: "success",
-          content: "Ajuste contable aplicado correctamente"
+          content: t("success")
         });
         onClosePrincipalModal && onClosePrincipalModal();
       }
     } catch (error) {
       messageApi.open({
         type: "error",
-        content: "Error al aplicar el ajuste contable"
+        content: t("error")
       });
       console.error("Error applying accounting adjustment:", error);
     } finally {
@@ -187,25 +190,25 @@ export const ApplyNoveltyModal = ({
 
   const columns: ColumnsType<IcurrentInvoices> = [
     {
-      title: "ID Factura",
+      title: t("columns.invoiceId"),
       dataIndex: "id",
       key: "id",
       render: (text) => <a target="_blank">{text}</a>
     },
     {
-      title: "Pendiente",
+      title: t("columns.outstanding"),
       dataIndex: "current_value",
       key: "current_value",
       render: (text) => `$${text || 0}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     },
     {
-      title: "Saldo nuevo",
+      title: t("columns.newBalance"),
       dataIndex: "newBalance",
       key: "newBalance",
       render: (text) => `$${text || 0}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     },
     {
-      title: "Valor a aplicar",
+      title: t("columns.amountToApply"),
       key: "applyValue",
       className: "column__apply__value",
       render: (_, record) => (
@@ -232,7 +235,7 @@ export const ApplyNoveltyModal = ({
 
   return (
     <div className="modalContentApply">
-      <p className="subTitleModalApply">Define el monto a aplicar a cada factura</p>
+      <p className="subTitleModalApply">{t("subtitle")}</p>
       {selectedNotes.length > 1 && (
         <UiTabs
           tabs={selectedNotes.map((row) => row.id.toString())}
@@ -253,7 +256,7 @@ export const ApplyNoveltyModal = ({
           className="button__action__text button__action__text__white"
           onClick={() => setCurrentView("selectNote")}
         >
-          Cancelar
+          {tCommon("actions.cancel")}
         </button>
         <button
           type="button"
@@ -261,7 +264,7 @@ export const ApplyNoveltyModal = ({
           onClick={() => handleAttachEvidence()}
           disabled={Object.keys(applyValues).length === 0}
         >
-          {isLoading ? <Spin size="small" /> : "Continuar"}
+          {isLoading ? <Spin size="small" /> : tCommon("actions.continue")}
         </button>
       </Flex>
     </div>

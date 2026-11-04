@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useMemo, useState } from "react";
 import useSWR from "swr";
 
@@ -37,6 +38,7 @@ export const useInvoiceClaims = ({
   limit = DEFAULT_LIMIT,
   enabled = true
 }: UseInvoiceClaimsProps) => {
+  const t = useTranslations("shared.invoiceClaims");
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   const statusParam = status ? `&status=${status}` : "";
@@ -56,10 +58,10 @@ export const useInvoiceClaims = ({
     setIsActionLoading(true);
     try {
       const response = await createClaim(payload);
-      showMessage("success", "Glosa creada exitosamente");
+      showMessage("success", t("created"));
       return response.data ?? null;
     } catch (err) {
-      showMessage("error", err instanceof ApiError ? err.message : "Error al crear la glosa");
+      showMessage("error", err instanceof ApiError ? err.message : t("createError"));
       return null;
     } finally {
       mutate();
@@ -75,9 +77,9 @@ export const useInvoiceClaims = ({
     setIsActionLoading(true);
     try {
       await updateClaim(claimId, payload);
-      showMessage("success", "Glosa actualizada exitosamente");
+      showMessage("success", t("updated"));
     } catch (err) {
-      showMessage("error", err instanceof ApiError ? err.message : "Error al actualizar la glosa");
+      showMessage("error", err instanceof ApiError ? err.message : t("updateError"));
       return false;
     } finally {
       mutate();
@@ -90,9 +92,9 @@ export const useInvoiceClaims = ({
     setIsActionLoading(true);
     try {
       await deleteClaim(claimId);
-      showMessage("success", "Glosa eliminada exitosamente");
+      showMessage("success", t("deleted"));
     } catch (err) {
-      showMessage("error", err instanceof ApiError ? err.message : "Error al eliminar la glosa");
+      showMessage("error", err instanceof ApiError ? err.message : t("deleteError"));
       return false;
     } finally {
       mutate();

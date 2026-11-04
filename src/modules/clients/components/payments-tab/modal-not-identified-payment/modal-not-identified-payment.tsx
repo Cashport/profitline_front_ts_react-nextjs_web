@@ -2,6 +2,7 @@ import { Dispatch, FC, SetStateAction, useState } from "react";
 import { Flex } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { useMessageApi } from "@/context/MessageContext";
 
@@ -35,9 +36,10 @@ interface IFormNotIdentifiedPaymentModal {
   comment: string;
 }
 
-const ModalNotIdentifiedPayment: FC<ModalNotIdentifiedPaymentProps> = ({
-  setViewInfo
-}) => {
+const ModalNotIdentifiedPayment: FC<ModalNotIdentifiedPaymentProps> = ({ setViewInfo }) => {
+  const t = useTranslations("clients.payments.notIdentifiedPayment");
+  const tAttachment = useTranslations("clients.payments.attachment");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -62,10 +64,7 @@ const ModalNotIdentifiedPayment: FC<ModalNotIdentifiedPaymentProps> = ({
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
-        showMessage(
-          "error",
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
+        showMessage("error", tAttachment("fileTooLarge", { maxMb: 30 }));
         return;
       }
       setValue("evidence", rawFile);
@@ -78,10 +77,10 @@ const ModalNotIdentifiedPayment: FC<ModalNotIdentifiedPaymentProps> = ({
 
     try {
       console.info("Form data:", data);
-      showMessage("success", "Notificación enviada correctamente");
+      showMessage("success", t("notificationSent"));
       // onClose()
     } catch (error) {
-      showMessage("error", "Error al enviar notificación");
+      showMessage("error", t("notificationError"));
     }
     //timer 2 seconds
     setTimeout(() => {
@@ -97,21 +96,18 @@ const ModalNotIdentifiedPayment: FC<ModalNotIdentifiedPaymentProps> = ({
     <div className={styles.content}>
       <button className={styles.content__header} onClick={handleCancel}>
         <CaretLeft size={"1.25rem"} />
-        <h4>Pago no encontrado</h4>
+        <h4>{t("title")}</h4>
       </button>
-      <p className={styles.content__description}>
-        El pago no fue encontrado. Si deseas revisar la información, por favor regresa a la página
-        anterior. De lo contrario, envía una notificación.
-      </p>
+      <p className={styles.content__description}>{t("description")}</p>
       <div className={styles.content__evidence}>
         <Flex vertical>
-          <p>Evidencia</p>
-          <em className="descriptionDocument">*Obligatorio</em>
+          <p>{tAttachment("evidence")}</p>
+          <em className="descriptionDocument">{tAttachment("required")}</em>
         </Flex>
         <Controller
           name="evidence"
           control={control}
-          rules={{ required: "Evidencia es obligatoria" }}
+          rules={{ required: tAttachment("evidenceRequired") }}
           render={() => (
             <DocumentButton
               title={evidence?.name}
@@ -123,24 +119,24 @@ const ModalNotIdentifiedPayment: FC<ModalNotIdentifiedPaymentProps> = ({
           )}
         />
         <Flex vertical>
-          <p>Comentarios</p>
-          <em className="descriptionDocument">*Opcional</em>
+          <p>{tCommon("fields.comments")}</p>
+          <em className="descriptionDocument">{tAttachment("optional")}</em>
         </Flex>
         <Controller
           name="comment"
           control={control}
           rules={{ required: false }}
-          render={({ field }) => <textarea {...field} placeholder="Ingresar un comentario" />}
+          render={({ field }) => <textarea {...field} placeholder={t("commentPlaceholder")} />}
         />
       </div>
       <div className={styles.footer}>
-        <SecondaryButton onClick={handleCancel}>Cancelar</SecondaryButton>
+        <SecondaryButton onClick={handleCancel}>{tCommon("actions.cancel")}</SecondaryButton>
         <PrincipalButton
           loading={isSubmitting}
           onClick={handleSubmit(onSubmit)}
           disabled={!isValid || isSubmitting}
         >
-          {isSubmitting ? "Enviando..." : "Enviar notificación"}
+          {isSubmitting ? tCommon("status.sending") : t("sendNotification")}
         </PrincipalButton>
       </div>
     </div>

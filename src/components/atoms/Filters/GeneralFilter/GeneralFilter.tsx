@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 import "../filterCascader.scss";
 export interface FilterOption {
   id: string;
@@ -30,6 +31,7 @@ const GenericCascaderFilter: React.FC<GenericCascaderFilterProps> = ({
   apiCallbacks,
   onFilterChange
 }) => {
+  const t = useTranslations("components.filters");
   const [options, setOptions] = useState<CascaderOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[][]>([]);
 
@@ -88,7 +90,7 @@ const GenericCascaderFilter: React.FC<GenericCascaderFilterProps> = ({
 
   return (
     <Cascader
-    style={{ width: "15rem" }}
+      style={{ width: "15rem" }}
       options={options}
       loadData={loadData}
       onChange={onChange}
@@ -97,7 +99,7 @@ const GenericCascaderFilter: React.FC<GenericCascaderFilterProps> = ({
       className="filterCascader"
       changeOnSelect
       expandTrigger="hover"
-      placeholder="Seleccionar filtros"
+      placeholder={t("selectFilters")}
     />
   );
 };

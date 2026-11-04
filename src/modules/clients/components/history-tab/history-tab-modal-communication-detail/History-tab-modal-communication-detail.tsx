@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Flex, Modal } from "antd";
 import { FileArrowUp } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import GeneralSearchSelect from "@/components/ui/general-search-select";
@@ -28,6 +29,7 @@ export interface IFormDigitalRecordModal {
 }
 
 const ModalCommunicationDetail = ({ isOpen, onClose, mongoID }: DigitalRecordModalProps) => {
+  const t = useTranslations("clients.history.communicationDetail");
   const { control, setValue, watch, reset } = useForm<IFormDigitalRecordModal>({
     defaultValues: {
       attachments: []
@@ -74,7 +76,7 @@ const ModalCommunicationDetail = ({ isOpen, onClose, mongoID }: DigitalRecordMod
       open={isOpen}
       onCancel={onClose}
     >
-      <h2 className="modalCommunicationDetail__title">Correo enviado</h2>
+      <h2 className="modalCommunicationDetail__title">{t("title")}</h2>
 
       <Flex vertical gap="1.5rem">
         <Controller
@@ -83,7 +85,7 @@ const ModalCommunicationDetail = ({ isOpen, onClose, mongoID }: DigitalRecordMod
           render={({ field }) => (
             <GeneralSearchSelect
               field={field}
-              title="Para"
+              title={t("to")}
               placeholder=""
               suffixIcon={null}
               disabled
@@ -99,7 +101,7 @@ const ModalCommunicationDetail = ({ isOpen, onClose, mongoID }: DigitalRecordMod
           render={({ field }) => (
             <GeneralSearchSelect
               field={field}
-              title="CC"
+              title={t("cc")}
               placeholder=""
               suffixIcon={null}
               disabled
@@ -110,7 +112,7 @@ const ModalCommunicationDetail = ({ isOpen, onClose, mongoID }: DigitalRecordMod
 
         <InputForm
           validationRules={{ required: true }}
-          titleInput="Asunto"
+          titleInput={t("subject")}
           control={control}
           nameInput="subject"
           readOnly

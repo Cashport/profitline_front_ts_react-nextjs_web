@@ -1,0 +1,211 @@
+{
+  "view": {
+    "title": "Bancos",
+    "tabs": {
+      "activePayments": "Pagos activos",
+      "otherPayments": "Otros pagos",
+      "paymentApplications": "Aplicaciones de pago",
+      "informalPaymentApplications": "Aplicación de pago Informal",
+      "settlements": "Legalizaciones"
+    }
+  },
+  "shared": {
+    "searchPlaceholder": "Buscar referencia, valor…",
+    "generateAction": "Generar acción",
+    "selectAtLeastOnePayment": "Selecciona al menos un pago",
+    "sameCustomerOnly": "Solo puedes seleccionar pagos del mismo cliente para esta acción",
+    "approveConfirmTitle": "¿Está seguro de aprobar la asignación?",
+    "approveSuccess": "Asignación aprobada correctamente",
+    "approveError": "Error al aprobar la asignación",
+    "fileTooLarge": "El archivo es demasiado grande. Por favor, sube un archivo de menos de {maxMb} MB.",
+    "evidence": "Evidencia",
+    "optional": "*Opcional",
+    "required": "*Obligatorio",
+    "commentPlaceholder": "Ingresar un comentario (opcional)"
+  },
+  "activePayments": {
+    "bankRules": "Reglas de banco",
+    "markUnidentifiedSuccess": "Pago(s) marcados como no identificados",
+    "markUnidentifiedError": "Ha ocurrido un error al marcar los pagos seleccionados como no identificados",
+    "markUnidentifiedConfirm": "¿Marcar pagos seleccionados como sin identificar?",
+    "singlePaymentOnly": "Solo puedes seleccionar un pago para esta acción",
+    "cannotAssignApplied": "No puedes asignar cliente a pagos en estado Pago aplicado",
+    "periodOnlyIdentifiedOrApplied": "Solo puedes cambiar el periodo contable de pagos identificados o aplicados"
+  },
+  "table": {
+    "erpId": "Id ERP",
+    "account": "Cuenta",
+    "image": "Imagen"
+  },
+  "applicationsTable": {
+    "columns": {
+      "applicationId": "Id. Aplicación",
+      "cashportPaymentId": "Id. Pago Cashport",
+      "erpPaymentId": "Id. Pago ERP",
+      "collected": "Recaudo"
+    },
+    "noFile": "No hay archivo disponible para descargar",
+    "uploading": "Cargando archivo...",
+    "uploadSuccess": "Archivo cargado exitosamente",
+    "uploadError": "Error al cargar el archivo",
+    "regenerating": "Regenerando archivo...",
+    "regenerateError": "Error al regenerar el archivo",
+    "reverseSuccess": "Aplicación reversada correctamente",
+    "reverseError": "No se pudo reversar, intenta de nuevo",
+    "settling": "Legalizando...",
+    "settleSuccess": "Estado actualizado a Aplicado",
+    "settleError": "Error al legalizar",
+    "template": "Template",
+    "regenerateExcel": "Regenerar Excel",
+    "regeneratePdf": "Regenerar PDF",
+    "uploadTemplate": "Cargar Template",
+    "reverse": "Reversar aplicación",
+    "settle": "Legalizar",
+    "downloadFinalFile": "Descargar archivo final",
+    "reverseModal": {
+      "title": "Reversar aplicación de pago",
+      "confirm": "Confirmar reversión",
+      "question": "¿Estás seguro de que deseas reversar esta aplicación de pago?",
+      "applicationId": "Id. Aplicación:",
+      "customer": "Cliente:",
+      "collected": "Recaudo:",
+      "cashportPaymentId": "Id. Pago Cashport:",
+      "warning": "Esta acción no se puede deshacer. Las facturas vinculadas volverán a estar disponibles y los pagos quedarán sin aplicar."
+    }
+  },
+  "actionsModal": {
+    "selectAction": "Selecciona la acción que vas a realizar",
+    "editCustomer": "Editar cliente",
+    "assignCustomer": "Asignar cliente",
+    "approveAssignment": "Aprobar asignación",
+    "splitPayment": "Fraccionar pago",
+    "uploadSlip": "Cargar tirilla",
+    "changeStatus": "Cambiar de estado",
+    "changeErpId": "Cambiar id ERP",
+    "changePeriod": "Cambiar periodo contable",
+    "markUnidentified": "Marcar como sin identificar"
+  },
+  "paymentApplicationsActions": {
+    "selectAtLeastOne": "Selecciona al menos una aplicación de pago",
+    "noPayments": "Las aplicaciones seleccionadas no tienen pagos asociados",
+    "downloading": "Descargando plano...",
+    "downloadSuccess": "Plano descargado correctamente",
+    "downloadError": "Error al descargar el plano",
+    "downloadLayout": "Descargar layout"
+  },
+  "walletActions": {
+    "selectExactlyOne": "Selecciona exactamente un pago",
+    "mustBeIdentified": "Todos los pagos seleccionados deben estar en estado Identificado",
+    "mustBeUploadedToErp": "El pago seleccionado debe estar en estado Cargado al ERP",
+    "erpUploadSuccess": "Cargue ERP confirmado correctamente",
+    "erpUploadError": "Error al confirmar el cargue ERP",
+    "confirmErpUpload": "Confirmar cargue ERP",
+    "confirmCompensation": "Confirmar compensación",
+    "erpUploadConfirmTitle": "¿Desea confirmar el cargue ERP?",
+    "dontConfirm": "No confirmar"
+  },
+  "changeErpId": {
+    "title": "Cambiar id ERP",
+    "erpId": "Id ERP",
+    "erpIdPlaceholder": "Ingresar id ERP",
+    "commentPlaceholder": "Ingresar un comentario (opcional)",
+    "maxLength": "Máximo {max} caracteres",
+    "updated": "Id ERP actualizado correctamente",
+    "deleted": "Id ERP eliminado correctamente",
+    "error": "Ha ocurrido un error al cambiar el id ERP"
+  },
+  "changePeriod": {
+    "title": "Cambiar periodo contable",
+    "confirm": "Cambiar periodo",
+    "description": "Se actualizará el periodo contable de {count, plural, one {# pago} other {# pagos}}. No se modifica la fecha de ingreso ni el estado del pago.",
+    "periodLabel": "Periodo contable (YYYY-MM)",
+    "required": "El periodo es obligatorio",
+    "invalidFormat": "Formato inválido. Use YYYY-MM (ej. 2026-08)",
+    "success": "Periodo contable actualizado correctamente",
+    "error": "Ha ocurrido un error al cambiar el periodo contable"
+  },
+  "confirmCompensation": {
+    "title": "Confirmar compensación",
+    "paymentId": "Id pago",
+    "compensationId": "Id compensación",
+    "dontConfirm": "No confirmar",
+    "success": "Compensación confirmada correctamente",
+    "error": "Error al confirmar la compensación"
+  },
+  "assignCustomer": {
+    "title": "Asignar cliente",
+    "subtitle": "Selecciona el cliente para asignar al pago",
+    "searchCustomer": "Buscar cliente",
+    "success": "Cliente asignado correctamente",
+    "error": "Error al asignar cliente"
+  },
+  "editCustomer": {
+    "title": "Editar cliente",
+    "subtitle": "Ingresa el nombre del cliente para realizar el cambio",
+    "changeTo": "Cambiar por",
+    "customerPlaceholder": "Ingresar cliente",
+    "success": "Cliente editado correctamente",
+    "error": "Error al editar cliente"
+  },
+  "uploadSlip": {
+    "title": "Cargar tirilla",
+    "subtitle": "Cargar el archivo correspondiente",
+    "slip": "Tirilla",
+    "success": "Tirilla enviada correctamente",
+    "error": "Error al enviar tirilla"
+  },
+  "changeStatus": {
+    "title": "Cambio de estado",
+    "selectStatus": "Selecciona el nuevo estado del pago",
+    "changeStatus": "Cambiar de estado",
+    "evidenceDescription": "Adjunta la evidencia e ingresa un comentario",
+    "attachEvidence": "Adjuntar evidencia",
+    "changeWithoutEvidence": "Cambiar sin evidencia",
+    "success": "Estado cambiado con éxito",
+    "error": "Ha ocurrido un error al cambiar el estado del pago",
+    "uploadAnother": "Cargar otro documento"
+  },
+  "splitPayment": {
+    "title": "Fraccionar pago",
+    "payment": "Pago {id}",
+    "paymentPart": "Pago {id} - {index}",
+    "customerRequired": "Cliente es obligatorio",
+    "customerPlaceholder": "Ingresar cliente",
+    "valueRequired": "Valor es obligatorio",
+    "valueMin": "El valor debe ser mayor a 0",
+    "evidenceRequired": "Evidencia es obligatoria",
+    "addPayment": "Agregar pago",
+    "success": "Pago fraccionado correctamente",
+    "error": "Error al fraccionar pagos"
+  },
+  "rules": {
+    "title": "Reglas de bancos",
+    "createRule": "Crear nueva regla",
+    "deleteSuccess": "{count, plural, one {# regla eliminada exitosamente} other {# reglas eliminadas exitosamente}}",
+    "deleteError": "Error al eliminar las reglas",
+    "createSuccess": "Regla creada con éxito",
+    "createError": "Error al crear la regla",
+    "columns": {
+      "customerName": "Nombre del cliente",
+      "match": "Coincidencia"
+    },
+    "matchExact": "Coincidencia exacta",
+    "matchContains": "Contiene",
+    "modal": {
+      "newTitle": "Nueva regla",
+      "editTitle": "Editar regla",
+      "description": "Ingresa descripción y nombre del cliente",
+      "customerPlaceholder": "Ingresar nombre",
+      "matchPlaceholder": "Seleccione coincidencia"
+    }
+  },
+  "filters": {
+    "dates": "Fechas",
+    "active": "Activo",
+    "periodValue": "Periodo: {period}",
+    "selectPeriod": "Selecciona un periodo",
+    "selectDates": "Seleccionar fechas",
+    "from": "Desde",
+    "to": "Hasta"
+  }
+}

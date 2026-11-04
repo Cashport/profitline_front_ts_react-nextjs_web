@@ -13,6 +13,7 @@ import {
   X
 } from "lucide-react";
 import { ItemType } from "antd/es/menu/interface";
+import { useTranslations } from "use-intl";
 import { LoadError, Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
@@ -39,9 +40,11 @@ interface MedicalAccountDocumentsProps {
   onChanged: () => void;
 }
 
+type DocumentsT = ReturnType<typeof useTranslations<"medicalAccounts.documents">>;
+
 // Best-available human label for a document row (the API has no display name).
-const docLabel = (doc: IMedicalAccountDocumentApi): string =>
-  doc.service_description ?? doc.invoice_number ?? `Documento ${doc.sequence}`;
+const docLabel = (doc: IMedicalAccountDocumentApi, t: DocumentsT): string =>
+  doc.service_description ?? doc.invoice_number ?? t("fallbackName", { sequence: doc.sequence });
 
 // Opens a document's PDF in a new tab (mirrors the purchase-order viewer's download).
 const handleDownloadFile = (url: string | null | undefined) => {
@@ -80,25 +83,27 @@ function DocStatus({
 
 // ── PDF preview panel (renders the document's generated PDF) ────────────────────
 const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentApi }) {
-  const label = docLabel(doc);
+  const t = useTranslations("medicalAccounts.documents");
+  const tCommon = useTranslations("common");
+  const label = docLabel(doc, t);
   const fileUrl = doc.generated_file_url;
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   const renderError = (error: LoadError) => {
     const message =
       error.name === "InvalidPDFException"
-        ? "El documento es inválido o está corrupto."
+        ? t("preview.invalidPdf")
         : error.name === "MissingPDFException"
-          ? "No se encontró el documento."
+          ? t("preview.missingPdf")
           : error.name === "UnexpectedResponseException"
-            ? "Respuesta inesperada del servidor."
-            : "No se pudo cargar el documento.";
+            ? t("preview.unexpectedResponse")
+            : t("preview.loadError");
 
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
         <FileText className="h-12 w-12 text-gray-200" />
         <div>
-          <p className="text-sm font-medium text-gray-500">Vista previa no disponible</p>
+          <p className="text-sm font-medium text-gray-500">{t("preview.unavailable")}</p>
           <p className="mt-1 text-[13px] text-gray-400">{message}</p>
         </div>
         <button
@@ -108,7 +113,7 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
           className="flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-[13px] text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="h-3.5 w-3.5" />
-          Descargar
+          {tCommon("actions.download")}
         </button>
       </div>
     );
@@ -121,7 +126,7 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
           <FileText className="h-4 w-4 shrink-0 text-amber-400" />
           <span className="truncate text-sm font-semibold text-gray-700">{label}</span>
           <span className="shrink-0 text-[13px] text-gray-400">
-            — pág. {doc.page_start}–{doc.page_end}
+            — {t("pages", { start: doc.page_start, end: doc.page_end })}
           </span>
         </div>
         <button
@@ -129,10 +134,10 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
           onClick={() => handleDownloadFile(fileUrl)}
           disabled={!fileUrl}
           className="ml-3 flex shrink-0 items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-[13px] text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-          title="Descargar"
+          title={tCommon("actions.download")}
         >
           <Download className="h-3.5 w-3.5" />
-          Descargar
+          {tCommon("actions.download")}
         </button>
       </div>
 
@@ -150,10 +155,8 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
             <FileText className="h-12 w-12 text-gray-200" />
-            <p className="text-sm font-medium text-gray-400">Documento no disponible</p>
-            <p className="text-[13px] text-gray-300">
-              El PDF de este documento aún no está disponible.
-            </p>
+            <p className="text-sm font-medium text-gray-400">{t("preview.notAvailableTitle")}</p>
+            <p className="text-[13px] text-gray-300">{t("preview.notAvailableDescription")}</p>
           </div>
         )}
       </div>
@@ -163,6 +166,7 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
 
 // ── Row action menu ─────────────────────────────────────────────────────────────
 const buildRowMenuItems = (
+  t: DocumentsT,
   doc: IMedicalAccountDocumentApi,
   hasNovelties: boolean,
   onFix: (doc: IMedicalAccountDocumentApi) => void,
@@ -170,21 +174,21 @@ const buildRowMenuItems = (
 ): ItemType[] => [
   {
     key: "download",
-    label: "Descargar",
+    label: t("menu.download"),
     icon: <Download className="h-3.5 w-3.5" />,
     disabled: !doc.generated_file_url,
     onClick: () => handleDownloadFile(doc.generated_file_url)
   },
   {
     key: "fix",
-    label: "Solucionar novedades",
+    label: t("menu.fixNovelties"),
     icon: <Wrench className="h-3.5 w-3.5" />,
     disabled: !hasNovelties,
     onClick: () => onFix(doc)
   },
   {
     key: "replace",
-    label: "Reemplazar soporte",
+    label: t("menu.replaceSupport"),
     icon: <FileUp className="h-3.5 w-3.5" />,
     onClick: () => onReplace(doc)
   }
@@ -206,6 +210,8 @@ export function MedicalAccountDocuments({
   accountId,
   onChanged
 }: MedicalAccountDocumentsProps) {
+  const t = useTranslations("medicalAccounts.documents");
+  const tCommon = useTranslations("common");
   const sortedDocs = [...documents].sort((a, b) => a.sequence - b.sequence);
 
   const [viewingDoc, setViewingDoc] = useState<IMedicalAccountDocumentApi | null>(
@@ -256,13 +262,10 @@ export function MedicalAccountDocuments({
       if (url) {
         window.open(url, "_blank");
       } else {
-        showMessage("error", "No se pudo generar el PDF unificado.");
+        showMessage("error", t("mergeError"));
       }
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "No se pudo descargar los documentos."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("downloadError"));
     } finally {
       setIsMerging(false);
     }
@@ -276,10 +279,10 @@ export function MedicalAccountDocuments({
       for (const novelty of docNovelties) {
         await resolveMedicalAccountNovelty(accountId, novelty.id);
       }
-      showMessage("success", `${docNovelties.length} novedad(es) resuelta(s).`);
+      showMessage("success", t("noveltiesResolved", { count: docNovelties.length }));
       onChanged();
     } catch {
-      showMessage("error", "No se pudieron resolver las novedades.");
+      showMessage("error", t("noveltiesResolveError"));
     }
   };
 
@@ -295,7 +298,7 @@ export function MedicalAccountDocuments({
           {someSelected ? (
             <>
               <span className="text-[13px] font-semibold text-gray-700">
-                {selectedIds.size} seleccionado{selectedIds.size > 1 ? "s" : ""}
+                {tCommon("count.selected", { count: selectedIds.size })}
               </span>
               <button
                 type="button"
@@ -304,7 +307,7 @@ export function MedicalAccountDocuments({
                 className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
               >
                 <Download className="h-3.5 w-3.5" />
-                {isMerging ? "Generando…" : `Descargar PDF${selectedIds.size > 1 ? "s" : ""}`}
+                {isMerging ? t("generating") : t("downloadPdfs", { count: selectedIds.size })}
               </button>
               <button
                 type="button"
@@ -312,14 +315,12 @@ export function MedicalAccountDocuments({
                 className="ml-auto inline-flex items-center gap-1 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
               >
                 <X className="h-3.5 w-3.5" />
-                Limpiar
+                {tCommon("actions.clear")}
               </button>
             </>
           ) : (
             <>
-              <span className="text-[13px] font-semibold text-gray-600">
-                Documentos clasificados
-              </span>
+              <span className="text-[13px] font-semibold text-gray-600">{t("title")}</span>
               <span className="text-[13px] font-medium text-gray-400">{documents.length}</span>
             </>
           )}
@@ -328,10 +329,8 @@ export function MedicalAccountDocuments({
         {documents.length === 0 ? (
           <div className="px-5 py-14 text-center">
             <FileText className="mx-auto mb-2 h-7 w-7 text-gray-200" />
-            <p className="text-sm font-medium text-gray-400">Sin documentos clasificados</p>
-            <p className="mt-0.5 text-[13px] text-gray-300">
-              Este archivo aún no ha sido procesado.
-            </p>
+            <p className="text-sm font-medium text-gray-400">{t("empty.title")}</p>
+            <p className="mt-0.5 text-[13px] text-gray-300">{t("empty.description")}</p>
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -349,16 +348,16 @@ export function MedicalAccountDocuments({
                   />
                 </th>
                 <th className="w-36 px-2 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                  Tipo
+                  {tCommon("fields.type")}
                 </th>
                 <th className="px-4 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                  Archivo
+                  {tCommon("fields.file")}
                 </th>
                 <th className="w-32 px-4 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                  Estado
+                  {tCommon("fields.status")}
                 </th>
                 <th className="w-24 px-4 py-3 text-left text-[13.5px] font-semibold text-cp-ink">
-                  Novedades
+                  {t("columns.novelties")}
                 </th>
                 <th className="w-12 px-4 py-3" />
               </tr>
@@ -394,9 +393,9 @@ export function MedicalAccountDocuments({
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-sm font-medium text-gray-700">{docLabel(doc)}</span>
+                      <span className="text-sm font-medium text-gray-700">{docLabel(doc, t)}</span>
                       <p className="mt-0.5 font-mono text-[13px] text-gray-400">
-                        pág. {doc.page_start}–{doc.page_end}
+                        {t("pages", { start: doc.page_start, end: doc.page_end })}
                       </p>
                     </td>
                     <td className="px-4 py-3">
@@ -416,6 +415,7 @@ export function MedicalAccountDocuments({
                       <div className="flex items-center justify-end gap-1">
                         <DotsDropdown
                           items={buildRowMenuItems(
+                            t,
                             doc,
                             novedadesCount > 0,
                             handleResolveNovelties,
@@ -433,7 +433,7 @@ export function MedicalAccountDocuments({
                               ? "bg-blue-100 text-blue-500 hover:bg-blue-200"
                               : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                           )}
-                          title={isViewing ? "Cerrar" : "Ver documento"}
+                          title={isViewing ? tCommon("actions.close") : t("viewDocument")}
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -454,7 +454,7 @@ export function MedicalAccountDocuments({
               className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-[13px] text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             >
               <FileUp className="h-3.5 w-3.5" />
-              Cargar soporte
+              {t("uploadSupport")}
             </button>
           </div>
         )}
@@ -467,10 +467,8 @@ export function MedicalAccountDocuments({
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 bg-gray-50 px-6 text-center">
             <FileText className="h-8 w-8 text-gray-200" />
-            <p className="text-sm font-medium text-gray-400">Ningún documento seleccionado</p>
-            <p className="text-[13px] text-gray-300">
-              Haz clic en el ojo de un documento para verlo aquí.
-            </p>
+            <p className="text-sm font-medium text-gray-400">{t("noSelection.title")}</p>
+            <p className="text-[13px] text-gray-300">{t("noSelection.description")}</p>
           </div>
         )}
       </div>

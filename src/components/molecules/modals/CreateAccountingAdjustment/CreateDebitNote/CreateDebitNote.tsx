@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import "./createDebitNote.scss";
 import { FieldError, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -26,14 +27,19 @@ interface Props {
   clientIdParam?: string;
 }
 
-const schema = yup.object().shape({
-  motive: yup.string().required("Campo obligatorio"),
-  amount: yup.number().min(0, "El valor no puede ser negativo").required("Campo obligatorio"),
-  validity_range: yup.array().of(yup.date()).optional(),
-  expedition_date: yup.date().required("Campo obligatorio")
-});
+type CreateAdjustmentT = ReturnType<typeof useTranslations<"modals.createAdjustment">>;
+
+const buildSchema = (t: CreateAdjustmentT) =>
+  yup.object().shape({
+    motive: yup.string().required(t("required")),
+    amount: yup.number().min(0, t("negative")).required(t("required")),
+    validity_range: yup.array().of(yup.date()).optional(),
+    expedition_date: yup.date().required(t("required"))
+  });
 
 export const CreateDebitNote = ({ onClose, messageApi, projectIdParam, clientIdParam }: Props) => {
+  const t = useTranslations("modals.createAdjustment");
+  const schema = useMemo(() => buildSchema(t), [t]);
   const {
     control,
     handleSubmit,
@@ -71,13 +77,13 @@ export const CreateDebitNote = ({ onClose, messageApi, projectIdParam, clientIdP
 
       messageApi.open({
         type: "success",
-        content: "Nota débito creado con éxito"
+        content: t("debit.success")
       });
       onClose();
     } catch (error) {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error creando nota débito. Por favor, intente nuevamente."
+        content: t("debit.error")
       });
     } finally {
       setIsSubmitting(false);
@@ -86,37 +92,37 @@ export const CreateDebitNote = ({ onClose, messageApi, projectIdParam, clientIdP
 
   return (
     <div className="createDebitCustom">
-      <p className="subTitleModalAction">Ingresa la información para crear la nueva nota débito</p>
+      <p className="subTitleModalAction">{t("debit.subtitle")}</p>
       <form className="modalContent" onSubmit={handleSubmit(handleSubmitForm)}>
         <div className="containterForm">
           <InputSelect
-            titleInput="Motivo"
+            titleInput={t("reason")}
             nameInput="motive"
             control={control}
             error={errors.motive}
             options={motives?.map((motive) => ({ value: motive.name, label: motive.name })) || []}
             loading={isLoading}
             isError={isError}
-            placeholder="Seleccionar motivo"
+            placeholder={t("reasonPlaceholder")}
           />
           <InputFormMoney
-            titleInput="Valor del ajuste"
+            titleInput={t("adjustmentAmount")}
             nameInput="amount"
             control={control}
             error={errors.amount}
-            placeholder="Ingresar valor"
+            placeholder={t("amountPlaceholder")}
             typeInput="number"
             customStyle={{ width: "100%" }}
           />
           <InputDateForm
-            titleInput="Fecha de expedición"
+            titleInput={t("issueDate")}
             nameInput="expedition_date"
-            placeholder="Seleccionar fecha de expiración"
+            placeholder={t("issueDatePlaceholder")}
             control={control}
             error={errors.expedition_date}
           />
           <InputDateRange
-            titleInput="Rango de vigencia"
+            titleInput={t("validityRange")}
             nameInput="validity_range"
             control={control}
             error={errors.validity_range as FieldError}
@@ -127,7 +133,7 @@ export const CreateDebitNote = ({ onClose, messageApi, projectIdParam, clientIdP
           handleOk={handleSubmit(handleSubmitForm)}
           onClose={onClose}
           isConfirmDisabled={!isValid || isSubmitting}
-          titleConfirm="Crear Nota Débito"
+          titleConfirm={t("debit.submit")}
           className="createDebitCustom__footer"
         />
       </form>

@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { Input, Modal } from "antd";
+import { useTranslations } from "use-intl";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 
@@ -32,6 +33,7 @@ export function ModalMotivoDevolucion({
   onClose,
   onConfirm
 }: ModalMotivoDevolucionProps) {
+  const tCommon = useTranslations("common");
   const [motivo, setMotivo] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -78,7 +80,7 @@ export function ModalMotivoDevolucion({
           />
         </div>
         <div className="flex items-center justify-end gap-2 pt-2">
-          <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+          <SecondaryButton onClick={onClose}>{tCommon("actions.cancel")}</SecondaryButton>
           <PrincipalButton
             onClick={handleConfirm}
             loading={submitting}

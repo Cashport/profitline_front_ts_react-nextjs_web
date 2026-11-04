@@ -5,6 +5,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 import { Flex, Input } from "antd";
 import { PlusCircle } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
 import PendingInvoiceCard from "../../components/PendingInvoiceCard/PendingInvoiceCard";
@@ -28,6 +29,7 @@ type IPaymentFormValues = {
 
 const ModifyPayments: React.FC = () => {
   const router = useRouter();
+  const t = useTranslations("publicPortals.mobile.modifyPayment");
 
   // Inicializar react-hook-form con el arreglo de invoices
   const { control, handleSubmit } = useForm<IPaymentFormValues>({
@@ -50,7 +52,7 @@ const ModifyPayments: React.FC = () => {
   });
 
   const handleGoBack = () => {
-    router.push("/mobile/confirmPayment");
+    router.push("/mobile/confirm-payment");
   };
 
   const onSubmit = (data: IPaymentFormValues) => {
@@ -64,14 +66,12 @@ const ModifyPayments: React.FC = () => {
   CustomNumberInput.displayName = "CustomNumberInput";
 
   return (
-    <MobileNavBar title={"Modificar y pagar"} onBack={handleGoBack}>
+    <MobileNavBar title={t("title")} onBack={handleGoBack}>
       {/* Margin based on PaymentSummaryConfirm at the bottom */}
       <div style={{ marginBottom: "115px" }}>
         <Flex vertical gap={"0.625rem"} className="modifyPayments">
           <Flex vertical gap="1rem">
-            <p className="modifyPayments__description">
-              Ingresa los valores que deseas pagar por cada factura
-            </p>
+            <p className="modifyPayments__description">{t("description")}</p>
 
             <Flex vertical gap="0.5rem">
               {fields.map((field, index) => (
@@ -115,7 +115,7 @@ const ModifyPayments: React.FC = () => {
           </Flex>
 
           <button className="modifyPayments__addDocument">
-            Agregar documento
+            {t("addDocument")}
             <PlusCircle size={14} />
           </button>
         </Flex>

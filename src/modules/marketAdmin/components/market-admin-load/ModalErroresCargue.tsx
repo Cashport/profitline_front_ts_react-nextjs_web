@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal, Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 import { getProfitLoaderBatchDetail } from "@/services/marketAdmin/marketAdmin";
 import {
   IProfitLoaderBatchDetail,
@@ -20,17 +21,19 @@ type Props = {
 
 const sectionTitle = "text-sm font-bold text-[#141414] mb-2";
 
-const errorColumns: ColumnsType<IProfitLoaderBatchError> = [
-  { title: "Fila", dataIndex: "row_number", width: 70, render: (v) => v || "—" },
-  { title: "Columna", dataIndex: "field_name", width: 160, render: (v) => v || "—" },
-  { title: "Error", dataIndex: "error_message" },
+type Translate = ReturnType<typeof useTranslations<"marketAdmin.load.errors">>;
+
+const getErrorColumns = (t: Translate): ColumnsType<IProfitLoaderBatchError> => [
+  { title: t("columns.row"), dataIndex: "row_number", width: 70, render: (v) => v || "—" },
+  { title: t("columns.column"), dataIndex: "field_name", width: 160, render: (v) => v || "—" },
+  { title: t("columns.error"), dataIndex: "error_message" },
   {
-    title: "Tipo",
+    title: t("columns.type"),
     key: "tipo",
     width: 110,
     render: (_, e) => (
       <EstadoPill
-        label={e.is_fatal ? "Bloqueante" : "Advertencia"}
+        label={e.is_fatal ? t("types.blocking") : t("types.warning")}
         color={e.is_fatal ? "red" : "yellow"}
       />
     )
@@ -38,6 +41,8 @@ const errorColumns: ColumnsType<IProfitLoaderBatchError> = [
 ];
 
 export default function ModalErroresCargue({ open, loaderId, item, onClose }: Props) {
+  const t = useTranslations("marketAdmin.load.errors");
+  const errorColumns = useMemo(() => getErrorColumns(t), [t]);
   const [detail, setDetail] = useState<IProfitLoaderBatchDetail | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -88,12 +93,12 @@ export default function ModalErroresCargue({ open, loaderId, item, onClose }: Pr
           <Spin />
         </div>
       ) : failed ? (
-        <p className="text-sm text-[#B00020] py-6">No se pudo leer el detalle del cargue.</p>
+        <p className="text-sm text-[#B00020] py-6">{t("loadError")}</p>
       ) : (
         <div className="flex flex-col gap-5 py-2">
           <p className="text-[13px] text-[#999999]">
             {item && `${formatDateTime(item.uploaded_at)} · ${item.uploaded_by}`}
-            {file && ` · ${file.rows_raw} filas leídas · ${file.rows_loaded} cargadas`}
+            {file && ` · ${t("rowsSummary", { read: file.rows_raw, loaded: file.rows_loaded })}`}
           </p>
 
           {file?.error_message && (
@@ -104,7 +109,7 @@ export default function ModalErroresCargue({ open, loaderId, item, onClose }: Pr
 
           {errors.length > 0 && (
             <div>
-              <p className={sectionTitle}>Errores por fila ({errors.length})</p>
+              <p className={sectionTitle}>{t("rowErrors", { count: errors.length })}</p>
               <Table
                 size="small"
                 rowKey="id"
@@ -117,7 +122,7 @@ export default function ModalErroresCargue({ open, loaderId, item, onClose }: Pr
 
           {validations.length > 0 && (
             <div>
-              <p className={sectionTitle}>Validaciones que no se cumplieron</p>
+              <p className={sectionTitle}>{t("failedValidations")}</p>
               <div className="flex flex-col gap-2">
                 {validations.map((v) => (
                   <div key={v.id} className="rounded-lg border border-[#EEEEEE] px-3 py-2 text-sm">
@@ -131,12 +136,12 @@ export default function ModalErroresCargue({ open, loaderId, item, onClose }: Pr
 
           {executions.length > 0 && (
             <div>
-              <p className={sectionTitle}>Registro del proceso</p>
+              <p className={sectionTitle}>{t("processLog")}</p>
               <div className="flex flex-col gap-1.5">
                 {executions.map((e) => (
                   <div key={e.id} className="flex gap-2 text-[13px]">
                     <EstadoPill
-                      label={e.level === "ERROR" ? "Error" : "Aviso"}
+                      label={e.level === "ERROR" ? t("levels.error") : t("levels.warning")}
                       color={e.level === "ERROR" ? "red" : "yellow"}
                     />
                     <span className="text-[#555555] break-words min-w-0">{e.message}</span>
@@ -146,7 +151,7 @@ export default function ModalErroresCargue({ open, loaderId, item, onClose }: Pr
             </div>
           )}
 
-          {nothing && <p className="text-sm text-[#999999]">Este cargue no registró errores.</p>}
+          {nothing && <p className="text-sm text-[#999999]">{t("noErrors")}</p>}
         </div>
       )}
     </Modal>

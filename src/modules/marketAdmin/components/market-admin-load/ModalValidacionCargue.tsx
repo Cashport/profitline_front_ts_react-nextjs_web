@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 import { Bell, Check, ChevronDown, Download, TriangleAlert, Upload, X } from "lucide-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -28,24 +29,14 @@ const POLL_MS = 1500;
 const MIN_JUSTIFICATION = 10;
 const RUNNING = ["ANALYZING", "APPLYING"];
 
-const ANALYSIS_STEPS = [
-  "Leyendo el archivo",
-  "Validando columnas, tipos de dato y duplicados",
-  "Cruzando códigos con Cashport",
-  "Comparando con los cargues de los últimos 60 días"
-];
+// Claves en marketAdmin.load.validation.steps
+const ANALYSIS_STEPS = ["reading", "validating", "matching", "comparing"] as const;
 const STEP_INDEX: Record<string, number> = {
   READING: 0,
   VALIDATING: 1,
   MATCHING_CLIENTS: 2,
   MEASURING: 3,
   DONE: 3
-};
-
-const PLACEHOLDERS: Record<ILoadAnalysisMeasureKey, string> = {
-  total_balance: "Ej.: el cliente aplicó un castigo de cartera aprobado esta semana.",
-  active_clients: "Ej.: se depuraron clientes inactivos del maestro.",
-  documents: "Ej.: se cerró un lote grande de facturas pagadas."
 };
 
 const btn =
@@ -69,6 +60,7 @@ const toLocal = (value: string | null) =>
   value ? dayjs.utc(value).local().format("DD/MM/YYYY HH:mm") : "—";
 
 function CriticalRow({ item, last }: { item: ILoadAnalysisCritical; last: boolean }) {
+  const t = useTranslations("marketAdmin.load.validation.critical");
   const columns = item.code === "MISSING_COLUMNS" ? [] : item.columns ?? [];
   return (
     <div
@@ -79,7 +71,7 @@ function CriticalRow({ item, last }: { item: ILoadAnalysisCritical; last: boolea
       <div className="flex-1 flex flex-col gap-1">
         {item.code === "MISSING_COLUMNS" ? (
           <span>
-            <strong>Faltan columnas:</strong>{" "}
+            <strong>{t("missingColumns")}</strong>{" "}
             {(item.columns ?? []).map((c) => (
               <span key={c} className="font-mono text-xs bg-[#F1F4F5] px-1.5 py-px rounded mr-1">
                 {c}
@@ -91,7 +83,7 @@ function CriticalRow({ item, last }: { item: ILoadAnalysisCritical; last: boolea
         )}
         {columns.length > 0 && item.code !== "DUPLICATES" && (
           <span className="text-xs" style={{ color: COLORS.muted }}>
-            Columna{columns.length > 1 ? "s" : ""}:{" "}
+            {t("columns", { count: columns.length })}{" "}
             {columns.map((c) => (
               <span key={c} className="font-mono bg-[#F1F4F5] px-1.5 py-px rounded mr-1">
                 {c}
@@ -101,13 +93,13 @@ function CriticalRow({ item, last }: { item: ILoadAnalysisCritical; last: boolea
         )}
         {!!item.sample_rows?.length && (
           <span className="text-xs" style={{ color: COLORS.muted }}>
-            Filas: {item.sample_rows.join(", ")}
+            {t("rows", { list: item.sample_rows.join(", ") })}
             {item.count > item.sample_rows.length ? "…" : ""}
           </span>
         )}
         {!!item.sample_values?.length && (
           <span className="text-xs" style={{ color: COLORS.muted }}>
-            Códigos: {item.sample_values.join(", ")}
+            {t("codes", { list: item.sample_values.join(", ") })}
             {item.count > item.sample_values.length ? "…" : ""}
           </span>
         )}
@@ -125,6 +117,9 @@ export default function ModalValidacionCargue({
   onClose,
   onUploadCorrected
 }: Props) {
+  const t = useTranslations("marketAdmin.load.validation");
+  const tLoad = useTranslations("marketAdmin.load");
+  const tCommon = useTranslations("common");
   const { showMessage } = useMessageApi();
   const [analysis, setAnalysis] = useState<ILoadAnalysis | null>(null);
   const [opens, setOpens] = useState<Partial<Record<ILoadAnalysisMeasureKey, boolean>>>({});
@@ -194,10 +189,7 @@ export default function ModalValidacionCargue({
       if (ok) showMessage("success", ok);
       return data;
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "No se pudo completar la acción."
-      );
+      showMessage("error", error instanceof Error ? error.message : t("actionError"));
       return null;
     } finally {
       setBusy(null);
@@ -210,10 +202,10 @@ export default function ModalValidacionCargue({
       return;
     }
     Modal.confirm({
-      title: "¿Cancelar el cargue?",
-      content: "El archivo no se aplicará en Cashport.",
-      okText: "Cancelar cargue",
-      cancelText: "Seguir",
+      title: t("cancelConfirm.title"),
+      content: t("cancelConfirm.content"),
+      okText: t("cancelUpload"),
+      cancelText: t("cancelConfirm.keep"),
       okButtonProps: { danger: true },
       onOk: async () => {
         const data = await run("cancel", () => cancelLoadAnalysis(loaderId, analysisId));
@@ -247,30 +239,38 @@ export default function ModalValidacionCargue({
   const pickFile = () => fileRef.current?.click();
 
   const title =
-    status === "APPLIED" ? "Cargue confirmado" : loaderName ?? analysis?.loader_name ?? "Cargue";
+    status === "APPLIED"
+      ? t("titleConfirmed")
+      : loaderName ?? analysis?.loader_name ?? t("titleFallback");
 
   const stageDefs = [
     {
-      label: "1 · Críticas",
+      name: t("stages.critical"),
       active: status === "CRITICAL",
       done: ["READY", "APPLYING", "APPLIED"].includes(status)
     },
     {
-      label: "2 · Advertencias",
+      name: t("stages.warnings"),
       active: status === "READY",
       done: ["APPLYING", "APPLIED"].includes(status)
     },
-    { label: "3 · Confirmar", active: status === "APPLYING", done: status === "APPLIED" }
+    { name: t("stages.confirm"), active: status === "APPLYING", done: status === "APPLIED" }
   ];
 
   const fileMeta = (() => {
     if (!analysis) return "";
-    if (status === "APPLIED") return `Confirmado ${toLocal(analysis.confirmed_at)}`;
-    const rows =
-      analysis.rows_raw !== null ? `${formatMeasure("count", analysis.rows_raw)} filas · ` : "";
-    if (status === "APPLYING")
-      return `${rows}${analysis.justified_count} advertencias justificadas`;
-    return `${rows}subido ${toLocal(analysis.created_at)}`;
+    if (status === "APPLIED")
+      return t("fileMeta.confirmed", { date: toLocal(analysis.confirmed_at) });
+    const detail =
+      status === "APPLYING"
+        ? t("fileMeta.justified", { count: analysis.justified_count })
+        : t("fileMeta.uploaded", { date: toLocal(analysis.created_at) });
+    if (analysis.rows_raw === null) return detail;
+    return t("fileMeta.withRows", {
+      count: analysis.rows_raw,
+      rows: formatMeasure("count", analysis.rows_raw),
+      detail
+    });
   })();
 
   const loadingPanel = (applying: boolean) => {
@@ -286,17 +286,17 @@ export default function ModalValidacionCargue({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/gifs/Profitline_Motion_Isotipo_Positivo.gif"
-              alt="Cargando"
+              alt={t("loading.alt")}
               className="w-16 h-16 flex-none"
             />
             <div className="flex-1 min-w-0 flex flex-col gap-0.5">
               <h3 className="m-0 text-base font-semibold tracking-[-.01em]" style={sora}>
-                {applying ? "Cargando la cartera" : "Analizando el archivo"}
+                {applying ? t("loading.applyingTitle") : t("loading.analyzingTitle")}
               </h3>
               <span className="text-[12.5px]" style={{ color: COLORS.muted }}>
                 {applying
-                  ? "Estamos aplicando el archivo en Cashport."
-                  : `${ANALYSIS_STEPS[stepIdx]}. Nada se aplica hasta que confirmes.`}
+                  ? t("loading.applyingText")
+                  : t("loading.analyzingText", { step: t(`steps.${ANALYSIS_STEPS[stepIdx]}`) })}
               </span>
             </div>
             {pct !== null && (
@@ -316,10 +316,7 @@ export default function ModalValidacionCargue({
             style={{ border: `1px solid ${COLORS.line}`, color: COLORS.ink2 }}
           >
             <Bell size={16} className="flex-none" />
-            <span className="flex-1">
-              Si el archivo es grande puede tardar unos minutos. Puedes cerrar esta ventana y
-              retomarlo desde el historial de cargues.
-            </span>
+            <span className="flex-1">{t("loading.largeFileHint")}</span>
           </div>
         </div>
         <div
@@ -328,7 +325,7 @@ export default function ModalValidacionCargue({
         >
           {applying ? (
             <button type="button" className={btnDefault} onClick={onClose}>
-              Cerrar
+              {tCommon("actions.close")}
             </button>
           ) : (
             <button
@@ -337,7 +334,7 @@ export default function ModalValidacionCargue({
               onClick={handleCancel}
               disabled={busy === "cancel"}
             >
-              Cancelar cargue
+              {t("cancelUpload")}
             </button>
           )}
         </div>
@@ -355,12 +352,10 @@ export default function ModalValidacionCargue({
         >
           <div className="flex flex-col gap-0.5">
             <h3 className="m-0 text-base font-semibold tracking-[-.01em]" style={sora}>
-              {items.length} {items.length === 1 ? "alerta crítica" : "alertas críticas"}
+              {t("critical.title", { count: items.length })}
             </h3>
             <span className="text-[12.5px]" style={{ color: COLORS.ink2 }}>
-              {analysis?.can_force
-                ? "Corrige el archivo y vuelve a cargarlo, o cárgalo de todas formas justificando por qué."
-                : "Corrige el archivo y vuelve a cargarlo."}
+              {analysis?.can_force ? t("critical.fixOrForce") : t("critical.fix")}
             </span>
           </div>
           <div
@@ -393,13 +388,13 @@ export default function ModalValidacionCargue({
               <Upload size={18} color={COLORS.orange} />
             </span>
             <div className="flex-[1_1_200px] flex flex-col">
-              <span className="font-bold">Arrastra aquí el archivo corregido</span>
+              <span className="font-bold">{t("critical.dropTitle")}</span>
               <span className="text-xs" style={{ color: COLORS.muted }}>
-                Se vuelve a validar desde la etapa 1
+                {t("critical.dropHint")}
               </span>
             </div>
             <button type="button" className={btnPrimary} onClick={pickFile}>
-              Seleccionar archivo
+              {t("critical.selectFile")}
             </button>
             <input
               ref={fileRef}
@@ -421,19 +416,20 @@ export default function ModalValidacionCargue({
               <div className="flex gap-2.5 items-start">
                 <TriangleAlert size={18} color={COLORS.orangeInk} className="flex-none mt-0.5" />
                 <div className="flex flex-col">
-                  <span className="font-bold">Cargar con {items.length} alertas críticas</span>
+                  <span className="font-bold">
+                    {t("critical.forceTitle", { count: items.length })}
+                  </span>
                   <span className="text-xs" style={{ color: COLORS.muted }}>
-                    Los datos con error se cargan tal como vienen en el archivo. Queda registrado en
-                    la bitácora con tu usuario y esta justificación.
+                    {t("critical.forceHint")}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <input
                   type="text"
-                  aria-label="Justificación para cargar con alertas críticas"
+                  aria-label={t("critical.forceAria")}
                   value={forceText}
-                  placeholder="Ej.: el cliente confirmó que los saldos son correctos; se corrige en el próximo cargue."
+                  placeholder={t("critical.forcePlaceholder")}
                   onChange={(e) => setForceText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") forceLoad();
@@ -448,7 +444,7 @@ export default function ModalValidacionCargue({
                   className="border-0 rounded-lg px-3.5 h-[38px] text-[12.5px] font-bold text-white whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ background: COLORS.orange }}
                 >
-                  Cargar con alertas
+                  {t("critical.forceSubmit")}
                 </button>
               </div>
             </div>
@@ -459,12 +455,12 @@ export default function ModalValidacionCargue({
           style={{ borderTop: "1px solid #EEF2F3" }}
         >
           <button type="button" className={btnDefault} onClick={onClose}>
-            Cerrar
+            {tCommon("actions.close")}
           </button>
           <span className="ml-auto" />
           {analysis?.can_force && !forceOpen && (
             <button type="button" className={btnDefault} onClick={() => setForceOpen(true)}>
-              Cargar de todas formas
+              {t("critical.forceOpen")}
             </button>
           )}
           {templateUrl && (
@@ -473,7 +469,7 @@ export default function ModalValidacionCargue({
               className={btnDefault}
               onClick={() => window.open(templateUrl, "_blank", "noopener,noreferrer")}
             >
-              <Download size={15} /> Descargar template
+              <Download size={15} /> {tLoad("downloadTemplate")}
             </button>
           )}
         </div>
@@ -494,10 +490,10 @@ export default function ModalValidacionCargue({
         {firstNormal && (
           <div className="flex flex-col gap-0.5 pt-2">
             <h3 className="m-0 text-sm font-semibold" style={sora}>
-              Dentro de lo normal
+              {t("measures.normalTitle")}
             </h3>
             <span className="text-xs" style={{ color: COLORS.muted }}>
-              Ábrelas para ver su comportamiento de los últimos {analysis?.history_days ?? 60} días.
+              {t("measures.normalHint", { days: analysis?.history_days ?? 60 })}
             </span>
           </div>
         )}
@@ -538,12 +534,12 @@ export default function ModalValidacionCargue({
                       {m.delta_pct !== null ? ` · ${formatDelta(m.delta_pct)}` : ""}
                     </span>
                     <span className="text-xs" style={{ color: COLORS.faint }}>
-                      media {formatMeasure(m.unit, m.mean)}
+                      {t("measures.mean", { value: formatMeasure(m.unit, m.mean) })}
                     </span>
                   </>
                 ) : (
                   <span className="text-xs" style={{ color: COLORS.faint }}>
-                    Sin cargues previos suficientes para comparar
+                    {t("measures.noBaseline")}
                   </span>
                 )}
               </span>
@@ -560,8 +556,10 @@ export default function ModalValidacionCargue({
               {isWarn && (
                 <span
                   role="img"
-                  title={justified ? "Justificada" : "Falta justificar"}
-                  aria-label={justified ? "Justificada" : "Falta justificar"}
+                  title={justified ? t("measures.justified") : t("measures.needsJustification")}
+                  aria-label={
+                    justified ? t("measures.justified") : t("measures.needsJustification")
+                  }
                   className="w-7 h-7 rounded-full grid place-items-center"
                   style={{
                     background: justified ? COLORS.lime : COLORS.orangeSoft,
@@ -589,9 +587,9 @@ export default function ModalValidacionCargue({
                 <div className="flex items-center gap-2 pt-0.5">
                   <input
                     type="text"
-                    aria-label="Justificación"
+                    aria-label={t("measures.justification")}
                     value={draft}
-                    placeholder={PLACEHOLDERS[m.key]}
+                    placeholder={t(`measures.placeholders.${m.key}`)}
                     onChange={(e) => setDrafts((d) => ({ ...d, [m.key]: e.target.value }))}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && canSave) saveJustification(m);
@@ -606,7 +604,7 @@ export default function ModalValidacionCargue({
                     className="border-0 rounded-lg px-3.5 h-[38px] text-[12.5px] font-bold text-white whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: COLORS.ink }}
                   >
-                    Guardar
+                    {tCommon("actions.save")}
                   </button>
                 </div>
               )}
@@ -636,7 +634,7 @@ export default function ModalValidacionCargue({
                     className="border-0 bg-transparent text-xs font-semibold underline cursor-pointer px-2 h-[30px]"
                     style={{ color: COLORS.muted }}
                   >
-                    Editar
+                    {tCommon("actions.edit")}
                   </button>
                 </div>
               )}
@@ -660,14 +658,10 @@ export default function ModalValidacionCargue({
           <div className="flex items-end gap-4 flex-wrap">
             <div className="flex-[1_1_260px] flex flex-col gap-0.5">
               <h3 className="m-0 text-base font-semibold tracking-[-.01em]" style={sora}>
-                {warnings.length
-                  ? `${warnings.length} ${warnings.length === 1 ? "advertencia" : "advertencias"} por resolver`
-                  : "Sin advertencias"}
+                {t("warnings.title", { count: warnings.length })}
               </h3>
               <span className="text-[12.5px]" style={{ color: COLORS.ink2 }}>
-                {warnings.length
-                  ? "Cada una necesita su propia justificación antes de confirmar."
-                  : "Todas las medidas están dentro de lo normal. Puedes confirmar el cargue."}
+                {warnings.length ? t("warnings.eachNeedsJustification") : t("warnings.allNormal")}
               </span>
             </div>
             <div
@@ -679,7 +673,7 @@ export default function ModalValidacionCargue({
                   className="w-3.5 h-2.5 rounded-sm"
                   style={{ background: COLORS.soft, boxShadow: `inset 0 0 0 1px ${COLORS.line}` }}
                 />
-                Normal
+                {t("warnings.legendNormal")}
               </span>
               <span className="inline-flex gap-1.5 items-center">
                 <span className="w-3.5" style={{ borderTop: `1.5px dashed ${COLORS.ink}` }} />
@@ -711,7 +705,7 @@ export default function ModalValidacionCargue({
             onClick={handleCancel}
             disabled={busy === "cancel"}
           >
-            Cancelar cargue
+            {t("cancelUpload")}
           </button>
           <div className="ml-auto flex items-center gap-2.5">
             {warnings.length > 0 && (
@@ -726,7 +720,7 @@ export default function ModalValidacionCargue({
                   ))}
                 </div>
                 <span className="text-xs font-semibold" style={{ color: COLORS.ink2 }}>
-                  {done} de {warnings.length} justificadas
+                  {t("warnings.progress", { done, total: warnings.length })}
                 </span>
               </>
             )}
@@ -737,7 +731,7 @@ export default function ModalValidacionCargue({
             onClick={confirm}
             disabled={!analysis?.can_confirm || busy === "confirm"}
           >
-            Confirmar cargue
+            {t("confirmUpload")}
           </button>
         </div>
       </>
@@ -753,7 +747,7 @@ export default function ModalValidacionCargue({
           style={{ background: COLORS.bg, borderTop: "1px solid #EEF2F3" }}
         >
           <span className="text-[10.5px] font-bold tracking-[.1em]" style={{ color: COLORS.muted }}>
-            LO QUE SE CARGÓ
+            {t("applied.heading")}
           </span>
           <div
             className="bg-white rounded-lg overflow-hidden w-full"
@@ -763,14 +757,18 @@ export default function ModalValidacionCargue({
               <thead>
                 <tr style={{ background: "#F7F9F9" }}>
                   {[
-                    { label: "MEDIDA", align: "left", width: 216 },
-                    { label: "CARGADO", align: "right", width: 110 },
+                    { label: t("applied.columns.measure"), align: "left", width: 216 },
+                    { label: t("applied.columns.loaded"), align: "right", width: 110 },
                     {
-                      label: `MEDIA ${analysis?.summary_days ?? 30} D`,
+                      label: t("applied.columns.mean", { days: analysis?.summary_days ?? 30 }),
                       align: "right",
                       width: 110
                     },
-                    { label: `${analysis?.summary_days ?? 30} DÍAS`, align: "left", width: 90 }
+                    {
+                      label: t("applied.columns.trend", { days: analysis?.summary_days ?? 30 }),
+                      align: "left",
+                      width: 90
+                    }
                   ].map((h) => (
                     <th
                       key={h.label}
@@ -858,24 +856,26 @@ export default function ModalValidacionCargue({
             className="grid gap-y-1.5 text-[12.5px] pt-1"
             style={{ gridTemplateColumns: "120px minmax(0, 1fr)" }}
           >
-            <span style={{ color: COLORS.muted }}>Archivo</span>
+            <span style={{ color: COLORS.muted }}>{tCommon("fields.file")}</span>
             <span className="font-mono text-xs">{analysis?.file_name}</span>
-            <span style={{ color: COLORS.muted }}>Confirmado por</span>
+            <span style={{ color: COLORS.muted }}>{t("applied.confirmedBy")}</span>
             <span>
               {analysis?.confirmed_by ?? "—"} · {toLocal(analysis?.confirmed_at ?? null)}
             </span>
-            <span style={{ color: COLORS.muted }}>Advertencias</span>
+            <span style={{ color: COLORS.muted }}>{t("applied.warnings")}</span>
             <span>
               {analysis?.justified_count
-                ? `${analysis.justified_count} justificadas · quedaron en la bitácora`
-                : "Ninguna"}
+                ? t("applied.justifiedLogged", { count: analysis.justified_count })
+                : t("applied.none")}
             </span>
             {analysis?.critical_override && (
               <>
-                <span style={{ color: COLORS.muted }}>Alertas críticas</span>
+                <span style={{ color: COLORS.muted }}>{t("applied.criticalAlerts")}</span>
                 <span>
-                  Cargado con {analysis.criticals.length} alertas · “
-                  {analysis.critical_override.justification}”
+                  {t("applied.criticalOverride", {
+                    count: analysis.criticals.length,
+                    justification: analysis.critical_override.justification
+                  })}
                 </span>
               </>
             )}
@@ -887,7 +887,7 @@ export default function ModalValidacionCargue({
         >
           <span className="ml-auto" />
           <button type="button" className={btnPrimary} onClick={onClose}>
-            Listo
+            {t("applied.done")}
           </button>
         </div>
       </>
@@ -912,7 +912,7 @@ export default function ModalValidacionCargue({
         style={{ borderTop: "1px solid #EEF2F3" }}
       >
         <button type="button" className={btnDefault} onClick={onClose}>
-          Cerrar
+          {tCommon("actions.close")}
         </button>
       </div>
     </>
@@ -931,12 +931,9 @@ export default function ModalValidacionCargue({
       case "APPLIED":
         return appliedPanel();
       case "CANCELLED":
-        return messagePanel("Cargue cancelado", "El archivo no se aplicó en Cashport.");
+        return messagePanel(t("cancelled.title"), t("cancelled.text"));
       default:
-        return messagePanel(
-          "No se pudo completar el cargue",
-          analysis?.error_message ?? "Revisa el historial de cargues para ver el detalle."
-        );
+        return messagePanel(t("failed.title"), analysis?.error_message ?? t("failed.text"));
     }
   };
 
@@ -967,7 +964,7 @@ export default function ModalValidacionCargue({
                 className="text-[10.5px] font-bold tracking-[.14em]"
                 style={{ color: COLORS.orange }}
               >
-                CASHPORT · VALIDACIÓN DE CARGUE
+                {t("eyebrow")}
               </span>
               <h2 className="m-0 text-[21px] font-semibold tracking-[-.02em]" style={sora}>
                 {title}
@@ -989,7 +986,7 @@ export default function ModalValidacionCargue({
             </div>
             <button
               type="button"
-              aria-label="Cerrar"
+              aria-label={tCommon("actions.close")}
               onClick={onClose}
               className="border-0 rounded-[10px] w-10 h-10 grid place-items-center cursor-pointer flex-none"
               style={{ background: COLORS.soft, color: COLORS.ink2 }}
@@ -998,14 +995,14 @@ export default function ModalValidacionCargue({
             </button>
           </div>
           {status === "APPLIED" && (
-            <span style={{ color: COLORS.ink2 }}>La cartera ya está disponible en Cashport.</span>
+            <span style={{ color: COLORS.ink2 }}>{t("applied.available")}</span>
           )}
           <div className="grid grid-cols-3 gap-1.5 pb-4">
             {stageDefs.map((g, i) => {
               const activeColor = i === 0 ? COLORS.red : COLORS.orange;
               const activeInk = i === 0 ? COLORS.red : COLORS.orangeInk;
               return (
-                <div key={g.label} className="flex flex-col gap-[7px]">
+                <div key={i} className="flex flex-col gap-[7px]">
                   <span
                     className="h-1 rounded"
                     style={{
@@ -1019,7 +1016,11 @@ export default function ModalValidacionCargue({
                       color: g.done ? COLORS.ink2 : g.active ? activeInk : COLORS.faint
                     }}
                   >
-                    {status === "APPLIED" ? "" : g.done ? `✓ ${g.label.slice(4)}` : g.label}
+                    {status === "APPLIED"
+                      ? ""
+                      : g.done
+                        ? `✓ ${g.name}`
+                        : t("stages.label", { step: i + 1, name: g.name })}
                   </span>
                 </div>
               );

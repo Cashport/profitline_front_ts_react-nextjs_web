@@ -1,0 +1,282 @@
+{
+  "shared": {
+    "addClient": "Add customer",
+    "accountStatement": "Account statement",
+    "newChat": "New chat",
+    "searchPlaceholder": "Search customer, phone, or message...",
+    "templateSent": "Template sent",
+    "templateSendError": "Couldn't send the template"
+  },
+  "format": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "am": "AM",
+    "pm": "PM"
+  },
+  "accountStatement": {
+    "title": "Send account statement",
+    "recipientsRequired": "Select at least one recipient",
+    "loadError": "Couldn't load the information",
+    "noClientSelected": "No customer selected",
+    "noClientSelectedHint": "No customer selected. Select a conversation first.",
+    "sentByEmail": "Account statement sent by email",
+    "sentByWhatsapp": "Account statement sent by WhatsApp",
+    "downloaded": "Account statement files downloaded",
+    "downloadFailed": "Couldn't download the files",
+    "invalidMethod": "Invalid delivery method",
+    "errors": {
+      "email": "Couldn't send the account statement by email",
+      "whatsapp": "Couldn't send the account statement by WhatsApp",
+      "download": "Couldn't download the account statement files",
+      "generic": "Couldn't process the account statement"
+    },
+    "tabs": {
+      "email": "Email"
+    },
+    "to": "To",
+    "recipientsPlaceholder": "Select or type recipients",
+    "files": "Files",
+    "filesPlaceholder": "Select files"
+  },
+  "tagsSelect": {
+    "required": "{field} is required *"
+  },
+  "inboxHeader": {
+    "title": "Conversations"
+  },
+  "audio": {
+    "pause": "Pause audio",
+    "play": "Play audio"
+  },
+  "allChats": {
+    "botEnabled": "Bot enabled",
+    "botDisabled": "Bot disabled",
+    "escalationError": "Couldn't update the chat status",
+    "markUnread": "Mark as unread",
+    "enableBot": "Enable bot",
+    "disableBot": "Disable bot",
+    "selectOneAtATime": "Select only one chat for this action",
+    "sendBulk": "Send bulk message",
+    "tabs": {
+      "open": "Open",
+      "unread": "Unread"
+    },
+    "loading": "Loading tickets...",
+    "empty": "No tickets found",
+    "selectChat": "Select chat with {customer}",
+    "closedName": "{name} - Closed ⚠️",
+    "escalated": "Escalated",
+    "agentAssigned": "Agent assigned"
+  },
+  "bubble": {
+    "quoted": {
+      "unavailable": "message unavailable",
+      "image": "image",
+      "sticker": "sticker",
+      "audio": "audio",
+      "document": "document",
+      "contact": "contact",
+      "template": "template",
+      "message": "message"
+    },
+    "reacted": "Reacted <emoji></emoji> to:",
+    "contactNoData": "Contact without details",
+    "noPhone": "No phone",
+    "viewImage": "View image",
+    "sentImage": "Sent image",
+    "openDocument": "Open document",
+    "loadingTemplate": "Loading template...",
+    "templateNotFound": "Template \"{name}\" not found",
+    "document": "Document",
+    "clickToOpen": "Click to open",
+    "noName": "No name"
+  },
+  "footer": {
+    "noNumberTitle": "No phone number",
+    "noNumberDescription": "This contact doesn't have a valid phone number.",
+    "messageSentTitle": "Message sent",
+    "messageSentDescription": "WhatsApp Cloud accepted the message.",
+    "sendErrorTitle": "Couldn't send",
+    "sendErrorDescription": "Couldn't send through WhatsApp Cloud.",
+    "fileSent": "File sent",
+    "fileSendError": "Couldn't send the file",
+    "templates": "Templates",
+    "attachFile": "Attach file",
+    "attachFiles": "Attach files",
+    "messagePlaceholder": "Type a message...",
+    "sendMessage": "Send message",
+    "emailSubjectPlaceholder": "Email subject",
+    "emailBodyPlaceholder": "Write the email body...",
+    "attachmentAlt": "Attachment {name}",
+    "removeImage": "Remove image {name}",
+    "removeAttachment": "Remove attachment {name}",
+    "sendEmail": "Send email",
+    "dropHint": "Drop files or images to attach"
+  },
+  "addClient": {
+    "title": "Add customer",
+    "subtitle": "Enter the new customer's information.",
+    "success": "Customer added",
+    "error": "Couldn't add the customer",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "jobTitle": "Job title",
+    "role": "Role",
+    "countryCode": "Country code",
+    "phoneTenDigits": "Phone number must have 10 digits",
+    "phoneDigitsRange": "Phone number must have between 7 and 12 digits",
+    "selectClient": "Select customer",
+    "clientRequired": "Customer is required *"
+  },
+  "massMessage": {
+    "title": "WhatsApp bulk send",
+    "selected": "Selected:",
+    "message": "Message",
+    "placeholder": "Hi {name}, you are {days} days past due...",
+    "variablesHint": "Supports simple variables such as {name} and {days}.",
+    "linkPreview": "Link preview",
+    "linkPreviewHint": "Send with rich preview",
+    "sendTo": "Send to {count}"
+  },
+  "paymentLink": {
+    "title": "Generate payment link",
+    "subtitle": "Fill in the information to generate the link.",
+    "validation": {
+      "invalidDate": "Enter a valid date",
+      "expirationDateRequired": "Expiration date is required",
+      "invalidTime": "Enter a valid time",
+      "expirationTimeRequired": "Expiration time is required",
+      "selectInvoice": "Select at least one invoice",
+      "invalidNumber": "Enter a valid number",
+      "amountPositive": "Amount must be greater than 0",
+      "amountRequired": "Amount is required",
+      "descriptionRequired": "Description is required"
+    },
+    "generated": "Payment link generated",
+    "generateError": "Couldn't generate the link",
+    "copied": "Link copied to clipboard",
+    "copyError": "Couldn't copy the link",
+    "templateSendError": "Couldn't send the WhatsApp template",
+    "datePlaceholder": "MM/DD/YYYY",
+    "dueTime": "Due time",
+    "amountToPay": "Amount to pay",
+    "selectInvoicesPlaceholder": "Select invoices",
+    "descriptionPlaceholder": "Enter a description",
+    "generate": "Generate link",
+    "successTitle": "Link generated",
+    "sendTemplate": "Send template",
+    "details": "Transaction details",
+    "createdAt": "Created on",
+    "expiresAt": "Expires on"
+  },
+  "selectInvoices": {
+    "title": "Invoices to pay",
+    "overdueBy": "{days}d past due",
+    "dueIn": "Due in {days}d",
+    "noInvoices": "No invoices",
+    "searchById": "Search by ID",
+    "selectedCount": "{count, plural, one {# invoice selected} other {# invoices selected}}",
+    "placeholder": "Select invoices"
+  },
+  "selectClient": {
+    "title": "Select customer",
+    "sendErrorTitle": "Couldn't send",
+    "sendErrorDescription": "Couldn't send the WhatsApp message.",
+    "loadingContacts": "Loading contacts...",
+    "contact": "Contact",
+    "sendWhatsapp": "Send WhatsApp"
+  },
+  "templates": {
+    "title": "{channel, select, whatsapp {WhatsApp templates} other {Email templates}}",
+    "tabs": {
+      "use": "Use"
+    },
+    "textBadge": "Text",
+    "emailBadge": "Email",
+    "subject": "Subject",
+    "body": "Body",
+    "insert": "Insert",
+    "namePlaceholder": "Template name",
+    "contentPlaceholder": "Content with variables: Hi {name}, ...",
+    "waTip": "Tip: Put variables in braces, for example {name}.",
+    "insertInMessage": "Insert into message",
+    "subjectPlaceholder": "Email subject",
+    "bodyPlaceholder": "Email body with variables: Dear {name}, ...",
+    "emailTip": "Tip: You can use variables such as {name} and {period}.",
+    "insertInEmail": "Insert into email",
+    "email": {
+      "accountSummary": {
+        "name": "Account summary",
+        "subject": "Your account statement summary",
+        "body": "Hi {name},\n\nAttached is your account statement for {period}. If you have already paid, please disregard this message.\n\nBest regards,\nThe Cashport team"
+      },
+      "formalReminder": {
+        "name": "Formal payment reminder",
+        "subject": "Payment reminder - {dueDate}",
+        "body": "Dear {name},\n\nThis is a reminder that your balance due on {dueDate} is {daysPastDue} days past due. Amount outstanding: {amount}.\n\nYou can pay here: {paymentLink}\n\nSincerely,\nThe Cashport team"
+      }
+    }
+  },
+  "details": {
+    "contactDeactivated": "Contact deactivated",
+    "contactDeactivateError": "Couldn't deactivate the contact",
+    "hideClientInfo": "Hide customer information",
+    "generatePaymentLink": "Generate payment link",
+    "deactivateContact": "Deactivate contact",
+    "closeChat": "Close chat",
+    "clientInfo": "Customer information",
+    "copyTaxId": "Copy tax ID",
+    "taxIdCopied": "Tax ID copied",
+    "copyFailed": "Couldn't copy",
+    "copyPhone": "Copy phone",
+    "phoneCopied": "Phone copied",
+    "codes": "Code(s)",
+    "copyCode": "Copy code",
+    "codeCopied": "Code copied",
+    "collector": "Collector",
+    "channel": "Channel",
+    "copyEmail": "Copy email",
+    "emailCopied": "Email copied",
+    "segment": "Segment",
+    "receivablesSummary": "Receivables summary",
+    "totalReceivables": "Total receivables",
+    "pastDue": "Past due",
+    "unappliedPayments": "Unapplied payments",
+    "lastPayment": "Last payment",
+    "deactivateConfirm": "Are you sure you want to deactivate this contact?",
+    "deactivate": "Deactivate"
+  },
+  "thread": {
+    "ticketOpen": "Ticket \"{subject}\" - Open",
+    "ticketClosed": "Ticket \"{subject}\" - Closed{hasBy, select, yes { by {closedBy}} other {}}{hasDate, select, yes { {closedAt}} other {}}",
+    "missingDataTitle": "Missing data",
+    "missingDataDescription": "Couldn't send the template because customer data is missing.",
+    "templateSentTitle": "Template sent",
+    "templateSentDescription": "The WhatsApp template was sent.",
+    "sendErrorTitle": "Couldn't send",
+    "sendErrorDescription": "Couldn't send the WhatsApp template.",
+    "noEmail": "no email",
+    "emailTab": "Email",
+    "showClientInfo": "Show customer information",
+    "loadingOlder": "Loading earlier messages..."
+  },
+  "ui": {
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next",
+    "previousPage": "Go to previous page",
+    "nextPage": "Go to next page",
+    "morePages": "More pages",
+    "more": "More",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "sidebar": "Sidebar",
+    "sidebarDescription": "Displays the mobile sidebar.",
+    "toggleSidebar": "Toggle sidebar",
+    "commandPalette": "Command palette",
+    "commandPaletteDescription": "Search for a command to run..."
+  },
+  "view": {
+    "selectChat": "Select a chat to see the conversation"
+  }
+}

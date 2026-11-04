@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Select, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import useSWR from "swr";
+import { useTranslations } from "use-intl";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -17,21 +18,25 @@ import DiscountsToolbar from "./DiscountsToolbar";
 import {
   DateCell,
   ESTADO_FILTER_ALL,
-  ESTADO_FILTER_OPTIONS,
   ESTADO_SELECT_CLASSNAME,
   PAGE_SIZE,
   StatusPill,
   TextCell,
   TypePill,
-  headerCell
+  headerCell,
+  useEstadoFilterOptions
 } from "./discountsTableConfig";
-import { PROMOTION_TYPE_LABELS } from "./promotionLabels";
+import { PROMOTION_TYPE_LABEL_KEYS } from "./promotionLabels";
 
 interface BonificadosTabProps {
   onCrearNuevo: () => void;
 }
 
 export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
+  const t = useTranslations("marketAdmin.discountsTable");
+  const tPromotionTypes = useTranslations("marketAdmin.promotionTypes");
+  const tCommon = useTranslations("common");
+  const estadoFilterOptions = useEstadoFilterOptions();
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState(ESTADO_FILTER_ALL);
   const [page, setPage] = useState(1);
@@ -54,7 +59,7 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
 
   const columns: ColumnsType<IPromotionListItem> = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
@@ -62,16 +67,18 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
       render: (v: string) => <TextCell value={v} />
     },
     {
-      title: "Tipo",
+      title: tCommon("fields.type"),
       dataIndex: "type",
       key: "type",
       width: 160,
       sorter: (a, b) => a.type.localeCompare(b.type),
       onHeaderCell: headerCell,
-      render: (type: IPromotionListItem["type"]) => <TypePill tipo={PROMOTION_TYPE_LABELS[type]} />
+      render: (type: IPromotionListItem["type"]) => (
+        <TypePill tipo={tPromotionTypes(PROMOTION_TYPE_LABEL_KEYS[type])} />
+      )
     },
     {
-      title: "Niveles",
+      title: t("columns.levels"),
       dataIndex: "ranges_count",
       key: "ranges_count",
       width: 100,
@@ -81,15 +88,15 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Unidad de negocio",
+      title: t("columns.businessUnit"),
       dataIndex: "business_unit",
       key: "business_unit",
       sorter: (a, b) => (a.business_unit ?? "").localeCompare(b.business_unit ?? ""),
       onHeaderCell: headerCell,
-      render: (v: string | null) => <TextCell value={v ?? "Todas"} />
+      render: (v: string | null) => <TextCell value={v ?? t("bonuses.allBusinessUnits")} />
     },
     {
-      title: "Inicio",
+      title: t("columns.start"),
       dataIndex: "start_date",
       key: "start_date",
       sorter: (a, b) => (a.start_date ?? "").localeCompare(b.start_date ?? ""),
@@ -97,7 +104,7 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
       render: (v: string) => <DateCell value={v} />
     },
     {
-      title: "Fin",
+      title: t("columns.end"),
       dataIndex: "end_date",
       key: "end_date",
       sorter: (a, b) => (a.end_date ?? "").localeCompare(b.end_date ?? ""),
@@ -105,7 +112,7 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
       render: (v: string | null) => <DateCell value={v} />
     },
     {
-      title: "Aprobación",
+      title: t("columns.approval"),
       dataIndex: "approval_entity_status_id",
       key: "approval_entity_status_id",
       width: 140,
@@ -117,7 +124,7 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
       render: (statusId: number | null) => <ApprovalStatusPill statusId={statusId} />
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "active",
       key: "active",
       width: 110,
@@ -138,7 +145,7 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
     <>
       <DiscountsToolbar onCrearNuevo={onCrearNuevo}>
         <UiSearchInput
-          placeholder="Buscar..."
+          placeholder={t("searchPlaceholder")}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
@@ -150,8 +157,8 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
             setEstadoFilter(value);
             setPage(1);
           }}
-          options={ESTADO_FILTER_OPTIONS}
-          placeholder="Estado"
+          options={estadoFilterOptions}
+          placeholder={tCommon("fields.status")}
           style={{ minWidth: 140 }}
           className={ESTADO_SELECT_CLASSNAME}
         />
@@ -167,14 +174,14 @@ export default function BonificadosTab({ onCrearNuevo }: BonificadosTabProps) {
           dataSource={filtered}
           rowKey="id"
           showSorterTooltip={false}
-          locale={{ emptyText: "No hay promociones para mostrar." }}
+          locale={{ emptyText: t("bonuses.empty") }}
           pagination={{
             current: page,
             pageSize: PAGE_SIZE,
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} promociones · ${activas} activas`
+              t("bonuses.total", { from: range[0], to: range[1], total, active: activas })
           }}
           onChange={(pag, _filters, _sorter, extra) =>
             setPage(extra.action === "paginate" ? pag.current ?? 1 : 1)

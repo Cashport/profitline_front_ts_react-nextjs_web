@@ -1,0 +1,50 @@
+{
+  "header": {
+    "title": "Control Tower",
+    "searchPlaceholder": "Customer, invoice or dispute…"
+  },
+  "kpis": {
+    "total": "Total receivables",
+    "totalFoot": "{invoices} · {customers}",
+    "pastDue": "Past due",
+    "pastDueFoot": "Operating target {pct}%",
+    "covered": "Past due covered",
+    "coveredFoot": "{amount} unreconciled",
+    "openDisputes": "Open disputes",
+    "overdueTicket": "{count} with overdue ticket",
+    "stale": "{count} with no activity 7+ days"
+  },
+  "aging": {
+    "title": "Receivables by aging bucket",
+    "hintIdle": "click a bucket to filter the dashboard",
+    "hintActive": "{count, plural, one {# bucket filtering} other {# buckets filtering}} the dashboard",
+    "current": "Current <b>{amount}</b>",
+    "pastDue": "Past due <b>{amount}</b>",
+    "over60": "Over 60 days <b>{amount}</b>",
+    "unreconciled": "Unreconciled <b>{amount}</b>"
+  },
+  "executives": {
+    "title": "Receivables mix by collector",
+    "hint": "width = receivables · figure = unreconciled past due",
+    "empty": "No collector has receivables with these filters.",
+    "tooltipTitle": "{name} · receivables"
+  },
+  "disputeTypes": {
+    "title": "Open disputes by type",
+    "onTime": "on time",
+    "overdueTicket": "with overdue ticket",
+    "empty": "No open disputes with these filters.",
+    "onTimeLabel": "On time",
+    "overdueCount": "{count} with overdue ticket",
+    "total": "{count, plural, one {# dispute} other {# disputes}}"
+  },
+  "topCustomers": {
+    "title": "Customers with the most unreconciled past due",
+    "hint": "past due with no payment plan or dispute",
+    "collector": "Collector",
+    "pastDue": "Past due",
+    "unreconciled": "Unreconciled",
+    "covered": "Covered",
+    "empty": "No customers with past-due amounts under these filters."
+  }
+}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button, Flex, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
 
 import { Upload, FileText } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
@@ -29,6 +30,8 @@ import { PresentationChart } from "phosphor-react";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 export function PurchaseOrdersView() {
+  const t = useTranslations("purchaseOrders.list");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
@@ -163,7 +166,7 @@ export function PurchaseOrdersView() {
                   className={
                     isMobile ? "!w-[130px] !flex-none" : isTablet ? "!w-[200px] !flex-none" : ""
                   }
-                  placeholder="Buscar"
+                  placeholder={tCommon("placeholders.search")}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
@@ -171,7 +174,7 @@ export function PurchaseOrdersView() {
                 />
 
                 <GenerateActionButton
-                  label={isMobile || isTablet ? "" : "Generar acción"}
+                  label={isMobile || isTablet ? "" : t("generateAction")}
                   onClick={handleOpenActionsModal}
                 />
 
@@ -191,7 +194,6 @@ export function PurchaseOrdersView() {
                   statuses={filterOptions.statuses || []}
                   onStatusChange={handleStatusChange}
                   showCompradorFilter={true}
-                  clienteFilterLabel="Cliente"
                   selectedClientId={selectedFilters.clientId ?? null}
                   clients={filterOptions.clients || []}
                   onCompradorChange={handleClientChange}
@@ -215,8 +217,12 @@ export function PurchaseOrdersView() {
                     fontSize: 14
                   }}
                 >
-                  <Upload className={isMobile || isTablet ? "h-[18px] w-[18px]" : "mr-2 h-[18px] w-[18px]"} />
-                  {isMobile || isTablet ? null : "Cargar Orden de compra"}
+                  <Upload
+                    className={
+                      isMobile || isTablet ? "h-[18px] w-[18px]" : "mr-2 h-[18px] w-[18px]"
+                    }
+                  />
+                  {isMobile || isTablet ? null : t("uploadPurchaseOrder")}
                 </PrincipalButton>
               </div>
             </div>
@@ -229,10 +235,10 @@ export function PurchaseOrdersView() {
             ) : data.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="mb-4">Carga tu primera orden de compra para comenzar el análisis</p>
+                <p className="mb-4">{t("emptyState")}</p>
                 <PrincipalButton onClick={() => setWhichModalIsOpen({ selected: 2 })}>
                   <Upload className="h-4 w-4 mr-2" />
-                  Cargar Orden de compra
+                  {t("uploadPurchaseOrder")}
                 </PrincipalButton>
               </div>
             ) : (

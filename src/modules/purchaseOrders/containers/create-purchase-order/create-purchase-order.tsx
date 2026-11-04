@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { message } from "antd";
+import { useTranslations } from "use-intl";
 import { FileText, GripVertical } from "lucide-react";
 
 import { useResizablePanel } from "../../hooks/useResizablePanel";
@@ -27,6 +28,7 @@ interface FileFormState {
 }
 
 export function CreatePurchaseOrder() {
+  const t = useTranslations("purchaseOrders.create");
   const router = useRouter();
   const { pdfWidth, isPdfCollapsed, containerRef, handleMouseDown, expandPdf, collapsePdf } =
     useResizablePanel();
@@ -123,22 +125,20 @@ export function CreatePurchaseOrder() {
     for (let i = 0; i < createFiles.length; i++) {
       const state = formStatesRef.current.get(i);
       if (!state?.info?.purchase_order_number) {
-        message.warning(`Archivo "${createFiles[i].name}": falta el número de orden de compra`);
+        message.warning(t("missingOrderNumber", { fileName: createFiles[i].name }));
         return;
       }
       if (!state.clientId) {
-        message.warning(`Archivo "${createFiles[i].name}": falta seleccionar un cliente`);
+        message.warning(t("missingCustomer", { fileName: createFiles[i].name }));
         return;
       }
       if (!state.products?.products?.length) {
-        message.warning(`Archivo "${createFiles[i].name}": debe tener al menos un producto`);
+        message.warning(t("missingProducts", { fileName: createFiles[i].name }));
         return;
       }
       const hasProductWithoutSelection = state.products.products.some((p) => !p.product_id);
       if (hasProductWithoutSelection) {
-        message.warning(
-          `Archivo "${createFiles[i].name}": todos los productos deben tener un producto seleccionado`
-        );
+        message.warning(t("productsWithoutSelection", { fileName: createFiles[i].name }));
         return;
       }
 
@@ -167,9 +167,7 @@ export function CreatePurchaseOrder() {
     // Validate all files belong to the same client
     const firstClientId = purchaseOrders[0].client_id;
     if (purchaseOrders.some((po) => po.client_id !== firstClientId)) {
-      message.error(
-        "Todos los archivos deben pertenecer al mismo cliente. Por favor verifica los clientes seleccionados."
-      );
+      message.error(t("sameCustomerRequired"));
       return;
     }
 
@@ -185,12 +183,10 @@ export function CreatePurchaseOrder() {
         client_id: selectedClientId || "",
         purchaseOrder: purchaseOrders
       });
-      message.success("Órdenes de compra creadas correctamente");
+      message.success(t("success"));
       router.push("/purchase-orders");
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al crear las órdenes de compra"
-      );
+      message.error(error instanceof Error ? error.message : t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -255,7 +251,7 @@ export function CreatePurchaseOrder() {
               disabled={isSubmitting}
               className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6"
             >
-              {isSubmitting ? "Creando..." : "Crear Orden de Compra"}
+              {isSubmitting ? t("creating") : t("submit")}
             </Button>
           </div>
         </CardContent>

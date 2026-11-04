@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Modal, Radio } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
 import { CaretLeft } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { changeStatusInvoice } from "@/services/accountingAdjustment/accountingAdjustment";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
@@ -31,6 +32,23 @@ export const invoiceStates = [
   "Facturado mes actual"
 ];
 
+// Etiqueta traducida de cada estado (el valor en español es el que se envía al backend).
+export const INVOICE_STATE_LABEL_KEYS = {
+  Conciliada: "reconciled",
+  "Sin conciliar": "unreconciled",
+  Glosado: "denied",
+  Devolucion: "returned",
+  Anulada: "voided",
+  Recibida: "received",
+  "Facturado mes actual": "billedThisMonth"
+} as const;
+
+export type InvoiceStateLabelKey =
+  (typeof INVOICE_STATE_LABEL_KEYS)[keyof typeof INVOICE_STATE_LABEL_KEYS];
+
+export const getInvoiceStateLabelKey = (state: string): InvoiceStateLabelKey | undefined =>
+  INVOICE_STATE_LABEL_KEYS[state as keyof typeof INVOICE_STATE_LABEL_KEYS];
+
 const WalletTabChangeStatusModal: React.FC<Props> = ({
   isOpen,
   onClose,
@@ -40,6 +58,7 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
   messageShow,
   onCloseAllModals
 }) => {
+  const t = useTranslations("clients.changeStatus");
   const [selectedState, setSelectedState] = useState<string | undefined>();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string | undefined>();
@@ -82,16 +101,14 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
       );
       messageShow.open({
         type: "success",
-        content: response?.data?.message
-          ? response?.data?.message
-          : "La factura ha cambiado de estado correctamente."
+        content: response?.data?.message ? response?.data?.message : t("success")
       });
       onCloseAllModals();
       handleGoBackToFirstView();
     } catch (error) {
       messageShow.open({
         type: "error",
-        content: "Ha ocurrido un error al cambiar el estado de la factura"
+        content: t("error")
       });
     }
     setLoading(false);
@@ -102,10 +119,10 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
     <>
       <Button onClick={onClose} className={styles.content__header}>
         <CaretLeft size="1.25rem" />
-        <span>Cambio de estado</span>
+        <span>{t("title")}</span>
       </Button>
       <div className={styles.content} style={{ height: "90%" }}>
-        <p className={styles.content__description}>Selecciona el nuevo estado de la factura</p>
+        <p className={styles.content__description}>{t("description")}</p>
 
         <div className={styles.content__status}>
           {invoiceStates.map((state) => (
@@ -115,7 +132,10 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
               key={state}
             >
               <Radio className={styles.content__status__item} value={state?.toLocaleLowerCase()}>
-                {state}
+                {(() => {
+                  const key = getInvoiceStateLabelKey(state);
+                  return key ? t(`states.${key}`) : state;
+                })()}
               </Radio>
             </Radio.Group>
           ))}
@@ -124,7 +144,7 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
         <FooterButtons
           handleOk={() => setIsSecondView(true)}
           onClose={onClose}
-          titleConfirm="Cambiar de estado"
+          titleConfirm={t("confirm")}
           isConfirmDisabled={!selectedState}
         />
       </div>

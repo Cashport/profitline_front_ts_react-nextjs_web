@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Select, Divider } from "antd";
+import { useTranslations } from "use-intl";
 
 import { ICityWarehouse } from "@/types/commerce/ICommerce";
 
@@ -36,7 +37,7 @@ export default function CitiesSelect({
   onChangeWarehouseId,
   cities,
   isLoading = false,
-  placeholder = "Seleccione o escriba una ciudad",
+  placeholder,
   disabled = false,
   size = "middle",
   className,
@@ -46,6 +47,7 @@ export default function CitiesSelect({
   // Ciudades que el usuario creó desde este Select (no vienen del backend).
   // Se mergean con `cities` (prop) para armar la lista final de opciones,
   // sin caer en el anti-pattern de `useState(prop)` (que ignora updates).
+  const t = useTranslations("commerce.selects");
   const [addedCities, setAddedCities] = useState<ICityWarehouse[]>([]);
   const [searchValue, setSearchValue] = useState("");
 
@@ -105,7 +107,7 @@ export default function CitiesSelect({
     <Select
       showSearch
       autoFocus={autoFocus}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t("selectCity")}
       value={value}
       onChange={handleSelect}
       onSearch={setSearchValue}
@@ -131,7 +133,7 @@ export default function CitiesSelect({
                 onClick={handleAddNew}
                 className="citiesSelect__add"
               >
-                Agregar &quot;{trimmedSearch}&quot;
+                {t("addCity", { city: trimmedSearch })}
               </div>
             </>
           )}

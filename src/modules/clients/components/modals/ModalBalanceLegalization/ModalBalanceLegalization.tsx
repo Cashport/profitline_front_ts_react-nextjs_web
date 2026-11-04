@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { Flex, Input, message, Modal, Select, Table, TableProps, Tooltip } from "antd";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Trash } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import {
   balanceLegalization,
@@ -53,6 +54,8 @@ const ModalBalanceLegalization = ({
   selectedAdjustments,
   clientUUIDProp
 }: Props) => {
+  const t = useTranslations("clients.balanceSettlement");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const clientId = clientIdParam || clientUUIDProp || "";
@@ -83,10 +86,10 @@ const ModalBalanceLegalization = ({
         setAdjustmentsToLegalize(res);
 
         if (res.length === 0) {
-          message.warning("No hay ajustes disponibles para legalizar");
+          message.warning(t("noAdjustmentsToSettle"));
         }
       } catch (error) {
-        message.error("Error al cargar ajustes a legalizar");
+        message.error(t("loadToSettleError"));
       }
     };
     const fetchSelectAdjustments = async () => {
@@ -95,10 +98,10 @@ const ModalBalanceLegalization = ({
         setSelectAdjustments(res);
 
         if (res.length === 0) {
-          message.warning("No hay ajustes disponibles para el select");
+          message.warning(t("noAdjustmentsAvailable"));
         }
       } catch (error) {
-        message.error("Error al cargar ajustes disponibles");
+        message.error(t("loadAvailableError"));
       }
     };
 
@@ -160,11 +163,11 @@ const ModalBalanceLegalization = ({
       }));
 
       await balanceLegalization(balances);
-      message.success("Saldos legalizados correctamente");
+      message.success(t("success"));
       onClose();
     } catch (error) {
       message.error(
-        `Error al legalizar los saldos: ${error instanceof Error ? error.message : "desconocido"}`
+        t("error", { detail: error instanceof Error ? error.message : t("unknownError") })
       );
     }
     setLoadingRequest(false);
@@ -172,7 +175,7 @@ const ModalBalanceLegalization = ({
 
   const columns: TableProps<IAdjustmentRow>["columns"] = [
     {
-      title: "Ajuste Cashport",
+      title: t("columns.cashportAdjustment"),
       dataIndex: "financialDiscountId",
       key: "financialDiscountId",
       render: (_: any, row) => {
@@ -192,7 +195,7 @@ const ModalBalanceLegalization = ({
       width: 147
     },
     {
-      title: "Monto",
+      title: tCommon("fields.amount"),
       dataIndex: "ammount",
       key: "ammount",
       render: (_: any, row) => {
@@ -206,7 +209,7 @@ const ModalBalanceLegalization = ({
       align: "right"
     },
     {
-      title: "Factura Asociada",
+      title: t("columns.linkedInvoice"),
       dataIndex: "financialDiscountId",
       key: "financialRecordsAsociate",
       render: (_: any, row) => {
@@ -223,7 +226,7 @@ const ModalBalanceLegalization = ({
       }
     },
     {
-      title: "Ajuste ERP",
+      title: t("columns.erpAdjustment"),
       dataIndex: "adjustment",
       key: "adjustment",
       render: (_: any, __: any, index: number) => (
@@ -300,7 +303,7 @@ const ModalBalanceLegalization = ({
       width: 145
     },
     {
-      title: "Diferencia",
+      title: t("columns.difference"),
       dataIndex: "difference",
       key: "difference",
       render: (_: any, row, index) => {
@@ -317,7 +320,7 @@ const ModalBalanceLegalization = ({
       align: "right"
     },
     {
-      title: "Observación",
+      title: t("columns.observation"),
       dataIndex: "observation",
       key: "observation",
       render: (_: any, row, index) => (
@@ -328,7 +331,7 @@ const ModalBalanceLegalization = ({
           render={({ field, fieldState }) => (
             <Input
               {...field}
-              placeholder="Agrega un comentario"
+              placeholder={t("commentPlaceholder")}
               className={fieldState.invalid ? "inputText inputText__error" : "inputText"}
             />
           )}
@@ -364,10 +367,8 @@ const ModalBalanceLegalization = ({
       onCancel={closeModal}
       destroyOnClose
     >
-      <h3 className="modalBalanceLegalization__title">Legalización de Saldos</h3>
-      <p className="modalBalanceLegalization__description">
-        Selecciona la Nota crédito generada para la Legalización del saldo.
-      </p>
+      <h3 className="modalBalanceLegalization__title">{t("title")}</h3>
+      <p className="modalBalanceLegalization__description">{t("description")}</p>
 
       <Table
         className="modalBalanceLegalization__documentsTable"

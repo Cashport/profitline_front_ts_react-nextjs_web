@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import { AxiosResponse } from "axios";
 import config from "@/config";
 import { API } from "@/utils/api/api";
@@ -49,7 +50,7 @@ export const addShipTo = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `El Ship To fue creado exitosamente.`
+        content: getTranslator("shared")("services.shipToCreated")
       });
     } else {
       console.warn("Error creating Ship To: ", response);
@@ -119,12 +120,12 @@ export const updateShipTo = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `El Ship To fue actualizado exitosamente.`
+        content: getTranslator("shared")("services.shipToUpdated")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error actualizando Ship To."
+        content: getTranslator("shared")("services.updateShipToError")
       });
     }
 
@@ -151,12 +152,12 @@ export const deleteShipToByCode = async (
     if (response.status === SUCCESS) {
       messageApi.open({
         type: "success",
-        content: `El Ship To fue eliminado exitosamente.`
+        content: getTranslator("shared")("services.shipToDeleted")
       });
     } else {
       messageApi.open({
         type: "error",
-        content: "Oops ocurrio un error eliminando Ship To."
+        content: getTranslator("shared")("services.deleteShipToError")
       });
     }
     return response;
@@ -164,7 +165,7 @@ export const deleteShipToByCode = async (
     console.warn("Error deleting Ship To: ", error);
     messageApi.open({
       type: "error",
-      content: "Oops ocurrio un error eliminando Ship To."
+      content: getTranslator("shared")("services.deleteShipToError")
     });
     return error as any;
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import {
   FilterModal,
@@ -33,6 +34,7 @@ const idOf = (sel: FilterSelection, key: FieldKey) => sel[key]?.[0]?.id ?? null;
  * El cliente se busca en la barra (TorreToolbar); los chips los pinta FilterChips.
  */
 export default function FiltersPopover({ data }: { data?: ICollectionTower }) {
+  const tc = useTranslations("collections.filters");
   const { filters: f, patch, clear } = useTowerFilters();
   const [draft, setDraft] = useState<FilterSelection>({});
 
@@ -68,20 +70,25 @@ export default function FiltersPopover({ data }: { data?: ICollectionTower }) {
   const categories: FilterCategoryConfig[] = [
     {
       key: "management",
-      label: "Gerencia",
+      label: tc("management"),
       selectMode: "single",
       options: toOptions(cat?.managements ?? [])
     },
     {
       key: "coordinator",
-      label: "Coordinador",
+      label: tc("coordinator"),
       selectMode: "single",
       options: toOptions(coordinators)
     },
-    { key: "executive", label: "Ejecutivo", selectMode: "single", options: toOptions(executives) },
+    {
+      key: "executive",
+      label: tc("executive"),
+      selectMode: "single",
+      options: toOptions(executives)
+    },
     {
       key: "channel",
-      label: "Canal",
+      label: tc("channel"),
       selectMode: "single",
       options: toOptions(cat?.channels ?? [])
     }

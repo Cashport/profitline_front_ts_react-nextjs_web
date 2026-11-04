@@ -9,8 +9,9 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { Modal, Spin } from "antd";
 import { getWhatsAppTemplates } from "@/services/chat/chat";
 import { IWhatsAppTemplate } from "@/types/chat/IChat";
+import { useTranslations } from "use-intl";
 
-type EmailTemplate = { id: string; name: string; subject: string; body: string };
+type EmailTemplate = { id: string; key: "accountSummary" | "formalReminder" };
 
 type Payload = { channel: "whatsapp"; content: string; templateId: string };
 
@@ -23,19 +24,19 @@ type Props = {
 };
 
 const emailTemplates: EmailTemplate[] = [
-  {
-    id: "e1",
-    name: "Resumen de cuenta",
-    subject: "Resumen de tu estado de cuenta",
-    body: "Hola {nombre},\n\nAdjuntamos tu estado de cuenta correspondiente a {periodo}. Si ya realizaste el pago, por favor ignora este mensaje.\n\nSaludos,\nEquipo Cashport"
-  },
-  {
-    id: "e2",
-    name: "Recordatorio de pago formal",
-    subject: "Recordatorio de pago - {fecha_vencimiento}",
-    body: "Estimado/a {nombre},\n\nTe recordamos que tu obligación con vencimiento el {fecha_vencimiento} presenta {dias_atraso} días de atraso. Monto pendiente: {monto}.\n\nPuedes regularizar aquí: {link_pago}\n\nAtentamente,\nEquipo Cashport"
-  }
+  { id: "e1", key: "accountSummary" },
+  { id: "e2", key: "formalReminder" }
 ];
+
+// Variables de plantilla que interpreta el envío: se muestran tal cual, no se traducen.
+const TOKENS = {
+  name: "{nombre}",
+  period: "{periodo}",
+  dueDate: "{fecha_vencimiento}",
+  daysPastDue: "{dias_atraso}",
+  amount: "{monto}",
+  paymentLink: "{link_pago}"
+};
 
 export default function TemplateDialog({
   open,
@@ -44,6 +45,8 @@ export default function TemplateDialog({
   onUse,
   loading = false
 }: Props) {
+  const t = useTranslations("chat.templates");
+  const tCommon = useTranslations("common");
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
@@ -68,7 +71,7 @@ export default function TemplateDialog({
       onCancel={() => onOpenChange(false)}
       footer={null}
       width="60%"
-      title={`Plantillas de ${channel === "whatsapp" ? "WhatsApp" : "Correo"}`}
+      title={t("title", { channel })}
     >
       <div className="relative">
         {loading && (
@@ -79,9 +82,9 @@ export default function TemplateDialog({
 
         <Tabs defaultValue="usar" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-[#F7F7F7]">
-            <TabsTrigger value="usar">Usar</TabsTrigger>
+            <TabsTrigger value="usar">{t("tabs.use")}</TabsTrigger>
             <TabsTrigger disabled value="crear">
-              Crear
+              {tCommon("actions.create")}
             </TabsTrigger>
           </TabsList>
 
@@ -101,7 +104,7 @@ export default function TemplateDialog({
                       <div className="mb-2 flex items-center justify-between">
                         <div className="font-medium">{tpl.id}</div>
                         <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
-                          Texto
+                          {t("textBadge")}
                         </Badge>
                       </div>
                       <pre className="whitespace-pre-wrap text-sm text-[#606060]">
@@ -120,7 +123,7 @@ export default function TemplateDialog({
                           }
                           disabled={tpl.usage === "INTERNAL"}
                         >
-                          Enviar
+                          {tCommon("actions.send")}
                         </Button>
                       </div>
                     </div>
@@ -136,16 +139,18 @@ export default function TemplateDialog({
                     style={{ borderColor: "#DDDDDD" }}
                   >
                     <div className="mb-2 flex items-center justify-between">
-                      <div className="font-medium">{tpl.name}</div>
+                      <div className="font-medium">{t(`email.${tpl.key}.name`)}</div>
                       <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
-                        Correo
+                        {t("emailBadge")}
                       </Badge>
                     </div>
                     <div className="text-sm">
-                      <div className="font-semibold">Asunto</div>
-                      <div className="text-[#606060]">{tpl.subject}</div>
-                      <div className="mt-2 font-semibold">Cuerpo</div>
-                      <pre className="whitespace-pre-wrap text-sm text-[#606060]">{tpl.body}</pre>
+                      <div className="font-semibold">{t("subject")}</div>
+                      <div className="text-[#606060]">{t(`email.${tpl.key}.subject`, TOKENS)}</div>
+                      <div className="mt-2 font-semibold">{t("body")}</div>
+                      <pre className="whitespace-pre-wrap text-sm text-[#606060]">
+                        {t(`email.${tpl.key}.body`, TOKENS)}
+                      </pre>
                     </div>
                     <div className="mt-3 flex justify-end">
                       <Button
@@ -155,7 +160,7 @@ export default function TemplateDialog({
                           onOpenChange(false);
                         }}
                       >
-                        Insertar
+                        {t("insert")}
                       </Button>
                     </div>
                   </div>
@@ -166,7 +171,7 @@ export default function TemplateDialog({
 
           <TabsContent value="crear" className="space-y-3 pt-4">
             <Input
-              placeholder="Nombre de la plantilla"
+              placeholder={t("namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="bg-[#F7F7F7]"
@@ -175,16 +180,14 @@ export default function TemplateDialog({
             {channel === "whatsapp" ? (
               <>
                 <Textarea
-                  placeholder="Contenido con variables: Hola {nombre}, ..."
+                  placeholder={t("contentPlaceholder", TOKENS)}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   className="min-h-[160px] bg-[#F7F7F7]"
                   style={{ borderColor: "#DDDDDD" }}
                 />
                 <div className="flex items-center justify-between">
-                  <div className="text-[13px] text-muted-foreground">
-                    Tip: Usa variables entre llaves, por ejemplo {"{nombre}"}.
-                  </div>
+                  <div className="text-[13px] text-muted-foreground">{t("waTip", TOKENS)}</div>
                   <Button
                     disabled={!canCreateWA}
                     className="text-[#141414]"
@@ -194,30 +197,28 @@ export default function TemplateDialog({
                       onOpenChange(false);
                     }}
                   >
-                    Insertar en el mensaje
+                    {t("insertInMessage")}
                   </Button>
                 </div>
               </>
             ) : (
               <>
                 <Input
-                  placeholder="Asunto del correo"
+                  placeholder={t("subjectPlaceholder")}
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   className="bg-[#F7F7F7]"
                   style={{ borderColor: "#DDDDDD" }}
                 />
                 <Textarea
-                  placeholder="Cuerpo del correo con variables: Estimado {nombre}, ..."
+                  placeholder={t("bodyPlaceholder", TOKENS)}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   className="min-h-[160px] bg-[#F7F7F7]"
                   style={{ borderColor: "#DDDDDD" }}
                 />
                 <div className="flex items-center justify-between">
-                  <div className="text-[13px] text-muted-foreground">
-                    Tip: Puedes usar variables como {"{nombre}"} y {"{periodo}"}.
-                  </div>
+                  <div className="text-[13px] text-muted-foreground">{t("emailTip", TOKENS)}</div>
                   <Button
                     disabled={!canCreateEmail}
                     className="text-[#141414]"
@@ -226,7 +227,7 @@ export default function TemplateDialog({
                       onOpenChange(false);
                     }}
                   >
-                    Insertar en el correo
+                    {t("insertInEmail")}
                   </Button>
                 </div>
               </>

@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
@@ -9,12 +10,7 @@ import StatusChip from "@/modules/walletModule/components/shared/status-chip";
 import type { SortState } from "@/modules/walletModule/types";
 import { cn } from "@/utils/utils";
 import type { ICollectionTower, ITowerSeries } from "@/types/collectionTower/ICollectionTower";
-import {
-  AGREEMENT_COMPLIANCE_OK,
-  AGREEMENT_COMPLIANCE_WARN,
-  GROUPING_BY_ID,
-  TONE_TEXT
-} from "../../constants";
+import { AGREEMENT_COMPLIANCE_OK, AGREEMENT_COMPLIANCE_WARN, TONE_TEXT } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { useProgressiveRows } from "../../hooks/use-progressive-rows";
 import type { Grouping } from "../../types";
@@ -47,22 +43,31 @@ import TowerTooltip from "../shared/tower-tooltip";
 const GROUPING_OPTIONS: Grouping[] = ["executive", "client", "channel", "coordinator"];
 
 /** Columnas ordenables (mismas llaves que el `sort_by` del Excel). */
+/** Columnas con nombre propio (`collections.executivesTable.columns`); la del nombre es la agrupación. */
+type ExecutiveCol =
+  | "progress"
+  | "collected"
+  | "goal"
+  | "diff"
+  | "pending"
+  | "forecast"
+  | "agreementsCompliance";
+
 const COLUMNS: {
-  col: string;
-  label: string;
+  col: "name" | ExecutiveCol;
   align?: "right";
   width: string;
   /** Dirección del primer clic. */
   dir: SortState["dir"];
 }[] = [
-  { col: "name", label: "", width: "w-[19%]", dir: "asc" },
-  { col: "progress", label: "Avance", width: "w-[21%] pl-[18px]", dir: "desc" },
-  { col: "collected", label: "Recaudo", align: "right", width: "w-[10%]", dir: "desc" },
-  { col: "goal", label: "Meta", align: "right", width: "w-[10%]", dir: "desc" },
-  { col: "diff", label: "Dif. vs meta", align: "right", width: "w-[10%]", dir: "asc" },
-  { col: "pending", label: "Acuerdos", align: "right", width: "w-[10%]", dir: "desc" },
-  { col: "forecast", label: "Forecast", align: "right", width: "w-[10%]", dir: "desc" },
-  { col: "agreementsCompliance", label: "% Cumpl.", align: "right", width: "w-[10%]", dir: "asc" }
+  { col: "name", width: "w-[19%]", dir: "asc" },
+  { col: "progress", width: "w-[21%] pl-[18px]", dir: "desc" },
+  { col: "collected", align: "right", width: "w-[10%]", dir: "desc" },
+  { col: "goal", align: "right", width: "w-[10%]", dir: "desc" },
+  { col: "diff", align: "right", width: "w-[10%]", dir: "asc" },
+  { col: "pending", align: "right", width: "w-[10%]", dir: "desc" },
+  { col: "forecast", align: "right", width: "w-[10%]", dir: "desc" },
+  { col: "agreementsCompliance", align: "right", width: "w-[10%]", dir: "asc" }
 ];
 
 /** Valor de cada columna para ordenar; sin acuerdos vencidos, el % va al final. */
@@ -104,6 +109,7 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
   fulfilled,
   onSelect
 }: ExecutiveRowViewProps) {
+  const tc = useTranslations("collections.executivesTable");
   const td = isTotal ? TD_TOTAL : TD;
   const compliance = r.goal ? r.collected / r.goal : 0;
   const forecastRatio = r.goal ? r.forecast / r.goal : 0;
@@ -130,7 +136,7 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
     >
       <td className={td}>
         {isTotal ? (
-          "Total"
+          tc("total")
         ) : (
           <>
             <span className={byClient ? NAME : PERSON}>{r.name}</span>
@@ -147,22 +153,22 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
               {
                 key: "rec",
                 color: collected.color,
-                label: "Recaudado",
+                label: tc("collected"),
                 value: `${money(r.collected)} · ${pct(compliance, 0)}`
               },
               {
                 key: "pen",
                 color: pendingAgreements.color,
-                label: "Acuerdos vigentes",
+                label: tc("activeAgreements"),
                 value: money(r.pending)
               },
               {
                 key: "fc",
                 color: withAlpha(FORECAST, 0.16),
-                label: "Forecast",
+                label: tc("columns.forecast"),
                 value: `${money(r.forecast)} · ${pct(forecastRatio, 0)}`
               },
-              { key: "meta", color: FOREGROUND, label: "Meta", value: money(r.goal) }
+              { key: "meta", color: FOREGROUND, label: tc("columns.goal"), value: money(r.goal) }
             ]}
           >
             <div className="flex max-w-[260px] flex-col gap-[5px]">
@@ -193,7 +199,7 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
             </div>
           </TowerTooltip>
         ) : (
-          <span className={NO_GOAL}>Sin meta</span>
+          <span className={NO_GOAL}>{tc("noGoal")}</span>
         )}
       </td>
       <td className={cn(td, "text-right")}>
@@ -212,19 +218,24 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
       </td>
       <td className={cn(td, "text-right")}>
         <TowerTooltip
-          title="Forecast"
+          title={tc("columns.forecast")}
           rows={[
-            { key: "rec", color: collected.color, label: "Recaudado", value: money(r.collected) },
+            {
+              key: "rec",
+              color: collected.color,
+              label: tc("collected"),
+              value: money(r.collected)
+            },
             {
               key: "pen",
               color: pendingAgreements.color,
-              label: "Acuerdos vigentes",
+              label: tc("activeAgreements"),
               value: money(r.pending)
             },
             {
               key: "dif",
               color: FOREGROUND,
-              label: "Frente a la meta",
+              label: tc("vsTarget"),
               value: money(r.forecast - r.goal, true)
             }
           ]}
@@ -239,15 +250,15 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
           chip
         ) : (
           <TowerTooltip
-            title="Cumplimiento de acuerdos"
+            title={tc("complianceTitle")}
             rows={[
               {
                 key: "pag",
                 color: fulfilled,
-                label: "Pagado de lo vencido",
+                label: tc("paidOfDue"),
                 value: pct(agreementsCompliance)
               },
-              { key: "n", label: "Acuerdos vencidos", value: String(r.overdueCount) }
+              { key: "n", label: tc("overdueAgreements"), value: String(r.overdueCount) }
             ]}
           >
             <span>{chip}</span>
@@ -264,13 +275,14 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
  * Alto máximo ≈ 650 px con scroll interno; encabezado y total fijos.
  */
 export default function ExecutivesTable({ data }: { data: ICollectionTower }) {
+  const tc = useTranslations("collections");
   const { filters, patch } = useTowerFilters();
   const [by, setBy] = useState<Grouping>("executive");
   // Por defecto, de mayor a menor forecast frente a la meta.
   const [sort, setSort] = useState<SortState>({ col: "progress", dir: "desc" });
   const scrollRef = useRef<HTMLDivElement>(null);
   const ix = indexCatalogs(data.catalogs);
-  const grouping = GROUPING_BY_ID[by];
+  const title = tc(`groupings.${by}.title`);
   const rows = useMemo(
     () => sortRows(executiveRows(data.clients, by, ix), sort, sortValue),
     [data.clients, by, ix, sort]
@@ -288,36 +300,48 @@ export default function ExecutivesTable({ data }: { data: ICollectionTower }) {
 
   return (
     <PanelCard
-      title={`${grouping.plural} frente a su meta`}
-      hint="clic para filtrar"
+      title={title}
+      hint={tc("executivesTable.hint")}
       flush
       actions={
         <>
           <Select
             size="small"
-            aria-label="Ver por"
+            aria-label={tc("executivesTable.viewBy")}
             className="w-[136px]"
             popupMatchSelectWidth={false}
             value={by}
-            options={GROUPING_OPTIONS.map((id) => ({ value: id, label: GROUPING_BY_ID[id].label }))}
+            options={GROUPING_OPTIONS.map((id) => ({
+              value: id,
+              label: tc(`groupings.${id}.label`)
+            }))}
             onChange={setBy}
           />
           <ExcelButton
             table="executives"
             state={{ groupBy: by, sortBy: sort.col, sortDir: sort.dir }}
-            name={`${grouping.plural} frente a su meta`}
+            name={title}
             periodLabel={data.period.label}
           />
         </>
       }
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px] text-foreground/80">
-        <LegendItem mark={<Swatch color={collected.color} />} label="Recaudado" />
-        <LegendItem mark={<Swatch color={pendingAgreements.color} />} label="Acuerdos vigentes" />
-        <LegendItem mark={<Swatch color={FORECAST} outline />} label="Forecast" />
+        <LegendItem
+          mark={<Swatch color={collected.color} />}
+          label={tc("executivesTable.collected")}
+        />
+        <LegendItem
+          mark={<Swatch color={pendingAgreements.color} />}
+          label={tc("executivesTable.activeAgreements")}
+        />
+        <LegendItem
+          mark={<Swatch color={FORECAST} outline />}
+          label={tc("executivesTable.columns.forecast")}
+        />
         <LegendItem
           mark={<i className="inline-block h-2 w-[3px] shrink-0 rounded-[1px] bg-foreground" />}
-          label="Meta"
+          label={tc("executivesTable.columns.goal")}
         />
       </div>
       {rows.length ? (
@@ -332,7 +356,11 @@ export default function ExecutivesTable({ data }: { data: ICollectionTower }) {
                   <SortableTh
                     key={c.col}
                     col={c.col}
-                    label={c.col === "name" ? grouping.singular : c.label}
+                    label={
+                      c.col === "name"
+                        ? tc(`groupings.${by}.singular`)
+                        : tc(`executivesTable.columns.${c.col}`)
+                    }
                     align={c.align}
                     sort={sort}
                     onSort={(col) => setSort((s) => nextSort(s, col, c.dir))}
@@ -357,7 +385,7 @@ export default function ExecutivesTable({ data }: { data: ICollectionTower }) {
           </table>
         </div>
       ) : (
-        <div className={cn(EMPTY, "border-t border-border")}>Sin datos para esta selección</div>
+        <div className={cn(EMPTY, "border-t border-border")}>{tc("executivesTable.empty")}</div>
       )}
     </PanelCard>
   );

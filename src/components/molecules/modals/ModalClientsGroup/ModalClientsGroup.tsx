@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { Flex, message, Modal, Typography } from "antd";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { groupInfo } from "@/components/organisms/projects/ClientsGroupsProjectView/ClientsGroupsProjectView";
 import { ClientsTableModal } from "../../tables/ClientsTableModal/ClientsTableModal";
@@ -32,6 +33,8 @@ export const ModalClientsGroup = ({
   updateClientsGroup,
   createGroup
 }: CreateGroupProps) => {
+  const t = useTranslations("modals.clientsGroup");
+  const tCommon = useTranslations("common");
   const [groupName, setGroupName] = useState("");
   const [clientsKeys, setClientsKeys] = useState<React.Key[]>([]);
   const [messageApi, contextHolder] = message.useMessage();
@@ -54,7 +57,7 @@ export const ModalClientsGroup = ({
 
   const onCreateGroup = () => {
     if (clientsKeys.length <= 0) {
-      messageApi.open({ type: "warning", content: "Selecciona clientes para añadir al grupo" });
+      messageApi.open({ type: "warning", content: t("selectCustomersWarning") });
       return;
     }
     if (clientsKeys.length > 0) {
@@ -87,7 +90,7 @@ export const ModalClientsGroup = ({
     <>
       {groupName === "" && !isEditGroup ? (
         <Modal
-          title="Nuevo Grupo de Clientes"
+          title={t("newTitle")}
           open={isOpen}
           onCancel={onCancel}
           okButtonProps={{
@@ -96,8 +99,8 @@ export const ModalClientsGroup = ({
           cancelButtonProps={{
             className: "buttonCancel"
           }}
-          okText="Continuar"
-          cancelText="Cancelar"
+          okText={tCommon("actions.continue")}
+          cancelText={tCommon("actions.cancel")}
           className="modalCreateClientsGroup"
           onOk={() => {
             handleSubmit(onSubmitName)();
@@ -105,10 +108,10 @@ export const ModalClientsGroup = ({
         >
           {contextHolder}
           <Flex vertical>
-            <Text>Ingresa el nombre del grupo de clientes</Text>
+            <Text>{t("enterName")}</Text>
             <form className="inputcreatezone">
               <InputForm
-                titleInput="Nombre del grupo"
+                titleInput={t("groupName")}
                 control={control}
                 nameInput="name"
                 error={errors.name}
@@ -118,7 +121,7 @@ export const ModalClientsGroup = ({
                   border: "1px solid white",
                   borderRadius: ".8rem"
                 }}
-                placeholder="Nombre"
+                placeholder={tCommon("fields.name")}
               />
             </form>
           </Flex>
@@ -135,19 +138,15 @@ export const ModalClientsGroup = ({
           cancelButtonProps={{
             className: "buttonCancel"
           }}
-          okText={isEditGroup ? "Actualizar grupo" : "Crear Grupo"}
-          cancelText="Cancelar"
+          okText={isEditGroup ? t("update") : t("create")}
+          cancelText={tCommon("actions.cancel")}
           className="modalCreateClientsGroup"
           onOk={() => {
             isEditGroup ? onUpdateGroup() : onCreateGroup();
           }}
         >
           <Flex vertical>
-            <Text>
-              {isEditGroup
-                ? "Selecciona los clientes para añadir/quitar del grupo"
-                : "Selecciona los clientes para añadir al grupo"}
-            </Text>
+            <Text>{isEditGroup ? t("selectToEdit") : t("selectToAdd")}</Text>
             <ClientsTableModal
               setClientsKeys={setClientsKeys}
               selectedClientsKeys={selectedGroupInfo?.clientsIds}

@@ -1,4 +1,5 @@
 import { Col, Flex, Row } from "antd";
+import { useTranslations } from "use-intl";
 import styles from "./ModalHeader.module.scss"; // Ajusta la ruta según tu estructura
 import { IInvoiceDetail } from "../../interfaces/interface";
 import { Calendar, Globe, Phone, User } from "phosphor-react";
@@ -8,13 +9,14 @@ interface ModalHeaderProps {
 }
 
 const ModalHeader: React.FC<ModalHeaderProps> = ({ invoice }) => {
+  const t = useTranslations("modals.orderTracking.header");
   if (!invoice) return <></>;
   return (
     <Flex gap={16} vertical style={{ padding: "16px 0px" }}>
       <Row>
         <Col span={8}>
           <User size={18} className={styles.icon} />
-          <span className={styles.label}>Cliente</span>
+          <span className={styles.label}>{t("customer")}</span>
         </Col>
         <Col span={16}>
           <span className={styles.value}>{invoice.client ?? ""}</span>
@@ -24,7 +26,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({ invoice }) => {
       <Row>
         <Col span={8}>
           <Calendar size={18} className={styles.icon} />
-          <span className={styles.label}>Fecha creación</span>
+          <span className={styles.label}>{t("createdAt")}</span>
         </Col>
         <Col span={16}>
           <span className={styles.value}>{invoice.createdAt ?? ""}</span>
@@ -34,7 +36,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({ invoice }) => {
       <Row>
         <Col span={8}>
           <Globe size={18} className={styles.icon} />
-          <span className={styles.label}>Entrega</span>
+          <span className={styles.label}>{t("delivery")}</span>
         </Col>
         <Col span={16}>
           <span className={styles.value}>{invoice.deliveryAddress}</span>
@@ -44,7 +46,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({ invoice }) => {
       <Row>
         <Col span={8}>
           <Phone size={18} className={styles.icon} />
-          <span className={styles.label}>Contacto</span>
+          <span className={styles.label}>{t("contact")}</span>
         </Col>
         <Col span={16}>
           <span className={styles.value}>{invoice.contact}</span>

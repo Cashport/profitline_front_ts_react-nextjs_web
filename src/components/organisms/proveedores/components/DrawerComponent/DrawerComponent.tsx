@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Drawer, Flex, Typography } from "antd";
 import { DotOutline } from "@phosphor-icons/react";
 import { CaretDoubleRight, Files, ListChecks } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
 import { getStatusDetails } from "../../utils/documentStatusMap";
 import { useDocument, useDrawerDocumentEvents } from "@/hooks/useDocument";
@@ -38,6 +39,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
   type,
   mutateSupplierInfo
 }) => {
+  const t = useTranslations("suppliers.drawer");
   const { document, isLoading, mutate } = useDocument(subjectId, documentId);
   const { events, mutate: mutateComments } = useDrawerDocumentEvents(subjectId, documentId);
   useEffect(() => {
@@ -57,7 +59,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
       title={
         <Flex vertical justify="flex-start">
           <Flex gap={8} align="center">
-            <button type="button" className="backButton" onClick={onClose}>
+            <button type="button" className="backButton" onClick={onClose} aria-label={t("close")}>
               <CaretDoubleRight />
             </button>
             <div
@@ -114,7 +116,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           />
         ) : (
           <ColumnText
-            title="Formulario"
+            title={t("form")}
             icon={<Files size={16} color="#7B7B7B" />}
             content={
               <Flex
@@ -129,10 +131,10 @@ const DrawerComponent: React.FC<DrawerProps> = ({
               >
                 <ListChecks size={16} color="#7B7B7B" />
                 <Typography.Text style={{ fontSize: 16, fontWeight: 400 }}>
-                  Formulario
+                  {t("form")}
                 </Typography.Text>
                 <Typography.Text style={{ fontSize: 13, fontWeight: 300 }}>
-                  10 Preguntas
+                  {t("questionCount", { count: 10 })}
                 </Typography.Text>
               </Flex>
             }

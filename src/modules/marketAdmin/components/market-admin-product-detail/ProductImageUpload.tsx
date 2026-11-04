@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Upload, Package } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 type Props = {
   imagen: string;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function ProductImageUpload({ imagen, alt, onChange }: Props) {
+  const t = useTranslations("marketAdmin.productDetail");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +39,7 @@ export default function ProductImageUpload({ imagen, alt, onChange }: Props) {
         onClick={() => fileInputRef.current?.click()}
         className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] border border-[#DDDDDD] hover:border-[#141414] px-3 py-2 rounded-lg transition-colors justify-center"
       >
-        <Upload size={13} /> Cambiar imagen
+        <Upload size={13} /> {t("changeImage")}
       </button>
     </div>
   );

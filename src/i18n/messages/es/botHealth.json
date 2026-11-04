@@ -1,0 +1,40 @@
+{
+  "status": {
+    "operational": "Operativo",
+    "failing": "Con fallas",
+    "running": "Ejecutando",
+    "inReview": "En revisión",
+    "noStatus": "Sin estado"
+  },
+  "summary": {
+    "total": "Total de bots"
+  },
+  "fields": {
+    "bot": "Bot",
+    "customer": "Cliente",
+    "country": "País",
+    "fileType": "Tipo de archivo",
+    "frequency": "Periodicidad",
+    "lastRun": "Última ejecución",
+    "runCount": "Cantidad de ejecuciones",
+    "errorMessage": "Mensaje de error",
+    "category": "Categoría",
+    "errorCode": "Código de error",
+    "failedStep": "Paso fallido",
+    "requiredAction": "Acción requerida"
+  },
+  "notAvailable": "No disponible",
+  "searchPlaceholder": "Buscar bot o cliente",
+  "drawer": {
+    "evidence": "Evidencia",
+    "evidenceAlt": "Evidencia del error",
+    "noEvidence": "Sin evidencia disponible",
+    "runBot": "Ejecutar bot",
+    "goToCustomerSettings": "Ir a configuración del cliente"
+  },
+  "actions": {
+    "run": "Ejecutar bot",
+    "viewDetail": "Ver detalle"
+  },
+  "headerTitle": "Salud de Automatizaciones"
+}

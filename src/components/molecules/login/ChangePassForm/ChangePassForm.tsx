@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useTranslations } from "use-intl";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { Flex, Input, notification, Tooltip } from "antd";
@@ -23,21 +24,32 @@ interface IChangePassForm {
   confirmPassword: string;
 }
 
-const schema = yup.object().shape({
-  password: yup
-    .string()
-    .min(8, "La contraseña debe tener al menos 8 caracteres")
-    .max(32, "La contraseña no puede tener más de 32 caracteres")
-    .matches(/[a-z]/, "La contraseña debe contener al menos una minúscula")
-    .matches(/[A-Z]/, "La contraseña debe contener al menos una mayúscula")
-    .matches(/\d/, "La contraseña debe contener al menos un número")
-    .matches(/[!@#$%^&*(),.?":{}|<>]/, "La contraseña debe contener al menos un carácter especial")
-    .required(),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "Las contraseñas no coinciden")
-    .required()
-});
+// eslint-disable-next-line no-unused-vars
+const buildSchema = (t: (key: PasswordRuleKey) => string) =>
+  yup.object().shape({
+    password: yup
+      .string()
+      .min(8, t("rules.minLength"))
+      .max(32, t("rules.maxLength"))
+      .matches(/[a-z]/, t("rules.lowercase"))
+      .matches(/[A-Z]/, t("rules.uppercase"))
+      .matches(/\d/, t("rules.number"))
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, t("rules.special"))
+      .required(),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref("password")], t("rules.mismatch"))
+      .required()
+  });
+
+type PasswordRuleKey =
+  | "rules.minLength"
+  | "rules.maxLength"
+  | "rules.lowercase"
+  | "rules.uppercase"
+  | "rules.number"
+  | "rules.special"
+  | "rules.mismatch";
 
 interface ChangePassFormProps {
   mode: "accept" | "reset" | "expired";
@@ -53,23 +65,27 @@ interface ChangePassFormProps {
 }
 
 export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProps) => {
+  const t = useTranslations("auth.changePassword");
+  const tPassword = useTranslations("auth.password");
+  const schema = useMemo(() => buildSchema(tPassword), [tPassword]);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
-  const token = mode === "expired" ? null : searchParams.get(mode === "accept" ? "token" : "oobCode");
+  const token =
+    mode === "expired" ? null : searchParams.get(mode === "accept" ? "token" : "oobCode");
   const copyText =
     mode === "accept"
       ? {
-          title: "Crea una nueva contraseña",
-          text: "Ingresa tu nueva contraseña"
+          title: t("accept.title"),
+          text: t("accept.text")
         }
       : mode === "expired"
         ? {
-            title: "Tu contraseña ha vencido",
-            text: "Crea una nueva contraseña para continuar"
+            title: t("expired.title"),
+            text: t("expired.text")
           }
         : {
-            title: "Restablece tu contraseña",
-            text: "Ingresa tu nueva contraseña"
+            title: t("reset.title"),
+            text: t("reset.text")
           };
   const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
@@ -99,21 +115,21 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
       openNotification({
         api: api,
         type: "success",
-        title: "Contraseña restablecida",
-        message: "Tu contraseña ha sido restablecida"
+        title: t("reset.successTitle"),
+        message: t("reset.successMessage")
       });
       setTimeout(() => {
         router.push("/");
       }, 1500);
     } catch (error) {
-      let message = "Hubo un error al restablecer la contraseña, pruebe mandar otro correo";
+      let message = t("reset.error");
       if (error instanceof ApiError) {
         message = error.message;
       }
       openNotification({
         api: api,
         type: "error",
-        title: "Error",
+        title: t("errorTitle"),
         message
       });
     }
@@ -128,21 +144,21 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
       openNotification({
         api: api,
         type: "success",
-        title: "Contraseña creada",
-        message: "Tu contraseña ha sido creada"
+        title: t("accept.successTitle"),
+        message: t("accept.successMessage")
       });
       setTimeout(() => {
         router.push("/");
       }, 1500);
     } catch (error) {
-      let message = "Hubo un error al crear la contraseña, pruebe mandar otro correo";
+      let message = t("accept.error");
       if (error instanceof ApiError) {
         message = error.message;
       }
       openNotification({
         api: api,
         type: "error",
-        title: "Error",
+        title: t("errorTitle"),
         message: message
       });
     }
@@ -159,14 +175,14 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
       }
       // "success" already redirected inside completeLoginAfterPasswordChange.
     } catch (error) {
-      let message = "Hubo un error al actualizar la contraseña, inténtalo de nuevo";
+      let message = t("expired.error");
       if (error instanceof ApiError) {
         message = error.message;
       }
       openNotification({
         api: api,
         type: "error",
-        title: "Error",
+        title: t("errorTitle"),
         message: message
       });
     }
@@ -191,7 +207,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
 
       <Flex vertical gap={"1.5rem"} className="changePassForm__content">
         <div>
-          <p className="changePassForm__inputTitle">Nueva Contraseña</p>
+          <p className="changePassForm__inputTitle">{t("newPassword")}</p>
           <Controller
             name="password"
             control={control}
@@ -202,7 +218,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
                   size="large"
                   type={showPassword.password ? "text" : "password"}
                   className="inputPassword"
-                  placeholder="Contrasena"
+                  placeholder={tPassword("placeholder")}
                   variant="borderless"
                   required
                   autoComplete="current-password"
@@ -219,7 +235,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
                     return false;
                   }}
                   suffix={
-                    <Tooltip title={showPassword.password ? "Hidden Password" : "Show Password"}>
+                    <Tooltip title={showPassword.password ? tPassword("hide") : tPassword("show")}>
                       {!showPassword.password ? (
                         <Eye
                           onClick={() => {
@@ -251,7 +267,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
           />
         </div>
         <div>
-          <p className="changePassForm__inputTitle">Confirmar contraseña</p>
+          <p className="changePassForm__inputTitle">{t("confirmPassword")}</p>
           <Controller
             name="confirmPassword"
             control={control}
@@ -262,7 +278,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
                   size="large"
                   type={showPassword.confirmPassword ? "text" : "password"}
                   className="inputPassword"
-                  placeholder="Contrasena"
+                  placeholder={tPassword("placeholder")}
                   variant="borderless"
                   required
                   autoComplete="current-password"
@@ -280,7 +296,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
                   }}
                   suffix={
                     <Tooltip
-                      title={showPassword.confirmPassword ? "Hidden Password" : "Show Password"}
+                      title={showPassword.confirmPassword ? tPassword("hide") : tPassword("show")}
                     >
                       {!showPassword.confirmPassword ? (
                         <Eye
@@ -317,7 +333,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProp
       </Flex>
 
       <PrincipalButton disabled={!isValid} loading={isLoading} htmlType="submit">
-        {mode === "expired" ? "Actualizar contraseña" : "Restablecer contraseña"}
+        {mode === "expired" ? t("submitUpdate") : t("submitReset")}
       </PrincipalButton>
     </form>
   );

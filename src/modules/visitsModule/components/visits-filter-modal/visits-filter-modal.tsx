@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useTranslations } from "use-intl";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -11,13 +12,9 @@ import type {
 
 import {
   EMPTY_VISITS_FILTERS,
-  OPERATION_LABELS,
   OPERATION_ORDER,
   PROJECT_ORDER,
-  PROJECTS,
-  RESULT_LABELS,
   RESULT_ORDER,
-  STATUS_LABELS,
   STATUS_ORDER
 } from "../../constants";
 import type {
@@ -72,13 +69,15 @@ export default function VisitsFilterModal({
   barEnd,
   inHeader
 }: VisitsFilterModalProps) {
+  const tv = useTranslations("visits");
+  const tCommon = useTranslations("common");
   const proyectoOptions: FilterOptionItem[] = PROJECT_ORDER.map((p) => ({
     id: p,
-    name: PROJECTS[p].name
+    name: tv(`projects.${p}.name`)
   }));
   const operacionOptions: FilterOptionItem[] = OPERATION_ORDER.map((o) => ({
     id: o,
-    name: OPERATION_LABELS[o]
+    name: tv(`operation.${o}`)
   }));
   const zonaOptions: FilterOptionItem[] = zones.map((z) => ({ id: z.id, name: z.name }));
   const ciudadOptions: FilterOptionItem[] = Array.from(new Set(zones.map((z) => z.city))).map(
@@ -92,11 +91,11 @@ export default function VisitsFilterModal({
     .sort(byName);
   const estadoOptions: FilterOptionItem[] = STATUS_ORDER.map((s) => ({
     id: s,
-    name: STATUS_LABELS[s]
+    name: tv(`status.${s}`)
   }));
   const resultadoOptions: FilterOptionItem[] = RESULT_ORDER.map((r) => ({
     id: r,
-    name: RESULT_LABELS[r]
+    name: tv(`result.${r}`)
   }));
 
   const selection: FilterSelection = {
@@ -122,14 +121,14 @@ export default function VisitsFilterModal({
   });
 
   const categories: FilterCategoryConfig[] = [
-    { key: "proyecto", label: "Proyecto", options: proyectoOptions },
-    { key: "operacion", label: "Tipo de operación", options: operacionOptions },
-    { key: "zona", label: "Zona", options: zonaOptions },
-    { key: "ciudad", label: "Ciudad", options: ciudadOptions },
-    { key: "asesor", label: "Asesor", options: asesorOptions },
-    { key: "cliente", label: "Cliente", options: clienteOptions },
-    { key: "estado", label: "Estado", options: estadoOptions },
-    { key: "resultado", label: "Resultado", options: resultadoOptions }
+    { key: "proyecto", label: tv("filters.project"), options: proyectoOptions },
+    { key: "operacion", label: tv("filters.operation"), options: operacionOptions },
+    { key: "zona", label: tv("filters.zone"), options: zonaOptions },
+    { key: "ciudad", label: tv("filters.city"), options: ciudadOptions },
+    { key: "asesor", label: tv("filters.salesRep"), options: asesorOptions },
+    { key: "cliente", label: tCommon("fields.customer"), options: clienteOptions },
+    { key: "estado", label: tCommon("fields.status"), options: estadoOptions },
+    { key: "resultado", label: tv("filters.result"), options: resultadoOptions }
   ];
 
   return (
@@ -137,7 +136,7 @@ export default function VisitsFilterModal({
       categories={categories}
       value={selection}
       formatTagValue={(_cat, items) =>
-        items.length === 1 ? items[0].name : `${items.length} seleccionados`
+        items.length === 1 ? items[0].name : tv("filters.selectedCount", { count: items.length })
       }
       onApply={(sel) => onChange(selectionToDomain(sel))}
       onValueChange={(sel) => onChange(selectionToDomain(sel))}

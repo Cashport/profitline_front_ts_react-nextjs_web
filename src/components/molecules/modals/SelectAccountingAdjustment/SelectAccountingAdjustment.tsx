@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "./selectAccountingAdjustment.scss";
 import { Flex, Spin } from "antd";
+import { useTranslations } from "use-intl";
 import { ISelectedAccountingAdjustment } from "../ModalActionDiscountCredit/ModalActionDiscountCredit";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import ItemsActionsModal from "@/components/atoms/ItemsModal/ItemsActionsModal";
@@ -35,6 +36,8 @@ export const SelectAccountingAdjustment = ({
   clientIdParam,
   projectIdParam
 }: Props) => {
+  const t = useTranslations("modals.selectAccountingAdjustment");
+  const tCommon = useTranslations("common");
   const { data, isLoading } = useAcountingAdjustment(
     clientIdParam || "0",
     projectIdParam || "0",
@@ -71,7 +74,7 @@ export const SelectAccountingAdjustment = ({
 
   return (
     <div className="modalContent">
-      <p className="subTitleModalAction">{subtitleMap[type || 1]}</p>
+      <p className="subTitleModalAction">{t(subtitleMap[type || 1] ?? subtitleMap[1])}</p>
       <Flex vertical className="conten_modal_select_ajust">
         <div className="modalContentScroll">
           {isLoading ? (
@@ -93,7 +96,7 @@ export const SelectAccountingAdjustment = ({
             className="button__create__action"
             onClick={() => setCurrentView("create")}
           >
-            <Plus /> Crear {typeMap[type || 1]}
+            <Plus /> {t(typeMap[type || 1] ?? typeMap[1])}
           </button>
           <FooterButtons
             handleOk={() => {
@@ -101,7 +104,7 @@ export const SelectAccountingAdjustment = ({
             }}
             onClose={onClose}
             isConfirmDisabled={!selectedRows.length}
-            titleConfirm="Continuar"
+            titleConfirm={tCommon("actions.continue")}
           />
         </Flex>
       </Flex>
@@ -109,14 +112,14 @@ export const SelectAccountingAdjustment = ({
   );
 };
 
-const typeMap: Record<number, string> = {
-  1: "débito",
-  2: "crédito",
-  3: "descuento"
+const typeMap: Record<number, "createDebit" | "createCredit" | "createDiscount"> = {
+  1: "createDebit",
+  2: "createCredit",
+  3: "createDiscount"
 };
 
-const subtitleMap: Record<number, string> = {
-  1: "Selecciona la(s) nota(s) débito a aplicar",
-  2: "Selecciona la(s) nota(s) crédito a aplicar",
-  3: "Selecciona los descuento a aplicar"
+const subtitleMap: Record<number, "selectDebitMemos" | "selectCreditMemos" | "selectDiscounts"> = {
+  1: "selectDebitMemos",
+  2: "selectCreditMemos",
+  3: "selectDiscounts"
 };

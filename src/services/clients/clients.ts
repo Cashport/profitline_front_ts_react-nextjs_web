@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import axios, { AxiosResponse } from "axios";
 import config from "@/config";
 import { API } from "@/utils/api/api";
@@ -71,7 +72,7 @@ export const createClient = async (
     const response = await API.post(`${config.API_HOST}/client`, formData);
 
     if (response.status === SUCCESS) {
-      showMessage("success", "El Cliente fue creado exitosamente.");
+      showMessage("success", getTranslator("shared")("services.customerCreated"));
       return response;
     }
 
@@ -79,7 +80,7 @@ export const createClient = async (
   } catch (error) {
     console.warn("error creating new client: ", error);
 
-    showMessage("error", "error creando cliente");
+    showMessage("error", getTranslator("shared")("services.createCustomerError"));
 
     throw error;
   }
@@ -145,13 +146,13 @@ export const updateClient = async (
     );
 
     if (response.status === SUCCESS) {
-      showMessage("success", "El Cliente fue actualizado exitosamente.");
+      showMessage("success", getTranslator("shared")("services.customerUpdated"));
       return response;
     }
     return response;
   } catch (error) {
     console.warn("error updating client: ", error);
-    showMessage("error", "error actualizando cliente");
+    showMessage("error", getTranslator("shared")("services.updateCustomerError"));
     throw error;
   }
 };
@@ -167,10 +168,10 @@ export const deleteClientById = async (
     const response = await API.delete(`${config.API_HOST}/client/${idUser}/project/${projectId}`);
 
     if (response.status === SUCCESS) {
-      showMessage("success", "El Cliente fue eliminado exitosamente.");
+      showMessage("success", getTranslator("shared")("services.customerDeleted"));
       onClose();
     } else {
-      showMessage("error", "Oops ocurrio un error.");
+      showMessage("error", getTranslator("shared")("services.genericError"));
       onClose();
     }
 
@@ -217,14 +218,14 @@ export const changeClientStatus = async (
     });
 
     if (response.status === 200) {
-      showMessage("success", "Estado del cliente cambiado exitosamente.");
+      showMessage("success", getTranslator("shared")("services.customerStatusChanged"));
     } else {
-      showMessage("error", "Oops, ocurrió un error cambiando el estado del cliente.");
+      showMessage("error", getTranslator("shared")("services.customerStatusError"));
     }
     return response;
   } catch (error) {
     console.warn("Error cambiando el estado del cliente: ", error);
-    showMessage("error", "Oops, ocurrió un error cambiando el estado del cliente.");
+    showMessage("error", getTranslator("shared")("services.customerStatusError"));
     throw error;
   }
 };
@@ -259,12 +260,12 @@ export const editClientDocument = async ({
     const response = await API.put(`${config.API_HOST}/client/change-documents`, formData, {});
 
     if (response.status === SUCCESS) {
-      showMessage("success", "Documento actualizado exitosamente.");
+      showMessage("success", getTranslator("shared")("services.documentUpdated"));
       return response;
     }
   } catch (error) {
     console.warn("Error editando documentos cliente: ", error);
-    showMessage("error", "Oops, ocurrió un error editando el documento del cliente.");
+    showMessage("error", getTranslator("shared")("services.customerDocumentError"));
     alert("error");
     throw error;
   }

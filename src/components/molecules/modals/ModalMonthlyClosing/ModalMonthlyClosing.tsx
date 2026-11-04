@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { Flex, Input, message, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import {
   closeMonthByProject,
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
+  const t = useTranslations("modals.monthlyClosing");
   const [confirmationText, setConfirmationText] = useState<string>();
   const [closeMonthData, setCloseMonthData] = useState<IGetCloseMonth>();
   const [noCloseMonths, setNoCloseMonths] = useState<boolean>(false);
@@ -34,7 +36,7 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
         const closeMonths = await getCloseMonthByProject(ID);
         setCloseMonthData(closeMonths);
       } catch (error) {
-        message.error("Error al obtener el cierre de mes");
+        message.error(t("fetchError"));
         setNoCloseMonths(true);
       }
     };
@@ -47,13 +49,13 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
     if (confirmationText === closeMonthData?.collection_period) {
       try {
         await closeMonthByProject(ID, confirmationText || "");
-        message.success("Periodo contable cerrado con éxito");
+        message.success(t("success"));
         handleCancel();
       } catch (error) {
-        message.error("Error al cerrar periodo contable");
+        message.error(t("closeError"));
       }
     } else {
-      message.error("El texto de confirmación no coincide");
+      message.error(t("mismatch"));
     }
     setLoadingRequest(false);
   };
@@ -74,33 +76,33 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
       centered
       title={
         <Title className="modalMonthlyClosing__title" level={4}>
-          Cerrar periodo contable
+          {t("title")}
         </Title>
       }
       footer={null}
       onCancel={handleCancel}
     >
       {noCloseMonths ? (
-        <p className="modalMonthlyClosing__description">No hay cierre para este proyecto</p>
+        <p className="modalMonthlyClosing__description">{t("noClosing")}</p>
       ) : (
         <Flex vertical gap="1.25rem" align="center">
           <p className="modalMonthlyClosing__description">
-            Vas a cerrar el periodo <strong>{closeMonthData?.collection_period}</strong> que va
-            desde el{" "}
-            <strong>
-              {closeMonthData?.start_date
+            {t.rich("description", {
+              period: closeMonthData?.collection_period ?? "",
+              start: closeMonthData?.start_date
                 ? dayjs(closeMonthData.start_date).format("DD/MM/YYYY")
-                : ""}
-            </strong>{" "}
-            hasta hoy
-            <strong>
-              {" "}
-              {closeMonthData?.end_date ? dayjs(closeMonthData.end_date).format("DD/MM/YYYY") : ""}
-            </strong>
+                : "",
+              end: closeMonthData?.end_date
+                ? dayjs(closeMonthData.end_date).format("DD/MM/YYYY")
+                : "",
+              b: (chunks) => <strong>{chunks}</strong>
+            })}
           </p>
           <p className="modalMonthlyClosing__description">
-            Si estás seguro escribe el mes que vas a cerrar{" "}
-            <strong>&quot;{closeMonthData?.collection_period}&quot;</strong>
+            {t.rich("confirmPrompt", {
+              period: closeMonthData?.collection_period ?? "",
+              b: (chunks) => <strong>{chunks}</strong>
+            })}
           </p>
 
           <Input
@@ -118,7 +120,7 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
               }}
               loading={loadingRequest}
             >
-              Cerrar periodo
+              {t("closePeriod")}
             </PrincipalButton>
           </div>
         </Flex>

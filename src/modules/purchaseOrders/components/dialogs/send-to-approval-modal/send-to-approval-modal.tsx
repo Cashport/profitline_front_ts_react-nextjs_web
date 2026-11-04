@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "use-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import { Check, Loader2, AlertTriangle } from "lucide-react";
@@ -19,6 +20,8 @@ export function SendToApprovalModal({
   packageId,
   mutate
 }: SendToApprovalModalProps) {
+  const t = useTranslations("purchaseOrders.sendToApprovalModal");
+  const tCommon = useTranslations("common");
   const [availableApprovers, setAvailableApprovers] = useState<IApprover[]>();
   const [selectedApprovers, setSelectedApprovers] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,11 +54,11 @@ export function SendToApprovalModal({
 
       await sendPackageToApproval(Number(packageId), approvers);
 
-      message.success("Orden enviada a aprobación correctamente");
+      message.success(t("success"));
       mutate?.();
       onOpenChange(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error al enviar a aprobación";
+      const errorMessage = error instanceof Error ? error.message : t("error");
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
@@ -79,13 +82,13 @@ export function SendToApprovalModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Enviar a aprobación</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{t("title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-gray-600">Selecciona quién debe aprobar esta novedad</p>
+          <p className="text-sm text-gray-600">{t("description")}</p>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Aprobadores</label>
+            <label className="text-sm font-medium text-gray-700">{t("approvers")}</label>
             <div className="border rounded-lg divide-y">
               {availableApprovers?.map((approver) => (
                 <div
@@ -131,7 +134,7 @@ export function SendToApprovalModal({
             disabled={isLoading}
             className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </Button>
           <Button
             onClick={handleConfirm}
@@ -142,10 +145,10 @@ export function SendToApprovalModal({
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Enviando...
+                {tCommon("status.sending")}
               </>
             ) : (
-              "Enviar"
+              tCommon("actions.send")
             )}
           </Button>
         </div>

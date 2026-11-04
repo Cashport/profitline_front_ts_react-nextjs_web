@@ -1,3 +1,5 @@
+import { getTranslator } from "@/i18n/translator";
+
 export enum ApprovalType {
   NEW_CLIENT = "NEW_CLIENT",
   DISCOUNT_REQUEST = "DISCOUNT_REQUEST",
@@ -9,16 +11,34 @@ export enum ApprovalType {
   PROMOTION_NEGOTIATION = "PROMOTION_NEGOTIATION"
 }
 
-export const APPROVAL_TYPE_LABELS: Record<ApprovalType, string> = {
-  [ApprovalType.NEW_CLIENT]: "Nuevo Cliente",
-  [ApprovalType.DISCOUNT_REQUEST]: "Solicitud de Descuento",
-  [ApprovalType.COMPRA_MATERIAL]: "Compra de Material",
-  [ApprovalType.PURCHASE_ORDER]: "Orden de Compra",
-  [ApprovalType.ANNUAL_DISCOUNT_NEGOTIATION]: "Descuento negociación del cliente",
-  [ApprovalType.MANAGER_BONIFICATION_NEGOTIATION]: "Bonificación negociacion del cliente",
-  [ApprovalType.DISCOUNT_PACKAGE_NEGOTIATION]: "Paquete de descuentos",
-  [ApprovalType.PROMOTION_NEGOTIATION]: "Promociones"
+const APPROVAL_TYPE_KEYS: Record<ApprovalType, string> = {
+  [ApprovalType.NEW_CLIENT]: "newCustomer",
+  [ApprovalType.DISCOUNT_REQUEST]: "discountRequest",
+  [ApprovalType.COMPRA_MATERIAL]: "materialPurchase",
+  [ApprovalType.PURCHASE_ORDER]: "purchaseOrder",
+  [ApprovalType.ANNUAL_DISCOUNT_NEGOTIATION]: "annualDiscountNegotiation",
+  [ApprovalType.MANAGER_BONIFICATION_NEGOTIATION]: "freeGoodsNegotiation",
+  [ApprovalType.DISCOUNT_PACKAGE_NEGOTIATION]: "discountPackage",
+  [ApprovalType.PROMOTION_NEGOTIATION]: "promotions"
 };
+
+// Etiquetas visibles: cada propiedad es un getter que traduce al leerla (idioma activo).
+const translatedLabels = <K extends string>(keys: Record<K, string>, prefix: string) =>
+  Object.defineProperties(
+    {} as Record<K, string>,
+    Object.fromEntries(
+      Object.entries(keys).map(([code, key]) => [
+        code,
+        {
+          enumerable: true,
+          get: () =>
+            (getTranslator("shared") as unknown as (k: string) => string)(`${prefix}.${key}`)
+        }
+      ])
+    )
+  );
+
+export const APPROVAL_TYPE_LABELS = translatedLabels(APPROVAL_TYPE_KEYS, "constants.approvalTypes");
 
 export enum ApprovalStepStatus {
   PENDING = "PENDING",
@@ -28,13 +48,18 @@ export enum ApprovalStepStatus {
   CANCELLED = "CANCELLED"
 }
 
-export const APPROVAL_STEP_STATUS_LABELS: Record<ApprovalStepStatus, string> = {
-  [ApprovalStepStatus.PENDING]: "Pendiente",
-  [ApprovalStepStatus.IN_PROGRESS]: "En Progreso",
-  [ApprovalStepStatus.APPROVED]: "Aprobado",
-  [ApprovalStepStatus.REJECTED]: "Rechazado",
-  [ApprovalStepStatus.CANCELLED]: "Cancelado"
+const APPROVAL_STEP_STATUS_KEYS: Record<ApprovalStepStatus, string> = {
+  [ApprovalStepStatus.PENDING]: "pending",
+  [ApprovalStepStatus.IN_PROGRESS]: "inProgress",
+  [ApprovalStepStatus.APPROVED]: "approved",
+  [ApprovalStepStatus.REJECTED]: "rejected",
+  [ApprovalStepStatus.CANCELLED]: "canceled"
 };
+
+export const APPROVAL_STEP_STATUS_LABELS = translatedLabels(
+  APPROVAL_STEP_STATUS_KEYS,
+  "constants.approvalStepStatus"
+);
 
 export const APPROVAL_STEP_STATUS_COLORS: Record<
   ApprovalStepStatus,

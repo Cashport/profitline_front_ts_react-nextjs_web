@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Input } from "antd";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 import { fmtD } from "../../utils/format";
@@ -29,6 +30,8 @@ const BUTTON =
   "flex-none rounded-md border border-border bg-card px-2.5 py-[3px] text-[13px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45";
 
 export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
+  const t = useTranslations("wallet.ticketCard");
+  const tCommon = useTranslations("common");
   const [resolviendo, setResolviendo] = useState(false);
   const [comentario, setComentario] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -81,7 +84,7 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
 
       {ticket.estado === "resuelto" && ticket.comentarioResolucion && (
         <div className="text-[13px] leading-relaxed text-muted-foreground">
-          <span className="font-semibold">Resolución:</span> {ticket.comentarioResolucion}
+          <span className="font-semibold">{t("resolution")}</span> {ticket.comentarioResolucion}
         </div>
       )}
 
@@ -89,7 +92,7 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
         <span className="flex min-w-0 items-center gap-[7px] overflow-hidden whitespace-nowrap">
           <PersonBadge person={ticket.responsable} mini />
           <span className="opacity-45">·</span>
-          <span className="tabular-nums">{fecha ? fmtD(fecha) : "Sin fecha"}</span>
+          <span className="tabular-nums">{fecha ? fmtD(fecha) : t("noDate")}</span>
         </span>
 
         {ticket.estado === "abierto" && !resolviendo && (
@@ -98,7 +101,7 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
             onClick={() => setResolviendo(true)}
             className={cn("ml-auto", BUTTON)}
           >
-            Resolver
+            {t("resolve")}
           </button>
         )}
       </div>
@@ -110,7 +113,7 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
             autoFocus
             value={comentario}
             disabled={isSending}
-            placeholder="Comentario de resolución (opcional)"
+            placeholder={t("resolutionPlaceholder")}
             onChange={(e) => setComentario(e.target.value)}
           />
           <div className="flex items-center justify-end gap-2">
@@ -123,7 +126,7 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
               }}
               className={BUTTON}
             >
-              Cancelar
+              {tCommon("actions.cancel")}
             </button>
             <button
               type="button"
@@ -131,7 +134,7 @@ export default function TicketCard({ ticket, onResolve }: TicketCardProps) {
               onClick={handleConfirmResolve}
               className="flex-none rounded-md bg-cashport-green px-2.5 py-[3px] text-[13px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
             >
-              {isSending ? "Resolviendo…" : "Confirmar"}
+              {isSending ? t("resolving") : tCommon("actions.confirm")}
             </button>
           </div>
         </div>

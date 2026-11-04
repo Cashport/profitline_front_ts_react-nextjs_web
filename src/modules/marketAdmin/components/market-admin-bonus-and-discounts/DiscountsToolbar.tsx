@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { Plus, ChevronLeft } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 interface DiscountsToolbarProps {
   onCrearNuevo: () => void;
@@ -11,10 +12,13 @@ interface DiscountsToolbarProps {
 }
 
 export default function DiscountsToolbar({ onCrearNuevo, children }: DiscountsToolbarProps) {
+  const t = useTranslations("marketAdmin.discountsTable");
+  const tCommon = useTranslations("common.actions");
   return (
     <div className="flex items-center gap-2 mb-4">
       <Link
         href="/market-admin"
+        aria-label={tCommon("back")}
         className="flex items-center gap-1.5 px-2 h-8 rounded-lg text-sm text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
       >
         <ChevronLeft size={18} />
@@ -25,7 +29,7 @@ export default function DiscountsToolbar({ onCrearNuevo, children }: DiscountsTo
         onClick={onCrearNuevo}
         className="flex items-center gap-1.5 px-4 h-[var(--control-h)] bg-[#CBE71E] text-[#141414] rounded-lg text-sm font-semibold hover:bg-[#b8d11a] transition-colors"
       >
-        <Plus size={18} /> Crear nuevo
+        <Plus size={18} /> {t("createNew")}
       </button>
     </div>
   );

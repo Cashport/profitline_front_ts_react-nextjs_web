@@ -3,6 +3,7 @@ import { Button, Flex, Spin } from "antd";
 import { DotsThree, MagnifyingGlassPlus } from "phosphor-react";
 import { useParams } from "next/navigation";
 import { AxiosError } from "axios";
+import { useTranslations } from "use-intl";
 
 import {
   addItemsToTable,
@@ -35,6 +36,8 @@ interface PaymentProd {
 }
 
 const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
+  const t = useTranslations("clients.payments.tab");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const clientId = extractSingleParam(params.clientId);
   const projectId = extractSingleParam(params.projectId);
@@ -128,17 +131,14 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
         selectedPayments?.map((payment) => payment.id) || []
       );
       setIsModalActionPaymentOpen(false);
-      showMessage("success", "Pagos añadidos a la tabla de aplicación de pagos");
+      showMessage("success", t("addedToApplication"));
       // mutate Applytable data
       mutateApplyTabData();
     } catch (error) {
       if (error instanceof AxiosError) {
-        showMessage(
-          "error",
-          `${error.response?.data?.message || "Error al añadir pagos a la tabla de aplicación de pagos"}`
-        );
+        showMessage("error", `${error.response?.data?.message || t("addToApplicationError")}`);
       } else {
-        showMessage("error", `Error al añadir pagos a la tabla de aplicación de pagos`);
+        showMessage("error", t("addToApplicationError"));
       }
     }
   };
@@ -146,14 +146,11 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
   const handlePaymentUnidentified = async () => {
     try {
       await markPaymentsAsUnidentified(selectedPayments.map((payment) => payment.id));
-      showMessage("success", "Pago(s) marcados como no identificados");
+      showMessage("success", t("markedUnidentified", { count: selectedPayments.length }));
       mutate();
       setSelectedPayments([]);
     } catch (error) {
-      showMessage(
-        "error",
-        "Ha ocurrido un error al marcar los pagos seleccionados como no identificados"
-      );
+      showMessage("error", t("markUnidentifiedError"));
     }
     setIsSelectedActionModalOpen({ selected: 0 });
   };
@@ -163,7 +160,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
       {selectedPayments && selectedPayments.length > 0 && (
         <DraggableTotalModal
           totalAmount={selectedPayments.reduce((acc, payment) => acc + payment.current_value, 0)}
-          itemName="Pagos"
+          itemName={t("itemName")}
           count={selectedPayments.length}
         />
       )}
@@ -176,7 +173,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="standardSearch"
-              placeholder="Buscar"
+              placeholder={tCommon("placeholders.search")}
               onChange={(event) => setSearch(event.target.value)}
             />
             <Button
@@ -186,12 +183,12 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
               disabled={false}
               onClick={() => setIsModalActionPaymentOpen(true)}
             >
-              Generar acción
+              {t("generateAction")}
             </Button>
           </Flex>
 
           <Button type="primary" className="identifiyPayment" onClick={handleOpenIdentifyPayment}>
-            Identificar pago
+            {t("identifyPayment")}
             <MagnifyingGlassPlus size={18} style={{ marginLeft: "0.5rem" }} />
           </Button>
         </Flex>
@@ -238,7 +235,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
         onClose={handleCloseActionModal}
       />
       <ModalConfirmAction
-        title="Se marcarán los pagos seleccionados como no identificados"
+        title={t("confirmUnidentifiedTitle")}
         isOpen={isSelectedActionModalOpen.selected === 2}
         onClose={handleCloseActionModal}
         onOk={handlePaymentUnidentified}

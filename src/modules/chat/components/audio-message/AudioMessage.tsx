@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "@phosphor-icons/react";
 import { Slider } from "antd";
+import { useTranslations } from "use-intl";
 
 interface AudioMessageProps {
   src: string;
@@ -18,6 +19,7 @@ function formatDuration(seconds: number) {
 
 export default function AudioMessage({ src, mine }: AudioMessageProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const t = useTranslations("chat.audio");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -85,7 +87,7 @@ export default function AudioMessage({ src, mine }: AudioMessageProps) {
       <button
         type="button"
         onClick={togglePlay}
-        aria-label={isPlaying ? "Pausar audio" : "Reproducir audio"}
+        aria-label={isPlaying ? t("pause") : t("play")}
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80 ${
           mine ? "bg-white/15 text-white" : "bg-[#011822] text-white"
         }`}

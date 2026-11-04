@@ -1,5 +1,6 @@
 import React from "react";
 import { Filter, ChevronDown } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { FilterButton } from "@/components/ui/page-header-controls/page-header-controls";
 
@@ -17,10 +18,12 @@ export default function FilterTrigger({
   count,
   onClick,
   disabled,
-  label = "Filtrar",
+  label: labelProp,
   className,
   showChevron
 }: FilterTriggerProps) {
+  const tCommon = useTranslations("common");
+  const label = labelProp ?? tCommon("actions.filter");
   if (!className) {
     return <FilterButton count={count} onClick={onClick} label={label} disabled={disabled} />;
   }

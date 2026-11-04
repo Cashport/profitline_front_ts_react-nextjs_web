@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import axios from "axios";
 
 import { GenericResponse } from "@/types/global/IGlobal";
@@ -73,6 +74,6 @@ export const exportVisitFormResponses = async (
         // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
       }
     }
-    throw new Error(message || "No se pudieron descargar las respuestas.");
+    throw new Error(message || getTranslator("shared")("services.downloadResponsesError"));
   }
 };

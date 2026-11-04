@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback, useLayoutEffect } from "react";
 import { Image as AntImage } from "antd";
 import { CaretDoubleLeft } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import { getWhatsAppTemplates, markTicketAsRead, sendTemplate } from "@/services/chat/chat";
 
@@ -34,6 +35,7 @@ export default function ChatThread({
   detailsOpen,
   mutateTickets
 }: Props) {
+  const t = useTranslations("chat.thread");
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [templateOpen, setTemplateOpen] = useState(false);
@@ -72,16 +74,23 @@ export default function ChatThread({
       const closedAt = m.ticket?.closedAt ? dayjs(m.ticket.closedAt).format("DD/MM/YYYY") : null;
       const isClosed = m.ticket?.status === "CLOSED";
 
+      const subject = m.ticket?.subject || "";
       const label = isClosed
-        ? `Ticket "${m.ticket?.subject || ""}" - Cerrado${closedBy ? ` por ${closedBy}` : ""}${closedAt ? ` ${closedAt}` : ""}`
-        : `Ticket "${m.ticket?.subject || ""}" - Abierto`;
+        ? t("ticketClosed", {
+            subject,
+            closedBy: closedBy || "",
+            closedAt: closedAt || "",
+            hasBy: closedBy ? "yes" : "no",
+            hasDate: closedAt ? "yes" : "no"
+          })
+        : t("ticketOpen", { subject });
 
       map.set(m.id, label);
       lastTicketId = ticketId;
     }
 
     return map;
-  }, [ticketMessages, conversation.id]);
+  }, [ticketMessages, conversation.id, t]);
 
   const messagesByWaId = useMemo(() => {
     const map = new Map<string, IMessage>();
@@ -102,9 +111,9 @@ export default function ChatThread({
   // Memoized template lookup map for O(1) access
   const templateMap = useMemo(() => {
     const map = new Map<string, IWhatsAppTemplate>();
-    waTemplates.forEach((t) => {
-      map.set(t.id, t);
-      map.set(t.name, t);
+    waTemplates.forEach((tpl) => {
+      map.set(tpl.id, tpl);
+      map.set(tpl.name, tpl);
     });
     return map;
   }, [waTemplates]);
@@ -249,8 +258,8 @@ export default function ChatThread({
   const handleSendTemplate = async (templateId: string) => {
     if (!conversation.customerCashportUUID && !conversation.phoneNumber) {
       toast({
-        title: "Datos insuficientes",
-        description: "No se pudo enviar la plantilla porque faltan datos del cliente.",
+        title: t("missingDataTitle"),
+        description: t("missingDataDescription"),
         variant: "destructive"
       });
       return;
@@ -264,15 +273,14 @@ export default function ChatThread({
       setTemplateOpen(false);
       mutate();
       toast({
-        title: "Plantilla enviada",
-        description: "La plantilla de WhatsApp fue enviada exitosamente."
+        title: t("templateSentTitle"),
+        description: t("templateSentDescription")
       });
       scrollToBottom();
     } catch (error) {
       toast({
-        title: "Error al enviar",
-        description:
-          error instanceof Error ? error.message : "No se pudo enviar la plantilla de WhatsApp.",
+        title: t("sendErrorTitle"),
+        description: error instanceof Error ? error.message : t("sendErrorDescription"),
         variant: "destructive"
       });
     }
@@ -298,7 +306,7 @@ export default function ChatThread({
             <p className="text-[13px] text-muted-foreground">
               {channel === "whatsapp"
                 ? `${conversation.phone} - ${conversation.customer}`
-                : conversation.email ?? "sin correo"}
+                : conversation.email ?? t("noEmail")}
             </p>
           </div>
         </div>
@@ -306,12 +314,12 @@ export default function ChatThread({
           <Tabs value={channel} onValueChange={(v) => setChannel(v as typeof channel)}>
             <TabsList className="grid grid-cols-2 bg-[#F7F7F7]">
               <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
-              <TabsTrigger value="email">Correo</TabsTrigger>
+              <TabsTrigger value="email">{t("emailTab")}</TabsTrigger>
             </TabsList>
           </Tabs>
 
           {!detailsOpen ? (
-            <button onClick={() => onShowDetails?.()} aria-label="Ocultar información del cliente">
+            <button onClick={() => onShowDetails?.()} aria-label={t("showClientInfo")}>
               <CaretDoubleLeft size={20} />
             </button>
           ) : null}
@@ -326,9 +334,7 @@ export default function ChatThread({
       >
         <div className="pl-4 py-6">
           {isLoadingMore ? (
-            <div className="py-2 text-center text-[13px] text-[#62687A]">
-              Cargando mensajes anteriores...
-            </div>
+            <div className="py-2 text-center text-[13px] text-[#62687A]">{t("loadingOlder")}</div>
           ) : null}
           {Array.from(messagesByDay.entries()).map(([day, messages]) => (
             <div key={`group-${day}`} className="space-y-6">

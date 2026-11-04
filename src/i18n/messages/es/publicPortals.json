@@ -1,0 +1,150 @@
+{
+  "mobile": {
+    "payment": {
+      "confirmPayment": "Confirmar pago",
+      "invalidLink": "El link de pago no es válido o ya expiró.",
+      "billed": "Facturado",
+      "earlyPaymentDiscount": "Descuento pronto pago"
+    },
+    "error": {
+      "title": "Algo salió mal",
+      "unexpected": "Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo."
+    },
+    "creditBalances": {
+      "reportDispute": "Reportar novedad",
+      "empty": "No hay saldos a favor."
+    },
+    "totalDebt": {
+      "totalDebt": "Deuda total",
+      "totalToPay": "Total a pagar",
+      "brandAlt": "Marca",
+      "goToPay": "Ir a pagar"
+    },
+    "myPayments": {
+      "title": "Pagos disponibles",
+      "reportPayment": "Reportar pago"
+    },
+    "invoiceSummary": {
+      "invoice": "Factura <strong>{code}</strong>",
+      "earlyPayment": "Pronto pago",
+      "daysLeft": "{count, plural, one {(Falta # día)} other {(Faltan # días)}}",
+      "payPartially": "Abonar",
+      "goToPay": "Ir a pagar"
+    },
+    "invoiceStatus": {
+      "pastDue": "Vencidas",
+      "dueSoon": "Vence pronto",
+      "current": "Vigente"
+    },
+    "invoiceDetail": {
+      "products": "Productos",
+      "mockProductName": "Nombre del producto {number}",
+      "units": "{count, plural, one {# ud.} other {# uds.}}"
+    },
+    "confirmPayment": {
+      "incompleteInfo": "Información de pago incompleta o inválida.",
+      "loadError": "No se pudo cargar la información del pago.",
+      "title": "Detalles del pago",
+      "includedInvoices": "Facturas incluidas",
+      "modifyPayment": "Modificar pago"
+    },
+    "modifyPayment": {
+      "title": "Modificar y pagar",
+      "description": "Ingresa los valores que deseas pagar por cada factura",
+      "addDocument": "Agregar documento"
+    },
+    "home": {
+      "missingToken": "Token no proporcionado",
+      "expiredLink": "El enlace de acceso ha caducado o es inválido. Por favor, solicite uno nuevo.",
+      "loadError": "Ocurrió un error al cargar la información. Por favor intente nuevamente.",
+      "tabs": {
+        "pendingInvoices": "Facturas pendientes",
+        "creditBalances": "Saldos a favor",
+        "myPayments": "Mis pagos"
+      },
+      "creditBalance": "Saldo a favor",
+      "payError": "No se pudo iniciar el pago."
+    }
+  },
+  "paymentWeb": {
+    "headerTitle": "Pago",
+    "scriptLoadError": "No se pudo cargar el módulo de pagos. Intenta de nuevo.",
+    "signatureError": "No se pudo obtener la firma de seguridad",
+    "widgetUnavailable": "Wompi WidgetCheckout no está disponible",
+    "registerTransactionError": "No se pudo registrar la transacción en el backend",
+    "startPaymentError": "Error al iniciar el pago",
+    "processing": "Procesando pago..."
+  },
+  "filePortal": {
+    "downloadStarted": "Descarga iniciada",
+    "downloading": "Se está descargando {fileName}",
+    "downloadError": "Error al descargar",
+    "singleUseLink": "No se pudo descargar {fileName}. Es un link de descarga única.",
+    "unexpectedError": "No se pudo descargar {fileName} debido a un error inesperado.",
+    "downloadCompleted": "Descarga completada",
+    "filesDownloaded": "{count, plural, one {# archivo descargado.} other {# archivos descargados.}}",
+    "missingToken": "No se proporcionó el token del archivo",
+    "title": "Archivos a descargar",
+    "acceptReminder": "¡Recuerda darle a <u>aceptar descarga</u>!"
+  },
+  "cetaphil": {
+    "landing": {
+      "mailLinkSent": "Enlace de correo enviado exitosamente. Revisa tu bandeja de entrada.",
+      "mailLinkError": "Error al enviar el enlace de correo",
+      "invalidDocumentType": "Tipo de documento inválido",
+      "acceptInvitationError": "Error al aceptar la invitación",
+      "registrationSuccess": "Registro exitoso",
+      "referralSameAsEmail": "El email de referencia no puede ser igual al email de registro",
+      "referralRequired": "El email de referencia es obligatorio",
+      "signIn": "Iniciar Sesión",
+      "signInDescription": "Ingresa tu email para recibir un código de acceso",
+      "emailPlaceholder": "tu@email.com",
+      "sendCode": "Enviar Código",
+      "checkEmailTitle": "Revisa tu correo",
+      "requestReceived": "Muchas gracias por enviar tu solicitud. Pronto nos pondremos en contacto contigo.",
+      "accessLinkSent": "Hemos enviado a tu correo un link para acceder al marketplace",
+      "requestAccess": "Solicitar Acceso",
+      "registration": {
+        "title": "Solicitud de Registro",
+        "description": "Complete el formulario para acceder al marketplace de distribuidores",
+        "submit": "Crear mi cuenta"
+      },
+      "bannerAlt": "Banner Cetaphil {number}",
+      "goToBanner": "Ir al banner {number}",
+      "exclusiveBadge": "Marketplace Exclusivo para trabajadores de Galderma",
+      "productsTitle": "Productos <brand>Cetaphil</brand>",
+      "productsSubtitle": "Línea completa de cuidado dermatológico para piel sensible",
+      "products": {
+        "cleanserAlt": "Limpiador Cetaphil",
+        "cleansers": "Limpiadores",
+        "cleansersDescription": "Limpieza suave para piel sensible",
+        "moisturizerAlt": "Humectante Cetaphil",
+        "moisturizers": "Humectantes",
+        "moisturizersDescription": "Hidratación profunda y duradera",
+        "sunscreenAlt": "Protector Solar Cetaphil",
+        "sunscreen": "Protección Solar",
+        "sunscreenDescription": "Protección UV para piel sensible"
+      },
+      "footer": "© 2025 Marketplace Exclusivo para Distribuidores Autorizados"
+    },
+    "registration": {
+      "title": "Solicitud de Registro",
+      "description": "Complete el formulario para acceder al marketplace de distribuidores",
+      "submit": "Crear mi cuenta",
+      "fullName": "Nombre y Apellido",
+      "fullNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "fullNamePlaceholder": "Ingresa tu nombre",
+      "documentType": "Tipo de documento",
+      "documentTypePlaceholder": "Seleccione su tipo de identificación",
+      "documentNumber": "N° de identificación",
+      "onlyNumbers": "Solo se permiten números",
+      "documentNumberPlaceholder": "Número de identificación",
+      "emailPlaceholder": "Ingresa tu correo",
+      "referralEmail": "Correo electrónico de referido",
+      "referralEmailPlaceholder": "Ingresa el correo de referido",
+      "phone": "Celular",
+      "phoneDigits": "Debe contener {count} dígitos",
+      "phonePlaceholder": "Ingresa tu celular"
+    }
+  }
+}

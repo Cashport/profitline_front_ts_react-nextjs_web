@@ -1,5 +1,6 @@
 import { Dropdown } from "antd";
 import { Filter, ChevronDown, Tag } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { Button } from "@/modules/chat/ui/button";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
@@ -26,6 +27,7 @@ const toggle = <T,>(arr: T[], id: T): T[] =>
   arr.includes(id) ? arr.filter((item) => item !== id) : [...arr, id];
 
 export function FilterBalances({ motives, value, onChange, isLoading }: IFilterBalancesProps) {
+  const t = useTranslations("clients.balances.filter");
   const menu = (
     <div className="bg-cashport-white border border-cashport-gray-light rounded-lg shadow-lg w-96">
       <div className="p-4 space-y-4">
@@ -33,7 +35,7 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
         <div>
           <label className="text-[13px] font-semibold text-gray-700 mb-2 block">
             <Tag className="h-3 w-3 inline mr-1" />
-            Tipo
+            {t("type")}
           </label>
           <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
             <button
@@ -45,7 +47,7 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
               }`}
               onClick={() => onChange({ ...value, motive_ids: [] })}
             >
-              Todos los tipos
+              {t("allTypes")}
             </button>
 
             {motives?.map((motive) => (
@@ -94,7 +96,7 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
         className="h-[var(--control-h)] border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
       >
         <Filter className="h-4 w-4 mr-2" />
-        Filtros
+        {t("filters")}
         <ChevronDown className="h-4 w-4 ml-2" />
       </Button>
     </Dropdown>

@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import {
   EstadoKey,
   IWalletMatrixModalFilters,
@@ -7,17 +8,41 @@ import {
   WalletDocumentType
 } from "./types";
 
+/** Rótulos traducidos de un tramo o de la columna "Vencido"; se leen al usarse. */
+const tramo = <I extends number, Id extends string>(
+  i: I,
+  id: Id,
+  key: "current" | "d1_30" | "d31_60" | "d61_90" | "d91_120" | "over120"
+) => ({
+  i,
+  id,
+  get label(): string {
+    return getTranslator("wallet")(`buckets.${key}.label`);
+  },
+  get short(): string {
+    return getTranslator("wallet")(`buckets.${key}.short`);
+  }
+});
+
 export const TRAMOS = [
-  { i: 0, id: "corriente", label: "Corriente", short: "Corriente" },
-  { i: 1, id: "t1", label: "1 – 30 días", short: "1–30" },
-  { i: 2, id: "t2", label: "31 – 60 días", short: "31–60" },
-  { i: 3, id: "t3", label: "61 – 90 días", short: "61–90" },
-  { i: 4, id: "t4", label: "91 – 120 días", short: "91–120" },
-  { i: 5, id: "t5", label: "Más de 120 días", short: "+120" }
+  tramo(0, "corriente", "current"),
+  tramo(1, "t1", "d1_30"),
+  tramo(2, "t2", "d31_60"),
+  tramo(3, "t3", "d61_90"),
+  tramo(4, "t4", "d91_120"),
+  tramo(5, "t5", "over120")
 ] as const;
 
 /** Columna "Vencido" de la matriz: no es un tramo, junta del 1–30 al +120. */
-export const VENCIDO = { id: "vencido", label: "Vencido", short: "Vencido" } as const;
+export const VENCIDO = {
+  id: "vencido",
+  get label(): string {
+    return getTranslator("wallet")("buckets.pastDue.label");
+  },
+  get short(): string {
+    return getTranslator("wallet")("buckets.pastDue.short");
+  }
+} as const;
 
 /** Rótulos de una columna elegible de la matriz, sea tramo o vencido. */
 export const columnMeta = (col: MatrixColumn) => (col === "vencido" ? VENCIDO : TRAMOS[col]);
@@ -47,93 +72,36 @@ export interface EstadoMeta {
   corta: string;
 }
 
+/** Nombre, chip y descripción corta salen del catálogo `wallet.estados` al leerse. */
+const estado = (key: EstadoKey, bg: string, chip: Sev): EstadoMeta => ({
+  bg,
+  chip,
+  get nom(): string {
+    return getTranslator("wallet")(`estados.${key}.name`);
+  },
+  get chipTxt(): string {
+    return getTranslator("wallet")(`estados.${key}.chip`);
+  },
+  get corta(): string {
+    return getTranslator("wallet")(`estados.${key}.short`);
+  }
+});
+
 export const EST_META: Record<EstadoKey, EstadoMeta> = {
-  compensada: {
-    nom: "Compensada",
-    bg: "bg-wallet-comp",
-    chip: "ok",
-    chipTxt: "Por depurar",
-    corta: "Cruce aplicado, sale al depurar"
-  },
-  pagada: {
-    nom: "Pagada sin depurar",
-    bg: "bg-wallet-pag",
-    chip: "ok",
-    chipTxt: "Pagada",
-    corta: "Pagada, pendiente de depurar en SAP"
-  },
-  conciliado: {
-    nom: "Conciliado",
-    bg: "bg-wallet-conc",
-    chip: "idle",
-    chipTxt: "Esperando pago",
-    corta: "Esperando pago del cliente"
-  },
-  abono: {
-    nom: "Abono",
-    bg: "bg-wallet-conc",
-    chip: "idle",
-    chipTxt: "Abono",
-    corta: "Pago parcial aplicado; queda saldo pendiente"
-  },
-  novedad: {
-    nom: "Con novedad",
-    bg: "bg-wallet-nov",
-    chip: "warn",
-    chipTxt: "En gestión",
-    corta: "Novedad abierta en gestión"
-  },
-  sin_conciliar: {
-    nom: "Sin conciliar",
-    bg: "bg-wallet-risk",
-    chip: "crit",
-    chipTxt: "Sin gestión",
-    corta: "Sin acuerdo ni novedad"
-  },
-  saldo: {
-    nom: "Saldo",
-    bg: "bg-wallet-saldo",
-    chip: "idle",
-    chipTxt: "Saldo",
-    corta: "Saldo a favor pendiente de cruce"
-  },
-  saldo_factura: {
-    nom: "Saldo de factura",
-    bg: "bg-wallet-saldo-fact",
-    chip: "idle",
-    chipTxt: "Saldo de factura",
-    corta: "Saldo pendiente de la factura"
-  },
-  glosado: {
-    nom: "Glosado",
-    bg: "bg-wallet-glosa",
-    chip: "warn",
-    chipTxt: "Glosado",
-    corta: "Factura glosada por el cliente"
-  },
-  devolucion: {
-    nom: "Devolución",
-    bg: "bg-wallet-devol",
-    chip: "warn",
-    chipTxt: "Devolución",
-    corta: "Documento de devolución"
-  },
+  compensada: estado("compensada", "bg-wallet-comp", "ok"),
+  pagada: estado("pagada", "bg-wallet-pag", "ok"),
+  conciliado: estado("conciliado", "bg-wallet-conc", "idle"),
+  abono: estado("abono", "bg-wallet-conc", "idle"),
+  novedad: estado("novedad", "bg-wallet-nov", "warn"),
+  sin_conciliar: estado("sin_conciliar", "bg-wallet-risk", "crit"),
+  saldo: estado("saldo", "bg-wallet-saldo", "idle"),
+  saldo_factura: estado("saldo_factura", "bg-wallet-saldo-fact", "idle"),
+  glosado: estado("glosado", "bg-wallet-glosa", "warn"),
+  devolucion: estado("devolucion", "bg-wallet-devol", "warn"),
   /* Documento de cartera propio del proyecto 166 (Gilead): suma como una
      factura sin conciliar, pero se distingue con nombre propio. */
-  nota_debito: {
-    nom: "Nota de débito",
-    bg: "bg-wallet-risk",
-    chip: "crit",
-    chipTxt: "Sin gestión",
-    corta: "Nota de débito sin conciliar"
-  },
-  otros: {
-    nom: "Otros",
-    bg: "bg-wallet-otros",
-    chip: "idle",
-    chipTxt: "Otros",
-    corta: "Otros estados del catálogo"
-  }
+  nota_debito: estado("nota_debito", "bg-wallet-risk", "crit"),
+  otros: estado("otros", "bg-wallet-otros", "idle")
 };
 
 /**
@@ -148,10 +116,14 @@ export const FALLBACK_BG = [
   "bg-wallet-nuevo-4"
 ];
 
-/** Etiqueta de cada tipo de documento de una novedad. */
+/** Etiqueta de cada tipo de documento de una novedad (se traduce al leerse). */
 export const DOCUMENT_TYPE_LABEL: Record<WalletDocumentType, string> = {
-  FINANCIAL_RECORD: "Factura",
-  BALANCE: "Saldo"
+  get FINANCIAL_RECORD() {
+    return getTranslator("wallet")("documentType.FINANCIAL_RECORD");
+  },
+  get BALANCE() {
+    return getTranslator("wallet")("documentType.BALANCE");
+  }
 };
 
 /** Fondo de cada tramo, para la barra de reparto. */
@@ -163,9 +135,6 @@ export const TRAMO_BG = [
   "bg-wallet-t4",
   "bg-wallet-t5"
 ];
-
-/** Texto que se muestra mientras aún no llegó el corte real del snapshot. */
-export const FECHA_CORTE_PLACEHOLDER = "Cargando corte…";
 
 /**
  * Corte fijo de los datos simulados. La cartera ya lo toma del snapshot del

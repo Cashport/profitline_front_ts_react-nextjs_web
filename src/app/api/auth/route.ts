@@ -7,6 +7,8 @@ import { customGetAuth } from "../../../../firebase";
 import { getPermissions } from "@/utils/permissions/getPermissions";
 import { deflateSync } from "zlib";
 import { Buffer } from "buffer";
+import { LANG_COOKIE, LANG_COOKIE_MAX_AGE } from "@/modules/landing/language";
+import { isLocale } from "@/i18n/config";
 
 customInitApp();
 
@@ -62,6 +64,17 @@ export async function POST() {
       };
 
       cookies().set(options as any);
+    }
+    // Idioma guardado en el usuario: manda sobre el que traía este navegador.
+    const savedLanguage = permissions?.preferences?.language;
+    if (isLocale(savedLanguage)) {
+      cookies().set({
+        name: LANG_COOKIE,
+        value: savedLanguage,
+        maxAge: LANG_COOKIE_MAX_AGE,
+        path: "/",
+        sameSite: "lax"
+      });
     }
   }
 

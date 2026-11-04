@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Paperclip } from "lucide-react";
 import { Spin, message } from "antd";
+import { useTranslations } from "use-intl";
 import WhatsAppPreview from "../WhatsAppPreview/WhatsAppPreview";
 import { whatsappTemplates } from "../../lib/mockData";
 import { getCircularizationMessagePreview } from "@/services/communications/communications";
@@ -21,6 +22,7 @@ export default function ClientPreview({
   clientName,
   onBack
 }: ClientPreviewProps) {
+  const t = useTranslations("massCommunications.clientPreview");
   const searchParams = useSearchParams();
   const channel = searchParams.get("channel") ?? "email";
   const [data, setData] = useState<IMessagePreview | null>(null);
@@ -35,9 +37,7 @@ export default function ClientPreview({
         const response = await getCircularizationMessagePreview(Number(communicationId), clientId);
         setData(response.data);
       } catch (error) {
-        message.error(
-          error instanceof Error ? error.message : "No se pudo cargar la vista previa del mensaje."
-        );
+        message.error(error instanceof Error ? error.message : t("loadError"));
       } finally {
         setLoading(false);
       }
@@ -60,7 +60,7 @@ export default function ClientPreview({
             className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#141414] transition-colors font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver a la lista
+            {t("backToList")}
           </button>
         </div>
         <div className="flex items-center gap-3">
@@ -86,16 +86,16 @@ export default function ClientPreview({
               <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden mx-auto">
                 <div className="bg-[#141414] px-5 py-3">
                   <p className="text-[13px] text-gray-400 font-medium">
-                    Correo personalizado para {clientName}
+                    {t("personalizedEmail", { name: clientName })}
                   </p>
                 </div>
                 <div className="p-6">
                   <div className="border-b border-[#EEEEEE] pb-3 mb-4">
                     <p className="text-[13px] text-gray-400 mb-0.5">
-                      Para: {recipients.join(", ")}
+                      {t("to", { recipients: recipients.join(", ") })}
                     </p>
                     <p className="text-base font-semibold text-[#141414]">
-                      {data.subject || "Sin asunto"}
+                      {data.subject || t("noSubject")}
                     </p>
                   </div>
                   {data.body ? (
@@ -105,12 +105,14 @@ export default function ClientPreview({
                     />
                   ) : (
                     <div className="text-sm text-[#141414] leading-relaxed">
-                      <span className="italic text-gray-400">Sin contenido</span>
+                      <span className="italic text-gray-400">{t("noContent")}</span>
                     </div>
                   )}
                   {attachments.length > 0 && (
                     <div className="mt-5 pt-4 border-t border-[#EEEEEE]">
-                      <p className="text-[13px] text-gray-500 font-medium mb-2">Adjuntos:</p>
+                      <p className="text-[13px] text-gray-500 font-medium mb-2">
+                        {t("attachments")}
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {attachments.map((att, i) => (
                           <span

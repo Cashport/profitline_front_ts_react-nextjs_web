@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Maximize2, Minimize2, ArrowLeft } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 interface ExpandableCardProps {
   title: React.ReactNode;
@@ -14,6 +15,8 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
   className = "",
   noPadding = false
 }) => {
+  const t = useTranslations("newDashboard.card");
+  const tCommon = useTranslations("common");
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Lock body scroll when expanded
@@ -38,7 +41,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
             <button
               onClick={() => setIsExpanded(false)}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 group"
-              aria-label="Volver"
+              aria-label={tCommon("actions.back")}
             >
               <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
             </button>
@@ -49,7 +52,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
           >
             <Minimize2 size={16} />
-            <span className="hidden sm:inline">Minimizar</span>
+            <span className="hidden sm:inline">{t("minimize")}</span>
           </button>
         </div>
 
@@ -74,7 +77,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
         <button
           onClick={() => setIsExpanded(true)}
           className="p-1.5 text-gray-400 hover:text-[#141414] hover:bg-gray-50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 ml-2"
-          title="Ampliar vista"
+          title={t("expand")}
         >
           <Maximize2 size={18} />
         </button>

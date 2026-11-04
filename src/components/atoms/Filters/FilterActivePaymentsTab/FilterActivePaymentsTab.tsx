@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState, ReactNode } from "react";
 import dayjs from "dayjs";
 import { Cascader } from "antd";
+import { useTranslations } from "use-intl";
 
+import { filterLabel } from "../FilterLabel";
 import "../filterCascader.scss";
 
 interface Option {
@@ -31,6 +33,8 @@ export const FilterActivePaymentsTab = ({
   customDate,
   setCustomDate
 }: Props) => {
+  const t = useTranslations("components.filters");
+  const tCommon = useTranslations("common");
   const [optionsList, setOptionsList] = useState<Option[]>(initialOptions);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [openOption, setOpenOption] = useState<string | null>(null);
@@ -133,11 +137,11 @@ export const FilterActivePaymentsTab = ({
     if (targetOption.value === "Activo") {
       targetOption.children = [
         {
-          label: "Si",
+          label: filterLabel("yes"),
           value: "1"
         },
         {
-          label: "No",
+          label: filterLabel("no"),
           value: "0"
         }
       ];
@@ -165,19 +169,23 @@ export const FilterActivePaymentsTab = ({
   const dates = useMemo(
     () => [
       {
-        label: "Últimos 7 días",
+        key: "last7Days",
+        label: filterLabel("last7Days"),
         value: `${dayjs().subtract(7, "day").format("YYYY-MM-DD")}|${dayjs().format("YYYY-MM-DD")}`
       },
       {
-        label: "Últimos 30 días",
+        key: "last30Days",
+        label: filterLabel("last30Days"),
         value: `${dayjs().subtract(30, "day").format("YYYY-MM-DD")}|${dayjs().format("YYYY-MM-DD")}`
       },
       {
-        label: "Este mes",
+        key: "thisMonth",
+        label: filterLabel("thisMonth"),
         value: `${dayjs().startOf("month").format("YYYY-MM-DD")}|${dayjs().endOf("month").format("YYYY-MM-DD")}`
       },
       {
-        label: "Este trimestre",
+        key: "thisQuarter",
+        label: filterLabel("thisQuarter"),
         value: `${dayjs()
           .utc()
           .startOf("month")
@@ -191,11 +199,13 @@ export const FilterActivePaymentsTab = ({
           .format("YYYY-MM-DD")}`
       },
       {
-        label: "Este año",
+        key: "thisYear",
+        label: filterLabel("thisYear"),
         value: `${dayjs().utc().startOf("year").format("YYYY-MM-DD")}|${dayjs().utc().endOf("year").format("YYYY-MM-DD")}`
       },
       {
-        label: "Trimestre pasado",
+        key: "lastQuarter",
+        label: filterLabel("lastQuarter"),
         value: (() => {
           const currentMonth = dayjs().utc().month();
           const startMonth = currentMonth - (currentMonth % 3) - 3;
@@ -212,7 +222,7 @@ export const FilterActivePaymentsTab = ({
   );
 
   const defaultDateValue = useMemo(() => {
-    return dates.find((d) => d.label === "Últimos 30 días")?.value;
+    return dates.find((d) => d.key === "last30Days")?.value;
   }, [dates]);
 
   useEffect(() => {
@@ -240,7 +250,7 @@ export const FilterActivePaymentsTab = ({
                   style={{ textDecoration: "underline", cursor: "pointer" }}
                   onClick={handleOpenCustomDate}
                 >
-                  Fecha personalizada
+                  {t("customDate")}
                 </p>
               </div>
             )}
@@ -253,7 +263,7 @@ export const FilterActivePaymentsTab = ({
       multiple
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={tCommon("actions.filter")}
       placement="bottomLeft"
       changeOnSelect
       onClear={() => {
@@ -277,13 +287,13 @@ export const FilterActivePaymentsTab = ({
 const initialOptions: Option[] = [
   {
     value: "Fechas",
-    label: "Fechas",
+    label: filterLabel("dates"),
     isLeaf: false,
     disableCheckbox: true
   },
   {
     value: "Activo",
-    label: "Activo",
+    label: filterLabel("active"),
     isLeaf: false,
     disableCheckbox: true
   }

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -29,6 +30,8 @@ const PAGE_SIZE = 20;
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export default function MarketAdminUsers() {
+  const t = useTranslations("marketAdmin.users");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<IMarketAdminUsersFilter>({
     roleId: null,
@@ -90,14 +93,13 @@ export default function MarketAdminUsers() {
         },
         ID
       );
-      showMessage("success", "El usuario fue creado exitosamente.");
+      showMessage("success", t("feedback.created"));
       setShowCreate(false);
       mutate();
     } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : "Oops ocurrió un error creando el usuario.";
+      const message = error instanceof ApiError ? error.message : t("feedback.createError");
       if (error instanceof ApiError && error.status === 409) {
-        showMessage("error", "Este email ya está en uso, prueba otro.");
+        showMessage("error", t("feedback.emailInUse"));
       } else {
         showMessage("error", message);
       }
@@ -106,16 +108,16 @@ export default function MarketAdminUsers() {
     }
   };
 
-  function runAccion(accion: string) {
+  function runAccion(accion: "activate" | "inactivate" | "changeRole" | "export") {
     setShowAcciones(false);
     const count = selectedRowKeys.length;
     setSelectedRowKeys([]);
-    alert(`Acción "${accion}" aplicada a ${count} usuario(s).`);
+    alert(t("bulkActions.applied", { action: t(`bulkActions.actionNames.${accion}`), count }));
   }
 
   const columns: ColumnsType<IMarketAdminUser> = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
@@ -123,7 +125,7 @@ export default function MarketAdminUsers() {
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Email",
+      title: tCommon("fields.email"),
       dataIndex: "email",
       key: "email",
       sorter: (a, b) => a.email.localeCompare(b.email),
@@ -131,7 +133,7 @@ export default function MarketAdminUsers() {
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Rol",
+      title: t("columns.role"),
       dataIndex: "role_name",
       key: "role_name",
       sorter: (a, b) => (a.role_name ?? "").localeCompare(b.role_name ?? ""),
@@ -145,7 +147,7 @@ export default function MarketAdminUsers() {
       )
     },
     {
-      title: "Clientes",
+      title: t("columns.customers"),
       dataIndex: "clients_count",
       key: "clients_count",
       width: 100,
@@ -154,7 +156,7 @@ export default function MarketAdminUsers() {
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       dataIndex: "is_active",
       key: "is_active",
       width: 110,
@@ -166,12 +168,12 @@ export default function MarketAdminUsers() {
             isActive === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
           }`}
         >
-          {isActive === 1 ? "Activo" : "Inactivo"}
+          {isActive === 1 ? tCommon("status.active") : tCommon("status.inactive")}
         </span>
       )
     },
     {
-      title: "Facturador",
+      title: t("columns.biller"),
       dataIndex: "biller_name",
       key: "biller_name",
       onHeaderCell: headerCell,
@@ -182,19 +184,19 @@ export default function MarketAdminUsers() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, u) => <GenericEyeButton href={`/market-admin/usuarios/${u.id}`} />
+      render: (_, u) => <GenericEyeButton href={`/market-admin/users/${u.id}`} />
     }
   ];
 
   return (
     <div className="cp-page min-h-full">
-      <Header title="Usuarios" back="/market-admin" />
+      <Header title={t("title")} back="/market-admin" />
 
       <div className="cp-card cp-list-card overflow-hidden px-[18px] py-[14px] [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
           <UiSearchInput
-            placeholder="Buscar..."
+            placeholder={t("searchPlaceholder")}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
@@ -208,29 +210,29 @@ export default function MarketAdminUsers() {
             {showAcciones && (
               <div className="absolute left-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-30 w-48 py-1">
                 <button
-                  onClick={() => runAccion("Activar")}
+                  onClick={() => runAccion("activate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Activar
+                  {t("bulkActions.activate")}
                 </button>
                 <button
-                  onClick={() => runAccion("Inactivar")}
+                  onClick={() => runAccion("inactivate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Inactivar
+                  {t("bulkActions.inactivate")}
                 </button>
                 <button
-                  onClick={() => runAccion("Cambiar rol")}
+                  onClick={() => runAccion("changeRole")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Cambiar rol
+                  {t("bulkActions.changeRole")}
                 </button>
                 <div className="h-px bg-[#EEEEEE] my-1" />
                 <button
-                  onClick={() => runAccion("Exportar")}
+                  onClick={() => runAccion("export")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Exportar selección
+                  {t("bulkActions.exportSelection")}
                 </button>
               </div>
             )}
@@ -244,7 +246,7 @@ export default function MarketAdminUsers() {
               icon={<Plus size={18} />}
               customStyles={{ fontSize: 14 }}
             >
-              Crear usuario
+              {t("create")}
             </PrincipalButton>
           </div>
         </div>
@@ -256,7 +258,7 @@ export default function MarketAdminUsers() {
           rowKey="id"
           loading={isLoading}
           showSorterTooltip={false}
-          locale={{ emptyText: "No se encontraron usuarios." }}
+          locale={{ emptyText: t("empty") }}
           rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
           onRow={(record) => ({
             onClick: (e) => {
@@ -277,7 +279,7 @@ export default function MarketAdminUsers() {
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} usuarios · ${activos} activos`
+              t("total", { from: range[0], to: range[1], total, active: activos })
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);

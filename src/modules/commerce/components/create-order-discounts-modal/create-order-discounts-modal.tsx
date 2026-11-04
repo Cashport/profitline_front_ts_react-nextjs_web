@@ -1,6 +1,7 @@
 import { Dispatch, FC, SetStateAction, useContext, useEffect, useState } from "react";
 import { Modal, Spin } from "antd";
 import { WarningDiamond, X } from "@phosphor-icons/react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
@@ -21,6 +22,8 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
   floating = false,
   open = false
 }) => {
+  const t = useTranslations("commerce.discountsModal");
+  const tCommon = useTranslations("common");
   const [radioValue, setRadioValue] = useState<IDiscountPackageAvailable>();
   const { selectedDiscount, setSelectedDiscount, discounts, discountsLoading } =
     useContext(OrderViewContext);
@@ -56,7 +59,7 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
   const content = (
     <>
       <div className={styles.header}>
-        <h3>Descuentos</h3>
+        <h3>{t("title")}</h3>
         <button onClick={() => setOpenDiscountsModal(false)} className={styles.buttonClose}>
           <X size={26} />
         </button>
@@ -64,7 +67,7 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
 
       <div className={styles.subTitle}>
         <WarningDiamond size={20} />
-        <p>Recuerda que algunos descuentos no son acumulables</p>
+        <p>{t("notCumulative")}</p>
       </div>
 
       {discountsLoading ? (
@@ -94,7 +97,7 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
       )}
 
       <PrincipalButton disabled={false} onClick={handleApplyDiscounts}>
-        Aplicar
+        {tCommon("actions.apply")}
       </PrincipalButton>
     </>
   );

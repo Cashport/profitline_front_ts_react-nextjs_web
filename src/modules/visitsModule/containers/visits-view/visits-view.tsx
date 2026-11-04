@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import dayjs, { type Dayjs } from "dayjs";
+import { useTranslations } from "use-intl";
 
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
 
@@ -70,6 +71,7 @@ const VisitsMap = dynamic(() => import("../../components/visits-map/visits-map")
  * en el mapa.
  */
 export default function VisitsView() {
+  const tv = useTranslations("visits");
   const { palette, isDark } = useVisitsPalette();
   const router = useRouter();
   const pathname = usePathname();
@@ -160,14 +162,18 @@ export default function VisitsView() {
   const dayDetail = dayOpen && detail && selected === detailAdvisor ? detail : null;
   // "hoy" sólo encaja con el día en curso; para el que se mira el texto va sin él, o la
   // fecha de la barra y el mensaje se contradicen.
-  const dayWord = dayMode === "today" ? "hoy" : "ese día";
+  const isToday = dayMode === "today";
   const emptyText = error
-    ? `No se pudieron cargar las visitas de ${dayWord}.`
+    ? isToday
+      ? tv("view.loadErrorToday")
+      : tv("view.loadErrorDay")
     : isLoading
-      ? "Cargando asesores…"
+      ? tv("view.loading")
       : advisors.length
-        ? "Ningún asesor coincide con el filtro."
-        : `No hay asesores en campo ${dayWord}.`;
+        ? tv("view.noMatch")
+        : isToday
+          ? tv("view.noneToday")
+          : tv("view.noneDay");
 
   // El primer encuadre llega antes que los datos: se repite cuando aparecen los asesores.
   // `day` también entra porque los asesores ya no llegan vacíos al cambiar de día, así
@@ -316,7 +322,7 @@ export default function VisitsView() {
             <HeaderSearch
               value={search}
               onChange={setSearch}
-              placeholder="Buscar asesor o cliente"
+              placeholder={tv("header.searchPlaceholder")}
             />
           </>
         }

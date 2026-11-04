@@ -1,3 +1,10 @@
+import { getTranslator } from "@/i18n/translator";
+
+// Las etiquetas se resuelven al leerlas (getter) para usar siempre el idioma activo;
+// `value` e `id` son los valores que viajan al backend y no se traducen.
+const label = (key: string) => () =>
+  (getTranslator("shared") as unknown as (k: string) => string)(key);
+
 export interface DocumentType {
   id: number;
   value: string;
@@ -7,11 +14,18 @@ export interface DocumentType {
 2	Cedula
 3	Pasaporte
 4	Cedula de extranjeria */
+function withLabel<T extends { id: number; value: string }>(item: T, key: string) {
+  return Object.defineProperty(item, "label", {
+    get: label(key),
+    enumerable: true
+  }) as T & { label: string };
+}
+
 export const DOCUMENT_TYPES: DocumentType[] = [
-  { id: 1, value: "nit", label: "NIT" },
-  { id: 2, value: "cc", label: "Cédula de Ciudadanía" },
-  { id: 3, value: "pasaporte", label: "Pasaporte" },
-  { id: 4, value: "ce", label: "Cédula de Extranjería" }
+  withLabel({ id: 1, value: "nit" }, "constants.documentTypes.nit"),
+  withLabel({ id: 2, value: "cc" }, "constants.documentTypes.cc"),
+  withLabel({ id: 3, value: "pasaporte" }, "constants.documentTypes.passport"),
+  withLabel({ id: 4, value: "ce" }, "constants.documentTypes.foreignId")
 ];
 
 // Helper para obtener el ID por value
@@ -36,13 +50,12 @@ export interface PaymentType {
 }
 
 export const PAYMENT_TYPES: PaymentType[] = [
-  { id: 1, value: "cupo", label: "Cupo" },
-  { id: 2, value: "contado", label: "Contado" },
-  { id: 3, value: "pasarela", label: "Pasarela" }
+  withLabel({ id: 1, value: "cupo" }, "constants.paymentTypes.credit"),
+  withLabel({ id: 2, value: "contado" }, "constants.paymentTypes.cash"),
+  withLabel({ id: 3, value: "pasarela" }, "constants.paymentTypes.gateway")
 ];
 
-export const getPaymentTypeById = (id: number) =>
-  PAYMENT_TYPES.find((type) => type.id === id);
+export const getPaymentTypeById = (id: number) => PAYMENT_TYPES.find((type) => type.id === id);
 
 export const getPaymentTypeByValue = (value: string) =>
   PAYMENT_TYPES.find((type) => type.value === value);

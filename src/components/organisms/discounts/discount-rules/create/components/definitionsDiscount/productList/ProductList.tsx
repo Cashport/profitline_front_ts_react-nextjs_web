@@ -3,6 +3,7 @@ import { Typography, Flex, Checkbox, Skeleton } from "antd";
 import { ProductLine } from "@/types/products/products";
 import { UseFormReturn } from "react-hook-form";
 import { DiscountSchema } from "../../../resolvers/generalResolver";
+import { useTranslations } from "use-intl";
 
 const { Title, Text } = Typography;
 
@@ -13,6 +14,7 @@ type ProductListProps = {
   statusForm: "create" | "edit" | "review";
 };
 export default function ProductList({ lines, loading, form, statusForm }: ProductListProps) {
+  const t = useTranslations("discounts.products");
   const {
     formState: { errors },
     watch,
@@ -64,7 +66,7 @@ export default function ProductList({ lines, loading, form, statusForm }: Produc
 
   return (
     <>
-      <Title level={5}>Productos a aplicar</Title>
+      <Title level={5}>{t("title")}</Title>
       {!loading ? (
         <Flex className={styles.products} gap={10} wrap>
           {lines.map((line) => (
@@ -111,7 +113,7 @@ export default function ProductList({ lines, loading, form, statusForm }: Produc
                 ))}
               </Flex>
             </Flex>
-          )) || <Text type="danger">No hay productos para aplicar</Text>}
+          )) || <Text type="danger">{t("empty")}</Text>}
         </Flex>
       ) : (
         <Skeleton paragraph={{ rows: 3 }} />

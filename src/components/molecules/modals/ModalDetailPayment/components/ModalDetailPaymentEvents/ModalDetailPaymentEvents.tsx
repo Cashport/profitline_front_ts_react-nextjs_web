@@ -1,6 +1,7 @@
 import { FC, useState } from "react";
 import { ArrowLineDown } from "phosphor-react";
 import { Flex } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 
@@ -21,6 +22,7 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
   paymentEvents,
   handleOpenPaymentDetail
 }) => {
+  const t = useTranslations("modals.detailPayment.events");
   const formatMoney = useAppStore((state) => state.formatMoney);
   const [isModalFileDetailOpen, setIsModalFileDetailOpen] = useState<boolean>(false);
   const [urlStep, setUrlStep] = useState<string>("");
@@ -55,11 +57,13 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
 
     const content = (
       <div className={styles.modalDetailPaymentEvents__eventContent}>
-        {event.USER_NAME && <p className={styles.regularEntry}>Responsable: {event.USER_NAME}</p>}
+        {event.USER_NAME && (
+          <p className={styles.regularEntry}>{t("owner", { name: event.USER_NAME })}</p>
+        )}
 
         {event.id_payment_parent && (
           <Flex gap={"0.2rem"} wrap="wrap">
-            <p className={styles.regularEntry}>Id del pago padre:</p>
+            <p className={styles.regularEntry}>{t("parentPaymentId")}</p>
             <p
               className={styles.linkEntry}
               onClick={() => {
@@ -74,21 +78,25 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
         {event.client_name &&
           (event.payments_events_types_name === "Identificación" ||
             event.payments_events_types_name === "Identificación automática") && (
-            <p className={styles.regularEntry}>Cliente: {event.client_name}</p>
+            <p className={styles.regularEntry}>{t("customer", { name: event.client_name })}</p>
           )}
 
         {event.previous_name_client && (
-          <p className={styles.regularEntry}>Cliente previo: {event.previous_name_client}</p>
+          <p className={styles.regularEntry}>
+            {t("previousCustomer", { name: event.previous_name_client })}
+          </p>
         )}
         {event.payments_events_types_name === "Cambio de cliente asignado" && (
-          <p className={styles.regularEntry}>Nuevo cliente: {event.client_name}</p>
+          <p className={styles.regularEntry}>
+            {t("newCustomer", { name: event.client_name ?? "" })}
+          </p>
         )}
 
         {event.payments_events_types_name === "Aplicación de pagos" && (
           <>
             {event.id_aplication_payment && (
               <Flex gap={"0.2rem"} wrap="wrap">
-                <p className={styles.regularEntry}>Id de la aplicación:</p>
+                <p className={styles.regularEntry}>{t("applicationId")}</p>
                 <p className={styles.linkEntry} style={{ cursor: "default" }}>
                   {event.id_aplication_payment}
                 </p>
@@ -96,12 +104,12 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
             )}
 
             <p className={styles.regularEntry}>
-              Valor aplicado: {formatMoney(event.ammount_applied)}
+              {t("appliedAmount", { amount: formatMoney(event.ammount_applied) })}
             </p>
 
             {event.ids_split_payment && (
               <Flex gap={"0.2rem"} wrap="wrap">
-                <p className={styles.regularEntry}>Id de las facturas:</p>
+                <p className={styles.regularEntry}>{t("invoiceIds")}</p>
 
                 {event.ids_split_payment?.map((id, index) => (
                   <p
@@ -120,7 +128,9 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
           </>
         )}
 
-        {event.comments && <p className={styles.regularEntry}>Comentarios: {event.comments}</p>}
+        {event.comments && (
+          <p className={styles.regularEntry}>{t("comments", { comments: event.comments })}</p>
+        )}
       </div>
     );
 
@@ -140,7 +150,7 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
 
   return (
     <div className={styles.modalDetailPaymentEvents}>
-      <h3 className={styles.modalDetailPaymentEvents__title}>Trazabilidad</h3>
+      <h3 className={styles.modalDetailPaymentEvents__title}>{t("title")}</h3>
       <TimelineEvents events={items} />
       <InvoiceDownloadModal
         isModalOpen={isModalFileDetailOpen}

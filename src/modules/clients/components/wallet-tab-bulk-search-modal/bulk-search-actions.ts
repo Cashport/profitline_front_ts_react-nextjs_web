@@ -1,5 +1,5 @@
-import { formatNumber } from "@/utils/utils";
 import { ApiError } from "@/utils/api/api";
+import { getTranslator } from "@/i18n/translator";
 import {
   IUser,
   changeStatusInvoice,
@@ -39,6 +39,7 @@ const sendAccountStatement = async (
   contacts: IUser[],
   clientUUID: string
 ): Promise<string> => {
+  const t = getTranslator("clients");
   switch (config.statementMethod) {
     case "correo":
       await sendDigitalRecord(clientUUID, {
@@ -48,22 +49,22 @@ const sendAccountStatement = async (
         })),
         subject: ""
       });
-      return "Estado de cuenta enviado por correo.";
+      return t("bulkSearch.summary.statementEmailed");
 
     case "whatsapp":
       await sendDigitalRecordWhatsapp(
         clientUUID,
         toDestinations(config.recipients, contacts, "full_phone").map(Number)
       );
-      return "Estado de cuenta enviado por WhatsApp.";
+      return t("bulkSearch.summary.statementWhatsapp");
 
     case "descargar": {
       // El servicio devuelve null en vez de lanzar el error
       const files = await downloadDigitalRecordFiles(clientUUID);
-      if (!files) throw new Error("No se pudieron descargar los archivos del estado de cuenta.");
+      if (!files) throw new Error(t("bulkSearch.summary.statementDownloadError"));
 
       files.forEach((file) => window.open(file.url, "_blank"));
-      return "Archivos del estado de cuenta descargados.";
+      return t("bulkSearch.summary.statementDownloaded");
     }
   }
 };
@@ -80,7 +81,8 @@ export const runBulkAction = async ({
   projectId,
   createNewIncident
 }: IRunBulkActionParams): Promise<string> => {
-  const invoices = `${formatNumber(invoiceIds.length)} facturas`;
+  const t = getTranslator("clients");
+  const count = invoiceIds.length;
 
   switch (config.action) {
     case "estado": {
@@ -92,12 +94,12 @@ export const runBulkAction = async ({
         projectId,
         clientUUID
       );
-      return response?.data?.message || `Se cambió el estado de ${invoices}.`;
+      return response?.data?.message || t("bulkSearch.summary.statusChanged", { count });
     }
 
     case "pago":
       await addItemsToTable(projectId, clientUUID, "invoices", invoiceIds);
-      return `Se agregaron ${invoices} a la tabla de aplicación de pagos.`;
+      return t("bulkSearch.summary.paymentAdded", { count });
 
     case "novedad":
       await reportInvoiceIncident(
@@ -110,7 +112,7 @@ export const runBulkAction = async ({
         config.noveltyAmount ?? undefined,
         createNewIncident
       );
-      return `Se registró la novedad en ${invoices}.`;
+      return t("bulkSearch.summary.disputeRegistered", { count });
 
     case "radicar":
       await radicateInvoice(
@@ -123,7 +125,7 @@ export const runBulkAction = async ({
         config.evidence,
         clientUUID
       );
-      return `Se radicaron ${invoices}.`;
+      return t("bulkSearch.summary.invoicesSubmitted", { count });
 
     case "estado_cta":
       return sendAccountStatement(config, contacts, clientUUID);

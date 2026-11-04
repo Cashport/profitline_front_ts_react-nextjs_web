@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
 import "./selecnoveltynote.scss";
 import { Flex, Spin } from "antd";
+import { useTranslations } from "use-intl";
 import ItemsActionsModal from "@/components/atoms/ItemsModal/ItemsActionsModal";
 import { useAcountingAdjustment } from "@/hooks/useAcountingAdjustment";
 
@@ -23,6 +24,8 @@ export const SelectNoveltyNode: React.FC<Props> = ({
   clientId,
   projectId
 }) => {
+  const t = useTranslations("modals.selectNoveltyNote");
+  const tCommon = useTranslations("common");
   const { data, isLoading } = useAcountingAdjustment(
     clientId?.toString() || "",
     projectId?.toString() || "",
@@ -42,7 +45,9 @@ export const SelectNoveltyNode: React.FC<Props> = ({
     <div className="acn-modalContent">
       <Flex vertical className="acn-content-modal-select-note">
         <div>
-          <p className="acn-subTitleModalAction">{titleApplyMap[type || 1]}</p>
+          <p className="acn-subTitleModalAction">
+            {t(titleApplyMap[type || 1] ?? titleApplyMap[1])}
+          </p>
           <div className="acn-modalContentScroll">
             {isLoading ? (
               <Spin size="large" style={{ margin: "auto" }} />
@@ -70,7 +75,7 @@ export const SelectNoveltyNode: React.FC<Props> = ({
             className="acn-button-action-text acn-button-action-text--white"
             onClick={onClose}
           >
-            Cancelar
+            {tCommon("actions.cancel")}
           </button>
           <button
             type="button"
@@ -80,7 +85,7 @@ export const SelectNoveltyNode: React.FC<Props> = ({
             onClick={onContinue}
             disabled={selectedNotes.length === 0}
           >
-            Continuar
+            {tCommon("actions.continue")}
           </button>
         </Flex>
       </Flex>
@@ -88,8 +93,9 @@ export const SelectNoveltyNode: React.FC<Props> = ({
   );
 };
 
-const titleApplyMap: Record<number, string> = {
-  1: "Selecciona la(s) nota(s) débito a aplicar",
-  2: "Selecciona la(s) nota(s) crédito a aplicar",
-  3: "Selecciona los descuentos a aplicar"
-};
+const titleApplyMap: Record<number, "selectDebitMemos" | "selectCreditMemos" | "selectDiscounts"> =
+  {
+    1: "selectDebitMemos",
+    2: "selectCreditMemos",
+    3: "selectDiscounts"
+  };

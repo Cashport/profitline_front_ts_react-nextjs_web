@@ -6,7 +6,7 @@ import { ArrowLeft, Gift } from "@phosphor-icons/react";
 import { IBonus, IGiftOption, IOtherBonusGroup } from "@/types/commerce/ICommerce";
 import { IPromotion } from "@/services/promotion/promotion";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
-import { SPANISH_MONTHS } from "@/modules/dataQuality/utils/months";
+import { useFormatter, useTranslations } from "use-intl";
 
 import styles from "./modal-bonus.module.scss";
 
@@ -29,6 +29,9 @@ const ModalBonus = ({
   onSelectPromotion,
   loading
 }: Props) => {
+  const t = useTranslations("commerce.bonusModal");
+  const tCommon = useTranslations("common");
+  const format = useFormatter();
   const { confirmOrderData, setBonus } = useContext(OrderViewContext);
 
   const promotion = confirmOrderData?.promotion;
@@ -45,7 +48,8 @@ const ModalBonus = ({
   const flexPromotion = promotions.find((p) => p.isFlex);
   const nonFlexPromotions = promotions.filter((p) => !p.isFlex);
 
-  const currentMonthName = SPANISH_MONTHS[new Date().getMonth()];
+  const monthName = format.dateTime(new Date(), { month: "long" });
+  const currentMonthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
   type Segment = "flex" | "promos" | "otros";
 
@@ -264,7 +268,7 @@ const ModalBonus = ({
 
   const renderPromosList = () => (
     <div className={styles.selectContent}>
-      <p className={styles.selectLabel}>Elige la promoción a aplicar</p>
+      <p className={styles.selectLabel}>{t("choosePromotion")}</p>
       <div className={styles.promotionsList}>
         {nonFlexPromotions.map((promo) => {
           const isActive = selectedPromotionId === promo.id;
@@ -298,13 +302,13 @@ const ModalBonus = ({
       const progressMessage = promotion?.ranges?.[0]?.progress_message;
       return (
         <p style={{ color: "#999", fontSize: 13, textAlign: "center", padding: "1rem 0" }}>
-          {progressMessage || "No hay bonificados disponibles"}
+          {progressMessage || t("noFreeGoods")}
         </p>
       );
     }
     return (
       <div className={styles.section}>
-        <p className={styles.sectionLabel}>Bonificados promoción</p>
+        <p className={styles.sectionLabel}>{t("promotionFreeGoods")}</p>
 
         {tabOptions.length > 1 && (
           <div className={styles.tabRow}>
@@ -314,7 +318,7 @@ const ModalBonus = ({
                 onClick={() => setActiveTab(idx)}
                 className={activeTab === idx ? styles.tabActive : styles.tab}
               >
-                Opción {opt.option_number}
+                {t("option", { number: opt.option_number })}
               </button>
             ))}
           </div>
@@ -328,7 +332,7 @@ const ModalBonus = ({
               return (
                 <div key={group.gift_item_group_id} className={styles.poolTable}>
                   <div className={styles.poolHeader}>
-                    <span>Elige {group.max_selection_qty} und.</span>
+                    <span>{t("chooseUnits", { count: group.max_selection_qty })}</span>
                     <span className={styles.poolCount}>
                       {groupTotal}/{group.max_selection_qty}
                     </span>
@@ -408,7 +412,7 @@ const ModalBonus = ({
             .map((group) => (
               <div key={group.gift_item_group_id} className={styles.fixedTable}>
                 <div className={styles.fixedHeader}>
-                  <span>Incluido</span>
+                  <span>{t("included")}</span>
                 </div>
                 <table className={styles.table}>
                   <tbody>
@@ -442,7 +446,7 @@ const ModalBonus = ({
     return (
       <div key={subgroup.group_item_id} className={styles.poolTable}>
         <div className={styles.poolHeader}>
-          <span>Elige {subgroup.max_selection_qty} und.</span>
+          <span>{t("chooseUnits", { count: subgroup.max_selection_qty })}</span>
           <span className={styles.poolCount}>
             {groupTotal}/{subgroup.max_selection_qty}
           </span>
@@ -525,7 +529,7 @@ const ModalBonus = ({
     return (
       <div key={subgroup.group_item_id} className={styles.fixedTable}>
         <div className={styles.fixedHeader}>
-          <span>Incluido</span>
+          <span>{t("included")}</span>
           <span className={styles.poolCount}>
             {groupTotal}/{subgroup.max_selection_qty}
           </span>
@@ -601,14 +605,17 @@ const ModalBonus = ({
 
   const renderOtros = () => (
     <div className={styles.section}>
-      <p className={styles.sectionLabel}>Otros bonificados</p>
+      <p className={styles.sectionLabel}>{t("otherFreeGoods")}</p>
       <div className={styles.otrosGroups}>
         {otherGroups.map((group) => (
           <div key={group.group_id} className={styles.otrosGroup}>
             <div className={styles.otrosGroupHeader}>
               <span className={styles.otrosGroupTitle}>{group.description}</span>
               <span className={styles.saldoHint}>
-                Disp. {group.available_qty}/{group.assigned_qty}
+                {t("availableQty", {
+                  available: group.available_qty,
+                  assigned: group.assigned_qty
+                })}
               </span>
             </div>
             <div className={styles.grupos}>
@@ -642,13 +649,13 @@ const ModalBonus = ({
             <button
               onClick={() => setPromosScreen("list")}
               className={styles.backButton}
-              aria-label="Volver a la lista de promociones"
+              aria-label={t("backToPromotions")}
             >
               <ArrowLeft size={16} weight="bold" />
             </button>
           )}
           <Title level={4} style={{ margin: 0 }}>
-            Bonificados
+            {t("title")}
           </Title>
         </div>
       }
@@ -665,7 +672,7 @@ const ModalBonus = ({
                 }}
                 className={activeSegment === "flex" ? styles.segmentActive : styles.segment}
               >
-                Flex
+                {t("flex")}
               </button>
             )}
             {nonFlexPromotions.length > 0 && (
@@ -676,7 +683,7 @@ const ModalBonus = ({
                 }}
                 className={activeSegment === "promos" ? styles.segmentActive : styles.segment}
               >
-                Promos {currentMonthName}
+                {t("monthPromos", { month: currentMonthName })}
               </button>
             )}
           </div>
@@ -687,7 +694,7 @@ const ModalBonus = ({
                 onClick={() => setActiveSegment("otros")}
                 className={activeSegment === "otros" ? styles.otrosBtnActive : styles.otrosBtn}
               >
-                Otros
+                {t("others")}
               </button>
             </>
           )}
@@ -697,10 +704,13 @@ const ModalBonus = ({
 
         <div className={styles.footer}>
           <p className={styles.footerTotal}>
-            Total: <strong>{loading ? "—" : totalBonificados()}</strong>
+            {t.rich("total", {
+              total: loading ? "—" : String(totalBonificados()),
+              strong: (chunks) => <strong>{chunks}</strong>
+            })}
           </p>
           <button onClick={handleConfirm} className={styles.confirmBtn}>
-            Confirmar
+            {tCommon("actions.confirm")}
           </button>
         </div>
       </div>

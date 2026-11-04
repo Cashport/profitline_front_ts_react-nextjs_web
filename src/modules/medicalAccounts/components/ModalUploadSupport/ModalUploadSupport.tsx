@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Flex, Input, Modal, Typography } from "antd";
 import { FileText, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
@@ -28,13 +29,14 @@ export function ModalUploadSupport({
 }: ModalUploadSupportProps) {
   const [documentType, setDocumentType] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const t = useTranslations("medicalAccounts");
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
 
   const handleFileUpload = (file: File) => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      showMessage("error", "Solo se permiten archivos PDF.");
+      showMessage("error", t("upload.onlyPdf"));
       return;
     }
     setPdfFile(file);
@@ -46,14 +48,11 @@ export function ModalUploadSupport({
     setIsLoading(true);
     try {
       await uploadMedicalAccountSupport(accountId, pdfFile, documentType.trim());
-      showMessage("success", "Soporte cargado correctamente.");
+      showMessage("success", t("uploadSupportModal.success"));
       onSuccess();
       onClose();
     } catch (err) {
-      showMessage(
-        "error",
-        err instanceof Error ? err.message : "Ocurrió un error al cargar el soporte."
-      );
+      showMessage("error", err instanceof Error ? err.message : t("uploadSupportModal.error"));
     } finally {
       setIsLoading(false);
     }
@@ -73,10 +72,10 @@ export function ModalUploadSupport({
       open={isOpen}
       width={520}
       onCancel={handleClose}
-      title={<Title level={4}>Cargar soporte</Title>}
+      title={<Title level={4}>{t("uploadSupportModal.title")}</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Cargar soporte"
+          titleConfirm={t("uploadSupportModal.confirm")}
           showLeftButton={false}
           isConfirmDisabled={!pdfFile || !documentType.trim()}
           isConfirmLoading={isLoading}
@@ -87,14 +86,14 @@ export function ModalUploadSupport({
       destroyOnClose
     >
       <Flex vertical gap="1.25rem">
-        <p className="-mt-2 text-sm text-gray-500">Adjunta el PDF e indica el tipo de documento.</p>
+        <p className="-mt-2 text-sm text-gray-500">{t("uploadSupportModal.description")}</p>
 
         <div>
           <p className="mb-2 text-[13px] font-semibold text-gray-500">
-            Tipo de documento <span className="text-red-500">*</span>
+            {t("uploadSupportModal.documentType")} <span className="text-red-500">*</span>
           </p>
           <Input
-            placeholder="Ej: soporte_medico"
+            placeholder={t("uploadSupportModal.documentTypePlaceholder")}
             value={documentType}
             onChange={(e) => setDocumentType(e.target.value)}
           />
@@ -116,7 +115,7 @@ export function ModalUploadSupport({
                 type="button"
                 onClick={() => setPdfFile(null)}
                 className="shrink-0 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                aria-label="Quitar archivo"
+                aria-label={t("upload.removeFile")}
               >
                 <X size={18} />
               </button>
@@ -125,8 +124,8 @@ export function ModalUploadSupport({
             <UploadDropZone
               onFileUpload={handleFileUpload}
               allowedExtensions={[".pdf"]}
-              title="Arrastra el PDF aquí"
-              subtitle="o haz clic para seleccionarlo"
+              title={t("upload.dropTitle")}
+              subtitle={t("upload.dropSubtitle")}
             />
           )}
         </div>

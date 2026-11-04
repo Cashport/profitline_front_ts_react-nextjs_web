@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Select } from "antd";
 import { Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import { Button } from "@/modules/chat/ui/button";
@@ -26,21 +27,23 @@ import {
   useReferenceTypes
 } from "../../hooks/useReferences";
 import { useReferenceCatalogs } from "../../hooks/useReferenceCatalogs";
+import { useReferenceScopeLabels } from "../../hooks/useReferenceScopeLabels";
 import { ReferencesTable } from "../../components/ReferencesTable";
 import { ModalReferenceForm } from "../../components/ModalReferenceForm/ModalReferenceForm";
 import { ModalReferenceDetail } from "../../components/ModalReferenceDetail/ModalReferenceDetail";
 import { ModalReplaceReference } from "../../components/ModalReplaceReference/ModalReplaceReference";
 import { ModalToggleReferenceStatus } from "../../components/ModalToggleReferenceStatus/ModalToggleReferenceStatus";
 import {
-  REFERENCE_SCOPE_OPTIONS,
   ReferenceContextQuery,
-  resolveReferenceOwnerLabel,
-  scopeLabel
+  resolveReferenceOwnerLabel
 } from "../../references/references.utils";
 
 const CONTEXT_SCOPES: IReferenceScopeLevel[] = ["client", "country", "region"];
 
 export default function ReferencesView() {
+  const t = useTranslations("dataQuality.references.view");
+  const tCommon = useTranslations("common");
+  const scopeLabels = useReferenceScopeLabels();
   const searchParams = useSearchParams();
 
   // ---------------------------------------------------------------------------
@@ -108,7 +111,7 @@ export default function ReferencesView() {
   );
 
   const ownerLabel = (reference: IReferenceFile | null) =>
-    reference ? resolveReferenceOwnerLabel(reference, catalogs) : "";
+    reference ? resolveReferenceOwnerLabel(reference, catalogs, scopeLabels.labels) : "";
 
   const contextOwner = isContextMode
     ? {
@@ -118,7 +121,9 @@ export default function ReferencesView() {
         id_region: contextScope === "region" ? contextOwnerId : null
       }
     : null;
-  const contextOwnerLabel = contextOwner ? resolveReferenceOwnerLabel(contextOwner, catalogs) : "";
+  const contextOwnerLabel = contextOwner
+    ? resolveReferenceOwnerLabel(contextOwner, catalogs, scopeLabels.labels)
+    : "";
 
   const ownReferences = referenceContext?.own ?? [];
   const inheritedReferences = referenceContext?.inherited ?? [];
@@ -213,17 +218,17 @@ export default function ReferencesView() {
 
   return (
     <div className="cp-page">
-      <Header title="Referencias" back />
+      <Header title={t("title")} back />
       <div className="cp-card flex flex-col gap-3 px-[18px] py-[14px]">
         {isContextMode && (
           <div className="rounded-lg bg-[#F5F5F4] p-4">
             <p className="text-sm font-semibold text-[#141414]">
-              Referencias — {scopeLabel(contextScope as IReferenceScopeLevel)}: {contextOwnerLabel}
+              {t("contextTitle", {
+                scope: scopeLabels.label(contextScope as IReferenceScopeLevel),
+                owner: contextOwnerLabel
+              })}
             </p>
-            <p className="text-[13px] text-[#6B7280] mt-1">
-              Se muestran las referencias propias de este ámbito y las heredadas que aplican
-              (precedencia cliente → país → región).
-            </p>
+            <p className="text-[13px] text-[#6B7280] mt-1">{t("contextDescription")}</p>
           </div>
         )}
 
@@ -231,32 +236,35 @@ export default function ReferencesView() {
           <div className="flex flex-wrap items-center gap-2">
             <Select
               allowClear
-              placeholder="Tipo"
+              placeholder={t("typePlaceholder")}
               style={{ minWidth: 180 }}
               value={filters.reference_type}
               onChange={(value) =>
                 setFilters((prev) => ({ ...prev, reference_type: value ?? undefined }))
               }
-              options={(referenceTypes ?? []).map((t) => ({ value: t.code, label: t.description }))}
+              options={(referenceTypes ?? []).map((type) => ({
+                value: type.code,
+                label: type.description
+              }))}
             />
 
             {!isContextMode && (
               <>
                 <Select
                   allowClear
-                  placeholder="Ámbito"
+                  placeholder={t("scopePlaceholder")}
                   style={{ minWidth: 140 }}
                   value={filters.scope_level}
                   onChange={(value) =>
                     handleScopeFilterChange(value as IReferenceScopeLevel | undefined)
                   }
-                  options={REFERENCE_SCOPE_OPTIONS}
+                  options={scopeLabels.options}
                 />
                 <Select
                   allowClear
                   showSearch
                   optionFilterProp="label"
-                  placeholder="Propietario"
+                  placeholder={t("ownerPlaceholder")}
                   style={{ minWidth: 180 }}
                   value={ownerFilter}
                   disabled={!filters.scope_level}
@@ -265,15 +273,15 @@ export default function ReferencesView() {
                 />
                 <Select
                   allowClear
-                  placeholder="Estado"
+                  placeholder={t("statusPlaceholder")}
                   style={{ minWidth: 140 }}
                   value={filters.is_active}
                   onChange={(value) =>
                     setFilters((prev) => ({ ...prev, is_active: value as 0 | 1 | undefined }))
                   }
                   options={[
-                    { value: 1, label: "Activo" },
-                    { value: 0, label: "Inactivo" }
+                    { value: 1, label: tCommon("status.active") },
+                    { value: 0, label: tCommon("status.inactive") }
                   ]}
                 />
               </>
@@ -285,14 +293,13 @@ export default function ReferencesView() {
             onClick={() => setCreateOpen(true)}
           >
             <Plus className="w-4 h-4 mr-1" />
-            Nueva referencia
+            {t("newReference")}
           </Button>
         </div>
 
         {displayError && (
           <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
-            No se pudieron cargar las referencias.{" "}
-            {displayError instanceof Error ? displayError.message : ""}
+            {t("loadError")} {displayError instanceof Error ? displayError.message : ""}
           </div>
         )}
 
@@ -300,7 +307,7 @@ export default function ReferencesView() {
           <div className="flex flex-col gap-6">
             <section className="space-y-2">
               <h3 className="text-sm font-semibold text-[#141414]">
-                Propias de {contextOwnerLabel}
+                {t("ownTitle", { owner: contextOwnerLabel })}
               </h3>
               <ReferencesTable
                 references={ownReferences}
@@ -317,12 +324,9 @@ export default function ReferencesView() {
 
             <section className="space-y-2">
               <h3 className="text-sm font-semibold text-[#141414]">
-                Heredadas que aplican a {contextOwnerLabel}
+                {t("inheritedTitle", { owner: contextOwnerLabel })}
               </h3>
-              <p className="text-[13px] text-[#6B7280]">
-                Se marcan como «Efectiva» cuando son las que resuelven por precedencia para su tipo
-                de referencia.
-              </p>
+              <p className="text-[13px] text-[#6B7280]">{t("inheritedDescription")}</p>
               <ReferencesTable
                 references={inheritedReferences}
                 catalogs={catalogs}

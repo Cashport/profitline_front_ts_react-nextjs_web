@@ -4,19 +4,21 @@ import { useState, useMemo, useRef } from "react";
 import { ResponsiveContainer, Treemap, Tooltip } from "recharts";
 import { Maximize2, Minimize2, ChevronDown } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { useTranslations } from "use-intl";
 
 import { useDashboardSalesTreemap } from "@/modules/commerce/hooks/revenue-tracking/useDashboardSalesTreemap";
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 
 type DimensionKey = "linea" | "producto" | "cliente" | "ciudad" | "vendedor" | "canal";
 
-const dimensionOptions: { value: DimensionKey; label: string }[] = [
-  { value: "linea", label: "Línea de Negocio" },
-  { value: "producto", label: "Producto" },
-  { value: "vendedor", label: "Vendedor" },
-  { value: "ciudad", label: "Ciudad" },
-  { value: "cliente", label: "Cliente" },
-  { value: "canal", label: "Canal de Venta" }
+// `value` viaja al API; el texto sale de commerce.dashboard.treemap.dimensions.<value>.
+const DIMENSION_KEYS: DimensionKey[] = [
+  "linea",
+  "producto",
+  "vendedor",
+  "ciudad",
+  "cliente",
+  "canal"
 ];
 
 const COLORS = [
@@ -226,6 +228,7 @@ function TreemapRender({
   data: { name: string; children: any[] };
   colorMapping: Record<string, string>;
 }) {
+  const t = useTranslations("commerce.dashboard.treemap");
   const parentRectsRef = useRef<ParentRect[]>([]);
   parentRectsRef.current = [];
 
@@ -252,7 +255,7 @@ function TreemapRender({
                 <div className="text-primary">{formatCurrency(node.value)}</div>
                 {typeof node.percentage === "number" ? (
                   <div className="text-[13px] text-muted-foreground mt-0.5">
-                    {node.percentage.toFixed(1)}% del total
+                    {t("percentOfTotal", { pct: node.percentage.toFixed(1) })}
                   </div>
                 ) : null}
               </div>
@@ -266,6 +269,12 @@ function TreemapRender({
 
 export default function ProductTreemap() {
   const { filters, includeIva } = useRevenueTracking();
+  const t = useTranslations("commerce.dashboard.treemap");
+  const tCommon = useTranslations("common");
+  const dimensionOptions = DIMENSION_KEYS.map((value) => ({
+    value,
+    label: t(`dimensions.${value}`)
+  }));
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeDim1, setActiveDim1] = useState<DimensionKey>("linea");
   const [activeDim2, setActiveDim2] = useState<DimensionKey>("producto");
@@ -301,14 +310,14 @@ export default function ProductTreemap() {
     if (isLoading && !data) {
       return (
         <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-          Cargando…
+          {tCommon("status.loading")}
         </div>
       );
     }
     if (chartData.children.length === 0) {
       return (
         <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-          Sin datos
+          {tCommon("status.noData")}
         </div>
       );
     }
@@ -320,10 +329,8 @@ export default function ProductTreemap() {
       <div className="cp-card flex flex-col overflow-hidden">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-[18px] py-[14px] shrink-0 bg-cp-surface z-10">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Análisis cruzado (Treemap 2D)</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Explora dos dimensiones combinadas en simultáneo
-            </p>
+            <h3 className="text-lg font-semibold text-foreground">{t("title")}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{t("description")}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -364,7 +371,7 @@ export default function ProductTreemap() {
             <Dialog.Trigger asChild>
               <button
                 className="p-2 hover:bg-secondary rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                title="Pantalla completa"
+                title={t("fullscreen")}
               >
                 <Maximize2 className="w-5 h-5" />
               </button>
@@ -381,18 +388,14 @@ export default function ProductTreemap() {
           <div className="flex justify-between items-start mb-8">
             <div>
               <Dialog.Title className="text-2xl font-bold text-foreground">
-                Análisis cruzado detallado
+                {t("detailTitle")}
               </Dialog.Title>
               <Dialog.Description className="text-muted-foreground mt-2">
-                Agrupado por{" "}
-                <span className="font-semibold text-foreground">
-                  {dimensionOptions.find((d) => d.value === activeDim1)?.label}
-                </span>{" "}
-                cruzado con{" "}
-                <span className="font-semibold text-foreground">
-                  {dimensionOptions.find((d) => d.value === activeDim2)?.label}
-                </span>
-                . Pasa el cursor sobre los recuadros para revisar la estadística.
+                {t.rich("detailDescription", {
+                  dim1: t(`dimensions.${activeDim1}`),
+                  dim2: t(`dimensions.${activeDim2}`),
+                  b: (chunks) => <span className="font-semibold text-foreground">{chunks}</span>
+                })}
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>

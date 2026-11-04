@@ -1,3 +1,4 @@
+import { getTranslator } from "@/i18n/translator";
 import config from "@/config";
 
 import { API, getIdToken } from "@/utils/api/api";
@@ -202,11 +203,12 @@ export const createCommunication = async ({
       modelData
     );
 
-    if (response.status === 200) showMessage("success", "Comunicación creada correctamente");
+    if (response.status === 200)
+      showMessage("success", getTranslator("shared")("services.communicationCreated"));
     return response;
   } catch (error) {
     console.error("Error creating communication", error);
-    showMessage("error", "Ocurrió un error al crear la comunicación");
+    showMessage("error", getTranslator("shared")("services.communicationCreateError"));
     throw error;
   }
 };

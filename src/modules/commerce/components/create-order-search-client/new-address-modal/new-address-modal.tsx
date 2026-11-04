@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { Modal } from "antd";
+import { useTranslations } from "use-intl";
 
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import CitiesSelect from "@/modules/commerce/components/cities-select";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
-import { useCityWarehouse } from "@/app/(platform)/comercio/pedido/hooks/useCityWarehouses";
+import { useCityWarehouse } from "@/app/(platform)/commerce/order/hooks/useCityWarehouses";
 
 // New-address modal (Ant Design). Owns its own ciudad/dirección/bodega local state
 // and reports the result through onSave; resets on save/cancel.
@@ -16,6 +17,9 @@ interface INewAddressModalProps {
 }
 
 function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
+  const t = useTranslations("commerce.searchClient");
+  const tShipping = useTranslations("commerce.shippingFields");
+  const tCommon = useTranslations("common");
   const [newCiudad, setNewCiudad] = useState("");
   const [newDireccion, setNewDireccion] = useState("");
   const [newWarehouseId, setNewWarehouseId] = useState<number | undefined>();
@@ -68,10 +72,10 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
 
   return (
     <Modal
-      title="Nueva dirección"
+      title={t("newAddress")}
       open={open}
-      okText="Guardar"
-      cancelText="Cancelar"
+      okText={tCommon("actions.save")}
+      cancelText={tCommon("actions.cancel")}
       onOk={handleSave}
       okButtonProps={{ disabled: isSaveDisabled }}
       onCancel={handleCancel}
@@ -79,7 +83,7 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
     >
       <div className="flex flex-col gap-3 py-2">
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-semibold text-[#666666]">Ciudad</label>
+          <label className="text-[13px] font-semibold text-[#666666]">{tShipping("city")}</label>
           <CitiesSelect
             cities={warehouseCities}
             isLoading={isCityLoading}
@@ -92,7 +96,9 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-semibold text-[#666666]">Dirección de despacho</label>
+          <label className="text-[13px] font-semibold text-[#666666]">
+            {tShipping("dispatchAddress")}
+          </label>
           <input
             type="text"
             placeholder="Cl. 76 9-88"
@@ -104,10 +110,12 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
             }}
             className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
           />
-          <p className="text-[13px] text-[#999999]">Máximo 35 caracteres</p>
+          <p className="text-[13px] text-[#999999]">{t("maxChars", { count: 35 })}</p>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-semibold text-[#666666]">Bodega de despacho</label>
+          <label className="text-[13px] font-semibold text-[#666666]">
+            {tShipping("dispatchWarehouse")}
+          </label>
           <WarehouseSelect
             warehouseForced={warehouseForced}
             value={newWarehouseId}

@@ -5,8 +5,13 @@ import { Flex, Input, Tooltip, notification } from "antd";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { Eye, EyeClosed } from "phosphor-react";
+import { useTranslations } from "use-intl";
 
-import { getAuth, signInWithPolicyCheck, continueLoginAfterAuth } from "../../../../../firebase-utils";
+import {
+  getAuth,
+  signInWithPolicyCheck,
+  continueLoginAfterAuth
+} from "../../../../../firebase-utils";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -65,6 +70,9 @@ export const LoginForm = ({
   onExpiredPassword,
   initialOtpEmail
 }: LoginFormProps) => {
+  const t = useTranslations("auth.login");
+  const tPassword = useTranslations("auth.password");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -99,8 +107,8 @@ export const LoginForm = ({
       openNotification({
         api: api,
         type: "error",
-        title: "Error",
-        message: "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
+        title: t("errorTitle"),
+        message: t("otpSendError")
       });
     }
   };
@@ -114,11 +122,10 @@ export const LoginForm = ({
       openNotification({
         api: api,
         type: "error",
-        title: "Error",
+        title: t("errorTitle"),
         // El backend distingue entre cooldown de reenvío, bloqueo por intentos
         // fallidos y fallo de envío; se muestra su mensaje cuando lo trae.
-        message:
-          result.message || "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
+        message: result.message || t("otpSendError")
       });
       return;
     }
@@ -150,8 +157,8 @@ export const LoginForm = ({
           openNotification({
             api: api,
             type: "error",
-            title: "Error",
-            message: "El código OTP ingresado no es válido. Verifica e intenta nuevamente."
+            title: t("errorTitle"),
+            message: t("otpInvalid")
           });
           return;
         }
@@ -180,10 +187,8 @@ export const LoginForm = ({
         openNotification({
           api: api,
           type: "error",
-          title: "Error",
-          message:
-            result.message ||
-            "El código OTP ingresado no es válido o ha expirado. Verifica e intenta nuevamente."
+          title: t("errorTitle"),
+          message: result.message || t("otpInvalidOrExpired")
         });
         return;
       }
@@ -196,7 +201,13 @@ export const LoginForm = ({
       return;
     }
 
-    const outcome = await signInWithPolicyCheck(email.trim(), password!, router, openNotification, api);
+    const outcome = await signInWithPolicyCheck(
+      email.trim(),
+      password!,
+      router,
+      openNotification,
+      api
+    );
     if (outcome.step === "otp") {
       await handleSendLoginOtp();
     } else if (outcome.step === "expiredPassword") {
@@ -234,38 +245,37 @@ export const LoginForm = ({
       <ModalConfirmAction
         isOpen={isOtpSentModalOpen}
         onClose={handleConfirmOtpSent}
-        title="Revisa tu correo"
-        content={
-          <p>
-            Por seguridad hemos enviado un código de acceso único a tu correo. Ingrésalo para
-            continuar.
-          </p>
-        }
-        cancelText="OK"
+        title={t("otpSentModal.title")}
+        content={<p>{t("otpSentModal.content")}</p>}
+        cancelText={t("otpSentModal.ok")}
         hideOkButton
       />
-      <h4 className="loginForm__title">{!token ? "Inicia sesión" : "Ingresar"}</h4>
+      <h4 className="loginForm__title">{!token ? t("title") : t("titleExternal")}</h4>
 
       <Flex vertical gap={"1.5rem"} className="loginForm__content">
         {!isCodeSent && (
           <div>
-            <p className="loginForm__inputTitle">{!token ? "Usuario" : "Correo electrónico"}</p>
+            <p className="loginForm__inputTitle">
+              {!token ? t("userLabel") : tCommon("fields.email")}
+            </p>
             <InputForm
               customStyle={{ with: "100%" }}
-              placeholder="Ingresar usuario"
+              placeholder={t("userPlaceholder")}
               hiddenTitle
               control={control}
               nameInput="email"
               typeInput="email"
-              validationRules={{ required: "Email es obligatorio" }}
+              validationRules={{ required: t("emailRequired") }}
             />
           </div>
         )}
         {isCodeSent && (
           <div>
             <p className="loginForm__otpTitle">
-              Hemos enviado el código de autenticación al correo{" "}
-              <span className="loginForm__otpTitle__bold">{getValues("email")}</span>
+              {t.rich("otpSentTo", {
+                email: getValues("email"),
+                b: (chunks) => <span className="loginForm__otpTitle__bold">{chunks}</span>
+              })}
             </p>
             <div className="otpInputContainer">
               <Controller
@@ -285,22 +295,22 @@ export const LoginForm = ({
                 )}
               />
             </div>
-            {isInvalidCode && <p className="loginForm__otpError">Código inválido</p>}
+            {isInvalidCode && <p className="loginForm__otpError">{t("otpInvalidShort")}</p>}
             {timeLeft > 0 ? (
-              <p className="loginForm__otpResentCode">Reenviar en {timeLeft}s</p>
+              <p className="loginForm__otpResentCode">{t("resendIn", { seconds: timeLeft })}</p>
             ) : (
               <p
                 onClick={() => handleSentOtpCode(getValues("email"))}
                 className="loginForm__otpResentCode"
               >
-                Reenviar codigo
+                {t("resendCode")}
               </p>
             )}
           </div>
         )}
         {!token && !isCodeSent && (
           <div>
-            <p className="loginForm__inputTitle">Contraseña</p>
+            <p className="loginForm__inputTitle">{tPassword("label")}</p>
             <Controller
               name="password"
               control={control}
@@ -310,12 +320,12 @@ export const LoginForm = ({
                   size="large"
                   type={showPassword ? "text" : "password"}
                   className="inputPassword"
-                  placeholder="Contrasena"
+                  placeholder={tPassword("placeholder")}
                   variant="borderless"
                   required
                   autoComplete="current-password"
                   suffix={
-                    <Tooltip title={showPassword ? "Hidden Password" : "Show Password"}>
+                    <Tooltip title={showPassword ? tPassword("hide") : tPassword("show")}>
                       {!showPassword ? (
                         <Eye onClick={() => setShowPassword(true)} className={"iconEyePassword"} />
                       ) : (
@@ -334,13 +344,13 @@ export const LoginForm = ({
         )}
         {!token && !isCodeSent && (
           <p onClick={handleForgotPassword} className="forgotPassword">
-            Olvidé mi contraseña
+            {t("forgotPassword")}
           </p>
         )}
       </Flex>
 
       <PrincipalButton disabled={!isValid} loading={isLoading} htmlType="submit">
-        {isLoading ? "Cargando..." : "Iniciar sesión"}
+        {isLoading ? tCommon("status.loading") : t("submit")}
       </PrincipalButton>
     </form>
   );

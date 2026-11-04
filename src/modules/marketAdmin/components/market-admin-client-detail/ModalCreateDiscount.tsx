@@ -3,6 +3,7 @@
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import { Modal } from "antd";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 import { ClipboardList, Eye, Plus, Tag, Upload, X } from "lucide-react";
 import { useMarketAdminClientLines } from "@/modules/marketAdmin/hooks/useMarketAdminClientLines";
 import {
@@ -29,14 +30,14 @@ const createDiscountGroup = (): IDiscountGroup => ({
 const isGroupValid = (g: IDiscountGroup) =>
   g.products.length > 0 && g.discount > 0 && g.discount <= 100 && g.units >= 1;
 
-const pluralize = (count: number, word: string) => `${count} ${word}${count !== 1 ? "s" : ""}`;
-
 const dateInputClass =
   "w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors text-[#141414]";
 const iconButtonClass =
   "w-9 h-9 flex items-center justify-center border border-[#DDDDDD] rounded-lg text-[#666666] hover:border-[#141414] hover:text-[#141414] transition-colors flex-shrink-0";
 
 export default function ModalCreateDiscount({ clientId, saving, onClose, onSave }: Props) {
+  const t = useTranslations("marketAdmin.clientDetail.createDiscount");
+  const tCommon = useTranslations("common");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -113,10 +114,8 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
             <ClipboardList size={15} className="text-[#141414]" />
           </span>
           <div>
-            <h2 className="text-base font-bold text-[#141414]">Nueva promoción</h2>
-            <p className="text-[13px] font-normal text-[#999999]">
-              Descuento negociado para este cliente
-            </p>
+            <h2 className="text-base font-bold text-[#141414]">{t("title")}</h2>
+            <p className="text-[13px] font-normal text-[#999999]">{t("subtitle")}</p>
           </div>
         </div>
       }
@@ -124,21 +123,21 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
       footer={
         <div className="flex items-center justify-between">
           <span className="text-[13px] text-[#999999]">
-            {pluralize(groups.length, "grupo")} · {pluralize(totalProducts, "producto")}
+            {t("footerSummary", { groups: groups.length, products: totalProducts })}
           </span>
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
               className="text-sm text-[#666666] px-4 py-2 rounded-lg hover:bg-[#F5F5F5] transition-colors"
             >
-              Cancelar
+              {tCommon("actions.cancel")}
             </button>
             <button
               onClick={handleSave}
               disabled={!isValid || saving}
               className="text-sm font-semibold bg-[#CBE71E] text-[#141414] px-5 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {saving ? "Enviando…" : "Enviar a aprobación"}
+              {saving ? tCommon("status.sending") : t("submitForApproval")}
             </button>
           </div>
         </div>
@@ -147,36 +146,38 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
       <div className="flex flex-col gap-6 py-2">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-[13px] font-bold text-[#141414] block mb-1.5">Vigencia</label>
+            <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
+              {t("validity")}
+            </label>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <input
                   type="date"
-                  aria-label="Fecha de inicio"
+                  aria-label={t("startDate")}
                   className={dateInputClass}
                   value={startDate}
                   min={today}
                   max={endDate || undefined}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
-                <span className="text-[13px] text-[#999999] block mt-1">Inicio</span>
+                <span className="text-[13px] text-[#999999] block mt-1">{t("start")}</span>
               </div>
               <div>
                 <input
                   type="date"
-                  aria-label="Fecha de fin"
+                  aria-label={t("endDate")}
                   className={dateInputClass}
                   value={endDate}
                   min={startDate || today}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
-                <span className="text-[13px] text-[#999999] block mt-1">Fin</span>
+                <span className="text-[13px] text-[#999999] block mt-1">{t("end")}</span>
               </div>
             </div>
           </div>
           <div>
             <label className="text-[13px] font-bold text-[#141414] block mb-1.5">
-              Adjunto (contrato / acuerdo)
+              {t("attachment")}
             </label>
             <input
               ref={fileInputRef}
@@ -191,12 +192,13 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
                   file ? "text-[#141414]" : "text-[#BBBBBB]"
                 }`}
               >
-                {file ? file.name : "Sin archivo adjunto"}
+                {file ? file.name : t("noFile")}
               </span>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                title="Subir archivo"
+                title={t("uploadFile")}
+                aria-label={t("uploadFile")}
                 className={iconButtonClass}
               >
                 <Upload size={14} />
@@ -206,7 +208,8 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
                   <button
                     type="button"
                     onClick={handleViewFile}
-                    title="Ver archivo"
+                    title={t("viewFile")}
+                    aria-label={t("viewFile")}
                     className={iconButtonClass}
                   >
                     <Eye size={14} />
@@ -214,7 +217,8 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
                   <button
                     type="button"
                     onClick={() => setFile(null)}
-                    title="Quitar archivo"
+                    title={t("removeFile")}
+                    aria-label={t("removeFile")}
                     className="w-9 h-9 flex items-center justify-center border border-[#DDDDDD] rounded-lg text-[#AAAAAA] hover:border-[#E53E3E] hover:text-[#E53E3E] transition-colors flex-shrink-0"
                   >
                     <X size={14} />
@@ -228,10 +232,10 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
         <div>
           <div className="flex items-center justify-between mb-3">
             <label className="text-sm font-bold text-[#141414]">
-              Grupos de descuento
+              {t("discountGroups")}
               {totalProducts > 0 && (
                 <span className="ml-1.5 text-[#999999] font-normal">
-                  ({pluralize(totalProducts, "producto")})
+                  {t("productsCount", { count: totalProducts })}
                 </span>
               )}
             </label>
@@ -241,23 +245,20 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
               disabled={hasNoProducts}
               className="flex items-center gap-1.5 text-[13px] font-semibold text-[#141414] border border-[#DDDDDD] px-3.5 py-2 rounded-lg hover:border-[#141414] hover:bg-[#FAFAFA] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Plus size={12} /> Agregar grupo de descuento
+              <Plus size={12} /> {t("addGroup")}
             </button>
           </div>
 
           {hasNoProducts ? (
             <div className="text-center py-14 border border-dashed border-[#DDDDDD] rounded-xl bg-[#FAFAFA]">
-              <p className="text-sm text-[#999999]">No hay productos para este cliente.</p>
+              <p className="text-sm text-[#999999]">{t("noProducts")}</p>
             </div>
           ) : groups.length === 0 ? (
             <div className="flex flex-col items-center gap-2 text-center py-14 border border-dashed border-[#DDDDDD] rounded-xl bg-[#FAFAFA]">
               <span className="w-10 h-10 rounded-full bg-white border border-[#EEEEEE] flex items-center justify-center">
                 <Tag size={16} className="text-[#AAAAAA]" />
               </span>
-              <p className="text-sm text-[#999999] max-w-sm px-4">
-                Agrega un grupo para definir un % de descuento y una cantidad, y luego busca los
-                productos que quieres incluir.
-              </p>
+              <p className="text-sm text-[#999999] max-w-sm px-4">{t("emptyHint")}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">

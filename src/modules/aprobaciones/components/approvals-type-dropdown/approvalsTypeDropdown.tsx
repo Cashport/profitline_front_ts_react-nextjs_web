@@ -1,4 +1,5 @@
 import { ListFilter } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { IGetApprovalTypeActions } from "@/types/approvals/IApprovals";
 import { Button } from "@/modules/chat/ui/button";
@@ -20,6 +21,7 @@ export default function ApprovalsTypeDropdown({
   selectedTypes,
   onTypeChange
 }: ApprovalsTypeDropdownProps) {
+  const t = useTranslations("approvals.filters");
   const handleToggleType = (code: string) => {
     const newTypes = selectedTypes.includes(code)
       ? selectedTypes.filter((t) => t !== code)
@@ -36,7 +38,7 @@ export default function ApprovalsTypeDropdown({
           style={{ height: "var(--control-h)" }}
         >
           <ListFilter className="h-4 w-4" />
-          Tipos
+          {t("types")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

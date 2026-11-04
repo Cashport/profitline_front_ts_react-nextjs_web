@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "use-intl";
+
 import { cn } from "@/utils/utils";
 import type { IWalletPerson } from "../../types";
 
@@ -12,10 +14,11 @@ interface PersonBadgeProps {
 
 /** Avatar de iniciales + nombre. Sin persona muestra el estado "sin dueño". */
 export default function PersonBadge({ person, mini, className }: PersonBadgeProps) {
+  const t = useTranslations("wallet.person");
   if (!person) {
     return (
       <span className={cn("font-semibold text-rose-600 dark:text-rose-400", className)}>
-        {mini ? "Sin dueño" : "Sin responsable"}
+        {mini ? t("noOwner") : t("noAssignee")}
       </span>
     );
   }

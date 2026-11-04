@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ConfigProvider, Select } from "antd";
 import { Download } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { MiniSwitch } from "@/components/ui/page-header-controls/page-header-controls";
 import type { IVisitFormResponsesExportParams } from "@/types/surveys/ISurveys";
@@ -31,6 +32,8 @@ export default function ResponsesDownloadCard({
   formId: number;
   className?: string;
 }) {
+  const t = useTranslations("surveys.download");
+  const tPeriods = useTranslations("surveys.exportPeriods");
   const { download, isDownloading } = useVisitFormResponsesExport(formId);
   const [format, setFormat] = useState<ExportFormat>("xlsx");
   const [periodId, setPeriodId] = useState("mes");
@@ -47,17 +50,15 @@ export default function ResponsesDownloadCard({
     >
       <div className="flex min-w-0 items-center gap-2 text-[13px]">
         <Download className="h-4 w-4 shrink-0 text-cp-ink" />
-        <h2 className="shrink-0 font-semibold text-cp-ink">Descargar respuestas</h2>
-        <span className="truncate text-muted-foreground">
-          · Una fila por respuesta, una columna por pregunta
-        </span>
+        <h2 className="shrink-0 font-semibold text-cp-ink">{t("title")}</h2>
+        <span className="truncate text-muted-foreground">· {t("subtitle")}</span>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {/* Selector segmentado gris con la opción activa en blanco, como el de Tema del avatar. */}
         <div
           role="radiogroup"
-          aria-label="Formato"
+          aria-label={t("format")}
           className="flex h-[var(--control-h)] shrink-0 rounded-lg bg-cp-bg p-[3px]"
         >
           {FORMATS.map((f) => (
@@ -82,11 +83,11 @@ export default function ResponsesDownloadCard({
         {/* El tema raíz usa controles de 47px: aquí van al alto de los demás (--control-h). */}
         <ConfigProvider theme={{ components: { Select: { controlHeight: 36, borderRadius: 8 } } }}>
           <Select
-            aria-label="Periodo"
+            aria-label={t("period")}
             variant="filled"
             value={periodId}
             onChange={setPeriodId}
-            options={EXPORT_PERIODS.map((p) => ({ value: p.id, label: p.label }))}
+            options={EXPORT_PERIODS.map((p) => ({ value: p.id, label: tPeriods(p.id) }))}
             className="w-[170px] shrink-0"
           />
         </ConfigProvider>
@@ -95,8 +96,8 @@ export default function ResponsesDownloadCard({
           <MiniSwitch
             checked={includeLinks}
             onChange={setIncludeLinks}
-            label="Enlaces a fotos y archivos"
-            title="Incluir enlaces a fotos y archivos"
+            label={t("includeLinksShort")}
+            title={t("includeLinks")}
           />
         </span>
 
@@ -107,7 +108,7 @@ export default function ResponsesDownloadCard({
           onClick={handleDownload}
           className="ml-auto"
         >
-          Descargar {format === "csv" ? "CSV" : "Excel"}
+          {t("download", { format: format === "csv" ? "CSV" : "Excel" })}
         </ActionButton>
       </div>
     </section>

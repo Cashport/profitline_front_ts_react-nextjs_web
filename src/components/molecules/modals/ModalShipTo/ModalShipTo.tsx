@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, createContext, useEffect, useState } from "react";
 import { Button, Modal } from "antd";
+import { useTranslations } from "use-intl";
 
 import { ModalBillingPeriod } from "../ModalBillingPeriod/ModalBillingPeriod";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
@@ -84,6 +85,8 @@ export const ModalShipTo = ({
   getShipTo,
   editShipTo
 }: Props) => {
+  const t = useTranslations("modals.shipTo");
+  const tCommon = useTranslations("common");
   const [currentView, setCurrentView] = useState<"main" | "businessRules">("main");
   const [selectedShipToData, setSelectedShipToData] = useState<ShipToFormType | undefined>();
   const [isBillingPeriodOpen, setIsBillingPeriodOpen] = useState(false);
@@ -160,14 +163,14 @@ export const ModalShipTo = ({
     footer: (
       <div className="footer">
         <Button className="cancelButton" onClick={() => setCurrentView("main")}>
-          Cancelar
+          {tCommon("actions.cancel")}
         </Button>
         <Button
           onClick={handleSubmitShipTo}
           disabled={selectedStructure.channels?.length === 0 || zones?.length === 0}
           className="acceptButton"
         >
-          {isShipToModalOpen.accounting_code ? "Actualizar Ship To" : "Crear Ship To"}
+          {isShipToModalOpen.accounting_code ? t("update") : t("create")}
         </Button>
       </div>
     )

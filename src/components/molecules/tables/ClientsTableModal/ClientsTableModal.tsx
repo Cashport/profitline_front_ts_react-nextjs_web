@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Dispatch, SetStateAction, useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Flex, message, Spin, Table, TableProps, Typography } from "antd";
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export const ClientsTableModal = ({ setClientsKeys, selectedClientsKeys }: Props) => {
+  const t = useTranslations("shared.tables");
+  const tCommon = useTranslations("common");
   const [allSelectedKeys, setAllSelectedKeys] = useState<React.Key[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [page, setPage] = useState(1);
@@ -142,37 +145,37 @@ export const ClientsTableModal = ({ setClientsKeys, selectedClientsKeys }: Props
 
   const columns: TableProps<IClient>["columns"] = [
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "client_name",
       key: "client_name",
       render: (text) => <Link underline>{text}</Link>
     },
     {
-      title: "NIT",
+      title: tCommon("fields.taxId"),
       dataIndex: "nit",
       key: "nit",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Ship To",
+      title: t("shipTo"),
       key: "shipTo",
       dataIndex: "shipTo",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Holding",
+      title: t("clients.columns.holding"),
       key: "holding_name",
       dataIndex: "holding_name",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Cartera",
+      title: t("clients.columns.receivables"),
       key: "budget",
       dataIndex: "budget",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Grupos",
+      title: t("clients.columns.groups"),
       key: "groups",
       dataIndex: "groups",
       render: (text) => <Text>{text}</Text>
@@ -184,7 +187,7 @@ export const ClientsTableModal = ({ setClientsKeys, selectedClientsKeys }: Props
       {contextHolder}
       <Flex justify="flex-start" gap={"0.5rem"} className="clientsTableModal_header">
         <UiSearchInput
-          placeholder="Buscar clientes"
+          placeholder={t("clients.searchPlaceholder")}
           onChange={(e) => {
             setPage(1);
             setSearchQuery(e.target.value);

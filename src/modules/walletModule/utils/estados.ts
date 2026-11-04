@@ -1,6 +1,7 @@
 /* Estados de la pantalla: los conocidos, con su fila en EST_META, y los que el
    API mande sin que el front los conozca todavía. Estos últimos no se pierden
    ni se agrupan: se pintan aparte, con nombre y color propios. */
+import { getTranslator } from "@/i18n/translator";
 import { EST_META, FALLBACK_BG, ORDEN_EST } from "../constants";
 import type { EstadoMeta } from "../constants";
 import type { EstadoId, EstadoNuevo } from "../types";
@@ -56,6 +57,6 @@ export const estadoMeta = (e: EstadoId): EstadoMeta => {
     bg: FALLBACK_BG[hashKey(statusKey) % FALLBACK_BG.length],
     chip: "idle",
     chipTxt: nom,
-    corta: "Estado nuevo del catálogo"
+    corta: getTranslator("wallet")("estados.newStatus")
   };
 };

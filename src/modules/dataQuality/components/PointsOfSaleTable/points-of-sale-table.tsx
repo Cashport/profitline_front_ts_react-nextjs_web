@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslations } from "use-intl";
 
 import { message } from "antd";
 
@@ -26,6 +27,9 @@ import {
 } from "@/services/dataQuality/dataQuality";
 
 export function PointsOfSaleTable() {
+  const t = useTranslations("dataQuality.posTable");
+  const tUploads = useTranslations("dataQuality.countryView");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const clientId = params.clientId as string;
   const countryId = params.countryId as string;
@@ -48,7 +52,7 @@ export function PointsOfSaleTable() {
     setIsDownloadPointsOfSaleLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando catálogo...",
+      content: tUploads("downloadingCatalog"),
       duration: 0
     });
     try {
@@ -59,13 +63,11 @@ export function PointsOfSaleTable() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      message.success("Catálogo descargado exitosamente.");
+      message.success(tUploads("catalogDownloaded"));
       setWhichModalOpen({ selected: 0 });
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error al descargar el catálogo.";
+        error?.response?.data?.message || error?.message || tUploads("catalogDownloadError");
       message.error(errorMessage);
     } finally {
       hide();
@@ -77,13 +79,11 @@ export function PointsOfSaleTable() {
     setIsUploadLoading(true);
     try {
       await uploadPointsOfSaleFile(file);
-      message.success("Archivo de puntos de venta cargado exitosamente.");
+      message.success(tUploads("posUploaded"));
       setWhichModalOpen({ selected: 0 });
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
-      );
+      message.error(error instanceof Error ? error.message : tUploads("posUploadError"));
     } finally {
       setIsUploadLoading(false);
     }
@@ -101,11 +101,11 @@ export function PointsOfSaleTable() {
     try {
       await deletePointOfSale(selectedPOS.id);
       mutate();
-      message.success("Punto de venta eliminado exitosamente");
+      message.success(t("deleted"));
       setIsDeleteModalOpen(false);
       setSelectedPOS(null);
     } catch {
-      message.error("Error al eliminar el punto de venta");
+      message.error(t("deleteError"));
     } finally {
       setIsLoadingDelete(false);
     }
@@ -149,7 +149,7 @@ export function PointsOfSaleTable() {
       onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
     },
     {
-      title: "Acciones",
+      title: t("actions"),
       key: "acciones",
       align: "right",
       onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } }),
@@ -178,7 +178,10 @@ export function PointsOfSaleTable() {
     <div>
       <div className="flex items-center justify-between pb-4">
         <div className="flex items-center gap-3">
-          <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
+          <UiSearchInput
+            placeholder={tCommon("placeholders.search")}
+            onChange={(e) => setSearch(e.target.value)}
+          />
           <GenerateActionButton onClick={() => setWhichModalOpen({ selected: 1 })} />
         </div>
 
@@ -196,14 +199,12 @@ export function PointsOfSaleTable() {
           }}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Nuevo POS
+          {t("newPos")}
         </Button>
       </div>
       {error ? (
         <div className="bg-white rounded-lg p-6 text-center">
-          <p className="text-red-600">
-            {error instanceof Error ? error.message : "No se pudo cargar los puntos de venta."}
-          </p>
+          <p className="text-red-600">{error instanceof Error ? error.message : t("loadError")}</p>
         </div>
       ) : (
         <Table
@@ -236,8 +237,8 @@ export function PointsOfSaleTable() {
           setSelectedPOS(null);
         }}
         onOk={handleDeletePOS}
-        title="¿Está seguro de eliminar?"
-        okText="Eliminar"
+        title={t("confirmDelete")}
+        okText={tCommon("actions.delete")}
         okLoading={isLoadingDelete}
       />
 

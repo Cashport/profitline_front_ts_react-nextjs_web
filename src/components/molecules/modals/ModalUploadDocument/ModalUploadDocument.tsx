@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { Flex, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import "./modaluploaddocument.scss";
 import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
@@ -30,6 +31,8 @@ export const ModalUploadDocument = ({
 }: Props) => {
   // Hay un estado de files en el modal para poder dejar la posibilidad de verificacion
   // El estado de clientDocuments ya deberia contener todos los documentos necesarios
+  const t = useTranslations("modals.uploadDocument");
+  const tCommon = useTranslations("common");
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
   const { data } = useModalUploadDocument(clientTypeId?.value);
   const handleOnSubmit = (e: React.SyntheticEvent) => {
@@ -56,18 +59,14 @@ export const ModalUploadDocument = ({
       cancelButtonProps={{
         className: "buttonCancel"
       }}
-      okText={editing ? "Reemplazar documentos" : "Adjuntar documentos"}
-      cancelText="Cancelar"
-      title={<Title level={4}>{editing ? "Editar documentos" : "Cargar Documentos"}</Title>}
+      okText={editing ? t("okReplace") : t("okAttach")}
+      cancelText={tCommon("actions.cancel")}
+      title={<Title level={4}>{editing ? t("titleEdit") : t("titleUpload")}</Title>}
       className="modaluploaddocument"
       onCancel={handleOnCancel}
       onOk={handleOnSubmit}
     >
-      <Text className="description">
-        {editing
-          ? "Los documentos seleccionados reemplezarán los actuales"
-          : "Haz clic en cada casilla para adjuntar los documentos requeridos"}
-      </Text>
+      <Text className="description">{editing ? t("descriptionEdit") : t("descriptionUpload")}</Text>
       <Flex vertical className="mainUploadDocuments">
         {_data &&
           _data?.map((file) => (

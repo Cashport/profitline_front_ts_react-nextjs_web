@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Modal, Typography, Tag, Flex, Spin, message } from "antd";
 import { PaperClipOutlined } from "@ant-design/icons";
+import { useTranslations } from "use-intl";
 
 import { getCircularizationMessagePreview } from "@/services/communications/communications";
 import type { IMessagePreview, IPreviewClient } from "@/types/communications/ICommunications";
@@ -21,6 +22,7 @@ export default function ModalDetailClientCommunication({
   communicationId,
   client
 }: ModalDetailClientCommunicationProps) {
+  const t = useTranslations("massCommunications.clientPreview");
   const [data, setData] = useState<IMessagePreview | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,9 +38,7 @@ export default function ModalDetailClientCommunication({
         );
         setData(response.data);
       } catch (error) {
-        message.error(
-          error instanceof Error ? error.message : "No se pudo cargar la vista previa del mensaje."
-        );
+        message.error(error instanceof Error ? error.message : t("loadError"));
       } finally {
         setLoading(false);
       }
@@ -93,7 +93,7 @@ export default function ModalDetailClientCommunication({
             {client.client_name}
           </Text>
           <Text style={{ color: "#999", fontSize: 13 }}>
-            {recipients.length} destinatario{recipients.length !== 1 ? "s" : ""}
+            {t("recipientCount", { count: recipients.length })}
           </Text>
         </div>
       </div>
@@ -137,11 +137,11 @@ export default function ModalDetailClientCommunication({
                     color: "#999"
                   }}
                 >
-                  Asunto
+                  {t("subject")}
                 </Text>
                 <br />
                 <Text strong style={{ fontSize: 14 }}>
-                  {data.subject || "Sin asunto"}
+                  {data.subject || t("noSubject")}
                 </Text>
               </div>
 
@@ -165,7 +165,7 @@ export default function ModalDetailClientCommunication({
                   }}
                 >
                   <Text type="secondary" italic>
-                    Sin contenido
+                    {t("noContent")}
                   </Text>
                 </div>
               )}
@@ -186,7 +186,7 @@ export default function ModalDetailClientCommunication({
                       marginBottom: 8
                     }}
                   >
-                    Adjuntos
+                    {t("attachmentsTitle")}
                   </Text>
                   <Flex wrap="wrap" gap={8}>
                     {attachments.map((att, i) => (

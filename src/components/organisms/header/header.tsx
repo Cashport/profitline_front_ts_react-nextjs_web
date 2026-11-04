@@ -3,10 +3,14 @@ import { FC, ReactNode } from "react";
 import { CaretLeft } from "phosphor-react";
 import styles from "./header.module.scss";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "use-intl";
+import type { Messages } from "@/i18n/types";
 import UserMenu from "./user-menu/user-menu";
 
 interface HeaderProps {
-  title: string;
+  title?: string;
+  /** Título de la página desde el catálogo `meta` (layouts de servidor que no pueden traducir). */
+  titleKey?: keyof Messages["meta"];
   /** Reemplaza el texto del título (p. ej. un selector de tableros); `title` queda como nombre accesible. */
   titleNode?: ReactNode;
   /** Línea pequeña bajo el título (corte, "Proyectar a cierre"…). */
@@ -25,6 +29,7 @@ interface HeaderProps {
 
 const Header: FC<HeaderProps> = ({
   title,
+  titleKey,
   titleNode,
   titleExtra,
   actionsExtra,
@@ -34,6 +39,8 @@ const Header: FC<HeaderProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("shell.header");
+  const tMeta = useTranslations("meta");
 
   const handleBack = () => {
     if (onBack) {
@@ -52,12 +59,12 @@ const Header: FC<HeaderProps> = ({
   return (
     <header className={`${styles.wrapper} ${className ?? ""}`}>
       {(back || onBack) && (
-        <button type="button" className={styles.back} onClick={handleBack} title="Volver">
+        <button type="button" className={styles.back} onClick={handleBack} title={t("back")}>
           <CaretLeft size={21} weight="bold" />
         </button>
       )}
       <div className={styles.titleBlock}>
-        {titleNode ?? <h1 className={styles.title}>{title}</h1>}
+        {titleNode ?? <h1 className={styles.title}>{titleKey ? tMeta(`${titleKey}.title`) : title}</h1>}
         {titleExtra && <div className={styles.meta}>{titleExtra}</div>}
       </div>
       {/* cp-on-page: los controles del header van sobre el gris (Filtrar, buscador → blancos). */}

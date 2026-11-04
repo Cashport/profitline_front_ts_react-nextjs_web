@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { Flex, Spin, Typography, Upload, UploadProps, message } from "antd";
 import "./uploadimg.scss";
 import Image from "next/image";
+import { useTranslations } from "use-intl";
 interface Props {
   imgDefault?: string;
   setImgFile: Dispatch<SetStateAction<any>>;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export const UploadImg = ({ disabled = false, imgDefault = "", setImgFile }: Props) => {
+  const t = useTranslations("components.uploadImg");
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>(imgDefault);
 
@@ -23,10 +25,10 @@ export const UploadImg = ({ disabled = false, imgDefault = "", setImgFile }: Pro
   const beforeUpload = (file: any) => {
     const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
     if (!isJpgOrPng) {
-      message.error("You can only upload JPG/PNG file!");
+      message.error(t("invalidType"));
     }
     const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) message.error("Image must smaller than 2MB!");
+    if (!isLt2M) message.error(t("tooLarge"));
     return isJpgOrPng && isLt2M;
   };
 
@@ -66,14 +68,12 @@ export const UploadImg = ({ disabled = false, imgDefault = "", setImgFile }: Pro
         {loading && <Spin />}
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt="avatar" className="img" />
+          <img src={imageUrl} alt={t("logoAlt")} className="img" />
         ) : (
-          <Image src={"/images/watermark.svg"} alt="marca de agua" width={48} height={48} />
+          <Image src={"/images/watermark.svg"} alt={t("watermarkAlt")} width={48} height={48} />
         )}
       </Upload>
-      <Typography.Text className="uploadText">
-        * Sube la imagen del logo del proyecto que vas a crear
-      </Typography.Text>
+      <Typography.Text className="uploadText">{t("hint")}</Typography.Text>
     </Flex>
   );
 };

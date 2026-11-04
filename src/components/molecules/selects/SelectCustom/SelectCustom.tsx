@@ -1,4 +1,5 @@
 import { Flex, Select, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import "./selectcustom.scss";
 
@@ -17,6 +18,7 @@ export const SelectCustom = ({
   errors,
   options = []
 }: Props) => {
+  const t = useTranslations("shared.selects");
   // doesn't show super admin role
   return (
     <Flex vertical style={{ width: "48%" }}>
@@ -34,7 +36,7 @@ export const SelectCustom = ({
             </Option>
           );
         })}
-        {errors && <Typography.Text className="textError">Rol es obligatorio *</Typography.Text>}
+        {errors && <Typography.Text className="textError">{t("roleRequired")}</Typography.Text>}
       </Select>
     </Flex>
   );

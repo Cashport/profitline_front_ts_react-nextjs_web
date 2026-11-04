@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from "recharts";
 
 import { Card } from "@/modules/chat/ui/card";
@@ -14,6 +15,7 @@ interface NovedadesChartProps {
 }
 
 export function NovedadesChart({ alerts }: NovedadesChartProps) {
+  const t = useTranslations("dataQuality.dashboard.issues");
   const [selectedAlert, setSelectedAlert] = useState<IDashboardSummaryAlert | null>(null);
 
   const data = alerts ?? [];
@@ -25,18 +27,18 @@ export function NovedadesChart({ alerts }: NovedadesChartProps) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold" style={{ color: "#000000" }}>
-              Novedades
+              {t("title")}
             </p>
             <span
               className="inline-flex items-center gap-1 text-[13px] font-medium px-2 py-0.5 rounded-full"
               style={{ color: "#FF28FF", backgroundColor: "rgba(255,40,255,0.08)" }}
             >
               <AlertTriangle className="h-3 w-3" />
-              {total} total
+              {t("total", { count: total })}
             </span>
           </div>
           <p className="text-[13px]" style={{ color: "#9CA3AF" }}>
-            Clic en barra para ver clientes
+            {t("clickHint")}
           </p>
         </div>
 
@@ -65,7 +67,7 @@ export function NovedadesChart({ alerts }: NovedadesChartProps) {
                   fontSize: 13,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
                 }}
-                formatter={(value: number) => [`${value} casos`, ""]}
+                formatter={(value: number) => [t("cases", { count: value }), ""]}
                 labelStyle={{ fontWeight: 600, color: "#000000", marginBottom: 2 }}
               />
               <Bar

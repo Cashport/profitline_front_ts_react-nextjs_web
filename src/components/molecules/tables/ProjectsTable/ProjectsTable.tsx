@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -19,6 +20,8 @@ import "./projectstable.scss";
 const { Text } = Typography;
 
 export const ProjectTable = () => {
+  const t = useTranslations("shared.tables.projects");
+  const tCommon = useTranslations("common");
   const [selectFilters, setSelectFilters] = useState({
     country: [] as string[],
     currency: [] as string[]
@@ -75,12 +78,12 @@ export const ProjectTable = () => {
       isSuperAdmin: projectPermissions?.isSuperAdmin
     });
 
-    router.push(`/proyectos/review/${row.ID}/detail`);
+    router.push(`/projects/review/${row.ID}/detail`);
   };
 
   const columns: TableProps<IProject>["columns"] = [
     {
-      title: "Proyecto",
+      title: t("columns.project"),
       dataIndex: "name",
       className: "tableTitle",
       key: "name",
@@ -100,14 +103,14 @@ export const ProjectTable = () => {
       )
     },
     {
-      title: "Nombre",
+      title: tCommon("fields.name"),
       dataIndex: "PROJECT_DESCRIPTION",
       className: "tableTitle",
       key: "PROJECT_DESCRIPTION",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "País",
+      title: t("columns.country"),
       dataIndex: "COUNTRY_NAME",
       className: "tableTitle",
       key: "COUNTRY_NAME",
@@ -115,7 +118,7 @@ export const ProjectTable = () => {
         <Text className="text">
           <Image
             src={`https://cdn.countryflags.com/thumbs/${text.toLowerCase()}/flag-400.png`}
-            alt={`${text} flag`}
+            alt={t("flagAlt", { country: text })}
             width={16}
             height={16}
           />
@@ -124,34 +127,34 @@ export const ProjectTable = () => {
       )
     },
     {
-      title: "Dirección",
+      title: t("columns.address"),
       className: "tableTitle",
       dataIndex: "ADDRESS",
       key: "ADDRESS"
     },
     {
-      title: "Contacto",
+      title: t("columns.contact"),
       key: "CONTACT",
       className: "tableTitle",
       dataIndex: "CONTACT",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Teléfono",
+      title: tCommon("fields.phone"),
       key: "PHONE",
       className: "tableTitle",
       dataIndex: "PHONE",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Usuarios",
+      title: t("columns.users"),
       key: "NUMBER_USERS",
       className: "tableTitle",
       dataIndex: "NUMBER_USERS",
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Divisas",
+      title: t("columns.currencies"),
       key: "CURRENCY",
       className: "tableTitle",
       dataIndex: "CURRENCY",
@@ -167,7 +170,7 @@ export const ProjectTable = () => {
       }
     },
     {
-      title: "Estado",
+      title: tCommon("fields.status"),
       key: "status",
       className: "tableTitle",
       width: "130px",
@@ -179,7 +182,7 @@ export const ProjectTable = () => {
             className={IS_ACTIVE ? "statusContainerActive" : "statusContainerInactive"}
           >
             <div className={IS_ACTIVE ? "statusActive" : "statusInactive"} />
-            <Text>{IS_ACTIVE ? "Activo" : "Inactivo"}</Text>
+            <Text>{IS_ACTIVE ? tCommon("status.active") : tCommon("status.inactive")}</Text>
           </Flex>
         </Flex>
       )
@@ -206,7 +209,7 @@ export const ProjectTable = () => {
         <Flex gap={"10px"}>
           <UiSearchInput
             className="search"
-            placeholder="Buscar"
+            placeholder={tCommon("placeholders.search")}
             onChange={(event) => {
               setTimeout(() => {
                 setSearch(event.target.value);
@@ -216,8 +219,8 @@ export const ProjectTable = () => {
           <FilterProjects setSelecetedProjects={setSelectFilters} />
           <DotsDropdown />
         </Flex>
-        <Button type="primary" className="buttonNewProject" size="large" href="/proyectos/new">
-          Nuevo Proyecto
+        <Button type="primary" className="buttonNewProject" size="large" href="/projects/new">
+          {t("newProject")}
           {<Plus weight="bold" size={18} />}
         </Button>
       </Flex>

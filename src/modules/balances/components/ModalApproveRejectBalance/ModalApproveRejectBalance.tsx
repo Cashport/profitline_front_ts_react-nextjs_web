@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Flex, Modal, Typography } from "antd";
+import { useTranslations } from "use-intl";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
@@ -30,6 +31,7 @@ export function ModalApproveRejectBalance({
   action,
   onUploaded
 }: ModalApproveRejectBalanceProps) {
+  const t = useTranslations("balances.decision");
   const { showMessage } = useMessageApi();
   const [observations, setObservations] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +40,7 @@ export function ModalApproveRejectBalance({
     if (!isOpen) setObservations("");
   }, [isOpen]);
 
-  const title = action === "approve" ? "Aprobar" : "Rechazar";
+  const title = action === "approve" ? t("approve") : t("reject");
 
   const handleOk = async () => {
     if (!observations) return;
@@ -46,15 +48,11 @@ export function ModalApproveRejectBalance({
     setIsLoading(true);
     try {
       await submitBalanceApprovalDecision(record.id, decision, observations);
-      showMessage(
-        "success",
-        action === "approve" ? "Saldo aprobado correctamente" : "Saldo rechazado correctamente"
-      );
+      showMessage("success", action === "approve" ? t("approved") : t("rejected"));
       onUploaded?.();
       onClose();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Ocurrió un error al procesar la decisión";
+      const message = error instanceof Error ? error.message : t("error");
       showMessage("error", message);
     } finally {
       setIsLoading(false);
@@ -80,12 +78,12 @@ export function ModalApproveRejectBalance({
       destroyOnClose
     >
       <Flex vertical gap="0.25rem" style={{ marginBottom: "1rem" }}>
-        <h4 className="inputTitle">Observaciones</h4>
+        <h4 className="inputTitle">{t("observations")}</h4>
         <textarea
           className={styles.textarea}
           value={observations}
           onChange={(e) => setObservations(e.target.value)}
-          placeholder="Ingresar observaciones"
+          placeholder={t("observationsPlaceholder")}
           rows={4}
         />
       </Flex>

@@ -3,6 +3,7 @@ import styles from "./GroupClientsPackage.module.scss";
 import { IClientsGroup } from "@/types/clientsGroups/IClientsGroups";
 import { UseFormReturn } from "react-hook-form";
 import { DiscountPackageSchema } from "../resolvers/generaResolver";
+import { useTranslations } from "use-intl";
 
 const { Text } = Typography;
 
@@ -14,6 +15,7 @@ type Props = {
   statusForm: "create" | "edit" | "review";
 };
 export default function GroupClientsPackage({ clients, error, loading, form, statusForm }: Props) {
+  const tCommon = useTranslations("common");
   const {
     formState: { errors },
     getValues,
@@ -55,7 +57,7 @@ export default function GroupClientsPackage({ clients, error, loading, form, sta
               />
             </label>
           ))}
-        {loading && <Text type="secondary">Cargando...</Text>}
+        {loading && <Text type="secondary">{tCommon("status.loading")}</Text>}
       </Flex>
       <Text type="danger" hidden={!errors.client_groups}>
         {errors.client_groups?.message}
