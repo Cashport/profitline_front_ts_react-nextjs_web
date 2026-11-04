@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "use-intl";
+import { useTranslations } from "use-intl";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { KpiCard, KpiValue } from "@/components/ui/kpi-card/kpi-card";
@@ -31,7 +31,7 @@ export default function PortfolioCard({
   extras,
   className
 }: PortfolioCardProps) {
-  useLocale(); // re-renderiza al cambiar de idioma: los rótulos salen de AGING_SEGMENTS
+  const t = useTranslations("blockingAlerts.aging");
   const formatMoney = useAppStore((s) => s.formatMoney);
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
 
@@ -46,7 +46,7 @@ export default function PortfolioCard({
                 key: s.key,
                 value: aging[s.key],
                 color: s.color,
-                tip: `${s.label}: ${money(aging[s.key])}`
+                tip: t("tip", { label: t(s.key), amount: money(aging[s.key]) })
               }))}
             />
             <div
@@ -63,7 +63,7 @@ export default function PortfolioCard({
                     className="h-2 w-2 shrink-0 rounded-[2px]"
                     style={{ background: s.color }}
                   />
-                  <span className={stacked ? "flex-1" : "max-md:flex-1"}>{s.label}</span>
+                  <span className={stacked ? "flex-1" : "max-md:flex-1"}>{t(s.key)}</span>
                   <b className="font-semibold tabular-nums text-cp-ink">{money(aging[s.key])}</b>
                 </span>
               ))}

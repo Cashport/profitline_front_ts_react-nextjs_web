@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Select } from "antd";
+import { useTranslations } from "use-intl";
 
 import { cn } from "@/utils/utils";
 
@@ -54,6 +55,7 @@ export default function RecipientsField({
   loading,
   className
 }: RecipientsFieldProps) {
+  const t = useTranslations("blockingAlerts.recipients");
   const change = (next: string[]) =>
     onChange(
       Array.from(new Set(next.map(NORMALIZE[kind]))).filter(
@@ -63,11 +65,11 @@ export default function RecipientsField({
 
   return (
     <div className={cn("flex min-h-[44px] items-center gap-2.5 max-md:min-h-[38px]", className)}>
-      <span className={FIELD_LABEL}>Para</span>
+      <span className={FIELD_LABEL}>{t("to")}</span>
       <Select
         mode={manual ? "tags" : "multiple"}
         variant="borderless"
-        aria-label="Para"
+        aria-label={t("to")}
         placeholder={placeholder}
         loading={loading}
         options={options}

@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { ChevronRight, Store } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { useAppStore } from "@/lib/store/store";
 import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
 
 import { BLOCKING_ALERTS_PATH, STATUS_META } from "../../constants";
-import { plural } from "../../utils/blocking-alerts";
 
 /** Puntos de venta del cliente por estado, los más urgentes y el acceso a todos. */
 export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDetail }) {
   const formatMoney = useAppStore((s) => s.formatMoney);
+  const t = useTranslations("blockingAlerts.pointsOfSaleCard");
+  const tRoot = useTranslations("blockingAlerts");
   const pos = detail.pointsOfSale;
   if (!pos) return null;
 
@@ -21,9 +23,13 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
   // Los más urgentes ya vienen ordenados del API.
   const atRisk = pos.top;
   const legend = [
-    { key: "blocked", n: pos.blocked, label: pos.blocked === 1 ? "Bloqueado" : "Bloqueados" },
-    { key: "to_be_blocked", n: pos.to_be_blocked, label: "Por bloquear" },
-    { key: "up_to_date", n: pos.total - pos.blocked - pos.to_be_blocked, label: "Al día" }
+    { key: "blocked", n: pos.blocked, label: t("blocked", { count: pos.blocked }) },
+    { key: "to_be_blocked", n: pos.to_be_blocked, label: tRoot("status.to_be_blocked") },
+    {
+      key: "up_to_date",
+      n: pos.total - pos.blocked - pos.to_be_blocked,
+      label: tRoot("status.up_to_date")
+    }
   ] as const;
 
   return (
@@ -32,14 +38,14 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
         <span className="flex min-w-0 items-center gap-2">
           <Store className="h-4 w-4 shrink-0 text-cp-ink-3" />
           <span className="truncate text-[15px] font-semibold text-cp-ink">
-            {plural(pos.total, "punto de venta", "puntos de venta")}
+            {tRoot("count.pointsOfSale", { count: pos.total })}
           </span>
         </span>
         <Link
           href={allHref}
           className="flex shrink-0 items-center gap-0.5 text-[13px] font-semibold text-cp-blue hover:underline"
         >
-          Ver todos
+          {t("viewAll")}
           <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -64,7 +70,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
 
       {atRisk.length === 0 ? (
         <p className="m-0 border-t border-cp-line pt-2.5 text-[13px] text-cp-ink-3">
-          Todos sus puntos de venta están al día.
+          {t("allCurrent")}
         </p>
       ) : (
         <div className="flex flex-col">
@@ -80,7 +86,9 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
                   <span className="block truncate text-[13px] font-semibold">
                     {s.name}{" "}
                     {s.code && (
-                      <span className="font-normal text-cp-ink-4">· Ship-to {s.code}</span>
+                      <span className="font-normal text-cp-ink-4">
+                        · {tRoot("card.shipTo", { code: s.code })}
+                      </span>
                     )}
                   </span>
                   <span
@@ -98,7 +106,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
                   >
                     {formatMoney(s.amount, { hideDecimals: true })}
                   </span>
-                  <span className="block text-[13px] text-cp-ink-4">pago vencido</span>
+                  <span className="block text-[13px] text-cp-ink-4">{t("pastDue")}</span>
                 </span>
               </Link>
             );
@@ -110,7 +118,7 @@ export default function PointsOfSaleCard({ detail }: { detail: IBlockingAlertsDe
         href={allHref}
         className="flex h-9 items-center justify-center rounded-[10px] border border-cp-line-2 text-[13px] font-semibold text-cp-ink hover:border-cp-ink"
       >
-        Ver los {plural(pos.total, "punto de venta", "puntos de venta")}
+        {t("viewAllCount", { items: tRoot("count.pointsOfSale", { count: pos.total }) })}
       </Link>
     </section>
   );

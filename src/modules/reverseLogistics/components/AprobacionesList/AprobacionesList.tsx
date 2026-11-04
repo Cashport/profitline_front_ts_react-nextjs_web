@@ -30,7 +30,7 @@ const guidToNumber = (guid: string): number => {
 // Map the Profit360 payload to the legacy `IApproval` shape consumed by the
 // columns + detail view. Fields that aren't surfaced by the new endpoint are
 // left blank rather than fabricated. The real GUID is attached on the row so
-// the "Ir a Aprobar" button can navigate to /logistica-inversa/aprobaciones/:id.
+// the "Ir a Aprobar" button can navigate to /reverse-logistics/approvals/:id.
 const mapProfit360ToApprovalRow = (raw: {
   id: string;
   cliente: string;

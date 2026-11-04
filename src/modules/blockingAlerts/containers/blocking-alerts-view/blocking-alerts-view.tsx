@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Alert, Empty, Pagination, Segmented } from "antd";
 import { ArrowUpDown, Building2, Check, Store } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import GeneralDropdown from "@/components/ui/dropdown/dropdown";
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
@@ -20,8 +21,7 @@ import {
   MOBILE_TABS,
   PAGE_SIZE,
   SORT_OPTIONS,
-  STATUS_META,
-  blockingRulesNote
+  STATUS_META
 } from "../../constants";
 import { useBlockingAlertsList, useBlockingAlertsSummary } from "../../hooks/use-blocking-alerts";
 import {
@@ -29,7 +29,7 @@ import {
   type AlertsStatusFilter,
   type AlertsView
 } from "../../stores/blocking-alerts-store";
-import { fmtCutoff, plural } from "../../utils/blocking-alerts";
+import { fmtCutoff } from "../../utils/blocking-alerts";
 
 const STATUS_TABS: AlertsStatusFilter[] = ["all", "blocked", "to_be_blocked", "up_to_date"];
 
@@ -49,15 +49,15 @@ interface BlockingAlertsViewProps {
  */
 export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps) {
   const { resolvedTheme } = useWalletTheme();
+  const t = useTranslations("blockingAlerts");
   const store = useBlockingAlertsStore();
   const { setScope } = store;
 
   useEffect(() => setScope(clientId ?? null), [clientId, setScope]);
 
   const isPos = Boolean(clientId) || store.view === "points_of_sale";
-  const noun: [string, string] = isPos
-    ? ["punto de venta", "puntos de venta"]
-    : ["cliente", "clientes"];
+  const countOf = (count: number) =>
+    isPos ? t("count.pointsOfSale", { count }) : t("count.customers", { count });
   const sort = SORT_OPTIONS.find((o) => o.key === store.sort) ?? SORT_OPTIONS[0];
   const search = useDebounce(store.search, 300);
 
@@ -98,14 +98,18 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
         list && (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={`Sin ${noun[1]} en esta vista`}
+            description={isPos ? t("list.emptyPointsOfSale") : t("list.emptyCustomers")}
           />
         )
       )}
       {total > PAGE_SIZE && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-[12px] text-cp-ink-3">
-            {offset + 1}–{offset + (list?.rows.length ?? 0)} de {plural(total, ...noun)}
+            {t("list.range", {
+              from: offset + 1,
+              to: offset + (list?.rows.length ?? 0),
+              items: countOf(total)
+            })}
           </span>
           <Pagination
             current={store.page}
@@ -128,10 +132,10 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
         className="w-auto flex-1 bg-cp-bg"
         placeholder={
           clientId
-            ? "Buscar punto de venta o ship-to"
+            ? t("list.searchClientPointsOfSale")
             : isPos
-              ? "Buscar punto de venta, ship-to o cliente"
-              : "Buscar cliente o ship-to"
+              ? t("list.searchPointsOfSale")
+              : t("list.searchCustomers")
         }
       />
       <GeneralDropdown
@@ -141,7 +145,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
           key: o.key,
           label: (
             <span className="flex items-center justify-between gap-6">
-              {o.label}
+              {t(`sort.${o.key}`)}
               <Check
                 className={cn("h-4 w-4 text-cp-lime-dark", o.key !== store.sort && "invisible")}
               />
@@ -152,8 +156,8 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
       >
         <button
           type="button"
-          aria-label="Ordenar"
-          title={`Orden: ${sort.label}`}
+          aria-label={t("list.sort")}
+          title={t("list.sortBy", { label: t(`sort.${sort.key}`) })}
           className={cn(HEADER_BUTTON, "w-[var(--control-h)] px-0")}
         >
           <ArrowUpDown className="h-4 w-4" />
@@ -175,7 +179,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
           label: (
             <span className={VIEW_LABEL}>
               <Building2 className={VIEW_ICON} />
-              Clientes
+              {t("list.customers")}
               <span className="font-medium opacity-60">{summary.clients.all}</span>
             </span>
           )
@@ -185,7 +189,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
           label: (
             <span className={VIEW_LABEL}>
               <Store className={VIEW_ICON} />
-              Puntos de venta
+              {t("list.pointsOfSale")}
               <span className="font-medium opacity-60">{summary.pointsOfSale.all}</span>
             </span>
           )
@@ -200,20 +204,20 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
         crumbs={
           clientId
             ? [
-                { label: "Alertas de bloqueo", href: BLOCKING_ALERTS_PATH },
+                { label: t("title"), href: BLOCKING_ALERTS_PATH },
                 {
-                  label: summary?.client?.name ?? "Cliente",
+                  label: summary?.client?.name ?? t("list.customer"),
                   href: `${BLOCKING_ALERTS_PATH}/${clientId}`
                 },
-                { label: "Puntos de venta" }
+                { label: t("list.pointsOfSale") }
               ]
-            : [{ label: "Alertas de bloqueo" }]
+            : [{ label: t("title") }]
         }
         info={
           summary && (
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 shrink-0 rounded-full bg-cp-lime-dark max-md:hidden" />
-              Corte {fmtCutoff(summary.cutoffAt)}
+              {t("cutoff", { date: fmtCutoff(summary.cutoffAt) })}
             </span>
           )
         }
@@ -223,15 +227,15 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
         <Alert
           type="error"
           showIcon
-          message="No se pudieron cargar las alertas"
+          message={t("list.loadError")}
           description={loadError.message}
         />
       )}
 
       <PortfolioCard
-        label={clientId ? "Cartera del cliente" : "Total cartera"}
+        label={clientId ? t("list.customerReceivables") : t("list.totalReceivables")}
         aging={summary?.portfolio}
-        caption={counts && `${plural(counts.all, ...noun)} · ${counts.alerts} en alerta`}
+        caption={counts && t("list.caption", { items: countOf(counts.all), alerts: counts.alerts })}
       />
 
       <section className={cn("rounded-[14px] bg-cp-surface p-3 md:p-4", MOBILE_TABS)}>
@@ -253,7 +257,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
                     style={{ background: STATUS_META[status].color }}
                   />
                 )}
-                {status === "all" ? "Todos" : STATUS_META[status].tab}
+                {status === "all" ? t("list.all") : t(`status.${status}`)}
                 <span className="font-medium opacity-60">{counts?.[status]}</span>
               </span>
             ),
@@ -264,11 +268,14 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
 
       {summary && (
         <p className="m-0 text-center text-[11.5px] leading-relaxed text-cp-ink-4">
-          {blockingRulesNote(summary.rules)}
+          {t("rules", {
+            blockDays: summary.rules.blockDays,
+            warningDays: summary.rules.warningDays
+          })}
           {isPos && (
             <>
               <br />
-              Cada punto de venta se identifica por su código ship-to
+              {t("list.shipToHint")}
             </>
           )}
         </p>

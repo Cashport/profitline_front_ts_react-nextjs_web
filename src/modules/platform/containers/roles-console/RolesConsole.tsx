@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "use-intl";
 import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
 import { useAppStore } from "@/lib/store/store";
@@ -14,6 +15,7 @@ const TABS = ["por-proyecto", "roles", "catalogo"] as const;
 type TabKey = (typeof TABS)[number];
 
 export default function RolesConsole() {
+  const t = useTranslations("platform.console");
   const isSuperAdmin = useAppStore((s) => Boolean(s.selectedProject?.isSuperAdmin));
   const router = useRouter();
   const pathname = usePathname();
@@ -27,9 +29,9 @@ export default function RolesConsole() {
   if (!isSuperAdmin) {
     return (
       <div className="cp-page min-h-full">
-        <Header title="Roles y permisos" back="/market-admin" />
+        <Header title={t("title")} back="/market-admin" />
         <div className="cp-card p-[var(--card-pad)] text-[13.5px] text-cp-ink-2">
-          Esta sección es solo para administradores de Profitline.
+          {t("superAdminOnly")}
         </div>
       </div>
     );
@@ -45,7 +47,7 @@ export default function RolesConsole() {
 
   return (
     <div className="cp-page min-h-full">
-      <Header title="Roles y permisos" back="/market-admin" />
+      <Header title={t("title")} back="/market-admin" />
       <div className="cp-card cp-list-card overflow-hidden px-[18px] pb-[14px]">
         <UiTab
           activeKey={tab}
@@ -53,12 +55,12 @@ export default function RolesConsole() {
           tabs={[
             {
               key: "por-proyecto",
-              label: "Roles por proyecto",
+              label: t("tabs.byProject"),
               children: <ProjectRolesTab onOpenRole={setModalRolId} />
             },
             {
               key: "roles",
-              label: "Roles",
+              label: t("tabs.roles"),
               children: (
                 <RolesTab
                   selection={roleSelection}
@@ -69,7 +71,7 @@ export default function RolesConsole() {
             },
             {
               key: "catalogo",
-              label: "Catálogo de endpoints",
+              label: t("tabs.catalog"),
               children: <CatalogTab />
             }
           ]}

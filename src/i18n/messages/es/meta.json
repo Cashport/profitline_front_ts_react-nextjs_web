@@ -109,6 +109,10 @@
     "title": "Pago",
     "description": "Pantalla de pago con Wompi"
   },
+  "platformRoles": {
+    "title": "Roles y permisos",
+    "description": "Administración de roles y permisos de la plataforma"
+  },
   "projects": {
     "title": "Proyectos"
   },

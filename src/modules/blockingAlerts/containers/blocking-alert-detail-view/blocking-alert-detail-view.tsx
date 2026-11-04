@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Alert, Empty, Skeleton } from "antd";
 import { ChevronRight, Download, Info, Link2, Send, Store, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiTab from "@/components/ui/ui-tab";
@@ -40,60 +41,21 @@ import {
   STATUS_META
 } from "../../constants";
 import { useBlockingAlertDetail, useBlockingAlertDocuments } from "../../hooks/use-blocking-alerts";
-import { fmtDay, plural } from "../../utils/blocking-alerts";
+import { fmtDay } from "../../utils/blocking-alerts";
 
 type DetailTab = BlockingAlertsDocumentTab;
 
-/** Pestañas en el orden del prototipo, con su sustantivo y su mensaje sin documentos. */
-const TABS: {
-  key: DetailTab;
-  label: string;
-  noun: [string, string];
-  selected: [string, string];
-  empty: (who: string) => string;
-}[] = [
-  {
-    key: "all",
-    label: "Todas",
-    noun: ["factura", "facturas"],
-    selected: ["factura seleccionada", "facturas seleccionadas"],
-    empty: (who) => `No hay facturas pendientes para ${who}.`
-  },
-  {
-    key: "past_due",
-    label: "Vencidas",
-    noun: ["factura", "facturas"],
-    selected: ["factura seleccionada", "facturas seleccionadas"],
-    empty: () => "Sin facturas vencidas. Puede comprar con normalidad."
-  },
-  {
-    key: "credit_notes",
-    label: "Notas crédito",
-    noun: ["nota crédito", "notas crédito"],
-    selected: ["nota crédito seleccionada", "notas crédito seleccionadas"],
-    empty: (who) => `No hay notas crédito para ${who}.`
-  },
-  {
-    key: "available_payments",
-    label: "Pagos disponibles",
-    noun: ["pago disponible", "pagos disponibles"],
-    selected: ["pago seleccionado", "pagos seleccionados"],
-    empty: (who) => `No hay pagos disponibles para ${who}.`
-  },
-  {
-    key: "balances",
-    label: "Saldos",
-    noun: ["saldo pendiente", "saldos pendientes"],
-    selected: ["saldo seleccionado", "saldos seleccionados"],
-    empty: (who) => `No hay saldos pendientes para ${who}.`
-  },
-  {
-    key: "paid_invoices",
-    label: "Pagadas",
-    noun: ["factura", "facturas"],
-    selected: ["pagada seleccionada", "pagadas seleccionadas"],
-    empty: () => "No hay facturas pagadas pendientes de depuración."
-  }
+/**
+ * Pestañas en el orden del prototipo. Su nombre, sustantivo, selección y mensaje sin documentos
+ * están en blockingAlerts.detail.{tabs,count,selected,empty}.<pestaña>.
+ */
+const TABS: DetailTab[] = [
+  "all",
+  "past_due",
+  "credit_notes",
+  "available_payments",
+  "balances",
+  "paid_invoices"
 ];
 
 /** Acciones del cliente: botones redondos, solo ícono, junto al nombre (prototipo). */
@@ -120,6 +82,9 @@ export default function BlockingAlertDetailView({
   shipToCode
 }: BlockingAlertDetailViewProps) {
   const { detail, error } = useBlockingAlertDetail(clientId, shipToCode);
+  const t = useTranslations("blockingAlerts.detail");
+  const tRoot = useTranslations("blockingAlerts");
+  const tCommon = useTranslations("common");
   const formatMoney = useAppStore((s) => s.formatMoney);
   const sendActions = useAppStore((s) => s.selectedProject?.ID === SEND_ACTIONS_PROJECT_ID);
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
@@ -133,9 +98,12 @@ export default function BlockingAlertDetailView({
 
   const clientHref = `${BLOCKING_ALERTS_PATH}/${clientId}`;
   const crumbs = [
-    { label: "Alertas de bloqueo", href: BLOCKING_ALERTS_PATH },
-    ...(shipToCode ? [{ label: detail?.client.name ?? "Cliente", href: clientHref }] : []),
-    { label: detail?.name ?? (shipToCode ? `Ship-to ${shipToCode}` : "Cliente") }
+    { label: tRoot("title"), href: BLOCKING_ALERTS_PATH },
+    ...(shipToCode ? [{ label: detail?.client.name ?? t("customer"), href: clientHref }] : []),
+    {
+      label:
+        detail?.name ?? (shipToCode ? tRoot("card.shipTo", { code: shipToCode }) : t("customer"))
+    }
   ];
 
   if (!detail) {
@@ -151,11 +119,11 @@ export default function BlockingAlertDetailView({
     );
   }
 
-  const who = shipToCode ? "este punto de venta" : "este cliente";
+  const target = shipToCode ? "pos" : "customer";
   const selectionOf = (key: DetailTab) => picked[key] ?? ALL_SELECTED;
   const totalsOf = (key: DetailTab) => selectionTotals(selectionOf(key), detail.tabs[key]);
   const bar = totalsOf(tab);
-  const tabMeta = TABS.find((t) => t.key === tab) ?? TABS[1];
+  const tabKey = TABS.find((key) => key === tab) ?? TABS[1];
 
   const describe = (d: IBlockingAlertsDocument) => {
     switch (tab) {
@@ -163,7 +131,7 @@ export default function BlockingAlertDetailView({
         const n = d as IBlockingAlertsCreditNote;
         return {
           title: n.number ?? n.id,
-          subtitle: [n.type ?? "Nota crédito", n.date && fmtDay(n.date)]
+          subtitle: [n.type ?? t("creditNote"), n.date && fmtDay(n.date)]
             .filter(Boolean)
             .join(" · "),
           dot: (n.type && CREDIT_NOTE_COLORS[n.type]) || "rgb(var(--cp-ink-4))"
@@ -172,16 +140,18 @@ export default function BlockingAlertDetailView({
       case "available_payments": {
         const p = d as IBlockingAlertsPayment;
         return {
-          title: p.date ? fmtDay(p.date) : `Pago ${p.number ?? p.id}`,
-          subtitle: `Pago ${p.number ?? p.id} · disponible`,
+          title: p.date ? fmtDay(p.date) : t("paymentTitle", { id: p.number ?? p.id }),
+          subtitle: t("paymentSubtitle", { id: p.number ?? p.id }),
           dot: "rgb(var(--cp-lime))"
         };
       }
       case "balances": {
         const b = d as IBlockingAlertsBalance;
         return {
-          title: `Saldo ${b.number ?? b.id}`,
-          subtitle: [b.status ?? "Saldo", b.date && fmtDay(b.date)].filter(Boolean).join(" · "),
+          title: t("balanceTitle", { id: b.number ?? b.id }),
+          subtitle: [b.status ?? t("balance"), b.date && fmtDay(b.date)]
+            .filter(Boolean)
+            .join(" · "),
           dot: "rgb(var(--cp-ink-4))"
         };
       }
@@ -190,8 +160,8 @@ export default function BlockingAlertDetailView({
         return {
           title: i.number ?? i.id,
           subtitle: i.paidAt
-            ? `Pagada el ${fmtDay(i.paidAt)} · depuración SAP`
-            : "Pagada · depuración SAP",
+            ? t("paidSubtitle", { date: fmtDay(i.paidAt) })
+            : t("paidSubtitleNoDate"),
           dot: "rgb(var(--cp-blue))"
         };
       }
@@ -201,10 +171,10 @@ export default function BlockingAlertDetailView({
           title: i.number ?? i.id,
           subtitle: [
             i.daysOverdue > 0
-              ? `Vencida · ${plural(i.daysOverdue, "día", "días")}`
+              ? t("overdueBy", { days: i.daysOverdue })
               : i.dueDate
-                ? `Vence el ${fmtDay(i.dueDate)}`
-                : "Sin fecha de vencimiento",
+                ? t("dueOn", { date: fmtDay(i.dueDate) })
+                : t("noDueDate"),
             i.pointOfSale?.name
           ]
             .filter(Boolean)
@@ -224,8 +194,8 @@ export default function BlockingAlertDetailView({
       describe={describe}
       selection={selectionOf(tab)}
       onSelectionChange={(selection) => setPicked((p) => ({ ...p, [tab]: selection }))}
-      noun={tabMeta.noun}
-      empty={tabMeta.empty(who)}
+      formatCount={(count) => t(`count.${tabKey}`, { count })}
+      empty={t(`empty.${tabKey}`, { target })}
       page={page}
       pageSize={PAGE_SIZE}
       onPageChange={(next) => setPages((p) => ({ ...p, [tab]: next }))}
@@ -235,7 +205,7 @@ export default function BlockingAlertDetailView({
             type="info"
             showIcon
             icon={<Info className="h-4 w-4" />}
-            message="En depuración SAP · no suman a la cartera ni se cobran"
+            message={t("paidNotice")}
             className="my-2 text-[12px]"
           />
         )
@@ -272,8 +242,8 @@ export default function BlockingAlertDetailView({
         </div>
         <button
           type="button"
-          aria-label="Estado de cuenta"
-          title="Estado de cuenta"
+          aria-label={t("statement")}
+          title={t("statement")}
           className={ROUND_BUTTON}
           onClick={() => setModal("statement")}
         >
@@ -282,8 +252,8 @@ export default function BlockingAlertDetailView({
         {sendActions && (
           <button
             type="button"
-            aria-label="Enviar al cliente"
-            title="Enviar al cliente"
+            aria-label={t("sendToCustomer")}
+            title={t("sendToCustomer")}
             className={ROUND_BUTTON}
             onClick={() => setModal("send")}
           >
@@ -299,13 +269,16 @@ export default function BlockingAlertDetailView({
         >
           <Store className="h-4 w-4 shrink-0" />
           <span className="shrink-0 font-semibold text-cp-ink">
-            Ship-to {detail.pointOfSale.code}
+            {tRoot("card.shipTo", { code: detail.pointOfSale.code ?? "" })}
           </span>
           <span className="min-w-0 flex-1 truncate">
-            de <b className="font-semibold text-cp-ink">{detail.client.name}</b>
+            {t.rich("ofCustomer", {
+              name: detail.client.name,
+              b: (chunks) => <b className="font-semibold text-cp-ink">{chunks}</b>
+            })}
           </span>
           <span className="flex shrink-0 items-center gap-0.5 font-semibold text-cp-blue">
-            Ver cliente
+            {t("viewCustomer")}
             <ChevronRight className="h-3.5 w-3.5" />
           </span>
         </Link>
@@ -314,20 +287,23 @@ export default function BlockingAlertDetailView({
       <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-3">
           <PortfolioCard
-            label="Cartera"
+            label={t("receivables")}
             aging={detail}
             stacked
             extras={[
-              { label: "Saldos pendientes", value: detail.tabs.balances.total },
-              { label: "Notas crédito", value: detail.tabs.credit_notes.total },
-              { label: "Pagos disponibles", value: detail.tabs.available_payments.total }
+              { label: t("extras.pendingBalances"), value: detail.tabs.balances.total },
+              { label: t("extras.creditNotes"), value: detail.tabs.credit_notes.total },
+              {
+                label: t("extras.availablePayments"),
+                value: detail.tabs.available_payments.total
+              }
             ]}
           />
 
           {showPay && (
             <section className="flex items-center justify-between gap-3 rounded-[14px] bg-cp-surface px-[18px] py-[14px]">
               <span className="min-w-0">
-                <span className="block text-[13px] font-medium text-cp-ink-3">Pago vencido</span>
+                <span className="block text-[13px] font-medium text-cp-ink-3">{t("pastDue")}</span>
                 <span className="block truncate text-[18px] font-semibold tabular-nums text-cp-ink md:text-[20px]">
                   {money(detail.pastDue)}
                 </span>
@@ -337,7 +313,7 @@ export default function BlockingAlertDetailView({
                   icon={<Link2 className="h-4 w-4" />}
                   onClick={() => setModal("payment")}
                 >
-                  Link de pago
+                  {t("paymentLink")}
                 </PrincipalButton>
               )}
             </section>
@@ -350,15 +326,15 @@ export default function BlockingAlertDetailView({
           <UiTab
             activeKey={tab}
             onChangeTab={(key) => setTab(key as DetailTab)}
-            tabs={TABS.map((t) => ({
-              key: t.key,
+            tabs={TABS.map((key) => ({
+              key,
               label: (
                 <span className="flex items-center gap-1.5">
-                  {t.label}
-                  <span className="font-medium opacity-60">{detail.tabs[t.key].count}</span>
+                  {t(`tabs.${key}`)}
+                  <span className="font-medium opacity-60">{detail.tabs[key].count}</span>
                 </span>
               ),
-              children: t.key === tab ? documentList : null
+              children: key === tab ? documentList : null
             }))}
           />
         </section>
@@ -369,7 +345,7 @@ export default function BlockingAlertDetailView({
         <div className="sticky bottom-2 z-10 flex items-center gap-3 rounded-[14px] border border-cp-line bg-cp-surface px-4 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
           <span className="min-w-0 flex-1">
             <span className="block text-[12px] text-cp-ink-3">
-              {plural(bar.count, ...tabMeta.selected)}
+              {t(`selected.${tabKey}`, { count: bar.count })}
             </span>
             <span className="block truncate text-[16px] font-semibold tabular-nums text-cp-ink">
               {money(bar.total)}
@@ -381,7 +357,7 @@ export default function BlockingAlertDetailView({
             className="flex shrink-0 cursor-pointer items-center gap-1 border-0 bg-transparent text-[12px] font-medium text-cp-ink-4 hover:text-cp-ink"
           >
             <X className="h-3 w-3" />
-            Limpiar
+            {tCommon("actions.clear")}
           </button>
         </div>
       )}

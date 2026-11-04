@@ -6,7 +6,7 @@ import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { fmtCop, fmtNumber, parseFechaApproval } from "../../utils/format";
 
 // AntD columns for the Aprobaciones list. `onSelect` receives the row's real
-// Profit360 GUID so the caller can navigate to /logistica-inversa/aprobaciones/:id.
+// Profit360 GUID so the caller can navigate to /reverse-logistics/approvals/:id.
 // The `guid` field is attached by AprobacionesList when mapping the Profit360
 // payload — it lives alongside the legacy numeric `id` that AntD needs as rowKey.
 export interface IApprovalRow extends IApproval {

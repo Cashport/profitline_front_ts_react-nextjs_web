@@ -1,8 +1,8 @@
 # Cambios de texto en español
 
-Lista para QA antes de salir a producción. La traducción al inglés queda detrás de `ENGLISH_FOR_SUPER_ADMINS_ONLY` (`src/i18n/config.ts`), pero el español sale para todos los usuarios, así que estos son los textos que un usuario puede notar distintos frente a `main`.
+Lista para QA antes de salir a producción. El inglés queda detrás de `ENGLISH_FOR_SUPER_ADMINS_ONLY` (`src/i18n/config.ts`), pero el español sale para todos los usuarios: estos son los textos que un usuario puede notar distintos frente a `main`.
 
-De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo en tildes o mayúsculas y 160 en redacción o son nuevos (textos que antes estaban en inglés, etiquetas de accesibilidad, mensajes partidos que ahora son una frase). Los textos con variables o plurales (unos 880) no se comparan tal cual: revísalos navegando las pantallas.
+De 6.520 textos simples, 6.231 son idénticos a `main`. Cambiaron 289: 140 solo en tildes o mayúsculas y 149 en redacción o son nuevos (textos que antes estaban en inglés, etiquetas de accesibilidad, mensajes partidos que ahora son una frase). Los textos con variables o plurales no se comparan tal cual: revísalos navegando las pantallas.
 
 ## Redacción distinta o texto nuevo
 
@@ -94,25 +94,6 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 | Ocurrió un error al agregar la dirección. | `modals.shipTo.address.addError` |
 | Los documentos seleccionados reemplazarán los actuales | `modals.uploadDocument.descriptionEdit` |
 
-### Alertas de bloqueo (14)
-
-| Texto | Clave |
-|---|---|
-| Se bloquea hoy | `blockingAlerts.statusLabel.blocksToday` |
-| Se bloquea mañana | `blockingAlerts.statusLabel.blocksTomorrow` |
-| Al día · saldo a favor | `blockingAlerts.statusLabel.okCredit` |
-| Bloqueo: facturas de +60 días o cupo superado · Alerta desde 45 días | `blockingAlerts.rules` |
-| Sin clientes en esta vista | `blockingAlerts.list.emptyCustomers` |
-| Sin puntos de venta en esta vista | `blockingAlerts.list.emptyPointsOfSale` |
-| No encontramos este cliente | `blockingAlerts.list.customerNotFound` |
-| Pueden pagar el valor vencido aquí: | `blockingAlerts.sendToClient.payHere` |
-| Adjuntamos el estado de cuenta. | `blockingAlerts.sendToClient.statementAttached` |
-| Adjuntamos el estado de cuenta con corte de hoy. | `blockingAlerts.sendToClient.statementAttachedToday` |
-| Plantilla · Cobro con link de pago | `blockingAlerts.sendToClient.template` |
-| El QR estará disponible al conectar el servicio de pagos | `blockingAlerts.paymentLink.qrSoon` |
-| Escribe un correo válido para enviar. | `blockingAlerts.statement.invalidEmail` |
-| Elige qué incluir | `blockingAlerts.statement.chooseWhat` |
-
 ### WhatsApp (11)
 
 | Texto | Clave |
@@ -194,15 +175,6 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 | Eliminar pregunta | `projects.forms.question.deleteQuestion` |
 | Eliminar opción | `projects.forms.question.deleteOption` |
 
-### Precintos (4)
-
-| Texto | Clave |
-|---|---|
-| Precinto, código, rango numérico... | `seals.view.searchPlaceholder` |
-| Si seleccionas “Otro”, debes escribir una observación | `seals.voidModal.otherNeedsObservation` |
-| Solo números · los precintos con código (ej. CLIS_3676) se asignan en “Individual / códigos” | `seals.assignModal.rangeHint` |
-| El prefijo (letras o guiones) debe ser igual en el “Desde” y el “Hasta”. | `seals.receiveModal.prefixMismatch` |
-
 ### Componentes compartidos (3)
 
 | Texto | Clave |
@@ -210,6 +182,14 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 | PDF, Word, PNG, XLS, MSG, EML (Tamaño máx. 30 MB) | `components.documentButton.allowedFiles` |
 | Solo puedes subir archivos JPG o PNG. | `components.uploadImg.invalidType` |
 | La imagen debe pesar menos de 2 MB. | `components.uploadImg.tooLarge` |
+
+### Precintos (3)
+
+| Texto | Clave |
+|---|---|
+| Si seleccionas “Otro”, debes escribir una observación | `seals.voidModal.otherNeedsObservation` |
+| Solo números · los precintos con código (ej. CLIS_3676) se asignan en “Individual / códigos” | `seals.assignModal.rangeHint` |
+| El prefijo (letras o guiones) debe ser igual en el “Desde” y el “Hasta”. | `seals.receiveModal.prefixMismatch` |
 
 ### Menú y sesión (3)
 
@@ -226,6 +206,13 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 | Buscar proveedores | `suppliers.list.searchSuppliers` |
 | Descargar documento | `suppliers.audit.downloadDocument` |
 | PDF, Word, PNG. (Tamaño máx. 30 MB) | `suppliers.drawer.fileHint` |
+
+### Alertas de bloqueo (2)
+
+| Texto | Clave |
+|---|---|
+| Sin clientes en esta vista | `blockingAlerts.list.emptyCustomers` |
+| Sin puntos de venta en esta vista | `blockingAlerts.list.emptyPointsOfSale` |
 
 ### Torre de recaudo (2)
 
@@ -261,6 +248,12 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 |---|---|
 | No se pudieron descargar los documentos. | `medicalAccounts.documents.downloadError` |
 
+### Consola de roles (1)
+
+| Texto | Clave |
+|---|---|
+| Lo que está en "Generico" lo puede usar cualquier rol y no aparece aquí. Para controlarlo, muévelo a una funcionalidad en la pestaña Catálogo de endpoints. | `platform.roles.genericNotice` |
+
 ### Portales públicos (1)
 
 | Texto | Clave |
@@ -278,6 +271,12 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 | Texto | Clave |
 |---|---|
 | Procesando la cartera… | `reconciliation.uploadStatus.processingPortfolio` |
+
+### Logística inversa (1)
+
+| Texto | Clave |
+|---|---|
+| Documento sin número | `reverseLogistics.returnDetail.documents.noNumber` |
 
 ### Mail (1)
 
@@ -475,13 +474,6 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 | Días pendientes | `approvals.table.columns.daysPending` |
 | Confirmar rechazo | `approvals.detail.confirmReject` |
 
-### Precintos (2)
-
-| Texto | Clave |
-|---|---|
-| Agrupar: Unidad | `seals.view.groupByUnit` |
-| Aplicar filtros | `seals.filters.apply` |
-
 ### Proveedores (2)
 
 | Texto | Clave |
@@ -507,17 +499,17 @@ De 6.274 textos simples, 5.972 son idénticos a `main`. Cambiaron 302: 142 solo 
 |---|---|
 | N/D | `common.status.notAvailable` |
 
-### Configuración del Marketplace (1)
-
-| Texto | Clave |
-|---|---|
-| Comunicaciones Masivas | `marketAdmin.home.sections.massCommunications.label` |
-
 ### Logística inversa (1)
 
 | Texto | Clave |
 |---|---|
 | autorizado por el lab vía correo | `reverseLogistics.detail.observationFallback` |
+
+### Precintos (1)
+
+| Texto | Clave |
+|---|---|
+| Aplicar filtros | `seals.filters.apply` |
 
 ### Cartera por edad (1)
 

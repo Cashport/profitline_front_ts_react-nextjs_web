@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
+import { useTranslations } from "use-intl";
 import { IProfit360DevolucionDocumento } from "@/types/reverseLogistics/IReverseLogistics";
 import { fmtCop, fmtNumber } from "../../utils/format";
 
@@ -34,40 +35,46 @@ const esHija = (fila: FilaProducto) => !fila.children;
 // Las hijas usan la primera celda para "↳ Documento · Lote · Vence".
 const ocultarEnHija = (fila: FilaProducto) => ({ colSpan: esHija(fila) ? 0 : 1 });
 
-const columns: ColumnsType<FilaProducto> = [
+const getColumns = (
+  t: ReturnType<typeof useTranslations<"reverseLogistics.returnDetail.products">>
+): ColumnsType<FilaProducto> => [
   {
-    title: "Producto",
+    title: t("product"),
     dataIndex: "nombreProducto",
     onCell: (fila) => ({ colSpan: esHija(fila) ? 4 : 1 }),
     render: (_: unknown, fila) =>
       esHija(fila) ? (
         <span className="text-xs text-gray-500">
-          ↳ Documento <b className="font-semibold text-gray-900">{fila.numeroDocumento}</b>
-          {` · Lote ${fila.lote} · Vence ${dayjs(fila.fechaVencimiento).format("DD/MM/YYYY")}`}
+          {t.rich("childRow", {
+            number: fila.numeroDocumento ?? "",
+            lot: fila.lote ?? "",
+            date: dayjs(fila.fechaVencimiento).format("DD/MM/YYYY"),
+            b: (chunks) => <b className="font-semibold text-gray-900">{chunks}</b>
+          })}
         </span>
       ) : (
         <span className="text-sm text-gray-900">{fila.nombreProducto}</span>
       )
   },
-  { title: "Código", dataIndex: "codigo", width: 100, onCell: ocultarEnHija },
-  { title: "Lotes", dataIndex: "lotes", width: 80, align: "right", onCell: ocultarEnHija },
+  { title: t("code"), dataIndex: "codigo", width: 100, onCell: ocultarEnHija },
+  { title: t("lots"), dataIndex: "lotes", width: 80, align: "right", onCell: ocultarEnHija },
   {
-    title: "Documentos",
+    title: t("documents"),
     dataIndex: "documentos",
     width: 110,
     align: "right",
     onCell: ocultarEnHija,
-    render: (documentos: number) => `${documentos} ${documentos === 1 ? "doc." : "docs."}`
+    render: (documentos: number) => t("docsCount", { count: documentos })
   },
   {
-    title: "Cantidad",
+    title: t("quantity"),
     dataIndex: "cantidad",
     width: 100,
     align: "right",
     render: (cantidad: number) => fmtNumber(cantidad)
   },
   {
-    title: "Valor total",
+    title: t("totalValue"),
     dataIndex: "valorTotal",
     width: 130,
     align: "right",
@@ -83,6 +90,8 @@ export function DevolucionProductos({
   expandedKeys,
   onChangeExpandedKeys
 }: DevolucionProductosProps) {
+  const t = useTranslations("reverseLogistics.returnDetail.products");
+  const columns = useMemo(() => getColumns(t), [t]);
   const q = search.trim().toLowerCase();
 
   const filas = useMemo(() => {
@@ -139,7 +148,7 @@ export function DevolucionProductos({
           onExpandedRowsChange: (keys) => onChangeExpandedKeys(keys.map(String))
         }}
         locale={{
-          emptyText: q ? `Sin resultados para “${search.trim()}”` : "Sin productos"
+          emptyText: q ? t("noResults", { query: search.trim() }) : t("empty")
         }}
       />
     </div>

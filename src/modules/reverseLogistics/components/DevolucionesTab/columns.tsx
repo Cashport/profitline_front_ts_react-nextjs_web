@@ -7,14 +7,17 @@ import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { CausalBadge } from "../CausalBadge/CausalBadge";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 import Link from "next/link";
+import { useTranslations } from "use-intl";
 
 // Estado "Finalizado" de Pharma360 (logistica.Estados). Solo las finalizadas
 // tienen acta, y el detalle (ConsultarDevolucionesPdf) falla para el resto.
 const ESTADO_FINALIZADO = "7664364A-7228-4C88-87EC-676CAD88871D";
 
 // Per-row action buttons. `record.idDevolucion` is the GUID the devolución
-// detail (/logistica-inversa/devoluciones/:id) is loaded with.
+// detail (/reverse-logistics/returns/:id) is loaded with.
 function ActionsCell({ record }: { record: ReturnRow }) {
+  const t = useTranslations("reverseLogistics.returns");
+  const tCommon = useTranslations("common");
   const finalizada = record.IdEstado?.toUpperCase() === ESTADO_FINALIZADO;
   return (
     <div className="flex items-center gap-1">
@@ -22,7 +25,7 @@ function ActionsCell({ record }: { record: ReturnRow }) {
         <button
           type="button"
           onClick={() => record.pdfUrl && window.open(record.pdfUrl, "_blank")}
-          aria-label="Ver PDF"
+          aria-label={t("viewPdf")}
           className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-red-400 hover:border-red-400 hover:text-red-600 transition-colors"
         >
           <FileText className="h-3.5 w-3.5" />
@@ -32,7 +35,7 @@ function ActionsCell({ record }: { record: ReturnRow }) {
         <Link
           href={`/reverse-logistics/returns/${record.idDevolucion}`}
           type="button"
-          aria-label="Ver detalle"
+          aria-label={tCommon("actions.viewDetail")}
           className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#1a3a6b] hover:text-[#1a3a6b] transition-colors"
         >
           <Eye className="h-3.5 w-3.5" />
@@ -44,22 +47,24 @@ function ActionsCell({ record }: { record: ReturnRow }) {
 
 // AntD columns for the Devoluciones table. The table is fed tree data (client groups
 // with `children`), so each render handles both the group (aggregated) and leaf rows.
-export const returnsColumns: ColumnsType<ReturnRow> = [
+export const getReturnsColumns = (
+  t: ReturnType<typeof useTranslations<"reverseLogistics.returns">>
+): ColumnsType<ReturnRow> => [
   {
-    title: "Id",
+    title: t("columns.id"),
     dataIndex: "idBoleto",
     width: 160,
     render: (_: unknown, record) =>
       record.isGroup ? (
         <span className="text-[13px] text-gray-400 font-normal whitespace-nowrap">
-          {record.devCount} devs.
+          {t("groupCount", { count: record.devCount })}
         </span>
       ) : (
         <span className="text-gray-900 text-sm whitespace-nowrap">{record.idBoleto}</span>
       )
   },
   {
-    title: "Fecha",
+    title: t("columns.date"),
     dataIndex: "fecha",
     width: 100,
     render: (_: unknown, record) => {
@@ -73,7 +78,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     }
   },
   {
-    title: "Cliente",
+    title: t("columns.customer"),
     dataIndex: "cliente",
     sorter: (a, b) => a.cliente.localeCompare(b.cliente),
     render: (_: unknown, record) => {
@@ -96,7 +101,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     }
   },
   {
-    title: "Canal / Línea",
+    title: t("columns.channelLine"),
     dataIndex: "canal",
     width: 110,
     render: (_: unknown, record) => (
@@ -107,7 +112,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     )
   },
   {
-    title: "Causal",
+    title: t("columns.reason"),
     dataIndex: "causales",
     width: 180,
     // Group rows carry the distinct causales of their children, so both group
@@ -121,7 +126,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     )
   },
   {
-    title: "Estado",
+    title: t("columns.status"),
     dataIndex: "estado",
     width: 150,
     render: (_: unknown, record) => {
@@ -142,7 +147,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     }
   },
   {
-    title: "Unid.",
+    title: t("columns.units"),
     dataIndex: "unidades",
     width: 90,
     align: "right",
@@ -152,7 +157,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     )
   },
   {
-    title: "Monto",
+    title: t("columns.amount"),
     dataIndex: "monto",
     width: 130,
     align: "right",

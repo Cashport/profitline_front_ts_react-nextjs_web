@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Modal, Spin } from "antd";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { MiniSwitch } from "@/components/ui/page-header-controls/page-header-controls";
 import {
   useAdminRoles,
@@ -25,6 +26,8 @@ interface Props {
 }
 
 export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props) {
+  const t = useTranslations("platform.capabilities");
+  const tCommon = useTranslations("common");
   const { detail, isLoading: loadingDetail, error: detailError } = useRoleDetail(rolId);
   const {
     catalog: fullCatalog,
@@ -92,7 +95,7 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
       title={
         <div className="flex flex-wrap items-center gap-2 pr-6">
           <span className="text-[18px] font-semibold text-cp-ink">
-            {detail?.rol_name ?? summary?.rol_name ?? "Rol"}
+            {detail?.rol_name ?? summary?.rol_name ?? t("fallbackTitle")}
           </span>
           {detail?.is_system && <SystemBadge />}
         </div>
@@ -106,35 +109,35 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
 
       {(detailError || catalogError) && !loadingDetail && !loadingCatalog && (
         <p className="text-[13px] text-cp-magenta">
-          No se pudo cargar el rol: {(detailError || catalogError)?.message}
+          {t("loadError", { error: (detailError || catalogError)?.message ?? "" })}
         </p>
       )}
 
       {detail && catalog && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-3 text-[13px] text-cp-ink-3">
-            <span>{granted.size} funcionalidades</span>
+            <span>{t("features", { count: granted.size })}</span>
             {summary && (
               <>
                 <span>·</span>
-                <span>{summary.active_users} usuarios activos</span>
+                <span>{t("activeUsers", { count: summary.active_users })}</span>
                 <span>·</span>
-                <span>{summary.projects} proyectos</span>
+                <span>{t("projects", { count: summary.projects })}</span>
               </>
             )}
             <span className="flex-1" />
             {onEdit && (
               <button type="button" className={BTN_SECONDARY} onClick={() => onEdit(detail.rol_id)}>
-                Editar rol
+                {t("editRole")}
               </button>
             )}
           </div>
 
           <div>
-            <p className="mb-2 text-[13px] font-semibold text-cp-ink">Pantallas que ve</p>
+            <p className="mb-2 text-[13px] font-semibold text-cp-ink">{t("screensTitle")}</p>
             <div className="flex flex-wrap gap-2">
               {screens.length === 0 && (
-                <span className="text-[13px] text-cp-ink-3">Ninguna pantalla</span>
+                <span className="text-[13px] text-cp-ink-3">{t("noScreens")}</span>
               )}
               {screens.map((screen) => (
                 <span
@@ -147,18 +150,14 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
             </div>
           </div>
 
-          <Notice tone="warning">
-            Además, cualquier rol puede usar {genericEndpoints} endpoints de &quot;Generico&quot;. Y
-            hoy el backend no distingue ver de modificar: con acceso a una funcionalidad, el rol usa
-            todos sus endpoints.
-          </Notice>
+          <Notice tone="warning">{t("genericWarning", { count: genericEndpoints })}</Notice>
 
           <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold text-cp-ink">Funcionalidades</p>
+            <p className="text-[13px] font-semibold text-cp-ink">{t("featuresTitle")}</p>
             <MiniSwitch
               checked={showMissing}
               onChange={setShowMissing}
-              label={<span className="text-[13px] text-cp-ink-2">Mostrar lo que no tiene</span>}
+              label={<span className="text-[13px] text-cp-ink-2">{t("showMissing")}</span>}
             />
           </div>
 
@@ -199,7 +198,7 @@ export default function RoleCapabilitiesModal({ rolId, onClose, onEdit }: Props)
                               : "whitespace-nowrap rounded-[5px] bg-cp-muted px-2 py-px text-center text-[13px] font-semibold text-cp-ink-3"
                           }
                         >
-                          {has ? "Acceso" : "No"}
+                          {has ? t("access") : tCommon("status.no")}
                         </span>
                       </button>
                       {open && (

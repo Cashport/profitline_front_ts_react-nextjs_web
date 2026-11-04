@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Dropdown, Modal, Select, Spin } from "antd";
 import { ChevronDown, Lock, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 import SearchField from "@/components/ui/search-field/search-field";
 import { MiniSwitch } from "@/components/ui/page-header-controls/page-header-controls";
 import { useMessageApi } from "@/context/MessageContext";
@@ -22,8 +23,7 @@ import {
   MethodTag,
   Notice,
   PaneItem,
-  filterCatalog,
-  INCLUDE_OTHER_HINT
+  filterCatalog
 } from "@/modules/platform/components/shared/shared";
 
 const LOCKED_ROUTE = "role";
@@ -34,6 +34,9 @@ type Located = { module: ICatalogModule; component: ICatalogComponent };
 
 export default function CatalogTab() {
   const { showMessage } = useMessageApi();
+  const t = useTranslations("platform.catalog");
+  const tShared = useTranslations("platform.shared");
+  const tCommon = useTranslations("common");
   const { catalog, isLoading, mutate, error } = useRolesCatalog();
   const {
     routes: unregistered,
@@ -140,19 +143,18 @@ export default function CatalogTab() {
     const target = index.get(componentId)?.component;
     if (!target) return null;
     if (target.is_generic) {
-      return <p>Quedará abierto a cualquier rol.</p>;
+      return <p>{t("accessNote.generic")}</p>;
     }
     return (
       <>
         <p>
-          Lo podrán usar los roles que tengan {target.component_name} ({target.roles_with_access}).
-          Aplica en máximo un minuto.
+          {t("accessNote.roles", {
+            feature: target.component_name,
+            count: target.roles_with_access
+          })}
         </p>
         {target.roles_with_access === 0 && (
-          <p className="font-semibold text-cp-magenta">
-            Ningún rol tiene esta funcionalidad: nadie podrá usar el endpoint hasta que se la
-            asignes a un rol.
-          </p>
+          <p className="font-semibold text-cp-magenta">{t("accessNote.noRoles")}</p>
         )}
       </>
     );
@@ -165,26 +167,31 @@ export default function CatalogTab() {
     if (!from || !index.get(targetId)) return;
     const toLabel = componentLabel(targetId);
     Modal.confirm({
-      title: `¿Mover ${endpoint.method} /${endpoint.route}${endpoint.path}?`,
+      title: t("move.title", {
+        endpoint: `${endpoint.method} /${endpoint.route}${endpoint.path}`
+      }),
       width: 560,
       content: (
         <div className="flex flex-col gap-2 text-[13px]">
           <p>
-            Pasa de <b>{from.component_name}</b> a <b>{toLabel}</b>. Los roles que solo tenían{" "}
-            {from.component_name} lo pierden.
+            {t.rich("move.content", {
+              from: from.component_name,
+              to: toLabel,
+              b: (chunks) => <b>{chunks}</b>
+            })}
           </p>
           {accessNote(targetId)}
         </div>
       ),
-      okText: "Mover",
-      cancelText: "Cancelar",
+      okText: t("move.ok"),
+      cancelText: tCommon("actions.cancel"),
       onOk: async () => {
         try {
           await moveEndpoint(endpoint.endpoint_id, targetId);
           await refresh();
-          showMessage("success", `Endpoint movido a ${toLabel}.`);
+          showMessage("success", t("move.success", { target: toLabel }));
         } catch (e) {
-          showMessage("error", (e as ApiError)?.message || "No se pudo mover el endpoint.");
+          showMessage("error", (e as ApiError)?.message || t("move.error"));
         }
       }
     });
@@ -199,36 +206,42 @@ export default function CatalogTab() {
       await refresh();
       showMessage(
         "success",
-        `${saved.method} /${saved.route}${saved.path} registrado en ${componentLabel(componentId)}.`
+        t("register.success", {
+          endpoint: `${saved.method} /${saved.route}${saved.path}`,
+          target: componentLabel(componentId)
+        })
       );
       return true;
     } catch (e) {
-      showMessage("error", (e as ApiError)?.message || "No se pudo registrar el endpoint.");
+      showMessage("error", (e as ApiError)?.message || t("register.error"));
       return false;
     }
   };
 
   const askRegister = (route: IUnregisteredRoute, componentId: number) => {
     Modal.confirm({
-      title: `¿Registrar ${route.method} /${route.route}${route.path}?`,
+      title: t("register.title", { endpoint: `${route.method} /${route.route}${route.path}` }),
       width: 560,
       content: (
         <div className="flex flex-col gap-2 text-[13px]">
           <p>
-            Queda en <b>{componentLabel(componentId)}</b>.
+            {t.rich("register.content", {
+              target: componentLabel(componentId),
+              b: (chunks) => <b>{chunks}</b>
+            })}
           </p>
           {accessNote(componentId)}
         </div>
       ),
-      okText: "Registrar",
-      cancelText: "Cancelar",
+      okText: t("register.ok"),
+      cancelText: tCommon("actions.cancel"),
       onOk: () => doRegister(route, componentId)
     });
   };
 
   const submitNewComponent = async () => {
     if (!newPageId || !newName.trim()) {
-      showMessage("warning", "Elige el módulo y escribe el nombre de la funcionalidad.");
+      showMessage("warning", t("newFeatureModal.missingFields"));
       return;
     }
     try {
@@ -237,12 +250,9 @@ export default function CatalogTab() {
       setSelectedId(component_id);
       setCreating(false);
       setNewName("");
-      showMessage(
-        "success",
-        "Funcionalidad creada. Mueve aquí sus endpoints y asígnala a los roles que la necesiten."
-      );
+      showMessage("success", t("newFeatureModal.created"));
     } catch (e) {
-      showMessage("error", (e as ApiError)?.message || "No se pudo crear la funcionalidad.");
+      showMessage("error", (e as ApiError)?.message || t("newFeatureModal.error"));
     }
   };
 
@@ -274,7 +284,7 @@ export default function CatalogTab() {
 
   const submitRegister = async () => {
     if (!parsed || !regComponentId) {
-      showMessage("warning", "Pega la URL o la ruta y elige la funcionalidad.");
+      showMessage("warning", t("register.missingFields"));
       return;
     }
     const input =
@@ -296,15 +306,15 @@ export default function CatalogTab() {
             <SearchField
               value={search}
               onChange={setSearch}
-              placeholder="Buscar funcionalidad o ruta"
+              placeholder={tShared("searchFeatureOrRoute")}
               className="flex-1"
             />
             <Dropdown
               trigger={["click"]}
               menu={{
                 items: [
-                  { key: "component", label: "Funcionalidad" },
-                  { key: "endpoint", label: "Endpoint" }
+                  { key: "component", label: t("newFeature") },
+                  { key: "endpoint", label: t("newEndpoint") }
                 ],
                 onClick: ({ key }) =>
                   key === "endpoint" ? setRegistering(true) : setCreating(true)
@@ -312,7 +322,8 @@ export default function CatalogTab() {
             >
               <button type="button" className={BTN_PRIMARY}>
                 <span className="flex items-center gap-1">
-                  <Plus size={16} aria-hidden /> Nuevo <ChevronDown size={14} aria-hidden />
+                  <Plus size={16} aria-hidden /> {t("newButton")}{" "}
+                  <ChevronDown size={14} aria-hidden />
                 </span>
               </button>
             </Dropdown>
@@ -320,13 +331,13 @@ export default function CatalogTab() {
           <MiniSwitch
             checked={showTms}
             onChange={setShowTms}
-            title={INCLUDE_OTHER_HINT}
-            label={<span className="text-[13px] text-cp-ink-2">Incluir TMS</span>}
+            title={tShared("includeOtherHint")}
+            label={<span className="text-[13px] text-cp-ink-2">{tShared("includeTms")}</span>}
           />
           <div className="cp-list-scroll">
             {error && (
               <p className="px-3 py-2 text-[13px] text-cp-magenta">
-                No se pudo cargar el catálogo: {error.message}
+                {t("loadError", { error: error.message })}
               </p>
             )}
             {isLoading && (
@@ -338,12 +349,8 @@ export default function CatalogTab() {
               <PaneItem
                 active={showingUnregistered}
                 onClick={() => setSelectedId(UNREGISTERED)}
-                title={`Rutas sin registrar (${unregistered.length})`}
-                subtitle={
-                  unregistered.length
-                    ? "Responden 401 a todos hasta registrarlas"
-                    : "Todas las rutas están registradas"
-                }
+                title={t("unregisteredItem", { count: unregistered.length })}
+                subtitle={unregistered.length ? t("unregisteredItemHint") : t("allRegistered")}
               />
             )}
             {genericFirst.map(({ module, component }) => (
@@ -356,16 +363,20 @@ export default function CatalogTab() {
                 onClick={() => setSelectedId(component.component_id)}
                 title={
                   component.is_generic
-                    ? `${component.component_name} (sin control de rol)`
+                    ? t("genericName", { name: component.component_name })
                     : component.component_name
                 }
                 subtitle={
-                  <>
-                    {module.page_name} · {component.endpoints.length} endpoints ·{" "}
-                    {component.is_generic
-                      ? "todos los roles"
-                      : `${component.roles_with_access} roles`}
-                  </>
+                  component.is_generic
+                    ? t("itemSubtitleGeneric", {
+                        page: module.page_name,
+                        endpoints: component.endpoints.length
+                      })
+                    : t("itemSubtitle", {
+                        page: module.page_name,
+                        endpoints: component.endpoints.length,
+                        roles: component.roles_with_access
+                      })
                 }
               />
             ))}
@@ -378,31 +389,27 @@ export default function CatalogTab() {
               <div className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[18px] font-semibold text-cp-ink">
-                    Rutas sin registrar
+                    {t("unregisteredTitle")}
                   </p>
                   <p className="text-[13px] text-cp-ink-3">
-                    {unregistered?.length ?? 0} rutas del backend que piden rol y no están en el
-                    catálogo
+                    {t("unregisteredDescription", { count: unregistered?.length ?? 0 })}
                   </p>
                 </div>
                 <MiniSwitch
                   checked={onlyWrites}
                   onChange={setOnlyWrites}
-                  label={<span className="text-[13px] text-cp-ink-2">Solo escrituras</span>}
+                  label={<span className="text-[13px] text-cp-ink-2">{t("onlyWrites")}</span>}
                 />
               </div>
-              <Notice tone="warning">
-                El backend las tiene, pero sin fila en el catálogo responden 401 a cualquier
-                usuario, incluso a un super admin. Regístralas en la funcionalidad que corresponda.
-              </Notice>
+              <Notice tone="warning">{t("unregisteredNotice")}</Notice>
               {unregisteredError && (
                 <p className="text-[13px] text-cp-magenta">
-                  No se pudieron cargar las rutas: {unregisteredError.message}
+                  {t("routesLoadError", { error: unregisteredError.message })}
                 </p>
               )}
               <div className="cp-list-scroll pr-1">
                 {unregisteredVisible.length === 0 && (
-                  <p className="py-4 text-[13px] text-cp-ink-3">No hay rutas con ese filtro.</p>
+                  <p className="py-4 text-[13px] text-cp-ink-3">{t("noRoutes")}</p>
                 )}
                 {unregisteredVisible.map((route) => (
                   <div
@@ -418,7 +425,7 @@ export default function CatalogTab() {
                       {route.path}
                     </span>
                     <Select
-                      placeholder="Registrar en…"
+                      placeholder={t("registerIn")}
                       value={null}
                       showSearch
                       optionFilterProp="label"
@@ -432,9 +439,7 @@ export default function CatalogTab() {
             </>
           )}
 
-          {!showingUnregistered && !selected && !isLoading && (
-            <Notice>Elige una funcionalidad.</Notice>
-          )}
+          {!showingUnregistered && !selected && !isLoading && <Notice>{t("pickFeature")}</Notice>}
           {!showingUnregistered && selected && (
             <>
               <div className="flex flex-wrap items-center gap-3">
@@ -444,28 +449,25 @@ export default function CatalogTab() {
                   </p>
                   <p className="text-[13px] text-cp-ink-3">
                     {selected.component.is_generic
-                      ? "Cualquier rol puede usar estos endpoints"
-                      : `${selected.component.roles_with_access} roles tienen acceso`}{" "}
+                      ? t("genericAccess")
+                      : t("rolesWithAccess", { count: selected.component.roles_with_access })}{" "}
                     · <EndpointStats component={selected.component} />
                   </p>
                 </div>
                 <MiniSwitch
                   checked={onlyWrites}
                   onChange={setOnlyWrites}
-                  label={<span className="text-[13px] text-cp-ink-2">Solo escrituras</span>}
+                  label={<span className="text-[13px] text-cp-ink-2">{t("onlyWrites")}</span>}
                 />
               </div>
 
               {selected.component.is_generic && (
-                <Notice tone="warning">
-                  Estos endpoints no tienen control de rol. Mueve a una funcionalidad real los que
-                  no deban estar abiertos a todos, sobre todo las escrituras.
-                </Notice>
+                <Notice tone="warning">{t("genericNotice")}</Notice>
               )}
 
               <div className="cp-list-scroll pr-1">
                 {endpoints.length === 0 && (
-                  <p className="py-4 text-[13px] text-cp-ink-3">No hay endpoints con ese filtro.</p>
+                  <p className="py-4 text-[13px] text-cp-ink-3">{t("noEndpoints")}</p>
                 )}
                 {endpoints.map((endpoint) => {
                   const locked = endpoint.route.toLowerCase() === LOCKED_ROUTE;
@@ -485,13 +487,13 @@ export default function CatalogTab() {
                       {locked ? (
                         <span
                           className="flex items-center gap-1 text-[13px] text-cp-ink-3"
-                          title="Si se mueve, se perdería el acceso a esta consola"
+                          title={t("lockedHint")}
                         >
-                          <Lock size={14} aria-hidden /> Bloqueado
+                          <Lock size={14} aria-hidden /> {t("locked")}
                         </span>
                       ) : (
                         <Select
-                          placeholder="Mover a…"
+                          placeholder={t("moveTo")}
                           value={null}
                           showSearch
                           optionFilterProp="label"
@@ -511,19 +513,16 @@ export default function CatalogTab() {
 
       <Modal
         open={creating}
-        title="Nueva funcionalidad"
+        title={t("newFeatureModal.title")}
         onCancel={() => setCreating(false)}
         onOk={submitNewComponent}
-        okText="Crear"
-        cancelText="Cancelar"
+        okText={tCommon("actions.create")}
+        cancelText={tCommon("actions.cancel")}
       >
         <div className="flex flex-col gap-3">
-          <p className="text-[13px] text-cp-ink-2">
-            Úsala para separar endpoints que necesitan un permiso propio. Después mueve aquí esos
-            endpoints y asígnala en la pestaña Roles.
-          </p>
+          <p className="text-[13px] text-cp-ink-2">{t("newFeatureModal.description")}</p>
           <Select
-            placeholder="Módulo"
+            placeholder={t("newFeatureModal.modulePlaceholder")}
             value={newPageId}
             onChange={setNewPageId}
             showSearch
@@ -533,7 +532,7 @@ export default function CatalogTab() {
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Nombre, por ejemplo Reversar pagos"
+            placeholder={t("newFeatureModal.namePlaceholder")}
             maxLength={255}
             className="h-[var(--control-h)] rounded-lg border border-cp-line-2 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-cp-ink-4"
           />
@@ -542,18 +541,15 @@ export default function CatalogTab() {
 
       <Modal
         open={registering}
-        title="Registrar endpoint"
+        title={t("register.modalTitle")}
         width={620}
         onCancel={() => setRegistering(false)}
         onOk={submitRegister}
-        okText="Registrar"
-        cancelText="Cancelar"
+        okText={t("register.ok")}
+        cancelText={tCommon("actions.cancel")}
       >
         <div className="flex flex-col gap-3">
-          <p className="text-[13px] text-cp-ink-2">
-            Pega la URL que falla (con o sin dominio) o escribe la ruta. El backend solo acepta
-            rutas que existan en su código.
-          </p>
+          <p className="text-[13px] text-cp-ink-2">{t("register.description")}</p>
           <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2">
             <Select
               value={regMethod}
@@ -571,7 +567,7 @@ export default function CatalogTab() {
             <div className="rounded-lg bg-cp-bg px-3 py-2 text-[13px] text-cp-ink-2">
               {detected.kind === "missing" && (
                 <span className="flex flex-wrap items-center gap-2">
-                  Ruta encontrada en el backend:
+                  {t("register.found")}
                   <MethodTag method={detected.route.method} />
                   <span className="font-mono">
                     /{detected.route.route}
@@ -580,21 +576,15 @@ export default function CatalogTab() {
                 </span>
               )}
               {detected.kind === "registered" && (
-                <span>
-                  Ya está registrada en {detected.label}. Para cambiarla, usa &quot;Mover a…&quot;.
-                </span>
+                <span>{t("register.alreadyRegistered", { target: detected.label })}</span>
               )}
               {detected.kind === "unknown" && (
-                <span>
-                  No está entre las rutas sin registrar: revisa el método y la URL. Se intentará
-                  registrar /{parsed.route}
-                  {parsed.path}.
-                </span>
+                <span>{t("register.unknown", { route: `/${parsed.route}${parsed.path}` })}</span>
               )}
             </div>
           )}
           <Select
-            placeholder="Funcionalidad"
+            placeholder={t("register.featurePlaceholder")}
             value={regComponentId}
             onChange={setRegComponentId}
             showSearch

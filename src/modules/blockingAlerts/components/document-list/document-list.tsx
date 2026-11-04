@@ -1,11 +1,10 @@
 "use client";
 
 import { Pagination, Skeleton } from "antd";
+import { useTranslations } from "use-intl";
 
 import { useAppStore } from "@/lib/store/store";
 import type { IBlockingAlertsTabSummary } from "@/types/blockingAlerts/IBlockingAlerts";
-
-import { plural } from "../../utils/blocking-alerts";
 
 /**
  * Selección de una pestaña sin tener todos sus documentos: con `all` están todos menos los de
@@ -40,8 +39,8 @@ interface DocumentListProps<T> {
   describe: (item: T) => { title: string; subtitle: string; dot: string };
   selection: DocumentSelection;
   onSelectionChange: (selection: DocumentSelection) => void;
-  /** Sustantivo de la lista ("factura", "facturas"). */
-  noun: [string, string];
+  /** Conteo de la lista con su sustantivo ("3 facturas"). */
+  formatCount: (count: number) => string;
   empty: string;
   /** Aviso sobre la lista (p. ej. que las pagadas no suman). */
   notice?: React.ReactNode;
@@ -65,7 +64,7 @@ export default function DocumentList<T>({
   describe,
   selection,
   onSelectionChange,
-  noun,
+  formatCount,
   empty,
   notice,
   page,
@@ -73,6 +72,7 @@ export default function DocumentList<T>({
   onPageChange
 }: DocumentListProps<T>) {
   const formatMoney = useAppStore((s) => s.formatMoney);
+  const t = useTranslations("blockingAlerts.documents");
   const money = (value: number) => formatMoney(value, { hideDecimals: true });
 
   const touched = Object.keys(selection.items).length;
@@ -103,9 +103,9 @@ export default function DocumentList<T>({
               }}
               onChange={() => onSelectionChange(allOn ? { all: false, items: {} } : ALL_SELECTED)}
             />
-            <span className="flex-1 text-[13px] font-semibold text-cp-ink">Seleccionar todas</span>
+            <span className="flex-1 text-[13px] font-semibold text-cp-ink">{t("selectAll")}</span>
             <span className="text-[12px] text-cp-ink-3">
-              {plural(summary.count, ...noun)} · {money(summary.total)}
+              {formatCount(summary.count)} · {money(summary.total)}
             </span>
           </label>
           {items ? (

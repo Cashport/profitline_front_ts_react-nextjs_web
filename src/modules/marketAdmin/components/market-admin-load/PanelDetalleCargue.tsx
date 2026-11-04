@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Spin } from "antd";
+import { useTranslations } from "use-intl";
 import {
   ChevronsRight,
   Download,
@@ -52,6 +53,8 @@ export default function PanelDetalleCargue({
   onEditValidations,
   onOpenDetail
 }: Props) {
+  const t = useTranslations("marketAdmin.load");
+  const tCommon = useTranslations("common.actions");
   const { loader, isLoading: loadingLoader } = useProfitLoader(open ? loaderId : null);
   const { timeline, isLoading: loadingTimeline } = useProfitLoaderTimeline(open ? loaderId : null);
 
@@ -83,7 +86,8 @@ export default function PanelDetalleCargue({
           <button
             type="button"
             onClick={onClose}
-            title="Cerrar"
+            title={tCommon("close")}
+            aria-label={tCommon("close")}
             className="flex items-center justify-center w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
           >
             <ChevronsRight size={18} />
@@ -107,14 +111,14 @@ export default function PanelDetalleCargue({
                   <Info size={14} className="text-[#141414]" />
                 </div>
                 <div>
-                  <p className={sectionLabelClass}>¿Qué hace este ETL?</p>
+                  <p className={sectionLabelClass}>{t("detail.whatItDoes")}</p>
                   <p className="text-sm text-[#141414] leading-relaxed">{loader.description}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-5">
                 <div>
-                  <p className={sectionLabelClass}>Último archivo</p>
+                  <p className={sectionLabelClass}>{t("detail.lastFile")}</p>
                   <div className="flex items-center gap-1.5 min-w-0">
                     {ultimoCargue ? (
                       <>
@@ -125,19 +129,20 @@ export default function PanelDetalleCargue({
                         <button
                           type="button"
                           onClick={() => window.open(ultimoCargue.s3_url, "_blank")}
-                          title="Descargar archivo actual"
+                          title={t("detail.downloadCurrentFile")}
+                          aria-label={t("detail.downloadCurrentFile")}
                           className={iconButtonClass}
                         >
                           <Download size={12} />
                         </button>
                       </>
                     ) : (
-                      <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>
+                      <span className="text-sm text-[#BBBBBB]">{t("noUploadsYet")}</span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <p className={sectionLabelClass}>Último cargue</p>
+                  <p className={sectionLabelClass}>{t("columns.lastUpload")}</p>
                   <span className="text-sm text-[#141414]">
                     {ultimoCargue ? formatDateTime(ultimoCargue.uploaded_at) : "—"}
                   </span>
@@ -150,7 +155,7 @@ export default function PanelDetalleCargue({
                   onClick={() => onDownloadTemplate(loader)}
                   className="flex items-center justify-center gap-1.5 flex-1 px-4 py-2 rounded-lg text-sm font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
                 >
-                  <Download size={14} /> Template
+                  <Download size={14} /> {t("template")}
                 </button>
                 {onEditValidations && (
                   <button
@@ -158,7 +163,7 @@ export default function PanelDetalleCargue({
                     onClick={() => onEditValidations(loader)}
                     className="flex items-center justify-center gap-1.5 flex-1 px-4 py-2 rounded-lg text-sm font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
                   >
-                    <ShieldCheck size={14} /> Validaciones
+                    <ShieldCheck size={14} /> {t("detail.validations")}
                   </button>
                 )}
                 {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
@@ -169,7 +174,7 @@ export default function PanelDetalleCargue({
                     onClick={() => onUpload(loader.id)}
                     icon={<Upload size={14} />}
                   >
-                    Cargar
+                    {t("upload")}
                   </PrincipalButton>
                 </div>
               </div>
@@ -177,7 +182,7 @@ export default function PanelDetalleCargue({
 
             {/* Log de cargues */}
             <div className="px-6 py-5">
-              <h3 className="text-sm font-bold text-[#141414] mb-4">Historial de cargues</h3>
+              <h3 className="text-sm font-bold text-[#141414] mb-4">{t("detail.history")}</h3>
 
               {loadingTimeline ? (
                 <div className="flex items-center justify-center py-10">
@@ -185,7 +190,7 @@ export default function PanelDetalleCargue({
                 </div>
               ) : timeline.length === 0 ? (
                 <p className="text-sm text-[#999999] text-center py-10">
-                  Aún no se han registrado cargues para este ETL.
+                  {t("detail.historyEmpty")}
                 </p>
               ) : (
                 <div className="flex flex-col">
@@ -209,7 +214,14 @@ export default function PanelDetalleCargue({
                                 type="button"
                                 onClick={() => onOpenDetail(loader, item)}
                                 title={
-                                  item.analysis_id ? "Ver validación del cargue" : "Ver errores"
+                                  item.analysis_id
+                                    ? t("detail.viewValidation")
+                                    : t("detail.viewErrors")
+                                }
+                                aria-label={
+                                  item.analysis_id
+                                    ? t("detail.viewValidation")
+                                    : t("detail.viewErrors")
                                 }
                                 className={iconButtonClass}
                               >
@@ -219,7 +231,8 @@ export default function PanelDetalleCargue({
                             <button
                               type="button"
                               onClick={() => window.open(item.s3_url, "_blank")}
-                              title={`Descargar ${item.file_name}`}
+                              title={t("detail.downloadFile", { fileName: item.file_name })}
+                              aria-label={t("detail.downloadFile", { fileName: item.file_name })}
                               className={iconButtonClass}
                             >
                               <Download size={13} />

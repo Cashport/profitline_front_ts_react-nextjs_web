@@ -26,13 +26,21 @@
         "label": "Cargue de información",
         "description": "Alimenta el app con ETLs manuales: inventario, precios, clientes y más."
       },
+      "seals": {
+        "label": "Precintos",
+        "description": "Controla el inventario de precintos: bodega, ejecutivos y asignaciones."
+      },
       "massCommunications": {
-        "label": "Comunicaciones Masivas",
+        "label": "Comunicaciones masivas",
         "description": "Envía comunicaciones masivas a los clientes en minutos."
       },
       "settings": {
         "label": "Configuraciones",
         "description": "Gestión administrativa del proyecto."
+      },
+      "roles": {
+        "label": "Roles y permisos",
+        "description": "Solo Profitline: roles por proyecto, qué puede hacer cada rol y su catálogo."
       }
     }
   },
@@ -810,7 +818,9 @@
       "validations": "Validaciones",
       "history": "Historial de cargues",
       "historyEmpty": "Aún no se han registrado cargues para este ETL.",
-      "downloadFile": "Descargar {fileName}"
+      "downloadFile": "Descargar {fileName}",
+      "viewValidation": "Ver validación del cargue",
+      "viewErrors": "Ver errores"
     },
     "newEtl": {
       "title": "Nuevo ETL",
@@ -819,6 +829,139 @@
       "optional": "(opcional)",
       "notesPlaceholder": "Describe qué hace este cargue y cuándo debe usarse...",
       "create": "Crear ETL"
+    },
+    "errors": {
+      "columns": {
+        "row": "Fila",
+        "column": "Columna",
+        "error": "Error",
+        "type": "Tipo"
+      },
+      "types": {
+        "blocking": "Bloqueante",
+        "warning": "Advertencia"
+      },
+      "levels": {
+        "error": "Error",
+        "warning": "Aviso"
+      },
+      "loadError": "No se pudo leer el detalle del cargue.",
+      "rowsSummary": "{read, plural, one {# fila leída} other {# filas leídas}} · {loaded, plural, one {# cargada} other {# cargadas}}",
+      "rowErrors": "Errores por fila ({count})",
+      "failedValidations": "Validaciones que no se cumplieron",
+      "processLog": "Registro del proceso",
+      "noErrors": "Este cargue no registró errores."
+    },
+    "validation": {
+      "eyebrow": "CASHPORT · VALIDACIÓN DE CARGUE",
+      "titleConfirmed": "Cargue confirmado",
+      "titleFallback": "Cargue",
+      "actionError": "No se pudo completar la acción.",
+      "cancelUpload": "Cancelar cargue",
+      "confirmUpload": "Confirmar cargue",
+      "cancelConfirm": {
+        "title": "¿Cancelar el cargue?",
+        "content": "El archivo no se aplicará en Cashport.",
+        "keep": "Seguir"
+      },
+      "stages": {
+        "label": "{step} · {name}",
+        "critical": "Críticas",
+        "warnings": "Advertencias",
+        "confirm": "Confirmar"
+      },
+      "fileMeta": {
+        "confirmed": "Confirmado {date}",
+        "justified": "{count, plural, one {# advertencia justificada} other {# advertencias justificadas}}",
+        "uploaded": "subido {date}",
+        "withRows": "{count, plural, one {{rows} fila} other {{rows} filas}} · {detail}"
+      },
+      "steps": {
+        "reading": "Leyendo el archivo",
+        "validating": "Validando columnas, tipos de dato y duplicados",
+        "matching": "Cruzando códigos con Cashport",
+        "comparing": "Comparando con los cargues de los últimos 60 días"
+      },
+      "loading": {
+        "alt": "Cargando",
+        "applyingTitle": "Cargando la cartera",
+        "analyzingTitle": "Analizando el archivo",
+        "applyingText": "Estamos aplicando el archivo en Cashport.",
+        "analyzingText": "{step}. Nada se aplica hasta que confirmes.",
+        "largeFileHint": "Si el archivo es grande puede tardar unos minutos. Puedes cerrar esta ventana y retomarlo desde el historial de cargues."
+      },
+      "critical": {
+        "title": "{count, plural, one {# alerta crítica} other {# alertas críticas}}",
+        "fixOrForce": "Corrige el archivo y vuelve a cargarlo, o cárgalo de todas formas justificando por qué.",
+        "fix": "Corrige el archivo y vuelve a cargarlo.",
+        "dropTitle": "Arrastra aquí el archivo corregido",
+        "dropHint": "Se vuelve a validar desde la etapa 1",
+        "selectFile": "Seleccionar archivo",
+        "forceTitle": "Cargar con {count, plural, one {# alerta crítica} other {# alertas críticas}}",
+        "forceHint": "Los datos con error se cargan tal como vienen en el archivo. Queda registrado en la bitácora con tu usuario y esta justificación.",
+        "forceAria": "Justificación para cargar con alertas críticas",
+        "forcePlaceholder": "Ej.: el cliente confirmó que los saldos son correctos; se corrige en el próximo cargue.",
+        "forceSubmit": "Cargar con alertas",
+        "forceOpen": "Cargar de todas formas",
+        "missingColumns": "Faltan columnas:",
+        "columns": "{count, plural, one {Columna:} other {Columnas:}}",
+        "rows": "Filas: {list}",
+        "codes": "Códigos: {list}"
+      },
+      "measures": {
+        "normalTitle": "Dentro de lo normal",
+        "normalHint": "Ábrelas para ver su comportamiento de los últimos {days} días.",
+        "mean": "media {value}",
+        "noBaseline": "Sin cargues previos suficientes para comparar",
+        "justified": "Justificada",
+        "needsJustification": "Falta justificar",
+        "justification": "Justificación",
+        "placeholders": {
+          "total_balance": "Ej.: el cliente aplicó un castigo de cartera aprobado esta semana.",
+          "active_clients": "Ej.: se depuraron clientes inactivos del maestro.",
+          "documents": "Ej.: se cerró un lote grande de facturas pagadas."
+        }
+      },
+      "warnings": {
+        "title": "{count, plural, =0 {Sin advertencias} one {# advertencia por resolver} other {# advertencias por resolver}}",
+        "eachNeedsJustification": "Cada una necesita su propia justificación antes de confirmar.",
+        "allNormal": "Todas las medidas están dentro de lo normal. Puedes confirmar el cargue.",
+        "legendNormal": "Normal",
+        "progress": "{done} de {total} justificadas"
+      },
+      "applied": {
+        "heading": "LO QUE SE CARGÓ",
+        "available": "La cartera ya está disponible en Cashport.",
+        "columns": {
+          "measure": "MEDIDA",
+          "loaded": "CARGADO",
+          "mean": "MEDIA {days} D",
+          "trend": "{days} DÍAS"
+        },
+        "confirmedBy": "Confirmado por",
+        "warnings": "Advertencias",
+        "justifiedLogged": "{count} justificadas · quedaron en la bitácora",
+        "none": "Ninguna",
+        "criticalAlerts": "Alertas críticas",
+        "criticalOverride": "Cargado con {count} alertas · “{justification}”",
+        "done": "Listo"
+      },
+      "cancelled": {
+        "title": "Cargue cancelado",
+        "text": "El archivo no se aplicó en Cashport."
+      },
+      "failed": {
+        "title": "No se pudo completar el cargue",
+        "text": "Revisa el historial de cargues para ver el detalle."
+      },
+      "chart": {
+        "todayValue": "Hoy · {value}",
+        "todayDate": "HOY · {date}",
+        "sigmaVsMean": "{sigma} vs media",
+        "deltaVsMean": "{delta} vs media",
+        "summary": "Media {mean} · σ {sd} · {count, plural, one {# cargue} other {# cargues}} de los últimos {days} días. Pasa el cursor sobre la serie para ver cada cargue.",
+        "notEnoughData": "Todavía no hay suficientes cargues en los últimos {days} días para calcular la media y la desviación estándar."
+      }
     }
   }
 }

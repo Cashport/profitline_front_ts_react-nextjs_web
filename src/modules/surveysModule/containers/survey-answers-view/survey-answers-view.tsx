@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import Header from "@/components/organisms/header";
 import Pagination from "@/components/ui/pagination";
@@ -19,6 +20,7 @@ import { useVisitFormResponses } from "../../hooks/useVisitFormResponses";
  * periodo y el listado paginado; cada fila abre la respuesta completa.
  */
 export default function SurveyAnswersView({ formId }: { formId: number }) {
+  const t = useTranslations("surveys.answers");
   const { form } = useVisitForm(formId);
   const { responsesPage, page, setPage, isLoading, error } = useVisitFormResponses(formId);
   const [openResponseId, setOpenResponseId] = useState<number | null>(null);
@@ -29,21 +31,21 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
   const cards: StatCardItem[] = [
     {
       id: "total",
-      label: "Total respuestas",
+      label: t("stats.total"),
       value: fmt(responsesPage?.total),
-      foot: "Completas y parciales"
+      foot: t("stats.totalFoot")
     },
     {
       id: "month",
-      label: "Este mes",
+      label: t("stats.month"),
       value: fmt(responsesPage?.month_total),
-      foot: "Desde el día 1"
+      foot: t("stats.monthFoot")
     },
     {
       id: "users",
-      label: "Asesores",
+      label: t("stats.users"),
       value: fmt(responsesPage?.user_count),
-      foot: "Han respondido la encuesta"
+      foot: t("stats.usersFoot")
     }
   ];
 
@@ -52,16 +54,12 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
     if (error) {
       return (
         <p className="p-9 text-center text-sm text-destructive">
-          {error.message || "No se pudieron cargar las respuestas."}
+          {error.message || t("loadError")}
         </p>
       );
     }
     if (!total) {
-      return (
-        <p className="p-9 text-center text-sm text-muted-foreground">
-          Esta encuesta aún no tiene respuestas.
-        </p>
-      );
+      return <p className="p-9 text-center text-sm text-muted-foreground">{t("empty")}</p>;
     }
     return <ResponsesTable responses={responses} onOpen={setOpenResponseId} />;
   };
@@ -69,7 +67,7 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
   return (
     <div className="cp-page pb-6">
       <Header
-        title={form?.name ? `Respuestas · ${form.name}` : "Respuestas"}
+        title={form?.name ? t("titleWithName", { name: form.name }) : t("title")}
         back={`/surveys/${formId}`}
       />
 
@@ -81,10 +79,10 @@ export default function SurveyAnswersView({ formId }: { formId: number }) {
 
       <section className="cp-card flex flex-col gap-1 px-[18px] pb-[14px]">
         <div className="flex h-[var(--table-title-h)] items-center justify-between gap-2.5">
-          <h2 className="text-[18px] font-semibold text-cp-ink">Respuestas recientes</h2>
+          <h2 className="text-[18px] font-semibold text-cp-ink">{t("recent")}</h2>
           {responsesPage && (
             <span className="text-[14px] text-cp-ink-4">
-              Mostrando {responses.length} de {total.toLocaleString("es-CO")}
+              {t("showing", { shown: responses.length, total: total.toLocaleString("es-CO") })}
             </span>
           )}
         </div>

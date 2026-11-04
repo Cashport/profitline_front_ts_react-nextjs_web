@@ -6,13 +6,14 @@
   },
   "status": {
     "blocked": "On hold",
-    "warning": "At risk",
-    "ok": "Current"
+    "to_be_blocked": "At risk",
+    "up_to_date": "Current"
   },
   "aging": {
     "current": "Current",
-    "past_due_1_60": "Past due 1–60 days",
-    "past_due_60_plus": "Past due 60+ days"
+    "pastDue1To60": "Past due 1–60 days",
+    "pastDueOver60": "Past due 60+ days",
+    "tip": "{label}: {amount}"
   },
   "sort": {
     "urgency": "Most urgent first",
@@ -21,16 +22,8 @@
     "oldest_overdue_days": "Most days past due",
     "name": "Name A–Z"
   },
-  "statusLabel": {
-    "blockedFor": "On hold for {days, plural, one {# day} other {# days}}",
-    "blocksToday": "Goes on hold today",
-    "blocksTomorrow": "Goes on hold tomorrow",
-    "blocksIn": "Goes on hold in {days} days",
-    "okCredit": "Current · overpayment",
-    "ok": "Current"
-  },
-  "rules": "Hold: invoices 60+ days past due or credit limit exceeded · Alert from 45 days",
-  "cutoff": "Cutoff {date}",
+  "rules": "Hold: invoices {blockDays}+ days past due or credit limit exceeded · Alert from {warningDays} days",
+  "cutoff": "As of {date}",
   "count": {
     "customers": "{count, plural, one {# customer} other {# customers}}",
     "pointsOfSale": "{count, plural, one {# point of sale} other {# points of sale}}",
@@ -52,7 +45,6 @@
     "pointsOfSale": "Points of sale",
     "customer": "Customer",
     "loadError": "Couldn't load alerts",
-    "customerNotFound": "We couldn't find this customer",
     "customerReceivables": "Customer receivables",
     "totalReceivables": "Total receivables",
     "all": "All",
@@ -80,18 +72,24 @@
   "documents": {
     "selectAll": "Select all"
   },
+  "recipients": {
+    "to": "To"
+  },
   "sendToClient": {
-    "greeting": "Hi {contact} from {company},",
-    "pastDueLine": "You have {count, plural, one {# past-due invoice} other {# past-due invoices}} totaling {amount}.",
-    "payHere": "You can pay the past-due amount here:",
-    "statementAttached": "Your account statement is attached.",
-    "statementAttachedToday": "Your account statement as of today is attached.",
-    "email": "email",
-    "sent": "Sent via {channel} to {contact}",
     "title": "Send to customer",
-    "to": "To: {contact}",
+    "email": "email",
     "emailTab": "Email",
-    "template": "Template · Collection with payment link",
+    "phonePlaceholder": "Contact or number with country code (57…)",
+    "emailPlaceholder": "Contact or email",
+    "pickContact": "Choose a contact",
+    "noContacts": "{name} has no {channel} contacts for the account statement.",
+    "templateLabel": "Template · Account statement",
+    "emailLabel": "Email · Account statement",
+    "noTemplate": "The project doesn't have the {template} WhatsApp template.",
+    "loadingTemplate": "Loading template…",
+    "emailBody": "The customer's account statement arrives as an attachment.",
+    "sent": "Sent via {channel} to {recipients}",
+    "sendError": "Couldn't send via {channel}",
     "sendBy": "Send via {channel}"
   },
   "paymentLink": {
@@ -104,14 +102,11 @@
     "emailTab": "Email",
     "email": "email",
     "qr": "In-store QR",
-    "qrSoon": "The QR code will be available once the payment service is connected",
     "done": "Done",
     "validFor": "{name} · valid for 48 hours",
     "modePastDue": "Past-due amount",
     "modeSelected": "Selected invoices",
     "youWillCharge": "You'll collect",
-    "customer": "Customer",
-    "contact": "Contact",
     "linkExpires": "Link expires",
     "expiresValue": "{date} (48 h)",
     "generate": "Generate payment link"
@@ -123,8 +118,11 @@
       "pendingBalances": "Pending deductions",
       "creditNotes": "Credit memos"
     },
+    "notAvailable": "There's no {format} account statement to download",
     "downloading": "Downloading {name}'s account statement ({format})",
-    "sent": "Account statement sent to {email}",
+    "sent": "Account statement sent to {recipients}",
+    "downloadError": "Couldn't download the account statement",
+    "sendError": "Couldn't send the account statement",
     "title": "Account statement",
     "include": "Include in the account statement",
     "whatToDo": "What do you want to do?",
@@ -132,14 +130,11 @@
     "downloadHint": "Save it to this device",
     "email": "Send by email",
     "emailHint": "The customer gets it as an attachment",
-    "to": "To",
     "toPlaceholder": "email@customer.com",
     "optional": "Optional",
     "subject": "Subject",
     "subjectValue": "Account statement · {name} · as of {date}",
     "attachment": "Attachment",
-    "invalidEmail": "Enter a valid email to send.",
-    "chooseWhat": "Choose what to include",
     "submitDownload": "Download account statement · {format}",
     "submitEmail": "Send account statement"
   },
@@ -147,37 +142,46 @@
     "customer": "Customer",
     "overdueBy": "Past due · {days, plural, one {# day} other {# days}}",
     "dueOn": "Due {date}",
+    "noDueDate": "No due date",
+    "creditNote": "Credit memo",
+    "balance": "Deduction",
     "tabs": {
       "all": "All",
-      "pastDue": "Past due",
-      "creditNotes": "Credit memos",
-      "availablePayments": "Available payments",
-      "pendingBalances": "Deductions",
-      "paidInvoices": "Paid"
+      "past_due": "Past due",
+      "credit_notes": "Credit memos",
+      "available_payments": "Available payments",
+      "balances": "Deductions",
+      "paid_invoices": "Paid"
     },
     "empty": {
-      "invoices": "No open invoices for this {target, select, pos {point of sale} other {customer}}.",
-      "pastDue": "No past-due invoices. They can keep ordering as usual.",
-      "creditNotes": "No credit memos for this {target, select, pos {point of sale} other {customer}}.",
-      "availablePayments": "No available payments for this {target, select, pos {point of sale} other {customer}}.",
-      "pendingBalances": "No pending deductions for this {target, select, pos {point of sale} other {customer}}.",
-      "paidInvoices": "No paid invoices pending clearing."
+      "all": "No open invoices for this {target, select, pos {point of sale} other {customer}}.",
+      "past_due": "No past-due invoices. They can keep ordering as usual.",
+      "credit_notes": "No credit memos for this {target, select, pos {point of sale} other {customer}}.",
+      "available_payments": "No available payments for this {target, select, pos {point of sale} other {customer}}.",
+      "balances": "No pending deductions for this {target, select, pos {point of sale} other {customer}}.",
+      "paid_invoices": "No paid invoices pending clearing."
     },
     "count": {
-      "creditNotes": "{count, plural, one {# credit memo} other {# credit memos}}",
-      "availablePayments": "{count, plural, one {# available payment} other {# available payments}}",
-      "pendingBalances": "{count, plural, one {# pending deduction} other {# pending deductions}}"
+      "all": "{count, plural, one {# invoice} other {# invoices}}",
+      "past_due": "{count, plural, one {# invoice} other {# invoices}}",
+      "credit_notes": "{count, plural, one {# credit memo} other {# credit memos}}",
+      "available_payments": "{count, plural, one {# available payment} other {# available payments}}",
+      "balances": "{count, plural, one {# pending deduction} other {# pending deductions}}",
+      "paid_invoices": "{count, plural, one {# invoice} other {# invoices}}"
     },
     "selected": {
-      "invoices": "{count, plural, one {# invoice selected} other {# invoices selected}}",
+      "all": "{count, plural, one {# invoice selected} other {# invoices selected}}",
+      "past_due": "{count, plural, one {# invoice selected} other {# invoices selected}}",
       "credit_notes": "{count, plural, one {# credit memo selected} other {# credit memos selected}}",
       "available_payments": "{count, plural, one {# payment selected} other {# payments selected}}",
-      "pending_balances": "{count, plural, one {# deduction selected} other {# deductions selected}}",
+      "balances": "{count, plural, one {# deduction selected} other {# deductions selected}}",
       "paid_invoices": "{count, plural, one {# paid invoice selected} other {# paid invoices selected}}"
     },
+    "paymentTitle": "Payment {id}",
     "paymentSubtitle": "Payment {id} · available",
     "balanceTitle": "Deduction {id}",
     "paidSubtitle": "Paid {date} · SAP clearing",
+    "paidSubtitleNoDate": "Paid · SAP clearing",
     "paidNotice": "In SAP clearing · not counted in receivables or collected",
     "statement": "Account statement",
     "sendToCustomer": "Send to customer",
@@ -190,7 +194,6 @@
       "availablePayments": "Available payments"
     },
     "pastDue": "Past due",
-    "paymentLink": "Payment link",
-    "clear": "Clear"
+    "paymentLink": "Payment link"
   }
 }

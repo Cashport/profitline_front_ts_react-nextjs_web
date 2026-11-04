@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiTab from "@/components/ui/ui-tab";
@@ -35,6 +36,7 @@ interface SendToClientModalProps {
  */
 export default function SendToClientModal({ detail, onClose }: SendToClientModalProps) {
   const { showMessage } = useMessageApi();
+  const t = useTranslations("blockingAlerts.sendToClient");
   const [channel, setChannel] = useState<Channel>("whatsapp");
   const [sending, setSending] = useState(false);
   const contacts = useStatementContacts(detail.client.clientUuid);
@@ -48,7 +50,7 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
   const to = whatsapp ? phones : emails;
   const noContacts = !manual && !contacts.isLoading && options.length === 0;
   const noTemplate = whatsapp && !template.isLoading && !template.templateId;
-  const channelLabel = whatsapp ? "WhatsApp" : "correo";
+  const channelLabel = whatsapp ? "WhatsApp" : t("email");
 
   const send = async () => {
     const { clientUuid } = detail.client;
@@ -66,24 +68,24 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
           subject: contacts.subject ?? ""
         });
       }
-      showMessage("success", `Enviado por ${channelLabel} a ${to.join(", ")}`);
+      showMessage("success", t("sent", { channel: channelLabel, recipients: to.join(", ") }));
       onClose();
     } catch {
-      showMessage("error", `No se pudo enviar por ${channelLabel}`);
+      showMessage("error", t("sendError", { channel: channelLabel }));
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <AlertModal onClose={onClose} title="Enviar al cliente" subtitle={detail.name}>
+    <AlertModal onClose={onClose} title={t("title")} subtitle={detail.name}>
       <div className={cn("[&_.ant-tabs-nav]:!mb-0", MOBILE_TABS)}>
         <UiTab
           activeKey={channel}
           onChangeTab={(key) => setChannel(key as Channel)}
           tabs={[
             { key: "whatsapp", label: "WhatsApp", children: null },
-            { key: "email", label: "Correo", children: null }
+            { key: "email", label: t("emailTab"), children: null }
           ]}
         />
       </div>
@@ -97,33 +99,27 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
           onChange={whatsapp ? setPhones : setEmails}
           loading={contacts.isLoading}
           placeholder={
-            manual
-              ? whatsapp
-                ? "Contacto o número con indicativo (57…)"
-                : "Contacto o correo"
-              : "Elige un contacto"
+            manual ? (whatsapp ? t("phonePlaceholder") : t("emailPlaceholder")) : t("pickContact")
           }
         />
       </div>
       {noContacts && (
         <span className="text-[12px] text-cp-orange max-md:text-[11.5px]">
-          {detail.name} no tiene contactos con {channelLabel} para el estado de cuenta.
+          {t("noContacts", { name: detail.name, channel: channelLabel })}
         </span>
       )}
       <div className="flex flex-col gap-2 rounded-[12px] border border-cp-line p-3">
-        <span className={SECTION_LABEL}>
-          {whatsapp ? "Plantilla · Estado de cuenta" : "Correo · Estado de cuenta"}
-        </span>
+        <span className={SECTION_LABEL}>{whatsapp ? t("templateLabel") : t("emailLabel")}</span>
         {whatsapp ? (
           <p className={BUBBLE}>
             {noTemplate
-              ? `El proyecto no tiene la plantilla ${TEMPLATE} de WhatsApp.`
-              : template.body ?? "Cargando plantilla…"}
+              ? t("noTemplate", { template: TEMPLATE })
+              : template.body ?? t("loadingTemplate")}
           </p>
         ) : (
           <p className={BUBBLE}>
-            {contacts.subject ? `${contacts.subject}\n` : ""}Le llega el estado de cuenta del
-            cliente como adjunto.
+            {contacts.subject ? `${contacts.subject}\n` : ""}
+            {t("emailBody")}
           </p>
         )}
       </div>
@@ -133,7 +129,7 @@ export default function SendToClientModal({ detail, onClose }: SendToClientModal
         loading={sending}
         onClick={send}
       >
-        Enviar por {channelLabel}
+        {t("sendBy", { channel: channelLabel })}
       </PrincipalButton>
     </AlertModal>
   );

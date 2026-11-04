@@ -129,5 +129,167 @@
       "document": "Document",
       "status": "Status"
     }
+  },
+  "returnDetail": {
+    "title": "Return",
+    "titleWithId": "Return {id}",
+    "loadError": "We couldn't load the return.",
+    "searchPlaceholder": "Search by product, code, lot, or document",
+    "createdBy": "Prepared by <b>{user}</b>",
+    "docsToFix": "{count, plural, one {# document to fix} other {# documents to fix}}",
+    "moreActions": "More actions",
+    "editMode": "Edit mode",
+    "editModeHint": "You can edit the note, the packaging quantity, and the documents with their products. Customer, contact, seals, and photos can't be edited. Changes are applied when you save.",
+    "observation": "Note",
+    "customerDocuments": "Customer documents",
+    "tabs": {
+      "byDocument": "By document · {count}",
+      "byProduct": "By product · {count}",
+      "history": "Change history"
+    },
+    "tabTotals": "<b>{units}</b> units · <b>{amount}</b>",
+    "total": "Return total · {units} units · {amount}",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "actions": {
+      "resend": "Resend receipt to customer",
+      "void": "Void return"
+    },
+    "messages": {
+      "reviewDocuments": "Review the highlighted documents before saving",
+      "noChanges": "No changes",
+      "saved": "Changes saved · return {id}",
+      "saveError": "We couldn't save the changes",
+      "resent": "Receipt resent to the customer",
+      "resendError": "We couldn't resend the receipt",
+      "voidError": "We couldn't void the return",
+      "voided": "Return {id} voided"
+    },
+    "resendModal": {
+      "title": "Resend receipt to customer",
+      "contentEmail": "The receipt for return {id} will be regenerated and sent again to {email}.",
+      "contentCustomer": "The receipt for return {id} will be regenerated and sent again to the customer.",
+      "ok": "Resend"
+    },
+    "voidModal": {
+      "title": "Void return",
+      "description": "Return {id} will be set to Voided and its receipt will be regenerated.",
+      "label": "Reason for voiding",
+      "placeholder": "Explain why you're voiding this return",
+      "ok": "Void return"
+    },
+    "saveModal": {
+      "title": "Save changes",
+      "summary": "Return {id} · {count, plural, one {# change} other {# changes}}",
+      "label": "Reason for the change",
+      "placeholder": "Explain why you modified this return",
+      "ok": "Save changes"
+    },
+    "changes": {
+      "observationUpdated": "Note updated",
+      "packagingQuantity": "Packaging quantity ({packaging}): {from} → {to}",
+      "document": "Document {number}",
+      "documentField": "{document}: {field} {from} → {to}",
+      "fields": {
+        "number": "number",
+        "date": "date",
+        "units": "units",
+        "value": "amount"
+      },
+      "productRemoved": "{document}: removed {product} (lot {lot})",
+      "productAdded": "{document}: added {product} (lot {lot})",
+      "product": "{document}: {product} (lot {lot})",
+      "quantity": "{product}: quantity {from} → {to}",
+      "unitPrice": "{product}: unit price {from} → {to}",
+      "productObservation": "{product}: note updated"
+    },
+    "validation": {
+      "numberRequired": "Enter the document number",
+      "numberDuplicated": "This document number is duplicated",
+      "quantityRequired": "Enter the quantity for the highlighted products"
+    },
+    "documents": {
+      "title": "Document {number}",
+      "noNumber": "Document without number",
+      "editDocument": "Edit document",
+      "productsCount": "{count, plural, one {# product} other {# products}}",
+      "units": "<b>{units}</b> <muted>units</muted>",
+      "alert": "Alert",
+      "mismatch": "Products add up to {productsAmount} · {productsUnits} units, but the document shows {documentAmount} · {documentUnits} units.",
+      "valueShort": "amount short by {amount}",
+      "valueOver": "amount over by {amount}",
+      "unitsShort": "units short by {units}",
+      "unitsOver": "units over by {units}",
+      "difference": "· Difference: {difference}",
+      "addProduct": "Add product",
+      "noResults": "No results for “{query}”",
+      "empty": "No documents"
+    },
+    "lines": {
+      "product": "Product",
+      "code": "Code",
+      "lot": "Lot",
+      "expiration": "Expiration",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "totalValue": "Total amount",
+      "observation": "Note",
+      "removeProduct": "Remove product",
+      "keepOneProduct": "The document must keep at least one product"
+    },
+    "products": {
+      "product": "Product",
+      "code": "Code",
+      "lots": "Lots",
+      "documents": "Documents",
+      "quantity": "Quantity",
+      "totalValue": "Total amount",
+      "childRow": "↳ Document <b>{number}</b> · Lot {lot} · Expires {date}",
+      "docsCount": "{count, plural, one {# doc} other {# docs}}",
+      "noResults": "No results for “{query}”",
+      "empty": "No products"
+    },
+    "infoCards": {
+      "customerTitle": "Customer",
+      "customer": "Customer",
+      "address": "Address",
+      "soldTo": "Sold To",
+      "shipTo": "Ship To",
+      "contact": "Contact",
+      "packagingTitle": "Packaging and evidence",
+      "packaging": "Packaging",
+      "quantity": "· Quantity",
+      "seals": "Seals",
+      "noSeals": "No seals",
+      "photos": "Photos",
+      "photoGroups": {
+        "packaging": "Packaging",
+        "products": "Products"
+      },
+      "photoCount": "{label} · {count}"
+    },
+    "addProductModal": {
+      "title": "Add product",
+      "product": "Product",
+      "searchProduct": "Search product",
+      "lot": "Lot",
+      "noLots": "No valid lots",
+      "selectLot": "Select the lot",
+      "expiration": "Expiration",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "observation": "Note",
+      "optional": "Optional",
+      "totalValue": "Total amount {amount}"
+    },
+    "editDocumentModal": {
+      "title": "Edit document",
+      "documentNumber": "Document number",
+      "numberPlaceholder": "Number",
+      "date": "Date",
+      "documentValue": "Document amount",
+      "units": "Units",
+      "productsSum": "Products add up to <b>{units} units · {amount}</b>"
+    }
   }
 }

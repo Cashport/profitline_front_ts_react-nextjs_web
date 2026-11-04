@@ -26,6 +26,10 @@
         "label": "Data Upload",
         "description": "Feed the app with manual ETLs: inventory, prices, customers and more."
       },
+      "seals": {
+        "label": "Seals",
+        "description": "Track seal inventory: warehouse, field reps and assignments."
+      },
       "massCommunications": {
         "label": "Campaigns",
         "description": "Send campaigns to your customers in minutes."
@@ -33,6 +37,10 @@
       "settings": {
         "label": "Settings",
         "description": "Project administration."
+      },
+      "roles": {
+        "label": "Roles and Permissions",
+        "description": "Profitline only: roles per project, what each role can do and its catalog."
       }
     }
   },
@@ -810,7 +818,9 @@
       "validations": "Validations",
       "history": "Upload history",
       "historyEmpty": "No uploads have been recorded for this ETL yet.",
-      "downloadFile": "Download {fileName}"
+      "downloadFile": "Download {fileName}",
+      "viewValidation": "View upload validation",
+      "viewErrors": "View errors"
     },
     "newEtl": {
       "title": "New ETL",
@@ -819,6 +829,139 @@
       "optional": "(optional)",
       "notesPlaceholder": "Describe what this upload does and when to use it...",
       "create": "Create ETL"
+    },
+    "errors": {
+      "columns": {
+        "row": "Row",
+        "column": "Column",
+        "error": "Error",
+        "type": "Type"
+      },
+      "types": {
+        "blocking": "Blocking",
+        "warning": "Warning"
+      },
+      "levels": {
+        "error": "Error",
+        "warning": "Warning"
+      },
+      "loadError": "We couldn't read the upload details.",
+      "rowsSummary": "{read, plural, one {# row read} other {# rows read}} · {loaded, plural, one {# loaded} other {# loaded}}",
+      "rowErrors": "Errors by row ({count})",
+      "failedValidations": "Failed validations",
+      "processLog": "Process log",
+      "noErrors": "This upload didn't record any errors."
+    },
+    "validation": {
+      "eyebrow": "CASHPORT · UPLOAD VALIDATION",
+      "titleConfirmed": "Upload confirmed",
+      "titleFallback": "Upload",
+      "actionError": "We couldn't complete the action.",
+      "cancelUpload": "Cancel upload",
+      "confirmUpload": "Confirm upload",
+      "cancelConfirm": {
+        "title": "Cancel the upload?",
+        "content": "The file won't be applied in Cashport.",
+        "keep": "Keep upload"
+      },
+      "stages": {
+        "label": "{step} · {name}",
+        "critical": "Critical",
+        "warnings": "Warnings",
+        "confirm": "Confirm"
+      },
+      "fileMeta": {
+        "confirmed": "Confirmed {date}",
+        "justified": "{count, plural, one {# warning justified} other {# warnings justified}}",
+        "uploaded": "uploaded {date}",
+        "withRows": "{count, plural, one {{rows} row} other {{rows} rows}} · {detail}"
+      },
+      "steps": {
+        "reading": "Reading the file",
+        "validating": "Validating columns, data types and duplicates",
+        "matching": "Matching codes against Cashport",
+        "comparing": "Comparing with uploads from the last 60 days"
+      },
+      "loading": {
+        "alt": "Loading",
+        "applyingTitle": "Loading receivables",
+        "analyzingTitle": "Analyzing the file",
+        "applyingText": "We're applying the file in Cashport.",
+        "analyzingText": "{step}. Nothing is applied until you confirm.",
+        "largeFileHint": "Large files can take a few minutes. You can close this window and pick it up again from the upload history."
+      },
+      "critical": {
+        "title": "{count, plural, one {# critical alert} other {# critical alerts}}",
+        "fixOrForce": "Fix the file and upload it again, or upload it anyway and explain why.",
+        "fix": "Fix the file and upload it again.",
+        "dropTitle": "Drag the corrected file here",
+        "dropHint": "It's validated again from stage 1",
+        "selectFile": "Select file",
+        "forceTitle": "Upload with {count, plural, one {# critical alert} other {# critical alerts}}",
+        "forceHint": "Data with errors is loaded exactly as it comes in the file. This is recorded in the audit log with your user and this justification.",
+        "forceAria": "Justification for uploading with critical alerts",
+        "forcePlaceholder": "E.g., the customer confirmed the outstanding amounts are correct; it will be fixed in the next upload.",
+        "forceSubmit": "Upload with alerts",
+        "forceOpen": "Upload anyway",
+        "missingColumns": "Missing columns:",
+        "columns": "{count, plural, one {Column:} other {Columns:}}",
+        "rows": "Rows: {list}",
+        "codes": "Codes: {list}"
+      },
+      "measures": {
+        "normalTitle": "Within normal range",
+        "normalHint": "Open them to see how they behaved over the last {days} days.",
+        "mean": "average {value}",
+        "noBaseline": "Not enough previous uploads to compare",
+        "justified": "Justified",
+        "needsJustification": "Needs justification",
+        "justification": "Justification",
+        "placeholders": {
+          "total_balance": "E.g., the customer applied a bad-debt write-off approved this week.",
+          "active_clients": "E.g., inactive customers were removed from the customer master data.",
+          "documents": "E.g., a large batch of paid invoices was closed."
+        }
+      },
+      "warnings": {
+        "title": "{count, plural, =0 {No warnings} one {# warning to resolve} other {# warnings to resolve}}",
+        "eachNeedsJustification": "Each one needs its own justification before you confirm.",
+        "allNormal": "All measures are within normal range. You can confirm the upload.",
+        "legendNormal": "Normal",
+        "progress": "{done} of {total} justified"
+      },
+      "applied": {
+        "heading": "WHAT WAS LOADED",
+        "available": "Receivables are now available in Cashport.",
+        "columns": {
+          "measure": "MEASURE",
+          "loaded": "LOADED",
+          "mean": "{days}D AVERAGE",
+          "trend": "{days} DAYS"
+        },
+        "confirmedBy": "Confirmed by",
+        "warnings": "Warnings",
+        "justifiedLogged": "{count} justified · recorded in the audit log",
+        "none": "None",
+        "criticalAlerts": "Critical alerts",
+        "criticalOverride": "Loaded with {count} alerts · “{justification}”",
+        "done": "Done"
+      },
+      "cancelled": {
+        "title": "Upload canceled",
+        "text": "The file wasn't applied in Cashport."
+      },
+      "failed": {
+        "title": "We couldn't complete the upload",
+        "text": "Check the upload history for details."
+      },
+      "chart": {
+        "todayValue": "Today · {value}",
+        "todayDate": "TODAY · {date}",
+        "sigmaVsMean": "{sigma} vs. average",
+        "deltaVsMean": "{delta} vs. average",
+        "summary": "Average {mean} · σ {sd} · {count, plural, one {# upload} other {# uploads}} in the last {days} days. Hover over the series to see each upload.",
+        "notEnoughData": "There aren't enough uploads in the last {days} days yet to calculate the average and standard deviation."
+      }
     }
   }
 }

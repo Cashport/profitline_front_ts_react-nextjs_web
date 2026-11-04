@@ -46,9 +46,6 @@
     "selectPeriod": "Select a period",
     "updatedTag": "Updated"
   },
-  "pageHeader": {
-    "backTo": "Back to {label}"
-  },
   "meta": {
     "namePlaceholder": "Survey name",
     "descriptionPlaceholder": "Description the sales rep sees when opening the survey",
@@ -68,8 +65,7 @@
     "publish": "Publish",
     "publishChanges": "Publish changes",
     "published": "Published",
-    "viewResponses": "View responses",
-    "backLabel": "Surveys"
+    "viewResponses": "View responses"
   },
   "editor": {
     "notFound": "We couldn't find this survey.",
@@ -219,6 +215,7 @@
     "empty": "This survey has no responses yet.",
     "backFallback": "Survey",
     "title": "Responses",
+    "titleWithName": "Responses · {name}",
     "recent": "Recent responses",
     "showing": "Showing {shown} of {total}"
   },
@@ -228,6 +225,7 @@
     "format": "Format",
     "period": "Period",
     "includeLinks": "Include links to photos and files",
+    "includeLinksShort": "Links to photos and files",
     "download": "Download {format}",
     "success": "Responses downloaded",
     "error": "We couldn't download the responses."

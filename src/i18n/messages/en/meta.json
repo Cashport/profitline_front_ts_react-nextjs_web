@@ -109,6 +109,10 @@
     "title": "Payment",
     "description": "Payment page powered by Wompi"
   },
+  "platformRoles": {
+    "title": "Roles and Permissions",
+    "description": "Platform roles and permissions management"
+  },
   "projects": {
     "title": "Projects"
   },

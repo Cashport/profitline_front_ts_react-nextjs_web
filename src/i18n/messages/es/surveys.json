@@ -46,9 +46,6 @@
     "selectPeriod": "Selecciona un periodo",
     "updatedTag": "Actualizada"
   },
-  "pageHeader": {
-    "backTo": "Volver a {label}"
-  },
   "meta": {
     "namePlaceholder": "Nombre de la encuesta",
     "descriptionPlaceholder": "Descripción que verá el asesor al abrir la encuesta",
@@ -68,8 +65,7 @@
     "publish": "Publicar",
     "publishChanges": "Publicar cambios",
     "published": "Publicada",
-    "viewResponses": "Ver respuestas",
-    "backLabel": "Encuestas"
+    "viewResponses": "Ver respuestas"
   },
   "editor": {
     "notFound": "No se encontró la encuesta.",
@@ -219,6 +215,7 @@
     "empty": "Esta encuesta aún no tiene respuestas.",
     "backFallback": "Encuesta",
     "title": "Respuestas",
+    "titleWithName": "Respuestas · {name}",
     "recent": "Respuestas recientes",
     "showing": "Mostrando {shown} de {total}"
   },
@@ -228,6 +225,7 @@
     "format": "Formato",
     "period": "Periodo",
     "includeLinks": "Incluir enlaces a fotos y archivos",
+    "includeLinksShort": "Enlaces a fotos y archivos",
     "download": "Descargar {format}",
     "success": "Respuestas descargadas",
     "error": "No se pudieron descargar las respuestas."

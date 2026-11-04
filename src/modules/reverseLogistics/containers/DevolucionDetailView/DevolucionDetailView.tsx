@@ -6,6 +6,7 @@ import useSWR, { useSWRConfig } from "swr";
 import dayjs from "dayjs";
 import { Input } from "antd";
 import { MoreHorizontal, Pencil } from "lucide-react";
+import { useTranslations } from "use-intl";
 import Header from "@/components/organisms/header";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import UiTab from "@/components/ui/ui-tab";
@@ -41,14 +42,17 @@ interface DevolucionDetailViewProps {
 
 type DetalleTab = "documentos" | "productos";
 
+type DetailT = ReturnType<typeof useTranslations<"reverseLogistics.returnDetail">>;
+
 const LISTADO_PATH = "/reverse-logistics/returns";
 
-// Campos del cambio `documento`: `monto` viaja como "montoDocumento".
+// Campos del cambio `documento`: `monto` viaja como "montoDocumento". `etiqueta`
+// es la clave de `reverseLogistics.returnDetail.changes.fields`.
 const CAMPOS_DOCUMENTO = [
-  { field: "numeroDocumento", campo: "numeroDocumento", etiqueta: "número" },
-  { field: "fechaDocumento", campo: "fechaDocumento", etiqueta: "fecha" },
-  { field: "unidades", campo: "unidades", etiqueta: "unidades" },
-  { field: "monto", campo: "montoDocumento", etiqueta: "valor" }
+  { field: "numeroDocumento", campo: "numeroDocumento", etiqueta: "number" },
+  { field: "fechaDocumento", campo: "fechaDocumento", etiqueta: "date" },
+  { field: "unidades", campo: "unidades", etiqueta: "units" },
+  { field: "monto", campo: "montoDocumento", etiqueta: "value" }
 ] as const;
 
 const mostrarCampo = (
@@ -64,21 +68,29 @@ const mostrarCampo = (
 // Compara el detalle con el borrador y arma el cuerpo de actualizar-productos,
 // junto con la lista legible que se muestra al guardar. Los precintos no se
 // envían, así que el backend los deja como están.
-function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360DevolucionPdf) {
+function buildCambios(
+  original: IProfit360DevolucionPdf,
+  draft: IProfit360DevolucionPdf,
+  t: DetailT
+) {
   const body: Omit<IProfit360ActualizarDevolucionRequest, "id" | "Observacion"> = { data: [] };
   const data: IProfit360DevolucionCambio[] = body.data;
   const resumen: string[] = [];
 
   if (draft.resumen.observacion !== original.resumen.observacion) {
     body.observacionGeneral = draft.resumen.observacion;
-    resumen.push("Observación actualizada");
+    resumen.push(t("changes.observationUpdated"));
   }
   if (draft.resumen.cantidadEmbalaje !== original.resumen.cantidadEmbalaje) {
     body.embalajes = [
       { idEmbalaje: draft.resumen.idembalaje, cantidad: draft.resumen.cantidadEmbalaje }
     ];
     resumen.push(
-      `Cantidad de embalaje (${draft.resumen.embalaje}): ${original.resumen.cantidadEmbalaje} → ${draft.resumen.cantidadEmbalaje}`
+      t("changes.packagingQuantity", {
+        packaging: draft.resumen.embalaje,
+        from: original.resumen.cantidadEmbalaje,
+        to: draft.resumen.cantidadEmbalaje
+      })
     );
   }
 
@@ -87,7 +99,7 @@ function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360Devolu
       (d) => d.idDocumentoXDevolucion === doc.idDocumentoXDevolucion
     );
     if (!previo) return;
-    const nombre = `Documento ${previo.numeroDocumento}`;
+    const nombre = t("changes.document", { number: previo.numeroDocumento });
 
     CAMPOS_DOCUMENTO.forEach(({ field, campo, etiqueta }) => {
       if (doc[field] === previo[field]) return;
@@ -99,19 +111,30 @@ function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360Devolu
         newvalue: String(doc[field])
       });
       resumen.push(
-        `${nombre}: ${etiqueta} ${mostrarCampo(field, previo)} → ${mostrarCampo(field, doc)}`
+        t("changes.documentField", {
+          document: nombre,
+          field: t(`changes.fields.${etiqueta}`),
+          from: mostrarCampo(field, previo),
+          to: mostrarCampo(field, doc)
+        })
       );
     });
 
     previo.data.forEach((p) => {
       if (doc.data.some((x) => x.idProductoxDocumento === p.idProductoxDocumento)) return;
       data.push({ type: "eliminar", idProductoxDocumento: p.idProductoxDocumento, lote: p.lote });
-      resumen.push(`${nombre}: se quitó ${p.nombreProducto} (lote ${p.lote})`);
+      resumen.push(
+        t("changes.productRemoved", { document: nombre, product: p.nombreProducto, lot: p.lote })
+      );
     });
 
     doc.data.forEach((p) => {
       const antes = previo.data.find((x) => x.idProductoxDocumento === p.idProductoxDocumento);
-      const producto = `${nombre}: ${p.nombreProducto} (lote ${p.lote})`;
+      const producto = t("changes.product", {
+        document: nombre,
+        product: p.nombreProducto,
+        lot: p.lote
+      });
       if (!antes) {
         // La forma de `newvalue` no está documentada: se envía la fila con la
         // misma forma que trae la respuesta, sin el id temporal. Pendiente de
@@ -121,7 +144,9 @@ function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360Devolu
           lote: p.lote,
           newvalue: JSON.stringify({ ...p, idProductoxDocumento: undefined })
         });
-        resumen.push(`${nombre}: se agregó ${p.nombreProducto} (lote ${p.lote})`);
+        resumen.push(
+          t("changes.productAdded", { document: nombre, product: p.nombreProducto, lot: p.lote })
+        );
         return;
       }
       const base = { idProductoxDocumento: p.idProductoxDocumento, lote: p.lote };
@@ -132,7 +157,13 @@ function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360Devolu
           oldvalue: String(antes.cantidadProdXDoc),
           newvalue: String(p.cantidadProdXDoc)
         });
-        resumen.push(`${producto}: cantidad ${antes.cantidadProdXDoc} → ${p.cantidadProdXDoc}`);
+        resumen.push(
+          t("changes.quantity", {
+            product: producto,
+            from: antes.cantidadProdXDoc,
+            to: p.cantidadProdXDoc
+          })
+        );
       }
       if (p.precioUnitario !== antes.precioUnitario) {
         data.push({
@@ -142,7 +173,11 @@ function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360Devolu
           newvalue: String(p.precioUnitario)
         });
         resumen.push(
-          `${producto}: valor unitario ${fmtCop(antes.precioUnitario)} → ${fmtCop(p.precioUnitario)}`
+          t("changes.unitPrice", {
+            product: producto,
+            from: fmtCop(antes.precioUnitario),
+            to: fmtCop(p.precioUnitario)
+          })
         );
       }
       if (p.observacionProducto !== antes.observacionProducto) {
@@ -152,7 +187,7 @@ function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360Devolu
           oldvalue: antes.observacionProducto,
           newvalue: p.observacionProducto
         });
-        resumen.push(`${producto}: observación actualizada`);
+        resumen.push(t("changes.productObservation", { product: producto }));
       }
     });
   });
@@ -162,16 +197,16 @@ function buildCambios(original: IProfit360DevolucionPdf, draft: IProfit360Devolu
 
 // Errores por documento en edición; bloquean el guardado. Que el documento
 // conserve al menos un producto lo asegura la tabla (no deja quitar el último).
-function validarDocumentos(datos: IProfit360DevolucionDocumento[]) {
+function validarDocumentos(datos: IProfit360DevolucionDocumento[], t: DetailT) {
   const errores: Record<string, string> = {};
   datos.forEach((doc) => {
     const numero = doc.numeroDocumento.trim();
     const error = !numero
-      ? "Escribe el número del documento"
+      ? t("validation.numberRequired")
       : datos.some((d) => d !== doc && d.numeroDocumento.trim() === numero)
-        ? "Este número de documento está repetido"
+        ? t("validation.numberDuplicated")
         : doc.data.some((p) => !(p.cantidadProdXDoc > 0))
-          ? "Completa la cantidad de los productos marcados"
+          ? t("validation.quantityRequired")
           : "";
     if (error) errores[doc.idDocumentoXDevolucion] = error;
   });
@@ -182,6 +217,8 @@ const mensajeError = (error: unknown, fallback: string) =>
   error instanceof Error && error.message ? error.message : fallback;
 
 export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
+  const t = useTranslations("reverseLogistics.returnDetail");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { mutate: mutateGlobal } = useSWRConfig();
   const { showMessage } = useMessageApi();
@@ -202,12 +239,12 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
   const [reenviando, setReenviando] = useState(false);
 
   const errores = useMemo<Record<string, string>>(
-    () => (draft ? validarDocumentos(draft.datos) : {}),
-    [draft]
+    () => (draft ? validarDocumentos(draft.datos, t) : {}),
+    [draft, t]
   );
   const cambios = useMemo(
-    () => (draft && data ? buildCambios(data, draft) : null),
-    [draft, data]
+    () => (draft && data ? buildCambios(data, draft, t) : null),
+    [draft, data, t]
   );
 
   const volver = () => router.push(LISTADO_PATH);
@@ -215,12 +252,12 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
   if (!data) {
     return (
       <div className="flex flex-col">
-        <Header title="Devolución" onBack={volver} />
+        <Header title={t("title")} onBack={volver} />
         <div className="flex min-h-[400px] items-center justify-center rounded-xl bg-cashport-white p-6 shadow-sm">
           {isLoading ? (
             <ProfitLoader />
           ) : (
-            <p className="text-sm text-[#999999]">No se pudo cargar la devolución.</p>
+            <p className="text-sm text-[#999999]">{t("loadError")}</p>
           )}
         </div>
       </div>
@@ -262,12 +299,12 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
 
   const handleGuardarClick = () => {
     if (nErrores) {
-      showMessage("warning", "Revisa los documentos marcados antes de guardar");
+      showMessage("warning", t("messages.reviewDocuments"));
       return;
     }
     if (!cambios?.resumen.length) {
       setDraft(null);
-      showMessage("info", "Sin cambios");
+      showMessage("info", t("messages.noChanges"));
       return;
     }
     setModal("guardar");
@@ -281,9 +318,9 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
     if (!cambios) return;
     try {
       await actualizarProfit360DevolucionProductos({ id, Observacion: motivo, ...cambios.body });
-      showMessage("success", `Cambios guardados · devolución ${resumen.idboleto}`);
+      showMessage("success", t("messages.saved", { id: resumen.idboleto }));
     } catch (error) {
-      const mensaje = mensajeError(error, "No se pudieron guardar los cambios");
+      const mensaje = mensajeError(error, t("messages.saveError"));
       // Pharma360 responde 400 cuando guardó pero no pudo regenerar el PDF: los
       // cambios ya quedaron, así que no se deben volver a enviar.
       if (!mensaje.startsWith("Los cambios se guardaron")) {
@@ -301,10 +338,10 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
     setReenviando(true);
     try {
       await reenviarProfit360Devolucion(id);
-      showMessage("success", "Acta reenviada al cliente");
+      showMessage("success", t("messages.resent"));
       setModal(null);
     } catch (error) {
-      showMessage("error", mensajeError(error, "No se pudo reenviar el acta"));
+      showMessage("error", mensajeError(error, t("messages.resendError")));
     } finally {
       setReenviando(false);
     }
@@ -314,19 +351,17 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
     try {
       await anularProfit360Devolucion({ id, Observacion: motivo });
     } catch (error) {
-      showMessage("error", mensajeError(error, "No se pudo anular la devolución"));
+      showMessage("error", mensajeError(error, t("messages.voidError")));
       throw error;
     }
-    showMessage("success", `Devolución ${resumen.idboleto} anulada`);
+    showMessage("success", t("messages.voided", { id: resumen.idboleto }));
     refrescarListado();
     router.push(LISTADO_PATH);
   };
 
-  const destinatario = resumen.email ? `a ${resumen.email}` : "al cliente";
-
   const acciones: DropdownItem[] = [
-    { key: "reenviar", label: "Reenviar acta al cliente", onClick: () => setModal("reenviar") },
-    { key: "anular", label: "Anular devolución", danger: true, onClick: () => setModal("anular") }
+    { key: "reenviar", label: t("actions.resend"), onClick: () => setModal("reenviar") },
+    { key: "anular", label: t("actions.void"), danger: true, onClick: () => setModal("anular") }
   ];
 
   const expandirTodo = (
@@ -335,7 +370,7 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
       onClick={toggleTodo}
       className="text-xs font-semibold text-gray-900 transition-colors hover:text-[#1677ff]"
     >
-      {todoAbierto ? "Contraer todo" : "Expandir todo"}
+      {todoAbierto ? t("collapseAll") : t("expandAll")}
     </button>
   );
 
@@ -356,7 +391,7 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
   return (
     <div className="flex flex-col">
       <Header
-        title={`Devolución ${resumen.idboleto}`}
+        title={t("titleWithId", { id: resumen.idboleto })}
         onBack={volver}
         titleExtra={
           <div className="flex flex-wrap gap-1">
@@ -369,7 +404,7 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
           editing ? null : (
             <UiSearchInput
               id="devolucion-detail-search"
-              placeholder="Buscar producto, código, lote o documento"
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
             />
@@ -385,7 +420,10 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
                 {resumen.usuario.slice(0, 2).toUpperCase()}
               </span>
               <span>
-                Elaborado por <span className="font-medium text-gray-900">{resumen.usuario}</span>
+                {t.rich("createdBy", {
+                  user: resumen.usuario,
+                  b: (chunks) => <span className="font-medium text-gray-900">{chunks}</span>
+                })}
               </span>
             </span>
             <span>{dayjs(resumen.fecharegistro).format("DD/MM/YYYY HH:mm")}</span>
@@ -395,23 +433,27 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
             <div className="flex flex-wrap items-center gap-3">
               {nErrores ? (
                 <span className="text-xs font-medium text-red-600">
-                  {nErrores} {nErrores === 1 ? "documento por corregir" : "documentos por corregir"}
+                  {t("docsToFix", { count: nErrores })}
                 </span>
               ) : null}
-              <SecondaryButton onClick={() => setDraft(null)}>Cancelar</SecondaryButton>
-              <PrincipalButton onClick={handleGuardarClick}>Guardar cambios</PrincipalButton>
+              <SecondaryButton onClick={() => setDraft(null)}>
+                {tCommon("actions.cancel")}
+              </SecondaryButton>
+              <PrincipalButton onClick={handleGuardarClick}>
+                {tCommon("actions.saveChanges")}
+              </PrincipalButton>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={startEdit}>
                 <Pencil className="mr-1 h-4 w-4" />
-                Editar
+                {tCommon("actions.edit")}
               </Button>
               <GeneralDropdown items={acciones} align="end">
                 <button
                   type="button"
-                  aria-label="Más acciones"
-                  title="Más acciones"
+                  aria-label={t("moreActions")}
+                  title={t("moreActions")}
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:border-gray-300"
                 >
                   <MoreHorizontal className="h-4 w-4" />
@@ -424,12 +466,8 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
         {editing ? (
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-lg bg-[#f4f9d2] px-3.5 py-2 text-xs">
             <Pencil className="h-3.5 w-3.5" />
-            <b className="font-semibold">Modo edición</b>
-            <span className="text-gray-600">
-              Puedes modificar la observación, la cantidad del embalaje y los documentos con sus
-              productos. Cliente, contacto, precintos y fotos no se pueden modificar. Los cambios
-              se aplican al guardar.
-            </span>
+            <b className="font-semibold">{t("editMode")}</b>
+            <span className="text-gray-600">{t("editModeHint")}</span>
           </div>
         ) : null}
 
@@ -442,7 +480,7 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
         />
 
         <div className="flex flex-col gap-1">
-          <span className="text-xs text-gray-400">Observación</span>
+          <span className="text-xs text-gray-400">{t("observation")}</span>
           {editing ? (
             <Input.TextArea
               rows={2}
@@ -461,7 +499,7 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
           <>
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-900">
-                Documentos del cliente{" "}
+                {t("customerDocuments")}{" "}
                 <span className="font-normal text-gray-500">· {datos.length}</span>
               </span>
               {expandirTodo}
@@ -471,10 +509,14 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
         ) : (
           <UiTab
             tabs={[
-              { key: "documentos", label: `Por documento · ${datos.length}`, children: documentos },
+              {
+                key: "documentos",
+                label: t("tabs.byDocument", { count: datos.length }),
+                children: documentos
+              },
               {
                 key: "productos",
-                label: `Por producto · ${codigos.length}`,
+                label: t("tabs.byProduct", { count: codigos.length }),
                 children: (
                   <DevolucionProductos
                     datos={datos}
@@ -485,16 +527,18 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
                 )
               },
               // El backend todavía no devuelve el historial de cambios.
-              { key: "historial", label: "Historial de cambios", children: null, disabled: true }
+              { key: "historial", label: t("tabs.history"), children: null, disabled: true }
             ]}
             activeKey={tab}
             onChangeTab={(key) => setTab(key as DetalleTab)}
             tabBarExtraContent={
               <div className="flex items-center gap-4 text-xs text-gray-500">
                 <span>
-                  <b className="font-semibold text-gray-900">{fmtNumber(totalUnidades)}</b>
-                  {" unid. · "}
-                  <b className="font-semibold text-gray-900">{fmtCop(totalValor)}</b>
+                  {t.rich("tabTotals", {
+                    units: fmtNumber(totalUnidades),
+                    amount: fmtCop(totalValor),
+                    b: (chunks) => <b className="font-semibold text-gray-900">{chunks}</b>
+                  })}
                 </span>
                 {expandirTodo}
               </div>
@@ -503,7 +547,7 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
         )}
 
         <div className="border-t border-gray-100 pt-3 text-xs text-gray-500">
-          Total devolución · {fmtNumber(totalUnidades)} unid. · {fmtCop(totalValor)}
+          {t("total", { units: fmtNumber(totalUnidades), amount: fmtCop(totalValor) })}
         </div>
       </div>
 
@@ -512,30 +556,36 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
         onClose={() => setModal(null)}
         onOk={handleReenviar}
         okLoading={reenviando}
-        title="Reenviar acta al cliente"
-        content={`Se regenerará el acta de la devolución ${resumen.idboleto} y se enviará de nuevo ${destinatario}.`}
-        okText="Reenviar"
+        title={t("resendModal.title")}
+        content={
+          resumen.email
+            ? t("resendModal.contentEmail", { id: resumen.idboleto, email: resumen.email })
+            : t("resendModal.contentCustomer", { id: resumen.idboleto })
+        }
+        okText={t("resendModal.ok")}
       />
       <ModalMotivoDevolucion
         open={modal === "anular"}
-        title="Anular devolución"
-        description={`La devolución ${resumen.idboleto} pasará a estado Anulado y se regenerará el acta.`}
-        label="Motivo de la anulación"
-        placeholder="Explica por qué se anula la devolución"
-        okText="Anular devolución"
+        title={t("voidModal.title")}
+        description={t("voidModal.description", { id: resumen.idboleto })}
+        label={t("voidModal.label")}
+        placeholder={t("voidModal.placeholder")}
+        okText={t("voidModal.ok")}
         danger
         onClose={() => setModal(null)}
         onConfirm={handleAnular}
       />
       <ModalMotivoDevolucion
         open={modal === "guardar"}
-        title="Guardar cambios"
+        title={t("saveModal.title")}
         description={
           cambios ? (
             <div className="flex flex-col gap-1 rounded-lg bg-gray-50 p-3 text-xs">
               <span className="font-semibold text-gray-900">
-                Devolución {resumen.idboleto} · {cambios.resumen.length}{" "}
-                {cambios.resumen.length === 1 ? "cambio" : "cambios"}
+                {t("saveModal.summary", {
+                  id: resumen.idboleto,
+                  count: cambios.resumen.length
+                })}
               </span>
               {cambios.resumen.map((c, i) => (
                 <span key={`${i}-${c}`}>· {c}</span>
@@ -543,9 +593,9 @@ export function DevolucionDetailView({ id }: DevolucionDetailViewProps) {
             </div>
           ) : null
         }
-        label="Motivo del cambio"
-        placeholder="Explica por qué se modificó la devolución"
-        okText="Guardar cambios"
+        label={t("saveModal.label")}
+        placeholder={t("saveModal.placeholder")}
+        okText={t("saveModal.ok")}
         onClose={() => setModal(null)}
         onConfirm={handleGuardar}
       />

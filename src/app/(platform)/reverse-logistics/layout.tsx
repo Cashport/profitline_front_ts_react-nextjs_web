@@ -11,10 +11,10 @@ const LogisticaInversaLayout = ({ children }: { children: React.ReactNode }) => 
       {/* ReverseLogisticsFiltersProvider mounted at the route layout so the
           devoluciones + aprobaciones tabs keep their filter / search / page /
           selection state when the user navigates between sibling
-          /logistica-inversa/* pages. App Router preserves the layout subtree
+          /reverse-logistics/* pages. App Router preserves the layout subtree
           across those navigations, so the provider state survives too. */}
       <ReverseLogisticsFiltersProvider>
-        {/* Provider mounted at the route layout so every /logistica-inversa/*
+        {/* Provider mounted at the route layout so every /reverse-logistics/*
             page (devoluciones list, aprobaciones list, aprobacion detail) gets
             the cached picklists (clientes / estados / causales) fetched by
             useProfit360Filters() without each tab refetching. */}

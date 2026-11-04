@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Modal, Select, Spin } from "antd";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 import SearchField from "@/components/ui/search-field/search-field";
 import { MiniSwitch } from "@/components/ui/page-header-controls/page-header-controls";
 import { useMessageApi } from "@/context/MessageContext";
@@ -22,8 +23,7 @@ import {
   Notice,
   PaneItem,
   SystemBadge,
-  filterCatalog,
-  INCLUDE_OTHER_HINT
+  filterCatalog
 } from "@/modules/platform/components/shared/shared";
 
 export const NEW_ROLE = "new" as const;
@@ -42,6 +42,10 @@ interface Props {
 
 export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
   const { showMessage } = useMessageApi();
+  const t = useTranslations("platform.roles");
+  const tShared = useTranslations("platform.shared");
+  const tGroups = useTranslations("platform.groups");
+  const tCommon = useTranslations("common");
   const {
     roles,
     mutate: mutateRoles,
@@ -85,10 +89,10 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
   const confirmLeave = (action: () => void) => {
     if (!dirty) return action();
     Modal.confirm({
-      title: "¿Descartar los cambios?",
-      content: "Tienes cambios sin guardar en este rol.",
-      okText: "Descartar",
-      cancelText: "Seguir editando",
+      title: tShared("discardTitle"),
+      content: t("discardContent"),
+      okText: tShared("discard"),
+      cancelText: tShared("keepEditing"),
       onOk: action
     });
   };
@@ -152,20 +156,20 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
     try {
       const source = await getRoleDetail(rolId);
       setDraft(new Set(source.component_ids));
-      showMessage("success", `Se copiaron las funcionalidades de ${source.rol_name}.`);
+      showMessage("success", t("copied", { role: source.rol_name }));
     } catch {
-      showMessage("error", "No se pudo copiar el rol.");
+      showMessage("error", t("copyError"));
     }
   };
 
   const save = async () => {
     const trimmed = name.trim().replace(/\s+/g, " ");
     if (!trimmed) {
-      showMessage("warning", "Escribe un nombre para el rol.");
+      showMessage("warning", t("nameRequired"));
       return;
     }
     if (trimmed.length > ROL_NAME_MAX) {
-      showMessage("warning", `El nombre admite máximo ${ROL_NAME_MAX} caracteres.`);
+      showMessage("warning", t("nameTooLong", { max: ROL_NAME_MAX }));
       return;
     }
     setSaving(true);
@@ -178,16 +182,13 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
       await Promise.all([mutateRoles(), mutateCatalog()]);
       if (editingId) {
         await mutateDetail({ status: 200, message: "", data: saved }, { revalidate: false });
-        showMessage(
-          "success",
-          `Rol ${saved.rol_name} actualizado. Sus usuarios verán el cambio al volver a iniciar sesión.`
-        );
+        showMessage("success", t("updated", { role: saved.rol_name }));
       } else {
         onSelect(saved.rol_id);
-        showMessage("success", `Rol ${saved.rol_name} creado.`);
+        showMessage("success", t("created", { role: saved.rol_name }));
       }
     } catch (e) {
-      showMessage("error", (e as ApiError)?.message || "No se pudo guardar el rol.");
+      showMessage("error", (e as ApiError)?.message || t("saveError"));
     } finally {
       setSaving(false);
     }
@@ -201,7 +202,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
             <SearchField
               value={roleSearch}
               onChange={setRoleSearch}
-              placeholder="Buscar rol"
+              placeholder={t("searchRole")}
               className="flex-1"
             />
             <button
@@ -210,14 +211,14 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
               onClick={() => confirmLeave(() => onSelect(NEW_ROLE))}
             >
               <span className="flex items-center gap-1">
-                <Plus size={16} aria-hidden /> Crear rol
+                <Plus size={16} aria-hidden /> {t("createRole")}
               </span>
             </button>
           </div>
           <div className="cp-list-scroll">
             {rolesError && (
               <p className="px-3 py-2 text-[13px] text-cp-magenta">
-                No se pudieron cargar los roles: {rolesError.message}
+                {t("loadError", { error: rolesError.message })}
               </p>
             )}
             {loadingRoles && (
@@ -227,14 +228,19 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
             )}
             {groupedRoles.map(({ group, roles: items }) => (
               <section key={group} className="mb-3">
-                <p className="px-3 pb-1 text-[13px] font-semibold text-cp-ink-3">{group}</p>
+                <p className="px-3 pb-1 text-[13px] font-semibold text-cp-ink-3">
+                  {tGroups(group)}
+                </p>
                 {items.map((role) => (
                   <PaneItem
                     key={role.rol_id}
                     active={role.rol_id === editingId}
                     onClick={() => confirmLeave(() => onSelect(role.rol_id))}
                     title={role.rol_name}
-                    subtitle={`${role.components} func. · ${role.active_users} usuarios`}
+                    subtitle={t("roleSubtitle", {
+                      features: role.components,
+                      users: role.active_users
+                    })}
                     badge={role.is_system ? <SystemBadge /> : undefined}
                   />
                 ))}
@@ -244,12 +250,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
         </div>
 
         <div className="flex min-h-0 min-w-0 flex-col gap-3 md:pl-[18px]">
-          {selection === null && (
-            <Notice>
-              Elige un rol para ver y editar sus funcionalidades, o crea uno nuevo. Los roles son
-              globales: un cambio aplica en todos los proyectos que lo tengan habilitado.
-            </Notice>
-          )}
+          {selection === null && <Notice>{t("emptyState")}</Notice>}
 
           {selection !== null && (loadingDetail || !catalog) && (
             <div className="flex justify-center py-10">
@@ -265,17 +266,13 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                   onChange={(e) => setName(e.target.value)}
                   maxLength={ROL_NAME_MAX}
                   disabled={isSystem}
-                  placeholder="Nombre del rol"
-                  aria-label="Nombre del rol"
-                  title={
-                    isSystem
-                      ? "El código usa este rol por su nombre: no se puede renombrar"
-                      : undefined
-                  }
+                  placeholder={t("namePlaceholder")}
+                  aria-label={t("namePlaceholder")}
+                  title={isSystem ? t("systemNameHint") : undefined}
                   className="h-[var(--control-h)] min-w-[220px] flex-1 rounded-lg border border-cp-line-2 bg-cp-surface px-3 text-[14px] font-semibold text-cp-ink outline-none focus:border-cp-ink-4 disabled:bg-cp-bg"
                 />
                 <Select
-                  placeholder="Copiar funcionalidades de…"
+                  placeholder={t("copyFromPlaceholder")}
                   className="min-w-[230px]"
                   value={null}
                   showSearch
@@ -291,7 +288,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                     className={BTN_SECONDARY}
                     onClick={() => onOpenRole(editingId)}
                   >
-                    Ver resumen
+                    {t("viewSummary")}
                   </button>
                 )}
                 <button
@@ -303,7 +300,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                     setName(baselineName);
                   }}
                 >
-                  Descartar
+                  {tShared("discard")}
                 </button>
                 <button
                   type="button"
@@ -311,47 +308,46 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                   disabled={(!dirty && selection !== NEW_ROLE) || saving}
                   onClick={save}
                 >
-                  {saving ? "Guardando…" : selection === NEW_ROLE ? "Crear rol" : "Guardar cambios"}
+                  {saving
+                    ? tCommon("status.saving")
+                    : selection === NEW_ROLE
+                      ? t("createRole")
+                      : tCommon("actions.saveChanges")}
                 </button>
               </div>
 
               <p className="text-[13px] text-cp-ink-3">
-                {draft.size} funcionalidades · {endpointCount} endpoints
+                {t("stats", { features: draft.size, endpoints: endpointCount })}
                 {summary &&
-                  ` · ${summary.active_users} usuarios activos en ${summary.projects} proyectos`}
-                {dirty && " · cambios sin guardar"}
+                  ` · ${t("usage", { users: summary.active_users, projects: summary.projects })}`}
+                {dirty && ` · ${t("unsaved")}`}
               </p>
 
-              <Notice>
-                Lo que está en &quot;Generico&quot; lo puede usar cualquier rol y no aparece aquí.
-                Para controlarlo, muévelo a una funcionalidad en la pestaña Catálogo de endpoints.
-              </Notice>
+              <Notice>{t("genericNotice")}</Notice>
 
               <div className="flex flex-wrap items-center gap-4">
                 <SearchField
                   value={search}
                   onChange={setSearch}
-                  placeholder="Buscar funcionalidad o ruta"
+                  placeholder={tShared("searchFeatureOrRoute")}
                   className="min-w-[260px] flex-1"
                 />
                 <MiniSwitch
                   checked={onlySelected}
                   onChange={setOnlySelected}
-                  label={<span className="text-[13px] text-cp-ink-2">Solo las que tiene</span>}
+                  label={<span className="text-[13px] text-cp-ink-2">{t("onlyAssigned")}</span>}
                 />
                 <MiniSwitch
                   checked={showTms}
                   onChange={setShowTms}
-                  title={INCLUDE_OTHER_HINT}
-                  label={<span className="text-[13px] text-cp-ink-2">Incluir TMS</span>}
+                  title={tShared("includeOtherHint")}
+                  label={<span className="text-[13px] text-cp-ink-2">{tShared("includeTms")}</span>}
                 />
               </div>
 
               <div className="cp-list-scroll pr-1">
                 {visibleModules.length === 0 && (
-                  <p className="py-4 text-[13px] text-cp-ink-3">
-                    No hay funcionalidades con ese filtro.
-                  </p>
+                  <p className="py-4 text-[13px] text-cp-ink-3">{t("noFeatures")}</p>
                 )}
                 {visibleModules.map((module) => {
                   const ids = module.components.map((c) => c.component_id);
@@ -372,7 +368,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                           {module.page_name}
                         </span>
                         <span className="text-[13px] text-cp-ink-3">
-                          {selected} de {ids.length}
+                          {tShared("ofTotal", { selected, total: ids.length })}
                         </span>
                       </label>
                       {module.components.map((component) => {
@@ -396,7 +392,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                                 className="border-0 bg-transparent p-0 text-cp-ink-3 disabled:opacity-30"
                                 disabled={component.endpoints.length === 0}
                                 onClick={() => toggleExpanded(component.component_id)}
-                                aria-label="Ver endpoints"
+                                aria-label={t("viewEndpoints")}
                               >
                                 {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                               </button>
@@ -404,7 +400,7 @@ export default function RolesTab({ selection, onSelect, onOpenRole }: Props) {
                                 {component.component_name}
                                 {changed && (
                                   <span className="ml-2 rounded-[5px] bg-cp-muted px-1.5 py-px text-[13px] font-semibold text-cp-ink-2">
-                                    Sin guardar
+                                    {tShared("unsavedBadge")}
                                   </span>
                                 )}
                               </span>

@@ -4,6 +4,7 @@ import { MouseEvent, useState } from "react";
 import { Table } from "antd";
 import dayjs from "dayjs";
 import { AlertTriangle, Pencil, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
 import GenericCollapse from "@/components/ui/collapse";
 import {
   IProfit360DevolucionCatalogoProducto,
@@ -35,20 +36,30 @@ interface DevolucionDocumentosProps {
 const stop = (e: MouseEvent) => e.stopPropagation();
 
 // Diferencia entre lo que registra el documento y la suma de sus productos.
-const descuadre = (doc: IProfit360DevolucionDocumento) => {
+const descuadre = (
+  doc: IProfit360DevolucionDocumento,
+  t: ReturnType<typeof useTranslations<"reverseLogistics.returnDetail.documents">>
+) => {
   const unidades = doc.data.reduce((acc, p) => acc + p.cantidadProdXDoc, 0);
   const valor = doc.data.reduce((acc, p) => acc + p.valorTotal, 0);
   const difUnidades = doc.unidades - unidades;
   const difValor = doc.monto - valor;
   if (!difUnidades && Math.abs(difValor) < 1) return null;
   return {
-    texto: `Los productos suman ${fmtCop(valor)} · ${fmtNumber(unidades)} unid. y el documento registra ${fmtCop(doc.monto)} · ${fmtNumber(doc.unidades)} unid.`,
+    texto: t("mismatch", {
+      productsAmount: fmtCop(valor),
+      productsUnits: fmtNumber(unidades),
+      documentAmount: fmtCop(doc.monto),
+      documentUnits: fmtNumber(doc.unidades)
+    }),
     diferencia: [
       Math.abs(difValor) >= 1
-        ? `valor ${difValor > 0 ? "faltan" : "sobran"} ${fmtCop(Math.abs(difValor))}`
+        ? t(difValor > 0 ? "valueShort" : "valueOver", { amount: fmtCop(Math.abs(difValor)) })
         : "",
       difUnidades
-        ? `unidades ${difUnidades > 0 ? "faltan" : "sobran"} ${fmtNumber(Math.abs(difUnidades))}`
+        ? t(difUnidades > 0 ? "unitsShort" : "unitsOver", {
+            units: fmtNumber(Math.abs(difUnidades))
+          })
         : ""
     ]
       .filter(Boolean)
@@ -69,6 +80,8 @@ export function DevolucionDocumentos({
   lotes,
   onChangeDatos
 }: DevolucionDocumentosProps) {
+  const t = useTranslations("reverseLogistics.returnDetail.documents");
+  const tLines = useTranslations("reverseLogistics.returnDetail.lines");
   const [docEditando, setDocEditando] = useState<IProfit360DevolucionDocumento | null>(null);
   const [docAgregando, setDocAgregando] = useState<string | null>(null);
 
@@ -106,10 +119,11 @@ export function DevolucionDocumentos({
     const lineas = q ? doc.data.filter(coincide) : doc.data;
     if (q && !lineas.length) return [];
 
-    const alerta = descuadre(doc);
+    const alerta = descuadre(doc, t);
     const error = errores[doc.idDocumentoXDevolucion];
     const columns = getLineasColumns({
       editing,
+      t: tLines,
       canRemove: doc.data.length > 1,
       onChange: (idProductoxDocumento, cambios) =>
         cambiarProducto(doc.idDocumentoXDevolucion, idProductoxDocumento, cambios),
@@ -127,7 +141,7 @@ export function DevolucionDocumentos({
           <div className="flex w-full flex-wrap items-center justify-between gap-x-5 gap-y-1.5">
             <span className="flex items-center gap-2.5">
               <span className="text-sm font-semibold text-gray-900">
-                Documento {doc.numeroDocumento || "sin número"}
+                {doc.numeroDocumento ? t("title", { number: doc.numeroDocumento }) : t("noNumber")}
               </span>
               <span className="text-xs text-gray-500">
                 {dayjs(doc.fechaDocumento).format("DD/MM/YYYY")}
@@ -135,8 +149,8 @@ export function DevolucionDocumentos({
               {editing ? (
                 <button
                   type="button"
-                  aria-label="Editar documento"
-                  title="Editar documento"
+                  aria-label={t("editDocument")}
+                  title={t("editDocument")}
                   onClick={(e) => {
                     stop(e);
                     setDocEditando(doc);
@@ -149,11 +163,14 @@ export function DevolucionDocumentos({
             </span>
             <span className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
               <span className="text-gray-500">
-                {doc.data.length} {doc.data.length === 1 ? "producto" : "productos"}
+                {t("productsCount", { count: doc.data.length })}
               </span>
               <span>
-                <b className="font-semibold">{fmtNumber(doc.unidades)}</b>{" "}
-                <span className="text-gray-500">unid.</span>
+                {t.rich("units", {
+                  units: fmtNumber(doc.unidades),
+                  b: (chunks) => <b className="font-semibold">{chunks}</b>,
+                  muted: (chunks) => <span className="text-gray-500">{chunks}</span>
+                })}
               </span>
               <span className="min-w-[96px] text-right font-semibold">{fmtCop(doc.monto)}</span>
               {alerta ? (
@@ -162,7 +179,7 @@ export function DevolucionDocumentos({
                   className="inline-flex items-center gap-1 rounded-md border border-[#ff6a13] px-2 py-0.5 font-semibold"
                 >
                   <AlertTriangle className="h-3 w-3 text-[#ff6a13]" />
-                  Alerta
+                  {t("alert")}
                 </span>
               ) : null}
               <span onClick={stop}>
@@ -177,7 +194,10 @@ export function DevolucionDocumentos({
               <div className="flex items-start gap-2 rounded-md bg-[#fff4ec] px-3 py-2 text-xs text-gray-900">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#ff6a13]" />
                 <span>
-                  {alerta.texto} <b className="font-semibold">· Diferencia: {alerta.diferencia}</b>
+                  {alerta.texto}{" "}
+                  <b className="font-semibold">
+                    {t("difference", { difference: alerta.diferencia })}
+                  </b>
                 </span>
               </div>
             ) : null}
@@ -199,7 +219,7 @@ export function DevolucionDocumentos({
                 className="flex w-fit items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-[#9bb514] hover:bg-[#fafdf0]"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Agregar producto
+                {t("addProduct")}
               </button>
             ) : null}
           </div>
@@ -218,7 +238,7 @@ export function DevolucionDocumentos({
         />
       ) : (
         <div className="py-8 text-center text-sm text-gray-400">
-          {q ? `Sin resultados para “${search.trim()}”` : "Sin documentos"}
+          {q ? t("noResults", { query: search.trim() }) : t("empty")}
         </div>
       )}
 
