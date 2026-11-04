@@ -49,10 +49,10 @@ const LangSwitch = ({
 }) => (
   <nav className={className} aria-label={label}>
     <Icon name="globe" size={13} stroke="#7d8b93" strokeWidth={1.8} />
-    <a href="/" hrefLang="es" lang="es" aria-current={lang === "es" ? "true" : undefined}>
+    <a href="/?lang=es" hrefLang="es" lang="es" aria-current={lang === "es" ? "true" : undefined}>
       ES
     </a>
-    <a href="/en" hrefLang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>
+    <a href="/en?lang=en" hrefLang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>
       EN
     </a>
   </nav>

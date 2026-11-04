@@ -417,10 +417,20 @@ export const LandingLogin = ({ lang, contactHref }: { lang: Lang; contactHref: s
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/cashport-logo.webp" alt="Cashport" width={108} height={20} />
           <nav className="lang" aria-label={copy.language}>
-            <a href="/" hrefLang="es" lang="es" aria-current={lang === "es" ? "true" : undefined}>
+            <a
+              href="/?lang=es"
+              hrefLang="es"
+              lang="es"
+              aria-current={lang === "es" ? "true" : undefined}
+            >
               ES
             </a>
-            <a href="/en" hrefLang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>
+            <a
+              href="/en?lang=en"
+              hrefLang="en"
+              lang="en"
+              aria-current={lang === "en" ? "true" : undefined}
+            >
               EN
             </a>
           </nav>

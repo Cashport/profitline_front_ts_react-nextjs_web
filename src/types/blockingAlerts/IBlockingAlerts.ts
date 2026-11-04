@@ -1,106 +1,159 @@
-/* Contrato esperado del API de Alertas de bloqueo (aún no existe): el módulo lee
-   datos simulados con esta misma forma (src/modules/blockingAlerts/mocked-data.ts).
-   Montos en pesos y fechas ISO (yyyy-mm-dd), como en el resto de la cartera. */
+/* API de Alertas de bloqueo (`/portfolio/blocking-alerts/*`): el backend clasifica,
+   filtra, ordena y pagina; el front solo pinta. */
 
-/** blocked: facturas de +60 días o cupo superado · warning: alguna vencida desde 45 días. */
-export type BlockingAlertStatus = "blocked" | "warning" | "ok";
+export type BlockingAlertStatus = "blocked" | "to_be_blocked" | "up_to_date";
 
-/** Cartera por tramo. `past_due` negativa es saldo a favor (y los tramos vencidos van en 0). */
+/** Cartera por tramo. `pastDue` negativa es saldo a favor. */
 export interface IBlockingAlertAging {
   portfolio: number;
   current: number;
-  past_due: number;
-  past_due_1_60: number;
-  past_due_60_plus: number;
+  pastDue: number;
+  pastDue1To60: number;
+  pastDueOver60: number;
 }
 
 /** Puntos de venta de un cliente por estado. */
 export interface IBlockingAlertPosCount {
   total: number;
   blocked: number;
-  warning: number;
+  to_be_blocked: number;
 }
 
-/** Fila del listado: un cliente o uno de sus puntos de venta (ship-to). */
-export interface IBlockingAlertRow extends IBlockingAlertAging {
-  client_id: string;
-  client_name: string;
-  /** null en la fila de un cliente. */
-  ship_to_code: string | null;
-  name: string;
+/** Conteos por estado de una vista; `alerts` = bloqueados + por bloquear. */
+export type IBlockingAlertsCounts = Record<BlockingAlertStatus | "all" | "alerts", number>;
+
+export interface IBlockingAlertsSummary {
+  cutoffAt: string;
+  referenceDate: string;
+  rules: { blockDays: number; warningDays: number };
+  /** Solo al pedir el resumen de un cliente (`client_uuid`). */
+  client: { clientUuid: string; name: string } | null;
+  portfolio: IBlockingAlertAging;
+  clients: IBlockingAlertsCounts;
+  pointsOfSale: IBlockingAlertsCounts;
+}
+
+interface IBlockingAlertsState extends IBlockingAlertAging {
   status: BlockingAlertStatus;
-  /** Días que lleva bloqueado; null si no lo está. */
-  blocked_days: number | null;
-  /** Días que faltan para el bloqueo; null si no está por bloquearse. */
-  days_to_block: number | null;
-  /** Mora de la factura vencida más antigua (0 sin vencidas). */
-  oldest_overdue_days: number;
-  /** Solo en la fila de un cliente. */
-  points_of_sale_count: IBlockingAlertPosCount | null;
+  statusLabel: string;
+  blockReason: "overdue" | "quota" | null;
+  blockedDays: number | null;
+  daysToBlock: number | null;
+  oldestOverdueDays: number;
+  /** Pago vencido en alerta; cartera si está al día. */
+  amount: number;
 }
 
-export interface IBlockingAlertsTotals extends IBlockingAlertAging {
+export interface IBlockingAlertsClient extends IBlockingAlertsState {
+  clientUuid: string | null;
+  clientId: string;
+  name: string;
+  pointsOfSale: IBlockingAlertPosCount;
+  /** Punto de venta que coincide con la búsqueda cuando el cliente no coincide por nombre. */
+  matchedPointOfSale: { code: string | null; name: string } | null;
+}
+
+export interface IBlockingAlertsPointOfSale extends IBlockingAlertsState {
+  /** null: documentos sin ship-to, el punto de venta es el mismo cliente. */
+  code: string | null;
+  name: string;
+  clientUuid: string | null;
+  clientId: string;
+  clientName: string;
+}
+
+export interface IBlockingAlertsPage<T> {
+  cutoffAt: string;
+  rows: T[];
+  pagination: { total: number; page: number; limit: number };
+}
+
+/** Filtros del listado: se envían tal cual al API. */
+export interface IBlockingAlertsListQuery {
+  /** Acota los puntos de venta a un cliente. */
+  clientUuid?: string;
+  status: BlockingAlertStatus | null;
+  search: string;
+  sortBy: "urgency" | "pastDue" | "oldestOverdueDays" | "name";
+  sortDir?: "asc" | "desc";
+  page: number;
+  limit: number;
+}
+
+/* Detalle de un cliente o de un punto de venta. */
+
+export type BlockingAlertsDocumentTab =
+  | "all"
+  | "past_due"
+  | "credit_notes"
+  | "available_payments"
+  | "balances"
+  | "paid_invoices";
+
+/** Conteo y suma de todos los documentos de una pestaña (no solo de la página). */
+export interface IBlockingAlertsTabSummary {
   count: number;
-  /** Bloqueados más por bloquear. */
-  alerts: number;
+  total: number;
 }
 
-export interface IBlockingAlertsResponse {
-  cutoff_at: string;
-  totals: { clients: IBlockingAlertsTotals; points_of_sale: IBlockingAlertsTotals };
-  clients: IBlockingAlertRow[];
-  points_of_sale: IBlockingAlertRow[];
+export interface IBlockingAlertsDetail extends IBlockingAlertsState {
+  cutoffAt: string;
+  referenceDate: string;
+  client: { clientUuid: string; clientId: string; name: string };
+  /** null en el detalle del cliente. */
+  pointOfSale: { code: string | null; name: string } | null;
+  /** Nombre del punto de venta o del cliente. */
+  name: string;
+  /** Sus puntos de venta y los más urgentes; null en el detalle de un punto de venta. */
+  pointsOfSale: (IBlockingAlertPosCount & { top: IBlockingAlertsPointOfSale[] }) | null;
+  tabs: Record<BlockingAlertsDocumentTab, IBlockingAlertsTabSummary>;
 }
 
-export interface IBlockingAlertInvoice {
+interface IBlockingAlertsDocumentBase {
   id: string;
-  number: string;
-  /** Punto de venta de la factura en el detalle de un cliente; null en el de un punto de venta. */
-  ship_to_name: string | null;
-  due_date: string;
+  number: string | null;
+  amount: number;
+}
+
+export interface IBlockingAlertsInvoice extends IBlockingAlertsDocumentBase {
+  dueDate: string | null;
   /** Negativo: días que faltan para el vencimiento. */
-  days_overdue: number;
-  amount: number;
+  daysOverdue: number;
+  /** Punto de venta de la factura en el detalle del cliente; null en el de un punto de venta. */
+  pointOfSale: { code: string; name: string } | null;
 }
 
-export interface IBlockingAlertCreditNote {
-  id: string;
-  type: string;
-  date: string;
-  amount: number;
+export interface IBlockingAlertsCreditNote extends IBlockingAlertsDocumentBase {
+  type: string | null;
+  date: string | null;
 }
 
-export interface IBlockingAlertPayment {
-  id: string;
-  date: string;
-  amount: number;
+export interface IBlockingAlertsPayment extends IBlockingAlertsDocumentBase {
+  description: string | null;
+  date: string | null;
 }
 
-export interface IBlockingAlertBalance {
-  id: string;
-  date: string;
-  status: string;
-  amount: number;
+export interface IBlockingAlertsBalance extends IBlockingAlertsDocumentBase {
+  status: string | null;
+  date: string | null;
 }
 
-/** Pagada en el ERP y pendiente de depurar en SAP: no suma a la cartera ni se cobra. */
-export interface IBlockingAlertPaidInvoice {
-  id: string;
-  number: string;
-  paid_at: string;
-  amount: number;
+/** Pagada en Cashport y pendiente de depurar en SAP: no suma a la cartera ni se cobra. */
+export interface IBlockingAlertsPaidInvoice extends IBlockingAlertsDocumentBase {
+  /** Fecha del pago aplicado; null si se marcó pagada a mano. */
+  paidAt: string | null;
 }
 
-export interface IBlockingAlertDetail extends IBlockingAlertRow {
-  /** Corte de la cartera (asunto del estado de cuenta). */
-  cutoff_at: string;
-  contact_name: string;
-  /** Vencidas y por vencer. */
-  invoices: IBlockingAlertInvoice[];
-  credit_notes: IBlockingAlertCreditNote[];
-  available_payments: IBlockingAlertPayment[];
-  pending_balances: IBlockingAlertBalance[];
-  paid_invoices: IBlockingAlertPaidInvoice[];
-  /** Vacío en el detalle de un punto de venta. */
-  points_of_sale: IBlockingAlertRow[];
+export type IBlockingAlertsDocument =
+  | IBlockingAlertsInvoice
+  | IBlockingAlertsCreditNote
+  | IBlockingAlertsPayment
+  | IBlockingAlertsBalance
+  | IBlockingAlertsPaidInvoice;
+
+export interface IBlockingAlertsDocuments {
+  tab: BlockingAlertsDocumentTab;
+  summary: IBlockingAlertsTabSummary;
+  rows: IBlockingAlertsDocument[];
+  pagination: { total: number; page: number; limit: number };
 }
