@@ -10,7 +10,7 @@ import type { IBranchDetail, IBranchUser } from "@/types/branches/IBranches";
 import { useAppStore } from "@/lib/store/store";
 import { ApiError } from "@/utils/api/api";
 
-import { toBranch } from "../utils/branches";
+import { branchIdFromSlug, toBranch } from "../utils/branches";
 
 const SWR_OPTIONS = { revalidateOnFocus: false };
 
@@ -20,11 +20,15 @@ const SWR_OPTIONS = { revalidateOnFocus: false };
  */
 export const useBranchDetail = (branchId: string) => {
   const { ID: projectId } = useAppStore((s) => s.selectedProject);
+  // La URL es "/branches/cliente-municipio-5936": solo el final (número o GUID) identifica la sucursal.
+  const branchKey = branchIdFromSlug(branchId);
   const { data, error, isLoading, mutate } = useSWR(
-    projectId ? ["/integration/profit360/branches/registeredUsers", projectId, branchId] : null,
+    projectId && branchKey
+      ? ["/integration/profit360/branches/registeredUsers", projectId, branchKey]
+      : null,
     async (): Promise<IBranchDetail | null> => {
       try {
-        const res = await getBranchRegisteredUsers(branchId);
+        const res = await getBranchRegisteredUsers(branchKey as string);
         return {
           branch: toBranch(res.data.branch),
           canEdit: res.data.PuedeEditar === true,
@@ -35,7 +39,7 @@ export const useBranchDetail = (branchId: string) => {
           }))
         };
       } catch (err) {
-        // 404: no existe; 400: el id de la URL no es un GUID válido.
+        // 404: no existe en este proyecto; 400: el número de la URL no es válido.
         if (err instanceof ApiError && (err.status === 404 || err.status === 400)) return null;
         throw err;
       }
@@ -46,7 +50,7 @@ export const useBranchDetail = (branchId: string) => {
   /** Asigna usuarios a la sucursal (POST AddUsers) y vuelve a leer la lista real. */
   const addUsers = async (users: IBranchUser[]) => {
     const res = await addBranchUsers(
-      branchId,
+      branchKey as string,
       users.map((u) => u.id)
     );
     await mutate();
@@ -55,12 +59,14 @@ export const useBranchDetail = (branchId: string) => {
 
   /** Desvincula un usuario de la sucursal (PUT RemoveUsers) y vuelve a leer la lista real. */
   const removeUser = async (user: IBranchUser) => {
-    const res = await removeBranchUsers(branchId, [user.id]);
+    const res = await removeBranchUsers(branchKey as string, [user.id]);
     await mutate();
     return res.data;
   };
 
-  return { detail: data, error: error as Error | undefined, isLoading, addUsers, removeUser };
+  // Una URL sin id válido es una sucursal que no existe (no se consulta).
+  const detail = branchKey === null ? null : data;
+  return { detail, error: error as Error | undefined, isLoading, addUsers, removeUser };
 };
 
 /**

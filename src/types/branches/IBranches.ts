@@ -7,8 +7,10 @@ export interface IBranch {
   id: string;
   /** El listado del API no lo trae; solo los datos simulados del detalle. */
   client_id?: string;
-  /** Id de la sucursal en manager; no se muestra en la tabla. */
-  manager_branch_id?: string | null;
+  /** Número de la sucursal en manager. */
+  manager_branch_id?: number | null;
+  /** Lo que va al final de la URL del detalle: el número de manager o, si falta o se repite, un GUID. */
+  url_id: string;
   client_name: string;
   /** El listado del API aún no lo trae; solo los datos simulados del detalle. */
   client_nit?: string;
@@ -24,10 +26,12 @@ export interface IBranch {
 
 /** Fila tal cual la devuelve GET /integration/profit360/branches. */
 export interface IBranchApiRow {
-  /** Se usa para abrir el detalle (ojito); no se muestra en la tabla. */
+  /** Uno de los registros de la sucursal física; no se muestra en la tabla. */
   IdSucursalDevolucion: string;
-  /** Sucursal en manager; tampoco se muestra en la tabla. */
-  IdSucursalManager?: string | null;
+  /** Número de la sucursal en manager. */
+  IdSucursalManager?: number | null;
+  /** Id para la URL del detalle (número de manager o GUID); solo lo trae el listado. */
+  IdUrl?: string;
   /** Nombre de la empresa en manager.Clientes. */
   NombreCliente: string;
   NombreSucursal: string;

@@ -1,7 +1,7 @@
 import type { FilterSelection } from "@/components/ui/filter-modal";
 import type { IBranch, IBranchApiRow, IBranchesFilters } from "@/types/branches/IBranches";
 
-import { FILTER_CATEGORIES, NO_ADDRESS, PRICE_LIST_PALETTE } from "../constants";
+import { BRANCHES_PATH, FILTER_CATEGORIES, NO_ADDRESS, PRICE_LIST_PALETTE } from "../constants";
 
 /** Sin tildes ni mayúsculas: "bogota" encuentra "BOGOTÁ". */
 export const normalize = (text: string) =>
@@ -51,7 +51,8 @@ export const priceListColor = (name: string) => {
 /** Fila del API → sucursal del módulo. */
 export const toBranch = (row: IBranchApiRow): IBranch => ({
   id: row.IdSucursalDevolucion,
-  manager_branch_id: row.IdSucursalManager,
+  manager_branch_id: row.IdSucursalManager ?? null,
+  url_id: row.IdUrl ?? String(row.IdSucursalManager ?? row.IdSucursalDevolucion),
   client_name: row.NombreCliente,
   name: row.NombreSucursal,
   city: row.NombreMunicipio ?? "—",
@@ -65,6 +66,35 @@ export const toBranch = (row: IBranchApiRow): IBranch => ({
     : [{ list: "Sin lista", amount: Number(row.MontoMaximo ?? 0) }],
   is_active: row.Estado === "Activo"
 });
+
+/** "AUDIFARMA SA" → "audifarma-sa": sin tildes, minúsculas y guiones. */
+const slugify = (text: string) =>
+  normalize(text)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+
+/**
+ * URL del detalle: cliente, municipio y el número de la sucursal en manager
+ * (/branches/audifarma-sa-bogota-5936). Solo el final identifica la sucursal; si no tiene
+ * número o se repite en el proyecto, el final es el GUID de uno de sus registros.
+ */
+export const branchHref = (branch: IBranch) => {
+  const slug = [branch.client_name, branch.city === "—" ? "" : branch.city]
+    .map(slugify)
+    .filter(Boolean)
+    .join("-");
+  return `${BRANCHES_PATH}/${slug ? `${slug}-` : ""}${branch.url_id}`;
+};
+
+/** Id de la sucursal desde el final de la URL (GUID o número); `null` si no trae uno válido. */
+export const branchIdFromSlug = (slug: string) => {
+  const text = decodeURIComponent(slug ?? "");
+  const guid = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.exec(text);
+  if (guid) return guid[0];
+  const numero = /(?:^|-)(\d+)$/.exec(text);
+  return numero && Number(numero[1]) > 0 ? numero[1] : null;
+};
 
 /** Opciones del API → categorías del modal Filtros Avanzados. */
 export const toFilterCategories = (filters?: IBranchesFilters) =>

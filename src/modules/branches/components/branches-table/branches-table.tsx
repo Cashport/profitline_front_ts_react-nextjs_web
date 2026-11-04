@@ -5,8 +5,9 @@ import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import type { IBranch } from "@/types/branches/IBranches";
 import { cn } from "@/utils/utils";
 
-import { BRANCHES_PATH, NO_ADDRESS, SORT_LABEL, type BranchesSortKey } from "../../constants";
+import { NO_ADDRESS, SORT_LABEL, type BranchesSortKey } from "../../constants";
 import { useBranchesStore } from "../../stores/branches-store";
+import { branchHref } from "../../utils/branches";
 import BranchStatusBadge from "../branch-status-badge/branch-status-badge";
 import { PriceLimitStack, PriceListStack } from "../price-limit-stack/price-limit-stack";
 
@@ -114,7 +115,7 @@ export default function BranchesTable({ branches, hasQuery, onClearAll }: Branch
               </td>
               <td className={TD}>
                 <GenericEyeButton
-                  href={`${BRANCHES_PATH}/${b.id}`}
+                  href={branchHref(b)}
                   title={`Ver detalle de ${b.client_name} ${b.name}`}
                   className="mx-auto"
                 />
