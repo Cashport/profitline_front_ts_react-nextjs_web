@@ -153,6 +153,8 @@ export async function middleware(request: NextRequest) {
   if (!session && pathname === "/comercio/cetaphil") {
     return noIndex(NextResponse.redirect(new URL("/cetaphil", request.url)));
   }
+  // TEMP-DEV-BYPASS: quitar antes de commit/staging (solo afecta `next dev`).
+  if (process.env.NODE_ENV === "development") return noIndex(next());
   //Return to the landing login if there is no valid session
   if (!(await isValidSession())) {
     return redirectTo("/");

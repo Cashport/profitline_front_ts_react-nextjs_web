@@ -15,7 +15,8 @@ const STATUS_KEYS: Array<"EXITOSO" | "FALLIDO" | "EN_REVISION" | "EN_EJECUCION">
 ];
 
 interface AutomationStatusCardsProps {
-  summary: IBotsSummary;
+  // undefined mientras carga o si falló: nunca se muestran números de otro país.
+  summary?: IBotsSummary;
   statusFilter: BotStatusFilter;
   onStatusClick: (status: BotStatusFilter) => void;
 }
@@ -42,7 +43,7 @@ export function AutomationStatusCards({
         )}
       >
         <span className="block truncate text-sm font-light">Total de bots</span>
-        <span className="block truncate text-2xl font-medium">{summary.total}</span>
+        <span className="block truncate text-2xl font-medium">{summary?.total ?? "—"}</span>
       </button>
 
       {STATUS_KEYS.map((key) => {
@@ -65,10 +66,10 @@ export function AutomationStatusCards({
             <span
               className={cn(
                 "block truncate text-2xl font-medium",
-                key === "FALLIDO" && !isActive && summary.FALLIDO > 0 && "text-[#DC2626]"
+                key === "FALLIDO" && !isActive && (summary?.FALLIDO ?? 0) > 0 && "text-[#DC2626]"
               )}
             >
-              {summary[key]}
+              {summary?.[key] ?? "—"}
             </span>
           </button>
         );
