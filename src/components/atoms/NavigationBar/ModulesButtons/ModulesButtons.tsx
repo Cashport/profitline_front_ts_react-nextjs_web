@@ -40,7 +40,8 @@ export const RAIL_ICON_PATHS = {
   tickets: "M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4zM14 7v10",
   informes: "M3 4h18v12H3zM12 16v4M8 20h8M7 12l3-3 3 2 4-4",
   alertasBloqueo: "M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4M12 15v2",
-  encuestas: "M8 4h8v3H8zM8 5.5H5V21h14V5.5h-3M9 12h6M9 16h4"
+  encuestas: "M8 4h8v3H8zM8 5.5H5V21h14V5.5h-3M9 12h6M9 16h4",
+  cierres: "M4 4h16v17H4zM4 9h16M9 4v5M8 13h3M8 17h3M14 13l1.5 1.5L18 12"
 } as const;
 
 export const RailIcon = ({ name }: { name: keyof typeof RAIL_ICON_PATHS }) => (
@@ -115,6 +116,15 @@ const MODULES: RailModule[] = [
     icon: <RailIcon name="saldos" />,
     visible: can("Balances"),
     isActive: (p) => p.startsWith("/balances")
+  },
+  {
+    // Solo super admins mientras se valida con los proyectos; luego pasa a un permiso de vista.
+    href: "/cierres",
+    label: "Cierres de cartera",
+    group: "Cartera",
+    icon: <RailIcon name="cierres" />,
+    visible: (project) => Boolean(project?.isSuperAdmin),
+    isActive: (p) => p.startsWith("/cierres")
   },
   {
     href: "/blockingAlerts",
