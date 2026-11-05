@@ -44,17 +44,16 @@ export default function AlertCard({ row, href, showClient }: AlertCardProps) {
           {formatMoney(row.amount, { hideDecimals: true })}
         </span>
       </span>
-      <span className="flex items-center justify-between gap-2.5 text-[13px]">
+      <span className="flex items-center justify-between gap-2 text-[12px]">
         <span
-          className="flex min-w-0 items-center gap-1 truncate font-medium text-cp-ink-3"
+          title={row.statusLabel}
+          className="flex min-w-0 items-center gap-1 font-medium text-cp-ink-3"
           style={isOk ? undefined : { color: meta.color }}
         >
           <meta.Icon className="h-3 w-3 shrink-0" strokeWidth={2.6} />
-          {row.statusLabel}
+          <span className="truncate">{row.statusLabel}</span>
         </span>
-        <span className="shrink-0 text-[13px] text-cp-ink-4">
-          {isOk ? "cartera al día" : "pago vencido"}
-        </span>
+        <span className="shrink-0 text-cp-ink-4">{isOk ? "cartera al día" : "pago vencido"}</span>
       </span>
 
       {(store?.code || matched || (pos && pos.total > 1)) && (
