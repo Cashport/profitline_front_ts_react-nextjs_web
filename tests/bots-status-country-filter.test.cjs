@@ -219,16 +219,30 @@ test("initial render requests every country and shows the global summary", () =>
   assert.equal(view.table.totalBots, ALL.length);
 });
 
-test("country options come from the /country catalog, not from the bot rows", () => {
+test("country options come from the /country catalog, limited to countries with visible bots", () => {
   const { render } = ready();
   const { select } = render();
   assert.deepEqual(select.options, [
     { label: "Todos los países", value: "all" },
     { label: "Colombia", value: 1 },
     { label: "Brasil", value: 9 },
-    { label: "Argentina", value: 10 },
-    { label: "Uruguay", value: 42 }
+    { label: "Argentina", value: 10 }
   ]);
+});
+
+test("a new catalog country appears automatically once it has bots", () => {
+  const { render, swr } = ready();
+  const uy = [bot(42, "Uruguay", "Cliente UY", "EXITOSO")];
+  swr.store[KEY_ALL] = response([...ALL, ...uy]);
+  const values = render().select.options.map((option) => option.value);
+  assert.ok(values.includes(42));
+});
+
+test("while the scoped dataset is not available the full catalog is offered", () => {
+  const { render, swr } = ready();
+  delete swr.store[KEY_ALL];
+  const values = render().select.options.map((option) => option.value);
+  assert.deepEqual(values, ["all", 1, 9, 10, 42]);
 });
 
 for (const [name, id, rows] of [
@@ -241,7 +255,6 @@ for (const [name, id, rows] of [
     render().select.onChange(id);
     const view = render();
     assert.ok(view.requested.includes(keyFor(id)));
-    assert.ok(!view.requested.includes(KEY_ALL));
     assert.deepEqual(view.cards.summary, summaryOf(rows));
     assert.deepEqual(
       view.table.bots.map((row) => row.schedule_id),
@@ -273,7 +286,7 @@ test("going back to all countries restores the global summary", () => {
   assert.equal(view.table.bots.length, ALL.length);
 });
 
-test("country without bots shows zeros and an empty table", () => {
+test("a country that returns no bots shows zeros and an empty table", () => {
   const { render } = ready();
   render().select.onChange(42);
   const view = render();
@@ -335,6 +348,44 @@ test("search narrows the table inside the selected country but cards keep the co
     ["Carrefour"]
   );
   assert.deepEqual(view.cards.summary, summaryOf(BR));
+});
+
+test("changing country resets the status card filter", () => {
+  const { render } = ready();
+  render().cards.onStatusClick("FALLIDO");
+  assert.equal(render().cards.statusFilter, "FALLIDO");
+  render().select.onChange(10);
+  const view = render();
+  assert.equal(view.cards.statusFilter, "all");
+  assert.equal(view.table.bots.length, AR.length);
+});
+
+test("backend without id_country support never shows unfiltered rows as the selected country", () => {
+  const { render, swr } = ready();
+  const legacy = ALL.map(({ id_country: _omitted, ...row }) => row);
+  swr.store[keyFor(9)] = { status: 200, message: "Listado de estatus de bots", data: legacy };
+  render().select.onChange(9);
+  const view = render();
+  assert.equal(view.cards.summary, undefined);
+  assert.deepEqual(view.table.bots, []);
+  assert.equal(view.table.emptyText, "El filtro por país aún no está disponible en el servidor");
+});
+
+test("a response containing rows from another country is rejected", () => {
+  const { render, swr } = ready();
+  swr.store[keyFor(9)] = response(ALL);
+  render().select.onChange(9);
+  const view = render();
+  assert.equal(view.cards.summary, undefined);
+  assert.deepEqual(view.table.bots, []);
+});
+
+test("all countries still renders with a backend that sends no summary", () => {
+  const { render, swr } = ready();
+  swr.store[KEY_ALL] = { status: 200, message: "ok", data: ALL };
+  const view = render();
+  assert.equal(view.cards.summary, undefined);
+  assert.equal(view.table.bots.length, ALL.length);
 });
 
 test("status card filter narrows the table only within the selected country", () => {

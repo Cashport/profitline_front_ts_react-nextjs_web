@@ -38,11 +38,20 @@ export default function AutomationsView() {
     summary,
     isLoading,
     error,
+    isCountryFilterUnsupported,
     mutate
   } = useBotsStatus(countryFilter === "all" ? undefined : countryFilter);
+  // Respuesta global (misma key que "Todos los países", ya respeta el data_scope):
+  // define qué países del catálogo tienen bots visibles para el usuario.
+  const { data: scopedBots } = useBotsStatus();
   const { data: countriesResponse } = useSWR<ICountries>("/country", fetcher, {
     revalidateOnFocus: false
   });
+
+  const handleCountryChange = (value: CountryFilter) => {
+    setCountryFilter(value);
+    setStatusFilter("all");
+  };
 
   // id_client_data es el mismo identificador que ya usa Clientes para esta ruta
   // (ver CountriesClientsView: router.push(`/data-quality/client/${record.id}`)).
@@ -90,14 +99,20 @@ export default function AutomationsView() {
     });
   }, [bots, searchTerm, statusFilter]);
 
-  const countryOptions = useMemo(
-    () =>
-      (countriesResponse?.data ?? []).map((country) => ({
-        label: country.country_name,
-        value: country.id
-      })),
-    [countriesResponse]
-  );
+  const countryOptions = useMemo(() => {
+    const countryIdsWithBots = new Set(
+      (scopedBots ?? []).map((bot) => bot.id_country).filter((id) => id != null)
+    );
+    return (countriesResponse?.data ?? [])
+      .filter((country) => countryIdsWithBots.size === 0 || countryIdsWithBots.has(country.id))
+      .map((country) => ({ label: country.country_name, value: country.id }));
+  }, [countriesResponse, scopedBots]);
+
+  const emptyText = isCountryFilterUnsupported
+    ? "El filtro por país aún no está disponible en el servidor"
+    : error
+      ? "No se pudo cargar el estado de los bots"
+      : "Sin bots disponibles";
 
   return (
     <div className="cp-page">
@@ -117,7 +132,7 @@ export default function AutomationsView() {
               showSearch
               optionFilterProp="label"
               value={countryFilter}
-              onChange={setCountryFilter}
+              onChange={handleCountryChange}
               placeholder="Todos los países"
               className="w-48"
               style={{ minWidth: "12rem", height: "var(--control-h)" }}
@@ -140,7 +155,7 @@ export default function AutomationsView() {
             bots={filteredBots}
             totalBots={bots.length}
             loading={isLoading}
-            emptyText={error ? "No se pudo cargar el estado de los bots" : "Sin bots disponibles"}
+            emptyText={emptyText}
             executingScheduleId={executingScheduleId}
             onRun={requestExecution}
             onViewHistory={handleViewHistory}
