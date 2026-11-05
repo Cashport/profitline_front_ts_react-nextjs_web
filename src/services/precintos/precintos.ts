@@ -204,6 +204,40 @@ export const devolverStock = async (precintos: string[], fecha?: string, guia?: 
   }
 };
 
+/** Cuántos precintos inhabilitados (inactivos) tiene el proyecto. */
+export const getPrecintosInhabilitados = async (): Promise<number> => {
+  const response = await API.get(`/integration/profit360/precintos/inactive-count`, {
+    headers: { projectId: getProjectId() }
+  });
+  const data = response.data?.data;
+  return Number(data?.data?.total ?? data?.total ?? 0);
+};
+
+/** Habilita precintos inactivos: pasan a bodega. */
+export const habilitarPrecintos = async (precintos: string[]) => {
+  const response = await API.put(
+    `/integration/profit360/precintos/enable`,
+    { precintos },
+    { headers: { projectId: getProjectId() } }
+  );
+  return response.data;
+};
+
+/** Reutiliza precintos usados (más de año y medio): a bodega o directo a un ejecutivo. */
+export const reutilizarPrecintos = async (
+  precintos: string[],
+  destino: 'bodega' | 'ejecutivo',
+  ejecutivoId?: string,
+  fecha?: string
+) => {
+  const response = await API.put(
+    `/integration/profit360/precintos/reuse`,
+    { precintos, destino, ejecutivoid: ejecutivoId, fecha },
+    { headers: { projectId: getProjectId() } }
+  );
+  return response.data;
+};
+
 // 6. DESCARGAR CSV INVENTARIO COMPLETO
 export const descargarInventarioCSV = async () => {
   try {
@@ -273,6 +307,13 @@ export const getFilterExecutives = async () => {
     console.error("Error obteniendo ejecutivos:", error);
     throw error;
   }
+};
+
+/** Usuarios a los que se les pueden asignar precintos: solo los vinculados al proyecto. */
+export const getAssignableExecutives = async () => {
+  const data = await getFilterExecutives();
+  const list = data?.data || data || [];
+  return list.filter((exec: { EnProyecto?: boolean }) => exec.EnProyecto !== false);
 };
 
 export const getFilterClients = async () => {

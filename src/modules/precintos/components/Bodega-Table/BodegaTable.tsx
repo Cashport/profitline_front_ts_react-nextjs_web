@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
+import { formatFechaPrecinto } from '../../utils/fechas';
 
 interface BodegaTableProps {
   data?: any[];
@@ -74,7 +75,7 @@ export const BodegaTable: React.FC<BodegaTableProps> = ({
               
               {/* 👇 COLUMNA ORDENABLE: FABRICADO 👇 */}
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('FechaRegistro')}>
-                <span className="inline-flex items-center gap-1">Fabricado{renderSortIcon('FechaRegistro')}</span>
+                <span className="inline-flex items-center gap-1">Ingresado{renderSortIcon('FechaRegistro')}</span>
               </th>
               
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-12 text-right text-[13.5px] font-semibold text-cp-ink"></th>
@@ -97,7 +98,7 @@ export const BodegaTable: React.FC<BodegaTableProps> = ({
                   <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecinto}</td>
                   <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecintoHasta || ''}</td>
                   <td className="py-3 px-4 font-medium text-cp-ink">{item.Cantidad || 1}</td>
-                  <td className="py-3 px-4 font-medium text-cp-ink-2">{item.FechaRegistro ? new Date(item.FechaRegistro).toLocaleDateString('es-CO') : '-'}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink-2">{formatFechaPrecinto(item.FechaRegistro)}</td>
                   <td className="py-3 px-4 text-right relative">
                     <button type="button" onClick={() => setActiveMenuId(isMenuOpen ? null : item.Id)} className="p-1 rounded-lg hover:bg-cp-bg text-cp-ink-4 hover:text-cp-ink transition-colors cursor-pointer">•••</button>
                     

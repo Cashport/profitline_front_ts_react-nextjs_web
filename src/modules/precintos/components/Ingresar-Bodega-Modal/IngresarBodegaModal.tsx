@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { message } from 'antd';
 import { createPrecintos } from '@/services/precintos/precintos';
+import { hoyLocal } from '../../utils/fechas';
 
 interface IngresarBodegaModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = hoyLocal();
       setFecha(today);
       setDesde('');
       setHasta('');
@@ -86,9 +87,11 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
       const response = await createPrecintos(listaCodigos, fecha, observacion);
       
       if (response) {
-        const insertados = response.insertados || [];
-        const repetidos = response.repetidos || [];
-        const backendMessage = response.message || '';
+        // El resultado de farma llega dentro de `data` ({ status, message, data: { insertados, … } }).
+        const resultado = response.data?.insertados ? response.data : response;
+        const insertados = resultado.insertados || [];
+        const repetidos = resultado.repetidos || [];
+        const backendMessage = resultado.message || response.message || '';
 
         if (insertados.length === 0 && repetidos.length > 0) {
           setErrorModal(backendMessage);
@@ -101,6 +104,11 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
         } else if (insertados.length > 0) {
           message.success(backendMessage || `¡${insertados.length} precintos ingresados con éxito!`);
         }
+
+        // Aviso aparte: precintos que estaban inhabilitados o usados y ya quedaron en bodega.
+        if (resultado.aviso) {
+          message.info(resultado.aviso, 8);
+        }
       }
       
       onSuccess();
@@ -109,7 +117,10 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
       if (error.message && !error.response) {
         setErrorModal(error.message);
       } else {
-        message.error("Error: " + (error.response?.data?.message || error.message));
+        // p. ej. "Estos precintos no se pueden volver a usar: …": se deja visible en el modal.
+        const errorMsg = error.response?.data?.message || error.message;
+        setErrorModal(errorMsg);
+        message.error(errorMsg, 6);
       }
     } finally {
       setIsLoading(false);

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { message } from 'antd';
-import { cambiarEjecutivo, devolverStock } from '@/services/precintos/precintos';
+import { cambiarEjecutivo, devolverStock, getAssignableExecutives } from '@/services/precintos/precintos';
+import { hoyLocal } from '../../utils/fechas';
 
 interface MoverPrecintosModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface MoverPrecintosModalProps {
   onSuccess: () => void;
   precintosSeleccionados: string[];
   ejecutivosList: any[]; // 👈 Recibimos la lista con conteos
+  bodegaCount?: number;
 }
 
 export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
@@ -18,20 +20,36 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
   onSuccess,
   precintosSeleccionados = [],
   ejecutivosList = [],
+  bodegaCount = 0,
 }) => {
   const [destino, setDestino] = useState('');
   const [fecha, setFecha] = useState('');
   const [guia, setGuia] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // 👈 Estado para el menú
+  const [destinos, setDestinos] = useState<{ EjecutivoId: string; EjecutivoNombre: string; Asignados: number }[]>([]);
 
   useEffect(() => {
     if (isOpen) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = hoyLocal();
       setFecha(today);
       setDestino('');
       setGuia('');
       setIsDropdownOpen(false);
+
+      // Destinos: solo usuarios vinculados al proyecto, con sus asignados actuales.
+      getAssignableExecutives()
+        .then((list) => {
+          const asignados = new Map(ejecutivosList.map((e) => [e.EjecutivoId, Number(e.Asignados) || 0]));
+          setDestinos(
+            list.map((exec: { Id: string; Nombre?: string; UserName: string }) => ({
+              EjecutivoId: exec.Id,
+              EjecutivoNombre: exec.Nombre || exec.UserName,
+              Asignados: asignados.get(exec.Id) ?? 0,
+            })),
+          );
+        })
+        .catch((error) => console.error("Error cargando ejecutivos", error));
     }
   }, [isOpen]);
 
@@ -43,8 +61,6 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
 
         if (precintosSeleccionados.length === 0) throw new Error("No hay precintos seleccionados");
         if (!destino) throw new Error("Debes seleccionar un destino");
-
-        console.log("👉 Iniciando movimiento de:", precintosSeleccionados.length, "precintos al ID:", destino);
 
         if (destino === 'bodega') {
             await devolverStock(precintosSeleccionados, fecha, guia);
@@ -71,7 +87,7 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
   const getDestinoNombre = () => {
     if (!destino) return 'Selecciona un destino';
     if (destino === 'bodega') return 'Devolver a bodega';
-    const exec = ejecutivosList.find(e => e.EjecutivoId === destino);
+    const exec = destinos.find(e => e.EjecutivoId === destino);
     return exec ? exec.EjecutivoNombre : 'Selecciona un destino';
   };
 
@@ -129,11 +145,11 @@ export const MoverPrecintosModal: React.FC<MoverPrecintosModalProps> = ({
                     className="w-full px-4 py-2.5 text-left hover:bg-gray-200 transition-colors cursor-pointer"
                   >
                     <div className="text-sm font-bold text-gray-900">Devolver a bodega</div>
-                    <div className="text-[13px] text-gray-500">1.129 disponibles</div>
+                    <div className="text-[13px] text-gray-500">{bodegaCount.toLocaleString('es-CO')} en bodega</div>
                   </button>
 
                   {/* Lista de Ejecutivos */}
-                  {ejecutivosList.map((exec) => (
+                  {destinos.map((exec) => (
                     <button
                       key={exec.EjecutivoId}
                       type="button"
