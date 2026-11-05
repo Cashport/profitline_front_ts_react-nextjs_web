@@ -102,7 +102,7 @@ export default function CollectionsByMarket({
       help="Recaudo de cada cierre apilado por mercado, en miles de millones. Dentro de cada barra lo que aportó cada mercado; arriba, el total del mes. El eje no arranca en cero: hace zoom entre el mes más bajo y el más alto para que se note si el recaudo subió o bajó. Clic en un mercado (en la barra o en la leyenda) para filtrar todo el tablero."
       className="h-full"
     >
-      <div className="min-h-[260px] min-w-0 flex-1">
+      <div className="h-[300px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 22, right: 4, left: 0, bottom: 0 }}>
             <CartesianGrid {...gridProps} />

@@ -64,7 +64,7 @@ export default function AgingComparison({ periods, history }: Props) {
       legend={shown.map((p, i) => ({ label: periodLabel(p).split(" ")[0], color: colors[i] }))}
       className="h-full"
     >
-      <div className="min-h-[260px] min-w-0 flex-1">
+      <div className="h-[300px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 64, right: 4, left: 0, bottom: 0 }} barGap={3}>
             <CartesianGrid {...gridProps} />

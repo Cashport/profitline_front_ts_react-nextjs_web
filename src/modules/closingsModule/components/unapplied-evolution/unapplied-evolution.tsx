@@ -67,7 +67,7 @@ export default function UnappliedEvolution({ periods, period, unapplied }: Props
       ]}
       className="h-full"
     >
-      <div className="min-h-[240px] min-w-0 flex-1">
+      <div className="h-[260px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 18, right: 4, left: 4, bottom: 0 }}>
             <CartesianGrid {...gridProps} />

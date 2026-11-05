@@ -318,7 +318,7 @@ export default function TrendsTab({ periods, history, clientOf, onOpenClient }: 
             shape: "line" as const
           }))}
         >
-          <div className="min-h-[220px] min-w-0 flex-1">
+          <div className="h-[240px] min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={rollData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid {...gridProps} />

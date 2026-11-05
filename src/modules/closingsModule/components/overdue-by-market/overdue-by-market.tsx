@@ -159,7 +159,7 @@ export default function OverdueByMarket({ periods, history, clientOf }: Props) {
       }
       className="h-full"
     >
-      <div className="min-h-[260px] min-w-0 flex-1">
+      <div className="h-[300px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 58, right: 8, left: 0, bottom: 0 }} barGap={3}>
             <CartesianGrid {...gridProps} />
