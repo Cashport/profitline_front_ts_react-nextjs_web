@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Segmented } from "antd";
+import { Button, Segmented, Tooltip } from "antd";
 import dayjs from "dayjs";
-import { CircleCheck, Link2, Mail, MessageCircle, QrCode } from "lucide-react";
+import { CircleCheck, Info, Link2, Mail, MessageCircle, QrCode } from "lucide-react";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
-import type { IBlockingAlertsDetail } from "@/types/blockingAlerts/IBlockingAlerts";
+import type {
+  IBlockingAlertBuckets,
+  IBlockingAlertsDetail
+} from "@/types/blockingAlerts/IBlockingAlerts";
+import { cn } from "@/utils/utils";
 
 import { paymentLinkOf, plural } from "../../utils/blocking-alerts";
 import AlertModal from "../alert-modal/alert-modal";
@@ -39,7 +43,52 @@ export default function PaymentLinkModal({
   const [generated, setGenerated] = useState(false);
 
   const charge = mode === "past_due" ? pastDue : selected;
-  const amount = formatMoney(charge.total, { hideDecimals: true });
+  const money = (value: number) => formatMoney(value, { hideDecimals: true });
+  const amount = money(charge.total);
+  const { invoices, balances, creditNotes, unappliedPayments } = detail.breakdown;
+  const overdue = (b: IBlockingAlertBuckets) => b.pastDue1To60 + b.pastDueOver60;
+  const netLines: [string, number][] = [
+    ["Facturas vencidas", overdue(invoices)],
+    ["Saldos vencidos", overdue(balances)],
+    ["Notas crédito vencidas", overdue(creditNotes)],
+    ...(unappliedPayments ? [["Pagos sin aplicar", unappliedPayments] as [string, number]] : []),
+    ["Pago vencido", detail.pastDue]
+  ];
+
+  const chip = (
+    <span
+      tabIndex={mode === "past_due" ? 0 : undefined}
+      className="inline-flex items-center gap-1 rounded-md bg-cp-muted px-2 py-0.5 text-[13px] font-semibold text-cp-ink-2"
+    >
+      {plural(charge.count, "factura", "facturas")}
+      {mode === "past_due" && (
+        <>
+          {" · valor neto"}
+          <Info className="h-3.5 w-3.5" aria-hidden />
+        </>
+      )}
+    </span>
+  );
+
+  const netExplanation = (
+    <div className="flex flex-col gap-1.5 py-1 text-[12px]">
+      <dl className="m-0 flex flex-col gap-0.5 tabular-nums">
+        {netLines.map(([label, value], i) => (
+          <div
+            key={label}
+            className={cn(
+              "flex justify-between gap-4",
+              i === netLines.length - 1 && "mt-0.5 border-t border-white/30 pt-1"
+            )}
+          >
+            <dt>{label}</dt>
+            <dd className="m-0 font-semibold">{money(value)}</dd>
+          </div>
+        ))}
+      </dl>
+      <span>Para cobrar solo facturas, usa «Facturas seleccionadas».</span>
+    </div>
+  );
   const link = paymentLinkOf(detail);
   const expires = dayjs().add(48, "hour").locale("es").format("D MMM · HH:mm").replace(".", "");
 
@@ -116,9 +165,17 @@ export default function PaymentLinkModal({
       <div className="flex flex-col items-center gap-1 rounded-[12px] border border-cp-line bg-cp-subtle px-4 py-4 text-center">
         <span className="text-[13px] font-semibold text-cp-ink-4">Vas a cobrar</span>
         <span className="text-[28px] font-semibold leading-tight tabular-nums">{amount}</span>
-        <span className="rounded-md bg-cp-muted px-2 py-0.5 text-[13px] font-semibold text-cp-ink-2">
-          {plural(charge.count, "factura", "facturas")}
-        </span>
+        {mode === "past_due" ? (
+          <Tooltip
+            title={netExplanation}
+            trigger={["hover", "click", "focus"]}
+            overlayStyle={{ maxWidth: 340 }}
+          >
+            {chip}
+          </Tooltip>
+        ) : (
+          chip
+        )}
       </div>
       <dl className="m-0 flex flex-col text-[13px]">
         {[

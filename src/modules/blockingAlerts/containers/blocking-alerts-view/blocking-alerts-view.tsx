@@ -35,8 +35,8 @@ const STATUS_TABS: AlertsStatusFilter[] = ["all", "blocked", "to_be_blocked", "u
 
 /** Toggle Clientes / Puntos de venta: en móvil, letra e íconos más pequeños para que quepa. */
 const VIEW_LABEL =
-  "flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold max-md:gap-1 max-md:text-[13px]";
-const VIEW_ICON = "h-3.5 w-3.5 shrink-0 max-md:h-3 max-md:w-3";
+  "flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold max-md:gap-1 max-md:text-[12px]";
+const VIEW_ICON = "h-3.5 w-3.5 shrink-0 max-md:h-[11px] max-md:w-[11px]";
 
 interface BlockingAlertsViewProps {
   /** UUID del cliente: lista solo sus puntos de venta ("Ver los N puntos de venta"). */
@@ -80,7 +80,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
   const grid = (
     <div className="flex flex-col gap-3 pb-1 pt-1">
       {list?.rows.length ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-2">
           {list.rows.map((row) => {
             const clientHref = `${BLOCKING_ALERTS_PATH}/${row.clientUuid}`;
             const code = "code" in row ? row.code : null;
@@ -166,7 +166,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
   const viewToggle = !clientId && summary && (
     <Segmented<AlertsView>
       block
-      className="max-md:[&_.ant-segmented-item-label]:!px-1.5"
+      className="max-md:[&_.ant-segmented-item-label]:!px-1"
       value={store.view}
       onChange={store.setView}
       options={[
@@ -185,7 +185,7 @@ export default function BlockingAlertsView({ clientId }: BlockingAlertsViewProps
           label: (
             <span className={VIEW_LABEL}>
               <Store className={VIEW_ICON} />
-              Puntos de venta
+              <span className="min-w-0 truncate">Puntos de venta</span>
               <span className="font-medium opacity-60">{summary.pointsOfSale.all}</span>
             </span>
           )
