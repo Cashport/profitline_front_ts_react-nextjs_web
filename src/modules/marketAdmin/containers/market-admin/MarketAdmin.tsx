@@ -16,6 +16,7 @@ import {
 import { Chats } from "@phosphor-icons/react";
 import Header from "@/components/organisms/header";
 import { useAppStore } from "@/lib/store/store";
+import BranchesIcon from "@/modules/branches/components/branches-icon/branches-icon";
 
 type Section = {
   href: string;
@@ -67,6 +68,12 @@ const sections: Section[] = [
     icon: ShieldCheck,
     label: "Precintos",
     description: "Controla el inventario de precintos: bodega, ejecutivos y asignaciones."
+  },
+  {
+    href: "/branches",
+    icon: BranchesIcon,
+    label: "Sucursales",
+    description: "Consulta las sucursales de devolución: lista de precios, estado y ejecutivos."
   },
   {
     href: "/mass-communications",

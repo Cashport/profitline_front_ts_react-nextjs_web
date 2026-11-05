@@ -264,7 +264,8 @@ const SETTINGS_MODULE: Omit<RailModule, "group"> = {
   isActive: (p) =>
     p.startsWith("/market-admin") ||
     p.startsWith("/settings") ||
-    p.startsWith("/mass-communications")
+    p.startsWith("/mass-communications") ||
+    p.startsWith("/branches")
 };
 
 interface RailItemProps {
