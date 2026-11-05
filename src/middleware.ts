@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' https: data: blob:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' blob: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} ${mapboxHosts} https://checkout.wompi.co;
+    connect-src 'self' blob: ${request.nextUrl.pathname.startsWith("/auth/connect") ? "http://127.0.0.1:*" : ""} https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} ${mapboxHosts} https://checkout.wompi.co;
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com https://checkout.wompi.co;
     media-src 'self' blob: ${amazonFiles} ${azureBlob};
     object-src 'none';

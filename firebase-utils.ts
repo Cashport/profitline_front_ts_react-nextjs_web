@@ -131,6 +131,15 @@ const mintSessionCookie = async (router: AppRouterInstance) => {
 // and redirects) or reports which extra step the UI must show. Called right
 // after sign-in, and again after the OTP is verified or the password is
 // changed, so each remediation naturally re-evaluates whatever comes next.
+type LoginCompletionHandler = () => Promise<void>;
+let loginCompletionOverride: LoginCompletionHandler | null = null;
+
+// Lets a page (/auth/connect) run its own last step once the login policy is
+// satisfied, instead of minting the app session cookie and navigating.
+export const setLoginCompletionOverride = (handler: LoginCompletionHandler | null) => {
+  loginCompletionOverride = handler;
+};
+
 export const continueLoginAfterAuth = async (
   router: AppRouterInstance
 ): Promise<LoginOutcome> => {
@@ -140,6 +149,10 @@ export const continueLoginAfterAuth = async (
   }
   if (status.requiresOtp) {
     return { step: "otp", email: status.email };
+  }
+  if (loginCompletionOverride) {
+    await loginCompletionOverride();
+    return { step: "success" };
   }
   await mintSessionCookie(router);
   return { step: "success" };
