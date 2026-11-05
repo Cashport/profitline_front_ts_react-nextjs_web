@@ -55,8 +55,8 @@ export default function ChartCard({
 }: ChartCardProps) {
   return (
     <section className={cn("cp-card flex min-w-0 flex-col px-[18px] py-[14px]", className)}>
-      <div className="mb-3 flex min-h-[36px] flex-wrap items-center gap-x-4 gap-y-2">
-        <h3 className="flex items-center gap-1.5 text-[18px] font-semibold text-cp-ink">
+      <div className="mb-2 flex min-h-[36px] flex-wrap items-center gap-x-4 gap-y-2">
+        <h3 className="flex items-center gap-1.5 text-[15px] font-semibold text-cp-ink">
           {title}
           {help && (
             <Tooltip title={help}>

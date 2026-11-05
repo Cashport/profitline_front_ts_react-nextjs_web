@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import type { IClosingComment } from "@/types/closings/IClosings";
 import { cn } from "@/utils/utils";
 
-import { channelColor, HIGH_OVERDUE } from "../../constants";
+import { marketColor, HIGH_OVERDUE } from "../../constants";
 import type { ClientRow } from "../../utils/aggregate";
 import {
   formatDate,
@@ -101,18 +101,20 @@ export default function CommentsTab({ period, periods, comments, clients, onOpen
                       key={c.id}
                       type="button"
                       onClick={() => onOpenClient(c.nit)}
-                      className="rounded-xl bg-cp-bg px-4 py-3 text-left transition-colors hover:bg-[#efefef]"
+                      className="rounded-xl bg-cp-bg px-4 py-3 text-left transition-colors hover:bg-cp-muted"
                     >
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="text-[13.5px] font-semibold text-cp-blue">{c.client}</span>
+                        <span className="text-[13.5px] font-semibold text-cp-blue">
+                          {c.client_name ?? client?.client ?? c.nit}
+                        </span>
                         {client && (
                           <>
                             <span className="flex items-center gap-1.5 text-[13px] text-cp-ink-3">
                               <span
                                 className="h-2 w-2 rounded-[2px]"
-                                style={{ background: channelColor(client.channel) }}
+                                style={{ background: marketColor(client.market) }}
                               />
-                              {client.channel}
+                              {client.market}
                             </span>
                             <span className="ml-auto flex items-center gap-2 text-[13px] text-cp-ink-3">
                               Vencido {formatMillions(client.overdue)} M
@@ -123,9 +125,9 @@ export default function CommentsTab({ period, periods, comments, clients, onOpen
                           </>
                         )}
                       </div>
-                      <p className="mt-1.5 text-[13px] leading-[1.55] text-cp-ink">{c.text}</p>
+                      <p className="mt-1.5 text-[13px] leading-[1.55] text-cp-ink">{c.comment}</p>
                       <p className="mt-1.5 text-[13px] text-cp-ink-3">
-                        {c.author} · {formatDate(c.createdAt)}
+                        {c.created_by_name || c.created_by_email} · {formatDate(c.created_at)}
                         {scope === "period" ? "" : ` · ${periodShort(c.period)}`}
                       </p>
                     </button>
@@ -165,7 +167,7 @@ export default function CommentsTab({ period, periods, comments, clients, onOpen
           {pending.map((c) => (
             <div
               key={c.nit}
-              className="flex items-center gap-3 border-b border-[#f2f2f2] py-2.5 text-[13px]"
+              className="flex items-center gap-3 border-b border-cp-line py-2.5 text-[13px]"
             >
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium text-cp-ink">{c.client}</span>
@@ -176,7 +178,7 @@ export default function CommentsTab({ period, periods, comments, clients, onOpen
               <button
                 type="button"
                 onClick={() => onOpenClient(c.nit)}
-                className="cp-control-fill h-9 shrink-0 rounded-lg px-3 text-[13px] font-semibold text-cp-ink hover:bg-[#ececec]"
+                className="cp-control-fill h-9 shrink-0 rounded-lg px-3 text-[13px] font-semibold text-cp-ink hover:bg-cp-muted"
               >
                 Comentar
               </button>

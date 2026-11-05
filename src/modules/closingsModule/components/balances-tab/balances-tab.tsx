@@ -6,7 +6,8 @@ import type { IClosingPortfolioRow } from "@/types/closings/IClosings";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import { cn } from "@/utils/utils";
 
-import { channelColor } from "../../constants";
+import { marketColor } from "../../constants";
+import useIsMobile from "../../hooks/use-is-mobile";
 import { useTableSort } from "../../hooks/use-table-sort";
 import { sumBy } from "../../utils/aggregate";
 import { formatAmount, formatMillions, formatPct } from "../../utils/format";
@@ -84,8 +85,8 @@ interface DetailRow {
   key: string;
   nit: string;
   client: string;
-  channel: string;
-  salesExecutive: string;
+  market: string;
+  executive: string;
   kind: string;
   cause: string;
   bucket: string;
@@ -96,6 +97,7 @@ interface DetailRow {
 /** Saldos y cruces: partidas abiertas (Tipo = Saldos) y notas crédito en cartera (Tipo = NC). */
 export default function BalancesTab({ portfolio, onOpenClient }: Props) {
   const [kind, setKind] = useState<"Saldos" | "NC">("Saldos");
+  const isMobile = useIsMobile();
 
   const balances = useMemo(() => portfolio.filter((r) => r.kind === "Saldos"), [portfolio]);
   const notes = useMemo(() => portfolio.filter((r) => r.kind === "NC"), [portfolio]);
@@ -131,8 +133,8 @@ export default function BalancesTab({ portfolio, onOpenClient }: Props) {
           key,
           nit: r.nit,
           client: r.client,
-          channel: r.channel,
-          salesExecutive: r.salesExecutive,
+          market: r.market,
+          executive: r.executive,
           kind: r.kind,
           cause: r.balanceType,
           bucket: r.bucket,
@@ -171,7 +173,7 @@ export default function BalancesTab({ portfolio, onOpenClient }: Props) {
             label: "Saldos abiertos > 30 días",
             value: formatMillions(kpis.over30),
             unit: "M",
-            bar: { value: kpis.open ? kpis.over30 / kpis.open : 0, color: "#e0007a" },
+            bar: { value: kpis.open ? kpis.over30 / kpis.open : 0, color: "#d11a2a" },
             caption: `${formatPct(kpis.open ? kpis.over30 / kpis.open : 0)} de los saldos`
           },
           {
@@ -225,10 +227,10 @@ export default function BalancesTab({ portfolio, onOpenClient }: Props) {
           <table className="w-full table-fixed border-separate border-spacing-0 text-[13px] text-cp-ink">
             <colgroup>
               <col />
-              <col style={{ width: 220 }} />
-              <col style={{ width: 96 }} />
-              <col style={{ width: 96 }} />
-              <col style={{ width: 140 }} />
+              <col style={{ width: isMobile ? 110 : 220 }} />
+              {!isMobile && <col style={{ width: 96 }} />}
+              {!isMobile && <col style={{ width: 96 }} />}
+              <col style={{ width: isMobile ? 110 : 140 }} />
             </colgroup>
             <thead className="sticky top-0 z-[1]">
               <tr>
@@ -240,14 +242,16 @@ export default function BalancesTab({ portfolio, onOpenClient }: Props) {
                   className="pl-0"
                 />
                 <SortableTh col="cause" label="Causal" sort={sort} onSort={onSort} />
-                <SortableTh col="bucket" label="Tramo" sort={sort} onSort={onSort} />
-                <SortableTh
-                  col="documents"
-                  label="Doc."
-                  align="right"
-                  sort={sort}
-                  onSort={onSort}
-                />
+                {!isMobile && <SortableTh col="bucket" label="Tramo" sort={sort} onSort={onSort} />}
+                {!isMobile && (
+                  <SortableTh
+                    col="documents"
+                    label="Doc."
+                    align="right"
+                    sort={sort}
+                    onSort={onSort}
+                  />
+                )}
                 <SortableTh col="amount" label="Monto" align="right" sort={sort} onSort={onSort} />
               </tr>
             </thead>
@@ -256,22 +260,24 @@ export default function BalancesTab({ portfolio, onOpenClient }: Props) {
                 <tr
                   key={r.key}
                   onClick={() => onOpenClient(r.nit)}
-                  className="cursor-pointer hover:bg-[#fafafa] [&>td]:border-b [&>td]:border-[#f2f2f2]"
+                  className="cursor-pointer hover:bg-cp-bg [&>td]:border-b [&>td]:border-cp-line"
                 >
                   <td className="h-[var(--table-row-h)] py-2 pr-3">
                     <span className="block truncate font-medium text-cp-blue">{r.client}</span>
                     <span className="flex min-w-0 items-center gap-1.5 text-cp-ink-3">
-                      <span className="truncate">{r.salesExecutive}</span>·
+                      <span className="truncate">{r.executive}</span>·
                       <span
                         className="h-2 w-2 shrink-0 rounded-[2px]"
-                        style={{ background: channelColor(r.channel) }}
+                        style={{ background: marketColor(r.market) }}
                       />
-                      <span className="truncate">{r.channel}</span>
+                      <span className="truncate">{r.market}</span>
                     </span>
                   </td>
                   <td className="truncate px-3">{r.cause}</td>
-                  <td className="px-3 text-cp-ink-2">{r.bucket}</td>
-                  <td className="px-3 text-right tabular-nums text-cp-ink-2">{r.documents}</td>
+                  {!isMobile && <td className="px-3 text-cp-ink-2">{r.bucket}</td>}
+                  {!isMobile && (
+                    <td className="px-3 text-right tabular-nums text-cp-ink-2">{r.documents}</td>
+                  )}
                   <td
                     className={cn(
                       "px-3 text-right font-semibold tabular-nums",
@@ -285,13 +291,15 @@ export default function BalancesTab({ portfolio, onOpenClient }: Props) {
             </tbody>
             {sorted.length > 0 && (
               <tfoot className="sticky bottom-0">
-                <tr className="bg-[#fafafa] font-semibold [&>td]:border-t [&>td]:border-cp-line">
-                  <td className="h-[var(--table-total-h)] pr-3" colSpan={3}>
+                <tr className="bg-cp-bg font-semibold [&>td]:border-t [&>td]:border-cp-line">
+                  <td className="h-[var(--table-total-h)] pr-3" colSpan={isMobile ? 2 : 3}>
                     Total
                   </td>
-                  <td className="px-3 text-right tabular-nums">
-                    {sumBy(sorted, (r) => r.documents)}
-                  </td>
+                  {!isMobile && (
+                    <td className="px-3 text-right tabular-nums">
+                      {sumBy(sorted, (r) => r.documents)}
+                    </td>
+                  )}
                   <td className="px-3 text-right tabular-nums">
                     {formatAmount(sumBy(sorted, (r) => r.amount))}
                   </td>

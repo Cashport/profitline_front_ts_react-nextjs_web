@@ -1,20 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Drawer, Input } from "antd";
+import { Drawer, Input, Popconfirm, Select } from "antd";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { X } from "phosphor-react";
 
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useMessageApi } from "@/context/MessageContext";
+import useIsMobile from "../../hooks/use-is-mobile";
+import { useClosingsDark } from "../../containers/closings-layout/closings-layout";
 import {
   AGING_BUCKETS,
+  type IClosingClientInfo,
   type IClosingComment,
-  type IClosingPaymentRow,
+  type IClosingHistoryRow,
   type IClosingPortfolioRow
 } from "@/types/closings/IClosings";
 import { cn } from "@/utils/utils";
 
-import { AGING_COLORS, AGING_LABELS, channelColor, HIGH_OVERDUE, SERIES } from "../../constants";
-import { portfolioTotals, sumBy, type ClientRow } from "../../utils/aggregate";
+import { AGING_COLORS, AGING_LABELS, marketColor, HIGH_OVERDUE, SERIES } from "../../constants";
+import { sumBy, type ClientRow } from "../../utils/aggregate";
 import {
   formatAmount,
   formatDate,
@@ -28,10 +33,22 @@ import { Pill } from "../closing-kpis/closing-kpis";
 
 interface Props {
   client: ClientRow | null;
+  /** Atributos del cliente en la tabla client (KAM, coordinador…). */
+  info: IClosingClientInfo | null;
   period: string;
-  history: { period: string; portfolio: IClosingPortfolioRow[]; payments: IClosingPaymentRow[] }[];
+  /** Cierres cargados, del más reciente al más antiguo (para elegir el mes del comentario). */
+  periods: string[];
+  /** Cartera del cierre elegido (ya filtrada), para los saldos y notas del cliente. */
+  portfolio: IClosingPortfolioRow[];
+  history: IClosingHistoryRow[];
   comments: IClosingComment[];
-  onSaveComment: (nit: string, client: string, text: string) => void;
+  onSaveComment: (input: {
+    id?: number;
+    period: string;
+    nit: string;
+    comment: string;
+  }) => Promise<void>;
+  onDeleteComment: (id: number) => Promise<void>;
   onClose: () => void;
 }
 
@@ -53,26 +70,35 @@ function Stat({ label, value, extra }: { label: string; value: string; extra?: R
  */
 export default function ClientClosingDrawer({
   client,
+  info,
   period,
+  periods,
+  portfolio,
   history,
   comments,
   onSaveComment,
+  onDeleteComment,
   onClose
 }: Props) {
   const nit = client?.nit;
-  const current = comments.find((c) => c.nit === nit && c.period === period);
+  const user = useCurrentUser();
+  const { showMessage } = useMessageApi();
+  const isDark = useClosingsDark();
+  const isMobile = useIsMobile();
   const [draft, setDraft] = useState("");
-  const [editing, setEditing] = useState(false);
+  const [draftPeriod, setDraftPeriod] = useState(period);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setDraft(current?.text ?? "");
-    setEditing(!current);
-  }, [nit, current]);
+    setDraft("");
+    setDraftPeriod(period);
+    setEditingId(null);
+  }, [nit, period]);
 
   const detail = useMemo(() => {
     if (!nit) return null;
-    const own =
-      history.find((h) => h.period === period)?.portfolio.filter((r) => r.nit === nit) ?? [];
+    const own = portfolio.filter((r) => r.nit === nit);
     const byType = new Map<string, { kind: string; amount: number; documents: number }>();
     own
       .filter((r) => r.kind !== "Factura")
@@ -83,41 +109,76 @@ export default function ClientClosingDrawer({
         e.documents += r.documents;
         byType.set(key, e);
       });
-    const trend = history.map((h) => {
-      const t = portfolioTotals(h.portfolio.filter((r) => r.nit === nit));
+    const trend = [...periods].reverse().map((p) => {
+      const row = history.find((h) => h.period === p && h.nit === nit);
+      const total = row?.total ?? 0;
+      const overdue = total - (row?.buckets.Corriente ?? 0);
       return {
-        period: h.period,
-        label: periodShort(h.period),
-        total: t.total,
-        overdue: t.overdue,
-        overduePct: t.overduePct,
-        collected: sumBy(
-          h.payments.filter((p) => p.nit === nit),
-          (p) => p.amount
-        )
+        period: p,
+        label: periodShort(p),
+        total,
+        overdue,
+        overduePct: total ? overdue / total : 0,
+        collected: row?.collected ?? 0
       };
     });
-    const first = own[0];
     return {
-      info: first,
       documents: sumBy(own, (r) => r.documents),
       balances: Array.from(byType.entries())
         .map(([key, v]) => ({ key, name: key.split("·")[1], ...v }))
         .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)),
       trend
     };
-  }, [nit, history, period]);
+  }, [nit, portfolio, history, periods]);
 
   const timeline = useMemo(
-    () => comments.filter((c) => c.nit === nit).sort((a, b) => b.period.localeCompare(a.period)),
+    () =>
+      comments
+        .filter((c) => c.nit === nit)
+        .sort(
+          (a, b) => b.period.localeCompare(a.period) || b.created_at.localeCompare(a.created_at)
+        ),
     [comments, nit]
   );
+
+  const isMine = (c: IClosingComment) =>
+    Boolean(user?.email) && c.created_by_email.toLowerCase() === user?.email?.toLowerCase();
+
+  const submit = async () => {
+    if (!client || !draft.trim()) return;
+    setSaving(true);
+    try {
+      await onSaveComment({
+        id: editingId ?? undefined,
+        period: draftPeriod,
+        nit: client.nit,
+        comment: draft.trim()
+      });
+      showMessage("success", editingId ? "Comentario actualizado" : "Comentario guardado");
+      setDraft("");
+      setEditingId(null);
+    } catch (error) {
+      showMessage("error", (error as Error).message || "No se pudo guardar el comentario");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (id: number) => {
+    try {
+      await onDeleteComment(id);
+      showMessage("success", "Comentario eliminado");
+    } catch (error) {
+      showMessage("error", (error as Error).message || "No se pudo eliminar el comentario");
+    }
+  };
 
   return (
     <Drawer
       open={Boolean(client)}
       onClose={onClose}
-      width={560}
+      width={isMobile ? "100%" : 560}
+      rootClassName={isDark ? "dark closings-scope" : "closings-scope"}
       closable={false}
       destroyOnClose
       styles={{ body: { padding: 0 } }}
@@ -131,14 +192,13 @@ export default function ClientClosingDrawer({
                 NIT {client.nit} ·
                 <span
                   className="h-2 w-2 rounded-[2px]"
-                  style={{ background: channelColor(client.channel) }}
+                  style={{ background: marketColor(client.market) }}
                 />
-                {client.channel} · {client.salesExecutive}
+                {client.market} · {client.executive}
               </p>
-              {detail.info && (
+              {info && (
                 <p className="mt-0.5 text-[13px] text-cp-ink-3">
-                  Cartera: {detail.info.collectionExecutive} · Coordinador:{" "}
-                  {detail.info.coordinator} · {detail.info.city}
+                  KAM: {info.kam} · KAM líder: {info.kamLeader} · Coordinador: {info.coordinator}
                 </p>
               )}
             </div>
@@ -264,7 +324,7 @@ export default function ClientClosingDrawer({
                   {detail.balances.map((b) => (
                     <div
                       key={b.key}
-                      className="flex items-center justify-between gap-3 border-b border-[#f2f2f2] py-2 text-[13px]"
+                      className="flex items-center justify-between gap-3 border-b border-cp-line py-2 text-[13px]"
                     >
                       <span className="flex min-w-0 items-center gap-2">
                         <span className="rounded-[5px] bg-cp-muted px-1.5 py-px font-medium text-cp-ink-2">
@@ -287,48 +347,57 @@ export default function ClientClosingDrawer({
               </>
             )}
 
-            <h3 className="mb-2 mt-6 text-[15px] font-semibold">Comentarios del cierre</h3>
-            {editing ? (
-              <div className="flex flex-col gap-2">
-                <Input.TextArea
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  autoSize={{ minRows: 3, maxRows: 8 }}
-                  placeholder="Ej.: quedamos así porque el pago de $120 MM se aplicó el 30 y la compañía no lo alcanzó a compensar; toca refacturar…"
-                  className="!rounded-lg !text-[13px]"
+            <h3 className="mb-2 mt-6 text-[15px] font-semibold">Comentarios de cierre</h3>
+            <div className="flex flex-col gap-2 rounded-xl bg-cp-bg p-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] text-cp-ink-3">
+                  {editingId ? "Editando el comentario de" : "Comentario para el cierre de"}
+                </span>
+                <Select
+                  value={draftPeriod}
+                  onChange={setDraftPeriod}
+                  disabled={Boolean(editingId)}
+                  options={periods.map((p) => ({ value: p, label: periodLabel(p) }))}
+                  className="min-w-[170px]"
                 />
-                <div className="flex justify-end gap-2">
-                  {current && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDraft(current.text);
-                        setEditing(false);
-                      }}
-                      className="h-9 px-3 text-[14px] font-semibold text-cp-ink-2"
-                    >
-                      Cancelar
-                    </button>
-                  )}
+              </div>
+              <Input.TextArea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                autoSize={{ minRows: 3, maxRows: 8 }}
+                maxLength={5000}
+                placeholder="Ej.: quedamos así porque el pago de $120 MM se aplicó el 30 y la compañía no lo alcanzó a compensar; toca refacturar…"
+                className="!rounded-lg !text-[13px]"
+              />
+              <div className="flex justify-end gap-2">
+                {editingId && (
                   <button
                     type="button"
-                    disabled={!draft.trim()}
                     onClick={() => {
-                      onSaveComment(client.nit, client.client, draft.trim());
-                      setEditing(false);
+                      setEditingId(null);
+                      setDraft("");
+                      setDraftPeriod(period);
                     }}
-                    className="h-9 rounded-lg bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-cp-lime-dark disabled:opacity-50"
+                    className="h-9 px-3 text-[14px] font-semibold text-cp-ink-2"
                   >
-                    Guardar comentario
+                    Cancelar
                   </button>
-                </div>
+                )}
+                <button
+                  type="button"
+                  disabled={!draft.trim() || saving}
+                  onClick={submit}
+                  className="h-9 rounded-lg bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-cp-lime-dark disabled:opacity-50"
+                >
+                  {saving ? "Guardando…" : editingId ? "Guardar cambios" : "Guardar comentario"}
+                </button>
               </div>
-            ) : null}
+            </div>
 
-            <ol className="mt-3 flex flex-col">
+            <ol className="mt-4 flex flex-col">
               {timeline.length === 0 && (
                 <li className="text-[13px] text-cp-ink-3">
-                  Sin comentarios en cierres anteriores.
+                  Este cliente no tiene comentarios de cierre.
                 </li>
               )}
               {timeline.map((c) => (
@@ -339,25 +408,45 @@ export default function ClientClosingDrawer({
                       c.period === period ? "bg-cp-orange" : "bg-[#c4c4c4]"
                     )}
                   />
-                  <div className="flex items-center gap-2 text-[13px]">
+                  <div className="flex flex-wrap items-center gap-x-2 text-[13px]">
                     <span className="font-semibold">
                       Cierre {periodLabel(c.period).toLowerCase()}
                     </span>
                     <span className="text-cp-ink-3">
-                      · {c.author} · {formatDate(c.createdAt)}
+                      · {c.created_by_name || c.created_by_email} · {formatDate(c.created_at)}
+                      {c.updated_at ? " · editado" : ""}
                     </span>
-                    {c.period === period && !editing && (
-                      <button
-                        type="button"
-                        onClick={() => setEditing(true)}
-                        className="ml-auto text-[13px] font-semibold text-cp-blue hover:underline"
-                      >
-                        Editar
-                      </button>
+                    {isMine(c) && (
+                      <span className="ml-auto flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(c.id);
+                            setDraft(c.comment);
+                            setDraftPeriod(c.period);
+                          }}
+                          className="text-[13px] font-semibold text-cp-blue hover:underline"
+                        >
+                          Editar
+                        </button>
+                        <Popconfirm
+                          title="¿Eliminar este comentario?"
+                          okText="Eliminar"
+                          cancelText="Cancelar"
+                          onConfirm={() => remove(c.id)}
+                        >
+                          <button
+                            type="button"
+                            className="text-[13px] font-semibold text-[#d11a2a] dark:text-[#ff6b6b] hover:underline"
+                          >
+                            Eliminar
+                          </button>
+                        </Popconfirm>
+                      </span>
                     )}
                   </div>
                   <p className="mt-1 whitespace-pre-line text-[13px] leading-[1.55] text-cp-ink-2">
-                    {c.text}
+                    {c.comment}
                   </p>
                 </li>
               ))}

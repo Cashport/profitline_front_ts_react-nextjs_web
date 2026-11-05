@@ -3,11 +3,19 @@
 import { useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import type { IClosingPaymentRow, IClosingPortfolioRow } from "@/types/closings/IClosings";
+import type {
+  IClosingClientInfo,
+  IClosingHistoryRow,
+  IClosingPaymentRow,
+  IClosingPortfolioRow,
+  IClosingUnappliedPayment
+} from "@/types/closings/IClosings";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import { cn } from "@/utils/utils";
 
-import { channelColor, SERIES } from "../../constants";
+import { marketColor } from "../../constants";
+import { isCompensated } from "../../hooks/use-closings";
+import useIsMobile from "../../hooks/use-is-mobile";
 import { useTableSort } from "../../hooks/use-table-sort";
 import { collectionDeltas, sumBy, type CollectionDelta } from "../../utils/aggregate";
 import {
@@ -21,6 +29,7 @@ import {
 import ChartCard, { Segmented } from "../chart-card/chart-card";
 import { axisProps, ChartTooltipBox, gridProps } from "../chart-card/chart-theme";
 import ClosingKpis, { Delta, Pill } from "../closing-kpis/closing-kpis";
+import UnappliedEvolution from "../unapplied-evolution/unapplied-evolution";
 
 interface Props {
   period: string;
@@ -28,7 +37,10 @@ interface Props {
   payments: IClosingPaymentRow[];
   prevPayments: IClosingPaymentRow[];
   portfolio: IClosingPortfolioRow[];
-  history: { period: string; payments: IClosingPaymentRow[] }[];
+  history: IClosingHistoryRow[];
+  periods: string[];
+  clientOf: (nit: string) => IClosingClientInfo;
+  unapplied: IClosingUnappliedPayment[];
   onOpenClient: (nit: string) => void;
 }
 
@@ -39,6 +51,7 @@ function DeltaTable({
   rows: CollectionDelta[];
   onOpenClient: (nit: string) => void;
 }) {
+  const isMobile = useIsMobile();
   const { sort, onSort, sorted } = useTableSort(
     rows,
     { col: "delta", dir: rows[0]?.delta < 0 ? "asc" : "desc" },
@@ -49,18 +62,28 @@ function DeltaTable({
       <table className="w-full table-fixed border-separate border-spacing-0 text-[13px] text-cp-ink">
         <colgroup>
           <col />
-          <col style={{ width: 104 }} />
-          <col style={{ width: 104 }} />
-          <col style={{ width: 112 }} />
-          <col style={{ width: 76 }} />
+          {!isMobile && <col style={{ width: 104 }} />}
+          <col style={{ width: isMobile ? 72 : 104 }} />
+          <col style={{ width: isMobile ? 84 : 112 }} />
+          {!isMobile && <col style={{ width: 76 }} />}
         </colgroup>
         <thead className="sticky top-0 z-[1]">
           <tr>
             <SortableTh col="client" label="Cliente" sort={sort} onSort={onSort} className="pl-0" />
-            <SortableTh col="previous" label="Anterior" align="right" sort={sort} onSort={onSort} />
+            {!isMobile && (
+              <SortableTh
+                col="previous"
+                label="Anterior"
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
+            )}
             <SortableTh col="current" label="Actual" align="right" sort={sort} onSort={onSort} />
             <SortableTh col="delta" label="Variación" align="right" sort={sort} onSort={onSort} />
-            <SortableTh col="pct" label="%" align="right" sort={sort} onSort={onSort} />
+            {!isMobile && (
+              <SortableTh col="pct" label="%" align="right" sort={sort} onSort={onSort} />
+            )}
           </tr>
         </thead>
         <tbody>
@@ -68,31 +91,35 @@ function DeltaTable({
             <tr
               key={r.nit}
               onClick={() => onOpenClient(r.nit)}
-              className="cursor-pointer hover:bg-[#fafafa] [&>td]:border-b [&>td]:border-[#f2f2f2]"
+              className="cursor-pointer hover:bg-cp-bg [&>td]:border-b [&>td]:border-cp-line"
             >
               <td className="h-[var(--table-row-h-single)] pr-3">
                 <span className="flex min-w-0 items-center gap-2">
                   <span
                     className="h-2 w-2 shrink-0 rounded-[2px]"
-                    style={{ background: channelColor(r.channel) }}
+                    style={{ background: marketColor(r.market) }}
                   />
                   <span className="truncate font-medium text-cp-blue">{r.client}</span>
                 </span>
               </td>
-              <td className="px-3 text-right tabular-nums">{formatMillions(r.previous)}</td>
+              {!isMobile && (
+                <td className="px-3 text-right tabular-nums">{formatMillions(r.previous)}</td>
+              )}
               <td className="px-3 text-right tabular-nums">{formatMillions(r.current)}</td>
               <td
                 className={cn(
                   "px-3 text-right font-semibold tabular-nums",
-                  r.delta >= 0 ? "text-cp-lime-dark" : "text-cp-magenta"
+                  r.delta >= 0 ? "text-cp-lime-dark" : "text-[#d11a2a] dark:text-[#ff6b6b]"
                 )}
               >
                 {r.delta > 0 ? "+" : ""}
                 {formatMillions(r.delta)}
               </td>
-              <td className="px-3 text-right tabular-nums text-cp-ink-3">
-                {r.pct === null ? "Nuevo" : formatPct(r.pct).replace(",0", "")}
-              </td>
+              {!isMobile && (
+                <td className="px-3 text-right tabular-nums text-cp-ink-3">
+                  {r.pct === null ? "Nuevo" : formatPct(r.pct).replace(",0", "")}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -112,6 +139,9 @@ export default function CollectionsTab({
   prevPayments,
   portfolio,
   history,
+  periods,
+  clientOf,
+  unapplied,
   onOpenClient
 }: Props) {
   const [side, setSide] = useState<"up" | "down">("down");
@@ -120,7 +150,7 @@ export default function CollectionsTab({
     const total = sumBy(payments, (p) => p.amount);
     const prev = sumBy(prevPayments, (p) => p.amount);
     const applied = sumBy(
-      payments.filter((p) => p.status === "Compensado"),
+      payments.filter((p) => isCompensated(p.status)),
       (p) => p.amount
     );
     const unapplied = total - applied;
@@ -131,56 +161,46 @@ export default function CollectionsTab({
   const unappliedDetail = useMemo(() => {
     const map = new Map<
       string,
-      { status: string; detail: string; amount: number; count: number }
+      { status: string; amount: number; count: number; clients: Set<string> }
     >();
     payments
-      .filter((p) => p.status !== "Compensado")
+      .filter((p) => !isCompensated(p.status))
       .forEach((p) => {
-        const key = `${p.status}·${p.detail ?? "Sin detalle"}`;
-        const e = map.get(key) ?? {
+        const e = map.get(p.status) ?? {
           status: p.status,
-          detail: p.detail ?? "Sin detalle",
           amount: 0,
-          count: 0
+          count: 0,
+          clients: new Set()
         };
         e.amount += p.amount;
-        e.count += 1;
-        map.set(key, e);
+        e.count += p.payments;
+        e.clients.add(p.nit);
+        map.set(p.status, e);
       });
     return Array.from(map.values()).sort((a, b) => b.amount - a.amount);
   }, [payments]);
 
-  const channels = useMemo(() => {
-    const names = Array.from(new Set(history.flatMap((h) => h.payments.map((p) => p.channel))));
-    return history.map((h) => ({
-      period: h.period,
-      label: periodShort(h.period),
-      ...Object.fromEntries(
-        names.map((n) => [
-          n,
-          sumBy(
-            h.payments.filter((p) => p.channel === n),
-            (p) => p.amount
-          )
-        ])
-      )
-    }));
-  }, [history]);
-  const channelNames = useMemo(
-    () =>
-      Array.from(new Set(history.flatMap((h) => h.payments.map((p) => p.channel)))).sort(
-        (a, b) =>
-          sumBy(
-            payments.filter((p) => p.channel === b),
-            (p) => p.amount
-          ) -
-          sumBy(
-            payments.filter((p) => p.channel === a),
-            (p) => p.amount
-          )
-      ),
-    [history, payments]
-  );
+  const { markets, marketNames } = useMemo(() => {
+    const byPeriod = new Map<string, Map<string, number>>();
+    const totals = new Map<string, number>();
+    history.forEach((h) => {
+      if (!h.collected) return;
+      const market = clientOf(h.nit).market;
+      const row = byPeriod.get(h.period) ?? new Map<string, number>();
+      row.set(market, (row.get(market) ?? 0) + h.collected);
+      byPeriod.set(h.period, row);
+      totals.set(market, (totals.get(market) ?? 0) + h.collected);
+    });
+    const names = Array.from(totals.keys()).sort((a, b) => totals.get(b)! - totals.get(a)!);
+    return {
+      marketNames: names,
+      markets: periods.map((p) => ({
+        period: p,
+        label: periodShort(p),
+        ...Object.fromEntries(names.map((n) => [n, byPeriod.get(p)?.get(n) ?? 0]))
+      }))
+    };
+  }, [history, periods, clientOf]);
 
   const deltas = useMemo(() => collectionDeltas(payments, prevPayments), [payments, prevPayments]);
   const improved = deltas.filter((d) => d.delta > 0);
@@ -244,13 +264,13 @@ export default function CollectionsTab({
 
       <div className="grid grid-cols-1 gap-[var(--card-gap)] xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <ChartCard
-          title="Recaudo por canal"
-          help="Recaudo de cada canal en los últimos cierres, según la hoja Pagos de la plantilla."
-          legend={channelNames.map((n) => ({ label: n, color: channelColor(n) }))}
+          title="Recaudo por mercado"
+          help="Recaudo de cada mercado en los últimos cierres, según la hoja Pagos de la plantilla."
+          legend={marketNames.map((n) => ({ label: n, color: marketColor(n) }))}
         >
           <div className="h-[300px] min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={channels} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+              <BarChart data={markets} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
                 <CartesianGrid {...gridProps} />
                 <XAxis dataKey="label" {...axisProps} />
                 <YAxis {...axisProps} width={78} tickFormatter={formatShort} />
@@ -262,23 +282,23 @@ export default function CollectionsTab({
                     return (
                       <ChartTooltipBox
                         title={`Recaudo ${periodLabel(String(row.period)).toLowerCase()}`}
-                        rows={channelNames.map((n) => ({
+                        rows={marketNames.map((n) => ({
                           label: n,
                           value: formatAmount(Number(row[n] ?? 0)),
-                          color: channelColor(n)
+                          color: marketColor(n)
                         }))}
                       />
                     );
                   }}
                 />
-                {channelNames.map((n, i) => (
+                {marketNames.map((n, i) => (
                   <Bar
                     key={n}
                     dataKey={n}
                     stackId="c"
-                    fill={channelColor(n)}
+                    fill={marketColor(n)}
                     maxBarSize={52}
-                    radius={i === channelNames.length - 1 ? [4, 4, 0, 0] : undefined}
+                    radius={i === marketNames.length - 1 ? [4, 4, 0, 0] : undefined}
                   />
                 ))}
               </BarChart>
@@ -286,44 +306,7 @@ export default function CollectionsTab({
           </div>
         </ChartCard>
 
-        <ChartCard
-          title="Recaudo sin aplicar al cierre"
-          help="Pagos que llegaron en el mes pero la compañía no compensó en su ERP antes del corte. Explican por qué el cierre no cuadra con lo que se ve en Cashport."
-        >
-          {unappliedDetail.length === 0 ? (
-            <p className="py-6 text-[13px] text-cp-ink-3">Todo el recaudo quedó compensado.</p>
-          ) : (
-            <div className="flex flex-col">
-              {unappliedDetail.map((d) => (
-                <div
-                  key={`${d.status}${d.detail}`}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-b border-[#f2f2f2] py-2.5"
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate text-[13px] font-medium text-cp-ink">
-                      {d.status}
-                    </span>
-                    <span className="block truncate text-[13px] text-cp-ink-3">
-                      {d.detail} · {d.count} pagos
-                    </span>
-                  </span>
-                  <span className="text-right text-[13px] font-semibold tabular-nums text-cp-ink">
-                    {formatAmount(d.amount)}
-                  </span>
-                  <span className="col-span-2 mt-1.5 h-1 overflow-hidden rounded-full bg-cp-muted">
-                    <span
-                      className="block h-full rounded-full"
-                      style={{
-                        width: `${(d.amount / unappliedDetail[0].amount) * 100}%`,
-                        background: SERIES.overdue
-                      }}
-                    />
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </ChartCard>
+        <UnappliedEvolution periods={periods} period={period} unapplied={unapplied} />
       </div>
 
       <ChartCard

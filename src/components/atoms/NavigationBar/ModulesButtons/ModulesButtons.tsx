@@ -118,7 +118,7 @@ const MODULES: RailModule[] = [
     isActive: (p) => p.startsWith("/balances")
   },
   {
-    // Maqueta con datos de prueba: solo super admins hasta que exista la carga del cierre.
+    // Solo super admins mientras se valida con los proyectos; luego pasa a un permiso de vista.
     href: "/cierres",
     label: "Cierres de cartera",
     group: "Cartera",

@@ -1,6 +1,7 @@
 import {
   AGING_BUCKETS,
   type AgingBucket,
+  type IClosingHistoryRow,
   type IClosingPaymentRow,
   type IClosingPortfolioRow
 } from "@/types/closings/IClosings";
@@ -41,7 +42,7 @@ export const portfolioTotals = (rows: IClosingPortfolioRow[]): PortfolioTotals =
     documents += r.documents;
     if (r.kind === "Factura") invoices += r.amount;
     else if (r.kind === "Saldos") openBalances += r.amount;
-    else notes += r.amount;
+    else if (r.kind === "NC") notes += r.amount;
   });
   const total = AGING_BUCKETS.reduce((acc, b) => acc + buckets[b], 0);
   const current = buckets.Corriente;
@@ -62,14 +63,12 @@ export const portfolioTotals = (rows: IClosingPortfolioRow[]): PortfolioTotals =
 };
 
 export type PortfolioDimension =
-  | "channel"
-  | "salesExecutive"
-  | "collectionExecutive"
-  | "manager"
+  | "market"
+  | "kam"
+  | "executive"
+  | "kamLeader"
   | "coordinator"
   | "holding"
-  | "city"
-  | "segment"
   | "balanceType";
 
 export interface DimensionRow {
@@ -111,30 +110,53 @@ export const groupPortfolio = (
     .sort((a, b) => b.total - a.total);
 };
 
+/** Grupos del tooltip de cartera (como en Clientes): Facturas, Saldos, Notas y lo demás. */
+export const KIND_GROUPS = ["Facturas", "Saldos", "Notas", "Otros"] as const;
+export type KindGroup = (typeof KIND_GROUPS)[number];
+
+export const kindGroupOf = (kind: string): KindGroup =>
+  kind === "Factura"
+    ? "Facturas"
+    : kind === "Saldos"
+      ? "Saldos"
+      : kind === "NC"
+        ? "Notas"
+        : "Otros";
+
 export interface ClientRow {
   nit: string;
   client: string;
-  channel: string;
-  salesExecutive: string;
-  collectionExecutive: string;
+  market: string;
+  kam: string;
+  executive: string;
   total: number;
   current: number;
   overdue: number;
   overduePct: number;
   buckets: BucketTotals;
   openBalances: number;
+  notes: number;
   collected: number;
+  /** Recaudo del cierre anterior (null si no hay cierre anterior). */
+  prevCollected: number | null;
   /** % vencido del cierre anterior (null si el cliente no estaba). */
   prevOverduePct: number | null;
+  /** Cartera por tipo y tramo, para el tooltip de la celda Cartera. */
+  byKind: Record<KindGroup, BucketTotals>;
 }
 
 export const clientRows = (
   rows: IClosingPortfolioRow[],
   payments: IClosingPaymentRow[],
-  prevRows: IClosingPortfolioRow[]
+  prevRows: IClosingPortfolioRow[],
+  prevPayments: IClosingPaymentRow[] | null
 ): ClientRow[] => {
   const collected = new Map<string, number>();
   payments.forEach((p) => collected.set(p.nit, (collected.get(p.nit) ?? 0) + p.amount));
+  const prevCollected = new Map<string, number>();
+  prevPayments?.forEach((p) =>
+    prevCollected.set(p.nit, (prevCollected.get(p.nit) ?? 0) + p.amount)
+  );
 
   const prev = new Map<string, { total: number; current: number }>();
   prevRows.forEach((r) => {
@@ -151,21 +173,29 @@ export const clientRows = (
       ({
         nit: r.nit,
         client: r.client,
-        channel: r.channel,
-        salesExecutive: r.salesExecutive,
-        collectionExecutive: r.collectionExecutive,
+        market: r.market,
+        kam: r.kam,
+        executive: r.executive,
         total: 0,
         current: 0,
         overdue: 0,
         overduePct: 0,
         buckets: emptyBuckets(),
         openBalances: 0,
+        notes: 0,
         collected: collected.get(r.nit) ?? 0,
-        prevOverduePct: null
+        prevCollected: prevPayments ? prevCollected.get(r.nit) ?? 0 : null,
+        prevOverduePct: null,
+        byKind: Object.fromEntries(KIND_GROUPS.map((g) => [g, emptyBuckets()])) as Record<
+          KindGroup,
+          BucketTotals
+        >
       } as ClientRow);
     e.buckets[r.bucket] += r.amount;
+    e.byKind[kindGroupOf(r.kind)][r.bucket] += r.amount;
     e.total += r.amount;
     if (r.kind === "Saldos") e.openBalances += r.amount;
+    if (r.kind === "NC") e.notes += r.amount;
     map.set(r.nit, e);
   });
 
@@ -185,7 +215,7 @@ export const clientRows = (
 export interface CollectionDelta {
   nit: string;
   client: string;
-  channel: string;
+  market: string;
   previous: number;
   current: number;
   delta: number;
@@ -203,7 +233,7 @@ export const collectionDeltas = (
     ({
       nit: p.nit,
       client: p.client,
-      channel: p.channel,
+      market: p.market,
       previous: 0,
       current: 0,
       delta: 0,
@@ -228,3 +258,36 @@ export const collectionDeltas = (
 
 export const sumBy = <T>(items: T[], pick: (item: T) => number) =>
   items.reduce((acc, item) => acc + pick(item), 0);
+
+export interface PeriodTotals {
+  period: string;
+  total: number;
+  current: number;
+  overdue: number;
+  overduePct: number;
+  collected: number;
+  buckets: BucketTotals;
+}
+
+/** Totales por cierre a partir del histórico por cliente (evolución de los cierres). */
+export const periodTotals = (rows: IClosingHistoryRow[], periods: string[]): PeriodTotals[] =>
+  periods.map((period) => {
+    const buckets = emptyBuckets();
+    let collected = 0;
+    rows.forEach((r) => {
+      if (r.period !== period) return;
+      AGING_BUCKETS.forEach((b) => (buckets[b] += r.buckets[b]));
+      collected += r.collected;
+    });
+    const total = AGING_BUCKETS.reduce((acc, b) => acc + buckets[b], 0);
+    const overdue = total - buckets.Corriente;
+    return {
+      period,
+      total,
+      current: buckets.Corriente,
+      overdue,
+      overduePct: total ? overdue / total : 0,
+      collected,
+      buckets
+    };
+  });

@@ -1,45 +1,88 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { Skeleton } from "antd";
 import { UploadSimple } from "phosphor-react";
 
 import Header from "@/components/organisms/header";
 import { FilterModal } from "@/components/ui/filter-modal";
 import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
-import UiTab from "@/components/ui/ui-tab";
-import { cn } from "@/utils/utils";
 
-import AgingByChannel from "../../components/aging-by-channel/aging-by-channel";
+import AgingByMarket from "../../components/aging-by-market/aging-by-market";
+import CollectionsByMarket from "../../components/collections-by-market/collections-by-market";
 import BalancesTab from "../../components/balances-tab/balances-tab";
-import ChartCard from "../../components/chart-card/chart-card";
 import ClientClosingDrawer from "../../components/client-closing-drawer/client-closing-drawer";
 import ClientsTable from "../../components/clients-table/clients-table";
 import ClosingKpis, { Delta, Pill } from "../../components/closing-kpis/closing-kpis";
 import ClosingPicker from "../../components/closing-picker/closing-picker";
-import ClosingsTrend from "../../components/closings-trend/closings-trend";
+import AgingComparison from "../../components/aging-comparison/aging-comparison";
+import OverdueByMarket from "../../components/overdue-by-market/overdue-by-market";
 import CollectionsTab from "../../components/collections-tab/collections-tab";
 import CommentsTab from "../../components/comments-tab/comments-tab";
 import LoadClosingModal from "../../components/load-closing-modal/load-closing-modal";
-import PortfolioByDimension from "../../components/portfolio-by-dimension/portfolio-by-dimension";
+import MarketChips from "../../components/market-chips/market-chips";
 import TemplateTab from "../../components/template-tab/template-tab";
+import TrendsTab from "../../components/trends-tab/trends-tab";
+import ViewSelector from "../../components/view-selector/view-selector";
 import { HIGH_OVERDUE } from "../../constants";
-import { useClosings } from "../../hooks/use-closings";
+import { downloadPendingClients } from "../../utils/pending-clients";
+import { isCompensated, useClosings } from "../../hooks/use-closings";
 import { clientRows, portfolioTotals, sumBy } from "../../utils/aggregate";
-import { formatMillions, formatPct, formatPp, periodLabel } from "../../utils/format";
+import { clientForm } from "../../utils/trends";
+import { formatMillions, formatPct, formatPp, periodShort } from "../../utils/format";
 
-type TabKey = "resumen" | "clientes" | "recaudo" | "saldos" | "comentarios" | "plantilla";
+type TabKey =
+  | "resumen"
+  | "tendencias"
+  | "clientes"
+  | "recaudo"
+  | "saldos"
+  | "comentarios"
+  | "plantilla";
+
+/** Vistas del módulo: se eligen desde el título (como los tableros de la Torre de recaudo). */
+const VIEWS: { key: TabKey; name: string; description: string }[] = [
+  {
+    key: "clientes",
+    name: "Cierre por cliente",
+    description: "Cartera, recaudo y racha de cada cliente"
+  },
+  {
+    key: "resumen",
+    name: "Resumen del cierre",
+    description: "Indicadores, recaudo por mercado y edades"
+  },
+  {
+    key: "tendencias",
+    name: "Tendencias",
+    description: "Evolución entre cierres y señales por cliente"
+  },
+  {
+    key: "recaudo",
+    name: "Recaudo del cierre",
+    description: "Compensado, sin aplicar y cambios por cliente"
+  },
+  { key: "saldos", name: "Saldos y notas", description: "Partidas abiertas y notas por causal" },
+  { key: "comentarios", name: "Comentarios", description: "Bitácora del comité por cliente y mes" },
+  {
+    key: "plantilla",
+    name: "Plantilla y cargas",
+    description: "Formato del archivo y cierres cargados"
+  }
+];
 
 const direction = (diff: number, epsilon: number) =>
   diff > epsilon ? "up" : diff < -epsilon ? "down" : "flat";
 
 /**
  * Cierres de cartera (/cierres): informes del cierre de cada mes, fijos al corte que reporta
- * la compañía desde su ERP. Maqueta con datos de prueba: no lee nada de Cashport.
+ * la compañía desde su ERP (plantilla cargada en /portfolio-closings). No lee la cartera viva.
  */
 export default function ClosingsView() {
   const state = useClosings();
   const {
     closings,
+    readyClosings,
     period,
     setPeriod,
     prevPeriod,
@@ -48,16 +91,29 @@ export default function ClosingsView() {
     filterCategories,
     search,
     setSearch,
+    clientOf,
+    pendingClients,
     portfolio,
     prevPortfolio,
     payments,
     prevPayments,
     history,
     comments,
-    saveComment
+    saveComment,
+    removeComment,
+    refreshClosings,
+    markets,
+    selectedMarkets,
+    toggleMarket,
+    clearMarkets,
+    unapplied,
+    isLoading,
+    error,
+    projectId
   } = state;
+  const periods = useMemo(() => readyClosings.map((c) => c.period), [readyClosings]);
 
-  const [tab, setTab] = useState<TabKey>("resumen");
+  const [tab, setTab] = useState<TabKey>("clientes");
   const [openNit, setOpenNit] = useState<string | null>(null);
   const [loadOpen, setLoadOpen] = useState(false);
 
@@ -65,36 +121,60 @@ export default function ClosingsView() {
   const prevTotals = useMemo(() => portfolioTotals(prevPortfolio), [prevPortfolio]);
   const collected = useMemo(() => sumBy(payments, (p) => p.amount), [payments]);
   const prevCollected = useMemo(() => sumBy(prevPayments, (p) => p.amount), [prevPayments]);
-  const unapplied = useMemo(
+  const unappliedTotal = useMemo(
     () =>
       sumBy(
-        payments.filter((p) => p.status !== "Compensado"),
+        payments.filter((p) => !isCompensated(p.status)),
         (p) => p.amount
       ),
     [payments]
   );
   const clients = useMemo(
-    () => clientRows(portfolio, payments, prevPortfolio),
-    [portfolio, payments, prevPortfolio]
+    () => clientRows(portfolio, payments, prevPortfolio, prevPeriod ? prevPayments : null),
+    [portfolio, payments, prevPortfolio, prevPayments, prevPeriod]
   );
   const commented = useMemo(
     () => new Set(comments.filter((c) => c.period === period).map((c) => c.nit)),
     [comments, period]
   );
+  const periodComments = useMemo(() => {
+    const map = new Map<string, typeof comments>();
+    comments
+      .filter((c) => c.period === period)
+      .forEach((c) => map.set(c.nit, [...(map.get(c.nit) ?? []), c]));
+    return map;
+  }, [comments, period]);
   const openClient = clients.find((c) => c.nit === openNit) ?? null;
 
-  const prevLabel = prevPeriod ? periodLabel(prevPeriod).split(" ")[0].toLowerCase() : "";
+  const prevLabel = prevPeriod ? periodShort(prevPeriod).split(" ")[0].toLowerCase() : "";
   const totalDiff = prevTotals.total ? (totals.total - prevTotals.total) / prevTotals.total : 0;
   const pctDiff = totals.overduePct - prevTotals.overduePct;
   const collectedDiff = prevCollected ? (collected - prevCollected) / prevCollected : 0;
 
-  /** Clic en una barra o un canal: lo vuelve filtro del tablero (chip en el header). */
+  /** Clic en una barra o un mercado: lo vuelve filtro del tablero (chip en el header). */
   const filterBy = (key: string, value: string) =>
     setFilters({ ...filters, [key]: [{ id: value, name: value }] });
 
-  const topOverdue = useMemo(
-    () => [...clients].sort((a, b) => b.overdue - a.overdue).slice(0, 8),
-    [clients]
+  const form = useMemo(() => clientForm(history, [...periods].reverse()), [history, periods]);
+  const collectedTrend = useMemo(() => {
+    const window = [...periods].reverse().slice(-6);
+    const map = new Map<string, number[]>();
+    history.forEach((h) => {
+      const i = window.indexOf(h.period);
+      if (i < 0) return;
+      const values = map.get(h.nit) ?? window.map(() => 0);
+      values[i] += h.collected;
+      map.set(h.nit, values);
+    });
+    return map;
+  }, [history, periods]);
+
+  const onLoaded = useCallback(
+    (loaded: string) => {
+      void refreshClosings();
+      setPeriod(loaded);
+    },
+    [refreshClosings, setPeriod]
   );
 
   const summary = (
@@ -141,7 +221,7 @@ export default function ClosingsView() {
                   direction={direction(pctDiff, 0.0005)}
                   goodWhenUp={false}
                 />{" "}
-                vs {prevLabel} ({formatPct(prevTotals.overduePct)})
+                vs {prevLabel}
               </>
             ) : undefined
           },
@@ -150,7 +230,7 @@ export default function ClosingsView() {
             label: "Vencida > 30 días",
             value: formatMillions(totals.overdue30),
             unit: "M",
-            bar: { value: totals.total ? totals.overdue30 / totals.total : 0, color: "#e0007a" },
+            bar: { value: totals.total ? totals.overdue30 / totals.total : 0, color: "#d11a2a" },
             caption: `${formatPct(totals.total ? totals.overdue30 / totals.total : 0)} de la cartera`
           },
           {
@@ -172,9 +252,9 @@ export default function ClosingsView() {
           {
             key: "unapplied",
             label: "Recaudo sin aplicar",
-            value: formatMillions(unapplied),
+            value: formatMillions(unappliedTotal),
             unit: "M",
-            caption: "Pendiente de compensar al corte"
+            caption: "sin compensar al corte"
           },
           {
             key: "balances",
@@ -188,154 +268,190 @@ export default function ClosingsView() {
         ]}
       />
 
-      <div className="grid grid-cols-1 gap-[var(--card-gap)] xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <PortfolioByDimension rows={portfolio} onSelect={filterBy} />
-        <AgingByChannel rows={portfolio} onSelectChannel={(c) => filterBy("channel", c)} />
+      <div className="grid grid-cols-1 gap-[var(--card-gap)] xl:grid-cols-2">
+        <CollectionsByMarket
+          periods={[...periods].reverse()}
+          history={history}
+          clientOf={clientOf}
+          selected={selectedMarkets}
+          allMarkets={markets.map((m) => m.name)}
+          onToggleMarket={toggleMarket}
+        />
+        <AgingByMarket
+          rows={portfolio}
+          onSelect={(dim, value) => (dim === "market" ? toggleMarket(value) : filterBy(dim, value))}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--card-gap)] xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <ClosingsTrend history={history} />
-        <ChartCard
-          title="Mayor saldo vencido"
-          help="Los clientes con más vencido en el cierre. El punto naranja indica que ya tienen comentario para el comité."
-          actions={
-            <button
-              type="button"
-              onClick={() => setTab("clientes")}
-              className="text-[13px] font-semibold text-cp-blue hover:underline"
-            >
-              Ver todos
-            </button>
-          }
-        >
-          <div className="flex flex-col">
-            {topOverdue.map((c, i) => (
-              <button
-                key={c.nit}
-                type="button"
-                onClick={() => setOpenNit(c.nit)}
-                className="grid grid-cols-[20px_minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-[#f2f2f2] py-2 text-left text-[13px] last:border-b-0 hover:bg-[#fafafa]"
-              >
-                <span className="text-cp-ink-4">{i + 1}</span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1.5">
-                    <span className="truncate font-medium text-cp-blue">{c.client}</span>
-                    <span
-                      className={cn(
-                        "h-[7px] w-[7px] shrink-0 rounded-full",
-                        commented.has(c.nit) ? "bg-cp-orange" : "bg-transparent"
-                      )}
-                    />
-                  </span>
-                  <span className="block truncate text-cp-ink-3">{c.salesExecutive}</span>
-                </span>
-                <span className="text-right font-semibold tabular-nums">
-                  {formatMillions(c.overdue)} M
-                </span>
-                <Pill tone={c.overduePct > HIGH_OVERDUE ? "risk" : "neutral"}>
-                  {formatPct(c.overduePct)}
-                </Pill>
-              </button>
-            ))}
-          </div>
-        </ChartCard>
+      <div className="grid grid-cols-1 gap-[var(--card-gap)] xl:grid-cols-2">
+        <AgingComparison periods={[...periods].reverse()} history={history} />
+        <OverdueByMarket periods={[...periods].reverse()} history={history} clientOf={clientOf} />
       </div>
     </div>
   );
+
+  const hasClosing = Boolean(period);
+  const showTemplate = tab === "plantilla" || (!hasClosing && !isLoading);
 
   return (
     <div className="cp-page">
       <Header
         title="Cierres de cartera"
-        titleExtra={<ClosingPicker closings={closings} value={period} onChange={setPeriod} />}
+        titleNode={
+          <ViewSelector
+            views={
+              hasClosing
+                ? VIEWS.map((v) =>
+                    v.key === "comentarios" ? { ...v, name: `${v.name} (${commented.size})` } : v
+                  )
+                : VIEWS.filter((v) => v.key === "plantilla")
+            }
+            value={hasClosing ? tab : "plantilla"}
+            onChange={setTab}
+          />
+        }
+        titleExtra={
+          period ? (
+            <ClosingPicker
+              closings={readyClosings}
+              value={period}
+              onChange={setPeriod}
+              onLoadNew={() => setLoadOpen(true)}
+              pendingCount={pendingClients.length}
+              onDownloadPending={() => downloadPendingClients(pendingClients, period)}
+            />
+          ) : null
+        }
         actionsExtra={
           <>
-            <button
-              type="button"
-              onClick={() => setLoadOpen(true)}
-              className="flex h-[var(--control-h)] shrink-0 items-center gap-2 rounded-lg bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-cp-lime-dark"
-            >
-              <UploadSimple size={18} weight="bold" /> Cargar cierre
-            </button>
             <FilterModal
               inHeader
               categories={filterCategories}
               value={filters}
               onApply={setFilters}
               onValueChange={setFilters}
+              isLoading={!hasClosing}
             />
             <HeaderSearch value={search} onChange={setSearch} placeholder="Buscar cliente, NIT…" />
           </>
         }
       />
 
-      <section className="cp-card px-[18px] pb-[14px]">
-        <UiTab
-          activeKey={tab}
-          onChangeTab={(key) => setTab(key as TabKey)}
-          tabs={[
-            { key: "resumen", label: "Resumen", children: null },
-            { key: "clientes", label: "Clientes", children: null },
-            { key: "recaudo", label: "Recaudo", children: null },
-            { key: "saldos", label: "Saldos y notas", children: null },
-            { key: "comentarios", label: `Comentarios (${commented.size})`, children: null },
-            { key: "plantilla", label: "Plantilla", children: null }
-          ]}
-          tabBarExtraContent={
-            <span className="text-[13px] text-cp-ink-3">
-              Cifras del cierre en millones · {totals.clients} clientes
-            </span>
-          }
-        />
-      </section>
-
-      {tab === "resumen" && summary}
-      {tab === "clientes" && (
-        <ChartCard
-          title="Resultados del cierre por cliente"
-          help="Cartera, recaudo y aging de cada cliente al corte. Bajo el % vencido, la variación frente al cierre anterior. Clic en un cliente para ver su ficha y comentarios."
-        >
-          <ClientsTable rows={clients} commented={commented} onOpen={(r) => setOpenNit(r.nit)} />
-        </ChartCard>
+      {error && (
+        <section className="cp-card px-[18px] py-[14px] text-[13px] text-[#d11a2a] dark:text-[#ff6b6b]">
+          {error.message || "No se pudieron cargar los cierres"}
+        </section>
       )}
-      {tab === "recaudo" && (
-        <CollectionsTab
+
+      {isLoading && (
+        <section className="cp-card px-[18px] py-[14px]">
+          <Skeleton active paragraph={{ rows: 6 }} />
+        </section>
+      )}
+
+      {!projectId && (
+        <section className="cp-card px-[18px] py-[18px] text-[13px] text-cp-ink-3">
+          Elige un proyecto para ver sus cierres de cartera.
+        </section>
+      )}
+
+      {projectId && !isLoading && !hasClosing && !error && (
+        <section className="cp-card flex flex-col items-start gap-2 px-[18px] py-[18px]">
+          <h3 className="text-[18px] font-semibold text-cp-ink">Todavía no hay cierres cargados</h3>
+          <p className="max-w-[720px] text-[13px] leading-[1.55] text-cp-ink-3">
+            Carga la cartera y los pagos al cierre del mes con la plantilla. Cada cierre queda como
+            una foto fija del corte: así todos ven las mismas cifras que reportó la compañía.
+          </p>
+          <button
+            type="button"
+            onClick={() => setLoadOpen(true)}
+            className="mt-1 flex h-[var(--control-h)] items-center gap-2 rounded-lg bg-cp-lime px-4 text-[14px] font-semibold text-[#141414] hover:bg-cp-lime-dark"
+          >
+            <UploadSimple size={18} weight="bold" /> Cargar el primer cierre
+          </button>
+        </section>
+      )}
+
+      {hasClosing && !isLoading && period && (
+        <>
+          {tab === "resumen" && summary}
+          {tab === "tendencias" && (
+            <TrendsTab
+              periods={[...periods].reverse()}
+              history={history}
+              clientOf={clientOf}
+              onOpenClient={setOpenNit}
+            />
+          )}
+          {tab === "clientes" && (
+            <section className="cp-card min-w-0 px-[18px] py-[10px]">
+              <div className="pb-2 pt-1">
+                <MarketChips
+                  markets={markets}
+                  selected={selectedMarkets}
+                  onToggle={toggleMarket}
+                  onClear={clearMarkets}
+                />
+              </div>
+              <ClientsTable
+                rows={clients}
+                comments={periodComments}
+                form={form}
+                collectedTrend={collectedTrend}
+                onOpen={(r) => setOpenNit(r.nit)}
+              />
+            </section>
+          )}
+          {tab === "recaudo" && (
+            <CollectionsTab
+              period={period}
+              prevPeriod={prevPeriod}
+              payments={payments}
+              prevPayments={prevPayments}
+              portfolio={portfolio}
+              history={history}
+              periods={[...periods].reverse()}
+              clientOf={clientOf}
+              unapplied={unapplied}
+              onOpenClient={setOpenNit}
+            />
+          )}
+          {tab === "saldos" && <BalancesTab portfolio={portfolio} onOpenClient={setOpenNit} />}
+          {tab === "comentarios" && (
+            <CommentsTab
+              period={period}
+              periods={periods}
+              comments={comments}
+              clients={clients}
+              onOpenClient={setOpenNit}
+            />
+          )}
+        </>
+      )}
+      {showTemplate && <TemplateTab closings={closings} onDeleted={refreshClosings} />}
+
+      {period && (
+        <ClientClosingDrawer
+          client={openClient}
+          info={openNit ? clientOf(openNit) : null}
           period={period}
-          prevPeriod={prevPeriod}
-          payments={payments}
-          prevPayments={prevPayments}
+          periods={periods}
           portfolio={portfolio}
           history={history}
-          onOpenClient={setOpenNit}
-        />
-      )}
-      {tab === "saldos" && <BalancesTab portfolio={portfolio} onOpenClient={setOpenNit} />}
-      {tab === "comentarios" && (
-        <CommentsTab
-          period={period}
-          periods={closings.map((c) => c.period)}
           comments={comments}
-          clients={clients}
-          onOpenClient={setOpenNit}
+          onSaveComment={saveComment}
+          onDeleteComment={removeComment}
+          onClose={() => setOpenNit(null)}
         />
       )}
-      {tab === "plantilla" && <TemplateTab closings={closings} />}
-
-      <ClientClosingDrawer
-        client={openClient}
-        period={period}
-        history={history}
-        comments={comments}
-        onSaveComment={saveComment}
-        onClose={() => setOpenNit(null)}
-      />
       <LoadClosingModal
         open={loadOpen}
-        onClose={() => setLoadOpen(false)}
-        onSeeTemplate={() => {
+        loadedPeriods={closings.map((c) => c.period)}
+        onClose={() => {
           setLoadOpen(false);
-          setTab("plantilla");
+          void refreshClosings();
         }}
+        onLoaded={onLoaded}
       />
     </div>
   );

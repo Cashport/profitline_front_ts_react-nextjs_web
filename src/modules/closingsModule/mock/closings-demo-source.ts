@@ -1,12 +1,64 @@
-import {
-  AGING_BUCKETS,
-  type AgingBucket,
-  type IClosingComment,
-  type IClosingDataset,
-  type IClosingInfo,
-  type IClosingPaymentRow,
-  type IClosingPortfolioRow
-} from "@/types/closings/IClosings";
+import { AGING_BUCKETS, type AgingBucket } from "@/types/closings/IClosings";
+
+/* Generador de la maqueta (forma vieja de los datos). Solo lo usa el modo demo
+   (closings-demo.ts), que lo convierte a la forma de la API. */
+
+interface IClosingPortfolioRow {
+  period: string;
+  nit: string;
+  client: string;
+  channel: string;
+  holding: string;
+  manager: string;
+  salesExecutive: string;
+  collectionExecutive: string;
+  coordinator: string;
+  city: string;
+  segment: string;
+  balanceType: string;
+  kind: "Factura" | "NC" | "Saldos";
+  bucket: AgingBucket;
+  amount: number;
+  documents: number;
+}
+
+interface IClosingPaymentRow {
+  period: string;
+  nit: string;
+  client: string;
+  channel: string;
+  paymentType: string;
+  status: string;
+  detail: string | null;
+  amount: number;
+}
+
+interface IClosingComment {
+  id: string;
+  period: string;
+  nit: string;
+  client: string;
+  text: string;
+  author: string;
+  createdAt: string;
+}
+
+interface IClosingInfo {
+  period: string;
+  cutoffDate: string;
+  loadedAt: string;
+  loadedBy: string;
+  fileName: string;
+  rows: number;
+  status: "Publicado";
+}
+
+interface IClosingDataset {
+  closings: IClosingInfo[];
+  portfolio: IClosingPortfolioRow[];
+  payments: IClosingPaymentRow[];
+  comments: IClosingComment[];
+}
 
 /* Datos de prueba con la forma de la plantilla de cierre (hojas Cartera, Pagos y
    Comentarios). Nombres y montos inventados; las proporciones (canales, tramos, causales,
@@ -379,7 +431,7 @@ const buildDataset = (): IClosingDataset => {
             client: c.name,
             channel: c.channel.name,
             paymentType: "Consignación",
-            status: rand() < 0.85 ? "Pendiente compensación" : "Revisión doble abono",
+            status: rand() < 0.85 ? "Pendiente compensacion" : "Revision doble abono",
             detail: pick(UNAPPLIED_DETAIL),
             amount: unapplied
           });
@@ -431,4 +483,4 @@ const buildDataset = (): IClosingDataset => {
   return { closings, portfolio, payments, comments };
 };
 
-export const CLOSINGS_MOCK: IClosingDataset = buildDataset();
+export const DEMO_DATASET: IClosingDataset = buildDataset();

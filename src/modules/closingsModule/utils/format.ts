@@ -13,6 +13,9 @@ export const formatAmount = (value: number) => intFormatter.format(Math.round(va
 /** Monto en millones para KPIs y gráficas: "249.183" (unidad "M" aparte). */
 export const formatMillions = (value: number) => intFormatter.format(Math.round(value / 1e6));
 
+/** Millones con un decimal, como la tabla de Clientes: "1.133,5". */
+export const formatM1 = (value: number) => oneDecimal.format(value / 1e6);
+
 /** Monto corto para ejes y etiquetas: "249 mil M", "1,2 mil M", "850 M". */
 export const formatShort = (value: number) => {
   const abs = Math.abs(value);

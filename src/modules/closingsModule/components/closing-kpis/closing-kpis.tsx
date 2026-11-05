@@ -1,6 +1,5 @@
 "use client";
 
-import { KpiAside, KpiCard, KpiValue } from "@/components/ui/kpi-card/kpi-card";
 import { cn } from "@/utils/utils";
 
 /* Fila de KPIs del cierre (DESIGN.md §5): una sola fila, etiqueta → valor en millones →
@@ -21,7 +20,7 @@ export function Pill({
         "inline-flex items-center rounded-[5px] px-1.5 py-px text-[13px] font-semibold leading-[1.35]",
         tone === "neutral" && "bg-cp-muted text-cp-ink-2",
         tone === "positive" && "bg-cp-lime text-[#141414]",
-        tone === "risk" && "bg-cp-magenta text-white"
+        tone === "risk" && "bg-[#d11a2a] text-white"
       )}
     >
       {children}
@@ -45,7 +44,7 @@ export function Delta({
       className={cn(
         "font-semibold",
         good === true && "text-cp-lime-dark",
-        good === false && "text-cp-magenta",
+        good === false && "text-[#d11a2a] dark:text-[#ff6b6b]",
         good === null && "text-cp-ink-3"
       )}
     >
@@ -67,6 +66,18 @@ export interface ClosingKpi {
   split?: { label: string; value: string; caption?: React.ReactNode }[];
 }
 
+function CompactValue({ value, unit }: { value: string; unit?: string }) {
+  return (
+    <span className="flex shrink-0 items-baseline font-semibold leading-none text-cp-ink">
+      <span className="whitespace-nowrap text-[22px] tracking-[-0.4px]" title={value}>
+        {value}
+      </span>
+      {unit && <span className="ml-[3px] text-[13px] font-medium text-cp-ink-3">{unit}</span>}
+    </span>
+  );
+}
+
+/** Fila de KPIs compacta: dos renglones (etiqueta · valor con su comparación), sin barras. */
 export default function ClosingKpis({ items }: { items: ClosingKpi[] }) {
   return (
     <div
@@ -74,49 +85,42 @@ export default function ClosingKpis({ items }: { items: ClosingKpi[] }) {
       style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
     >
       {items.map((kpi) => (
-        <KpiCard key={kpi.key} className="min-h-[var(--kpi-h)]">
+        <section
+          key={kpi.key}
+          className="cp-card flex min-w-0 flex-col justify-center gap-1.5 px-4 py-2.5"
+        >
           {kpi.split ? (
             <div className="flex min-w-0 items-stretch gap-3">
               {kpi.split.map((s, i) => (
                 <div
                   key={s.label}
-                  className={cn("min-w-0 flex-1", i > 0 && "border-l border-cp-line pl-3")}
+                  className={cn(
+                    "flex min-w-0 flex-1 flex-col gap-1.5",
+                    i > 0 && "border-l border-cp-line pl-3"
+                  )}
                 >
-                  <KpiValue
-                    label={s.label}
-                    value={s.value}
-                    unit="M"
-                    size="md"
-                    caption={s.caption}
-                  />
+                  <span className="truncate text-[13px] text-cp-ink-3">{s.label}</span>
+                  <CompactValue value={s.value} unit="M" />
                 </div>
               ))}
             </div>
           ) : (
             <>
-              <div className="flex min-w-0 items-start gap-3">
-                <KpiValue label={kpi.label} value={kpi.value} unit={kpi.unit} />
-                {kpi.aside && (
-                  <KpiAside label={kpi.aside.label} pill={kpi.aside.pill} value={kpi.aside.value} />
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <span className="truncate text-[13px] text-cp-ink-3">{kpi.label}</span>
+                {kpi.aside?.pill}
+              </div>
+              <div className="flex min-w-0 items-baseline justify-between gap-2">
+                <CompactValue value={kpi.value} unit={kpi.unit} />
+                {kpi.caption && (
+                  <span className="min-w-0 truncate text-right text-[13px] text-cp-ink-3">
+                    {kpi.caption}
+                  </span>
                 )}
               </div>
-              {kpi.bar && (
-                <div className="h-[5px] overflow-hidden rounded-full bg-cp-muted">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${Math.max(0, Math.min(1, kpi.bar.value)) * 100}%`,
-                      background: kpi.bar.color
-                    }}
-                  />
-                </div>
-              )}
-              {kpi.caption && (
-                <span className="truncate text-[13px] text-cp-ink-3">{kpi.caption}</span>
-              )}
             </>
           )}
-        </KpiCard>
+        </section>
       ))}
     </div>
   );
