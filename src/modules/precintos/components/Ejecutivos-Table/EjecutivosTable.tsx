@@ -2,6 +2,7 @@
 
 import React from 'react';
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
+import { formatFechaPrecinto } from '../../utils/fechas';
 
 export interface IEjecutivoStats {
   EjecutivoId: string;
@@ -83,7 +84,7 @@ export const EjecutivosTable: React.FC<EjecutivosTableProps> = ({
                   {ejecutivo.EjecutivoNombre}
                 </td>
                 <td className="py-3 px-4 font-medium text-cp-ink-2">
-                  {ejecutivo.UltimoEnvio ? new Date(ejecutivo.UltimoEnvio).toLocaleDateString('es-CO') : '-'}
+                  {formatFechaPrecinto(ejecutivo.UltimoEnvio)}
                 </td>
                 <td className="py-3 px-4 font-medium text-cp-ink">{ejecutivo.Recibidos}</td>
                 <td className="py-3 px-4 font-medium text-cp-ink">{ejecutivo.Usados}</td>

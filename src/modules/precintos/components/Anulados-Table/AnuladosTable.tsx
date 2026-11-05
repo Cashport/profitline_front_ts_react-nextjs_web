@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
+import { formatFechaPrecinto } from '../../utils/fechas';
 
 interface AnuladosTableProps {
   data?: any[];
@@ -74,9 +75,7 @@ export const AnuladosTable: React.FC<AnuladosTableProps> = ({
                   </td>
                   
                   <td className="py-3 px-4 font-medium text-cp-ink-2">
-                    {item.FechaAnulacion 
-                      ? new Date(item.FechaAnulacion).toLocaleDateString('es-CO') 
-                      : (item.FechaRegistro ? new Date(item.FechaRegistro).toLocaleDateString('es-CO') : '-')}
+                    {formatFechaPrecinto(item.FechaAnulacion || item.FechaRegistro)}
                   </td>
                   
                   <td className="py-3 px-4 font-medium text-cp-ink">{item.UsuarioModifico || item.UsuarioRegistro || 'Sistema'}</td>

@@ -13,7 +13,9 @@ interface ActionModalProps {
   onAnular?: () => void; // 👈 NUEVA PROP
   onDownloadInventory?: () => void;
   onDownloadFiltered?: () => void;
-  onDownloadSelected?: () => void; 
+  onDownloadSelected?: () => void;
+  /** La selección es de precintos en bodega: no se pueden cambiar de ejecutivo ni devolver. */
+  seleccionEnBodega?: boolean;
 }
 
 interface ActionCardProps {
@@ -66,8 +68,12 @@ export const ActionModal: React.FC<ActionModalProps> = ({
   onDownloadInventory,
   onDownloadFiltered,
   onDownloadSelected,
+  seleccionEnBodega = false,
 }) => {
   if (!isOpen) return null;
+
+  const sinAsignados = selectedCount === 0 || seleccionEnBodega;
+  const subtituloAsignados = seleccionEnBodega ? 'No aplica a precintos en bodega' : `${selectedCount} asignados`;
 
   const handleActionClick = (actionId: string) => {
     if (onSelectAction) onSelectAction(actionId);
@@ -97,9 +103,9 @@ export const ActionModal: React.FC<ActionModalProps> = ({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ActionCard icon="+" iconBg="bg-blue-50 text-blue-600" title="Ingresar a bodega" subtitle="Crear precintos nuevos" onClick={() => handleActionClick('ingresar')} />
-              <ActionCard icon="+" iconBg="bg-blue-50 text-blue-600" title="Asignar a ejecutivo" subtitle="Por rango o códigos" onClick={() => handleActionClick('asignar')} />
-              <ActionCard icon="↔" iconBg="bg-blue-50/60 text-blue-400" title="Cambiar de ejecutivo" subtitle={`${selectedCount} asignados`} disabled={selectedCount === 0} onClick={() => onMover && onMover()} />
-              <ActionCard icon="↓" iconBg="bg-blue-50/60 text-blue-400" title="Devolver a bodega" subtitle={`${selectedCount} asignados`} disabled={selectedCount === 0} onClick={() => onDevolver && onDevolver()} />
+              <ActionCard icon="+" iconBg="bg-blue-50 text-blue-600" title="Asignar a ejecutivo" subtitle={seleccionEnBodega && selectedCount > 0 ? `${selectedCount} seleccionados` : 'Por rango o códigos'} onClick={() => handleActionClick('asignar')} />
+              <ActionCard icon="↔" iconBg="bg-blue-50/60 text-blue-400" title="Cambiar de ejecutivo" subtitle={subtituloAsignados} disabled={sinAsignados} onClick={() => onMover && onMover()} />
+              <ActionCard icon="↓" iconBg="bg-blue-50/60 text-blue-400" title="Devolver a bodega" subtitle={subtituloAsignados} disabled={sinAsignados} onClick={() => onDevolver && onDevolver()} />
             </div>
           </div>
 
