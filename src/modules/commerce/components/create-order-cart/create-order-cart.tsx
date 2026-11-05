@@ -89,7 +89,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     deactivateCrossSelling,
     channelName,
     bonus,
-    businessUnit
+    businessUnit,
+    channelCode
   } = useContext(OrderViewContext);
   const numberOfSelectedProducts = selectedCategories.reduce(
     (acc, category) => acc + category.products.length,
@@ -328,6 +329,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           executive_discounts: executiveDiscounts,
           deactivate_cross_selling: !deactivateCrossSelling,
           business_unit: businessUnit,
+          nit_id: channelCode || undefined,
           ...(promotionId !== undefined && { promotion_id: promotionId }),
           promotion_applyed: promotionApplyed
         };

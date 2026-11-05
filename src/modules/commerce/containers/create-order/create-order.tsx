@@ -145,7 +145,8 @@ export const CreateOrderView: FC = () => {
       const productsResponse = await getProductsByClient(
         projectId,
         draftResponse.order_summary?.client?.id,
-        draftResponse.order_summary.business_unit
+        draftResponse.order_summary.business_unit,
+        draftResponse.nit_id || draftResponse.order_summary.client?.nit_id
       );
       if (productsResponse.data) {
         const categoriesList: IFetchedCategories[] = productsResponse.data.map((category) => ({

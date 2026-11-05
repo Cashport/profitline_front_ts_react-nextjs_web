@@ -151,6 +151,7 @@ export interface IConfirmOrderData {
   executive_discounts: IExecutiveDiscount[];
   deactivate_cross_selling: boolean;
   promotion_id?: number;
+  nit_id?: string;
   /**
    * Indica si la promoción aplica al carrito actual. Se calcula en base a
    * los bonificados comunes (`bonusOptions`), NO a los "other bonified"
