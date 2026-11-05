@@ -105,6 +105,7 @@ export default function CheckoutPage() {
         order_summary: products,
         executive_discounts: executiveDiscounts,
         business_unit: businessUnit,
+        nit_id: channelCode || undefined,
         deactivate_cross_selling: !deactivateCrossSelling,
         ...(bonus?.id !== undefined && { promotion_id: bonus.id }),
         promotion_applyed: promotionApplyed

@@ -52,7 +52,8 @@ const CreateOrderProducts: FC = () => {
     setDeactivateCrossSelling,
     toggleCart,
     numberOfItems,
-    businessUnit
+    businessUnit,
+    channelCode
   } = useContext(OrderViewContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("");
@@ -65,7 +66,7 @@ const CreateOrderProducts: FC = () => {
     const fetchProducts = async () => {
       if (!client?.id) return;
 
-      const response = await getProductsByClient(ID, client.id, businessUnit);
+      const response = await getProductsByClient(ID, client.id, businessUnit, channelCode);
       if (!response.data) return;
 
       const newProductsMap = new Map<number, ISelectedProduct>();
@@ -154,7 +155,7 @@ const CreateOrderProducts: FC = () => {
     };
 
     fetchProducts();
-  }, [client?.id, ID]);
+  }, [client?.id, ID, channelCode]);
 
   const filteredCategories = useMemo(() => {
     if (!categories || categoriesMap.size === 0) return [];

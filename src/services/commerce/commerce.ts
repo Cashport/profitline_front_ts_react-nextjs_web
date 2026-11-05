@@ -49,11 +49,15 @@ export const getClients = async (projectId: number) => {
 export const getProductsByClient = async (
   projectId: number,
   clientId: string,
-  businessUnit?: string
+  businessUnit?: string,
+  nitId?: string
 ) => {
   const queryParams = new URLSearchParams();
   if (businessUnit) {
     queryParams.append("business_unit", businessUnit);
+  }
+  if (nitId) {
+    queryParams.append("nit_id", nitId);
   }
   const response: GenericResponse<IProductData[]> = await API.get(
     `/marketplace/projects/${projectId}/clients/${clientId}/products`,
