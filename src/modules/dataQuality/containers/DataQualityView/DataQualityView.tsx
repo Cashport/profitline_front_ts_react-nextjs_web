@@ -173,6 +173,11 @@ export default function DataQualityView() {
                 </Button>
               </Link>
             )}
+            <Link href="/data-quality/monitoring">
+              <Button variant="outline" className="text-[#141414]">
+                Monitoreo
+              </Button>
+            </Link>
             {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
               <Link href="/data-quality/alerts">
                 <Badge count={totalAlerts} color="#E53935">
