@@ -1,9 +1,11 @@
 import { Button } from "@/modules/chat/ui/button";
 import { Edit } from "lucide-react";
+import { IClientTier, TierBadge } from "../../tiers";
 
 interface ClientDetailInfoProps {
   stakeholder?: string | null | undefined;
   clientName?: string | null | undefined;
+  tier?: IClientTier | null;
   setIsEditClientOpen: (isOpen: boolean) => void;
   showEditButton?: boolean;
 }
@@ -11,6 +13,7 @@ interface ClientDetailInfoProps {
 export function ClientDetailInfo({
   stakeholder,
   clientName,
+  tier,
   setIsEditClientOpen,
   showEditButton = true
 }: ClientDetailInfoProps) {
@@ -23,17 +26,16 @@ export function ClientDetailInfo({
 
         {showEditButton && (
           <Button
-            variant="outline"
-            className="text-sm font-medium bg-transparent"
+            variant="ghost"
+            className="h-[var(--control-h)] border-0 bg-[#f7f7f7] text-[13px] font-medium text-[#141414] hover:bg-[#efefef]"
             onClick={() => setIsEditClientOpen(true)}
-            style={{ borderColor: "#DDDDDD", color: "#141414" }}
           >
             <Edit className="w-4 h-4 mr-2" />
             Editar
           </Button>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-x-8 gap-y-6 mb-8">
+      <div className="grid grid-cols-3 gap-x-8 gap-y-6">
         <div>
           <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
             Cliente
@@ -49,6 +51,23 @@ export function ClientDetailInfo({
           <p className="text-sm" style={{ color: "#141414" }}>
             {stakeholder || ""}
           </p>
+        </div>
+        <div>
+          <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
+            Clasificación
+          </p>
+          <div className="flex items-center gap-2">
+            <TierBadge tier={tier} showEmpty />
+            {!tier && showEditButton && (
+              <button
+                type="button"
+                onClick={() => setIsEditClientOpen(true)}
+                className="text-[13px] font-semibold text-[#141414] hover:underline"
+              >
+                Clasificar
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

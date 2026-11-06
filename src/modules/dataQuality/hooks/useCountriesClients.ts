@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
+import { tierQueryParam, TierFilterCode } from "../tiers/tiers";
 import {
   IClientDataList,
   GenericResponseWithFilters,
@@ -12,6 +13,7 @@ export interface IFilters {
   id_type_archive?: number;
   id_intake_type?: number;
   search?: string;
+  tiers?: TierFilterCode[];
 }
 
 export const useCountriesClients = (
@@ -28,6 +30,7 @@ export const useCountriesClients = (
   if (filters.id_type_archive) queryParams.push(`id_type_archive=${filters.id_type_archive}`);
   if (filters.id_intake_type) queryParams.push(`id_intake_type=${filters.id_intake_type}`);
   if (filters.search) queryParams.push(`search=${encodeURIComponent(filters.search)}`);
+  if (filters.tiers?.length) queryParams.push(tierQueryParam(filters.tiers));
 
   const pathKey = `/data/sumary/${countryId}/${projectId}?limit=${limit}&page=${page}${queryParams.length ? `&${queryParams.join("&")}` : ""}`;
 

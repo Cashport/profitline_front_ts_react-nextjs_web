@@ -104,7 +104,7 @@ const ModalReprocessDates = ({
     >
       <button className="modalReprocessDates__header" onClick={handleClose} aria-label="Volver">
         <CaretLeft size="1.25rem" />
-        <h4>Reprocesar fechas</h4>
+        <h4>Calcular periodicidad</h4>
       </button>
 
       <div className="modalReprocessDates__form">
@@ -150,7 +150,7 @@ const ModalReprocessDates = ({
       <FooterButtons
         handleOk={handleReprocess}
         onClose={handleClose}
-        titleConfirm="Reprocesar"
+        titleConfirm="Calcular"
         isConfirmLoading={isSubmitting}
         isConfirmDisabled={!isRangeValid}
       />

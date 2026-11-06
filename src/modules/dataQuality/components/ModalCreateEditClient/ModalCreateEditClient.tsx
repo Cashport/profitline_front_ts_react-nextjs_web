@@ -7,6 +7,7 @@ import { createClient, updateClient } from "@/services/dataQuality/dataQuality";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { useAppStore } from "@/lib/store/store";
+import { TierCode, TierSelector } from "../../tiers";
 
 import "./modalCreateEditClient.scss";
 
@@ -21,6 +22,7 @@ interface ModalCreateEditClientProps {
     id: number;
     client_name: string;
     stakeholder: string;
+    tier?: TierCode | null;
   };
 }
 
@@ -40,6 +42,7 @@ const ModalCreateEditClient = ({
 }: ModalCreateEditClientProps) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tier, setTier] = useState<TierCode | null>(null);
 
   const {
     control,
@@ -58,9 +61,11 @@ const ModalCreateEditClient = ({
     if (isOpen && mode === "edit" && clientData) {
       setValue("client_name", clientData.client_name);
       setValue("stakeholder", clientData.stakeholder);
+      setTier(clientData.tier ?? null);
     }
     if (!isOpen) {
       reset();
+      setTier(null);
     }
   }, [isOpen, mode, clientData, setValue, reset]);
 
@@ -72,14 +77,16 @@ const ModalCreateEditClient = ({
           id_project: projectId,
           client_name: data.client_name,
           id_country: Number(countryId),
-          stakeholder: data.stakeholder
+          stakeholder: data.stakeholder,
+          tier
         });
         message.success("Cliente creado exitosamente");
       } else if (clientData) {
         await updateClient(clientData.id, {
           client_name: data.client_name,
           id_country: Number(countryId),
-          stakeholder: data.stakeholder
+          stakeholder: data.stakeholder,
+          tier
         });
         message.success("Cliente actualizado exitosamente");
       }
@@ -136,6 +143,7 @@ const ModalCreateEditClient = ({
           error={undefined}
           placeholder="Ej: Juan Pérez"
         />
+        <TierSelector value={tier} onChange={setTier} disabled={isSubmitting} />
       </form>
 
       <FooterButtons

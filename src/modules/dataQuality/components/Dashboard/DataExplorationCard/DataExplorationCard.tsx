@@ -2,233 +2,186 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowUpRight } from "lucide-react";
 
 import { Card } from "@/modules/chat/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/modules/chat/ui/tooltip";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
-import { buildLastSixMonths } from "@/modules/dataQuality/utils/months";
-import { formatNumber } from "@/utils/utils";
-import { formatThousandNum } from "@/modules/dataQuality/utils/utils";
-import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
-import SearchField from "@/components/ui/search-field/search-field";
+import { PERIODICITY_LABEL } from "@/modules/dataQuality/utils/periodicity";
+import { TierSwatch, useTierFilter } from "@/modules/dataQuality/tiers";
+import { useFileTypes } from "@/modules/dataQuality/hooks/useFileTypes";
 
-const DAYS_IN_MONTH = 31;
-const TOTAL_COLUMNS = 35;
+/** The matrix shows one data type at a time (Sell Out or Stock), never both added up. */
+const MATRIX_TYPE_PATTERN = /sell\s*-?\s*out|stock/i;
+import {
+  DAY_NUMBERS,
+  MATRIX_LEGEND as LEGEND,
+  MatrixRowCells,
+  UnitType,
+  buildMatrixRow,
+  lastDataDayIndex,
+  todayCutoffFor
+} from "../matrix/MatrixRowCells";
 
-type UnitType = "units_haleon" | "vol_reported";
+const UNIT_OPTIONS: Array<{ key: "units_haleon" | "vol_reported"; label: string }> = [
+  { key: "units_haleon", label: "Unidades" },
+  { key: "vol_reported", label: "Volumen" }
+];
 
-type DayCell = IDataExplorationTotals & { novedades_percent: number };
+const TOTAL_COLUMNS = 37;
 
 export function DataExplorationCard() {
-  const { selectedRegion, selectedPeriod, setSelectedPeriod, selectedFileType } =
+  const { selectedRegion, selectedPeriod, selectedFileType, setSelectedFileType, search } =
     useDataQualityDashboardContext();
-  const [search, setSearch] = useState("");
+  const { data: fileTypesData } = useFileTypes();
+  const typeOptions = useMemo(() => {
+    const all = fileTypesData ?? [];
+    // Prefer exactly "Sell Out" and "Stock"; variants (All, Cedi, In-transit) only as fallback.
+    const main = all.filter((t) => /^\s*(sell\s*-?\s*out|stock)\s*$/i.test(t.description));
+    const matrixTypes = main.length
+      ? main
+      : all.filter((t) => MATRIX_TYPE_PATTERN.test(t.description));
+    return (matrixTypes.length ? matrixTypes : all).map((t) => ({
+      id: String(t.id),
+      label: t.description
+    }));
+  }, [fileTypesData]);
+  const defaultTypeId =
+    typeOptions.find((t) => /sell/i.test(t.label))?.id ?? typeOptions[0]?.id ?? "";
+  const activeTypeId = typeOptions.some((t) => t.id === selectedFileType)
+    ? selectedFileType
+    : defaultTypeId;
+  const selectedTiers = useTierFilter((s) => s.selected);
   const [unitType, setUnitType] = useState<UnitType>("units_haleon");
-  const months = useMemo(buildLastSixMonths, []);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, error, isLoading } = useDataExploration({
     id_country: selectedRegion || undefined,
     month: selectedPeriod,
-    id_type_archive: selectedFileType && selectedFileType !== "all" ? selectedFileType : undefined,
-    search: debouncedSearch || undefined
+    id_type_archive: activeTypeId || undefined,
+    search: debouncedSearch || undefined,
+    tiers: selectedTiers
   });
 
-  const dayNumbers = useMemo(() => Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1), []);
-
+  const dayNumbers = DAY_NUMBERS;
   const { rows, lastDataDayIdx } = useMemo(() => {
-    const computedRows = (data?.clients ?? []).map((client) => {
-      const dayMap = new Map<number, DayCell>();
-      for (const d of client.dates) {
-        const dayNum = Number(d.date.slice(-2));
-        if (!Number.isNaN(dayNum)) {
-          dayMap.set(dayNum, { ...d.totals, novedades_percent: d.novedades_percent ?? 0 });
-        }
-      }
-      const days = dayNumbers.map((n) => dayMap.get(n) ?? null);
+    const computedRows = (data?.clients ?? []).map((client) => buildMatrixRow(client, unitType));
+    return { rows: computedRows, lastDataDayIdx: lastDataDayIndex(computedRows) };
+  }, [data, unitType]);
 
-      return {
-        id_client: client.id_client,
-        client_name: client.client_name,
-        country: client.dates[0]?.rows[0]?.country ?? "",
-        country_client_id: client.country_client_id,
-        periodicity: client.periodicity,
-        days,
-        total: client.totals[unitType],
-        totalRegistros: client.totals.total_registros,
-        totalNovedades: client.totals.novedades,
-        lastMonth: client.last_month
-      };
-    });
-
-    let lastDataDayIdx = -1;
-    for (const row of computedRows) {
-      for (let i = row.days.length - 1; i >= 0; i--) {
-        if (row.days[i] !== null) {
-          if (i > lastDataDayIdx) lastDataDayIdx = i;
-          break;
-        }
-      }
-    }
-
-    return { rows: computedRows, lastDataDayIdx };
-  }, [data, dayNumbers, unitType]);
-
-  const todayDayCutoff = useMemo(() => {
-    const [year, month] = selectedPeriod.split("-").map(Number);
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth() + 1;
-    if (year < currentYear || (year === currentYear && month < currentMonth)) {
-      return Infinity;
-    }
-    if (year > currentYear || (year === currentYear && month > currentMonth)) {
-      return 0;
-    }
-    return today.getDate();
-  }, [selectedPeriod]);
+  const todayDayCutoff = useMemo(() => todayCutoffFor(selectedPeriod), [selectedPeriod]);
 
   return (
-    <Card className="cp-card rounded-[var(--card-radius)] border-0 bg-cp-surface shadow-none overflow-hidden">
-      <div
-        className="px-6 py-4 flex items-center justify-between"
-        style={{ borderColor: "#E5E7EB" }}
-      >
-        <div className="flex items-center gap-4">
-          <div>
-            <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>
-              Exploración de Datos
-            </h3>
-            <p className="text-[13px] mt-0.5" style={{ color: "#6B7280" }}>
-              {unitType === "units_haleon"
-                ? "Unidades recibidas por día del mes"
-                : "Volumen reportado por día del mes"}
-            </p>
+    <Card className="cp-card !p-0 rounded-[var(--card-radius)] border-0 bg-cp-surface shadow-none overflow-hidden">
+      {/* Title line: name + legend on the left, metric switch on the right */}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-[18px] pb-2 pt-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1.5">
+          <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-[#4a4a4a]">
+            {LEGEND.map((item) => (
+              <span key={item.label} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <span
+                  className="h-2.5 w-2.5 rounded-[3px] border"
+                  style={{ background: item.bg, borderColor: item.border }}
+                />
+                {item.label}
+              </span>
+            ))}
           </div>
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-[150px] h-8 text-[13px]" style={{ borderColor: "#E5E7EB" }}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map((m) => (
-                <SelectItem key={m.id} value={m.id} className="text-[13px]">
-                  {m.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={unitType} onValueChange={(v: UnitType) => setUnitType(v)}>
-            <SelectTrigger className="w-[160px] h-8 text-[13px]" style={{ borderColor: "#E5E7EB" }}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="units_haleon" className="text-[13px]">
-                Unidades (Haleon)
-              </SelectItem>
-              <SelectItem value="vol_reported" className="text-[13px]">
-                Volumen reportado
-              </SelectItem>
-            </SelectContent>
-          </Select>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-4 text-[13px]" style={{ color: "#6B7280" }}>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "#D1FAE5" }} />
-              <span>Recibido</span>
+
+        <div className="flex items-center gap-2">
+          {typeOptions.length > 0 && (
+            <div
+              role="radiogroup"
+              aria-label="Tipo de archivo"
+              className="flex h-9 items-center gap-0.5 rounded-lg bg-[#f7f7f7] p-[3px]"
+            >
+              {typeOptions.map((option) => {
+                const on = activeTypeId === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => setSelectedFileType(option.id)}
+                    className="h-full whitespace-nowrap rounded-md px-3.5 text-[13px] transition-colors"
+                    style={{
+                      background: on ? "#cbe71e" : "transparent",
+                      color: on ? "#141414" : "#6b6b6b",
+                      fontWeight: on ? 600 : 500
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "#FEF3C7" }} />
-              <span>Con novedades</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "#FEE2E2" }} />
-              <span>Faltante</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div
-                className="w-3 h-3 rounded border"
-                style={{ backgroundColor: "#F9FAFB", borderColor: "#E5E7EB" }}
-              />
-              <span>Esperado</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div
-                className="w-3 h-3 rounded border"
-                style={{ backgroundColor: "#ffffff", borderColor: "#E5E7EB" }}
-              />
-              <span>No esperado</span>
-            </div>
+          )}
+          <div className="flex h-9 items-center gap-0.5 rounded-lg bg-[#f7f7f7] p-[3px]">
+            {UNIT_OPTIONS.map((option) => {
+              const on = unitType === option.key;
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => setUnitType(option.key)}
+                  className="h-full rounded-md px-3.5 text-[13px] transition-colors"
+                  style={{
+                    background: on ? "#ffffff" : "transparent",
+                    color: on ? "#141414" : "#6b6b6b",
+                    fontWeight: on ? 600 : 500,
+                    boxShadow: on ? "0 1px 2px rgba(0,0,0,.06)" : "none"
+                  }}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
           </div>
-          <SearchField
-            value={search}
-            onChange={setSearch}
-            placeholder="Buscar cliente..."
-            className="w-48"
-          />
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto pr-[18px]">
         <table className="w-full" style={{ fontSize: "13px" }}>
           <thead>
             <tr className="border-b border-cp-line bg-cp-surface">
               <th
-                className="text-left px-2 py-3 text-[13.5px] font-semibold text-cp-ink sticky left-0 bg-cp-surface z-10"
-                style={{ minWidth: "90px" }}
+                className="text-left pl-[18px] pr-2 py-2 text-[13.5px] font-semibold text-cp-ink sticky left-0 bg-cp-surface z-10"
+                style={{ minWidth: "156px" }}
               >
                 Cliente
               </th>
-              {/* TODO: re-enable Periodicidad column once API exposes per-client periodicity */}
-              {/*
-              <th
-                className="text-left px-2 py-3 text-[13.5px] font-semibold text-cp-ink sticky left-[90px] bg-cp-surface z-10"
-                style={{ minWidth: "65px" }}
-              >
+              <th className="text-left px-2 py-2 text-[13.5px] font-semibold text-cp-ink">País</th>
+              <th className="text-left px-2 py-2 text-[13.5px] font-semibold text-cp-ink">
                 Periodicidad
               </th>
-              */}
               {dayNumbers.map((d) => (
                 <th
                   key={d}
-                  className="text-center py-3 text-[13.5px] font-semibold text-cp-ink"
-                  style={{ minWidth: "28px", width: "28px" }}
+                  className="text-center py-2 text-[13.5px] font-semibold text-cp-ink"
+                  style={{ minWidth: "24px", width: "24px" }}
                 >
                   {d}
                 </th>
               ))}
               <th
-                className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
+                className="text-right px-2 py-2 text-[13.5px] font-semibold text-cp-ink"
                 style={{ minWidth: "50px" }}
               >
                 Total
               </th>
               <th
-                className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
+                className="text-right px-2 py-2 text-[13.5px] font-semibold text-cp-ink"
                 style={{ minWidth: "55px" }}
               >
                 Novedades
               </th>
               <th
-                className="text-right px-2 py-3 text-[13.5px] font-semibold text-cp-ink"
+                className="text-right px-2 py-2 text-[13.5px] font-semibold text-cp-ink"
                 style={{ minWidth: "70px" }}
               >
-                Total mes ant.
+                Mes ant.
               </th>
             </tr>
           </thead>
@@ -265,10 +218,6 @@ export function DataExplorationCard() {
               </tr>
             ) : (
               rows.map((row, idx) => {
-                const novedadesPct =
-                  row.totalRegistros > 0
-                    ? Math.round((row.totalNovedades / row.totalRegistros) * 100)
-                    : 0;
                 return (
                   <tr
                     key={`${row.id_client}-${idx}`}
@@ -276,249 +225,39 @@ export function DataExplorationCard() {
                     style={{ borderColor: "#F3F4F6" }}
                   >
                     <td
-                      className="px-2 py-1 font-medium sticky left-0 bg-white z-10"
+                      className="pl-[18px] pr-2 py-1 font-medium sticky left-0 bg-white z-10"
                       style={{ color: "#111827" }}
                     >
-                      <div className="leading-tight">
-                        <Link
-                          href={`/data-quality/client/${row.id_client}`}
-                          className="block truncate hover:underline"
-                          style={{ maxWidth: "85px" }}
-                          title={row.client_name}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {row.client_name}
-                        </Link>
-                        <span className="block" style={{ color: "#9CA3AF", fontSize: "13px" }}>
-                          {row.country}
-                          {row.periodicity ? ` (${row.periodicity})` : ""}
-                        </span>
-                      </div>
-                    </td>
-                    {/* TODO: re-enable Periodicidad column once API exposes per-client periodicity */}
-                    {/*
-                    <td
-                      className="px-2 py-1 sticky left-[90px] bg-white z-10"
-                      style={{ color: "#6B7280" }}
-                    >
-                      {row.periodicidad}
-                    </td>
-                    */}
-                    {row.days.map((dayTotals, dayIdx) => {
-                      const dayNumber = dayIdx + 1;
-                      const isFutureDay = dayNumber > todayDayCutoff;
-                      const isWithinReportedRange = dayIdx < lastDataDayIdx;
-
-                      if (dayTotals === null) {
-                        const showAsExpected = isFutureDay || isWithinReportedRange;
-                        return (
-                          <td
-                            key={dayIdx}
-                            className="text-center py-1 font-medium tabular-nums"
-                            style={
-                              showAsExpected
-                                ? { backgroundColor: "#F9FAFB", color: "#9CA3AF" }
-                                : { backgroundColor: "#ffffff", color: "#9CA3AF" }
-                            }
-                          >
-                            {showAsExpected ? "⋯" : ""}
-                          </td>
-                        );
-                      }
-
-                      if (dayTotals.novedades > 0) {
-                        const catalogHref = row.country_client_id
-                          ? `/data-quality/catalogs/${row.id_client}/${row.country_client_id}` +
-                            `?clientName=${encodeURIComponent(row.client_name)}` +
-                            `&countryName=${encodeURIComponent(row.country)}`
-                          : null;
-                        const cellContent = (
-                          <td
-                            key={dayIdx}
-                            className="text-center py-1 font-medium tabular-nums relative"
-                            style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
-                          >
-                            {formatThousandNum(dayTotals[unitType])}
-                            <div
-                              className="absolute top-0 right-0 w-0 h-0"
-                              style={{
-                                borderLeft: "6px solid transparent",
-                                borderTop: "6px solid #F59E0B"
-                              }}
-                            />
-                          </td>
-                        );
-
-                        return (
-                          <TooltipProvider key={dayIdx} delayDuration={100}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>{cellContent}</TooltipTrigger>
-                              <TooltipContent
-                                side="top"
-                                className="text-[13px] px-2 py-1.5"
-                                style={{ backgroundColor: "#1F2937", color: "#fff" }}
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
-                                  <span>
-                                    {formatNumber(dayTotals.novedades)} novedades (
-                                    {dayTotals.novedades_percent}%)
-                                  </span>
-                                  {catalogHref && (
-                                    <Link
-                                      href={catalogHref}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      title="Ir al catálogo del cliente"
-                                      className="ml-1 inline-flex hover:opacity-80"
-                                    >
-                                      <ArrowUpRight
-                                        className="w-3.5 h-3.5"
-                                        style={{ color: "#FBBF24" }}
-                                      />
-                                    </Link>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        );
-                      }
-
-                      if (dayTotals[unitType] === 0) {
-                        if (isFutureDay) {
-                          return (
-                            <td
-                              key={dayIdx}
-                              className="text-center py-1 font-medium tabular-nums"
-                              style={{ backgroundColor: "#F9FAFB", color: "#9CA3AF" }}
-                            >
-                              ⋯
-                            </td>
-                          );
-                        }
-                        return (
-                          <td
-                            key={dayIdx}
-                            className="text-center py-1 font-medium tabular-nums"
-                            style={
-                              isWithinReportedRange
-                                ? { backgroundColor: "#FEE2E2", color: "#991B1B" }
-                                : { backgroundColor: "#ffffff", color: "#9CA3AF" }
-                            }
-                          >
-                            {isWithinReportedRange ? "-" : ""}
-                          </td>
-                        );
-                      }
-
-                      return (
-                        <td
-                          key={dayIdx}
-                          className="text-center py-1 font-medium tabular-nums"
-                          style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
-                        >
-                          {formatThousandNum(dayTotals[unitType])}
-                        </td>
-                      );
-                    })}
-                    <td
-                      className="text-right px-2 py-1 font-semibold tabular-nums"
-                      style={{ color: "#111827" }}
-                    >
-                      {formatNumber(row.total)}
-                    </td>
-                    <td className="text-right px-2 py-1 tabular-nums">
-                      {row.totalNovedades > 0 ? (
-                        <div className="flex items-center justify-end gap-1">
-                          <span className="font-semibold" style={{ color: "#F59E0B" }}>
-                            {formatNumber(row.totalNovedades)}
+                      <Link
+                        href={`/data-quality/client/${row.id_client}`}
+                        className="flex items-center gap-1.5 text-[#1677ff] hover:underline"
+                        style={{ maxWidth: "140px" }}
+                        title={row.client_name}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {row.tier && (
+                          <span title={row.tier.name} className="inline-flex">
+                            <TierSwatch code={row.tier.code} />
                           </span>
-                          <span
-                            className="text-[13px] px-1 py-0.5 rounded"
-                            style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
-                          >
-                            {novedadesPct}%
-                          </span>
-                        </div>
-                      ) : (
-                        <span style={{ color: "#9CA3AF" }}>-</span>
-                      )}
+                        )}
+                        <span className="truncate">{row.client_name}</span>
+                      </Link>
                     </td>
-                    {(() => {
-                      const lastMonth = row.lastMonth;
-
-                      if (lastMonth == null) {
-                        return (
-                          <td
-                            className="text-center px-2 py-1 font-semibold tabular-nums"
-                            style={{ backgroundColor: "#F9FAFB", color: "#9CA3AF" }}
-                          >
-                            ⋯
-                          </td>
-                        );
-                      }
-
-                      if (lastMonth[unitType] === 0 && lastMonth.novedades === 0) {
-                        return (
-                          <td
-                            className="text-center px-2 py-1 font-semibold tabular-nums"
-                            style={{ backgroundColor: "#FEE2E2", color: "#991B1B" }}
-                          >
-                            -
-                          </td>
-                        );
-                      }
-
-                      if (lastMonth.novedades > 0) {
-                        const cellContent = (
-                          <td
-                            className="text-right px-2 py-1 font-semibold tabular-nums relative"
-                            style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
-                          >
-                            {formatThousandNum(lastMonth[unitType])}
-                            <div
-                              className="absolute top-0 right-0 w-0 h-0"
-                              style={{
-                                borderLeft: "6px solid transparent",
-                                borderTop: "6px solid #F59E0B"
-                              }}
-                            />
-                          </td>
-                        );
-
-                        return (
-                          <TooltipProvider delayDuration={100}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>{cellContent}</TooltipTrigger>
-                              <TooltipContent
-                                side="top"
-                                className="text-[13px] px-2 py-1.5"
-                                style={{ backgroundColor: "#1F2937", color: "#fff" }}
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
-                                  <span>
-                                    {formatNumber(lastMonth.novedades)} novedades (
-                                    {lastMonth.novedades_percent}%)
-                                  </span>
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        );
-                      }
-
-                      return (
-                        <td
-                          className="text-right px-2 py-1 font-semibold tabular-nums"
-                          style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
-                        >
-                          {formatThousandNum(lastMonth[unitType])}
-                        </td>
-                      );
-                    })()}
+                    <td className="whitespace-nowrap px-2 py-1 text-[13px] text-[#4a4a4a]">
+                      {row.country || "-"}
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-1 text-[13px] text-[#4a4a4a]">
+                      {row.periodicity
+                        ? PERIODICITY_LABEL[row.periodicity] ?? row.periodicity
+                        : "-"}
+                    </td>
+                    <MatrixRowCells
+                      row={row}
+                      unitType={unitType}
+                      todayDayCutoff={todayDayCutoff}
+                      lastDataDayIdx={lastDataDayIdx}
+                    />
                   </tr>
                 );
               })
