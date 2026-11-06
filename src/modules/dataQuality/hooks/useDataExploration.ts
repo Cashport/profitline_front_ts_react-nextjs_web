@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
+import { TierFilterCode } from "../tiers/tiers";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IGetDataExploration } from "@/types/dataQuality/IDataQuality";
 
@@ -11,6 +12,8 @@ export interface IDataExplorationFilters {
   country?: string;
   region?: string;
   search?: string;
+  tiers?: TierFilterCode[];
+  id_client?: number;
 }
 
 export const useDataExploration = (filters: IDataExplorationFilters = {}) => {
@@ -24,6 +27,8 @@ export const useDataExploration = (filters: IDataExplorationFilters = {}) => {
   if (filters.country) params.append("country", filters.country);
   if (filters.region) params.append("region", filters.region);
   if (filters.search) params.append("search", filters.search);
+  if (filters.tiers?.length) params.append("tier", filters.tiers.join(","));
+  if (filters.id_client) params.append("id_client", String(filters.id_client));
 
   const queryString = params.toString();
   const pathKey = `/data/master-data/monthly-summary${queryString ? `?${queryString}` : ""}`;

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { Badge, Spin } from "antd";
-import { BellSimpleRinging } from "phosphor-react";
+import { Spin } from "antd";
 import { Users, UserX, Bell, FileText, FileX, Tag, Bot } from "lucide-react";
 
 import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
@@ -16,12 +15,24 @@ import {
 } from "@/utils/utils";
 import { DARK_TOOLTIP_ARROW, DARK_TOOLTIP_CONTENT } from "../../constants";
 
-import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import Header from "@/components/organisms/header";
 
 import { ISummaryCountries } from "@/types/dataQuality/IDataQuality";
+import { AlertsPill } from "../../components/alerts-pill/AlertsPill";
+import {
+  ITierOption,
+  TIER_CODES,
+  TIER_META,
+  TierSwatch,
+  TierQuickFilter,
+  useTierFilter
+} from "../../tiers";
+
+/** White, borderless header button on the gray page (DESIGN.md §8, same as Clientes). */
+const HEADER_BTN =
+  "flex h-[var(--control-h)] shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-white px-3.5 text-[13px] font-medium text-[#141414] no-underline transition-colors hover:bg-[#f2f2f2] hover:text-[#141414]";
 
 export default function DataQualityView() {
   const selectedProject = useAppStore((projects) => projects.selectedProject);
@@ -30,8 +41,12 @@ export default function DataQualityView() {
   const canReadData = canReadDataQuality(selectedProject);
   const canManageAux = canManageAuxiliaries(selectedProject);
 
+  const selectedTiers = useTierFilter((s) => s.selected);
+  const tiersKey = selectedTiers.join(",");
+
   const [summaryData, setSummaryData] = useState<ISummaryCountries | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noCountryAccess, setNoCountryAccess] = useState(false);
 
@@ -39,15 +54,29 @@ export default function DataQualityView() {
   const totalAlerts = summaryData?.countries.reduce((sum, c) => sum + c.active_alerts, 0) || 0;
   const totalCountries = summaryData?.total_countries || 0;
 
+  // Totals per tier across the visible countries (the breakdown ignores the tier filter).
+  const tierOptions: ITierOption[] = TIER_CODES.map((code) => ({
+    code,
+    name: TIER_META[code].label,
+    color: TIER_META[code].color,
+    count: countries.reduce(
+      (sum, c) => sum + (c.tiers?.find((t) => t.code === code)?.clients ?? 0),
+      0
+    )
+  }));
+
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
-      setIsLoading(true);
+      setIsRefreshing(true);
       setError(null);
       setNoCountryAccess(false);
-      setSummaryData(null);
       try {
-        const response = await getSummaryCountries(ID);
-        setSummaryData(response);
+        const response = await getSummaryCountries(
+          ID,
+          tiersKey ? (tiersKey.split(",") as typeof selectedTiers) : []
+        );
+        if (!cancelled) setSummaryData(response);
       } catch (err) {
         if (
           axios.isAxiosError<{ message?: string }>(err) &&
@@ -60,7 +89,10 @@ export default function DataQualityView() {
         console.error("Error fetching countries:", err);
         setError("No se pudieron cargar los países. Por favor, intenta de nuevo.");
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
       }
     };
 
@@ -72,7 +104,10 @@ export default function DataQualityView() {
       setNoCountryAccess(false);
       setIsLoading(false);
     }
-  }, [ID, canReadData]);
+    return () => {
+      cancelled = true;
+    };
+  }, [ID, canReadData, tiersKey]);
 
   // Rol sin acceso a la vista general (p.ej. Admin Global Aux): no invocar countries-summary
   // y no exponer navegación a países/clientes.
@@ -139,7 +174,7 @@ export default function DataQualityView() {
     );
   }
 
-  if (countries.length === 0) {
+  if (countries.length === 0 && selectedTiers.length === 0) {
     return (
       <div className="cp-page">
         <Header title="Data Quality" titleExtra="Países y Distribuidores" />
@@ -155,56 +190,61 @@ export default function DataQualityView() {
   return (
     <div className="cp-page">
       <Header
+        className="!pl-0"
         title="Data Quality"
         titleExtra={
-          <span className="flex items-center gap-3">
-            Países y Distribuidores
-            <BadgeUI variant="secondary" className="text-sm">
-              {totalCountries} países activos
-            </BadgeUI>
-          </span>
+          checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") ? (
+            <AlertsPill href="/data-quality/alerts" count={totalAlerts} />
+          ) : undefined
         }
         actionsExtra={
           <>
             {(hasDataQualityManagementPermission(selectedProject) || canManageAux) && (
-              <Link href="/data-quality/auxiliary-catalogs">
-                <Button variant="outline" className="text-[#141414]">
-                  Auxiliares
-                </Button>
+              <Link href="/data-quality/auxiliary-catalogs" className={HEADER_BTN}>
+                Auxiliares
               </Link>
             )}
-            <Link href="/data-quality/monitoring">
-              <Button variant="outline" className="text-[#141414]">
-                Monitoreo
-              </Button>
+            <Link href="/data-quality/monitoring" className={HEADER_BTN}>
+              Monitoreo
             </Link>
-            {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
-              <Link href="/data-quality/alerts">
-                <Badge count={totalAlerts} color="#E53935">
-                  <Button variant="outline">
-                    <BellSimpleRinging size={18} />
-                    Alertas
-                  </Button>
-                </Badge>
-              </Link>
-            )}
             {checkUserComponentPermission(
               selectedProject,
               "DataQuality",
               "data-view-dashboard"
             ) && (
-              <Link href={`/data-quality/dashboard`}>
-                <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
-                  Dashboard
-                </Button>
+              <Link href="/data-quality/dashboard" className={HEADER_BTN}>
+                Dashboard
               </Link>
             )}
           </>
         }
       />
 
+      {/* Tier legend and active countries: one line, same gap above and below */}
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <TierQuickFilter
+          options={countries.some((c) => c.tiers) ? tierOptions : undefined}
+          className="-ml-[7px]"
+        />
+        <span className="whitespace-nowrap text-[13px] text-[#6b6b6b]">
+          {totalCountries} {totalCountries === 1 ? "país activo" : "países activos"}
+        </span>
+      </div>
+
+      {countries.length === 0 && (
+        <div className="cp-card p-12 text-center">
+          <p className="text-[13px] text-[#6b6b6b]">
+            No hay clientes {selectedTiers.map((c) => TIER_META[c].label).join(" / ")} en los países
+            asignados.
+          </p>
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[var(--card-gap)]">
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[var(--card-gap)] transition-opacity"
+        style={{ opacity: isRefreshing ? 0.55 : 1 }}
+      >
         {countries.map((country) => {
           const { automation, missing, catalog } = country.alerts_by_category;
           const pendingClients = country.pending_clients.length;
@@ -228,10 +268,12 @@ export default function DataQualityView() {
               {/* Header: país + pills de estado */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold text-white bg-[#141414] shrink-0">
+                  <div className="w-[21px] h-[21px] rounded-full flex items-center justify-center text-[10px] font-semibold text-white bg-[#141414] shrink-0">
                     {country.country_name.slice(0, 2).toUpperCase()}
                   </div>
-                  <h3 className="text-sm font-medium text-[#141414]">{country.country_name}</h3>
+                  <h3 className="text-[14px] font-semibold text-[#141414]">
+                    {country.country_name}
+                  </h3>
                 </div>
                 <div className="flex items-center gap-1">
                   <span
@@ -294,11 +336,48 @@ export default function DataQualityView() {
                 </div>
               </div>
 
+              {/* Clasificación: clientes y alertas por tier, en una línea */}
+              {country.tiers && country.tiers.length > 0 && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+                  {country.tiers
+                    .filter((t) => t.code !== "NONE")
+                    .map((t) => {
+                      const dimmed = selectedTiers.length > 0 && !selectedTiers.includes(t.code);
+                      return (
+                        <span
+                          key={t.code}
+                          title={`${TIER_META[t.code].label}: ${t.clients} clientes · ${t.active_alerts} alertas${
+                            t.monthly_ingestion_percentage !== null
+                              ? ` · ingesta ${t.monthly_ingestion_percentage}%`
+                              : ""
+                          }`}
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap transition-opacity"
+                          style={{ opacity: dimmed ? 0.35 : 1 }}
+                        >
+                          <TierSwatch code={t.code} />
+                          <span className="text-[#4a4a4a]">{TIER_META[t.code].label}</span>
+                          <span className="font-semibold text-[#141414]">{t.clients}</span>
+                          {t.active_alerts > 0 && (
+                            <span className="inline-flex items-center gap-0.5 font-medium text-[#e5262b]">
+                              <Bell className="w-3 h-3" />
+                              {t.active_alerts}
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })}
+                </div>
+              )}
+
               {/* Ingesta del mes */}
-              <div className="rounded-xl bg-[#F5F5F4] p-3 space-y-2">
+              <div className="rounded-[10px] bg-[#F5F5F4] px-3 py-2 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-[#6B7280]">Ingesta del mes</span>
-                  <span className="text-lg font-bold text-[#4D7C0F]">
+                  <span className="text-[13px] text-[#6B7280]">
+                    Ingesta del mes
+                    {selectedTiers.length > 0 &&
+                      ` · ${selectedTiers.map((c) => TIER_META[c].label).join(" + ")}`}
+                  </span>
+                  <span className="text-[15px] font-semibold text-[#4D7C0F]">
                     {country.monthly_ingestion_percentage}%
                   </span>
                 </div>
@@ -314,13 +393,13 @@ export default function DataQualityView() {
               <div className="grid grid-cols-2 gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="rounded-xl bg-[#F5F5F4] p-3 space-y-1.5 text-left">
+                    <div className="rounded-[10px] bg-[#F5F5F4] px-3 py-2 space-y-1 text-left">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <Users className="w-3 h-3" />
                           Clientes
                         </div>
-                        <span className="text-lg font-bold text-[#141414]">
+                        <span className="text-[15px] font-semibold text-[#141414]">
                           {country.total_clients}
                         </span>
                       </div>
@@ -330,7 +409,7 @@ export default function DataQualityView() {
                           Pendientes
                         </div>
                         <span
-                          className={`text-lg font-bold ${pendingClients > 0 ? "text-[#DC2626]" : "text-[#141414]"}`}
+                          className={`text-[15px] font-semibold ${pendingClients > 0 ? "text-[#DC2626]" : "text-[#141414]"}`}
                         >
                           {pendingClients}
                         </span>
@@ -362,13 +441,13 @@ export default function DataQualityView() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="rounded-xl bg-[#F5F5F4] p-3 space-y-1.5 text-left">
+                    <div className="rounded-[10px] bg-[#F5F5F4] px-3 py-2 space-y-1 text-left">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
                           <FileText className="w-3 h-3" />
                           Archivos
                         </div>
-                        <span className="text-lg font-bold text-[#141414]">
+                        <span className="text-[15px] font-semibold text-[#141414]">
                           {country.total_files_expected}
                         </span>
                       </div>
@@ -378,7 +457,7 @@ export default function DataQualityView() {
                           Pendientes
                         </div>
                         <span
-                          className={`text-lg font-bold ${missing > 0 ? "text-[#DC2626]" : "text-[#141414]"}`}
+                          className={`text-[15px] font-semibold ${missing > 0 ? "text-[#DC2626]" : "text-[#141414]"}`}
                         >
                           {missing}
                         </span>

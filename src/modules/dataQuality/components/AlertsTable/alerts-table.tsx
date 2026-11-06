@@ -5,9 +5,9 @@ import { ExternalLink } from "lucide-react";
 import { Pagination, Table, TableProps, Tooltip } from "antd";
 import dayjs from "dayjs";
 
-import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { IAlert } from "@/types/dataQuality/IDataQuality";
+import { TierBadge } from "../../tiers";
 
 interface AlertsTableProps {
   alerts: IAlert[];
@@ -35,19 +35,26 @@ const columns: TableProps<IAlert>["columns"] = [
     title: "Cliente",
     dataIndex: "client_name",
     render: (text: string) => (
-      <span className="font-medium" style={{ color: "#141414" }}>
+      <span className="text-[13px] font-medium" style={{ color: "#141414" }}>
         {text}
       </span>
     )
   },
   {
+    title: "Tier",
+    dataIndex: "tier",
+    width: 100,
+    render: (_: unknown, record: IAlert) =>
+      record.tier ? (
+        <TierBadge tier={record.tier} />
+      ) : (
+        <span className="text-[13px] text-[#8a8a8a]">-</span>
+      )
+  },
+  {
     title: "País",
     dataIndex: "country_name",
-    render: (text: string) => (
-      <Badge variant="outline" className="text-[13px]">
-        {text}
-      </Badge>
-    )
+    render: (text: string) => <span className="text-[13px] text-[#4a4a4a]">{text}</span>
   },
 
   {
@@ -68,15 +75,9 @@ const columns: TableProps<IAlert>["columns"] = [
     dataIndex: "periodicity",
     render: (periodicity: IAlert["periodicity"]) =>
       periodicity?.length ? (
-        <div className="flex flex-wrap gap-1">
-          {periodicity.map((item) => (
-            <Badge key={item} variant="outline" className="text-[13px]">
-              {item}
-            </Badge>
-          ))}
-        </div>
+        <span className="text-[13px] text-[#6b6b6b]">{periodicity.join(" · ")}</span>
       ) : (
-        "-"
+        <span className="text-[13px] text-[#8a8a8a]">-</span>
       )
   },
   {
