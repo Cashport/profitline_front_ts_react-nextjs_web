@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { message } from 'antd';
-import { asignarPrecintos, getFilterExecutives } from '@/services/precintos/precintos'; 
+import { asignarPrecintos, getAssignableExecutives } from '@/services/precintos/precintos'; 
+import { hoyLocal } from '../../utils/fechas';
+import { armarRango, rangoConsecutivo } from '../../utils/rangos';
 
 interface AsignarEjecutivoModalProps {
   isOpen: boolean;
@@ -14,6 +16,8 @@ interface AsignarEjecutivoModalProps {
 interface Ejecutivo {
   Id: string;
   UserName: string;
+  /** Nombre en manager.Usuarios; si no hay, el back manda el correo. */
+  Nombre?: string;
 }
 
 export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
@@ -25,6 +29,8 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
   const [activeTab, setActiveTab] = useState<'rango' | 'individual'>('rango');
   const [desde, setDesde] = useState('');
   const [hasta, setHasta] = useState('');
+  // Rango que viene de la tabla (menú de 3 puntos): no se puede editar ni cambiar de pestaña.
+  const [rangoBloqueado, setRangoBloqueado] = useState(false);
   const [codigosIndividuales, setCodigosIndividuales] = useState('');
   const [ejecutivo, setEjecutivo] = useState('');
   const [fecha, setFecha] = useState('');
@@ -37,15 +43,21 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = hoyLocal();
       setFecha(today);
-      setDesde('');
-      setHasta('');
       setEjecutivo('');
       setGuia('');
       setErrorModal(null); // Limpiamos alertas al abrir
 
-      if (codigosIniciales.length > 0) {
+      const rango = rangoConsecutivo(codigosIniciales.map((c) => String(c).trim()));
+      setDesde(rango?.desde ?? '');
+      setHasta(rango?.hasta ?? '');
+      setRangoBloqueado(Boolean(rango));
+
+      if (rango) {
+        setActiveTab('rango');
+        setCodigosIndividuales('');
+      } else if (codigosIniciales.length > 0) {
         setActiveTab('individual');
         setCodigosIndividuales(codigosIniciales.join(', '));
       } else {
@@ -55,8 +67,7 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
 
       const fetchEjecutivos = async () => {
         try {
-          const data = await getFilterExecutives();
-          setEjecutivosList(data.data || data); 
+          setEjecutivosList(await getAssignableExecutives());
         } catch (error) {
           console.error("Error cargando ejecutivos", error);
         }
@@ -75,20 +86,7 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
       let listaCodigos: string[] = [];
 
       if (activeTab === 'rango') {
-        const inicio = parseInt(desde);
-        const fin = parseInt(hasta);
-        if (isNaN(inicio) || isNaN(fin)) throw new Error("Ingresa un rango válido");
-        if (fin < inicio) throw new Error("El número final debe ser mayor o igual al inicial");
-
-        // 👈 LÍMITE DE 1.000
-        const cantidad = fin - inicio + 1;
-        if (cantidad > 1000) {
-          throw new Error(`El rango supera el máximo permitido de 1.000 precintos (solicitaste ${cantidad}).`);
-        }
-
-        for (let i = inicio; i <= fin; i++) {
-          listaCodigos.push(i.toString());
-        }
+        listaCodigos = armarRango(desde, hasta);
       } else {
         listaCodigos = codigosIndividuales.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== '');
       }
@@ -146,21 +144,21 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
             <label className="block text-[13px] font-bold text-gray-900">1. Precintos</label>
 
             <div className="inline-flex p-1 bg-gray-100/80 rounded-2xl gap-1">
-              <button type="button" onClick={() => setActiveTab('rango')} className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${activeTab === 'rango' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Rango</button>
-              <button type="button" onClick={() => setActiveTab('individual')} className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${activeTab === 'individual' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Individual / códigos</button>
+              <button type="button" onClick={() => setActiveTab('rango')} disabled={rangoBloqueado} className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer disabled:cursor-not-allowed ${activeTab === 'rango' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Rango</button>
+              <button type="button" onClick={() => setActiveTab('individual')} disabled={rangoBloqueado} className={`px-4 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${activeTab === 'individual' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}>Individual / códigos</button>
             </div>
 
-            <p className="text-[13px] text-gray-400">Solo números · los precintos con código (ej. CLIS_3676) se asignan en &quot;Individual / códigos&quot;</p>
+            <p className="text-[13px] text-gray-400">Ej. 100 – 109 o TS100 – TS109 (mismo prefijo) · los códigos sueltos se asignan en &quot;Individual / códigos&quot;</p>
 
             {activeTab === 'rango' ? (
               <div className="grid grid-cols-2 gap-4 pt-1">
                 <div>
                   <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Desde</label>
-                  <input type="text" value={desde} onChange={(e) => setDesde(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-1 focus:ring-black" />
+                  <input type="text" value={desde} onChange={(e) => setDesde(e.target.value)} readOnly={rangoBloqueado} className={`w-full px-4 py-2.5 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-1 focus:ring-black ${rangoBloqueado ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50/50'}`} />
                 </div>
                 <div>
                   <label className="block text-[13px] font-medium text-gray-500 mb-1.5">Hasta</label>
-                  <input type="text" value={hasta} onChange={(e) => setHasta(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-1 focus:ring-black" />
+                  <input type="text" value={hasta} onChange={(e) => setHasta(e.target.value)} readOnly={rangoBloqueado} className={`w-full px-4 py-2.5 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-1 focus:ring-black ${rangoBloqueado ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50/50'}`} />
                 </div>
               </div>
             ) : (
@@ -177,7 +175,7 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
               <select value={ejecutivo} onChange={(e) => setEjecutivo(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-black appearance-none cursor-pointer">
                 <option value="" disabled>Selecciona un ejecutivo</option>
                 {ejecutivosList.map((exec) => (
-                  <option key={exec.Id} value={exec.Id}>{exec.UserName}</option>
+                  <option key={exec.Id} value={exec.Id}>{exec.Nombre || exec.UserName}</option>
                 ))}
               </select>
               <span className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 text-[13px]">▼</span>

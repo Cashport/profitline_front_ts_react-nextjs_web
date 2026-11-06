@@ -14,6 +14,7 @@ import { Button } from "@/modules/chat/ui/button";
 
 import { AlertsTable } from "../../components/AlertsTable";
 import { AlertCategoryCards } from "../../components/alert-category-cards";
+import { ITierOption, TierFilterCode, TierQuickFilter, useTierFilter } from "../../tiers";
 
 import {
   IAlertFilterCountry,
@@ -33,28 +34,33 @@ export default function NoveltyAlertsView() {
   const [countryFilter, setCountryFilter] = useState(countryIdParam ?? "all");
   const [clientFilter, setClientFilter] = useState(clientIdParam ?? "all");
   const [currentPage, setCurrentPage] = useState(1);
+  const selectedTiers = useTierFilter((s) => s.selected);
+  const tiersKey = selectedTiers.join(",");
 
   const [filtersData, setFiltersData] = useState<{
     countries: IAlertFilterCountry[];
     clients: IAlertFilterClient[];
     types: string[];
     categories: IAlertFilterCategory[];
-  }>({ countries: [], clients: [], types: [], categories: [] });
+    tiers: ITierOption[];
+  }>({ countries: [], clients: [], types: [], categories: [], tiers: [] });
 
+  // Category cards are recalculated for the selected tiers.
   useEffect(() => {
-    getAlertsFilters()
+    getAlertsFilters(tiersKey ? (tiersKey.split(",") as TierFilterCode[]) : [])
       .then((data) =>
         setFiltersData({
           countries: data.countries,
           clients: data.clients,
           types: data.types,
-          categories: data.categories ?? []
+          categories: data.categories ?? [],
+          tiers: data.tiers ?? []
         })
       )
       .catch((error) => {
         console.error("Error fetching alerts filters:", error);
       });
-  }, []);
+  }, [tiersKey]);
 
   // Las tarjetas espejan el select de tipos: una categoría está activa cuando todos sus
   // error_types ya están aplicados, así que el filtro es la única fuente de verdad.
@@ -71,10 +77,12 @@ export default function NoveltyAlertsView() {
     );
   };
 
-  const visibleClients =
-    countryFilter === "all"
-      ? filtersData.clients
-      : filtersData.clients.filter((client) => String(client.id_country) === countryFilter);
+  const visibleClients = filtersData.clients.filter(
+    (client) =>
+      (countryFilter === "all" || String(client.id_country) === countryFilter) &&
+      (selectedTiers.length === 0 ||
+        selectedTiers.includes((client.tier_code ?? "NONE") as TierFilterCode))
+  );
 
   const handleCountryChange = (value: string) => {
     setCountryFilter(value);
@@ -103,7 +111,8 @@ export default function NoveltyAlertsView() {
     searchTerm || undefined,
     countryFilter !== "all" ? Number(countryFilter) : undefined,
     clientFilter !== "all" ? Number(clientFilter) : undefined,
-    typeFilter.length ? typeFilter : undefined
+    typeFilter.length ? typeFilter : undefined,
+    selectedTiers
   );
 
   const alertsData = alertsResponse as unknown as IGetAlerts | undefined;
@@ -111,7 +120,7 @@ export default function NoveltyAlertsView() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, typeFilter, countryFilter, clientFilter]);
+  }, [searchTerm, typeFilter, countryFilter, clientFilter, tiersKey]);
 
   return (
     <div className="cp-page">
@@ -202,6 +211,10 @@ export default function NoveltyAlertsView() {
               </Button>
             )}
           </div>
+        </div>
+
+        <div className="mb-5">
+          <TierQuickFilter options={filtersData.tiers.length ? filtersData.tiers : undefined} />
         </div>
 
         <AlertCategoryCards

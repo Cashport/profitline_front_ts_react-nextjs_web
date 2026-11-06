@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { message } from 'antd';
-import { cambiarEjecutivo, getFilterExecutives } from '@/services/precintos/precintos'; 
+import { cambiarEjecutivo, getAssignableExecutives } from '@/services/precintos/precintos'; 
+import { hoyLocal } from '../../utils/fechas';
 
 interface CambiarPrecintoModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ interface CambiarPrecintoModalProps {
 interface Ejecutivo {
   Id: string;
   UserName: string;
+  /** Nombre en manager.Usuarios; si no hay, el back manda el correo. */
+  Nombre?: string;
 }
 
 export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
@@ -33,7 +36,7 @@ export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = hoyLocal();
       setFecha(today);
       setEjecutivo('');
       setGuia('');
@@ -41,8 +44,7 @@ export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
 
       const fetchEjecutivos = async () => {
         try {
-            const data = await getFilterExecutives();
-            setEjecutivosList(data.data || data); 
+            setEjecutivosList(await getAssignableExecutives());
         } catch (error) {
             console.error("Error cargando ejecutivos", error);
         }
@@ -134,7 +136,7 @@ export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
                       disabled={esElActual}
                       className={esElActual ? 'text-gray-300 bg-gray-100' : ''}
                     >
-                      {exec.UserName} {esElActual ? '(Actual)' : ''}
+                      {exec.Nombre || exec.UserName} {esElActual ? '(Actual)' : ''}
                     </option>
                   );
                 })}

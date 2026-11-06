@@ -1,5 +1,7 @@
 "use client";
 
+import { Tooltip } from "antd";
+
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import { KpiCard, KpiValue } from "@/components/ui/kpi-card/kpi-card";
 import { useAppStore } from "@/lib/store/store";
@@ -7,6 +9,7 @@ import type { IBlockingAlertAging } from "@/types/blockingAlerts/IBlockingAlerts
 import { cn } from "@/utils/utils";
 
 import { AGING_SEGMENTS } from "../../constants";
+import BreakdownTooltip from "../breakdown-tooltip/breakdown-tooltip";
 
 interface PortfolioCardProps {
   label: string;
@@ -37,35 +40,42 @@ export default function PortfolioCard({
       {aging && (
         <>
           <KpiValue label={label} value={money(aging.portfolio)} caption={caption} />
-          <div className="flex flex-col gap-2.5">
-            <AgingBar
-              segments={AGING_SEGMENTS.map((s) => ({
-                key: s.key,
-                value: aging[s.key],
-                color: s.color,
-                tip: `${s.label}: ${money(aging[s.key])}`
-              }))}
-            />
-            <div
-              className={cn(
-                "flex text-[13px] text-cp-ink-3",
-                stacked
-                  ? "flex-col gap-1.5"
-                  : "flex-wrap gap-x-6 gap-y-1 max-md:flex-col max-md:gap-1.5"
-              )}
-            >
-              {AGING_SEGMENTS.map((s) => (
-                <span key={s.key} className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-[2px]"
-                    style={{ background: s.color }}
-                  />
-                  <span className={stacked ? "flex-1" : "max-md:flex-1"}>{s.label}</span>
-                  <b className="font-semibold tabular-nums text-cp-ink">{money(aging[s.key])}</b>
-                </span>
-              ))}
+          <Tooltip
+            title={<BreakdownTooltip title={label} aging={aging} />}
+            color="#141414"
+            placement="bottom"
+            overlayStyle={{ maxWidth: "none" }}
+            overlayInnerStyle={{ padding: 0, borderRadius: 12 }}
+          >
+            <div className="flex flex-col gap-2.5">
+              <AgingBar
+                segments={AGING_SEGMENTS.map((s) => ({
+                  key: s.key,
+                  value: aging[s.key],
+                  color: s.color
+                }))}
+              />
+              <div
+                className={cn(
+                  "flex text-[13px] text-cp-ink-3",
+                  stacked
+                    ? "flex-col gap-1.5"
+                    : "flex-wrap gap-x-6 gap-y-1 max-md:flex-col max-md:gap-1.5"
+                )}
+              >
+                {AGING_SEGMENTS.map((s) => (
+                  <span key={s.key} className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-[2px]"
+                      style={{ background: s.color }}
+                    />
+                    <span className={stacked ? "flex-1" : "max-md:flex-1"}>{s.label}</span>
+                    <b className="font-semibold tabular-nums text-cp-ink">{money(aging[s.key])}</b>
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          </Tooltip>
           {extras && (
             <div className="flex flex-col gap-1.5 border-t border-cp-line pt-2.5 text-[13px] text-cp-ink-3">
               {extras.map((e) => (

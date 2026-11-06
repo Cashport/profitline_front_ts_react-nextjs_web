@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ConfigProvider, Segmented, Select, Switch } from "antd";
+import { ConfigProvider, Select } from "antd";
 import { Download } from "lucide-react";
 
+import { MiniSwitch } from "@/components/ui/page-header-controls/page-header-controls";
 import type { IVisitFormResponsesExportParams } from "@/types/surveys/ISurveys";
+import { cn } from "@/utils/utils";
 
 import { EXPORT_PERIODS } from "../../constants";
 import { useVisitFormResponsesExport } from "../../hooks/useVisitFormResponsesExport";
@@ -17,8 +19,18 @@ const FORMATS: { value: ExportFormat; label: string }[] = [
   { value: "csv", label: "CSV" }
 ];
 
-/** "Descargar respuestas": una fila por respuesta y una columna por pregunta, del periodo elegido. */
-export default function ResponsesDownloadCard({ formId }: { formId: number }) {
+/**
+ * "Descargar respuestas": una fila por respuesta y una columna por pregunta, del periodo elegido.
+ * Va en la fila de KPIs con su mismo alto (docs/DESIGN.md §5): título arriba y, abajo, los
+ * controles en una sola línea con la descarga a la derecha.
+ */
+export default function ResponsesDownloadCard({
+  formId,
+  className
+}: {
+  formId: number;
+  className?: string;
+}) {
   const { download, isDownloading } = useVisitFormResponsesExport(formId);
   const [format, setFormat] = useState<ExportFormat>("xlsx");
   const [periodId, setPeriodId] = useState("mes");
@@ -30,54 +42,70 @@ export default function ResponsesDownloadCard({ formId }: { formId: number }) {
   };
 
   return (
-    <section className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-          <Download className="h-4 w-4" />
+    <section
+      className={cn("cp-card flex flex-col justify-between gap-3 px-[18px] py-[14px]", className)}
+    >
+      <div className="flex min-w-0 items-center gap-2 text-[13px]">
+        <Download className="h-4 w-4 shrink-0 text-cp-ink" />
+        <h2 className="shrink-0 font-semibold text-cp-ink">Descargar respuestas</h2>
+        <span className="truncate text-muted-foreground">
+          · Una fila por respuesta, una columna por pregunta
         </span>
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">Descargar respuestas</h2>
-          <p className="text-[13px] text-muted-foreground">
-            Una fila por respuesta, una columna por pregunta
-          </p>
-        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium text-muted-foreground">Formato</span>
-          {/* El tema raíz fija colorTextSecondary en blanco, que oculta la opción no seleccionada */}
-          <ConfigProvider
-            theme={{ components: { Segmented: { itemColor: "rgba(0, 0, 0, 0.65)" } } }}
-          >
-            <Segmented
-              block
-              value={format}
-              onChange={(value) => setFormat(value as ExportFormat)}
-              options={FORMATS}
-            />
-          </ConfigProvider>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {/* Selector segmentado gris con la opción activa en blanco, como el de Tema del avatar. */}
+        <div
+          role="radiogroup"
+          aria-label="Formato"
+          className="flex h-[var(--control-h)] shrink-0 rounded-lg bg-cp-bg p-[3px]"
+        >
+          {FORMATS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              role="radio"
+              aria-checked={format === f.value}
+              onClick={() => setFormat(f.value)}
+              className={cn(
+                "cursor-pointer rounded-md border-0 px-3.5 text-[13px] transition-colors",
+                format === f.value
+                  ? "bg-cp-surface font-semibold text-cp-ink shadow-[0_1px_2px_rgba(0,0,0,.08)]"
+                  : "bg-transparent font-medium text-cp-ink-3 hover:text-cp-ink"
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium text-muted-foreground">Periodo</span>
+
+        {/* El tema raíz usa controles de 47px: aquí van al alto de los demás (--control-h). */}
+        <ConfigProvider theme={{ components: { Select: { controlHeight: 36, borderRadius: 8 } } }}>
           <Select
+            aria-label="Periodo"
+            variant="filled"
             value={periodId}
             onChange={setPeriodId}
             options={EXPORT_PERIODS.map((p) => ({ value: p.id, label: p.label }))}
+            className="w-[170px] shrink-0"
           />
-        </div>
-      </div>
+        </ConfigProvider>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <label className="flex cursor-pointer items-center gap-2 text-[13px] text-foreground">
-          <Switch size="small" checked={includeLinks} onChange={setIncludeLinks} />
-          Incluir enlaces a fotos y archivos
-        </label>
+        <span className="text-[13px] text-cp-ink-2">
+          <MiniSwitch
+            checked={includeLinks}
+            onChange={setIncludeLinks}
+            label="Enlaces a fotos y archivos"
+            title="Incluir enlaces a fotos y archivos"
+          />
+        </span>
+
         <ActionButton
           variant="primary"
           icon={<Download />}
           loading={isDownloading}
           onClick={handleDownload}
+          className="ml-auto"
         >
           Descargar {format === "csv" ? "CSV" : "Excel"}
         </ActionButton>

@@ -6,9 +6,10 @@ export const metadata: Metadata = {
   description: "Módulo de precintos"
 };
 
+// El header lo pinta PrecintosView: lleva Filtrar y el buscador (DESIGN.md §4).
 export default function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ViewWrapper headerTitle="Precintos">
+    <ViewWrapper headerTitle="Precintos" hideHeader>
       {children}
     </ViewWrapper>
   );

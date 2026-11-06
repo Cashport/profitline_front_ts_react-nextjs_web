@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
+import { formatFechaPrecinto } from '../../utils/fechas';
 
 interface AnuladosTableProps {
   data?: any[];
@@ -32,12 +33,12 @@ export const AnuladosTable: React.FC<AnuladosTableProps> = ({
   );
 
   return (
-    <div className="w-full bg-white overflow-visible">
-      <div className="overflow-x-auto">
+    <div className="w-full min-w-0">
+      <div className="min-w-0">
         <table className="w-full text-left text-[13px] border-collapse">
           <thead>
             <tr className="select-none">
-              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></th>
+              <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink"><input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-cp-line-2 accent-[#cbe71e] w-4 h-4 cursor-pointer" /></th>
               
               {/* 👇 COLUMNA ORDENABLE: PRECINTO 👇 */}
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('IdPrecinto')}>
@@ -56,30 +57,28 @@ export const AnuladosTable: React.FC<AnuladosTableProps> = ({
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 text-[13.5px] font-semibold text-cp-ink">Anulado por</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50 text-gray-700">
+          <tbody className="divide-y divide-cp-muted text-cp-ink">
             {data.map((item) => {
               const isSelected = selectedIds.includes(item.Id);
               return (
-                <tr key={item.Id} className={`hover:bg-gray-50/70 transition-colors ${isSelected ? 'bg-gray-50/40' : ''}`}>
-                  <td className="py-3 px-4"><input type="checkbox" checked={isSelected} onChange={() => toggleSelectRow(item.Id)} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" /></td>
-                  <td className="py-3 px-4 font-bold text-gray-900">{item.IdPrecinto}</td>
-                  <td className="py-3 px-4 font-bold text-gray-900">{item.IdPrecintoHasta || ''}</td>
-                  <td className="py-3 px-4 font-medium text-gray-800">{item.Cantidad || 1}</td>
+                <tr key={item.Id} className={`hover:bg-cp-subtle transition-colors ${isSelected ? 'bg-cp-subtle' : ''}`}>
+                  <td className="py-3 px-4"><input type="checkbox" checked={isSelected} onChange={() => toggleSelectRow(item.Id)} className="rounded border-cp-line-2 accent-[#cbe71e] w-4 h-4 cursor-pointer" /></td>
+                  <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecinto}</td>
+                  <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecintoHasta || ''}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink">{item.Cantidad || 1}</td>
                   
-                  <td className="py-3 px-4 font-medium text-gray-800">
+                  <td className="py-3 px-4 font-medium text-cp-ink">
                     <span className="inline-flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#e6007e]"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-cp-magenta"></span>
                       {item.MotivoAnulacion || 'No especificado'}
                     </span>
                   </td>
                   
-                  <td className="py-3 px-4 font-medium text-gray-600">
-                    {item.FechaAnulacion 
-                      ? new Date(item.FechaAnulacion).toLocaleDateString('es-CO') 
-                      : (item.FechaRegistro ? new Date(item.FechaRegistro).toLocaleDateString('es-CO') : '-')}
+                  <td className="py-3 px-4 font-medium text-cp-ink-2">
+                    {formatFechaPrecinto(item.FechaAnulacion || item.FechaRegistro)}
                   </td>
                   
-                  <td className="py-3 px-4 font-medium text-gray-800">{item.UsuarioModifico || item.UsuarioRegistro || 'Sistema'}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink">{item.UsuarioModifico || item.UsuarioRegistro || 'Sistema'}</td>
                 </tr>
               );
             })}

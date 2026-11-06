@@ -1,5 +1,6 @@
 import config from "@/config";
 import instance, { API } from "@/utils/api/api";
+import { appendTierParam, TierFilterCode } from "@/modules/dataQuality/tiers/tiers";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   ISummaryCountries,
@@ -36,10 +37,16 @@ import {
   IReprocessArchiveDatesResult
 } from "@/types/dataQuality/IDataQuality";
 
-export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
+export const getSummaryCountries = async (
+  projectId: number,
+  tiers: TierFilterCode[] = []
+): Promise<ISummaryCountries> => {
   try {
     const response: GenericResponse<ISummaryCountries> = await API.get(
-      `${config.API_HOST}/data/countries-summary/${projectId}?page=1&limit=100`
+      appendTierParam(
+        `${config.API_HOST}/data/countries-summary/${projectId}?page=1&limit=100`,
+        tiers
+      )
     );
     return response.data;
   } catch (error) {
@@ -370,10 +377,12 @@ export const uploadEvidence = async (id_archives_client_data: number, file: File
   }
 };
 
-export const getAlertsFilters = async (): Promise<IGetFiltersAlerts> => {
+export const getAlertsFilters = async (
+  tiers: TierFilterCode[] = []
+): Promise<IGetFiltersAlerts> => {
   try {
     const response: GenericResponse<IGetFiltersAlerts> = await API.get(
-      `${config.API_HOST}/data/filters`
+      appendTierParam(`${config.API_HOST}/data/filters`, tiers)
     );
     return response.data;
   } catch (error) {

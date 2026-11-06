@@ -90,3 +90,14 @@
         cursor: not-allowed;
     }
 }
+
+.ellipsis {
+    min-width: 1.5rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: $gray;
+    user-select: none;
+}

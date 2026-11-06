@@ -142,7 +142,7 @@ export default function QuestionCard({
       {...dropZone}
       onClick={() => editor.select(question.id)}
       className={cn(
-        "relative rounded-xl border bg-card px-[18px] shadow-sm transition-colors",
+        "relative rounded-[var(--card-radius)] border bg-cp-surface px-[18px] transition-colors",
         isOpen ? "py-4" : "py-3.5",
         isSelected
           ? "border-[#cbe71e] ring-[3px] ring-[#cbe71e]/35"

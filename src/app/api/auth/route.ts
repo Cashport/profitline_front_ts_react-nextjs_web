@@ -5,8 +5,7 @@ import { customInitApp } from "../../../../firebase-admin-config";
 import { COOKIE_NAME } from "@/utils/constants/globalConstants";
 import { customGetAuth } from "../../../../firebase";
 import { getPermissions } from "@/utils/permissions/getPermissions";
-import { deflateSync } from "zlib";
-import { Buffer } from "buffer";
+import { createPermissionedCustomToken } from "@/utils/auth/permissionedCustomToken";
 
 customInitApp();
 
@@ -18,29 +17,7 @@ export async function POST() {
     const idToken = authorization.split("Bearer ")[1];
     const decodedToken = await auth().verifyIdToken(idToken);
     const permissions = await getPermissions(idToken);
-    let extraPermissions: {
-      guestName?: string;
-      guestId?: string;
-      guestDocument?: string;
-      guestEmail?: string;
-      isMarketplaceGuest?: boolean;
-    } = {};
-    if (permissions?.isMarketplaceGuest) {
-      extraPermissions = {
-        guestName: permissions.guestName,
-        guestId: permissions.guestId,
-        guestDocument: permissions.guestDocument,
-        guestEmail: permissions.guestEmail,
-        isMarketplaceGuest: permissions.isMarketplaceGuest
-      };
-    }
-    const buffer = Buffer.from(JSON.stringify(permissions)) as any;
-    const compressedClaims = deflateSync(buffer).toString("base64");
-    const idCustomToken = await auth().createCustomToken(decodedToken.uid, {
-      ...extraPermissions,
-      userName: permissions?.userName,
-      permissions: compressedClaims
-    });
+    const idCustomToken = await createPermissionedCustomToken(decodedToken.uid, permissions);
     const idCustomTokenSession = await auth().createCustomToken(decodedToken.uid);
     token = idCustomToken;
     const customToken = await customGetAuth(idCustomTokenSession);

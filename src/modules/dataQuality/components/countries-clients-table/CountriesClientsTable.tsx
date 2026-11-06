@@ -1,8 +1,27 @@
-import { Calendar, Eye } from "lucide-react";
 import { Table, TableProps } from "antd";
+import { Eye } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
-import { Button } from "@/modules/chat/ui/button";
+import { PERIODICITY_LABEL } from "../../utils/periodicity";
 import { IClientData, IClientDataArchive } from "@/types/dataQuality/IDataQuality";
+import { TIER_CODES, TIER_META, TierBadge, TierFilterCode, useTierFilter } from "../../tiers";
+
+/** Soft status tags, same look as the archive statuses inside the client detail. */
+const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
+  Pendiente: { color: "#B45309", bg: "#FEF3C7" },
+  Completo: { color: "#047857", bg: "#D1FAE5" },
+  Novedad: { color: "#B91C1C", bg: "#FEE2E2" }
+};
+const NEUTRAL_STATUS = { color: "#4a4a4a", bg: "#f2f2f2" };
+
+const tierRank = (record: IClientData) => {
+  const index = record.tier ? TIER_CODES.indexOf(record.tier.code) : -1;
+  return index === -1 ? TIER_CODES.length : index;
+};
+
+const TIER_FILTERS = [...TIER_CODES, "NONE" as const].map((code) => ({
+  text: TIER_META[code].label,
+  value: code
+}));
 
 interface CountriesClientsTableProps {
   data: IClientData[];
@@ -25,22 +44,48 @@ export default function CountriesClientsTable({
   scrollHeight,
   onRowClick
 }: CountriesClientsTableProps) {
+  // The tier column filter is the same shared filter as the legend above the table.
+  const selectedTiers = useTierFilter((s) => s.selected);
+  const setSelectedTiers = useTierFilter((s) => s.setSelected);
+
   const columns: TableProps<IClientData>["columns"] = [
     {
       title: "Nombre",
       dataIndex: "client_name",
       key: "client_name",
       render: (name: string) => (
-        <p className="font-medium hover:underline text-[#141414]">{name}</p>
+        <span className="block truncate text-[13px] font-medium text-[#1677ff] hover:text-[#0b5bd3] hover:underline">
+          {name}
+        </span>
       ),
       sorter: (a, b) => a.client_name.localeCompare(b.client_name),
+      showSorterTooltip: false
+    },
+    {
+      title: "Tier",
+      key: "tier",
+      dataIndex: "tier",
+      width: 110,
+      render: (_, record: IClientData) =>
+        record.tier ? (
+          <TierBadge tier={record.tier} />
+        ) : (
+          <span className="text-[13px] text-[#8a8a8a]">-</span>
+        ),
+      sorter: (a, b) => tierRank(a) - tierRank(b),
+      filters: TIER_FILTERS,
+      filteredValue: selectedTiers.length ? selectedTiers : null,
       showSorterTooltip: false
     },
     {
       title: "Periodicidad",
       key: "periodicity",
       dataIndex: "periodicity",
-      render: (periodicity) => <span className="text-gray-500">{periodicity}</span>,
+      render: (periodicity: string | null) => (
+        <span className="text-[13px] text-[#141414]">
+          {periodicity ? PERIODICITY_LABEL[periodicity] ?? periodicity : "-"}
+        </span>
+      ),
       ellipsis: true
     },
     {
@@ -56,7 +101,7 @@ export default function CountriesClientsTable({
             {archives.map((archive) => (
               <div
                 key={archive.id}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-semibold text-white"
+                className="w-[21px] h-[21px] rounded-full flex items-center justify-center text-[9px] font-semibold text-white"
                 style={{ backgroundColor: archive.color }}
                 title={archive.description}
               >
@@ -81,12 +126,7 @@ export default function CountriesClientsTable({
           year: "numeric"
         });
 
-        return (
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-[#141414]" />
-            <span className="text-[#141414]">{formattedDate}</span>
-          </div>
-        );
+        return <span className="text-[13px] text-[#141414]">{formattedDate}</span>;
       },
       sorter: (a, b) => {
         const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
@@ -99,19 +139,20 @@ export default function CountriesClientsTable({
       title: "Pendientes",
       dataIndex: "alerts",
       key: "alerts",
-      align: "center",
+      align: "right",
+      width: 110,
       render: (alerts: number) => {
         const count = alerts ?? 0;
-        return (
+        return count > 0 ? (
           <span
-            className={
-              count > 0
-                ? "inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-[13px] font-semibold bg-red-100 text-red-600"
-                : "text-[13px] text-gray-400"
-            }
+            title={`${count} archivos pendientes`}
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold tabular-nums text-[#e5262b]"
           >
-            {count > 0 ? count : "-"}
+            <span className="h-[7px] w-[7px] rounded-full bg-[#e5262b]" />
+            {count}
           </span>
+        ) : (
+          <span className="text-[13px] text-[#8a8a8a]">-</span>
         );
       },
       sorter: (a, b) => (a.alerts ?? 0) - (b.alerts ?? 0),
@@ -121,9 +162,18 @@ export default function CountriesClientsTable({
       title: "Estado",
       key: "status",
       dataIndex: "status",
-      render: (status) => (
-        <Badge variant="outline" className="text-[13px]">
-          {status || "desconocido"}
+      width: 150,
+      render: (status: string | null) => (
+        <Badge
+          variant="outline"
+          className="text-[13px]"
+          style={{
+            color: ((status && STATUS_STYLE[status]) || NEUTRAL_STATUS).color,
+            backgroundColor: ((status && STATUS_STYLE[status]) || NEUTRAL_STATUS).bg,
+            borderColor: "transparent"
+          }}
+        >
+          {status || "Desconocido"}
         </Badge>
       )
     },
@@ -135,20 +185,17 @@ export default function CountriesClientsTable({
       onHeaderCell: () => ({ style: { paddingLeft: 0 } }),
       onCell: () => ({ style: { paddingLeft: 0 } }),
       render: (_, record: IClientData) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0"
+        <button
+          type="button"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#6b6b6b] transition-colors hover:bg-[#f2f2f2] hover:text-[#141414]"
           title="Ver detalles del cliente"
           onClick={(e) => {
             e.stopPropagation();
-            if (onRowClick) {
-              onRowClick(record);
-            }
+            onRowClick?.(record);
           }}
         >
-          <Eye className="w-4 h-4 text-gray-600" />
-        </Button>
+          <Eye className="h-4 w-4" />
+        </button>
       )
     }
   ];
@@ -160,6 +207,12 @@ export default function CountriesClientsTable({
         columns={columns}
         dataSource={data.map((item) => ({ ...item, key: item.id }))}
         loading={loading}
+        size="small"
+        onChange={(_, filters, __, extra) => {
+          if (extra.action === "filter") {
+            setSelectedTiers(((filters.tier as TierFilterCode[] | null) ?? []).slice());
+          }
+        }}
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,

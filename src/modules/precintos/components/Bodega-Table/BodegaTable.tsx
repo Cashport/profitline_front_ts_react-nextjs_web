@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
+import { formatFechaPrecinto } from '../../utils/fechas';
 
 interface BodegaTableProps {
   data?: any[];
@@ -55,13 +56,13 @@ export const BodegaTable: React.FC<BodegaTableProps> = ({
   );
 
   return (
-    <div className="w-full mt-2 bg-white rounded-2xl border border-gray-100 overflow-visible">
-      <div className="overflow-x-auto">
+    <div className="w-full min-w-0">
+      <div className="min-w-0">
         <table className="w-full text-left text-[13px] border-collapse">
           <thead>
             <tr className="select-none">
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-10 text-[13.5px] font-semibold text-cp-ink">
-                <input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" />
+                <input type="checkbox" checked={selectedIds.length === data.length && data.length > 0} onChange={toggleSelectAll} className="rounded border-cp-line-2 accent-[#cbe71e] w-4 h-4 cursor-pointer" />
               </th>
               
               {/* 👇 COLUMNA ORDENABLE: DESDE 👇 */}
@@ -74,13 +75,13 @@ export const BodegaTable: React.FC<BodegaTableProps> = ({
               
               {/* 👇 COLUMNA ORDENABLE: FABRICADO 👇 */}
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 cursor-pointer text-[13.5px] font-semibold text-cp-ink" onClick={() => onSort && onSort('FechaRegistro')}>
-                <span className="inline-flex items-center gap-1">Fabricado{renderSortIcon('FechaRegistro')}</span>
+                <span className="inline-flex items-center gap-1">Ingresado{renderSortIcon('FechaRegistro')}</span>
               </th>
               
               <th className="border-b border-cp-line bg-cp-surface py-3 px-4 w-12 text-right text-[13.5px] font-semibold text-cp-ink"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50 text-gray-700">
+          <tbody className="divide-y divide-cp-muted text-cp-ink">
             {data.map((item: any) => {
               const isSelected = selectedIds.includes(item.Id);
               const isMenuOpen = activeMenuId === item.Id;
@@ -90,28 +91,28 @@ export const BodegaTable: React.FC<BodegaTableProps> = ({
               };
 
               return (
-                <tr key={item.Id} className={`hover:bg-gray-50/70 transition-colors ${isSelected ? 'bg-gray-50/40' : ''}`}>
+                <tr key={item.Id} className={`hover:bg-cp-subtle transition-colors ${isSelected ? 'bg-cp-subtle' : ''}`}>
                   <td className="py-3 px-4">
-                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelectRow(item.Id)} className="rounded border-gray-300 accent-[#c2f012] w-4 h-4 cursor-pointer" />
+                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelectRow(item.Id)} className="rounded border-cp-line-2 accent-[#cbe71e] w-4 h-4 cursor-pointer" />
                   </td>
-                  <td className="py-3 px-4 font-bold text-gray-900">{item.IdPrecinto}</td>
-                  <td className="py-3 px-4 font-bold text-gray-900">{item.IdPrecintoHasta || ''}</td>
-                  <td className="py-3 px-4 font-medium text-gray-800">{item.Cantidad || 1}</td>
-                  <td className="py-3 px-4 font-medium text-gray-600">{item.FechaRegistro ? new Date(item.FechaRegistro).toLocaleDateString('es-CO') : '-'}</td>
+                  <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecinto}</td>
+                  <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecintoHasta || ''}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink">{item.Cantidad || 1}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink-2">{formatFechaPrecinto(item.FechaRegistro)}</td>
                   <td className="py-3 px-4 text-right relative">
-                    <button type="button" onClick={() => setActiveMenuId(isMenuOpen ? null : item.Id)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">•••</button>
+                    <button type="button" onClick={() => setActiveMenuId(isMenuOpen ? null : item.Id)} className="p-1 rounded-lg hover:bg-cp-bg text-cp-ink-4 hover:text-cp-ink transition-colors cursor-pointer">•••</button>
                     
                     {isMenuOpen && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setActiveMenuId(null)} />
-                        <div className="absolute right-4 top-8 z-20 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 text-left animate-in fade-in zoom-in-95 duration-100">
+                        <div className="absolute right-4 top-8 z-20 w-56 bg-cp-surface rounded-xl shadow-[0_12px_32px_rgba(0,0,0,.14)] py-2 text-left animate-in fade-in zoom-in-95 duration-100">
                           <button 
                             type="button" 
                             onClick={() => { 
                               setActiveMenuId(null); 
                               if (onAsignarEjecutivo) onAsignarEjecutivo(getCodigosDelItem()); 
                             }} 
-                            className="w-full px-4 py-2 text-[13px] font-semibold text-gray-800 hover:bg-gray-50 text-left transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[13px] font-semibold text-cp-ink hover:bg-cp-bg text-left transition-colors cursor-pointer"
                           >
                             Asignar a ejecutivo {item.Cantidad > 1 ? `(${item.Cantidad})` : ''}
                           </button>
@@ -122,7 +123,7 @@ export const BodegaTable: React.FC<BodegaTableProps> = ({
                               setActiveMenuId(null); 
                               if (onAnularPrecinto) onAnularPrecinto(getCodigosDelItem()); 
                             }} 
-                            className="w-full px-4 py-2 text-[13px] font-semibold text-pink-600 hover:bg-pink-50/50 text-left transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[13px] font-semibold text-cp-magenta hover:bg-cp-bg text-left transition-colors cursor-pointer"
                           >
                             Anular precinto {item.Cantidad > 1 ? `(${item.Cantidad})` : ''}
                           </button>

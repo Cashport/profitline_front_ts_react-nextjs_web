@@ -413,7 +413,7 @@ export const updatePrompt = async (id: number, prompt: string, updatedBy: string
 export const getApplicationsExcelLog = async (project_id: number, clientUUID: string) => {
   try {
     const response: GenericResponse<{ excel_url: string; file_name: string }> = await API.get(
-      `${config.API_HOST}/paymentApplication/applications/excel?project_id=${project_id}&clientUUID=${clientUUID}`
+      `${config.API_HOST}/paymentApplication/applications/log-excel?project_id=${project_id}&clientUUID=${clientUUID}`
     );
 
     return response.data;

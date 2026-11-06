@@ -19,6 +19,11 @@ export interface PaginationProps {
   showResultsText?: boolean;
   /** Disable pagination during loading */
   isLoading?: boolean;
+  /**
+   * Keep page 1 visible, with "…" when there is a gap before the window (default: false).
+   * In this mode the window is the previous page, the current one and the next two.
+   */
+  showFirstPage?: boolean;
 }
 
 const Pagination: FC<PaginationProps> = ({
@@ -29,7 +34,8 @@ const Pagination: FC<PaginationProps> = ({
   maxVisiblePages = 5,
   className,
   showResultsText = true,
-  isLoading = false
+  isLoading = false,
+  showFirstPage = false
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -41,6 +47,11 @@ const Pagination: FC<PaginationProps> = ({
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   const getVisiblePages = (): number[] => {
+    if (showFirstPage) {
+      const start = Math.max(1, currentPage - 1);
+      const end = Math.min(totalPages, currentPage + 2);
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    }
     const half = Math.floor(maxVisiblePages / 2);
     const initialStart = Math.max(1, currentPage - half);
     const end = Math.min(totalPages, initialStart + maxVisiblePages - 1);
@@ -53,6 +64,8 @@ const Pagination: FC<PaginationProps> = ({
   };
 
   const visiblePages = getVisiblePages();
+  const firstVisible = visiblePages[0];
+  const pinFirst = showFirstPage && firstVisible > 1;
 
   const handlePrevious = () => {
     if (currentPage > 1 && !isLoading) {
@@ -92,6 +105,23 @@ const Pagination: FC<PaginationProps> = ({
         </button>
 
         <div className={styles.pageNumbers}>
+          {pinFirst && (
+            <>
+              <button
+                type="button"
+                className={styles.pageButton}
+                onClick={() => handlePageClick(1)}
+                disabled={isLoading}
+              >
+                1
+              </button>
+              {firstVisible > 2 && (
+                <span className={styles.ellipsis} aria-hidden="true">
+                  …
+                </span>
+              )}
+            </>
+          )}
           {visiblePages.map((page) => (
             <button
               key={page}

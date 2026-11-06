@@ -3,13 +3,31 @@
 
 export type BlockingAlertStatus = "blocked" | "to_be_blocked" | "up_to_date";
 
-/** Cartera por tramo. `pastDue` negativa es saldo a favor. */
-export interface IBlockingAlertAging {
-  portfolio: number;
+export interface IBlockingAlertBuckets {
   current: number;
-  pastDue: number;
   pastDue1To60: number;
   pastDueOver60: number;
+}
+
+/**
+ * Desglose de la cartera, como el tooltip del Home: notas y pagos van en negativo
+ * (0 si el proyecto no los descuenta). `total` por tramo más `unappliedPayments`
+ * da `portfolio`; sus tramos vencidos más `unappliedPayments` dan `pastDue`.
+ */
+export interface IBlockingAlertBreakdown {
+  invoices: IBlockingAlertBuckets;
+  balances: IBlockingAlertBuckets;
+  creditNotes: IBlockingAlertBuckets;
+  /** Sin ship-to: solo en el cliente y el resumen. */
+  unappliedPayments: number;
+  total: IBlockingAlertBuckets;
+}
+
+/** Cartera por tramo. `pastDue` negativa es saldo a favor. */
+export interface IBlockingAlertAging extends IBlockingAlertBuckets {
+  portfolio: number;
+  pastDue: number;
+  breakdown: IBlockingAlertBreakdown;
 }
 
 /** Puntos de venta de un cliente por estado. */

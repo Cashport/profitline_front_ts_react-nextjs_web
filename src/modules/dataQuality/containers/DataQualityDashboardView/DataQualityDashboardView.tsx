@@ -11,16 +11,20 @@ import {
   useDataQualityDashboardContext
 } from "@/modules/dataQuality/context/DataQualityDashboardContext";
 import { useDashboardSummary } from "@/modules/dataQuality/hooks/useDashboardSummary";
+import { useTierFilter, useTierFilterHydration } from "@/modules/dataQuality/tiers";
 
 function DashboardContent() {
   const { activeTab, selectedPeriod, selectedRegion, selectedFileType } =
     useDataQualityDashboardContext();
+  useTierFilterHydration();
+  const selectedTiers = useTierFilter((s) => s.selected);
 
   const { data: dashboardSummary } = useDashboardSummary({
     month: selectedPeriod,
     id_country: selectedRegion ? Number(selectedRegion) : undefined,
     id_type_archive:
-      selectedFileType && selectedFileType !== "all" ? [Number(selectedFileType)] : undefined
+      selectedFileType && selectedFileType !== "all" ? [Number(selectedFileType)] : undefined,
+    tiers: selectedTiers
   });
 
   return (

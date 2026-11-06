@@ -1,0 +1,60 @@
+// Cierres de cartera en modo oscuro. Las gráficas (recharts) pintan con colores fijos en
+// atributos SVG; una regla CSS les gana a esos atributos, así que aquí se cambian por los
+// tokens oscuros sin tocar cada gráfica.
+.dark.closings-scope,
+.dark .closings-scope {
+    .recharts-cartesian-grid line,
+    .recharts-cartesian-axis-line {
+        stroke: rgb(var(--cp-line)) !important;
+    }
+
+    .recharts-cartesian-axis-tick text,
+    .recharts-label-list text,
+    .recharts-label {
+        fill: rgb(var(--cp-ink-3)) !important;
+    }
+
+    // Serie "Corriente" (negra en claro) y puntos blancos de las líneas.
+    [fill="#141414"] {
+        fill: rgb(228 228 231) !important;
+    }
+
+    .recharts-dot[fill="#fff"],
+    .recharts-line-dot[fill="#fff"],
+    circle[fill="#fff"] {
+        fill: rgb(var(--cp-surface)) !important;
+    }
+
+    .recharts-tooltip-cursor {
+        fill: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    // Sparklines y textos en tinta fija.
+    svg [stroke="#141414"] {
+        stroke: rgb(228 228 231) !important;
+    }
+}
+
+// Rojo de alerta (#d11a2a) en modo oscuro: más claro para que se lea sobre el fondo.
+.dark.closings-scope,
+.dark .closings-scope {
+    [stroke="#d11a2a"] {
+        stroke: #ff6b6b !important;
+    }
+
+    [fill="#d11a2a"] {
+        fill: #ff6b6b !important;
+    }
+}
+
+// Azul oscuro Profitline (#011722) en modo oscuro: casi igual al fondo, se aclara para leerlo.
+.dark.closings-scope,
+.dark .closings-scope {
+    [fill="#011722"] {
+        fill: #4f7ea0 !important;
+    }
+
+    [style*="rgb(1, 23, 34)"] {
+        background-color: #4f7ea0 !important;
+    }
+}

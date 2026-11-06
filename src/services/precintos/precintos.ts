@@ -34,7 +34,21 @@ const getProjectId = (): string => {
 };
 
 // 👇 Helper para descargar CSV de forma segura
-const downloadCsv = async (url: string, filename: string, options?: RequestInit) => {
+/** Cuántos precintos trae el CSV: X-Total-Count si el navegador lo deja leer; si no, las filas. */
+const countCsvRows = async (response: Response, blob: Blob) => {
+  const header = Number(response.headers.get("X-Total-Count"));
+  if (Number.isFinite(header) && response.headers.get("X-Total-Count") !== null) return header;
+  const text = await blob.text();
+  const rows = text.split("\n").filter((line) => line.trim() !== "");
+  return Math.max(0, rows.length - 1);
+};
+
+/** `filename` puede depender del total, p. ej. "Inventario filtrado - 120 precintos.csv". */
+const downloadCsv = async (
+  url: string,
+  filename: string | ((total: number) => string),
+  options?: RequestInit
+) => {
   const token = await getIdToken();
   if (!token) throw new Error("No hay sesión activa");
 
@@ -44,17 +58,19 @@ const downloadCsv = async (url: string, filename: string, options?: RequestInit)
     headers: {
       ...options?.headers,
       projectId: getProjectId(),
-      Authorization: `Bearer ${token}`,
-    },
+      Authorization: `Bearer ${token}`
+    }
   });
 
   if (!response.ok) throw new Error(`Error al descargar: ${response.status}`);
 
   const blob = await response.blob();
+  const name =
+    typeof filename === "function" ? filename(await countCsvRows(response, blob)) : filename;
   const objectUrl = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = objectUrl;
-  a.download = filename;
+  a.download = name;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -77,19 +93,24 @@ export const getPrecintos = async (
   sortOrder?: string
 ) => {
   try {
-    const response = await API.get(
-      `/integration/profit360/precintos`,
-      {
-        params: {
-          page, limit, _t: Date.now(), estado, ejecutivos, clientes, from, to, search,
-          groupBy: groupBy.toString(),
-          motivos,
-          sortField,
-          sortOrder,
-        },
-        headers: { projectId: getProjectId() }, // 👈 Dinámico
-      }
-    );
+    const response = await API.get(`/integration/profit360/precintos`, {
+      params: {
+        page,
+        limit,
+        _t: Date.now(),
+        estado,
+        ejecutivos,
+        clientes,
+        from,
+        to,
+        search,
+        groupBy: groupBy.toString(),
+        motivos,
+        sortField,
+        sortOrder
+      },
+      headers: { projectId: getProjectId() } // 👈 Dinámico
+    });
 
     const res = response as any;
 
@@ -110,7 +131,11 @@ export const getPrecintos = async (
 };
 
 // 2. INGRESAR A BODEGA (POST)
-export const createPrecintos = async (precintos: string[], fecha?: string, observacion?: string) => {
+export const createPrecintos = async (
+  precintos: string[],
+  fecha?: string,
+  observacion?: string
+) => {
   try {
     const response = await API.post(
       `/integration/profit360/precintos`,
@@ -125,7 +150,12 @@ export const createPrecintos = async (precintos: string[], fecha?: string, obser
 };
 
 // 3. ASIGNAR A EJECUTIVO (PUT)
-export const asignarPrecintos = async (precintos: string[], ejecutivoId: string, fecha?: string, guia?: string) => {
+export const asignarPrecintos = async (
+  precintos: string[],
+  ejecutivoId: string,
+  fecha?: string,
+  guia?: string
+) => {
   try {
     const response = await API.put(
       `/integration/profit360/precintos/assign-executive`,
@@ -140,7 +170,12 @@ export const asignarPrecintos = async (precintos: string[], ejecutivoId: string,
 };
 
 // 4. CAMBIAR EJECUTIVO (PUT)
-export const cambiarEjecutivo = async (precintos: string[], nuevoEjecutivoId: string, fecha?: string, guia?: string) => {
+export const cambiarEjecutivo = async (
+  precintos: string[],
+  nuevoEjecutivoId: string,
+  fecha?: string,
+  guia?: string
+) => {
   try {
     const response = await API.put(
       `/integration/profit360/precintos/change-executive`,
@@ -169,10 +204,44 @@ export const devolverStock = async (precintos: string[], fecha?: string, guia?: 
   }
 };
 
+/** Cuántos precintos inhabilitados (inactivos) tiene el proyecto. */
+export const getPrecintosInhabilitados = async (): Promise<number> => {
+  const response = await API.get(`/integration/profit360/precintos/inactive-count`, {
+    headers: { projectId: getProjectId() }
+  });
+  const data = response.data?.data;
+  return Number(data?.data?.total ?? data?.total ?? 0);
+};
+
+/** Habilita precintos inactivos: pasan a bodega. */
+export const habilitarPrecintos = async (precintos: string[]) => {
+  const response = await API.put(
+    `/integration/profit360/precintos/enable`,
+    { precintos },
+    { headers: { projectId: getProjectId() } }
+  );
+  return response.data;
+};
+
+/** Reutiliza precintos usados (más de año y medio): a bodega o directo a un ejecutivo. */
+export const reutilizarPrecintos = async (
+  precintos: string[],
+  destino: 'bodega' | 'ejecutivo',
+  ejecutivoId?: string,
+  fecha?: string
+) => {
+  const response = await API.put(
+    `/integration/profit360/precintos/reuse`,
+    { precintos, destino, ejecutivoid: ejecutivoId, fecha },
+    { headers: { projectId: getProjectId() } }
+  );
+  return response.data;
+};
+
 // 6. DESCARGAR CSV INVENTARIO COMPLETO
 export const descargarInventarioCSV = async () => {
   try {
-    await downloadCsv("/integration/profit360/precintos/download-csv", "inventario_precintos.csv");
+    await downloadCsv("/integration/profit360/precintos/download-csv", "Inventario completo.csv");
   } catch (error) {
     console.error("Error descargando CSV:", error);
     throw error;
@@ -199,7 +268,8 @@ export const descargarFiltradosCSV = async (filters: {
 
     await downloadCsv(
       `/integration/profit360/precintos/download-filtered-csv?${params.toString()}`,
-      "precintos_filtrados.csv"
+      (total) =>
+        `Inventario filtrado - ${total.toLocaleString("es-CO")} ${total === 1 ? "precinto" : "precintos"}.csv`
     );
   } catch (error) {
     console.error("Error descargando CSV filtrado:", error);
@@ -210,11 +280,16 @@ export const descargarFiltradosCSV = async (filters: {
 // 8. DESCARGAR CSV SELECCIÓN
 export const descargarSeleccionCSV = async (precintos: string[]) => {
   try {
-    await downloadCsv("/integration/profit360/precintos/download-check-csv", "precintos_seleccionados.csv", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ precintos }),
-    });
+    await downloadCsv(
+      "/integration/profit360/precintos/download-check-csv",
+      (total) =>
+        `Inventario seleccionado - ${total.toLocaleString("es-CO")} ${total === 1 ? "precinto" : "precintos"}.csv`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ precintos })
+      }
+    );
   } catch (error) {
     console.error("Error descargando CSV de seleccionados:", error);
     throw error;
@@ -225,7 +300,7 @@ export const descargarSeleccionCSV = async (precintos: string[]) => {
 export const getFilterExecutives = async () => {
   try {
     const response = await API.get("/integration/profit360/precintos/filter-executives", {
-      headers: { projectId: getProjectId() }, // 👈 Dinámico
+      headers: { projectId: getProjectId() } // 👈 Dinámico
     });
     return response.data;
   } catch (error) {
@@ -234,10 +309,17 @@ export const getFilterExecutives = async () => {
   }
 };
 
+/** Usuarios a los que se les pueden asignar precintos: solo los vinculados al proyecto. */
+export const getAssignableExecutives = async () => {
+  const data = await getFilterExecutives();
+  const list = data?.data || data || [];
+  return list.filter((exec: { EnProyecto?: boolean }) => exec.EnProyecto !== false);
+};
+
 export const getFilterClients = async () => {
   try {
     const response = await API.get("/integration/profit360/precintos/filter-clients", {
-      headers: { projectId: getProjectId() }, // 👈 Dinámico
+      headers: { projectId: getProjectId() } // 👈 Dinámico
     });
     return response.data;
   } catch (error) {
@@ -250,7 +332,7 @@ export const getFilterClients = async () => {
 export const getEjecutivosStats = async () => {
   try {
     const response = await API.get("/integration/profit360/precintos/executives-stats", {
-      headers: { projectId: getProjectId() }, // 👈 Dinámico
+      headers: { projectId: getProjectId() } // 👈 Dinámico
     });
     return response.data;
   } catch (error) {
@@ -259,7 +341,11 @@ export const getEjecutivosStats = async () => {
   }
 };
 
-export const anularPrecintos = async (precintos: string[], motivo?: string, observacion?: string) => {
+export const anularPrecintos = async (
+  precintos: string[],
+  motivo?: string,
+  observacion?: string
+) => {
   try {
     const response = await API.put(
       `/integration/profit360/precintos/tocancel`,

@@ -1,3 +1,10 @@
+import type {
+  IClientTier,
+  ITierBreakdown,
+  ITierOption,
+  TierCode
+} from "@/modules/dataQuality/tiers/tiers";
+
 import { GenericResponse } from "@/types/global/IGlobal";
 
 export interface GenericResponseWithFilters<T = any, F = any> extends GenericResponse<T> {
@@ -30,6 +37,7 @@ export interface ICountryClientsFilters {
     id: number;
     description: string;
   }[];
+  tiers?: ITierOption[];
 }
 
 export interface ICountryAlertsByCategory {
@@ -63,6 +71,7 @@ export interface ICountry {
   automation_failures: ICountryAutomationFailure[];
   pending_clients: ICountryPendingClient[];
   total_files_expected: number;
+  tiers?: ITierBreakdown[];
   status: string;
 }
 
@@ -116,6 +125,7 @@ export interface IClientData {
   periodicity: string | null;
   status: string;
   alerts: number;
+  tier?: IClientTier | null;
 }
 
 // Client List Response
@@ -140,6 +150,7 @@ export interface ICreateClientRequest {
   id_country: number;
   id_project: number;
   stakeholder: string;
+  tier?: TierCode | null;
 }
 
 // Create Client Response
@@ -160,6 +171,7 @@ export interface IUpdateClientRequest {
   client_name: string;
   id_country: number;
   stakeholder: string;
+  tier?: TierCode | null;
 }
 
 // Update Client Response (same as Create)
@@ -252,6 +264,7 @@ export interface IClientDetail {
   id_country: number | null;
   country_name: string | null;
   stakeholder: number | null;
+  tier?: IClientTier | null;
   periodicidad: string[] | null;
   tipos_archivo_esperados: string[] | null;
   fuente_ingesta: string[] | null;
@@ -388,6 +401,7 @@ export interface IAlertFilterClient {
   client_name: string;
   id_country: number;
   country_name: string;
+  tier_code?: TierCode | null;
 }
 
 export interface IAlertFilterStatus {
@@ -417,6 +431,7 @@ export interface IGetFiltersAlerts {
   alertStatus: IAlertFilterStatus[];
   types: string[];
   categories: IAlertFilterCategory[];
+  tiers?: ITierOption[];
 }
 
 export interface IAlert {
@@ -438,6 +453,7 @@ export interface IAlert {
   reported_units?: number;
   variation_percent?: number;
   periodicity: string[] | null;
+  tier?: IClientTier | null;
 }
 
 export interface IGetAlerts {
@@ -613,6 +629,8 @@ export interface IDataExplorationClient {
   totals: IDataExplorationTotals;
   last_month: ILastMonthDataExploration | null;
   periodicity: string | null;
+  tier?: IClientTier | null;
+  expected_days?: number[];
 }
 
 export interface IGetDataExploration {
