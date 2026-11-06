@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal, Select, Switch, message } from "antd";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -47,6 +47,12 @@ export function MonitoringSubscriptionsModal({
   const [sendEmail, setSendEmail] = useState(true);
   const [sendTeams, setSendTeams] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+
+  // El modal queda montado entre aperturas: al abrirlo, el país por defecto
+  // debe ser el que está viendo la página, no el del primer montaje.
+  useEffect(() => {
+    if (open) setCountryId(defaultCountryId);
+  }, [open, defaultCountryId]);
 
   const teamsEnabled = !!data?.teams_enabled;
   const subscriptions = data?.subscriptions ?? [];

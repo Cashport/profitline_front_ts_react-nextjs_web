@@ -18,6 +18,11 @@ const LIST_LIMIT = 10;
 
 export type DetailTab = "all" | "critical" | "late" | "novelty" | "received";
 
+export const DETAIL_TABS: readonly DetailTab[] = ["all", "critical", "late", "novelty", "received"];
+
+export const isDetailTab = (value: unknown): value is DetailTab =>
+  typeof value === "string" && (DETAIL_TABS as readonly string[]).includes(value);
+
 function Card({
   title,
   meta,

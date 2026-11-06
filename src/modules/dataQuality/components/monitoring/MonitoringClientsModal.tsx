@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Modal } from "antd";
 import UiSearchInput from "@/components/ui/search-input";
 import { IMonitoringClientRow, IMonitoringSummary } from "../../types/monitoring";
-import { DetailTab } from "./MonitoringCards";
+import { DetailTab, isDetailTab } from "./MonitoringCards";
 import {
   ALERT_META,
   PERIODICITY_LABEL,
@@ -54,7 +54,7 @@ export function MonitoringClientsModal({
 }) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "severity", dir: 1 });
-  const activeTab = tab ?? "all";
+  const activeTab = isDetailTab(tab) ? tab : "all";
 
   const rows = useMemo(() => {
     const term = search.trim().toLowerCase();

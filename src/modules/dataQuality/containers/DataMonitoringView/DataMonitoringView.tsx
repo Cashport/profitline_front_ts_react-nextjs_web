@@ -18,7 +18,8 @@ import {
   AnomaliesCard,
   DetailTab,
   QualityCard,
-  ReceptionCard
+  ReceptionCard,
+  isDetailTab
 } from "../../components/monitoring/MonitoringCards";
 import { MonitoringClientsModal } from "../../components/monitoring/MonitoringClientsModal";
 import { MonitoringSubscriptionsModal } from "../../components/monitoring/MonitoringSubscriptionsModal";
@@ -85,9 +86,10 @@ export default function DataMonitoringView() {
   }, [countryId, paramCountry]);
 
   const { data, isLoading, error } = useMonitoringSummary(countryId, month);
-  const [detailTab, setDetailTab] = useState<DetailTab | null>(
-    (searchParams.get("detail") as DetailTab | null) ?? null
-  );
+  const [detailTab, setDetailTab] = useState<DetailTab | null>(() => {
+    const param = searchParams.get("detail");
+    return isDetailTab(param) ? param : null;
+  });
 
   const titleExtra = data ? (
     <span className="text-[14px] text-cp-ink-3">
