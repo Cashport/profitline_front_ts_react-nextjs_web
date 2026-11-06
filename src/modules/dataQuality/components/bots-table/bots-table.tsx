@@ -12,6 +12,7 @@ interface BotsTableProps {
   bots: IBotStatusItem[];
   totalBots: number;
   loading?: boolean;
+  emptyText?: string;
   executingScheduleId: number | null;
   // eslint-disable-next-line no-unused-vars
   onRun: (bot: IBotStatusItem) => void;
@@ -39,6 +40,7 @@ export function BotsTable({
   bots,
   totalBots,
   loading,
+  emptyText,
   executingScheduleId,
   onRun,
   onViewHistory,
@@ -88,6 +90,7 @@ export function BotsTable({
         dataSource={groupedRows}
         rowKey={(record) => record.key}
         loading={loading}
+        locale={emptyText ? { emptyText } : undefined}
         pagination={false}
         showSorterTooltip={false}
         size="small"

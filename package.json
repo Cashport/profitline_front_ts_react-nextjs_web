@@ -11,6 +11,7 @@
     "prepare": "husky install",
     "commit": "git-cz",
     "lint": "next lint",
+    "test:bot-health": "node --test tests/bots-status-country-filter.test.cjs",
     "test:token-permissions": "node --test tests/tokenPermissions.test.cjs",
     "lint:fix": "next lint --fix",
     "lint-staged": "lint-staged",

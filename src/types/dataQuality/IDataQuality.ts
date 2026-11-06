@@ -829,6 +829,7 @@ export interface IBotStatusItem {
   id_client_data: number;
   cliente: string;
   bot: string;
+  id_country: number | null;
   pais: string | null;
   tipo_archivo: string | null;
   periodicidad: string[];

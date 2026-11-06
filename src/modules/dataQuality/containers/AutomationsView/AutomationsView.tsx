@@ -3,11 +3,14 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select as AntSelect, message } from "antd";
+import useSWR from "swr";
 
 import Header from "@/components/organisms/header";
 import UiSearchInput from "@/components/ui/search-input";
 import { runBotNow } from "@/services/dataQuality/dataQuality";
 import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
+import { ICountries } from "@/types/countries/ICountries";
+import { fetcher } from "@/utils/api/api";
 import { useConfirmBotExecution } from "@/hooks/useConfirmBotExecution";
 
 import { AutomationStatusCards } from "../../components/automation-status-cards";
@@ -15,18 +18,40 @@ import { BotsTable } from "../../components/bots-table";
 import { BotHistoryDrawer } from "../../components/bot-history-drawer";
 import { useBotsStatus } from "../../hooks/useBotsStatus";
 
-import { BotStatusFilter, IBotsSummary } from "../../types/automations";
+import { BotStatusFilter } from "../../types/automations";
+
+type CountryFilter = number | "all";
 
 export default function AutomationsView() {
   const router = useRouter();
-  const { data: bots = [], isLoading, mutate } = useBotsStatus();
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [countryFilter, setCountryFilter] = useState("all");
+  const [countryFilter, setCountryFilter] = useState<CountryFilter>("all");
   const [statusFilter, setStatusFilter] = useState<BotStatusFilter>("all");
   const [executingScheduleId, setExecutingScheduleId] = useState<number | null>(null);
   const [selectedBot, setSelectedBot] = useState<IBotStatusItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // País = única fuente de verdad de cards + tabla: backend filtra y devuelve
+  // `summary` calculado sobre las mismas filas de `data`.
+  const {
+    data: bots = [],
+    summary,
+    isLoading,
+    error,
+    isCountryFilterUnsupported,
+    mutate
+  } = useBotsStatus(countryFilter === "all" ? undefined : countryFilter);
+  // Respuesta global (misma key que "Todos los países", ya respeta el data_scope):
+  // define qué países del catálogo tienen bots visibles para el usuario.
+  const { data: scopedBots } = useBotsStatus();
+  const { data: countriesResponse } = useSWR<ICountries>("/country", fetcher, {
+    revalidateOnFocus: false
+  });
+
+  const handleCountryChange = (value: CountryFilter) => {
+    setCountryFilter(value);
+    setStatusFilter("all");
+  };
 
   // id_client_data es el mismo identificador que ya usa Clientes para esta ruta
   // (ver CountriesClientsView: router.push(`/data-quality/client/${record.id}`)).
@@ -63,43 +88,31 @@ export default function AutomationsView() {
 
   const { requestExecution, confirmationModal } = useConfirmBotExecution(handleRun);
 
+  // Búsqueda y filtro por estado solo afectan la tabla; el país ya viene aplicado en `bots`.
   const filteredBots = useMemo(() => {
     const term = searchTerm.toLowerCase();
     return bots.filter((bot) => {
       const matchesSearch =
         bot.bot.toLowerCase().includes(term) || bot.cliente.toLowerCase().includes(term);
-      const matchesCountry = countryFilter === "all" || bot.pais === countryFilter;
       const matchesStatus = statusFilter === "all" || bot.estado === statusFilter;
-      return matchesSearch && matchesCountry && matchesStatus;
+      return matchesSearch && matchesStatus;
     });
-  }, [bots, searchTerm, countryFilter, statusFilter]);
+  }, [bots, searchTerm, statusFilter]);
 
-  const uniqueCountries = useMemo(() => {
-    const paises = bots.map((bot) => bot.pais).filter((pais): pais is string => Boolean(pais));
-    return paises.filter((pais, index) => paises.indexOf(pais) === index);
-  }, [bots]);
+  const countryOptions = useMemo(() => {
+    const countryIdsWithBots = new Set(
+      (scopedBots ?? []).map((bot) => bot.id_country).filter((id) => id != null)
+    );
+    return (countriesResponse?.data ?? [])
+      .filter((country) => countryIdsWithBots.size === 0 || countryIdsWithBots.has(country.id))
+      .map((country) => ({ label: country.country_name, value: country.id }));
+  }, [countriesResponse, scopedBots]);
 
-  const summary = useMemo<IBotsSummary>(
-    () =>
-      bots.reduce<IBotsSummary>(
-        (acc, bot) => {
-          acc.total += 1;
-          // PENDIENTE/SIN_EJECUCIONES cuentan en el total pero no tienen card propia:
-          // el total NO debe forzarse como la suma de las 4 cards.
-          if (
-            bot.estado === "EXITOSO" ||
-            bot.estado === "FALLIDO" ||
-            bot.estado === "EN_EJECUCION" ||
-            bot.estado === "EN_REVISION"
-          ) {
-            acc[bot.estado] += 1;
-          }
-          return acc;
-        },
-        { total: 0, EXITOSO: 0, FALLIDO: 0, EN_EJECUCION: 0, EN_REVISION: 0 }
-      ),
-    [bots]
-  );
+  const emptyText = isCountryFilterUnsupported
+    ? "El filtro por país aún no está disponible en el servidor"
+    : error
+      ? "No se pudo cargar el estado de los bots"
+      : "Sin bots disponibles";
 
   return (
     <div className="cp-page">
@@ -119,20 +132,17 @@ export default function AutomationsView() {
               showSearch
               optionFilterProp="label"
               value={countryFilter}
-              onChange={setCountryFilter}
+              onChange={handleCountryChange}
               placeholder="Todos los países"
               className="w-48"
               style={{ minWidth: "12rem", height: "var(--control-h)" }}
-              options={[
-                { label: "Todos los países", value: "all" },
-                ...uniqueCountries.map((country) => ({ label: country, value: country }))
-              ]}
+              options={[{ label: "Todos los países", value: "all" }, ...countryOptions]}
             />
           </div>
         </div>
 
         <AutomationStatusCards
-          summary={summary}
+          summary={isLoading || error ? undefined : summary}
           statusFilter={statusFilter}
           onStatusClick={setStatusFilter}
         />
@@ -145,6 +155,7 @@ export default function AutomationsView() {
             bots={filteredBots}
             totalBots={bots.length}
             loading={isLoading}
+            emptyText={emptyText}
             executingScheduleId={executingScheduleId}
             onRun={requestExecution}
             onViewHistory={handleViewHistory}
