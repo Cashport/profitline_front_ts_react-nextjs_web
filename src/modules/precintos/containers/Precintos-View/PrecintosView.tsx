@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { IPrecintoEstadoSummary } from '../../types/precintos_types';
 import { FiltersModal, IAppliedFilters } from '../../components/FiltersModal/FiltersModal';
 import { ActionModal } from '../../components/ActionModal/ActionModal';
@@ -42,6 +43,7 @@ const TableFooter = ({ currentPage, total, onPageChange }: { currentPage: number
 };
 
 export const PrecintosView: React.FC = () => {
+  const router = useRouter();
   // El proyecto va en el header de cada request; al cambiarlo se recarga todo.
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [activeTab, setActiveTab] = useState<'precintos' | 'ejecutivos'>('precintos');
@@ -277,7 +279,8 @@ export const PrecintosView: React.FC = () => {
     setIsActionOpen(false);
     if (actionId === 'ingresar') setIsIngresarOpen(true);
     if (actionId === 'asignar') {
-      setCodigosParaAsignar([]); 
+      // Con precintos marcados en la tabla, se asignan esos (como rango si son seguidos).
+      setCodigosParaAsignar(expandedState === 'BODEGA' ? seleccionados : []);
       setIsAsignarOpen(true);
     }
     if (actionId === 'mover') {
@@ -456,7 +459,8 @@ export const PrecintosView: React.FC = () => {
             <div>
               <UsadosTable 
                 data={precintos} 
-                onDevolucionClick={(id) => console.log('Navegar a devolución:', id)} 
+                onDevolucionClick={(id) => id && router.push(`/logistica-inversa/devoluciones/${id}`)} 
+                onSelectionChange={setSeleccionados}
                 onSort={handleSort}
                 sortField={sortField}
                 sortOrder={sortOrder}
@@ -559,7 +563,8 @@ export const PrecintosView: React.FC = () => {
           isOpen={isActionOpen} 
           onClose={() => setIsActionOpen(false)} 
           onSelectAction={handleSelectAction} 
-          selectedCount={seleccionados.length} 
+          selectedCount={seleccionados.length}
+          seleccionEnBodega={expandedState === 'BODEGA'}
           totalCount={totalRegistros}
           onMover={() => { setIsActionOpen(false); handleSelectAction('mover'); }} 
           onDevolver={() => { setIsActionOpen(false); handleSelectAction('devolver'); }} 
@@ -637,6 +642,7 @@ export const PrecintosView: React.FC = () => {
 
         <MoverPrecintosModal 
           isOpen={isMoverOpen} 
+          bodegaCount={summary.find((item) => item.id === 'BODEGA')?.count ?? 0}
           onClose={() => {
             setIsMoverOpen(false);
             setPrecintosParaMover([]);

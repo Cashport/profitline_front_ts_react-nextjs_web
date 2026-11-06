@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { message } from "antd";
-import { BellSimpleRinging } from "@phosphor-icons/react";
 import { DotsThree } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -23,12 +22,20 @@ import { Button } from "@/modules/chat/ui/button";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailArchives } from "../../components/ClientDetailArchives";
+import type { ClientArchiveAction } from "../../components/ClientDetailArchives/client-detail-archives";
+import { ClientMonthMatrix } from "../../components/client-month-matrix/ClientMonthMatrix";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
 import ModalUploadInTransitHaleon from "../../components/ModalUploadInTransitHaleon/ModalUploadInTransitHaleon";
 
 import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
 import { ModalDataEmailRules } from "../../components/ModalDataRegisteredEmails/ModalDataEmailRules";
+import { TierBadge } from "../../tiers";
+import { AlertsPill } from "../../components/alerts-pill/AlertsPill";
+
+/** White, borderless header button on the gray page (same as the Data Quality home). */
+const HEADER_BTN =
+  "flex h-[var(--control-h)] shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-white px-3.5 text-[13px] font-medium text-[#141414] no-underline transition-colors hover:bg-[#f2f2f2] hover:text-[#141414]";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -48,6 +55,11 @@ export default function DataQualityClientDetails() {
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
   const [archiveCounts, setArchiveCounts] = useState({ shown: 0, total: 0 });
+  const [archiveAction, setArchiveAction] = useState<ClientArchiveAction | null>(null);
+  const openArchiveAction = (action: ClientArchiveAction) => {
+    setWhichModalIsOpen(0);
+    setArchiveAction(action);
+  };
 
   // Fetch client detail data using SWR hook
   const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
@@ -230,35 +242,31 @@ export default function DataQualityClientDetails() {
     <div className="cp-page">
       <Header
         title={`${countryName} - ${clientName}` || ""}
+        titleExtra={
+          <span className="flex items-center gap-2.5">
+            {clientDetail.tier && <TierBadge tier={clientDetail.tier} />}
+            {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+              <AlertsPill
+                href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
+              />
+            )}
+          </span>
+        }
         back="/data-quality"
         actionsExtra={
           <>
             {(canManage || canDownloadCatalog) && (
-              <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
-                <DotsThree size={"1.5rem"} />
+              <button type="button" className={HEADER_BTN} onClick={() => setWhichModalIsOpen(2)}>
+                <DotsThree size={18} weight="bold" />
                 Generar acción
-              </Button>
+              </button>
             )}
-            {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
-              <Link
-                href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <Button variant="outline" className="">
-                  <BellSimpleRinging size={18} />
-                  Alertas
-                </Button>
-              </Link>
-            )}
-
             {hasDataQualityManagementPermission(selectedProject) && (
               <Link
                 href={`/data-quality/references?scope=client&id_client=${clientDetail.id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
+                className={HEADER_BTN}
               >
-                <Button variant="outline" className="">
-                  Referencias
-                </Button>
+                Referencias
               </Link>
             )}
 
@@ -282,29 +290,38 @@ export default function DataQualityClientDetails() {
           </>
         }
       />
-      <main>
-        <div className="cp-card px-[18px] py-[14px]">
-          <ClientDetailInfo
-            clientName={clientDetail?.client_name}
-            stakeholder={clientDetail?.stakeholder?.toString()}
-            setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
-            showEditButton={canManage}
-          />
-          <ClientDetailArchives
-            clientId={clientId}
-            clientName={clientName}
-            clientNIT={clientDetail.id_client}
-            idCountry={clientDetail.id_country}
-            intakes={clientDetail.client_data_archives}
-            onMutateDetail={() => mutate()}
-            onCountsChange={setArchiveCounts}
-          />
-        </div>
+      <div className="cp-card px-[18px] py-[14px]">
+        <ClientDetailInfo
+          clientName={clientDetail?.client_name}
+          stakeholder={clientDetail?.stakeholder?.toString()}
+          tier={clientDetail.tier}
+          setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
+          showEditButton={canManage}
+        />
+      </div>
 
-        <div className="mt-4 text-sm" style={{ color: "#141414" }}>
+      <ClientMonthMatrix
+        clientId={Number(clientId)}
+        countryId={clientDetail.id_country}
+        intakes={clientDetail.client_data_archives}
+      />
+
+      <div className="cp-card px-[18px] py-[14px]">
+        <ClientDetailArchives
+          requestedAction={archiveAction}
+          onActionHandled={() => setArchiveAction(null)}
+          clientId={clientId}
+          clientName={clientName}
+          clientNIT={clientDetail.id_client}
+          idCountry={clientDetail.id_country}
+          intakes={clientDetail.client_data_archives}
+          onMutateDetail={() => mutate()}
+          onCountsChange={setArchiveCounts}
+        />
+        <p className="mt-3 text-right text-[13px] text-[#8a8a8a]">
           Mostrando {archiveCounts.shown} de {archiveCounts.total} archivos
-        </div>
-      </main>
+        </p>
+      </div>
 
       <ModalCreateEditClient
         isOpen={whichModalIsOpen === 1}
@@ -316,7 +333,8 @@ export default function DataQualityClientDetails() {
         clientData={{
           id: clientDetail.id!,
           client_name: clientDetail.client_name || "",
-          stakeholder: String(clientDetail.stakeholder || "")
+          stakeholder: String(clientDetail.stakeholder || ""),
+          tier: clientDetail.tier?.code ?? null
         }}
       />
 
@@ -331,6 +349,9 @@ export default function DataQualityClientDetails() {
         onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
         onUploadPacks={handleOpenPacksUpload}
         onUploadInTransitHaleon={() => setWhichModalIsOpen(7)}
+        onCreateIntake={canManage ? () => openArchiveAction("createIntake") : undefined}
+        onCreateFile={canManage ? () => openArchiveAction("createFile") : undefined}
+        onReprocessDates={canManage ? () => openArchiveAction("reprocessDates") : undefined}
         onAddEmails={() => setWhichModalIsOpen(4)}
         downloadCatalogOnly={!canManage}
       />

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { message } from 'antd';
 import { devolverStock } from '@/services/precintos/precintos';
+import { hoyLocal } from '../../utils/fechas';
 
 interface DevolverPrecintosModalProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ export const DevolverPrecintosModal: React.FC<DevolverPrecintosModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = hoyLocal();
       setFecha(today);
       setGuia('');
       setErrorModal(null);

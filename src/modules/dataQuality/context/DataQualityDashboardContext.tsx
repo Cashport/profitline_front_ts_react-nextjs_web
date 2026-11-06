@@ -13,6 +13,8 @@ interface DataQualityDashboardContextValue {
   setSelectedPeriod: (period: string) => void;
   selectedFileType: string;
   setSelectedFileType: (type: string) => void;
+  search: string;
+  setSearch: (value: string) => void;
 }
 
 const DataQualityDashboardContext = createContext<DataQualityDashboardContextValue | null>(null);
@@ -25,10 +27,11 @@ const getCurrentPeriodId = () => {
 };
 
 export function DataQualityDashboardProvider({ children }: { children: ReactNode }) {
-  const [activeTab, setActiveTab] = useState<TabType>("resumen");
+  const [activeTab, setActiveTab] = useState<TabType>("detalle");
   const [selectedRegion, setSelectedRegion] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState(getCurrentPeriodId);
   const [selectedFileType, setSelectedFileType] = useState("all");
+  const [search, setSearch] = useState("");
 
   const value = useMemo<DataQualityDashboardContextValue>(
     () => ({
@@ -39,9 +42,11 @@ export function DataQualityDashboardProvider({ children }: { children: ReactNode
       selectedPeriod,
       setSelectedPeriod,
       selectedFileType,
-      setSelectedFileType
+      setSelectedFileType,
+      search,
+      setSearch
     }),
-    [activeTab, selectedRegion, selectedPeriod, selectedFileType]
+    [activeTab, selectedRegion, selectedPeriod, selectedFileType, search]
   );
 
   return (

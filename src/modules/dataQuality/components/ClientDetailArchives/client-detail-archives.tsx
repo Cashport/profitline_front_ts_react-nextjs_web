@@ -1,14 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dropdown, Spin, message } from "antd";
-import { ChevronDown, Filter } from "lucide-react";
-import { ArrowsClockwise, Plus } from "phosphor-react";
+import { FilterButton } from "@/components/ui/page-header-controls/page-header-controls";
 
 import { useArchivesClientDataByType } from "../../hooks/useArchivesClientDataByType";
 
-import { useAppStore } from "@/lib/store/store";
-import { hasDataQualityManagementPermission } from "@/utils/utils";
 import Collapse from "@/components/ui/collapse";
-import { Button } from "@/modules/chat/ui/button";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 import { ClientDetailTable, ArchiveTypeCollapseLabel } from "../ClientDetailTable";
 import ModalCreateNewFile from "../ModalCreateNewFile/ModalCreateNewFile";
@@ -25,7 +21,12 @@ interface IClientDetailArchivesProps {
   intakes?: IClientDetailDataArchive[];
   onMutateDetail: () => void;
   onCountsChange?: (counts: { shown: number; total: number }) => void;
+  /** Action chosen from the page "Generar acción" modal. */
+  requestedAction?: ClientArchiveAction | null;
+  onActionHandled?: () => void;
 }
+
+export type ClientArchiveAction = "createIntake" | "createFile" | "reprocessDates";
 
 export function ClientDetailArchives({
   clientId,
@@ -34,7 +35,9 @@ export function ClientDetailArchives({
   idCountry,
   intakes = [],
   onMutateDetail,
-  onCountsChange
+  onCountsChange,
+  requestedAction,
+  onActionHandled
 }: IClientDetailArchivesProps) {
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
@@ -50,15 +53,18 @@ export function ClientDetailArchives({
   });
   const [selectedIntake, setSelectedIntake] = useState<IClientDetailDataArchive | null>(null);
 
-  const selectedProject = useAppStore((projects) => projects.selectedProject);
-  const canManage = hasDataQualityManagementPermission(selectedProject);
-
   // Fetch archives grouped by type for the collapsible sections
   const {
     archivesByType,
     isValidating: isArchivesValidating,
     mutate: mutateArchives
-  } = useArchivesClientDataByType(clientId, dateRange.start, dateRange.end, showProcessed, showFuture);
+  } = useArchivesClientDataByType(
+    clientId,
+    dateRange.start,
+    dateRange.end,
+    showProcessed,
+    showFuture
+  );
 
   // Aggregate per-type counts so the parent can render the "Mostrando X de Y" footer.
   // `shown` counts the rows actually returned/displayed (grows when "show processed" is
@@ -123,6 +129,15 @@ export function ClientDetailArchives({
     setIntakeModal({ isOpen: true, mode });
   };
 
+  useEffect(() => {
+    if (!requestedAction) return;
+    if (requestedAction === "createIntake") handleOpenIntakeModal("create");
+    if (requestedAction === "createFile") setIsCreateFileModalOpen(true);
+    if (requestedAction === "reprocessDates") setIsReprocessDatesModalOpen(true);
+    onActionHandled?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedAction]);
+
   const toggleShowProcessed = (idTypeArchive: number) => {
     setShowProcessed((prev) =>
       prev.includes(idTypeArchive)
@@ -151,55 +166,16 @@ export function ClientDetailArchives({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center justify-start gap-3">
-          <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
-            Archivos
-          </h2>
-          {canManage && (
-            <Button
-              onClick={() => handleOpenIntakeModal("create")}
-              variant="ghost"
-              className="bg-transparent"
-              style={{ color: "#141414" }}
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Crear nueva ingesta
-            </Button>
-          )}
-          {canManage && (
-            <Button
-              onClick={() => setIsCreateFileModalOpen(true)}
-              variant="ghost"
-              className="bg-transparent"
-              style={{ color: "#141414" }}
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Crear nuevo archivo
-            </Button>
-          )}
-          {canManage && (
-            <Button
-              onClick={() => setIsReprocessDatesModalOpen(true)}
-              variant="ghost"
-              className="bg-transparent"
-              style={{ color: "#141414" }}
-            >
-              <ArrowsClockwise className="w-4 h-4 mr-1" />
-              Reprocesar fechas
-            </Button>
-          )}
-        </div>
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-[18px] font-semibold text-[#141414]">Archivos</h2>
         <Dropdown dropdownRender={() => filterMenu} trigger={["click"]} placement="bottomRight">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
-            <ChevronDown className="h-4 w-4 ml-2" />
-          </Button>
+          <span>
+            <FilterButton
+              label="Fechas"
+              count={dateRange.start || dateRange.end ? 1 : 0}
+              onClick={() => undefined}
+            />
+          </span>
         </Dropdown>
       </div>
 
@@ -208,34 +184,37 @@ export function ClientDetailArchives({
           <Spin />
         </div>
       ) : (
-        <Collapse
-          items={archivesByType.map((group) => {
-            const intake = intakeByType.get(group.id_type_archive);
-            return {
-              key: group.id_type_archive,
-              label: (
-                <ArchiveTypeCollapseLabel
-                  group={group}
-                  intake={intake}
-                  active={showProcessed.includes(group.id_type_archive)}
-                  onToggle={() => toggleShowProcessed(group.id_type_archive)}
-                  futureActive={showFuture.includes(group.id_type_archive)}
-                  onToggleFuture={() => toggleShowFuture(group.id_type_archive)}
-                  onViewIntake={() => handleOpenIntakeModal("view", intake)}
-                />
-              ),
-              children: (
-                <ClientDetailTable
-                  archives={group.archives}
-                  clientName={clientName}
-                  mutateDetail={onMutateDetail}
-                  onMutate={() => mutateArchives()}
-                  loading={isArchivesValidating}
-                />
-              )
-            };
-          })}
-        />
+        // The shared Collapse pulls its chevron left; this lines it up with the card titles.
+        <div className="pl-2">
+          <Collapse
+            items={archivesByType.map((group) => {
+              const intake = intakeByType.get(group.id_type_archive);
+              return {
+                key: group.id_type_archive,
+                label: (
+                  <ArchiveTypeCollapseLabel
+                    group={group}
+                    intake={intake}
+                    active={showProcessed.includes(group.id_type_archive)}
+                    onToggle={() => toggleShowProcessed(group.id_type_archive)}
+                    futureActive={showFuture.includes(group.id_type_archive)}
+                    onToggleFuture={() => toggleShowFuture(group.id_type_archive)}
+                    onViewIntake={() => handleOpenIntakeModal("view", intake)}
+                  />
+                ),
+                children: (
+                  <ClientDetailTable
+                    archives={group.archives}
+                    clientName={clientName}
+                    mutateDetail={onMutateDetail}
+                    onMutate={() => mutateArchives()}
+                    loading={isArchivesValidating}
+                  />
+                )
+              };
+            })}
+          />
+        </div>
       )}
 
       <ModalCreateNewFile

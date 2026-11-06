@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import SortArrows from "@/components/ui/sort-arrows/sort-arrows";
+import { formatFechaPrecinto } from '../../utils/fechas';
 
 interface AsignadosTableProps {
   data?: any[]; 
@@ -101,7 +102,7 @@ export const AsignadosTable: React.FC<AsignadosTableProps> = ({
                   <td className="py-3 px-4 font-semibold text-cp-ink">{item.IdPrecintoHasta || ''}</td>
                   <td className="py-3 px-4 font-medium text-cp-ink">{item.Cantidad || 1}</td>
                   <td className="py-3 px-4 font-medium text-cp-ink">{item.UsuarioAsignoNombre || 'Sin asignar'}</td>
-                  <td className="py-3 px-4 font-medium text-cp-ink-2">{item.FechaAsigno ? new Date(item.FechaAsigno).toLocaleDateString('es-CO') : '-'}</td>
+                  <td className="py-3 px-4 font-medium text-cp-ink-2">{formatFechaPrecinto(item.FechaAsigno)}</td>
                   <td className="py-3 px-4 font-medium text-cp-ink-2">{item.UsuarioAsignacionNombre || 'Sistema'}</td>
                   <td className="py-3 px-4 text-right relative">
                     <button type="button" onClick={() => setActiveMenuId(isMenuOpen ? null : item.Id)} className="p-1 rounded-lg hover:bg-cp-bg text-cp-ink-4 hover:text-cp-ink transition-colors cursor-pointer">•••</button>

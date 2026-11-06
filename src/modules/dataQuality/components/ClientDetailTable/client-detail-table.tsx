@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Calendar, MoreHorizontal } from "lucide-react";
-import { Dropdown, Spin, message } from "antd";
+import { Dropdown, Pagination, Spin, message } from "antd";
 
 import {
   deleteFileDateIntake,
@@ -46,6 +46,8 @@ interface IClientDetailTableProps {
   loading?: boolean;
 }
 
+const PAGE_SIZE = 20;
+
 const bytesToMB = (bytes: number): string => {
   if (!bytes) return "-";
   return (bytes / (1024 * 1024)).toFixed(2) + " MB";
@@ -60,12 +62,27 @@ const formatDateTime = (isoDateString: string): string => {
 };
 
 export function ClientDetailTable({
-  archives: files,
+  archives,
   clientName,
   mutateDetail,
   onMutate,
   loading
 }: IClientDetailTableProps) {
+  // Newest file date first, 20 per page.
+  const [page, setPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
+  const sortedFiles = useMemo(
+    () =>
+      [...(archives ?? [])].sort(
+        (a, b) => dayjs(b.date_archive).valueOf() - dayjs(a.date_archive).valueOf()
+      ),
+    [archives]
+  );
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(sortedFiles.length / PAGE_SIZE));
+    if (page > lastPage) setPage(lastPage);
+  }, [sortedFiles.length, page]);
+  const files = showAll ? sortedFiles : sortedFiles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const [isUploadingEvidenceLoading, setIsUploadingEvidenceLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -524,6 +541,38 @@ export function ClientDetailTable({
           </TableBody>
         </Table>
       </Spin>
+      {sortedFiles.length > PAGE_SIZE && (
+        <div className="flex items-center justify-end gap-3 pt-3">
+          {showAll ? (
+            <span className="text-[13px] text-[#8a8a8a]">{sortedFiles.length} archivos</span>
+          ) : (
+            <>
+              <span className="text-[13px] text-[#8a8a8a]">
+                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sortedFiles.length)} de{" "}
+                {sortedFiles.length}
+              </span>
+              <Pagination
+                size="small"
+                current={page}
+                pageSize={PAGE_SIZE}
+                total={sortedFiles.length}
+                onChange={setPage}
+                showSizeChanger={false}
+              />
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setShowAll((v) => !v);
+              setPage(1);
+            }}
+            className="h-8 rounded-lg bg-[#f7f7f7] px-3 text-[13px] font-medium text-[#141414] transition-colors hover:bg-[#efefef]"
+          >
+            {showAll ? "Ver paginado" : "Ver todo"}
+          </button>
+        </div>
+      )}
       <ModalConfirmAction
         isOpen={isDeleteModalOpen}
         onClose={() => {

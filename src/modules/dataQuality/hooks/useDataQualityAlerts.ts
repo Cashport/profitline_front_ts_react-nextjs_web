@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
+import { tierQueryParam, TierFilterCode } from "../tiers/tiers";
 import { IGetAlerts } from "@/types/dataQuality/IDataQuality";
 import { GenericResponse } from "@/types/global/IGlobal";
 
@@ -9,7 +10,8 @@ export const useDataQualityAlerts = (
   search?: string,
   id_country?: number,
   id_client?: number,
-  types?: string[]
+  types?: string[],
+  tiers?: TierFilterCode[]
 ) => {
   const queryParams = [];
   if (page) queryParams.push(`page=${page}`);
@@ -18,6 +20,7 @@ export const useDataQualityAlerts = (
   if (id_country) queryParams.push(`id_country=${id_country}`);
   if (id_client) queryParams.push(`id_client=${id_client}`);
   if (types?.length) queryParams.push(`type=${encodeURIComponent(types.join(","))}`);
+  if (tiers?.length) queryParams.push(tierQueryParam(tiers));
 
   const pathKey = `/data/alerts${queryParams.length ? `?${queryParams.join("&")}` : ""}`;
 

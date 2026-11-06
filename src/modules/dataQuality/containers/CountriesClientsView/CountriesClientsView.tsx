@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { BellSimpleRinging } from "phosphor-react";
-import { DotsThree } from "phosphor-react";
-import { Button as AntButton, message } from "antd";
+import { message } from "antd";
 
 import {
   downloadUnifiedCatalogFile,
@@ -23,19 +21,25 @@ import { checkUserComponentPermission, hasDataQualityManagementPermission } from
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useCountriesClients } from "../../hooks/useCountriesClients";
+import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
 
-import UiSearchInput from "@/components/ui/search-input";
+import { HeaderSearch } from "@/components/ui/page-header-controls/page-header-controls";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { AlertsPill } from "../../components/alerts-pill/AlertsPill";
 import { Button } from "@/modules/chat/ui/button";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
-import { DataQualityGeneralFilter } from "../../components/general-filter";
+import {
+  ClientsFilterModal,
+  ClientsFilterValues
+} from "../../components/clients-filter-modal/ClientsFilterModal";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
 import { IqviaUploadResultModal } from "../../components/IqviaUploadResultModal/IqviaUploadResultModal";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import Header from "@/components/organisms/header";
 
 import { IClientData, IIqviaAuxUploadResult } from "@/types/dataQuality/IDataQuality";
-import useScreenWidth from "@/components/hooks/useScreenWidth";
+import { TierQuickFilter, useTierFilter } from "../../tiers";
 
 export default function CountriesClientsView() {
   const params = useParams();
@@ -51,15 +55,14 @@ export default function CountriesClientsView() {
     "data-download-catalog"
   );
   const height = useScreenHeight();
-  const width = useScreenWidth();
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
-  const [activeFilters, setActiveFilters] = useState({
-    status: "all",
-    periodicity: "all",
-    fileType: "all",
-    intakeType: "all"
+  const [activeFilters, setActiveFilters] = useState<ClientsFilterValues>({
+    status: null,
+    periodicity: null,
+    fileType: null,
+    intakeType: null
   });
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const closeAllModals = () => setWhichModalIsOpen(0);
@@ -82,20 +85,36 @@ export default function CountriesClientsView() {
     pageSize: 10
   });
 
+  const selectedTiers = useTierFilter((s) => s.selected);
+  const tiersKey = selectedTiers.join(",");
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, current: 1 }));
+  }, [tiersKey]);
+
   const { data, filters, isLoading, error, mutate } = useCountriesClients(
     countryId,
     projectId,
     pagination.current,
     pagination.pageSize,
     {
-      status: activeFilters.status !== "all" ? activeFilters.status : undefined,
-      periodicity: activeFilters.periodicity !== "all" ? activeFilters.periodicity : undefined,
-      id_type_archive:
-        activeFilters.fileType !== "all" ? Number(activeFilters.fileType) : undefined,
-      id_intake_type:
-        activeFilters.intakeType !== "all" ? Number(activeFilters.intakeType) : undefined,
-      search: debouncedSearchTerm || undefined
+      status: activeFilters.status ?? undefined,
+      periodicity: activeFilters.periodicity ?? undefined,
+      id_type_archive: activeFilters.fileType ? Number(activeFilters.fileType) : undefined,
+      id_intake_type: activeFilters.intakeType ? Number(activeFilters.intakeType) : undefined,
+      search: debouncedSearchTerm || undefined,
+      tiers: selectedTiers
     }
+  );
+
+  // Only the total is needed for the alerts pill next to the title.
+  const { data: alertsSummary } = useDataQualityAlerts(
+    1,
+    1,
+    undefined,
+    Number(countryId),
+    undefined,
+    undefined,
+    selectedTiers
   );
 
   const clientsData = data?.data ?? [];
@@ -314,57 +333,60 @@ export default function CountriesClientsView() {
 
   return (
     <div className="cp-page">
-      <Header title={countryName} back="/data-quality" />
+      <Header
+        title={countryName}
+        back="/data-quality"
+        titleExtra={
+          checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") ? (
+            <AlertsPill
+              href={`/data-quality/alerts?countryId=${countryId}`}
+              count={(alertsSummary as unknown as { total?: number } | undefined)?.total}
+            />
+          ) : undefined
+        }
+        actionsExtra={
+          <>
+            <ClientsFilterModal
+              options={filters}
+              value={activeFilters}
+              onChange={(next) => {
+                setActiveFilters(next);
+                setPagination((prev) => ({ ...prev, current: 1 }));
+              }}
+            />
+            <HeaderSearch
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar cliente"
+            />
+          </>
+        }
+      />
 
       {/* Main Content */}
       <div className="cp-card px-[18px] py-[14px]">
-        {/* Filter Bar */}
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            {/* Search Input */}
-            <div className="flex-1 max-w-sm">
-              <UiSearchInput
-                placeholder="Buscar cliente..."
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <AntButton
-              className="flex items-center gap-2 px-4 !h-[var(--control-h)] !bg-[#f7f7f7] !border-none rounded-lg !font-semibold !text-sm cursor-pointer hover:!border-[#dddddd]"
-              size="large"
-              icon={<DotsThree size={18} weight="bold" />}
-              style={{ display: canManage || canDownloadCatalog ? undefined : "none" }}
-              onClick={() => setWhichModalIsOpen(1)}
-            >
-              {width > 1100 && <span className="hidden min-[1100px]:inline">Generar acción</span>}
-            </AntButton>
-
-            <DataQualityGeneralFilter
-              filterOptions={filters}
-              activeFilters={activeFilters}
-              onChange={(key, val) =>
-                setActiveFilters((prev) => ({ ...prev, [key]: val ?? "all" }))
-              }
-            />
+        {/* Title line: tier legend on the left, module actions on the right (36px) */}
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="whitespace-nowrap text-[18px] font-semibold text-[#141414]">
+              Clientes
+            </span>
+            <TierQuickFilter options={filters?.tiers} />
           </div>
 
-          <div className="flex items-center gap-4">
-            {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
-              <Link
-                href={`/data-quality/alerts?countryId=${countryId}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <Button variant="outline" className="h-[var(--control-h)]">
-                  <BellSimpleRinging size={18} />
-                  <span className="hidden min-[1100px]:inline">Alertas</span>
-                </Button>
-              </Link>
+          <div className="flex items-center gap-2">
+            {(canManage || canDownloadCatalog) && (
+              <GenerateActionButton onClick={() => setWhichModalIsOpen(1)} />
             )}
             {hasDataQualityManagementPermission(selectedProject) && (
               <Link
                 href={`/data-quality/references?scope=country&id_country=${countryId}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                <Button variant="outline" className="h-[var(--control-h)]">
+                <Button
+                  variant="ghost"
+                  className="h-[var(--control-h)] border-0 bg-[#f7f7f7] font-semibold text-[#141414] hover:bg-[#efefef]"
+                >
                   Referencias
                 </Button>
               </Link>
