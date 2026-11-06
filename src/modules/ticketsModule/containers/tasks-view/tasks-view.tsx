@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTicketsView } from "../../stores/tickets-view-store";
 import ProfitLoader from "@/components/ui/profit-loader";
 import ProcessBar from "../../components/process-bar/process-bar";
@@ -20,6 +22,13 @@ export default function TasksView() {
   const { config, error } = useTaskConfig();
   const ready = useTaskViewPersistence(config);
   const layout = useTicketsView((s) => s.view.layout);
+  const openDetail = useTicketsView((s) => s.openDetail);
+  const taskParam = Number(useSearchParams().get("task"));
+
+  // Deep link (?task=ID) from a support ticket.
+  useEffect(() => {
+    if (config && ready && taskParam > 0) openDetail(taskParam);
+  }, [config, ready, taskParam, openDetail]);
 
   if (error) {
     return (

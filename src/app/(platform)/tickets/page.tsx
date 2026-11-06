@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import TasksView from "@/modules/ticketsModule/containers/tasks-view/tasks-view";
 
 export default function TicketsPage() {
-  return <TasksView />;
+  return (
+    <Suspense>
+      <TasksView />
+    </Suspense>
+  );
 }
