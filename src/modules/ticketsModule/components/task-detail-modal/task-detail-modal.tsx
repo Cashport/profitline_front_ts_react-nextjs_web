@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button, Input, Modal, Select } from "antd";
-import { X } from "lucide-react";
+import { Lock, X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -41,9 +41,7 @@ const EVENT_LABEL: Record<string, string> = {
 };
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-0.5 text-[13px] font-semibold text-cp-ink-3">
-    {children}
-  </div>
+  <div className="mb-0.5 text-[13px] font-semibold text-cp-ink-3">{children}</div>
 );
 
 /** Acción para pasar al estado `to` (texto del botón). */
@@ -114,7 +112,10 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
   const editable = config.fields.filter((f) => f.editable && f.body_key);
   const gridFields = config.fields.filter((f) => !OWN_PLACE.includes(f.key));
   const assigneeField = config.fields.find((f) => f.key === "assignee");
-  const transitions = config.transitions[t.status] ?? [];
+  const autoClose = t.auto_close ?? null;
+  const transitions = (config.transitions[t.status] ?? []).filter(
+    (to) => !autoClose || (to !== "COMPLETED" && to !== "CANCELLED")
+  );
 
   useEffect(() => {
     setValues(Object.fromEntries(editable.map((f) => [f.key, ticketValue(t, f.key)])));
@@ -224,6 +225,16 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
             </div>
           )}
         </>
+      )}
+
+      {autoClose && !editing && (
+        <div className="mt-4 flex items-start gap-2 rounded-[10px] bg-cp-bg px-3 py-2.5 text-[13px] text-cp-ink-2">
+          <Lock className="mt-[2px] h-[14px] w-[14px] shrink-0 text-cp-ink-3" strokeWidth={2} />
+          <span>
+            <span className="font-semibold text-cp-ink">Tarea automática.</span> {autoClose.hint} No
+            se puede resolver ni cancelar a mano.
+          </span>
+        </div>
       )}
 
       <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-cp-line pt-4">

@@ -91,6 +91,8 @@ export interface ITicket {
   tier_color: string | null;
   /** Minutos abierta (hasta que se resolvió, o hasta ahora). */
   open_minutes: number;
+  /** Solo en el detalle: la tarea la gestiona una alerta de datos y se cierra sola. */
+  auto_close?: { alert_type: string; hint: string } | null;
 }
 
 /** Fila de GET /tickets/:id/history. */
