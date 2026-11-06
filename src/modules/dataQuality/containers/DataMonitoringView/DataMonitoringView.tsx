@@ -10,7 +10,6 @@ import Header from "@/components/organisms/header";
 import { useAppStore } from "@/lib/store/store";
 import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
 import { canReadDataQuality, hasDataQualityManagementPermission } from "@/utils/utils";
-import { Button } from "@/modules/chat/ui/button";
 
 import { useMonitoringSummary } from "../../hooks/useMonitoringSummary";
 import {
@@ -117,10 +116,14 @@ export default function DataMonitoringView() {
         onChange={(value: string) => updateParams({ month: value })}
       />
       {canManage && (
-        <Button variant="outline" className="text-cp-ink" onClick={() => setNotifyOpen(true)}>
-          <BellRing className="h-4 w-4" />
+        <button
+          type="button"
+          onClick={() => setNotifyOpen(true)}
+          className="cp-control-fill flex h-[var(--control-h)] items-center gap-[8px] rounded-[8px] px-[14px] text-[13px] font-medium text-cp-ink-2 hover:text-cp-ink"
+        >
+          <BellRing className="h-[16px] w-[16px]" strokeWidth={2} />
           Notificaciones
-        </Button>
+        </button>
       )}
     </>
   );
@@ -158,9 +161,9 @@ export default function DataMonitoringView() {
           No tienes países asignados.
         </div>
       ) : data ? (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 gap-[var(--card-gap)] xl:grid-cols-3">
-            <div className="flex min-w-0 flex-col gap-[var(--card-gap)]">
+        <div className="min-h-0 flex-1 overflow-y-auto xl:overflow-hidden">
+          <div className="grid grid-cols-1 gap-[var(--card-gap)] xl:h-full xl:grid-cols-3 xl:grid-rows-[minmax(0,1fr)]">
+            <div className="flex min-h-0 min-w-0 flex-col gap-[var(--card-gap)]">
               <ReceptionCard data={data} onOpenDetail={setDetailTab} />
               <QualityCard data={data} />
             </div>

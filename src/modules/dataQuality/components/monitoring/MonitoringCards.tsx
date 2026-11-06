@@ -14,8 +14,6 @@ import {
   plural
 } from "./monitoringFormat";
 
-const LIST_LIMIT = 10;
-
 export type DetailTab = "all" | "critical" | "late" | "novelty" | "received";
 
 export const DETAIL_TABS: readonly DetailTab[] = ["all", "critical", "late", "novelty", "received"];
@@ -23,25 +21,39 @@ export const DETAIL_TABS: readonly DetailTab[] = ["all", "critical", "late", "no
 export const isDetailTab = (value: unknown): value is DetailTab =>
   typeof value === "string" && (DETAIL_TABS as readonly string[]).includes(value);
 
+const TH = "pb-[6px] text-[13px] font-semibold text-cp-ink";
+const ROW = "h-[38px] border-b border-cp-line";
+
 function Card({
   title,
   meta,
+  subtitle,
   children,
   className = ""
 }: {
   title: string;
   meta?: ReactNode;
+  subtitle?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section className={`cp-card flex min-w-0 flex-col px-[24px] py-[20px] ${className}`}>
-      <header className="mb-[12px] flex items-baseline justify-between gap-3">
-        <h2 className="text-[18px] font-semibold text-cp-ink">{title}</h2>
-        {meta && <span className="truncate text-[14px] text-cp-ink-3">{meta}</span>}
+    <section className={`cp-card flex min-h-0 min-w-0 flex-col px-[18px] py-[14px] ${className}`}>
+      <header className="flex items-baseline justify-between gap-3">
+        <h2 className="truncate text-[17px] font-semibold text-cp-ink">{title}</h2>
+        {meta && <span className="shrink-0 truncate text-[13px] text-cp-ink-3">{meta}</span>}
       </header>
+      {subtitle && <p className="mt-[2px] truncate text-[13px] text-cp-ink-3">{subtitle}</p>}
       {children}
     </section>
+  );
+}
+
+function ScrollBody({ children }: { children: ReactNode }) {
+  return (
+    <div className="mt-[8px] min-h-0 flex-1 overflow-y-auto overflow-x-hidden [scrollbar-width:thin]">
+      {children}
+    </div>
   );
 }
 
@@ -74,7 +86,7 @@ function StackedBar({
 function Dot({ color }: { color: string }) {
   return (
     <span
-      className="inline-block h-[9px] w-[9px] shrink-0 rounded-full"
+      className="inline-block h-[8px] w-[8px] shrink-0 rounded-full"
       style={{ backgroundColor: color }}
     />
   );
@@ -100,7 +112,7 @@ function LegendChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex items-center gap-[6px] rounded-[8px] border px-[8px] py-[2px] text-[15px] transition-colors ${
+      className={`flex items-center gap-[6px] rounded-[7px] border px-[7px] py-[1px] text-[14px] transition-colors ${
         active ? "border-cp-lime-dark font-semibold text-cp-ink" : "border-transparent"
       } ${!active && dimmed ? "text-cp-ink-4" : "text-cp-ink-2"} hover:text-cp-ink`}
     >
@@ -112,7 +124,7 @@ function LegendChip({
 }
 
 function EmptyState({ text }: { text: string }) {
-  return <p className="py-[24px] text-center text-[15px] text-cp-ink-3">{text}</p>;
+  return <p className="py-[20px] text-center text-[14px] text-cp-ink-3">{text}</p>;
 }
 
 export function ReceptionCard({
@@ -130,23 +142,25 @@ export function ReceptionCard({
   ];
 
   return (
-    <Card title="Recepción de datos" meta="Archivos esperados en el periodo">
+    <Card title="Recepción de datos" meta="Archivos esperados en el periodo" className="shrink-0">
       {r.expected_files === 0 ? (
         <EmptyState text="No hay archivos esperados en este periodo." />
       ) : (
         <>
-          <div className="text-[64px] font-semibold leading-none tracking-tight text-cp-ink">
-            {formatPct(r.received_pct)}
+          <div className="mt-[8px] flex flex-wrap items-baseline gap-x-[10px]">
+            <span className="text-[40px] font-semibold leading-none tracking-tight text-cp-ink">
+              {formatPct(r.received_pct)}
+            </span>
+            <span className="text-[14px] text-cp-ink-2">
+              de tus archivos ya llegó · {formatNumber(r.received_files)} de{" "}
+              {formatNumber(r.expected_files)}
+              {r.missing_files > 0 && ` · faltan ${formatNumber(r.missing_files)}`}
+            </span>
           </div>
-          <p className="mt-[6px] text-[15px] text-cp-ink-2">
-            de tus archivos ya llegó · {formatNumber(r.received_files)} de{" "}
-            {formatNumber(r.expected_files)}
-            {r.missing_files > 0 && ` · faltan ${formatNumber(r.missing_files)}`}
-          </p>
-          <div className="mt-[16px]">
-            <StackedBar parts={legend} height={10} />
+          <div className="mt-[10px]">
+            <StackedBar parts={legend} height={8} />
           </div>
-          <div className="mt-[8px] flex flex-wrap gap-x-[16px] gap-y-1 text-[15px] text-cp-ink-2">
+          <div className="mt-[6px] flex flex-wrap gap-x-[14px] gap-y-1 text-[13px] text-cp-ink-2">
             {legend.map((l) => (
               <span key={l.key} className="flex items-center gap-[6px]">
                 <Dot color={l.color} />
@@ -156,7 +170,7 @@ export function ReceptionCard({
             ))}
           </div>
 
-          <div className="mt-[16px] grid grid-cols-2 gap-[10px]">
+          <div className="mt-[10px] grid grid-cols-2 gap-[8px]">
             {[
               {
                 tab: "critical" as DetailTab,
@@ -175,20 +189,20 @@ export function ReceptionCard({
                 key={k.tab}
                 type="button"
                 onClick={() => onOpenDetail(k.tab)}
-                className="min-w-0 rounded-[12px] bg-cp-bg px-[14px] py-[12px] text-left transition-colors hover:bg-cp-muted"
+                className="min-w-0 rounded-[10px] bg-cp-bg px-[12px] py-[8px] text-left transition-colors hover:bg-cp-muted"
               >
-                <span className="flex items-center gap-[6px] truncate text-[14px] text-cp-ink-2">
+                <span className="flex items-center gap-[6px] truncate text-[13px] text-cp-ink-2">
                   <Dot color={k.color} />
                   {k.label}
                 </span>
-                <span className="mt-[4px] flex items-baseline gap-[6px]">
+                <span className="flex items-baseline gap-[6px]">
                   <span
-                    className="text-[29px] font-semibold"
+                    className="text-[22px] font-semibold"
                     style={{ color: k.tab === "critical" && k.value.clients ? k.color : undefined }}
                   >
                     {formatNumber(k.value.clients)}
                   </span>
-                  <span className="text-[14px] text-cp-ink-3">
+                  <span className="text-[13px] text-cp-ink-3">
                     {plural(k.value.clients, "cliente", "clientes")}
                   </span>
                 </span>
@@ -198,23 +212,23 @@ export function ReceptionCard({
 
           {r.by_periodicity.length > 0 && (
             <div
-              className="mt-[16px] grid gap-[12px]"
+              className="mt-[10px] grid gap-[12px]"
               style={{ gridTemplateColumns: `repeat(${r.by_periodicity.length}, minmax(0, 1fr))` }}
             >
               {r.by_periodicity.map((p) => (
                 <div key={p.periodicity} className="min-w-0">
-                  <div className="text-[14px] text-cp-ink-3">
+                  <div className="text-[13px] text-cp-ink-3">
                     {PERIODICITY_LABEL[p.periodicity]}
                   </div>
-                  <div className="mt-[2px] flex items-baseline gap-[4px] truncate">
-                    <span className="text-[20px] font-semibold text-cp-ink">
+                  <div className="flex items-baseline gap-[4px] truncate">
+                    <span className="text-[16px] font-semibold text-cp-ink">
                       {formatNumber(p.received_files)}/{formatNumber(p.expected_files)}
                     </span>
                     <span className="text-[13px] text-cp-ink-3">archivos</span>
                   </div>
-                  <div className="mt-[6px]">
+                  <div className="mt-[4px]">
                     <StackedBar
-                      height={5}
+                      height={4}
                       parts={[
                         { value: p.received_files, color: STATE_COLORS.received },
                         { value: p.novelty_files, color: STATE_COLORS.novelty },
@@ -230,7 +244,7 @@ export function ReceptionCard({
           <button
             type="button"
             onClick={() => onOpenDetail("all")}
-            className="mt-[14px] self-start text-[14px] text-cp-blue hover:underline"
+            className="mt-[8px] self-start text-[13px] text-cp-blue hover:underline"
           >
             Ver detalle por cliente
           </button>
@@ -250,20 +264,21 @@ export function QualityCard({ data }: { data: IMonitoringSummary }) {
           ? `${formatNumber(q.unhomologated_units)} und. sin homologar`
           : undefined
       }
+      className="flex-1"
     >
       {q.units_total === 0 ? (
         <EmptyState text="Aún no hay unidades de sell out en este periodo." />
       ) : (
         <>
-          <div className="flex items-baseline gap-[10px]">
-            <span className="text-[38px] font-semibold leading-none text-cp-ink">
+          <div className="mt-[8px] flex items-baseline gap-[8px]">
+            <span className="text-[28px] font-semibold leading-none text-cp-ink">
               {formatPct(q.homologated_pct)}
             </span>
-            <span className="text-[15px] text-cp-ink-2">de las unidades homologadas</span>
+            <span className="text-[14px] text-cp-ink-2">de las unidades homologadas</span>
           </div>
-          <div className="mt-[12px]">
+          <div className="mt-[8px]">
             <StackedBar
-              height={8}
+              height={6}
               parts={[
                 { value: q.units_total - q.unhomologated_units, color: STATE_COLORS.received },
                 { value: q.unhomologated_units, color: STATE_COLORS.pending }
@@ -271,24 +286,28 @@ export function QualityCard({ data }: { data: IMonitoringSummary }) {
             />
           </div>
           {q.top_impact.length > 0 && (
-            <table className="mt-[16px] w-full table-fixed text-[16px]">
-              <thead>
-                <tr className="border-b border-cp-line text-left text-[15px] font-semibold text-cp-ink">
-                  <th className="pb-[8px] font-semibold">Mayor impacto</th>
-                  <th className="w-[40%] pb-[8px] text-right font-semibold">Und. por homologar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {q.top_impact.map((t) => (
-                  <tr key={t.client_id} className="border-b border-cp-line">
-                    <td className="truncate py-[8px] text-cp-ink">{t.client_name}</td>
-                    <td className="py-[8px] text-right font-semibold text-cp-ink">
-                      {formatNumber(t.unhomologated_units)}
-                    </td>
+            <ScrollBody>
+              <table className="w-full table-fixed text-[14px]">
+                <thead className="sticky top-0 bg-cp-surface">
+                  <tr className="border-b border-cp-line text-left">
+                    <th className={TH}>Mayor impacto</th>
+                    <th className={`${TH} w-[45%] text-right`}>Und. por homologar</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {q.top_impact.map((t) => (
+                    <tr key={t.client_id} className={ROW}>
+                      <td className="truncate pr-2 text-cp-ink" title={t.client_name}>
+                        {t.client_name}
+                      </td>
+                      <td className="text-right font-semibold text-cp-ink">
+                        {formatNumber(t.unhomologated_units)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ScrollBody>
           )}
         </>
       )}
@@ -299,18 +318,17 @@ export function QualityCard({ data }: { data: IMonitoringSummary }) {
 export function AnomaliesCard({ data }: { data: IMonitoringSummary }) {
   const a = data.anomalies;
   const [direction, setDirection] = useState<"" | "up" | "down">("");
-  const [showAll, setShowAll] = useState(false);
   const filtered = a.items.filter(
     (i) => !direction || (direction === "up" ? i.variation_pct > 0 : i.variation_pct < 0)
   );
-  const visible = showAll ? filtered : filtered.slice(0, LIST_LIMIT);
 
   return (
-    <Card title="Variación anómala de unidades">
-      <p className="-mt-[8px] text-[14px] text-cp-ink-3">
-        ±{a.threshold_pct}% o más vs. promedio de los últimos {a.baseline_months} meses
-      </p>
-      <div className="mt-[10px] flex flex-wrap gap-[6px]">
+    <Card
+      title="Variación anómala de unidades"
+      subtitle={`±${a.threshold_pct}% o más vs. promedio de los últimos ${a.baseline_months} meses`}
+      className="h-full"
+    >
+      <div className="mt-[8px] flex flex-wrap gap-[4px]">
         <LegendChip
           color="#1677ff"
           label="Aumento"
@@ -328,22 +346,22 @@ export function AnomaliesCard({ data }: { data: IMonitoringSummary }) {
           onClick={() => setDirection(direction === "down" ? "" : "down")}
         />
       </div>
-      {visible.length === 0 ? (
+      {filtered.length === 0 ? (
         <EmptyState text="Sin variaciones anómalas en este periodo." />
       ) : (
-        <div className="cp-list-scroll mt-[12px] min-h-0">
-          <table className="w-full table-fixed text-[16px]">
+        <ScrollBody>
+          <table className="w-full table-fixed text-[14px]">
             <thead className="sticky top-0 bg-cp-surface">
-              <tr className="border-b border-cp-line text-left text-[15px] text-cp-ink">
-                <th className="pb-[8px] font-semibold">Cliente</th>
-                <th className="w-[19%] pb-[8px] text-right font-semibold">Actual</th>
-                <th className="w-[21%] pb-[8px] text-right font-semibold">Promedio</th>
-                <th className="w-[16%] pb-[8px] text-right font-semibold">Var.</th>
+              <tr className="border-b border-cp-line text-left">
+                <th className={TH}>Cliente</th>
+                <th className={`${TH} w-[76px] text-right`}>Actual</th>
+                <th className={`${TH} w-[84px] text-right`}>Promedio</th>
+                <th className={`${TH} w-[64px] text-right`}>Var.</th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((i) => (
-                <tr key={i.client_id} className="h-[50px] border-b border-cp-line">
+              {filtered.map((i) => (
+                <tr key={i.client_id} className={ROW}>
                   <td className="truncate pr-2 text-cp-ink" title={i.client_name}>
                     {i.client_name}
                   </td>
@@ -361,16 +379,7 @@ export function AnomaliesCard({ data }: { data: IMonitoringSummary }) {
               ))}
             </tbody>
           </table>
-          {filtered.length > LIST_LIMIT && (
-            <button
-              type="button"
-              onClick={() => setShowAll(!showAll)}
-              className="mt-[10px] text-[14px] text-cp-blue hover:underline"
-            >
-              {showAll ? "Ver menos" : `+${filtered.length - LIST_LIMIT} variaciones más`}
-            </button>
-          )}
-        </div>
+        </ScrollBody>
       )}
     </Card>
   );
@@ -379,61 +388,58 @@ export function AnomaliesCard({ data }: { data: IMonitoringSummary }) {
 export function AlertsCard({ data }: { data: IMonitoringSummary }) {
   const al = data.alerts;
   const [type, setType] = useState<MonitoringAlertType | "">("");
-  const [showAll, setShowAll] = useState(false);
   const filtered = useMemo(
     () => al.items.filter((i) => !type || i.type === type),
     [al.items, type]
   );
-  const visible = showAll ? filtered : filtered.slice(0, LIST_LIMIT);
 
   return (
-    <Card title={`Alertas en tus clientes · ${formatNumber(al.total)}`}>
-      <p className="-mt-[8px] text-[14px] text-cp-ink-3">
-        Necesitamos tu ayuda para volver a recibir estos datos
-      </p>
-      <div className="mt-[10px] flex flex-wrap gap-[6px]">
-        {ALERT_ORDER.filter((t) => al.by_type[t] > 0).map((t) => (
-          <LegendChip
-            key={t}
-            color={ALERT_META[t].color}
-            label={ALERT_META[t].label}
-            count={al.by_type[t]}
-            active={type === t}
-            dimmed={!!type}
-            onClick={() => setType(type === t ? "" : t)}
-          />
-        ))}
-      </div>
-      {visible.length === 0 ? (
+    <Card
+      title={`Alertas en tus clientes · ${formatNumber(al.total)}`}
+      subtitle="Necesitamos tu ayuda para volver a recibir estos datos"
+      className="h-full"
+    >
+      {al.total > 0 && (
+        <div className="mt-[8px] flex flex-wrap gap-[4px]">
+          {ALERT_ORDER.filter((t) => al.by_type[t] > 0).map((t) => (
+            <LegendChip
+              key={t}
+              color={ALERT_META[t].color}
+              label={ALERT_META[t].label}
+              count={al.by_type[t]}
+              active={type === t}
+              dimmed={!!type}
+              onClick={() => setType(type === t ? "" : t)}
+            />
+          ))}
+        </div>
+      )}
+      {filtered.length === 0 ? (
         <EmptyState text="Todos tus clientes enviaron sus archivos." />
       ) : (
-        <div className="cp-list-scroll mt-[12px] min-h-0">
-          <table className="w-full table-fixed text-[16px]">
+        <ScrollBody>
+          <table className="w-full table-fixed text-[14px]">
             <thead className="sticky top-0 bg-cp-surface">
-              <tr className="border-b border-cp-line text-left text-[15px] text-cp-ink">
-                <th className="pb-[8px] font-semibold">Cliente</th>
-                <th className="w-[30%] pb-[8px] font-semibold">Alerta</th>
-                <th className="w-[17%] pb-[8px] font-semibold">Desde</th>
-                <th className="w-[11%] pb-[8px] text-right font-semibold">Arch.</th>
+              <tr className="border-b border-cp-line text-left">
+                <th className={TH}>Cliente</th>
+                <th className={`${TH} w-[112px]`}>Alerta</th>
+                <th className={`${TH} w-[64px]`}>Desde</th>
+                <th className={`${TH} w-[44px] text-right`}>Arch.</th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((i) => (
-                <tr
-                  key={i.client_id}
-                  className="h-[50px] border-b border-cp-line"
-                  title={ALERT_META[i.type].hint}
-                >
+              {filtered.map((i) => (
+                <tr key={i.client_id} className={ROW} title={ALERT_META[i.type].hint}>
                   <td className="truncate pr-2 text-cp-ink" title={i.client_name}>
                     {i.client_name}
                   </td>
                   <td>
-                    <span className="flex items-center gap-[6px] truncate text-[15px] text-cp-ink-2">
+                    <span className="flex items-center gap-[6px] truncate text-cp-ink-2">
                       <Dot color={ALERT_META[i.type].color} />
                       {ALERT_META[i.type].label}
                     </span>
                   </td>
-                  <td className="text-[15px] text-cp-ink-2">{formatShortDate(i.since)}</td>
+                  <td className="text-cp-ink-2">{formatShortDate(i.since)}</td>
                   <td className="text-right font-semibold text-cp-ink">
                     {formatNumber(i.pending_files)}
                   </td>
@@ -441,16 +447,7 @@ export function AlertsCard({ data }: { data: IMonitoringSummary }) {
               ))}
             </tbody>
           </table>
-          {filtered.length > LIST_LIMIT && (
-            <button
-              type="button"
-              onClick={() => setShowAll(!showAll)}
-              className="mt-[10px] text-[14px] text-cp-blue hover:underline"
-            >
-              {showAll ? "Ver menos" : `+${filtered.length - LIST_LIMIT} alertas más`}
-            </button>
-          )}
-        </div>
+        </ScrollBody>
       )}
     </Card>
   );
