@@ -7,6 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
+import TaskSupportSection from "@/modules/supportModule/components/task-support-section/task-support-section";
 import { useWalletTheme } from "@/modules/walletModule/contexts/wallet-theme-context";
 import { updateTask, updateTaskAssignee, updateTaskStatus } from "@/services/tickets/tickets";
 import type {
@@ -284,6 +285,8 @@ function DetailBody({ ticket: t, config }: { ticket: ITicket; config: ITaskConfi
           </div>
         </div>
       )}
+
+      <TaskSupportSection taskId={t.id} version={`${t.status}-${t.assigned_to_user_id}`} />
 
       <History ticketId={t.id} config={config} />
     </>

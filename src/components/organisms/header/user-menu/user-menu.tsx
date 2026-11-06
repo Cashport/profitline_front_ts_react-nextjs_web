@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Popover } from "antd";
-import { ChevronDown, MessageCircle, User } from "lucide-react";
+import { ChevronDown, User } from "lucide-react";
 
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useMessageApi } from "@/context/MessageContext";
@@ -9,9 +10,6 @@ import { useThemeMenu, type ThemePreference } from "@/context/ThemeMenuContext";
 import { sendEmailResetPassword } from "@/services/users/users";
 import { cn } from "@/utils/utils";
 import { LogoutIcon, useLogoutConfirm } from "./logout-confirm";
-
-// "Contactar soporte" queda maquetado pero oculto hasta que exista el módulo de tickets.
-const SHOW_SUPPORT = false;
 
 const initialsOf = (name: string, email: string) => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -76,6 +74,8 @@ const MenuIcon = ({ d, size = 17 }: { d: string; size?: number }) => (
 
 const ICON_THEME = "M12 3a9 9 0 1 0 0 18zM12 3a9 9 0 0 1 0 18";
 const ICON_LOCK = "M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3";
+const ICON_SUPPORT =
+  "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01";
 
 const THEME_OPTIONS: { key: ThemePreference; label: string; d: string }[] = [
   {
@@ -92,6 +92,7 @@ const THEME_OPTIONS: { key: ThemePreference; label: string; d: string }[] = [
  * cambiar contraseña, (soporte) y cerrar sesión.
  */
 export default function UserMenu() {
+  const router = useRouter();
   const user = useCurrentUser();
   const { showMessage } = useMessageApi();
   const [open, setOpen] = useState(false);
@@ -163,13 +164,14 @@ export default function UserMenu() {
         onClick={handleChangePassword}
         disabled={sending || !email}
       />
-      {SHOW_SUPPORT && (
-        <MenuItem
-          icon={<MessageCircle size={17} strokeWidth={1.7} />}
-          label="Contactar soporte"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      <MenuItem
+        icon={<MenuIcon d={ICON_SUPPORT} />}
+        label="Soporte"
+        onClick={() => {
+          setOpen(false);
+          router.push("/support");
+        }}
+      />
       <div className="my-1 h-px bg-cp-line" />
       <MenuItem
         danger
