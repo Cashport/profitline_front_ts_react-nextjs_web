@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, UserCog } from "lucide-react";
 import Header from "@/components/organisms/header";
 import BranchesIcon from "@/modules/branches/components/branches-icon/branches-icon";
 import AdminSectionsGrid, { AdminSection } from "../../components/admin-sections-grid/admin-sections-grid";
@@ -17,6 +17,12 @@ const sections: AdminSection[] = [
     icon: BranchesIcon,
     label: "Sucursales",
     description: "Consulta las sucursales de devolución: lista de precios, estado y ejecutivos."
+  },
+  {
+    href: "/market-admin/logistica-inversa/usuarios",
+    icon: UserCog,
+    label: "Usuarios",
+    description: "Crea usuarios de Pharma 360, cambia su rol, actívalos o desactívalos."
   }
 ];
 
